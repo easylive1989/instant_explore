@@ -94,7 +94,7 @@
 
 ```
 instant_explore/
-├── front_end/                # Flutter 應用程式
+├── frontend/                 # Flutter 應用程式
 │   ├── lib/
 │   │   ├── main.dart         # 應用程式進入點
 │   │   ├── config/           # 設定檔
