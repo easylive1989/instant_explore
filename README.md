@@ -1,0 +1,193 @@
+# Instant Explore 隨性探點
+
+一款基於即時位置的智慧推薦應用程式，幫助使用者探索周邊的精彩去處。無論是旅遊觀光、朋友聚會，還是日常探索，Instant Explore 都能為您推薦最適合的下一站。
+
+## 🎯 解決的問題
+
+- **旅遊者的困擾**：到了新地方不知道該去哪裡玩
+- **聚會選擇困難**：朋友聚會時總是為了去哪裡而猶豫不決  
+- **日常探索需求**：想要發掘住家或工作地點附近的新去處
+
+## ✨ 功能特色
+
+### 📍 即時位置推薦
+- 根據您的當前位置，智慧推薦附近的景點、餐廳、飲料店等
+- 支援多種類別篩選，精準符合您的需求
+
+### 🏷️ 分類篩選
+- 旅遊景點
+- 餐廳美食
+- 咖啡飲料
+- 購物商場
+- 休閒娛樂
+- 更多自訂分類
+
+### ⭐ 地點評價查看
+- 整合 Google 評價資訊
+- 查看其他使用者的真實評論
+- 營業時間、聯絡資訊一目了然
+
+### 👥 多人投票決定
+- 建立群組，邀請朋友加入
+- 每個人都可以提出想去的地點
+- 透過投票機制，民主決定下一個目的地
+
+### 🗺️ 路線規劃
+- 整合 Google Maps 導航功能
+- 提供多種交通方式選擇（步行、開車、大眾運輸）
+- 預估交通時間和距離
+
+## 🛠️ 技術架構
+
+### 前端框架
+- **Flutter** - 跨平台應用程式開發框架
+- 支援平台：
+  - 📱 iOS
+  - 🤖 Android  
+  - 🌐 Web
+
+### API 整合
+- **Google Places API** - 地點資訊和推薦
+- **Google Maps** - 地圖顯示和路線規劃
+
+## 📋 系統需求
+
+### 開發環境
+- Flutter SDK 3.0.0 或以上版本
+- Dart SDK 2.17.0 或以上版本
+- Android Studio / Xcode (用於行動裝置開發)
+- Google Cloud Platform 帳號（用於 API 金鑰）
+
+### 支援的裝置
+- iOS 11.0 或以上版本
+- Android 5.0 (API level 21) 或以上版本
+- 現代瀏覽器（Chrome、Firefox、Safari、Edge）
+
+## 🚀 安裝與設定
+
+### 1. 複製專案
+```bash
+git clone https://github.com/[your-username]/instant_explore.git
+cd instant_explore
+```
+
+### 2. 安裝 Flutter 相依套件
+```bash
+flutter pub get
+```
+
+### 3. 設定 API 金鑰
+
+建立 `lib/config/api_keys.dart` 檔案：
+
+```dart
+class ApiKeys {
+  static const String googlePlacesApiKey = 'YOUR_GOOGLE_PLACES_API_KEY';
+  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+}
+```
+
+### 4. 執行應用程式
+
+#### iOS
+```bash
+flutter run -d ios
+```
+
+#### Android
+```bash
+flutter run -d android
+```
+
+#### Web
+```bash
+flutter run -d chrome
+```
+
+## 📱 使用說明
+
+### 基本流程
+
+1. **開啟應用程式**
+   - 允許位置存取權限
+   - 等待應用程式載入您的當前位置
+
+2. **瀏覽推薦地點**
+   - 在首頁查看系統推薦的附近地點
+   - 使用分類標籤篩選感興趣的類型
+
+3. **查看詳細資訊**
+   - 點擊地點卡片查看詳細資訊
+   - 瀏覽評價、照片、營業時間等
+
+4. **多人決定模式**
+   - 點擊「建立群組」
+   - 分享群組代碼給朋友
+   - 每個人都可以加入想去的地點
+   - 透過投票決定最終目的地
+
+5. **導航前往**
+   - 選定地點後點擊「導航」
+   - 選擇偏好的交通方式
+   - 跟隨導航指示前往目的地
+
+## 🏗️ 專案結構
+
+```
+instant_explore/
+├── lib/
+│   ├── main.dart              # 應用程式進入點
+│   ├── config/               # 設定檔
+│   ├── models/               # 資料模型
+│   ├── screens/              # 畫面元件
+│   ├── widgets/              # 可重用元件
+│   ├── services/             # API 服務
+│   └── utils/                # 工具函式
+├── test/                     # 測試檔案
+├── assets/                   # 靜態資源
+├── web/                      # Web 平台檔案
+├── ios/                      # iOS 平台檔案
+├── android/                  # Android 平台檔案
+└── pubspec.yaml             # 專案設定檔
+```
+
+## 🧪 測試
+
+執行單元測試：
+```bash
+flutter test
+```
+
+執行整合測試：
+```bash
+flutter test integration_test
+```
+
+## 🤝 貢獻指南
+
+我們歡迎所有形式的貢獻！如果您想為專案貢獻：
+
+1. Fork 此專案
+2. 建立您的功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 開啟 Pull Request
+
+## 📝 授權
+
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
+
+## 👥 開發團隊
+
+- 專案維護者 - [@your-username](https://github.com/your-username)
+
+## 📞 聯絡我們
+
+如有任何問題或建議，歡迎透過以下方式聯絡：
+
+- 開啟 [Issue](https://github.com/[your-username]/instant_explore/issues)
+- Email: your-email@example.com
+
+---
+
+**Instant Explore** - 讓每一次出門都是一場新的探險！ 🗺️✨
