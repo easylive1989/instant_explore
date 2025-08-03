@@ -63,51 +63,6 @@
 - Android 5.0 (API level 21) 或以上版本
 - 現代瀏覽器（Chrome、Firefox、Safari、Edge）
 
-## 🚀 安裝與設定
-
-### 1. 複製專案
-```bash
-git clone https://github.com/[your-username]/instant_explore.git
-cd instant_explore
-```
-
-### 2. 安裝 Flutter 相依套件
-```bash
-cd front_end
-flutter pub get
-```
-
-### 3. 設定 API 金鑰
-
-建立 `front_end/lib/config/api_keys.dart` 檔案：
-
-```dart
-class ApiKeys {
-  static const String googlePlacesApiKey = 'YOUR_GOOGLE_PLACES_API_KEY';
-  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
-}
-```
-
-### 4. 執行應用程式
-
-#### iOS
-```bash
-cd front_end
-flutter run -d ios
-```
-
-#### Android
-```bash
-cd front_end
-flutter run -d android
-```
-
-#### Web
-```bash
-cd front_end
-flutter run -d chrome
-```
-
 ## 📱 使用說明
 
 ### 基本流程
@@ -155,22 +110,7 @@ instant_explore/
 │   ├── android/              # Android 平台檔案
 │   └── pubspec.yaml          # Flutter 專案設定檔
 ├── doc/                      # 專案文件
-├── README.md                 # 專案說明文件
-└── TECHNICAL_FEASIBILITY.md  # 技術可行性分析
-```
-
-## 🧪 測試
-
-執行單元測試：
-```bash
-cd front_end
-flutter test
-```
-
-執行整合測試：
-```bash
-cd front_end
-flutter test integration_test
+└── README.md                 # 專案說明文件
 ```
 
 ## 📝 授權
