@@ -53,8 +53,8 @@
 ## 📋 系統需求
 
 ### 開發環境
-- Flutter SDK 3.0.0 或以上版本
-- Dart SDK 2.17.0 或以上版本
+- Flutter SDK 3.32.4
+- Dart SDK 3.8.4
 - Android Studio / Xcode (用於行動裝置開發)
 - Google Cloud Platform 帳號（用於 API 金鑰）
 
