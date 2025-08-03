@@ -73,12 +73,13 @@ cd instant_explore
 
 ### 2. 安裝 Flutter 相依套件
 ```bash
+cd front_end
 flutter pub get
 ```
 
 ### 3. 設定 API 金鑰
 
-建立 `lib/config/api_keys.dart` 檔案：
+建立 `front_end/lib/config/api_keys.dart` 檔案：
 
 ```dart
 class ApiKeys {
@@ -91,16 +92,19 @@ class ApiKeys {
 
 #### iOS
 ```bash
+cd front_end
 flutter run -d ios
 ```
 
 #### Android
 ```bash
+cd front_end
 flutter run -d android
 ```
 
 #### Web
 ```bash
+cd front_end
 flutter run -d chrome
 ```
 
@@ -135,58 +139,43 @@ flutter run -d chrome
 
 ```
 instant_explore/
-├── lib/
-│   ├── main.dart              # 應用程式進入點
-│   ├── config/               # 設定檔
-│   ├── models/               # 資料模型
-│   ├── screens/              # 畫面元件
-│   ├── widgets/              # 可重用元件
-│   ├── services/             # API 服務
-│   └── utils/                # 工具函式
-├── test/                     # 測試檔案
-├── assets/                   # 靜態資源
-├── web/                      # Web 平台檔案
-├── ios/                      # iOS 平台檔案
-├── android/                  # Android 平台檔案
-└── pubspec.yaml             # 專案設定檔
+├── front_end/                # Flutter 應用程式
+│   ├── lib/
+│   │   ├── main.dart         # 應用程式進入點
+│   │   ├── config/           # 設定檔
+│   │   ├── models/           # 資料模型
+│   │   ├── screens/          # 畫面元件
+│   │   ├── widgets/          # 可重用元件
+│   │   ├── services/         # API 服務
+│   │   └── utils/            # 工具函式
+│   ├── test/                 # 測試檔案
+│   ├── assets/               # 靜態資源
+│   ├── web/                  # Web 平台檔案
+│   ├── ios/                  # iOS 平台檔案
+│   ├── android/              # Android 平台檔案
+│   └── pubspec.yaml          # Flutter 專案設定檔
+├── doc/                      # 專案文件
+├── README.md                 # 專案說明文件
+└── TECHNICAL_FEASIBILITY.md  # 技術可行性分析
 ```
 
 ## 🧪 測試
 
 執行單元測試：
 ```bash
+cd front_end
 flutter test
 ```
 
 執行整合測試：
 ```bash
+cd front_end
 flutter test integration_test
 ```
-
-## 🤝 貢獻指南
-
-我們歡迎所有形式的貢獻！如果您想為專案貢獻：
-
-1. Fork 此專案
-2. 建立您的功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 開啟 Pull Request
 
 ## 📝 授權
 
 本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
-
-## 👥 開發團隊
-
-- 專案維護者 - [@your-username](https://github.com/your-username)
-
-## 📞 聯絡我們
-
-如有任何問題或建議，歡迎透過以下方式聯絡：
-
-- 開啟 [Issue](https://github.com/[your-username]/instant_explore/issues)
-- Email: your-email@example.com
 
 ---
 
