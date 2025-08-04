@@ -2,139 +2,43 @@
 
 一款基於即時位置的智慧推薦應用程式，幫助使用者探索周邊的精彩去處。無論是旅遊觀光、朋友聚會，還是日常探索，Instant Explore 都能為您推薦最適合的下一站。
 
-## 🎯 解決的問題
+## ✨ 核心功能
 
-- **旅遊者的困擾**：到了新地方不知道該去哪裡玩
-- **聚會選擇困難**：朋友聚會時總是為了去哪裡而猶豫不決  
-- **日常探索需求**：想要發掘住家或工作地點附近的新去處
+- 📍 **即時位置推薦** - 根據當前位置智慧推薦附近景點、餐廳、飲料店
+- 🏷️ **智慧篩選** - 支援分類和距離篩選，精準符合需求
+- ⭐ **地點評價** - 整合 Google 評價和使用者評論
+- 👥 **多人決定** - 群組投票功能，民主決定下一個目的地
+- 🗺️ **路線規劃** - 整合 Google Maps 導航，支援多種交通方式
 
-## ✨ 功能特色
+## 🛠️ 技術棧
 
-### 📍 即時位置推薦
-- 根據您的當前位置，智慧推薦附近的景點、餐廳、飲料店等
-- 支援多種類別篩選和距離篩選，精準符合您的需求
+- **前端：** Flutter (iOS / Android / Web)
+- **API：** Google Places API, Google Maps API
+- **架構：** Feature-First 模組化設計
 
-### 🏷️ 分類篩選
-- 旅遊景點
-- 餐廳美食
-- 咖啡飲料
-- 購物商場
-- 休閒娛樂
-- 更多自訂分類
+## 🚀 快速開始
 
-### ⭐ 地點評價查看
-- 整合 Google 評價資訊
-- 查看其他使用者的真實評論
-- 營業時間、聯絡資訊一目了然
+```bash
+# 複製專案
+git clone https://github.com/[your-username]/instant_explore.git
+cd instant_explore/frontend
 
-### 👥 多人投票決定
-- 建立群組，邀請朋友加入
-- 每個人都可以提出想去的地點
-- 透過投票機制，民主決定下一個目的地
+# 安裝依賴
+flutter pub get
 
-### 🗺️ 路線規劃
-- 整合 Google Maps 導航功能
-- 提供多種交通方式選擇（步行、開車、大眾運輸）
-- 預估交通時間和距離
-
-## 🛠️ 技術架構
-
-### 前端框架
-- **Flutter** - 跨平台應用程式開發框架
-- 支援平台：
-  - 📱 iOS
-  - 🤖 Android  
-  - 🌐 Web
-
-### API 整合
-- **Google Places API** - 地點資訊和推薦
-- **Google Maps** - 地圖顯示和路線規劃
-
-## 📋 系統需求
-
-### 開發環境
-- Flutter SDK 3.32.4
-- Dart SDK 3.8.4
-- Android Studio / Xcode (用於行動裝置開發)
-- Google Cloud Platform 帳號（用於 API 金鑰）
-
-### 支援的裝置
-- iOS 11.0 或以上版本
-- Android 5.0 (API level 21) 或以上版本
-- 現代瀏覽器（Chrome、Firefox、Safari、Edge）
-
-## 📱 使用說明
-
-### 基本流程
-
-1. **開啟應用程式**
-   - 允許位置存取權限
-   - 等待應用程式載入您的當前位置
-
-2. **瀏覽推薦地點**
-   - 在首頁查看系統推薦的附近地點
-   - 使用分類標籤篩選感興趣的類型，或調整搜尋距離範圍
-
-3. **查看詳細資訊**
-   - 點擊地點卡片查看詳細資訊
-   - 瀏覽評價、照片、營業時間等
-
-4. **多人決定模式**
-   - 點擊「建立群組」
-   - 分享群組代碼給朋友
-   - 每個人都可以加入想去的地點
-   - 透過投票決定最終目的地
-
-5. **導航前往**
-   - 選定地點後點擊「導航」
-   - 選擇偏好的交通方式
-   - 跟隨導航指示前往目的地
-
-## 🏗️ 專案結構
-
+# 執行應用程式
+flutter run
 ```
-instant_explore/
-├── frontend/                 # Flutter 應用程式
-│   ├── lib/
-│   │   ├── main.dart         # 應用程式進入點
-│   │   ├── core/             # 核心共用功能
-│   │   │   ├── config/       # 應用程式設定
-│   │   │   ├── constants/    # 常數定義
-│   │   │   ├── utils/        # 工具函式
-│   │   │   └── services/     # 共用服務
-│   │   ├── shared/           # 共用元件
-│   │   │   ├── widgets/      # 共用 UI 元件
-│   │   │   └── models/       # 共用資料模型
-│   │   └── features/         # 功能模組
-│   │       ├── location/     # 位置相關功能
-│   │       │   ├── models/   # 位置資料模型
-│   │       │   ├── services/ # 位置服務
-│   │       │   ├── widgets/  # 位置相關元件
-│   │       │   └── screens/  # 位置相關畫面
-│   │       ├── places/       # 地點推薦功能
-│   │       │   ├── models/
-│   │       │   ├── services/
-│   │       │   ├── widgets/
-│   │       │   └── screens/
-│   │       ├── voting/       # 多人投票功能
-│   │       │   ├── models/
-│   │       │   ├── services/
-│   │       │   ├── widgets/
-│   │       │   └── screens/
-│   │       └── navigation/   # 導航功能
-│   │           ├── models/
-│   │           ├── services/
-│   │           ├── widgets/
-│   │           └── screens/
-│   ├── test/                 # 測試檔案
-│   ├── assets/               # 靜態資源
-│   ├── web/                  # Web 平台檔案
-│   ├── ios/                  # iOS 平台檔案
-│   ├── android/              # Android 平台檔案
-│   └── pubspec.yaml          # Flutter 專案設定檔
-├── doc/                      # 專案文件
-└── README.md                 # 專案說明文件
-```
+
+> 詳細設定請參考 [開發指南](doc/DEVELOPMENT.md)
+
+## 📚 文件導覽
+
+- 📖 [使用者手冊](doc/USER_GUIDE.md) - 詳細功能說明和使用教學
+- 🏗️ [架構設計](doc/ARCHITECTURE.md) - 技術架構和專案結構
+- 💻 [開發指南](doc/DEVELOPMENT.md) - 開發環境設定和開發規範
+- 🔌 [API 整合](doc/API_INTEGRATION.md) - Google APIs 整合說明
+- 📊 [技術可行性](doc/TECHNICAL_FEASIBILITY.md) - 技術分析和成本評估
 
 ## 📝 授權
 
