@@ -97,12 +97,35 @@ instant_explore/
 ├── frontend/                 # Flutter 應用程式
 │   ├── lib/
 │   │   ├── main.dart         # 應用程式進入點
-│   │   ├── config/           # 設定檔
-│   │   ├── models/           # 資料模型
-│   │   ├── screens/          # 畫面元件
-│   │   ├── widgets/          # 可重用元件
-│   │   ├── services/         # API 服務
-│   │   └── utils/            # 工具函式
+│   │   ├── core/             # 核心共用功能
+│   │   │   ├── config/       # 應用程式設定
+│   │   │   ├── constants/    # 常數定義
+│   │   │   ├── utils/        # 工具函式
+│   │   │   └── services/     # 共用服務
+│   │   ├── shared/           # 共用元件
+│   │   │   ├── widgets/      # 共用 UI 元件
+│   │   │   └── models/       # 共用資料模型
+│   │   └── features/         # 功能模組
+│   │       ├── location/     # 位置相關功能
+│   │       │   ├── models/   # 位置資料模型
+│   │       │   ├── services/ # 位置服務
+│   │       │   ├── widgets/  # 位置相關元件
+│   │       │   └── screens/  # 位置相關畫面
+│   │       ├── places/       # 地點推薦功能
+│   │       │   ├── models/
+│   │       │   ├── services/
+│   │       │   ├── widgets/
+│   │       │   └── screens/
+│   │       ├── voting/       # 多人投票功能
+│   │       │   ├── models/
+│   │       │   ├── services/
+│   │       │   ├── widgets/
+│   │       │   └── screens/
+│   │       └── navigation/   # 導航功能
+│   │           ├── models/
+│   │           ├── services/
+│   │           ├── widgets/
+│   │           └── screens/
 │   ├── test/                 # 測試檔案
 │   ├── assets/               # 靜態資源
 │   ├── web/                  # Web 平台檔案
