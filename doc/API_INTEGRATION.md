@@ -583,7 +583,7 @@ class ProxyService {
 ```dart
 // test/unit/services/places_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:http/http.dart' as http;
 
 class MockClient extends Mock implements http.Client {}
@@ -600,8 +600,11 @@ void main() {
     
     test('should return places when API responds successfully', () async {
       // Arrange
-      when(mockClient.post(any, headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((_) async => http.Response(mockSuccessResponse, 200));
+      when(() => mockClient.post(
+        any(), 
+        headers: any(named: 'headers'), 
+        body: any(named: 'body')
+      )).thenAnswer((_) async => http.Response(mockSuccessResponse, 200));
       
       // Act
       final result = await service.searchNearby(
@@ -616,8 +619,11 @@ void main() {
     
     test('should throw exception when API fails', () async {
       // Arrange
-      when(mockClient.post(any, headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((_) async => http.Response('Error', 400));
+      when(() => mockClient.post(
+        any(), 
+        headers: any(named: 'headers'), 
+        body: any(named: 'body')
+      )).thenAnswer((_) async => http.Response('Error', 400));
       
       // Act & Assert
       expect(

@@ -218,7 +218,7 @@ test/
 
 ### 開發依賴
 - **flutter_test** - 測試框架
-- **mockito** - Mock 框架
+- **mocktail** - Mock 框架 (null-safety 支援)
 - **flutter_lints** - 程式碼規範
 
 ## 🔧 建置與部署

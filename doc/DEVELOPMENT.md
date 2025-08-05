@@ -163,7 +163,7 @@ genhtml coverage/lcov.info -o coverage/html
 ```dart
 // test/unit/services/places_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 
 void main() {
   group('PlacesService', () {
@@ -177,7 +177,7 @@ void main() {
 
     test('should return places when API call is successful', () async {
       // Arrange
-      when(mockHttpService.get(any))
+      when(() => mockHttpService.get(any()))
           .thenAnswer((_) async => mockApiResponse);
 
       // Act
