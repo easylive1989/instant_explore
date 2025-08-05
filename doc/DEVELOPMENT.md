@@ -183,115 +183,7 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 ### 4. 執行應用程式
 
-#### 使用環境變數執行
-
-```bash
-# 讀取 .env 檔案並執行應用程式
-source .env && flutter run \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# 或使用一行指令
-export $(cat .env | xargs) && flutter run \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# 指定平台
-export $(cat .env | xargs) && flutter run -d ios \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-```
-
-#### 多平台執行方式
-
-提供多種執行方式供開發者選擇：
-
-##### 方式一：直接指令（推薦）
-
-```bash
-# 開發執行
-export $(cat .env | xargs) && flutter run \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# iOS 平台
-export $(cat .env | xargs) && flutter run -d ios \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# Android 平台
-export $(cat .env | xargs) && flutter run -d android \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# Web 平台
-export $(cat .env | xargs) && flutter run -d chrome \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-```
-
-##### 方式二：簡化腳本（可選）
-
-在專案根目錄建立 `scripts/` 資料夾：
-
-```bash
-# scripts/dev.sh (Unix/Linux/macOS)
-#!/bin/bash
-set -e
-source .env
-flutter run \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-```
-
-```batch
-@echo off
-REM scripts/dev.bat (Windows)
-for /f "tokens=1,2 delims==" %%a in (.env) do set %%a=%%b
-flutter run ^
-  --dart-define=GOOGLE_PLACES_API_KEY=%GOOGLE_PLACES_API_KEY% ^
-  --dart-define=GOOGLE_MAPS_API_KEY=%GOOGLE_MAPS_API_KEY%
-```
-
-使用腳本：
-```bash
-# Unix/Linux/macOS
-chmod +x scripts/dev.sh
-./scripts/dev.sh
-
-# Windows
-scripts\dev.bat
-```
-
-##### 方式三：IDE 整合（新手友好）
-
-**VS Code 設定**
-
-在 `.vscode/launch.json` 中加入：
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Development",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "env": {
-        "GOOGLE_PLACES_API_KEY": "${env:GOOGLE_PLACES_API_KEY}",
-        "GOOGLE_MAPS_API_KEY": "${env:GOOGLE_MAPS_API_KEY}"
-      },
-      "toolArgs": [
-        "--dart-define=GOOGLE_PLACES_API_KEY=${env:GOOGLE_PLACES_API_KEY}",
-        "--dart-define=GOOGLE_MAPS_API_KEY=${env:GOOGLE_MAPS_API_KEY}"
-      ]
-    }
-  ]
-}
-```
-
-**Android Studio 設定**
+**Android Studio / IntelliJ IDEA 設定**
 
 1. Run/Debug Configurations → Edit Configurations
 2. Environment Variables 中加入：
@@ -302,34 +194,12 @@ scripts\dev.bat
    --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
    ```
 
-#### 建置指令
-
-```bash
-# Android APK
-export $(cat .env | xargs) && flutter build apk --release \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# iOS
-export $(cat .env | xargs) && flutter build ios --release \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# Web
-export $(cat .env | xargs) && flutter build web --release \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-```
-
 ## 🧪 測試
 
 ### 執行測試
 ```bash
 # 執行所有測試
 flutter test
-
-# 執行特定測試檔案
-flutter test test/unit/services/places_service_test.dart
 
 # 執行整合測試
 flutter test integration_test/
