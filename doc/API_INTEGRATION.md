@@ -534,14 +534,177 @@ class BatchRequestService {
 
 ## 🔒 安全性考量
 
-### API 金鑰保護
-1. **不要在版本控制中儲存 API 金鑰**
-2. **使用環境變數或設定檔案**
-3. **設定適當的應用程式限制**
-4. **定期輪換 API 金鑰**
+### API 金鑰安全管理
 
-### 伺服器端代理
-對於敏感操作，考慮透過後端服務代理 API 請求：
+#### 1. 環境變數設定
+
+**絕不將 API 金鑰硬編碼到程式中！**
+
+```dart
+// ✗ 錯誤做法 - 絕不這樣做！
+class ApiKeys {
+  static const String googlePlacesApiKey = 'AIzaSy...'; // 危險！
+}
+
+// ✓ 正確做法 - 使用環境變數
+class ApiKeys {
+  static const String googlePlacesApiKey = String.fromEnvironment(
+    'GOOGLE_PLACES_API_KEY',
+    defaultValue: '',
+  );
+  
+  // 安全檢查
+  static void validateKeys() {
+    if (googlePlacesApiKey.isEmpty) {
+      throw Exception('未設定 GOOGLE_PLACES_API_KEY 環境變數');
+    }
+    
+    // 檢查金鑰格式
+    if (!googlePlacesApiKey.startsWith('AIza')) {
+      throw Exception('Google API 金鑰格式不正確');
+    }
+  }
+}
+```
+
+#### 2. .env 檔案管理
+
+```bash
+# .env (加入 .gitignore)
+GOOGLE_PLACES_API_KEY=AIzaSyBvOkBo...your_actual_key
+GOOGLE_MAPS_API_KEY=AIzaSyBvOkBo...your_actual_key
+
+# 對於不同環境
+# .env.development
+GOOGLE_PLACES_API_KEY=AIzaSy...dev_key
+
+# .env.production  
+GOOGLE_PLACES_API_KEY=AIzaSy...prod_key
+```
+
+#### 3. .gitignore 設定
+
+```gitignore
+# API 金鑰和敏感資訊
+.env
+.env.*
+!.env.example
+
+# 備用設定檔
+config/secrets.dart
+lib/**/api_keys_real.dart
+```
+
+#### 4. 安全 HTTP 服務實作
+
+```dart
+// lib/core/services/secure_places_service.dart
+class SecurePlacesService extends PlacesService {
+  SecurePlacesService() : super(ApiKeys.currentPlacesApiKey) {
+    // 啟動時驗證金鑰
+    ApiKeys.validateKeys();
+  }
+  
+  @override
+  Future<List<Place>> searchNearby({
+    required double latitude,
+    required double longitude,
+    double radius = 5000,
+    String? type,
+    int maxResults = 20,
+  }) async {
+    // 加入請求限制檢查
+    if (radius > 50000) {
+      throw ArgumentError('搜尋半徑不能超過 50km');
+    }
+    
+    if (maxResults > 60) {
+      throw ArgumentError('每次最多可取 60 筆結果');
+    }
+    
+    try {
+      return await super.searchNearby(
+        latitude: latitude,
+        longitude: longitude,
+        radius: radius,
+        type: type,
+        maxResults: maxResults,
+      );
+    } catch (e) {
+      // 記錄錯誤但不暴露金鑰資訊
+      logger.error('地點搜尋失敗', error: e);
+      rethrow;
+    }
+  }
+}
+```
+
+#### 5. API 金鑰限制設定
+
+在 Google Cloud Console 中設定：
+
+```json
+{
+  "restrictions": {
+    "android_key_restrictions": {
+      "allowed_applications": [
+        {
+          "sha1_fingerprint": "SHA1_FINGERPRINT",
+          "package_name": "com.example.instant_explore"
+        }
+      ]
+    },
+    "ios_key_restrictions": {
+      "allowed_bundle_ids": [
+        "com.example.instant-explore"
+      ]
+    },
+    "browser_key_restrictions": {
+      "allowed_referrers": [
+        "https://instant-explore.app/*",
+        "https://*.instant-explore.app/*"
+      ]
+    }
+  },
+  "quota": {
+    "requests_per_minute_per_user": 100,
+    "requests_per_day": 25000
+  }
+}
+```
+
+#### 6. 金鑰輪換策略
+
+```dart
+// lib/core/services/api_key_rotation.dart
+class ApiKeyRotation {
+  static const int rotationIntervalDays = 90;
+  
+  static void checkKeyAge() {
+    final lastRotation = getLastRotationDate();
+    final daysSinceRotation = DateTime.now().difference(lastRotation).inDays;
+    
+    if (daysSinceRotation > rotationIntervalDays) {
+      showKeyRotationWarning();
+    }
+  }
+  
+  static void showKeyRotationWarning() {
+    // 提醒管理員輪換金鑰
+    logger.warning('建議輪換 API 金鑰，上次輪換已超過 $rotationIntervalDays 天');
+  }
+}
+```
+
+### 伺服器端代理（進階安全）
+
+對於高安全性需求，建議透過後端服務代理 API 請求：
+
+#### 優勢
+- API 金鑰完全不暴露給用戶端
+- 可以實作更細粒度的存取控制
+- 集中管理 API 成本和配額
+- 可以加入用戶認證和權限檢查
 
 ```dart
 // lib/core/services/proxy_service.dart
@@ -571,9 +734,124 @@ class ProxyService {
           .map((place) => Place.fromJson(place))
           .toList();
     } else {
-      throw Exception('Proxy request failed');
+      throw ProxyException('Proxy request failed: ${response.statusCode}');
     }
   }
+}
+
+class ProxyException implements Exception {
+  final String message;
+  ProxyException(this.message);
+  
+  @override
+  String toString() => 'ProxyException: $message';
+}
+```
+
+### GitHub Actions CI/CD 安全設定
+
+```yaml
+# .github/workflows/build.yml
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Run tests
+      run: flutter test
+    
+    - name: Build APK with secrets
+      env:
+        GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      run: |
+        flutter build apk --release \
+          --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+          --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+    
+    # 安全性檢查
+    - name: Security audit
+      run: |
+        # 檢查是否意外提交了敏感檔案
+        if git ls-files | grep -E '\.(env|key|pem|p12)$'; then
+          echo "錯誤：發現敏感檔案在版本控制中"
+          exit 1
+        fi
+        
+        # 檢查程式碼中是否有硬編碼的 API 金鑰
+        if grep -r "AIza[A-Za-z0-9_-]\{35\}" lib/; then
+          echo "錯誤：發現硬編碼的 Google API 金鑰"
+          exit 1
+        fi
+```
+
+### 開發環境安全檢查
+
+```dart
+// lib/core/utils/security_checker.dart
+class SecurityChecker {
+  static void performStartupChecks() {
+    checkApiKeyConfiguration();
+    checkBuildConfiguration();
+    warnIfDebugMode();
+  }
+  
+  static void checkApiKeyConfiguration() {
+    if (!ApiKeys.isConfigured) {
+      throw SecurityException('未正確設定 API 金鑰');
+    }
+    
+    // 檢查是否使用測試金鑰
+    if (ApiKeys.googlePlacesApiKey.contains('test') || 
+        ApiKeys.googlePlacesApiKey.contains('demo')) {
+      logger.warning('正在使用測試 API 金鑰');
+    }
+  }
+  
+  static void checkBuildConfiguration() {
+    if (kDebugMode) {
+      logger.info('當前為 Debug 模式');
+    }
+    
+    if (kReleaseMode && !ApiKeys.isConfigured) {
+      throw SecurityException('Release 模式下必須設定正式 API 金鑰');
+    }
+  }
+  
+  static void warnIfDebugMode() {
+    if (kDebugMode) {
+      // 在 Debug 模式下顯示警告
+      Future.delayed(Duration(seconds: 2), () {
+        logger.warning('當前為開發模式，請勿在生產環境使用');
+      });
+    }
+  }
+}
+
+class SecurityException implements Exception {
+  final String message;
+  SecurityException(this.message);
+  
+  @override
+  String toString() => 'SecurityException: $message';
 }
 ```
 

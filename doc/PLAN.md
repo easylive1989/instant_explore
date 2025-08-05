@@ -95,16 +95,22 @@
 - **負責角色**: Frontend Developer
 - **優先級**: High
 
-### Core-006: Google APIs 金鑰設定
-- **描述**: 設定 Google Cloud Console 專案和 API 金鑰
-- **時間**: 6小時
+### Core-006: Google APIs 安全金鑰設定
+- **描述**: 設定 Google Cloud Console 專案和安全 API 金鑰管理
+- **時間**: 8小時
 - **依賴**: Core-005
 - **產出物**:
-  - Google Cloud 專案設定
-  - API 金鑰配置檔案
-  - `lib/core/config/api_keys.dart`
-- **驗收標準**: API 金鑰可以成功呼叫 Google APIs
-- **負責角色**: Backend Developer
+  - Google Cloud 專案設定和 API 限制配置
+  - .env 檔案和 .env.example 範例
+  - .gitignore 設定排除敏感檔案
+  - `lib/core/config/api_keys.dart` 使用環境變數
+  - 跨平台執行腳本（scripts/dev.sh 和 scripts/dev.bat）
+- **驗收標準**: 
+  - API 金鑰使用環境變數管理
+  - 應用程式啟動時檢查金鑰設定
+  - 無硬編碼 API 金鑰在程式碼中
+  - .env 檔案已加入 .gitignore
+- **負責角色**: Backend Developer + DevOps
 - **優先級**: Critical
 
 ### Core-007: 錯誤處理和例外管理

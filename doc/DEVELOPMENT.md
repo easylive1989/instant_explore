@@ -79,20 +79,79 @@ flutter devices  # 確認可用裝置
    - Directions API
 
 #### 設定 API 金鑰
-建立 `lib/core/config/api_keys.dart` 檔案：
+
+**重要：絕不將真實 API 金鑰提交到版本控制！**
+
+##### 1. 建立環境變數檔案
+在專案根目錄建立 `.env` 檔案（加入 .gitignore）：
+
+```bash
+# .env
+GOOGLE_PLACES_API_KEY=你的真實_Places_API_金鑰
+GOOGLE_MAPS_API_KEY=你的真實_Maps_API_金鑰
+```
+
+##### 2. 建立 `lib/core/config/api_keys.dart` 檔案：
 
 ```dart
 class ApiKeys {
-  static const String googlePlacesApiKey = 'YOUR_GOOGLE_PLACES_API_KEY';
-  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+  // 使用環境變數讀取 API 金鑰
+  static const String googlePlacesApiKey = String.fromEnvironment(
+    'GOOGLE_PLACES_API_KEY',
+    defaultValue: '',
+  );
   
-  // 開發環境和正式環境可以使用不同的金鑰
+  static const String googleMapsApiKey = String.fromEnvironment(
+    'GOOGLE_MAPS_API_KEY',
+    defaultValue: '',
+  );
+  
+  // 檢查 API 金鑰是否已設定
+  static bool get isConfigured {
+    return googlePlacesApiKey.isNotEmpty && 
+           googleMapsApiKey.isNotEmpty;
+  }
+  
+  // 為不同環境提供不同的設定
   static String get currentPlacesApiKey {
-    return const bool.fromEnvironment('dart.vm.product')
-        ? googlePlacesApiKey
-        : 'YOUR_DEV_PLACES_API_KEY';
+    if (googlePlacesApiKey.isEmpty) {
+      throw Exception('未設定 GOOGLE_PLACES_API_KEY 環境變數');
+    }
+    return googlePlacesApiKey;
+  }
+  
+  static String get currentMapsApiKey {
+    if (googleMapsApiKey.isEmpty) {
+      throw Exception('未設定 GOOGLE_MAPS_API_KEY 環境變數');
+    }
+    return googleMapsApiKey;
   }
 }
+```
+
+##### 3. 設定 .gitignore
+在專案根目錄的 `.gitignore` 檔案中加入：
+
+```gitignore
+# API 金鑰和敏感資訊
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+
+# API 金鑰檔案
+lib/core/config/api_keys_local.dart
+**/api_keys_real.dart
+```
+
+##### 4. 建立 .env.example 範例檔案
+
+```bash
+# .env.example
+# 複製此檔案為 .env 並填入真實的 API 金鑰
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 ```
 
 #### 設定平台特定配置
@@ -107,7 +166,7 @@ class ApiKeys {
     <application ...>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
+            android:value="${GOOGLE_MAPS_API_KEY}"/>
     </application>
 </manifest>
 ```
@@ -124,19 +183,142 @@ class ApiKeys {
 
 ### 4. 執行應用程式
 
+#### 使用環境變數執行
+
 ```bash
-# iOS 模擬器
-flutter run -d ios
+# 讀取 .env 檔案並執行應用程式
+source .env && flutter run \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
 
-# Android 模擬器
-flutter run -d android
+# 或使用一行指令
+export $(cat .env | xargs) && flutter run \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
 
-# Web 瀏覽器
-flutter run -d chrome
+# 指定平台
+export $(cat .env | xargs) && flutter run -d ios \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+```
 
-# 指定裝置
-flutter devices
-flutter run -d [device-id]
+#### 多平台執行方式
+
+提供多種執行方式供開發者選擇：
+
+##### 方式一：直接指令（推薦）
+
+```bash
+# 開發執行
+export $(cat .env | xargs) && flutter run \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+
+# iOS 平台
+export $(cat .env | xargs) && flutter run -d ios \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+
+# Android 平台
+export $(cat .env | xargs) && flutter run -d android \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+
+# Web 平台
+export $(cat .env | xargs) && flutter run -d chrome \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+```
+
+##### 方式二：簡化腳本（可選）
+
+在專案根目錄建立 `scripts/` 資料夾：
+
+```bash
+# scripts/dev.sh (Unix/Linux/macOS)
+#!/bin/bash
+set -e
+source .env
+flutter run \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+```
+
+```batch
+@echo off
+REM scripts/dev.bat (Windows)
+for /f "tokens=1,2 delims==" %%a in (.env) do set %%a=%%b
+flutter run ^
+  --dart-define=GOOGLE_PLACES_API_KEY=%GOOGLE_PLACES_API_KEY% ^
+  --dart-define=GOOGLE_MAPS_API_KEY=%GOOGLE_MAPS_API_KEY%
+```
+
+使用腳本：
+```bash
+# Unix/Linux/macOS
+chmod +x scripts/dev.sh
+./scripts/dev.sh
+
+# Windows
+scripts\dev.bat
+```
+
+##### 方式三：IDE 整合（新手友好）
+
+**VS Code 設定**
+
+在 `.vscode/launch.json` 中加入：
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Development",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "env": {
+        "GOOGLE_PLACES_API_KEY": "${env:GOOGLE_PLACES_API_KEY}",
+        "GOOGLE_MAPS_API_KEY": "${env:GOOGLE_MAPS_API_KEY}"
+      },
+      "toolArgs": [
+        "--dart-define=GOOGLE_PLACES_API_KEY=${env:GOOGLE_PLACES_API_KEY}",
+        "--dart-define=GOOGLE_MAPS_API_KEY=${env:GOOGLE_MAPS_API_KEY}"
+      ]
+    }
+  ]
+}
+```
+
+**Android Studio 設定**
+
+1. Run/Debug Configurations → Edit Configurations
+2. Environment Variables 中加入：
+   - `GOOGLE_PLACES_API_KEY`
+   - `GOOGLE_MAPS_API_KEY`
+3. Additional Run Args 中加入：
+   ```
+   --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+   ```
+
+#### 建置指令
+
+```bash
+# Android APK
+export $(cat .env | xargs) && flutter build apk --release \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+
+# iOS
+export $(cat .env | xargs) && flutter build ios --release \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+
+# Web
+export $(cat .env | xargs) && flutter build web --release \
+  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
 ```
 
 ## 🧪 測試
@@ -383,10 +565,51 @@ flutter build ios
 
 ### Q: 如何處理 API 金鑰安全性？
 A: 
-1. 絕不將 API 金鑰提交到版本控制
-2. 使用環境變數或設定檔案
-3. 在 CI/CD 中使用密鑰管理服務
-4. 為不同環境使用不同的金鑰
+1. **絕不將 API 金鑰提交到版本控制**
+2. **使用環境變數和 .env 檔案**
+3. **設定 .gitignore 排除所有含密鑰的檔案**
+4. **在 CI/CD 中使用 GitHub Secrets**
+5. **為不同環境使用不同的金鑰**
+6. **定期輪換 API 金鑰**
+7. **設定 API 金鑰使用限制和配額**
+
+#### GitHub Secrets 設定
+1. 在 GitHub 儲存庫設定中加入 Secrets
+2. 新增 `GOOGLE_PLACES_API_KEY` 和 `GOOGLE_MAPS_API_KEY`
+3. 在 GitHub Actions 中使用：
+
+```yaml
+env:
+  GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+  GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+steps:
+  - name: Build APK
+    run: |
+      flutter build apk --release \
+        --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+        --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+```
+
+#### API 金鑰狀態檢查
+在應用程式启動時檢查：
+
+```dart
+void main() {
+  // 檢查 API 金鑰設定
+  if (!ApiKeys.isConfigured) {
+    print('錯誤：未設定 API 金鑰！');
+    print('請參考 README.md 中的 API 金鑰設定說明');
+    exit(1);
+  }
+  
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+```
 
 ### Q: 如何偵錯效能問題？
 A: 使用 Flutter 內建工具：
@@ -433,3 +656,235 @@ class PlacesListWidget extends ConsumerWidget {
 - [Google Places API 文件](https://developers.google.com/maps/documentation/places/web-service)
 - [Flutter 測試指南](https://flutter.dev/docs/testing)
 - [Riverpod 狀態管理](https://pub.dev/packages/flutter_riverpod)
+
+## 🔐 安全性最佳實踐
+
+### API 金鑰安全檢查清單
+
+執行以下檢查確保專案安全：
+
+```bash
+# 1. 檢查 .gitignore 是否正確設定
+cat .gitignore | grep -E "\.env|api.*key"
+
+# 2. 檢查是否意外提交了敏感檔案
+git ls-files | grep -E "\.(env|key|pem)$"
+
+# 3. 檢查程式碼中是否有硬編碼的 API 金鑰
+grep -r "AIza[A-Za-z0-9_-]\{35\}" lib/ || echo "未發現硬編碼 API 金鑰"
+
+# 4. 檢查環境變數是否設定
+echo "GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY:+已設定}"
+echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:+已設定}"
+```
+
+### 完整的 .gitignore 範例
+
+```gitignore
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+linked_*.ds
+unlinked.ds
+unlinked_spec.ds
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# API 金鑰和敏感資訊（重要！）
+.env
+.env.*
+!.env.example
+config/secrets.dart
+lib/**/api_keys_real.dart
+*.key
+*.pem
+*.p12
+*.jks
+
+# 平台特定
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+android/key.properties
+
+# 日誌檔案
+*.log
+
+# 測試覆蓋率
+coverage/
+.nyc_output/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+```
+
+### 環境變數設定指南
+
+#### 1. 本地開發設定
+
+```bash
+# 建立 .env 檔案
+cat > .env << EOF
+# Google APIs
+GOOGLE_PLACES_API_KEY=your_places_api_key_here
+GOOGLE_MAPS_API_KEY=your_maps_api_key_here
+
+# 環境設定
+ENVIRONMENT=development
+DEBUG_MODE=true
+EOF
+
+# 設定檔案權限（僅本人可讀寫）
+chmod 600 .env
+```
+
+#### 2. 團隊協作設定
+
+```bash
+# 建立 .env.example 供團隊參考
+cat > .env.example << EOF
+# 複製此檔案為 .env 並填入真實的 API 金鑰
+
+# Google APIs
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# 環境設定
+ENVIRONMENT=development
+DEBUG_MODE=true
+
+# API 設定
+API_BASE_URL=https://api.example.com
+API_TIMEOUT=30000
+EOF
+```
+
+#### 3. 自動化腳本
+
+建立 `scripts/setup.sh` 協助新團隊成員設定：
+
+```bash
+#!/bin/bash
+# scripts/setup.sh
+
+echo "🚀 設定 Instant Explore 開發環境..."
+
+# 檢查 Flutter 安裝
+if ! command -v flutter &> /dev/null; then
+    echo "❌ 請先安裝 Flutter"
+    exit 1
+fi
+
+# 複製環境變數範例
+if [ ! -f .env ]; then
+    cp .env.example .env
+    echo "✅ 已建立 .env 檔案，請填入真實的 API 金鑰"
+else
+    echo "⚠️  .env 檔案已存在"
+fi
+
+# 安裝依賴
+echo "📦 安裝 Flutter 依賴..."
+flutter pub get
+
+# 檢查 API 金鑰設定
+echo "🔑 檢查 API 金鑰設定..."
+source .env
+if [ -z "$GOOGLE_PLACES_API_KEY" ] || [ "$GOOGLE_PLACES_API_KEY" = "your_google_places_api_key_here" ]; then
+    echo "❌ 請在 .env 檔案中設定真實的 GOOGLE_PLACES_API_KEY"
+    exit 1
+fi
+
+if [ -z "$GOOGLE_MAPS_API_KEY" ] || [ "$GOOGLE_MAPS_API_KEY" = "your_google_maps_api_key_here" ]; then
+    echo "❌ 請在 .env 檔案中設定真實的 GOOGLE_MAPS_API_KEY"
+    exit 1
+fi
+
+echo "✅ 環境設定完成！"
+echo "🎯 執行 './scripts/dev.sh' 或使用 IDE 配置開始開發"
+```
+
+### 持續整合（CI）安全設定
+
+#### GitHub Actions Secrets 設定步驟
+
+1. **前往 GitHub 儲存庫設定**
+   - Settings → Secrets and variables → Actions
+
+2. **新增以下 Secrets**
+   ```
+   GOOGLE_PLACES_API_KEY: [你的 Places API 金鑰]
+   GOOGLE_MAPS_API_KEY: [你的 Maps API 金鑰]
+   ```
+
+3. **在 workflow 中使用**
+   ```yaml
+   # .github/workflows/ci.yml
+   name: CI/CD Pipeline
+   
+   on:
+     push:
+       branches: [ main, develop ]
+     pull_request:
+       branches: [ main ]
+   
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       
+       steps:
+       - uses: actions/checkout@v3
+       
+       - name: Setup Flutter
+         uses: subosito/flutter-action@v2
+         with:
+           flutter-version: '3.32.4'
+       
+       - name: Install dependencies
+         run: flutter pub get
+       
+       - name: Run tests
+         run: flutter test
+       
+       - name: Security check
+         run: |
+           # 檢查是否意外提交敏感檔案
+           if git ls-files | grep -E '\.(env|key|pem)$'; then
+             echo "錯誤：發現敏感檔案在版本控制中"
+             exit 1
+           fi
+   
+     build:
+       needs: test
+       runs-on: ubuntu-latest
+       
+       steps:
+       - uses: actions/checkout@v3
+       
+       - name: Setup Flutter
+         uses: subosito/flutter-action@v2
+         with:
+           flutter-version: '3.32.4'
+       
+       - name: Build APK
+         env:
+           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+         run: |
+           flutter build apk --release \
+             --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
+             --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+   ```
