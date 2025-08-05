@@ -133,31 +133,59 @@ External APIs (Google APIs)
 
 ## 🎨 狀態管理
 
-採用 **Provider** 模式進行狀態管理：
+採用 **Riverpod** 模式進行狀態管理：
 
 ```dart
 // 範例：地點狀態管理
-class PlacesProvider extends ChangeNotifier {
-  List<Place> _places = [];
-  bool _isLoading = false;
+@immutable
+class PlacesState {
+  final List<Place> places;
+  final bool isLoading;
+  final String? error;
   
-  List<Place> get places => _places;
-  bool get isLoading => _isLoading;
+  const PlacesState({
+    this.places = const [],
+    this.isLoading = false,
+    this.error,
+  });
+  
+  PlacesState copyWith({
+    List<Place>? places,
+    bool? isLoading,
+    String? error,
+  }) {
+    return PlacesState(
+      places: places ?? this.places,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class PlacesNotifier extends StateNotifier<PlacesState> {
+  PlacesNotifier(this._placesService) : super(const PlacesState());
+  
+  final PlacesService _placesService;
   
   Future<void> searchNearbyPlaces(LatLng location) async {
-    _isLoading = true;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, error: null);
     
     try {
-      _places = await _placesService.searchNearby(location);
+      final places = await _placesService.searchNearby(location);
+      state = state.copyWith(places: places, isLoading: false);
     } catch (e) {
-      // 錯誤處理
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      state = state.copyWith(
+        isLoading: false, 
+        error: e.toString(),
+      );
     }
   }
 }
+
+// Provider 定義
+final placesNotifierProvider = StateNotifierProvider<PlacesNotifier, PlacesState>(
+  (ref) => PlacesNotifier(ref.read(placesServiceProvider)),
+);
 ```
 
 ## 🧪 測試架構
@@ -179,7 +207,7 @@ test/
 
 ### 核心依賴
 - **flutter** - 核心框架
-- **provider** - 狀態管理
+- **flutter_riverpod** - 狀態管理
 - **http** - HTTP 請求
 - **shared_preferences** - 本地儲存
 
@@ -230,7 +258,7 @@ flutter build web --release    # Web
 4. **Notification 模組** - 推播通知
 
 ### 技術債務
-1. 實作 BLoC 狀態管理（替換 Provider）
+1. 持續優化 Riverpod 狀態管理模式
 2. 添加 GraphQL 支援
 3. 實作離線快取策略
 4. 添加國際化支援

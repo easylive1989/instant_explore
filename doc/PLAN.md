@@ -13,7 +13,7 @@
 - **認證**: Supabase Auth
 - **地圖服務**: Google Maps SDK
 - **API整合**: Google Places API (New), Directions API
-- **狀態管理**: Provider
+- **狀態管理**: Riverpod
 - **測試**: Flutter Test, Integration Test
 
 ### 團隊角色
@@ -192,11 +192,11 @@
 - **優先級**: High
 
 ### Location-004: 位置狀態管理
-- **描述**: 使用 Provider 管理位置相關狀態
+- **描述**: 使用 Riverpod 管理位置相關狀態
 - **時間**: 6小時
 - **依賴**: Location-002, Location-003
 - **產出物**:
-  - `lib/features/location/providers/location_provider.dart`
+  - `lib/features/location/providers/location_notifier.dart`
   - 位置狀態更新邏輯
 - **驗收標準**: 位置變更可以正確更新 UI
 - **負責角色**: Frontend Developer
@@ -275,11 +275,11 @@
 - **優先級**: High
 
 ### Places-006: 地點狀態管理
-- **描述**: 使用 Provider 管理地點相關狀態
+- **描述**: 使用 Riverpod 管理地點相關狀態
 - **時間**: 8小時
 - **依賴**: Places-003, Places-004
 - **產出物**:
-  - `lib/features/places/providers/places_provider.dart`
+  - `lib/features/places/providers/places_notifier.dart`
   - 搜尋狀態管理
   - 篩選狀態管理
 - **驗收標準**: 地點資料變更可以正確更新 UI

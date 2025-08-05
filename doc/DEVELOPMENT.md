@@ -396,26 +396,34 @@ flutter run --profile
 ```
 
 ### Q: 如何處理狀態管理？
-A: 專案使用 Provider 模式：
+A: 專案使用 Riverpod 模式：
 ```dart
 // 在 main.dart 中設定
-MultiProvider(
-  providers: [
-    ChangeNotifierProvider(create: (_) => PlacesProvider()),
-    ChangeNotifierProvider(create: (_) => LocationProvider()),
-  ],
-  child: MyApp(),
-)
+void main() {
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+
+// 定義 Provider
+final placesNotifierProvider = StateNotifierProvider<PlacesNotifier, PlacesState>(
+  (ref) => PlacesNotifier(),
+);
 
 // 在 widget 中使用
-Consumer<PlacesProvider>(
-  builder: (context, provider, child) {
+class PlacesListWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final placesState = ref.watch(placesNotifierProvider);
+    
     return ListView.builder(
-      itemCount: provider.places.length,
-      itemBuilder: (context, index) => PlaceCard(provider.places[index]),
+      itemCount: placesState.places.length,
+      itemBuilder: (context, index) => PlaceCard(placesState.places[index]),
     );
-  },
-)
+  }
+}
 ```
 
 ## 📚 參考資源
@@ -424,4 +432,4 @@ Consumer<PlacesProvider>(
 - [Dart 語言指南](https://dart.dev/guides)
 - [Google Places API 文件](https://developers.google.com/maps/documentation/places/web-service)
 - [Flutter 測試指南](https://flutter.dev/docs/testing)
-- [Provider 狀態管理](https://pub.dev/packages/provider)
+- [Riverpod 狀態管理](https://pub.dev/packages/flutter_riverpod)
