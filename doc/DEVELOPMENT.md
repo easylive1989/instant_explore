@@ -196,75 +196,184 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 ## 🧪 測試
 
+本專案主要使用 **Patrol** 進行 E2E 測試和**單元測試**來測試領域模型，幾乎不使用 Widget Test。
+
 ### 執行測試
 ```bash
-# 執行所有測試
+# 執行所有單元測試
 flutter test
 
-# 執行整合測試
-flutter test integration_test/
+# 執行 Patrol E2E 測試
+patrol test
 
-# 測試覆蓋率
+# 執行特定平台的 E2E 測試
+patrol test --target integration_test/app_test.dart --platform android
+patrol test --target integration_test/app_test.dart --platform ios
+
+# 測試覆蓋率（專注於領域模型）
 flutter test --coverage
 genhtml coverage/lcov.info -o coverage/html
 ```
 
 ### 測試指南
 
-#### 單元測試範例
+#### 測試策略
+- **單元測試**：專注於測試領域模型、業務邏輯和資料轉換
+- **E2E 測試**：使用 Patrol 測試完整的用戶流程和跨平台功能
+- **不使用 Widget Test**：避免維護成本高且容易失敗的 Widget 測試
+
+#### 單元測試範例（領域模型）
 ```dart
-// test/unit/services/places_service_test.dart
+// test/unit/models/place_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:instant_explore/features/places/models/place.dart';
+
+void main() {
+  group('Place Model', () {
+    test('should create Place from JSON', () {
+      // Arrange
+      final json = {
+        'id': 'test_id',
+        'displayName': {'text': '測試地點'},
+        'formattedAddress': '台北市信義區',
+        'rating': 4.5,
+        'priceLevel': 'PRICE_LEVEL_MODERATE',
+        'location': {'latitude': 25.0330, 'longitude': 121.5654},
+      };
+
+      // Act
+      final place = Place.fromJson(json);
+
+      // Assert
+      expect(place.id, 'test_id');
+      expect(place.name, '測試地點');
+      expect(place.address, '台北市信義區');
+      expect(place.rating, 4.5);
+      expect(place.location.latitude, 25.0330);
+    });
+
+    test('should calculate distance correctly', () {
+      // Arrange
+      final place = Place(
+        id: 'test',
+        name: '測試地點',
+        address: '測試地址',
+        location: PlaceLocation(latitude: 25.0330, longitude: 121.5654),
+      );
+      final userLocation = PlaceLocation(latitude: 25.0340, longitude: 121.5664);
+
+      // Act
+      final distance = place.calculateDistance(userLocation);
+
+      // Assert
+      expect(distance, closeTo(141.4, 0.1)); // 約 141 公尺
+    });
+  });
+}
+
+// test/unit/services/voting_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+class MockGroupRepository extends Mock implements GroupRepository {}
+
 void main() {
-  group('PlacesService', () {
-    late PlacesService placesService;
-    late MockHttpService mockHttpService;
+  group('VotingService', () {
+    late VotingService votingService;
+    late MockGroupRepository mockRepository;
 
     setUp(() {
-      mockHttpService = MockHttpService();
-      placesService = PlacesService(mockHttpService);
+      mockRepository = MockGroupRepository();
+      votingService = VotingService(mockRepository);
     });
 
-    test('should return places when API call is successful', () async {
+    test('should calculate voting results correctly', () {
       // Arrange
-      when(() => mockHttpService.get(any()))
-          .thenAnswer((_) async => mockApiResponse);
+      final votes = [
+        Vote(userId: 'user1', placeId: 'place1', score: 5),
+        Vote(userId: 'user2', placeId: 'place1', score: 4),
+        Vote(userId: 'user3', placeId: 'place2', score: 3),
+      ];
 
       // Act
-      final result = await placesService.searchNearby(testLocation);
+      final results = votingService.calculateResults(votes);
 
       // Assert
-      expect(result, isA<List<Place>>());
-      expect(result.length, 5);
+      expect(results['place1'], 4.5); // (5+4)/2
+      expect(results['place2'], 3.0);
     });
   });
 }
 ```
 
-#### Widget 測試範例
+#### Patrol E2E 測試範例
 ```dart
-// test/widget/screens/places_screen_test.dart
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// integration_test/app_test.dart
+import 'package:patrol/patrol.dart';
 
 void main() {
-  testWidgets('PlacesScreen should display places list', (tester) async {
-    // Arrange
-    await tester.pumpWidget(
-      MaterialApp(
-        home: PlacesScreen(),
-      ),
-    );
+  patrolTest(
+    '完整的地點搜尋和投票流程',
+    ($) async {
+      // 啟動應用程式
+      await $.pumpWidgetAndSettle(MyApp());
 
-    // Act
-    await tester.pump();
+      // 允許位置權限
+      await $.native.grantPermissions([
+        Permission.locationWhenInUse,
+      ]);
 
-    // Assert
-    expect(find.byType(ListView), findsOneWidget);
-    expect(find.text('附近推薦'), findsOneWidget);
-  });
+      // 等待首頁載入
+      await $.waitUntilVisible(find.text('附近推薦'));
+
+      // 搜尋地點
+      await $.tap(find.byIcon(Icons.search));
+      await $.enterText(find.byType(TextField), '咖啡廳');
+      await $.tap(find.byIcon(Icons.search));
+
+      // 等待搜尋結果
+      await $.waitUntilVisible(find.byType(PlaceCard));
+
+      // 選擇第一個地點
+      await $.tap(find.byType(PlaceCard).first);
+
+      // 檢查詳細資訊頁面
+      await $.waitUntilVisible(find.text('評分'));
+      expect($.find.text('導航'), findsOneWidget);
+
+      // 加入群組投票
+      await $.tap(find.text('加入投票'));
+      await $.waitUntilVisible(find.text('投票'));
+
+      // 進行投票
+      await $.tap(find.byIcon(Icons.thumb_up));
+
+      // 驗證投票結果
+      await $.waitUntilVisible(find.text('投票成功'));
+    },
+  );
+
+  patrolTest(
+    '測試多平台導航功能',
+    ($) async {
+      await $.pumpWidgetAndSettle(MyApp());
+
+      // 導航到地圖頁面
+      await $.tap(find.byIcon(Icons.map));
+      await $.waitUntilVisible(find.byType(GoogleMap));
+
+      // 測試地圖互動
+      await $.native.tap(Offset(200, 400)); // 點擊地圖上的位置
+
+      // 驗證標記顯示
+      await $.waitUntilVisible(find.byType(Marker));
+    },
+    config: PatrolTestConfig(
+      appName: 'Instant Explore',
+      packageName: 'com.example.instant_explore',
+      bundleId: 'com.example.instantExplore',
+    ),
+  );
 }
 ```
 
@@ -370,7 +479,7 @@ Closes #123
 
 ### 程式碼審查清單
 - [ ] 程式碼符合專案風格規範
-- [ ] 包含適當的單元測試
+- [ ] 包含適當的測試（領域模型單元測試或關鍵流程 E2E 測試）
 - [ ] 更新相關文件
 - [ ] 無 console.log 或 print 語句
 - [ ] 處理邊界情況和錯誤
@@ -726,8 +835,16 @@ echo "🎯 執行 './scripts/dev.sh' 或使用 IDE 配置開始開發"
        - name: Install dependencies
          run: flutter pub get
        
-       - name: Run tests
+       - name: Run unit tests
          run: flutter test
+       
+       - name: Install Patrol CLI
+         run: dart pub global activate patrol_cli
+       
+       - name: Run Patrol E2E tests
+         run: |
+           # 執行 E2E 測試（在 CI 環境中）
+           patrol test --target integration_test/app_test.dart --verbose
        
        - name: Security check
          run: |
