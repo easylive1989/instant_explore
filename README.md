@@ -9,12 +9,14 @@
 - ⭐ **地點評價** - 整合 Google 評價和使用者評論
 - 👥 **多人決定** - 群組投票功能，民主決定下一個目的地
 - 🗺️ **路線規劃** - 整合 Google Maps 導航，支援多種交通方式
+- 📱 **跨平台支援** - iOS、Android 和 Web（Web 版專為手機尺寸最佳化）
 
 ## 🛠️ 技術棧
 
 - **前端：** Flutter (iOS / Android / Web)
 - **API：** Google Places API, Google Maps API
 - **架構：** Feature-First 模組化設計
+- **設計理念：** 行動優先（Mobile-First），專注手機使用場景
 
 ## 🚀 快速開始
 
