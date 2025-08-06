@@ -2,28 +2,19 @@
 
 ## 📋 系統需求
 
-### 開發環境
+### 開發環境（macOS）
+- **macOS:** 10.15 或以上版本
 - **Flutter SDK:** 3.32.4
 - **Dart SDK:** 3.8.4
-- **IDE:** Android Studio / VS Code / IntelliJ IDEA
+- **Xcode:** 13.0 或以上版本
+- **CocoaPods:** 1.11.0 或以上版本
+- **IDE:** VS Code / Android Studio / IntelliJ IDEA
 - **版本控制:** Git
 - **Google Cloud Platform 帳號**（用於 API 金鑰）
 
-### 平台需求
-
-#### macOS (用於 iOS 開發)
-- **macOS:** 10.15 或以上版本
-- **Xcode:** 13.0 或以上版本
-- **CocoaPods:** 1.11.0 或以上版本
-
-#### Windows / Linux (用於 Android 開發)
-- **Android Studio:** 2021.1.1 或以上版本
-- **Android SDK:** API level 21 或以上版本
-- **Java:** JDK 11 或以上版本
-
 ### 支援的裝置
 - **iOS:** 11.0 或以上版本
-- **Android:** 5.0 (API level 21) 或以上版本
+- **Android:** 5.0 (API level 21) 或以上版本（透過 Android Studio 模擬器）
 - **Web:** 現代瀏覽器（Chrome、Firefox、Safari、Edge）
 
 ## 🚀 快速開始
@@ -32,10 +23,10 @@
 
 #### 安裝 Flutter
 ```bash
-# macOS
+# 使用 Homebrew（推薦）
 brew install flutter
 
-# 或手動下載
+# 或手動下載並設定 PATH
 git clone https://github.com/flutter/flutter.git
 export PATH="$PATH:`pwd`/flutter/bin"
 
@@ -528,9 +519,9 @@ class AppConfig {
 
 ### Q: Flutter Doctor 顯示錯誤怎麼辦？
 A: 根據錯誤訊息逐一解決：
-- Android toolchain: 安裝 Android Studio 和 SDK
 - iOS toolchain: 安裝 Xcode 和 CocoaPods
 - IDE plugins: 安裝 Flutter 和 Dart 擴充套件
+- Android toolchain（可選）: 如需 Android 開發，安裝 Android Studio 和 SDK
 
 ### Q: 如何解決 iOS 建置錯誤？
 A: 常見解決方案：
