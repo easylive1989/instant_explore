@@ -32,6 +32,8 @@ instant_explore/
 │   │   │   │   ├── date_utils.dart
 │   │   │   │   ├── validation_utils.dart
 │   │   │   │   └── format_utils.dart
+│   │   │   ├── models/       # 基礎設施資料模型
+│   │   │   │   └── api_response.dart
 │   │   │   └── services/     # 核心服務
 │   │   │       ├── http_service.dart
 │   │   │       ├── storage_service.dart
@@ -41,8 +43,7 @@ instant_explore/
 │   │   │   │   ├── custom_button.dart
 │   │   │   │   ├── loading_widget.dart
 │   │   │   │   └── error_widget.dart
-│   │   │   └── models/       # 共用資料模型
-│   │   │       ├── api_response.dart
+│   │   │   └── models/       # 跨功能業務模型
 │   │   │       └── user_preferences.dart
 │   │   └── features/         # 功能模組
 │   │       ├── location/     # 位置相關功能
@@ -91,13 +92,14 @@ features/[feature_name]/
 - **config/** - 應用程式設定、主題、安全 API 金鑰管理
 - **constants/** - 全域常數定義
 - **utils/** - 通用工具函式
+- **models/** - 基礎設施資料模型（API 回應格式等）
 - **services/** - 核心服務（HTTP、儲存、分析等）
 
 ### Shared 模組
 提供跨功能的共用元件：
 
 - **widgets/** - 可重用的 UI 元件
-- **models/** - 跨模組共用的資料模型
+- **models/** - 跨功能的業務領域模型（使用者偏好設定等）
 
 ### Features 模組
 
