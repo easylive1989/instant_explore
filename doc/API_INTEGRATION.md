@@ -2,12 +2,17 @@
 
 ## 🗺️ Google APIs 整合
 
-Instant Explore 主要整合以下 Google APIs：
+Instant Explore 主要整合以下 Google APIs 和第三方服務：
 
 ### 核心 APIs
 - **Google Places API (New)** - 地點搜尋和詳細資訊
 - **Google Maps SDK** - 地圖顯示和互動
 - **Directions API** - 路線規劃和導航
+
+### 用戶服務 APIs
+- **Supabase** - 後端服務（用戶註冊登入、資料庫）
+- **App Store Connect API** - iOS 訂閱管理
+- **Google Play Billing API** - Android 訂閱管理
 
 ## 📍 Google Places API 整合
 
@@ -927,9 +932,388 @@ const mockSuccessResponse = '''
 ''';
 ```
 
+## 💰 訂閱管理 API 整合
+
+### Supabase Authentication 整合
+
+```dart
+// lib/features/auth/services/auth_service.dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthService {
+  final SupabaseClient _supabase = Supabase.instance.client;
+  
+  Future<AuthResponse> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      final AuthResponse response = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (response.user == null) {
+        throw AuthException('登入失敗：無效的認證資訊');
+      }
+      
+      return response;
+    } catch (e) {
+      throw AuthException('登入失敗: $e');
+    }
+  }
+  
+  Future<AuthResponse> signUpWithEmailAndPassword(String email, String password) async {
+    try {
+      final AuthResponse response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      
+      return response;
+    } catch (e) {
+      throw AuthException('註冊失敗: $e');
+    }
+  }
+  
+  Future<void> signOut() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (e) {
+      throw AuthException('登出失敗: $e');
+    }
+  }
+  
+  User? get currentUser => _supabase.auth.currentUser;
+  
+  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
+}
+```
+
+### 社交登入整合
+
+Supabase 支援多種社交登入方式，包括 Google、Apple 等主流平台。
+
+#### Google 登入
+
+```dart
+// lib/features/auth/services/social_auth_service.dart
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class SocialAuthService {
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
+  
+  // Google 登入
+  Future<AuthResponse?> signInWithGoogle() async {
+    try {
+      // 1. 使用 Google Sign In 套件進行認證
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // 使用者取消登入
+        return null;
+      }
+      
+      // 2. 取得認證資訊
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      final String? accessToken = googleAuth.accessToken;
+      
+      if (idToken == null || accessToken == null) {
+        throw AuthException('無法取得 Google 認證資訊');
+      }
+      
+      // 3. 使用 ID Token 登入 Supabase
+      final AuthResponse response = await _supabase.auth.signInWithIdToken(
+        provider: Provider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+      
+      return response;
+    } catch (e) {
+      throw AuthException('Google 登入失敗: $e');
+    }
+  }
+  
+  // Apple 登入
+  Future<AuthResponse?> signInWithApple() async {
+    try {
+      // 使用 Supabase 內建的 Apple 登入流程
+      final AuthResponse response = await _supabase.auth.signInWithOAuth(
+        Provider.apple,
+        redirectTo: 'com.example.instantexplore://login-callback',
+        scopes: 'email name',
+      );
+      
+      return response;
+    } catch (e) {
+      throw AuthException('Apple 登入失敗: $e');
+    }
+  }
+  
+  // 登出（適用於所有登入方式）
+  Future<void> signOut() async {
+    try {
+      // 登出 Google（如果有登入）
+      await _googleSignIn.signOut();
+      
+      // 登出 Supabase
+      await _supabase.auth.signOut();
+    } catch (e) {
+      throw AuthException('登出失敗: $e');
+    }
+  }
+}
+```
+
+#### 平台特定設定
+
+##### iOS 設定（Apple 登入）
+```xml
+<!-- ios/Runner/Info.plist -->
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>com.example.instantexplore</string>
+    </array>
+  </dict>
+</array>
+```
+
+##### Android 設定（Google 登入）
+```xml
+<!-- android/app/src/main/AndroidManifest.xml -->
+<activity 
+    android:name="com.linusu.flutter_web_auth.CallbackActivity"
+    android:exported="true">
+    <intent-filter android:label="flutter_web_auth">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="com.example.instantexplore" />
+    </intent-filter>
+</activity>
+```
+
+### 統一認證介面
+
+```dart
+// lib/features/auth/services/unified_auth_service.dart
+class UnifiedAuthService {
+  final AuthService _authService = AuthService();
+  final SocialAuthService _socialAuthService = SocialAuthService();
+  
+  // 根據不同方式登入
+  Future<AuthResponse?> signIn({
+    required AuthMethod method,
+    String? email,
+    String? password,
+  }) async {
+    switch (method) {
+      case AuthMethod.email:
+        if (email == null || password == null) {
+          throw ArgumentError('Email 登入需要提供帳號密碼');
+        }
+        return await _authService.signInWithEmailAndPassword(email, password);
+        
+      case AuthMethod.google:
+        return await _socialAuthService.signInWithGoogle();
+        
+      case AuthMethod.apple:
+        return await _socialAuthService.signInWithApple();
+    }
+  }
+  
+  // 註冊（僅支援 Email）
+  Future<AuthResponse?> signUp({
+    required String email,
+    required String password,
+  }) async {
+    return await _authService.signUpWithEmailAndPassword(email, password);
+  }
+  
+  // 統一登出
+  Future<void> signOut() async {
+    await _socialAuthService.signOut();
+  }
+}
+
+enum AuthMethod {
+  email,
+  google,
+  apple,
+}
+```
+
+### In-App Purchase 整合
+
+```dart
+// lib/features/subscription/services/subscription_service.dart
+import 'package:in_app_purchase/in_app_purchase.dart';
+
+class SubscriptionService {
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  static const String monthlySubscriptionId = 'instant_explore_monthly';
+  
+  Future<bool> initializePurchase() async {
+    return await _inAppPurchase.isAvailable();
+  }
+  
+  Future<List<ProductDetails>> getSubscriptionProducts() async {
+    final Set<String> productIds = {monthlySubscriptionId};
+    final ProductDetailsResponse response = 
+        await _inAppPurchase.queryProductDetails(productIds);
+    
+    if (response.error != null) {
+      throw SubscriptionException('無法取得訂閱產品: ${response.error}');
+    }
+    
+    return response.productDetails;
+  }
+  
+  Future<void> purchaseSubscription(ProductDetails productDetails) async {
+    final PurchaseParam purchaseParam = PurchaseParam(
+      productDetails: productDetails,
+    );
+    
+    await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+  }
+}
+```
+
+### 搜尋配額管理
+
+```dart
+// lib/features/subscription/services/usage_service.dart
+class UsageService {
+  static const String _dailySearchCountKey = 'daily_search_count';
+  static const String _lastSearchDateKey = 'last_search_date';
+  static const int freeSearchLimit = 10;
+  
+  Future<bool> canSearch() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    // 檢查是否為付費用戶
+    if (await SubscriptionStatus.isPremiumUser()) {
+      return true;
+    }
+    
+    // 檢查免費配額
+    final String today = DateTime.now().toIso8601String().split('T')[0];
+    final String? lastSearchDate = prefs.getString(_lastSearchDateKey);
+    
+    if (lastSearchDate != today) {
+      // 新的一天，重置搜尋次數
+      await prefs.setInt(_dailySearchCountKey, 0);
+      await prefs.setString(_lastSearchDateKey, today);
+      return true;
+    }
+    
+    final int searchCount = prefs.getInt(_dailySearchCountKey) ?? 0;
+    return searchCount < freeSearchLimit;
+  }
+  
+  Future<void> recordSearch() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    if (!await SubscriptionStatus.isPremiumUser()) {
+      final int currentCount = prefs.getInt(_dailySearchCountKey) ?? 0;
+      await prefs.setInt(_dailySearchCountKey, currentCount + 1);
+    }
+  }
+  
+  Future<int> getRemainingSearches() async {
+    if (await SubscriptionStatus.isPremiumUser()) {
+      return -1; // 無限制
+    }
+    
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int searchCount = prefs.getInt(_dailySearchCountKey) ?? 0;
+    return math.max(0, freeSearchLimit - searchCount);
+  }
+}
+```
+
+### 訂閱狀態管理
+
+```dart
+// lib/features/subscription/models/subscription_status.dart
+class SubscriptionStatus {
+  static final SupabaseClient _supabase = Supabase.instance.client;
+  
+  static Future<bool> isPremiumUser() async {
+    // 檢查 Supabase Auth 和訂閱狀態
+    final User? user = _supabase.auth.currentUser;
+    if (user == null) return false;
+    
+    try {
+      // 從 Supabase 檢查訂閱狀態
+      final response = await _supabase
+          .from('user_subscriptions')
+          .select('is_active, expires_at')
+          .eq('user_id', user.id)
+          .maybeSingle();
+      
+      if (response == null) return false;
+      
+      final bool isActive = response['is_active'] ?? false;
+      final DateTime? expiresAt = response['expires_at'] != null 
+          ? DateTime.parse(response['expires_at']) 
+          : null;
+      
+      // 檢查訂閱是否仍然有效
+      if (isActive && expiresAt != null) {
+        return DateTime.now().isBefore(expiresAt);
+      }
+      
+      return false;
+    } catch (e) {
+      // 如果資料庫查詢失敗，回退到本地檢查
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('has_active_subscription') ?? false;
+    }
+  }
+  
+  static Future<void> updateSubscriptionStatus(bool isActive, {DateTime? expiresAt}) async {
+    final User? user = _supabase.auth.currentUser;
+    if (user == null) return;
+    
+    try {
+      // 更新 Supabase 資料庫
+      await _supabase.from('user_subscriptions').upsert({
+        'user_id': user.id,
+        'is_active': isActive,
+        'expires_at': expiresAt?.toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+      
+      // 同步更新本地快取
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_active_subscription', isActive);
+    } catch (e) {
+      // 如果資料庫更新失敗，至少更新本地狀態
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_active_subscription', isActive);
+      throw SubscriptionException('訂閱狀態更新失敗: $e');
+    }
+  }
+}
+```
+
 ## 📚 參考資源
 
+### 核心 APIs
 - [Google Places API (New) 文件](https://developers.google.com/maps/documentation/places/web-service/op-overview)
 - [Google Maps Flutter 套件](https://pub.dev/packages/google_maps_flutter)
 - [Directions API 文件](https://developers.google.com/maps/documentation/directions)
 - [Flutter HTTP 請求最佳實踐](https://flutter.dev/docs/cookbook/networking/fetch-data)
+
+### 訂閱和認證
+- [Supabase Flutter 文件](https://supabase.com/docs/reference/dart/introduction)
+- [Supabase Authentication 指南](https://supabase.com/docs/guides/auth/auth-helpers/flutter)
+- [In-App Purchase 套件](https://pub.dev/packages/in_app_purchase)
+- [App Store 訂閱指南](https://developer.apple.com/app-store/subscriptions/)
+- [Google Play Billing API](https://developer.android.com/google/play/billing)
