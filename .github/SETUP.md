@@ -61,6 +61,11 @@ chmod +x scripts/run_dev.sh
 ./scripts/run_dev.sh
 ```
 
+### Flutter 版本管理
+專案使用 Flutter 3.32.4 版本：
+- CI/CD 自動使用指定版本
+- 本地開發可使用 FVM 管理版本：`fvm use 3.32.4`
+
 ### 測試和檢查
 ```bash
 # 執行測試
