@@ -1,5 +1,8 @@
 # Instant Explore 隨性探點
 
+[![CI/CD Pipeline](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml/badge.svg)](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/easylive1989/instant_explore/branch/main/graph/badge.svg)](https://codecov.io/gh/easylive1989/instant_explore)
+
 一款基於即時位置的智慧推薦應用程式，幫助使用者探索周邊的精彩去處。無論是旅遊觀光、朋友聚會，還是日常探索，Instant Explore 都能為您推薦最適合的下一站。
 
 ## ✨ 核心功能
@@ -42,11 +45,21 @@ git clone https://github.com/[your-username]/instant_explore.git
 cd instant_explore/frontend
 
 # 安裝依賴
-flutter pub get
+fvm flutter pub get
 
-# 執行應用程式
-flutter run
+# 執行應用程式 (開發環境)
+fvm flutter run
+
+# 或使用開發腳本 (需要 .env 檔案)
+chmod +x scripts/run_dev.sh
+./scripts/run_dev.sh
 ```
+
+### 🔧 CI/CD 狀態
+- **自動化測試**: 每次 push 自動執行單元測試和程式碼檢查
+- **多平台建置**: 自動建置 Android APK、iOS 和 Web 版本
+- **安全檢查**: 自動掃描硬編碼 API 金鑰
+- **自動部署**: main/master 分支自動部署 Web 版本到 GitHub Pages
 
 > 詳細設定請參考 [開發指南](doc/DEVELOPMENT.md)
 

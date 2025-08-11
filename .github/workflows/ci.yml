@@ -1,0 +1,209 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # 程式碼檢查和測試
+  test:
+    name: Test & Security Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up FVM
+      uses: kuhnroyal/flutter-fvm-config-action@v2
+
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: frontend/.fvmrc
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+
+    - name: Analyze project source
+      run: flutter analyze --fatal-infos
+
+    - name: Security check - scan for hardcoded API keys
+      run: |
+        if grep -r "AIza[A-Za-z0-9_-]\{35\}" lib/; then
+          echo "❌ 發現硬編碼的 Google API 金鑰！"
+          exit 1
+        else
+          echo "✅ 無硬編碼 API 金鑰發現"
+        fi
+
+    - name: Run tests
+      run: flutter test --coverage
+      env:
+        GOOGLE_PLACES_API_KEY: test_key_placeholder
+        GOOGLE_MAPS_API_KEY: test_key_placeholder
+        GOOGLE_DIRECTIONS_API_KEY: test_key_placeholder
+        ENVIRONMENT: testing
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: frontend/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  # Android 建置
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Set up FVM
+      uses: kuhnroyal/flutter-fvm-config-action@v2
+
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: frontend/.fvmrc
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Build Android APK
+      run: |
+        flutter build apk --release \
+          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
+          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
+          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
+          --dart-define=ENVIRONMENT=production
+
+  # iOS 建置
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up FVM
+      uses: kuhnroyal/flutter-fvm-config-action@v2
+
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: frontend/.fvmrc
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Build iOS (no codesign)
+      run: |
+        flutter build ios --release --no-codesign \
+          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
+          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
+          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
+          --dart-define=ENVIRONMENT=production
+
+  # Web 建置和部署
+  build-web:
+    name: Build & Deploy Web
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: frontend
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up FVM
+      uses: kuhnroyal/flutter-fvm-config-action@v2
+
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: frontend/.fvmrc
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Build Web
+      run: |
+        flutter build web --release \
+          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
+          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
+          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
+          --dart-define=ENVIRONMENT=production
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    - name: Upload Web Build to Pages
+      uses: actions/upload-pages-artifact@v3
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      with:
+        path: frontend/build/web
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+  # 建置狀態報告
+  build-status:
+    name: Build Status Report
+    runs-on: ubuntu-latest
+    needs: [test, build-android, build-ios, build-web]
+    if: always()
+    
+    steps:
+    - name: Report Status
+      run: |
+        echo "## 🚀 建置狀態報告"
+        echo "- 測試: ${{ needs.test.result }}"
+        echo "- Android 建置: ${{ needs.build-android.result }}"  
+        echo "- iOS 建置: ${{ needs.build-ios.result }}"
+        echo "- Web 建置: ${{ needs.build-web.result }}"
+        
+        if [ "${{ needs.test.result }}" = "success" ] && \
+           [ "${{ needs.build-android.result }}" = "success" ] && \
+           [ "${{ needs.build-ios.result }}" = "success" ] && \
+           [ "${{ needs.build-web.result }}" = "success" ]; then
+          echo "✅ 所有建置成功完成！"
+        else
+          echo "❌ 部分建置失敗，請檢查日誌"
+          exit 1
+        fi

@@ -34,27 +34,14 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              Icons.explore,
-              size: 80,
-              color: Colors.blue,
-            ),
+            Icon(Icons.explore, size: 80, color: Colors.blue),
             SizedBox(height: 20),
             Text(
               'Hello, Instant Explore',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Text(
-              '隨性探點',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-            ),
+            Text('隨性探點', style: TextStyle(fontSize: 18, color: Colors.grey)),
           ],
         ),
       ),
