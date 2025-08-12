@@ -1,7 +1,7 @@
 # Instant Explore 隨性探點
 
 [![CI/CD Pipeline](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml/badge.svg)](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/easylive1989/instant_explore/branch/main/graph/badge.svg)](https://codecov.io/gh/easylive1989/instant_explore)
+[![codecov](https://codecov.io/gh/easylive1989/instant_explore/branch/master/graph/badge.svg)](https://codecov.io/gh/easylive1989/instant_explore)
 
 一款基於即時位置的智慧推薦應用程式，幫助使用者探索周邊的精彩去處。無論是旅遊觀光、朋友聚會，還是日常探索，Instant Explore 都能為您推薦最適合的下一站。
 
