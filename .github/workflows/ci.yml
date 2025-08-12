@@ -55,8 +55,8 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         file: frontend/coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: easylive1989/instant_explore
         fail_ci_if_error: false
 
   # Android 建置
