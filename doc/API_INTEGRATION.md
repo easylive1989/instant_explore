@@ -34,7 +34,6 @@ gcloud auth application-default set-quota-project PROJECT_ID
 #### 3. 設定應用程式限制
 - **Android:** 加入 SHA-1 指紋和套件名稱
 - **iOS:** 加入 Bundle ID
-- **Web:** 加入網域名稱
 
 ### Flutter 整合
 

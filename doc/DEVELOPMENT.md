@@ -15,9 +15,6 @@
 ### 支援的裝置
 - **iOS:** 11.0 或以上版本
 - **Android:** 5.0 (API level 21) 或以上版本（透過 Android Studio 模擬器）
-- **Web:** 現代瀏覽器（Chrome、Firefox、Safari、Edge）
-  - **重要**：Web 版採用行動優先設計，僅支援手機尺寸（360-414px 寬度）
-  - 桌面瀏覽器會顯示提示訊息，建議使用者在手機上開啟以獲得最佳體驗
 
 ## 🚀 快速開始
 
@@ -491,7 +488,6 @@ flutter build ios --debug
 # Release 版本
 flutter build apk --release
 flutter build ios --release
-flutter build web --release
 
 # 分析建置檔案大小
 flutter build apk --analyze-size

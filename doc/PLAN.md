@@ -6,7 +6,7 @@
 開發一款基於即時位置的智慧推薦應用程式，提供多人協作決策功能，幫助使用者探索周邊精彩去處。
 
 ### 技術棧
-- **前端**: Flutter 3.32.4 (iOS/Android/Web)
+- **前端**: Flutter 3.32.4 (iOS/Android)
 - **後端**: Supabase (PostgreSQL + Realtime + Edge Functions)
 - **資料庫**: Supabase PostgreSQL
 - **即時同步**: Supabase Realtime
@@ -42,7 +42,7 @@
   - 基本的環境變數設定（.env.example）
 - **驗收標準**: 
   - 專案可以成功 `flutter run`
-  - 在 iOS/Android/Web 平台都能運行
+  - 在 iOS/Android 平台都能運行
 
 ### WS-002: GitHub Actions CI/CD Pipeline
 - **描述**: 設定完整的持續整合和持續部署流程
@@ -51,7 +51,7 @@
 - **產出物**:
   - `.github/workflows/ci.yml` 檔案
   - 自動化測試執行
-  - 多平台建置（Android APK, iOS, Web）
+  - 多平台建置（Android APK, iOS）
   - 安全檢查（硬編碼密鑰掃描）
   - 建置狀態徽章
   - 多平台部署自動化
@@ -83,13 +83,11 @@
 - **依賴**: WS-002
 - **產出物**:
   - GitHub Secrets 設定文檔
-  - Web 版本部署到 GitHub Pages
   - Android APK 上傳到 Google Play Internal Testing
   - iOS IPA 上傳到 App Store TestFlight
   - 多平台部署腳本和流程
 - **驗收標準**: 
-  - 主分支更新後自動部署到三個平台
-  - 可透過 URL 訪問 Web 版本
+  - 主分支更新後自動部署到兩個平台
   - Android 測試版本可在 Google Play 內部測試下載
   - iOS 測試版本可在 TestFlight 下載
 
@@ -101,11 +99,11 @@
   - 簡單的位置權限請求
   - 顯示當前經緯度的 UI
   - 基本錯誤處理（無權限、無法取得位置）
-  - 跨平台配置（Android/iOS/Web）
+  - 跨平台配置（Android/iOS）
   - 位置服務的單元測試
   - 基本位置功能的 Patrol E2E 測試
 - **驗收標準**: 
-  - 可以在三個平台上請求位置權限
+  - 可以在兩個平台上請求位置權限
   - 成功顯示當前位置
   - 錯誤情況有適當處理
   - 領域模型測試覆蓋率 > 80%
@@ -575,7 +573,7 @@
 - **驗收標準**: 應用程式啟動時間 < 3秒，記憶體使用合理
 
 ### Integration-003: 多平台測試
-- **描述**: 在 iOS、Android、Web 平台進行完整測試
+- **描述**: 在 iOS、Android 平台進行完整測試
 - **時間**: 16小時
 - **依賴**: Integration-002
 - **產出物**:
@@ -619,15 +617,6 @@
   - 發布配置
 - **驗收標準**: 通過 Google Play 審核並上架
 
-### Deploy-004: Web 版本部署
-- **描述**: 部署 Web 版本到雲端平台
-- **時間**: 8小時
-- **依賴**: Integration-003
-- **產出物**:
-  - Web 版本優化
-  - 域名和 SSL 設定
-  - CDN 配置
-- **驗收標準**: Web 版本可以正常訪問使用
 
 ### Marketing-001: 行銷素材製作
 - **描述**: 製作應用程式推廣用的行銷素材
@@ -839,7 +828,6 @@
 - **時間**: 24小時
 - **依賴**: Enterprise-001
 - **產出物**:
-  - Web 管理介面
   - 用戶管理功能
   - 數據分析儀表板
 - **驗收標準**: 管理員可以有效管理平台運營
@@ -919,7 +907,6 @@
 - [ ] CI/CD pipeline 正常運作
 - [ ] 每次提交都自動執行測試
 - [ ] 測試框架設定完成，包含單元測試和 Patrol E2E 測試範例
-- [ ] Web 版本自動部署到 GitHub Pages
 - [ ] Android APK 自動上傳到 Google Play Internal Testing
 - [ ] iOS IPA 自動上傳到 App Store TestFlight
 - [ ] 簡單位置功能可以顯示當前經緯度
@@ -934,7 +921,7 @@
 
 ### 必要條件
 - [ ] 所有核心功能正常運作
-- [ ] 在三個平台（iOS/Android/Web）測試通過
+- [ ] 在兩個平台（iOS/Android）測試通過
 - [ ] 領域模型單元測試覆蓋率 > 80%
 - [ ] 100+ Beta 用戶測試完成
 - [ ] 技術文件和用戶文件完整

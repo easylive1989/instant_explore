@@ -125,60 +125,12 @@ jobs:
           --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
           --dart-define=ENVIRONMENT=production
 
-  # Web 建置和部署
-  build-web:
-    name: Build & Deploy Web
-    runs-on: ubuntu-latest
-    needs: test
-    defaults:
-      run:
-        working-directory: frontend
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Install Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.32.4'
-        channel: 'stable'
-
-    - name: Get dependencies
-      run: flutter pub get
-
-    - name: Build Web
-      run: |
-        flutter build web --release \
-          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
-          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
-          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
-          --dart-define=ENVIRONMENT=production
-
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-
-    - name: Upload Web Build to Pages
-      uses: actions/upload-pages-artifact@v3
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-      with:
-        path: frontend/build/web
-
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
   # 建置狀態報告
   build-status:
     name: Build Status Report
     runs-on: ubuntu-latest
-    needs: [test, build-android, build-ios, build-web]
+    needs: [test, build-android, build-ios]
     if: always()
     
     steps:
@@ -188,12 +140,10 @@ jobs:
         echo "- 測試: ${{ needs.test.result }}"
         echo "- Android 建置: ${{ needs.build-android.result }}"  
         echo "- iOS 建置: ${{ needs.build-ios.result }}"
-        echo "- Web 建置: ${{ needs.build-web.result }}"
         
         if [ "${{ needs.test.result }}" = "success" ] && \
            [ "${{ needs.build-android.result }}" = "success" ] && \
-           [ "${{ needs.build-ios.result }}" = "success" ] && \
-           [ "${{ needs.build-web.result }}" = "success" ]; then
+           [ "${{ needs.build-ios.result }}" = "success" ]; then
           echo "✅ 所有建置成功完成！"
         else
           echo "❌ 部分建置失敗，請檢查日誌"
