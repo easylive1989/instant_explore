@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.paulchwu.instantexplore
 
 import io.flutter.embedding.android.FlutterActivity
 
