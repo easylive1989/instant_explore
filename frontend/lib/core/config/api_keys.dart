@@ -24,6 +24,26 @@ class ApiKeys {
     defaultValue: '',
   );
 
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: '',
+  );
+
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: '',
+  );
+
+  static const String googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  static const String googleIosClientId = String.fromEnvironment(
+    'GOOGLE_IOS_CLIENT_ID',
+    defaultValue: '',
+  );
+
   static const String environment = String.fromEnvironment(
     'ENVIRONMENT',
     defaultValue: 'development',
@@ -38,6 +58,15 @@ class ApiKeys {
     }
     if (googleMapsApiKey.isEmpty) {
       missingKeys.add('GOOGLE_MAPS_API_KEY');
+    }
+    if (supabaseUrl.isEmpty) {
+      missingKeys.add('SUPABASE_URL');
+    }
+    if (supabaseAnonKey.isEmpty) {
+      missingKeys.add('SUPABASE_ANON_KEY');
+    }
+    if (googleWebClientId.isEmpty) {
+      missingKeys.add('GOOGLE_WEB_CLIENT_ID');
     }
 
     if (missingKeys.isNotEmpty) {

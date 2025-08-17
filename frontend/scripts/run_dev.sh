@@ -16,6 +16,10 @@ if [ -f .env ]; then
         --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
         --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY \
         --dart-define=GOOGLE_DIRECTIONS_API_KEY=$GOOGLE_DIRECTIONS_API_KEY \
+        --dart-define=SUPABASE_URL=$SUPABASE_URL \
+        --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+        --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID \
+        --dart-define=GOOGLE_IOS_CLIENT_ID=$GOOGLE_IOS_CLIENT_ID \
         --dart-define=ENVIRONMENT=$ENVIRONMENT
 else
     echo "⚠️  未找到 .env 檔案"
