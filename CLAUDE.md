@@ -48,14 +48,8 @@ GOOGLE_MAPS_API_KEY=your_key_here
 
 ### Running the App
 ```bash
-# Load environment variables and run
-export $(cat .env | xargs) && flutter run \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-
-# Platform-specific
-export $(cat .env | xargs) && flutter run -d ios --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
-export $(cat .env | xargs) && flutter run -d android --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+# Use the development script (loads .env and passes all environment variables)
+./scripts/run_dev.sh
 ```
 
 ### Testing
@@ -86,14 +80,14 @@ grep -r "AIza[A-Za-z0-9_-]\{35\}" lib/ || echo "No hardcoded API keys found"
 ### Building
 ```bash
 # Android
-export $(cat .env | xargs) && flutter build apk --release \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+GOOGLE_MAPS_API_KEY="your_api_key_here" fvm flutter build apk --release \
+  --dart-define=GOOGLE_PLACES_API_KEY="your_api_key_here" \
+  --dart-define=GOOGLE_MAPS_API_KEY="your_api_key_here"
 
 # iOS
-export $(cat .env | xargs) && flutter build ios --release \
-  --dart-define=GOOGLE_PLACES_API_KEY=$GOOGLE_PLACES_API_KEY \
-  --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
+GOOGLE_MAPS_API_KEY="your_api_key_here" fvm flutter build ios --release \
+  --dart-define=GOOGLE_PLACES_API_KEY="your_api_key_here" \
+  --dart-define=GOOGLE_MAPS_API_KEY="your_api_key_here"
 ```
 
 ## Key Technical Decisions

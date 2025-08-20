@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../services/auth_service.dart';
 
 /// 首頁畫面
@@ -15,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   User? _user;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -52,159 +56,73 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Google Map
+          GoogleMap(
+            onMapCreated: (GoogleMapController controller) {
+              _mapController = controller;
+            },
+            initialCameraPosition: CameraPosition(
+              target: LatLng(25.0339206, 121.5636985), //中心點座標
+              zoom: 16.0, //Camera縮放尺寸，越近數值越大，越遠數值越小，預設為0
+              bearing: 30, //Camera旋轉的角度，方向為逆時針轉動，預設為0
+              tilt: 90, //Camera侵斜角度
+            ),
+          ),
+          // Top info bar
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '歡迎回來！',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _user?.email ?? '使用者',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      '開始你的隨性探點之旅',
-                      style: TextStyle(fontSize: 14, color: Colors.white70),
-                    ),
-                  ],
-                ),
+                ],
               ),
-              const SizedBox(height: 32),
-
-              // Features Section
-              const Text(
-                '功能',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              child: Row(
+                children: [
+                  const Icon(Icons.explore, color: Colors.blue, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '歡迎回來！',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          _user?.email ?? '使用者',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.my_location),
+                    onPressed: () {},
+                    tooltip: '重新定位',
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-
-              // Feature Cards
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  children: [
-                    _buildFeatureCard(
-                      icon: Icons.explore,
-                      title: '探索地點',
-                      subtitle: '發現附近的有趣地點',
-                      color: Colors.orange,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('探索功能開發中...')),
-                        );
-                      },
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.map,
-                      title: '地圖導航',
-                      subtitle: '查看地點位置與路線',
-                      color: Colors.green,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('地圖功能開發中...')),
-                        );
-                      },
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.favorite,
-                      title: '我的最愛',
-                      subtitle: '收藏喜歡的地點',
-                      color: Colors.red,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('收藏功能開發中...')),
-                        );
-                      },
-                    ),
-                    _buildFeatureCard(
-                      icon: Icons.settings,
-                      title: '設定',
-                      subtitle: '調整應用程式設定',
-                      color: Colors.grey,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('設定功能開發中...')),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  /// 建立功能卡片
-  Widget _buildFeatureCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 40, color: color),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }

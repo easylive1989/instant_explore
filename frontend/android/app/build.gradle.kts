@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -38,6 +39,22 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        val dartEnvironmentVariables = mutableMapOf<String, String>()
+        if (project.hasProperty("dart-defines")) {
+            val dartDefines = project.property("dart-defines") as String
+            dartDefines.split(",").forEach { entry ->
+                val decodedEntry = String(Base64.getDecoder().decode(entry))
+                val pair = decodedEntry.split("=")
+                if (pair.size >= 2) {
+                    dartEnvironmentVariables[pair[0]] = pair[1]
+                }
+            }
+        }
+
+        
+        // Support for dart-define environment variables
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = dartEnvironmentVariables["GOOGLE_MAPS_API_KEY"] ?: ""
     }
 
     signingConfigs {

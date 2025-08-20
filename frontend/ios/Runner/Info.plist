@@ -46,6 +46,15 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	
+	<key>GOOGLE_MAPS_API_KEY</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
+	
 	<!-- URL Schemes for Google Sign In -->
 	<key>CFBundleURLTypes</key>
 	<array>
