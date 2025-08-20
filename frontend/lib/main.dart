@@ -9,13 +9,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    print('🚀 啟動 Instant Explore App...');
-
     // Validate API keys (non-blocking)
     ApiKeys.validateKeys();
 
     // Initialize Supabase (必須初始化)
-    print('🔌 正在初始化 Supabase...');
     if (ApiKeys.supabaseUrl.isEmpty || ApiKeys.supabaseAnonKey.isEmpty) {
       throw Exception(
         '❌ Supabase 憑證未設定！請檢查 .env 檔案中的 SUPABASE_URL 和 SUPABASE_ANON_KEY',
@@ -26,17 +23,12 @@ void main() async {
       url: ApiKeys.supabaseUrl,
       anonKey: ApiKeys.supabaseAnonKey,
     );
-    print('✅ Supabase 初始化成功');
 
     // Initialize Auth Service
     AuthService().initialize();
-    print('✅ 認證服務初始化成功');
 
-    print('✅ 應用程式啟動成功');
     runApp(const InstantExploreApp());
-  } catch (e, stackTrace) {
-    print('❌ 應用程式啟動失敗: $e');
-    print('Stack trace: $stackTrace');
+  } catch (e) {
     // 即使初始化失敗，仍嘗試啟動 app
     runApp(const InstantExploreApp());
   }
@@ -74,15 +66,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   void _setupAuthListener() {
     // Supabase 已經在 main() 中初始化，直接設定監聽器
-    try {
-      Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    } catch (e) {
-      print('⚠️ Supabase 認證監聽器設定失敗: $e');
-    }
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -99,8 +87,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
         return const LoginScreen();
       }
     } catch (e) {
-      print('⚠️ AuthWrapper 錯誤: $e');
-      // 如果有錯誤，回到登入畫面
       return const LoginScreen();
     }
   }
