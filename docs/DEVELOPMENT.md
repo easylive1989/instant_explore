@@ -493,26 +493,7 @@ flutter build ios --release
 flutter build apk --analyze-size
 ```
 
-### 環境變數設定
-```bash
-# 開發環境
-flutter run --dart-define=ENVIRONMENT=development
 
-# 正式環境
-flutter build apk --dart-define=ENVIRONMENT=production
-```
-
-### 程式碼中使用環境變數
-```dart
-class AppConfig {
-  static const String environment = String.fromEnvironment(
-    'ENVIRONMENT',
-    defaultValue: 'development',
-  );
-  
-  static bool get isProduction => environment == 'production';
-  static bool get isDevelopment => environment == 'development';
-}
 ```
 
 ## ❓ 常見問題
@@ -712,8 +693,7 @@ cat > .env << EOF
 GOOGLE_PLACES_API_KEY=your_places_api_key_here
 GOOGLE_MAPS_API_KEY=your_maps_api_key_here
 
-# 環境設定
-ENVIRONMENT=development
+# 除錯設定
 DEBUG_MODE=true
 EOF
 
@@ -732,8 +712,7 @@ cat > .env.example << EOF
 GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
-# 環境設定
-ENVIRONMENT=development
+# 除錯設定
 DEBUG_MODE=true
 
 # API 設定

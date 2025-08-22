@@ -49,7 +49,6 @@ jobs:
         GOOGLE_PLACES_API_KEY: test_key_placeholder
         GOOGLE_MAPS_API_KEY: test_key_placeholder
         GOOGLE_DIRECTIONS_API_KEY: test_key_placeholder
-        ENVIRONMENT: testing
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
@@ -92,8 +91,7 @@ jobs:
         flutter build apk --release \
           --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
           --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
-          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
-          --dart-define=ENVIRONMENT=production
+          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder
 
   # iOS 建置
   build-ios:
@@ -122,8 +120,7 @@ jobs:
         flutter build ios --release --no-codesign \
           --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
           --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
-          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder \
-          --dart-define=ENVIRONMENT=production
+          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder
 
 
   # 建置狀態報告

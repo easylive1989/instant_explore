@@ -44,11 +44,6 @@ class ApiKeys {
     defaultValue: '',
   );
 
-  static const String environment = String.fromEnvironment(
-    'ENVIRONMENT',
-    defaultValue: 'development',
-  );
-
   /// 檢查必要的 API 金鑰是否已設定
   static bool validateKeys() {
     final missingKeys = <String>[];
@@ -80,13 +75,4 @@ class ApiKeys {
 
     return true;
   }
-
-  /// 取得當前環境名稱
-  static String get currentEnvironment => environment;
-
-  /// 是否為開發環境
-  static bool get isDevelopment => environment == 'development';
-
-  /// 是否為生產環境
-  static bool get isProduction => environment == 'production';
 }
