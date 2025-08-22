@@ -100,7 +100,7 @@ jobs:
   # iOS 建置
   build-ios:
     name: Build iOS App
-    runs-on: macos-latest
+    runs-on: macos-14
     needs: test
     defaults:
       run:
