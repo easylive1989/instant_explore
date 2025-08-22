@@ -61,7 +61,7 @@ android {
         getByName("debug") {
             keyAlias = keystoreProperties["keyAlias"] as String? ?: "androiddebugkey"
             keyPassword = keystoreProperties["keyPassword"] as String? ?: "android"
-            storeFile = file(keystoreProperties["storeFile"] as String? ?: "debug.keystore")
+            storeFile = file(keystoreProperties["storeFile"] as String? ?: "../debug.keystore")
             storePassword = keystoreProperties["storePassword"] as String? ?: "android"
         }
     }
