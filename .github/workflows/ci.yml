@@ -46,9 +46,11 @@ jobs:
     - name: Run tests
       run: flutter test --coverage
       env:
-        GOOGLE_PLACES_API_KEY: test_key_placeholder
-        GOOGLE_MAPS_API_KEY: test_key_placeholder
-        GOOGLE_DIRECTIONS_API_KEY: test_key_placeholder
+        GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        GOOGLE_IOS_CLIENT_ID: ${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
@@ -89,9 +91,11 @@ jobs:
     - name: Build Android APK
       run: |
         flutter build apk --release \
-          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
-          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
-          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder
+          --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
+          --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
+          --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
   # iOS 建置
   build-ios:
@@ -118,9 +122,11 @@ jobs:
     - name: Build iOS (no codesign)
       run: |
         flutter build ios --release --no-codesign \
-          --dart-define=GOOGLE_PLACES_API_KEY=placeholder \
-          --dart-define=GOOGLE_MAPS_API_KEY=placeholder \
-          --dart-define=GOOGLE_DIRECTIONS_API_KEY=placeholder
+          --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
+          --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
+          --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
 
   # 建置狀態報告
