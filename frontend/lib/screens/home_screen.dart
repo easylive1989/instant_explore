@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -115,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.my_location),
-                    onPressed: () {},
+                    onPressed: _handleRecenter,
                     tooltip: '重新定位',
                   ),
                 ],
@@ -125,6 +123,22 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  /// 處理重新定位
+  void _handleRecenter() {
+    if (_mapController != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          const CameraPosition(
+            target: LatLng(25.0339206, 121.5636985),
+            zoom: 16.0,
+            bearing: 30,
+            tilt: 90,
+          ),
+        ),
+      );
+    }
   }
 
   /// 處理登出
