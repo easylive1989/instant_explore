@@ -100,16 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('已定位到您的位置'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -376,16 +366,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('已重新定位到您的位置'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 1),
-            ),
-          );
-        }
       } else {
         // 位置取得失敗，顯示錯誤訊息
         if (mounted) {
