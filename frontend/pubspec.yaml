@@ -46,6 +46,9 @@ dependencies:
   
   # Location services
   geolocator: ^14.0.2
+  
+  # HTTP requests for Places API
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
