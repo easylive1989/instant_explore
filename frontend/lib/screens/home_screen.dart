@@ -603,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      barrierColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.4,
         decoration: const BoxDecoration(
@@ -743,7 +743,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: _getRandomRestaurant,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _getRandomRestaurant();
+                            },
                             icon: const Icon(Icons.refresh),
                             label: const Text('換一家'),
                           ),
