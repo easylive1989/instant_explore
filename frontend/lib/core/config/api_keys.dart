@@ -7,13 +7,8 @@ import 'package:flutter/foundation.dart';
 ///
 /// 使用方式：
 /// 執行時需要透過 --dart-define 傳入環境變數
-/// flutter run --dart-define=GOOGLE_PLACES_API_KEY=your_key
+/// flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_key
 class ApiKeys {
-  static const String googlePlacesApiKey = String.fromEnvironment(
-    'GOOGLE_PLACES_API_KEY',
-    defaultValue: '',
-  );
-
   static const String googleMapsApiKey = String.fromEnvironment(
     'GOOGLE_MAPS_API_KEY',
     defaultValue: '',
@@ -48,9 +43,6 @@ class ApiKeys {
   static bool validateKeys() {
     final missingKeys = <String>[];
 
-    if (googlePlacesApiKey.isEmpty) {
-      missingKeys.add('GOOGLE_PLACES_API_KEY');
-    }
     if (googleMapsApiKey.isEmpty) {
       missingKeys.add('GOOGLE_MAPS_API_KEY');
     }
@@ -67,9 +59,7 @@ class ApiKeys {
     if (missingKeys.isNotEmpty) {
       debugPrint('⚠️ 警告: 以下 API 金鑰未設定: ${missingKeys.join(', ')}');
       debugPrint('請在執行時使用 --dart-define 參數設定環境變數');
-      debugPrint(
-        '範例: flutter run --dart-define=GOOGLE_PLACES_API_KEY=your_key',
-      );
+      debugPrint('範例: flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_key');
       return false;
     }
 
