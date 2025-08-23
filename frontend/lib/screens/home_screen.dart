@@ -461,16 +461,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // 顯示餐廳資訊
         _showRestaurantBottomSheet();
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('為您推薦：${restaurant.name}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -677,39 +667,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Spacer(),
 
                     // 按鈕區
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _getRandomRestaurant();
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('換一家'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // TODO: 實作導航功能
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('導航功能即將推出'),
-                                  backgroundColor: Colors.blue,
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.navigation),
-                            label: const Text('導航'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _getRandomRestaurant();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('換一家'),
+                      ),
                     ),
                   ],
                 ),
