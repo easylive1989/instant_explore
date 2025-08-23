@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "regular",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd frontend && flutter test"
+          },
+          {
+            "type": "command",
+            "command": "cd frontend && dart format lib"
+          }
+        ]
+      }
+    ]
+  }
+}
