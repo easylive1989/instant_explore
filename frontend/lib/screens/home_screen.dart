@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math';
@@ -22,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   final LocationService _locationService = LocationService();
   final PlacesService _placesService = PlacesService();
-  User? _user;
   GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<Marker> _markers = {};
@@ -32,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _user = _authService.currentUser;
     _initializeLocation();
   }
 
@@ -301,56 +298,17 @@ class _HomeScreenState extends State<HomeScreen> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false, // 使用自定義按鈕
           ),
-          // Top info bar
+          // 重新定位按鈕 - 右上角
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
             right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.explore, color: Colors.blue, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '歡迎回來！',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _user?.email ?? '使用者',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.my_location),
-                    onPressed: _handleRecenter,
-                    tooltip: '重新定位',
-                  ),
-                ],
-              ),
+            child: FloatingActionButton(
+              onPressed: _handleRecenter,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              heroTag: "recenter_button",
+              tooltip: '重新定位',
+              child: const Icon(Icons.my_location),
             ),
           ),
         ],
