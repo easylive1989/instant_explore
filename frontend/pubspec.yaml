@@ -60,6 +60,13 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  
+  # Patrol for E2E testing
+  patrol: ^3.12.0
+  
+  # Integration test support
+  integration_test:
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -102,3 +109,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Patrol configuration for E2E testing
+patrol:
+  app_name: Instant Explore
+  android:
+    package_name: com.paulchwu.instantexplore
+  ios:
+    bundle_id: com.paulchwu.instantexplore

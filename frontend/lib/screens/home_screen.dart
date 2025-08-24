@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math';
-import '../services/auth_service.dart';
-import '../services/location_service.dart';
-import '../services/places_service.dart';
+import '../services/service_provider.dart';
 import '../features/places/models/place.dart';
+import '../widgets/testable_map_widget.dart';
 
 /// 首頁畫面
 ///
@@ -18,9 +17,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
-  final LocationService _locationService = LocationService();
-  final PlacesService _placesService = PlacesService();
+  // 使用 ServiceProvider 取得服務
+  dynamic get _authService => serviceProvider.authService;
+  dynamic get _locationService => serviceProvider.locationService;
+  dynamic get _placesService => serviceProvider.placesService;
+
   GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<Marker> _markers = {};
@@ -252,8 +253,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
-          // Google Map
-          GoogleMap(
+          // Testable Map (Google Map 或 Mock Map)
+          TestableMapWidget(
             onMapCreated: (GoogleMapController controller) {
               _mapController = controller;
               // 如果已經有位置資訊，移動相機到當前位置
@@ -445,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final restaurant = await _placesService.getRandomNearbyRestaurant(
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
-        radius: 2000, // 2公里範圍內
+        radius: 2000.0, // 2公里範圍內
       );
 
       if (restaurant != null && mounted) {

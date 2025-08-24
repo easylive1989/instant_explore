@@ -39,8 +39,19 @@ class ApiKeys {
     defaultValue: '',
   );
 
+  /// 檢測是否為 E2E 測試模式
+  static bool get isE2ETestMode =>
+      const String.fromEnvironment('E2E_TEST_MODE', defaultValue: 'false') ==
+      'true';
+
   /// 檢查必要的 API 金鑰是否已設定
   static bool validateKeys() {
+    // E2E 測試模式下跳過 API 金鑰驗證
+    if (isE2ETestMode) {
+      debugPrint('🧪 E2E 測試模式：跳過 API 金鑰驗證');
+      return true;
+    }
+
     final missingKeys = <String>[];
 
     if (googleMapsApiKey.isEmpty) {

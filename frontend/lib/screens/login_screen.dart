@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/service_provider.dart';
 
 /// 登入畫面
 ///
@@ -12,7 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
+  // 使用 ServiceProvider 取得認證服務
+  dynamic get _authService => serviceProvider.authService;
   bool _isLoading = false;
 
   @override

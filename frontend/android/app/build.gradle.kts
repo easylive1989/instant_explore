@@ -55,6 +55,10 @@ android {
         
         // Support for dart-define environment variables
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = dartEnvironmentVariables["GOOGLE_MAPS_API_KEY"] ?: ""
+        
+        // Patrol configuration for E2E testing
+        testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
 
     signingConfigs {
@@ -76,8 +80,25 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        animationsDisabled = true
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
 }
