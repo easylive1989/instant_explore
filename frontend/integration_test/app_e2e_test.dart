@@ -53,7 +53,6 @@ void main() {
       for (final restaurantName in testRestaurantNames) {
         if (find.text(restaurantName).evaluate().isNotEmpty) {
           foundTestRestaurant = true;
-          print('✅ 找到測試餐廳: $restaurantName');
           break;
         }
       }
