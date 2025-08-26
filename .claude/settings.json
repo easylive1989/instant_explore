@@ -6,11 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd frontend && dart format lib"
-          },
-          {
-            "type": "command",
-            "command": "cd frontend && dart format test"
+            "command": "dart format ."
           }
         ]
       }
