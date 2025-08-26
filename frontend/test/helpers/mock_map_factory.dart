@@ -16,7 +16,8 @@ Widget Function({
   bool myLocationEnabled,
   bool myLocationButtonEnabled,
   bool zoomControlsEnabled,
-}) createMockMapFactory() {
+})
+createMockMapFactory() {
   return ({
     required CameraPosition initialCameraPosition,
     Set<Marker> markers = const <Marker>{},
