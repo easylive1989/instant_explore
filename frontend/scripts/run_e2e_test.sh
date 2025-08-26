@@ -38,15 +38,14 @@ echo ""
 # 顯示測試資訊
 echo "📋 測試資訊:"
 echo "- 測試檔案: integration_test/app_e2e_test.dart"
-echo "- 測試模式: E2E_TEST_MODE=true"
-echo "- 使用 Fake Services (無需真實 API 金鑰)"
+echo "- 使用 Riverpod Overrides 注入 Fake Services"
+echo "- 無需真實 API 金鑰"
 echo ""
 
 echo "🚀 開始執行 E2E 測試..."
 echo ""
 
-# 執行 patrol 測試，並傳入 E2E_TEST_MODE=true
+# 執行 patrol 測試
 /tmp/patrol_fvm test \
-    --dart-define=E2E_TEST_MODE=true \
     --target=integration_test/app_e2e_test.dart \
     --verbose

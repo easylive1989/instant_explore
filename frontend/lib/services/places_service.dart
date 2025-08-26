@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import '../core/config/api_keys.dart';
+import '../core/config/api_config.dart';
 import '../features/places/models/place.dart';
 import '../features/places/models/place_details.dart';
+import 'interfaces/places_service_interface.dart';
 
 /// Places API 異常類別
 class PlacesApiException implements Exception {
@@ -24,13 +25,12 @@ class PlacesApiException implements Exception {
 /// - 搜尋附近餐廳
 /// - 取得地點詳細資訊
 /// - 隨機推薦餐廳
-class PlacesService {
-  static final PlacesService _instance = PlacesService._internal();
-  factory PlacesService() => _instance;
-  PlacesService._internal();
-
+class PlacesService implements IPlacesService {
   static const String _baseUrl = 'https://places.googleapis.com/v1';
-  final String _apiKey = ApiKeys.googleMapsApiKey;
+  final ApiConfig _apiConfig;
+  String get _apiKey => _apiConfig.googleMapsApiKey;
+
+  PlacesService(this._apiConfig);
 
   /// 搜尋附近的餐廳
   ///
@@ -38,6 +38,7 @@ class PlacesService {
   /// [longitude] 經度
   /// [radius] 搜尋半徑（公尺），預設 2000 公尺
   /// [maxResults] 最大結果數量，預設 20
+  @override
   Future<List<Place>> searchNearbyRestaurants({
     required double latitude,
     required double longitude,
@@ -112,6 +113,7 @@ class PlacesService {
   /// 取得地點詳細資訊
   ///
   /// [placeId] 地點 ID
+  @override
   Future<PlaceDetails> getPlaceDetails(String placeId) async {
     if (_apiKey.isEmpty) {
       throw PlacesApiException('Google Places API Key 未設定');
@@ -151,6 +153,7 @@ class PlacesService {
   /// [latitude] 緯度
   /// [longitude] 經度
   /// [radius] 搜尋半徑（公尺），預設 2000 公尺
+  @override
   Future<Place?> getRandomNearbyRestaurant({
     required double latitude,
     required double longitude,
@@ -191,6 +194,7 @@ class PlacesService {
   /// 計算兩個座標點之間的距離（公尺）
   ///
   /// 使用 Haversine 公式計算球面距離
+  @override
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371000; // 地球半徑（公尺）
 
@@ -218,6 +222,7 @@ class PlacesService {
   /// 格式化距離文字
   ///
   /// [distanceInMeters] 距離（公尺）
+  @override
   String formatDistance(double distanceInMeters) {
     if (distanceInMeters < 1000) {
       return '${distanceInMeters.round()} 公尺';
@@ -236,6 +241,7 @@ class PlacesService {
   /// [photoName] 照片名稱
   /// [maxWidth] 最大寬度
   /// [maxHeight] 最大高度
+  @override
   String getPhotoUrl({
     required String photoName,
     int? maxWidth,
@@ -260,5 +266,6 @@ class PlacesService {
   }
 
   /// 檢查 API 金鑰是否已設定
+  @override
   bool get isApiKeyConfigured => _apiKey.isNotEmpty;
 }

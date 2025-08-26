@@ -1,41 +1,43 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:instant_explore/services/interfaces/location_service_interface.dart';
 
 /// Fake LocationService for E2E testing
 ///
 /// 模擬位置服務，在 E2E 測試中使用
 /// 回傳固定的測試位置，避免真實的位置權限和 GPS 定位
-class FakeLocationService {
-  static final FakeLocationService _instance = FakeLocationService._internal();
-  factory FakeLocationService() => _instance;
-  FakeLocationService._internal();
-
+class FakeLocationService implements ILocationService {
   // 台北101的座標作為測試位置
   static const double _testLatitude = 25.0330;
   static const double _testLongitude = 121.5654;
 
   /// 檢查位置權限狀態 (測試模式下總是回傳已授權)
+  @override
   Future<LocationPermission> checkPermission() async {
     return LocationPermission.whileInUse;
   }
 
   /// 請求位置權限 (測試模式下總是成功)
+  @override
   Future<LocationPermission> requestPermission() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return LocationPermission.whileInUse;
   }
 
   /// 檢查位置服務是否已啟用 (測試模式下總是已啟用)
+  @override
   Future<bool> isLocationServiceEnabled() async {
     return true;
   }
 
   /// 確保位置權限已取得 (測試模式下總是成功)
+  @override
   Future<bool> ensureLocationPermission() async {
     await Future.delayed(const Duration(milliseconds: 100));
     return true;
   }
 
   /// 取得使用者當前位置 (回傳固定的測試位置)
+  @override
   Future<Position?> getCurrentPosition({
     LocationAccuracy accuracy = LocationAccuracy.high,
     Duration timeoutDuration = const Duration(seconds: 15),
@@ -57,6 +59,7 @@ class FakeLocationService {
   }
 
   /// 監聽位置變化 (測試模式下回傳固定位置流)
+  @override
   Stream<Position> getPositionStream({
     LocationAccuracy accuracy = LocationAccuracy.high,
     int distanceFilter = 10,
@@ -80,18 +83,21 @@ class FakeLocationService {
   }
 
   /// 開啟系統位置設定頁面 (測試模式下模擬成功)
+  @override
   Future<bool> openLocationSettings() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return true;
   }
 
   /// 開啟應用程式設定頁面 (測試模式下模擬成功)
+  @override
   Future<bool> openAppSettings() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return true;
   }
 
   /// 取得位置權限狀態的描述文字
+  @override
   String getPermissionDescription(LocationPermission permission) {
     switch (permission) {
       case LocationPermission.denied:

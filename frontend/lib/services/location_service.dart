@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'interfaces/location_service_interface.dart';
 
 /// 位置服務類別
 ///
@@ -7,22 +8,21 @@ import 'package:geolocator/geolocator.dart';
 /// - 請求位置權限
 /// - 取得使用者當前位置
 /// - 監聽位置變化
-class LocationService {
-  static final LocationService _instance = LocationService._internal();
-  factory LocationService() => _instance;
-  LocationService._internal();
-
+class LocationService implements ILocationService {
   /// 檢查位置權限狀態
+  @override
   Future<LocationPermission> checkPermission() async {
     return await Geolocator.checkPermission();
   }
 
   /// 請求位置權限
+  @override
   Future<LocationPermission> requestPermission() async {
     return await Geolocator.requestPermission();
   }
 
   /// 檢查位置服務是否已啟用
+  @override
   Future<bool> isLocationServiceEnabled() async {
     return await Geolocator.isLocationServiceEnabled();
   }
@@ -30,6 +30,7 @@ class LocationService {
   /// 確保位置權限已取得
   ///
   /// 回傳 true 表示有權限，false 表示無權限
+  @override
   Future<bool> ensureLocationPermission() async {
     // 檢查位置服務是否已啟用
     bool serviceEnabled = await isLocationServiceEnabled();
@@ -60,6 +61,7 @@ class LocationService {
   ///
   /// [accuracy] 位置精度設定，預設為高精度
   /// [timeoutDuration] 超時時間，預設為15秒
+  @override
   Future<Position?> getCurrentPosition({
     LocationAccuracy accuracy = LocationAccuracy.high,
     Duration timeoutDuration = const Duration(seconds: 15),
@@ -90,6 +92,7 @@ class LocationService {
   ///
   /// [accuracy] 位置精度設定
   /// [distanceFilter] 最小移動距離（公尺）
+  @override
   Stream<Position> getPositionStream({
     LocationAccuracy accuracy = LocationAccuracy.high,
     int distanceFilter = 10,
@@ -103,16 +106,19 @@ class LocationService {
   }
 
   /// 開啟系統位置設定頁面
+  @override
   Future<bool> openLocationSettings() async {
     return await Geolocator.openLocationSettings();
   }
 
   /// 開啟應用程式設定頁面
+  @override
   Future<bool> openAppSettings() async {
     return await Geolocator.openAppSettings();
   }
 
   /// 取得位置權限狀態的描述文字
+  @override
   String getPermissionDescription(LocationPermission permission) {
     switch (permission) {
       case LocationPermission.denied:

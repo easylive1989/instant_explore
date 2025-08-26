@@ -35,6 +35,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   
+  # State management with Riverpod
+  flutter_riverpod: ^2.6.1
+  
   # Supabase for authentication and backend
   supabase_flutter: ^2.8.2
   

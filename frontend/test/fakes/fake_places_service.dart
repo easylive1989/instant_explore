@@ -1,15 +1,12 @@
-import '../../features/places/models/place.dart';
-import '../../features/places/models/place_details.dart';
+import 'package:instant_explore/features/places/models/place.dart';
+import 'package:instant_explore/features/places/models/place_details.dart';
+import 'package:instant_explore/services/interfaces/places_service_interface.dart';
 
 /// Fake PlacesService for E2E testing
 ///
 /// 模擬地點服務，在 E2E 測試中使用
 /// 回傳預設的 mock 餐廳資料，避免真實的 Google Places API 調用
-class FakePlacesService {
-  static final FakePlacesService _instance = FakePlacesService._internal();
-  factory FakePlacesService() => _instance;
-  FakePlacesService._internal();
-
+class FakePlacesService implements IPlacesService {
   // 單一測試餐廳資料
   static final Map<String, dynamic> _testRestaurant = {
     'id': 'fake-restaurant-1',
@@ -37,6 +34,7 @@ class FakePlacesService {
   };
 
   /// 搜尋附近的餐廳 (回傳預設測試資料)
+  @override
   Future<List<Place>> searchNearbyRestaurants({
     required double latitude,
     required double longitude,
@@ -48,6 +46,7 @@ class FakePlacesService {
   }
 
   /// 取得地點詳細資訊 (回傳預設測試資料)
+  @override
   Future<PlaceDetails> getPlaceDetails(String placeId) async {
     await Future.delayed(const Duration(milliseconds: 800));
 
@@ -84,6 +83,7 @@ class FakePlacesService {
   }
 
   /// 隨機推薦附近餐廳 (從測試資料中隨機選擇)
+  @override
   Future<Place?> getRandomNearbyRestaurant({
     required double latitude,
     required double longitude,
@@ -94,11 +94,13 @@ class FakePlacesService {
   }
 
   /// 計算兩個座標點之間的距離（模擬實作）
+  @override
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     return 500.0; // 固定回傳 500 公尺
   }
 
   /// 格式化距離文字（測試實作）
+  @override
   String formatDistance(double distanceInMeters) {
     if (distanceInMeters < 1000) {
       return '${distanceInMeters.round()} 公尺';
@@ -111,4 +113,18 @@ class FakePlacesService {
       }
     }
   }
+
+  /// 取得照片 URL (測試實作)
+  @override
+  String getPhotoUrl({
+    required String photoName,
+    int? maxWidth,
+    int? maxHeight,
+  }) {
+    return 'https://example.com/fake-photo.jpg';
+  }
+
+  /// 檢查 API 金鑰是否已設定 (測試模式下總是已配置)
+  @override
+  bool get isApiKeyConfigured => true;
 }

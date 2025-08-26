@@ -1,27 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/config/api_keys.dart';
+import '../core/config/api_config.dart';
+import 'interfaces/auth_service_interface.dart';
 
 /// 認證服務類別
 ///
 /// 負責處理 Google 登入和 Supabase 認證整合
-class AuthService {
-  static final AuthService _instance = AuthService._internal();
-  factory AuthService() => _instance;
-  AuthService._internal();
-
+class AuthService implements IAuthService {
+  final ApiConfig _apiConfig;
   late GoogleSignIn _googleSignIn;
 
+  AuthService(this._apiConfig);
+
   /// 初始化 Google Sign In
+  @override
   void initialize() {
     _googleSignIn = GoogleSignIn(
-      clientId: ApiKeys.googleIosClientId,
-      serverClientId: ApiKeys.googleWebClientId,
+      clientId: _apiConfig.googleIosClientId,
+      serverClientId: _apiConfig.googleWebClientId,
     );
   }
 
   /// Google 登入
+  @override
   Future<AuthResponse?> signInWithGoogle() async {
     try {
       debugPrint('🔐 開始 Google 登入流程...');
@@ -70,6 +72,7 @@ class AuthService {
   }
 
   /// 登出
+  @override
   Future<void> signOut() async {
     try {
       debugPrint('🚪 開始登出流程...');
@@ -89,12 +92,21 @@ class AuthService {
   }
 
   /// 取得當前使用者
+  @override
   User? get currentUser => Supabase.instance.client.auth.currentUser;
 
   /// 檢查是否已登入
+  @override
   bool get isSignedIn => currentUser != null;
 
   /// 取得認證狀態串流
+  @override
   Stream<AuthState> get authStateChanges =>
       Supabase.instance.client.auth.onAuthStateChange;
+
+  /// 清理資源（真實服務通常不需要特殊清理）
+  @override
+  void dispose() {
+    // 真實的 AuthService 通常不需要特殊的清理邏輯
+  }
 }

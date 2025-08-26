@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../core/config/api_keys.dart';
 
-/// Testable Map Widget
+/// Mock Map Widget for Testing
 ///
-/// 在 E2E 測試模式下顯示模擬地圖，避免使用真實的 Google Maps
-/// 在正常模式下顯示真實的 Google Maps
-class TestableMapWidget extends StatelessWidget {
+/// 模擬地圖 Widget，用於測試環境
+/// 顯示模擬地圖介面，避免在測試中使用真實的 Google Maps
+class MockMapWidget extends StatelessWidget {
   final CameraPosition initialCameraPosition;
   final Set<Marker> markers;
   final void Function(GoogleMapController)? onMapCreated;
@@ -18,7 +17,7 @@ class TestableMapWidget extends StatelessWidget {
   final bool myLocationButtonEnabled;
   final bool zoomControlsEnabled;
 
-  const TestableMapWidget({
+  const MockMapWidget({
     super.key,
     required this.initialCameraPosition,
     this.markers = const <Marker>{},
@@ -34,33 +33,6 @@ class TestableMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ApiKeys.isE2ETestMode) {
-      // E2E 測試模式：顯示模擬地圖
-      return _buildMockMap();
-    } else {
-      // 正常模式：顯示真實的 Google Maps
-      return _buildRealMap();
-    }
-  }
-
-  /// 建立真實的 Google Maps
-  Widget _buildRealMap() {
-    return GoogleMap(
-      initialCameraPosition: initialCameraPosition,
-      markers: markers,
-      onMapCreated: onMapCreated,
-      onCameraMove: onCameraMove,
-      onCameraIdle: onCameraIdle,
-      onTap: onTap,
-      mapType: mapType,
-      myLocationEnabled: myLocationEnabled,
-      myLocationButtonEnabled: myLocationButtonEnabled,
-      zoomControlsEnabled: zoomControlsEnabled,
-    );
-  }
-
-  /// 建立模擬地圖 (用於 E2E 測試)
-  Widget _buildMockMap() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -124,7 +96,7 @@ class TestableMapWidget extends StatelessWidget {
                   // 模擬按鈕點擊，觸發回調
                   if (onMapCreated != null) {
                     // 由於無法創建真實的 GoogleMapController，這裡簡化處理
-                    debugPrint('🧪 TestableMapWidget: 模擬我的位置按鈕點擊');
+                    debugPrint('🧪 MockMapWidget: 模擬我的位置按鈕點擊');
                   }
                 },
                 backgroundColor: Colors.white,

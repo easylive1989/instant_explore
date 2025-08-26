@@ -11,9 +11,8 @@ if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
     
     # 執行 Flutter 應用程式
-    echo "🚀 啟動 Instant Explore (E2E 測試模式)..."
+    echo "🚀 啟動 Instant Explore..."
     fvm flutter run \
-        --dart-define=E2E_TEST_MODE=true \
         -d emulator-5554
 else
     echo "⚠️  未找到 .env 檔案"

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import '../services/service_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/service_providers.dart';
 
 /// 登入畫面
 ///
 /// 提供 Google 登入功能
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  // 使用 ServiceProvider 取得認證服務
-  dynamic get _authService => serviceProvider.authService;
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
 
   @override
@@ -122,7 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await _authService.signInWithGoogle();
+      final authService = ref.read(authServiceProvider);
+      final response = await authService.signInWithGoogle();
 
       if (response != null && response.user != null) {
         // 登入成功，AuthWrapper 會自動導向首頁

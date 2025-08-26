@@ -1,15 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:patrol/patrol.dart';
 import 'package:instant_explore/main.dart' as app;
+import 'package:instant_explore/providers/service_providers.dart';
+import 'package:instant_explore/providers/map_provider.dart';
+import '../test/fakes/fake_auth_service.dart';
+import '../test/fakes/fake_location_service.dart';
+import '../test/fakes/fake_places_service.dart';
+import '../test/helpers/mock_map_factory.dart';
 
 void main() {
   patrolTest(
     '完整流程測試：登入 -> 隨機推薦 -> 驗證結果',
     framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
     ($) async {
-      // 1. 啟動應用程式
-      await $.pumpWidgetAndSettle(app.InstantExploreApp());
+      // 準備 fake services
+      final fakeAuth = FakeAuthService();
+      final fakeLocation = FakeLocationService();
+      final fakePlaces = FakePlacesService();
+
+      // 1. 啟動應用程式並注入 fake services
+      await $.pumpWidgetAndSettle(
+        ProviderScope(
+          overrides: [
+            authServiceProvider.overrideWithValue(fakeAuth),
+            locationServiceProvider.overrideWithValue(fakeLocation),
+            placesServiceProvider.overrideWithValue(fakePlaces),
+            mapWidgetProvider.overrideWithValue(createMockMapFactory()),
+          ],
+          child: const app.InstantExploreApp(),
+        ),
+      );
 
       // 等待應用程式完全載入
       await $.pump(const Duration(seconds: 2));
@@ -70,8 +92,23 @@ void main() {
   );
 
   patrolTest('測試模式驗證', ($) async {
-    // 啟動應用程式
-    await $.pumpWidgetAndSettle(app.InstantExploreApp());
+    // 準備 fake services
+    final fakeAuth = FakeAuthService();
+    final fakeLocation = FakeLocationService();
+    final fakePlaces = FakePlacesService();
+
+    // 啟動應用程式並注入 fake services
+    await $.pumpWidgetAndSettle(
+      ProviderScope(
+        overrides: [
+          authServiceProvider.overrideWithValue(fakeAuth),
+          locationServiceProvider.overrideWithValue(fakeLocation),
+          placesServiceProvider.overrideWithValue(fakePlaces),
+          mapWidgetProvider.overrideWithValue(createMockMapFactory()),
+        ],
+        child: const app.InstantExploreApp(),
+      ),
+    );
 
     // 登入
     await $('使用 Google 登入').tap();

@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math';
-import '../services/service_provider.dart';
+import '../providers/service_providers.dart';
+import '../providers/map_provider.dart';
 import '../features/places/models/place.dart';
-import '../widgets/testable_map_widget.dart';
 
 /// 首頁畫面
 ///
 /// 顯示已登入使用者的主要介面
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  // 使用 ServiceProvider 取得服務
-  dynamic get _authService => serviceProvider.authService;
-  dynamic get _locationService => serviceProvider.locationService;
-  dynamic get _placesService => serviceProvider.placesService;
-
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<Marker> _markers = {};
@@ -42,15 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 檢查位置權限並顯示相對應的提示對話框
   Future<void> _requestLocationWithDialog() async {
     try {
+      final locationService = ref.read(locationServiceProvider);
       // 先檢查位置服務是否已啟用
-      bool serviceEnabled = await _locationService.isLocationServiceEnabled();
+      bool serviceEnabled = await locationService.isLocationServiceEnabled();
       if (!serviceEnabled) {
         await _showLocationServiceDialog();
         return;
       }
 
       // 檢查權限狀態
-      LocationPermission permission = await _locationService.checkPermission();
+      LocationPermission permission = await locationService.checkPermission();
 
       switch (permission) {
         case LocationPermission.denied:
@@ -81,7 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 取得當前位置並更新地圖
   Future<void> _getCurrentLocationAndUpdate() async {
     try {
-      Position? position = await _locationService.getCurrentPosition();
+      final locationService = ref.read(locationServiceProvider);
+      Position? position = await locationService.getCurrentPosition();
       if (position != null && mounted) {
         setState(() {
           _currentPosition = position;
@@ -136,7 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await _locationService.openLocationSettings();
+                final locationService = ref.read(locationServiceProvider);
+                await locationService.openLocationSettings();
                 // 等待一下後重新檢查
                 await Future.delayed(const Duration(seconds: 2));
                 _requestLocationWithDialog();
@@ -169,7 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);
                 navigator.pop();
-                LocationPermission permission = await _locationService
+                final locationService = ref.read(locationServiceProvider);
+                LocationPermission permission = await locationService
                     .requestPermission();
                 if (permission == LocationPermission.whileInUse ||
                     permission == LocationPermission.always) {
@@ -211,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await _locationService.openAppSettings();
+                final locationService = ref.read(locationServiceProvider);
+                await locationService.openAppSettings();
               },
               child: const Text('開啟設定'),
             ),
@@ -253,41 +254,47 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
-          // Testable Map (Google Map 或 Mock Map)
-          TestableMapWidget(
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              // 如果已經有位置資訊，移動相機到當前位置
-              if (_currentPosition != null) {
-                controller.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: LatLng(
-                        _currentPosition!.latitude,
-                        _currentPosition!.longitude,
+          // Map Widget (Google Map 或 Mock Map)
+          Consumer(
+            builder: (context, ref, child) {
+              final mapWidgetFactory = ref.watch(mapWidgetProvider);
+
+              return mapWidgetFactory(
+                onMapCreated: (GoogleMapController controller) {
+                  _mapController = controller;
+                  // 如果已經有位置資訊，移動相機到當前位置
+                  if (_currentPosition != null) {
+                    controller.animateCamera(
+                      CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                          target: LatLng(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          ),
+                          zoom: 16.0,
+                          bearing: 0,
+                          tilt: 0,
+                        ),
                       ),
-                      zoom: 16.0,
-                      bearing: 0,
-                      tilt: 0,
-                    ),
-                  ),
-                );
-              }
+                    );
+                  }
+                },
+                initialCameraPosition: CameraPosition(
+                  target: _currentPosition != null
+                      ? LatLng(
+                          _currentPosition!.latitude,
+                          _currentPosition!.longitude,
+                        )
+                      : const LatLng(25.0339206, 121.5636985), // 預設位置（台北101）
+                  zoom: 16.0,
+                  bearing: 0,
+                  tilt: 0,
+                ),
+                markers: _markers,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false, // 使用自定義按鈕
+              );
             },
-            initialCameraPosition: CameraPosition(
-              target: _currentPosition != null
-                  ? LatLng(
-                      _currentPosition!.latitude,
-                      _currentPosition!.longitude,
-                    )
-                  : const LatLng(25.0339206, 121.5636985), // 預設位置（台北101）
-              zoom: 16.0,
-              bearing: 0,
-              tilt: 0,
-            ),
-            markers: _markers,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false, // 使用自定義按鈕
           ),
           // 重新定位按鈕 - 右上角
           Positioned(
@@ -331,14 +338,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (position == null) {
         // 檢查位置權限並重新取得位置
-        bool hasPermission = await _locationService.ensureLocationPermission();
+        final locationService = ref.read(locationServiceProvider);
+        bool hasPermission = await locationService.ensureLocationPermission();
         if (!hasPermission) {
           await _requestLocationWithDialog();
           return;
         }
 
         // 重新取得位置
-        position = await _locationService.getCurrentPosition();
+        position = await locationService.getCurrentPosition();
         if (position != null && mounted) {
           setState(() {
             _currentPosition = position;
@@ -443,7 +451,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final restaurant = await _placesService.getRandomNearbyRestaurant(
+      final placesService = ref.read(placesServiceProvider);
+      final restaurant = await placesService.getRandomNearbyRestaurant(
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
         radius: 2000.0, // 2公里範圍內
@@ -648,19 +657,26 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.grey,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            _placesService.formatDistance(
-                              _placesService.calculateDistance(
-                                _currentPosition!.latitude,
-                                _currentPosition!.longitude,
-                                _selectedRestaurant!.location.latitude,
-                                _selectedRestaurant!.location.longitude,
-                              ),
-                            ),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final placesService = ref.read(
+                                placesServiceProvider,
+                              );
+                              return Text(
+                                placesService.formatDistance(
+                                  placesService.calculateDistance(
+                                    _currentPosition!.latitude,
+                                    _currentPosition!.longitude,
+                                    _selectedRestaurant!.location.latitude,
+                                    _selectedRestaurant!.location.longitude,
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -692,7 +708,8 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 處理登出
   Future<void> _handleSignOut() async {
     try {
-      await _authService.signOut();
+      final authService = ref.read(authServiceProvider);
+      await authService.signOut();
       // AuthWrapper 會自動導向登入頁面
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
