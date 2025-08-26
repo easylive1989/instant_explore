@@ -43,7 +43,7 @@ jobs:
           echo "✅ 無硬編碼 API 金鑰發現"
         fi
 
-    - name: Run tests
+    - name: Run unit tests
       run: flutter test --coverage
       env:
         GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
@@ -60,11 +60,54 @@ jobs:
         slug: easylive1989/instant_explore
         fail_ci_if_error: false
 
+  # E2E 整合測試
+  e2e-test:
+    name: E2E Tests on Android
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+
+    - name: Enable KVM for Linux runners
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE=="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Install Patrol CLI
+      run: flutter pub global activate patrol_cli
+
+    - name: Run E2E tests on Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        working-directory: frontend
+        api-level: 29
+        arch: x86_64
+        profile: Nexus 6
+        script: |
+          flutter pub global run patrol_cli:patrol test \
+            --target=integration_test/app_e2e_test.dart \
+            --verbose
+
   # Android 建置
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, e2e-test]
     defaults:
       run:
         working-directory: frontend
@@ -101,7 +144,7 @@ jobs:
   build-ios:
     name: Build iOS App
     runs-on: macos-14
-    needs: test
+    needs: [test, e2e-test]
     defaults:
       run:
         working-directory: frontend
@@ -138,22 +181,24 @@ jobs:
   build-status:
     name: Build Status Report
     runs-on: ubuntu-latest
-    needs: [test, build-android, build-ios]
+    needs: [test, e2e-test, build-android, build-ios]
     if: always()
     
     steps:
     - name: Report Status
       run: |
         echo "## 🚀 建置狀態報告"
-        echo "- 測試: ${{ needs.test.result }}"
+        echo "- 單元測試: ${{ needs.test.result }}"
+        echo "- E2E 測試: ${{ needs.e2e-test.result }}"
         echo "- Android 建置: ${{ needs.build-android.result }}"  
         echo "- iOS 建置: ${{ needs.build-ios.result }}"
         
         if [ "${{ needs.test.result }}" = "success" ] && \
+           [ "${{ needs.e2e-test.result }}" = "success" ] && \
            [ "${{ needs.build-android.result }}" = "success" ] && \
            [ "${{ needs.build-ios.result }}" = "success" ]; then
-          echo "✅ 所有建置成功完成！"
+          echo "✅ 所有測試和建置成功完成！"
         else
-          echo "❌ 部分建置失敗，請檢查日誌"
+          echo "❌ 部分測試或建置失敗，請檢查日誌"
           exit 1
         fi
