@@ -89,7 +89,7 @@ jobs:
       run: flutter pub get
 
     - name: Install Patrol CLI
-      run: flutter pub global activate patrol_cli
+      run: dart pub global activate patrol_cli
 
     - name: Run E2E tests on Android Emulator
       uses: reactivecircus/android-emulator-runner@v2
@@ -99,7 +99,8 @@ jobs:
         arch: x86_64
         profile: Nexus 6
         script: |
-          flutter pub global run patrol_cli:patrol test \
+          export PATH="$PATH:$HOME/.pub-cache/bin"
+          patrol test \
             --target=integration_test/app_e2e_test.dart \
             --verbose
 
