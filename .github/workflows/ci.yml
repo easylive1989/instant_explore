@@ -100,9 +100,7 @@ jobs:
         profile: Nexus 6
         script: |
           export PATH="$PATH:$HOME/.pub-cache/bin"
-          patrol test \
-            --target=integration_test/app_e2e_test.dart \
-            --verbose
+          patrol test --target=integration_test/app_e2e_test.dart --verbose
 
   # Android 建置
   build-android:
