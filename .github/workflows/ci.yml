@@ -70,6 +70,12 @@ jobs:
         working-directory: frontend
     
     steps:
+    - name: Enable KVM for Linux runners
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE=="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        
     - name: Checkout repository
       uses: actions/checkout@v4
     
@@ -85,11 +91,6 @@ jobs:
         flutter-version: '3.32.4'
         channel: 'stable'
 
-    # - name: Enable KVM for Linux runners
-    #   run: |
-    #     echo 'KERNEL=="kvm", GROUP="kvm", MODE=="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-    #     sudo udevadm control --reload-rules
-    #     sudo udevadm trigger --name-match=kvm
 
     - name: Get dependencies
       run: flutter pub get
@@ -101,13 +102,11 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         working-directory: frontend
-        api-level: 26
-        target: default
+        api-level: 28
+        target: google_apis
         arch: x86_64
-        profile: Nexus 4
-        emulator-options: -no-window -no-boot-anim -no-audio -no-snapshot-load
+        profile: Nexus 6
         script: |
-          adb wait-for-device
           export PATH="$PATH:$HOME/.pub-cache/bin"
           patrol test --target=integration_test/app_e2e_test.dart --verbose
 
