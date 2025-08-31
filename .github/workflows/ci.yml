@@ -63,7 +63,7 @@ jobs:
   # E2E 整合測試
   e2e-test:
     name: E2E Tests on Android
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     needs: test
     defaults:
       run:
@@ -79,11 +79,11 @@ jobs:
         flutter-version: '3.32.4'
         channel: 'stable'
 
-    - name: Enable KVM for Linux runners
-      run: |
-        echo 'KERNEL=="kvm", GROUP="kvm", MODE=="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-        sudo udevadm control --reload-rules
-        sudo udevadm trigger --name-match=kvm
+    # - name: Enable KVM for Linux runners
+    #   run: |
+    #     echo 'KERNEL=="kvm", GROUP="kvm", MODE=="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+    #     sudo udevadm control --reload-rules
+    #     sudo udevadm trigger --name-match=kvm
 
     - name: Get dependencies
       run: flutter pub get
