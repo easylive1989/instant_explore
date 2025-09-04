@@ -1,0 +1,116 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and deploy iOS app to TestFlight"
+  lane :deploy_testflight do
+    # 設定 App Store Connect API 認證
+    api_key = app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+      key_filepath: "~/.appstoreconnect/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8",
+      duration: 1200, # 20 minutes
+      in_house: false
+    )
+
+    # 確認 Xcode 專案設定
+    update_code_signing_settings(
+      use_automatic_signing: true,
+      path: "Runner.xcodeproj"
+    )
+
+    # 建置 iOS IPA
+    build_app(
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.paulchwu.instantexplore" => "match AppStore com.paulchwu.instantexplore"
+        }
+      },
+      build_path: "../build/ios"
+    )
+
+    # 上傳到 TestFlight
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      changelog: "透過 CI/CD 自動建置上傳",
+      beta_app_review_info: {
+        contact_email: "your-email@example.com",
+        contact_first_name: "Your",
+        contact_last_name: "Name",
+        contact_phone: "1234567890",
+        demo_account_name: "demo@example.com",
+        demo_account_password: "demo123",
+        notes: "此版本透過 CI/CD 自動建置並上傳"
+      }
+    )
+
+    UI.success("✅ iOS App 已成功建置並上傳到 TestFlight！")
+  end
+
+  desc "Build iOS app using Flutter"
+  lane :build_flutter_ios do
+    Dir.chdir("../..") do
+      sh("flutter", "build", "ipa", "--release",
+         "--dart-define=GOOGLE_MAPS_API_KEY=#{ENV['GOOGLE_MAPS_API_KEY']}",
+         "--dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']}",
+         "--dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']}",
+         "--dart-define=GOOGLE_WEB_CLIENT_ID=#{ENV['GOOGLE_WEB_CLIENT_ID']}",
+         "--dart-define=GOOGLE_IOS_CLIENT_ID=#{ENV['GOOGLE_IOS_CLIENT_ID']}")
+    end
+
+    # 移動建置好的 IPA 到正確位置
+    sh("cp", "../build/ios/ipa/*.ipa", "../Runner.ipa")
+  end
+
+  desc "Complete build and deploy workflow"
+  lane :deploy_testflight_complete do
+    # 先用 Flutter 建置
+    build_flutter_ios
+
+    # 設定 App Store Connect API 認證
+    api_key = app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+      key_filepath: "~/.appstoreconnect/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8",
+      duration: 1200, # 20 minutes
+      in_house: false
+    )
+
+    # 上傳到 TestFlight
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "../Runner.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: "透過 CI/CD 自動建置上傳",
+      beta_app_review_info: {
+        contact_email: "your-email@example.com",
+        contact_first_name: "Your",
+        contact_last_name: "Name",
+        contact_phone: "1234567890",
+        demo_account_name: "demo@example.com",
+        demo_account_password: "demo123",
+        notes: "此版本透過 CI/CD 自動建置並上傳"
+      }
+    )
+
+    UI.success("✅ iOS App 已成功建置並上傳到 TestFlight！")
+  end
+end

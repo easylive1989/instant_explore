@@ -1,0 +1,96 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Deploy Android App Bundle to Google Play Console Internal Track"
+  lane :deploy_internal do
+    # 建立 service account 金鑰檔案
+    service_account_key_content = ENV['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON']
+    if service_account_key_content.nil? || service_account_key_content.empty?
+      UI.user_error!("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON environment variable is not set")
+    end
+    
+    # 寫入 service account 金鑰到檔案
+    File.write("service-account-key.json", service_account_key_content)
+    
+    # 上傳 AAB 到 Google Play Console Internal Track
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+    
+    # 清理 service account 金鑰檔案
+    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    
+    UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Internal Track！")
+  end
+
+  desc "Deploy Android App Bundle to Google Play Console Beta Track"
+  lane :deploy_beta do
+    # 建立 service account 金鑰檔案
+    service_account_key_content = ENV['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON']
+    if service_account_key_content.nil? || service_account_key_content.empty?
+      UI.user_error!("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON environment variable is not set")
+    end
+    
+    # 寫入 service account 金鑰到檔案
+    File.write("service-account-key.json", service_account_key_content)
+    
+    # 上傳 AAB 到 Google Play Console Beta Track
+    upload_to_play_store(
+      track: 'beta',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+    
+    # 清理 service account 金鑰檔案
+    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    
+    UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Beta Track！")
+  end
+
+  desc "Deploy Android App Bundle to Google Play Console Production Track"
+  lane :deploy_production do
+    # 建立 service account 金鑰檔案
+    service_account_key_content = ENV['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON']
+    if service_account_key_content.nil? || service_account_key_content.empty?
+      UI.user_error!("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON environment variable is not set")
+    end
+    
+    # 寫入 service account 金鑰到檔案
+    File.write("service-account-key.json", service_account_key_content)
+    
+    # 上傳 AAB 到 Google Play Console Production Track
+    upload_to_play_store(
+      track: 'production',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
+    
+    # 清理 service account 金鑰檔案
+    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    
+    UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Production Track！")
+  end
+end
