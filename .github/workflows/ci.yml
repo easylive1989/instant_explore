@@ -180,6 +180,12 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
+    - name: Install CocoaPods dependencies
+      run: |
+        cd ios
+        gem install cocoapods
+        pod install --repo-update
+
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:

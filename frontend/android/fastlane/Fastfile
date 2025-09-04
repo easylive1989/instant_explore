@@ -29,6 +29,7 @@ platform :android do
     
     # 上傳 AAB 到 Google Play Console Internal Track
     upload_to_play_store(
+      json_key: "service-account-key.json",
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: true,
@@ -55,6 +56,7 @@ platform :android do
     
     # 上傳 AAB 到 Google Play Console Beta Track
     upload_to_play_store(
+      json_key: "service-account-key.json",
       track: 'beta',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: true,
@@ -81,6 +83,7 @@ platform :android do
     
     # 上傳 AAB 到 Google Play Console Production Track
     upload_to_play_store(
+      json_key: "service-account-key.json",
       track: 'production',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: false,
