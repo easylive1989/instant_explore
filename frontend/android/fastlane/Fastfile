@@ -25,11 +25,12 @@ platform :android do
     end
     
     # 寫入 service account 金鑰到檔案
-    File.write("service-account-key.json", service_account_key_content)
+    key_file_path = File.expand_path("service-account-key.json")
+    File.write(key_file_path, service_account_key_content)
     
     # 上傳 AAB 到 Google Play Console Internal Track
     upload_to_play_store(
-      json_key: "service-account-key.json",
+      json_key: key_file_path,
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: true,
@@ -38,7 +39,7 @@ platform :android do
     )
     
     # 清理 service account 金鑰檔案
-    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    File.delete(key_file_path) if File.exist?(key_file_path)
     
     UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Internal Track！")
   end
@@ -52,11 +53,12 @@ platform :android do
     end
     
     # 寫入 service account 金鑰到檔案
-    File.write("service-account-key.json", service_account_key_content)
+    key_file_path = File.expand_path("service-account-key.json")
+    File.write(key_file_path, service_account_key_content)
     
     # 上傳 AAB 到 Google Play Console Beta Track
     upload_to_play_store(
-      json_key: "service-account-key.json",
+      json_key: key_file_path,
       track: 'beta',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: true,
@@ -65,7 +67,7 @@ platform :android do
     )
     
     # 清理 service account 金鑰檔案
-    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    File.delete(key_file_path) if File.exist?(key_file_path)
     
     UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Beta Track！")
   end
@@ -79,11 +81,12 @@ platform :android do
     end
     
     # 寫入 service account 金鑰到檔案
-    File.write("service-account-key.json", service_account_key_content)
+    key_file_path = File.expand_path("service-account-key.json")
+    File.write(key_file_path, service_account_key_content)
     
     # 上傳 AAB 到 Google Play Console Production Track
     upload_to_play_store(
-      json_key: "service-account-key.json",
+      json_key: key_file_path,
       track: 'production',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
       skip_upload_metadata: false,
@@ -92,7 +95,7 @@ platform :android do
     )
     
     # 清理 service account 金鑰檔案
-    File.delete("service-account-key.json") if File.exist?("service-account-key.json")
+    File.delete(key_file_path) if File.exist?(key_file_path)
     
     UI.success("✅ Android App Bundle 已成功上傳到 Google Play Console Production Track！")
   end
