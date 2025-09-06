@@ -16,6 +16,11 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Helper function to get property from keystore.properties or environment
+fun getSigningProperty(key: String): String? {
+    return keystoreProperties[key] as String? ?: System.getenv(key.toUpperCase())
+}
+
 android {
     namespace = "com.paulchwu.instantexplore"
     compileSdk = flutter.compileSdkVersion
@@ -63,16 +68,26 @@ android {
 
     signingConfigs {
         getByName("debug") {
-            keyAlias = keystoreProperties["debugKeyAlias"] as String? ?: "androiddebugkey"
-            keyPassword = keystoreProperties["debugKeyPassword"] as String? ?: "android"
-            storeFile = file(keystoreProperties["debugStoreFile"] as String? ?: "../debug.keystore")
-            storePassword = keystoreProperties["debugStorePassword"] as String? ?: "android"
+            keyAlias = getSigningProperty("debugKeyAlias") ?: "androiddebugkey"
+            keyPassword = getSigningProperty("debugKeyPassword") ?: "android"
+            storeFile = file(getSigningProperty("debugStoreFile") ?: "../debug.keystore")
+            storePassword = getSigningProperty("debugStorePassword") ?: "android"
         }
-        create("release") {
-            keyAlias = keystoreProperties["releaseKeyAlias"] as String
-            keyPassword = keystoreProperties["releaseKeyPassword"] as String
-            storeFile = keystoreProperties["releaseStoreFile"]?.let { file(it) }
-            storePassword = keystoreProperties["releaseStorePassword"] as String
+        
+        // Only create release signing config if we have the required properties
+        val releaseKeyAlias = getSigningProperty("releaseKeyAlias")
+        val releaseKeyPassword = getSigningProperty("releaseKeyPassword")
+        val releaseStoreFile = getSigningProperty("releaseStoreFile")
+        val releaseStorePassword = getSigningProperty("releaseStorePassword")
+        
+        if (releaseKeyAlias != null && releaseKeyPassword != null && 
+            releaseStoreFile != null && releaseStorePassword != null) {
+            create("release") {
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+            }
         }
     }
 
@@ -81,7 +96,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
-            signingConfig = signingConfigs.getByName("release")
+            // Use release signing config if available, otherwise fall back to debug for CI
+            signingConfig = if (signingConfigs.names.contains("release")) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 

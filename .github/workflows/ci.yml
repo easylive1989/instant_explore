@@ -125,6 +125,20 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
+    - name: Setup Android Release Signing
+      run: |
+        cd android
+        # Create keystore from base64 encoded secret
+        echo '${{ secrets.ANDROID_RELEASE_KEYSTORE }}' | base64 -d > release-keystore.jks
+        
+        # Create keystore.properties if it doesn't exist
+        if [ ! -f keystore.properties ]; then
+          echo "releaseStorePassword=${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}" >> keystore.properties
+          echo "releaseKeyPassword=${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}" >> keystore.properties
+          echo "releaseKeyAlias=${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}" >> keystore.properties
+          echo "releaseStoreFile=../release-keystore.jks" >> keystore.properties
+        fi
+
     - name: Build Android App Bundle
       run: |
         flutter build appbundle --release \
@@ -133,6 +147,11 @@ jobs:
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
           --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
           --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+      env:
+        RELEASESTOREPASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+        RELEASEKEYPASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        RELEASEKEYALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+        RELEASESTOREFILE: ../release-keystore.jks
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
