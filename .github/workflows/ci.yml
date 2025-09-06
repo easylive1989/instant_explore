@@ -208,19 +208,10 @@ jobs:
         bundler: '2.4.22'
         working-directory: frontend/ios
       
-    - name: Install CocoaPods dependencies
+    - name: Install dependencies
       run: |
         cd ios
-        pod install --repo-update
-
-    - name: Build iOS IPA
-      run: |
-        flutter build ipa --release \
-          --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
-          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
-          --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
-          --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+        pod install
 
     - name: Install Fastlane
       run: |
@@ -233,13 +224,18 @@ jobs:
         mkdir -p ~/.appstoreconnect/private_keys/
         echo '${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}' > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
 
-    - name: Upload to TestFlight
+    - name: Build and Deploy to TestFlight
       run: |
         cd ios
-        bundle exec fastlane deploy_testflight
+        bundle exec fastlane deploy_testflight_complete
       env:
         APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        GOOGLE_IOS_CLIENT_ID: ${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
 
   # 建置狀態報告
