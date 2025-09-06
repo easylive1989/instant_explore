@@ -63,7 +63,7 @@ jobs:
   # E2E 整合測試
   e2e-test:
     name: E2E Tests on iOS Simulator
-    runs-on: macos-14
+    runs-on: macos-15
     needs: test
     defaults:
       run:
@@ -199,12 +199,6 @@ jobs:
 
     - name: Get dependencies
       run: flutter pub get
-
-    - name: Install CocoaPods dependencies
-      run: |
-        cd ios
-        gem install cocoapods
-        pod install --repo-update
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
