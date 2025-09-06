@@ -77,7 +77,7 @@ platform :ios do
     end
 
     # 移動建置好的 IPA 到正確位置
-    sh("cp", "../build/ios/ipa/*.ipa", "../Runner.ipa")
+    sh("cp ../../build/ios/ipa/instantexplore.ipa ../Runner.ipa")
   end
 
   desc "Complete build and deploy workflow"
@@ -94,17 +94,23 @@ platform :ios do
       in_house: false
     )
 
+    # 檢查 IPA 檔案是否存在
+    ipa_file = "../Runner.ipa"
+    unless File.exist?(ipa_file)
+      UI.user_error!("❌ 找不到 IPA 檔案進行上傳：#{File.expand_path(ipa_file)}")
+    end
+    
     # 上傳到 TestFlight
     upload_to_testflight(
       api_key: api_key,
-      ipa: "../Runner.ipa",
+      ipa: File.expand_path(ipa_file),
       skip_waiting_for_build_processing: true,
       changelog: "透過 CI/CD 自動建置上傳",
       beta_app_review_info: {
-        contact_email: "your-email@example.com",
-        contact_first_name: "Your",
-        contact_last_name: "Name",
-        contact_phone: "1234567890",
+        contact_email: "easylive1989@gmail.com",
+        contact_first_name: "Paul",
+        contact_last_name: "Wu",
+        contact_phone: "",
         demo_account_name: "demo@example.com",
         demo_account_password: "demo123",
         notes: "此版本透過 CI/CD 自動建置並上傳"
