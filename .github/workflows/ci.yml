@@ -158,6 +158,7 @@ jobs:
       with:
         ruby-version: '3.2'
         bundler-cache: true
+        bundler: '2.4.22'
         working-directory: frontend/android
 
     - name: Install Fastlane
@@ -208,8 +209,9 @@ jobs:
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '2.6.1'
+        ruby-version: '3.2'
         bundler-cache: true
+        bundler: '2.4.22'
         working-directory: frontend/ios
 
     - name: Install Fastlane
