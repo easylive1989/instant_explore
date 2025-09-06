@@ -207,6 +207,11 @@ jobs:
         bundler-cache: true
         bundler: '2.4.22'
         working-directory: frontend/ios
+      
+    - name: Install dependencies
+      run: |
+        # 如果使用 CocoaPods
+        pod install
 
     - name: Install Fastlane
       run: |
