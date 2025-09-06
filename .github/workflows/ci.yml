@@ -210,7 +210,7 @@ jobs:
       
     - name: Install dependencies
       run: |
-        # 如果使用 CocoaPods
+        cd ios
         pod install
 
     - name: Install Fastlane
