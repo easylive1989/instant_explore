@@ -16,6 +16,22 @@
 default_platform(:android)
 
 platform :android do
+  desc "Build Android App Bundle (Release)"
+  lane :build_release_aab do
+    # 切換到 Flutter 專案根目錄
+    Dir.chdir("../../") do
+      # 建置 Release AAB
+      sh("fvm flutter build appbundle --release " +
+         "--dart-define=GOOGLE_MAPS_API_KEY=#{ENV['GOOGLE_MAPS_API_KEY']} " +
+         "--dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']} " +
+         "--dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']} " +
+         "--dart-define=GOOGLE_WEB_CLIENT_ID=#{ENV['GOOGLE_WEB_CLIENT_ID']} " +
+         "--dart-define=GOOGLE_IOS_CLIENT_ID=#{ENV['GOOGLE_IOS_CLIENT_ID']}")
+      
+      UI.success("✅ Android App Bundle 建置完成！")
+      UI.message("📍 AAB 位置: #{Dir.pwd}/build/app/outputs/bundle/release/app-release.aab")
+    end
+  end
   desc "Deploy Android App Bundle to Google Play Console Internal Track"
   lane :deploy_internal do
     # 建立 service account 金鑰檔案
