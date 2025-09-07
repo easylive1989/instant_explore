@@ -183,7 +183,7 @@ jobs:
       BUILD_CONFIGURATION: Release
       TEAM_ID: T9UXT366P9
       PROVISIONING_PROFILE: 4b6684aa-f0e4-4e40-8f0e-986e856d9aa0
-      CODE_SIGN_IDENTITY: "Apple Distribution: Paul Wu (T9UXT366P9)"
+      CODE_SIGN_IDENTITY: "Apple Distribution: Cheng Hua Wu (T9UXT366P9)"
     defaults:
       run:
         working-directory: frontend
@@ -239,8 +239,7 @@ jobs:
       env:
         DEVELOPMENT_TEAM: T9UXT366P9
       run: |
-        flutter build ipa --release \
-          --export-options-plist=ios/Runner/ExportOptions.plist \
+        run: flutter build ios --release --no-codesign \
           --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
