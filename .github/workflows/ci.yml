@@ -176,7 +176,7 @@ jobs:
   # iOS 建置與部署
   build-ios:
     name: Build & Deploy iOS IPA
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: test
     defaults:
       run:
@@ -189,7 +189,7 @@ jobs:
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.4'
+        xcode-version: latest-stable
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
