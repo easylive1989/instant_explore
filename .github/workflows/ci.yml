@@ -239,7 +239,7 @@ jobs:
       env:
         DEVELOPMENT_TEAM: T9UXT366P9
       run: |
-        run: flutter build ios --release --no-codesign \
+        flutter build ios --release --no-codesign \
           --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
