@@ -33,7 +33,7 @@ platform :ios do
       contact_email: "easylive1989@gmail.com",
       contact_first_name: "Paul",
       contact_last_name: "Wu",
-      contact_phone: "886918000223",
+      contact_phone: "+886-918-000-223",
       notes: "此版本透過 CI/CD 自動建置並上傳"
     }
   end
