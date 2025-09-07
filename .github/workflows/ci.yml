@@ -246,6 +246,9 @@ jobs:
           --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
           --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
+    - name: Build resolve Swift dependencies
+      run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme ${{ env.SHEME }} -configuration ${{ env.BUILD_CONFIGURATION }}
+
     - name: Build xArchive
       run: |
         xcodebuild -workspace ios/Runner.xcworkspace -scheme ${{ env.SHEME }} -configuration ${{ env.BUILD_CONFIGURATION }} DEVELOPMENT_TEAM=${{ env.TEAM_ID }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=${{ env.PROVISIONING_PROFILE }} clean archive CODE_SIGN_IDENTITY="${{ env.CODE_SIGN_IDENTITY }}"
