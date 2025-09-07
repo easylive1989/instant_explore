@@ -225,11 +225,20 @@ jobs:
         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
         security list-keychain -d user -s $KEYCHAIN_PATH
 
-        # 安裝配置文件
+        # 安裝配置文件到正確位置
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+        
+        # 設定正確的權限
+        chmod 644 ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+        
+        # 獲取 provisioning profile UUID 並更新 ExportOptions.plist
+        PP_UUID=$(security cms -D -i $PP_PATH | plutil -extract UUID xml1 -o - - | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+        sed -i '' "s/\$(PROVISIONING_PROFILE_UUID)/$PP_UUID/g" ios/Runner/ExportOptions.plist
 
     - name: Build iOS IPA
+      env:
+        DEVELOPMENT_TEAM: T9UXT366P9
       run: |
         flutter build ipa --release \
           --export-options-plist=ios/Runner/ExportOptions.plist \

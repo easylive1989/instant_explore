@@ -12,5 +12,12 @@
     <false/>
     <key>teamID</key>
     <string>T9UXT366P9</string>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.paulchwu.instantexplore</key>
+        <string>$(PROVISIONING_PROFILE_UUID)</string>
+    </dict>
 </dict>
 </plist>
