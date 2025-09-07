@@ -200,6 +200,45 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
+    - name: Install the Apple certificate and provisioning profile
+      env:
+        BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+        P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+        # 創建變數
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+        # 解碼證書和配置文件
+        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+
+        # 創建臨時 keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+        # 導入證書到 keychain
+        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+
+        # 安裝配置文件
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+    - name: Build iOS IPA
+      run: |
+        flutter build ipa --release \
+          --export-options-plist=ios/Runner/ExportOptions.plist \
+          --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
+          --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
+          --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -219,10 +258,10 @@ jobs:
         mkdir -p ~/.appstoreconnect/private_keys/
         echo '${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}' > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
 
-    - name: Build and Deploy to TestFlight
+    - name: Upload to TestFlight
       run: |
         cd ios
-        bundle exec fastlane deploy_testflight
+        bundle exec fastlane upload_testflight
       env:
         APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -231,6 +270,12 @@ jobs:
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         GOOGLE_IOS_CLIENT_ID: ${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+
+    - name: Clean up keychain and provisioning profile
+      if: ${{ always() }}
+      run: |
+        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+        rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
 
   # 建置狀態報告

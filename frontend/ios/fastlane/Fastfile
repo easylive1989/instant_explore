@@ -40,33 +40,11 @@ platform :ios do
     }
   end
 
-  desc "Build iOS app using Flutter"
-  lane :build_flutter_ios do
-    # 設定檔案路徑常數
-    source_ipa = "../../build/ios/ipa/instantexplore.ipa"
-    target_ipa = "../Runner.ipa"
+  desc "Upload IPA to TestFlight"
+  lane :upload_testflight do
+    # 設定檔案路徑常數 - GitHub Actions 建置的 IPA 位置
+    ipa_file = "../../build/ios/ipa/instantexplore.ipa"
     
-    Dir.chdir("../..") do
-      sh("flutter", "build", "ipa", "--release",
-         "--dart-define=GOOGLE_MAPS_API_KEY=#{ENV['GOOGLE_MAPS_API_KEY']}",
-         "--dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']}",
-         "--dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']}",
-         "--dart-define=GOOGLE_WEB_CLIENT_ID=#{ENV['GOOGLE_WEB_CLIENT_ID']}",
-         "--dart-define=GOOGLE_IOS_CLIENT_ID=#{ENV['GOOGLE_IOS_CLIENT_ID']}")
-    end
-
-    # 移動建置好的 IPA 到正確位置
-    sh("cp #{source_ipa} #{target_ipa}")
-  end
-
-  desc "Complete build and deploy workflow"
-  lane :deploy_testflight do
-    # 設定檔案路徑常數
-    ipa_file = "../Runner.ipa"
-    
-    # 先用 Flutter 建置
-    build_flutter_ios
-
     # 檢查 IPA 檔案是否存在
     unless File.exist?(ipa_file)
       UI.user_error!("❌ 找不到 IPA 檔案進行上傳：#{File.expand_path(ipa_file)}")
@@ -81,6 +59,6 @@ platform :ios do
       beta_app_review_info: get_beta_review_info
     )
 
-    UI.success("✅ iOS App 已成功建置並上傳到 TestFlight！")
+    UI.success("✅ iOS App 已成功上傳到 TestFlight！")
   end
 end
