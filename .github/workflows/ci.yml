@@ -208,11 +208,6 @@ jobs:
         bundler: '2.4.22'
         working-directory: frontend/ios
       
-    - name: Install dependencies
-      run: |
-        cd ios
-        pod install
-
     - name: Install Fastlane
       run: |
         cd ios
@@ -227,7 +222,7 @@ jobs:
     - name: Build and Deploy to TestFlight
       run: |
         cd ios
-        bundle exec fastlane deploy_testflight_complete
+        bundle exec fastlane deploy_testflight
       env:
         APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
