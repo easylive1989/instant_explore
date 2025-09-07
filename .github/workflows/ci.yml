@@ -178,12 +178,6 @@ jobs:
     name: Build & Deploy iOS IPA
     runs-on: macos-14
     needs: test
-    env:
-      SHEME: Runner
-      BUILD_CONFIGURATION: Release
-      TEAM_ID: T9UXT366P9
-      PROVISIONING_PROFILE: 4b6684aa-f0e4-4e40-8f0e-986e856d9aa0
-      CODE_SIGN_IDENTITY: "Apple Distribution: Cheng Hua Wu (T9UXT366P9)"
     defaults:
       run:
         working-directory: frontend
@@ -215,7 +209,7 @@ jobs:
       run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          PP_PATH=$RUNNER_TEMP/Instant_Explore.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # import certificate and provisioning profile from secrets
@@ -239,23 +233,13 @@ jobs:
       env:
         DEVELOPMENT_TEAM: T9UXT366P9
       run: |
-        flutter build ios --release --no-codesign \
+        flutter build ipa --release --export-options-plist ios/Runner/ExportOptions.plist \
           --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
           --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
           --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
 
-    - name: Build resolve Swift dependencies
-      run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme ${{ env.SHEME }} -configuration ${{ env.BUILD_CONFIGURATION }}
-
-    - name: Build xArchive
-      run: |
-        xcodebuild -workspace ios/Runner.xcworkspace -scheme ${{ env.SHEME }} -configuration ${{ env.BUILD_CONFIGURATION }} DEVELOPMENT_TEAM=${{ env.TEAM_ID }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=${{ env.PROVISIONING_PROFILE }} clean archive CODE_SIGN_IDENTITY="${{ env.CODE_SIGN_IDENTITY }}"
-    
-    - name: Export ipa
-      run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
-    
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
