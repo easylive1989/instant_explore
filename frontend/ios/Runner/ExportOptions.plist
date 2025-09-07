@@ -17,7 +17,7 @@
     <key>provisioningProfiles</key>
     <dict>
         <key>com.paulchwu.instantexplore</key>
-        <string>$(PROVISIONING_PROFILE_UUID)</string>
+        <string>4b6684aa-f0e4-4e40-8f0e-986e856d9aa0</string>
     </dict>
 </dict>
 </plist>

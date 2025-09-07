@@ -200,41 +200,22 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
-    - name: Install the Apple certificate and provisioning profile
+    - name: Install Apple Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+        p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+
+    - name: Install the provisioning profile
       env:
-        BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
-        P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
-        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        PROVISIONING_CERTIFICATE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
       run: |
-        # 創建變數
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
         PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-        # 解碼證書和配置文件
-        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+        echo -n "$PROVISIONING_CERTIFICATE_BASE64" | base64 --decode --output $PP_PATH
 
-        # 創建臨時 keychain
-        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-        # 導入證書到 keychain
-        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        # 安裝配置文件到正確位置
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
-        
-        # 設定正確的權限
-        chmod 644 ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
-        
-        # 獲取 provisioning profile UUID 並更新 ExportOptions.plist
-        PP_UUID=$(security cms -D -i $PP_PATH | plutil -extract UUID xml1 -o - - | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
-        sed -i '' "s/\$(PROVISIONING_PROFILE_UUID)/$PP_UUID/g" ios/Runner/ExportOptions.plist
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
     - name: Build iOS IPA
       env:
