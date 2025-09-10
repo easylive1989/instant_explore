@@ -16,6 +16,7 @@ Thumbs.db
 .pub/
 build/
 *.lock
+.fvm/
 
 # IDE
 .vscode/
