@@ -138,9 +138,22 @@ jobs:
           echo "releaseStoreFile=../release-keystore.jks" >> keystore.properties
         fi
 
+    - name: Generate version numbers
+      run: |
+        START_EPOCH=1735689600  # 2025-01-01 00:00:00 UTC
+        CURRENT_EPOCH=$(date +%s)
+        VERSION=$(date +%Y%m%d.%H%M)
+        BUILD_NUMBER=$((CURRENT_EPOCH - START_EPOCH))
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+        echo "Generated VERSION: $VERSION"
+        echo "Generated BUILD_NUMBER: $BUILD_NUMBER"
+
     - name: Build Android App Bundle
       run: |
         flutter build appbundle --release \
+          --build-name=${{ env.VERSION }} \
+          --build-number=${{ env.BUILD_NUMBER }} \
           --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
@@ -228,11 +241,25 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+    - name: Generate version numbers
+      run: |
+        START_EPOCH=1735689600  # 2025-01-01 00:00:00 UTC
+        CURRENT_EPOCH=$(date +%s)
+        VERSION=$(date +%Y%m%d.%H%M)
+        BUILD_NUMBER=$((CURRENT_EPOCH - START_EPOCH))
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+        echo "Generated VERSION: $VERSION"
+        echo "Generated BUILD_NUMBER: $BUILD_NUMBER"
+
     - name: Build iOS IPA
       env:
         DEVELOPMENT_TEAM: T9UXT366P9
       run: |
-        flutter build ipa --release --export-options-plist ios/Runner/ExportOptions.plist \
+        flutter build ipa --release \
+          --build-name=${{ env.VERSION }} \
+          --build-number=${{ env.BUILD_NUMBER }} \
+          --export-options-plist ios/Runner/ExportOptions.plist \
           --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
