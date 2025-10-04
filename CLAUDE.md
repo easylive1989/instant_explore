@@ -137,16 +137,127 @@ When building reusable APIs, such as a library, follow these principles.
   design. It should be clear, concise, and provide examples.
 
 ## Application Architecture
-* **Separation of Concerns:** Aim for separation of concerns similar to MVC/MVVM, with defined Model,
-  View, and ViewModel/Controller roles.
-* **Logical Layers:** Organize the project into logical layers:
-    * Presentation (widgets, screens)
-    * Domain (business logic classes)
-    * Data (model classes, API clients)
-    * Core (shared classes, utilities, and extension types)
-* **Feature-based Organization:** For larger projects, organize code by feature,
-  where each feature has its own presentation, domain, and data subfolders. This
-  improves navigability and scalability.
+
+### Overall Architecture
+
+Instant Explore adopts a **Feature-First** architecture design, organizing code around feature modules with each module following Clean Architecture principles internally.
+
+#### Architecture Principles
+
+1. **Modularity** - Each feature is independently encapsulated, reducing coupling
+2. **Extensibility** - New features can be easily added without affecting existing modules
+3. **Testability** - Clear dependency relationships facilitate unit testing
+4. **Maintainability** - Clear code organization facilitates team collaboration
+5. **Security** - Sensitive information is managed via environment variables, never committed to version control
+6. **Mobile-First** - Focus on mobile use cases to ensure optimal experience
+
+### Project Structure
+
+```
+instant_explore/
+├── frontend/                 # Flutter application
+│   ├── lib/
+│   │   ├── main.dart         # Application entry point
+│   │   ├── core/             # Core shared functionality
+│   │   │   ├── config/       # Application configuration
+│   │   │   │   ├── api_keys.dart      # Secure API key management
+│   │   │   │   ├── app_config.dart
+│   │   │   │   └── theme_config.dart
+│   │   │   ├── constants/    # Constant definitions
+│   │   │   │   ├── app_constants.dart
+│   │   │   │   ├── api_constants.dart
+│   │   │   │   └── ui_constants.dart
+│   │   │   ├── utils/        # Utility functions
+│   │   │   │   ├── date_utils.dart
+│   │   │   │   ├── validation_utils.dart
+│   │   │   │   └── format_utils.dart
+│   │   │   ├── models/       # Infrastructure data models
+│   │   │   │   └── api_response.dart
+│   │   │   └── services/     # Core services
+│   │   │       ├── http_service.dart
+│   │   │       ├── storage_service.dart
+│   │   │       └── analytics_service.dart
+│   │   ├── shared/           # Shared components
+│   │   │   ├── widgets/      # Shared UI components
+│   │   │   │   ├── custom_button.dart
+│   │   │   │   ├── loading_widget.dart
+│   │   │   │   └── error_widget.dart
+│   │   │   └── models/       # Cross-feature business models
+│   │   │       └── user_preferences.dart
+│   │   └── features/         # Feature modules
+│   │       ├── location/     # Location-related features
+│   │       ├── places/       # Place recommendation features
+│   │       ├── voting/       # Multi-user voting features
+│   │       ├── navigation/   # Navigation features
+│   │       └── subscription/ # Subscription management features
+│   ├── test/                 # Test files
+│   ├── assets/               # Static resources
+│   ├── ios/                  # iOS platform files
+│   ├── android/              # Android platform files
+│   └── pubspec.yaml          # Flutter project configuration
+├── scripts/                  # Execution scripts (optional)
+│   ├── dev.sh               # Unix/Linux/macOS development script
+│   ├── dev.bat              # Windows development script
+│   └── setup.sh             # Environment setup script
+├── docs/                     # Project documentation
+└── README.md                 # Project readme
+```
+
+### Feature Module Structure
+
+Each Feature module follows Clean Architecture layering internally:
+
+```
+features/[feature_name]/
+├── models/                   # Data model layer
+│   ├── [feature]_model.dart      # Data entities
+│   └── [feature]_repository.dart # Repository interface
+├── services/                 # Business logic layer
+│   ├── [feature]_service.dart     # Business logic implementation
+│   └── [feature]_repository_impl.dart # Repository implementation
+├── widgets/                  # UI component layer
+│   ├── [feature]_card.dart        # Feature-related components
+│   └── [feature]_list.dart        # List components
+└── screens/                  # Screen layer
+    ├── [feature]_screen.dart      # Main screen
+    └── [feature]_detail_screen.dart # Detail screen
+```
+
+### Core Modules
+
+The Core module is responsible for the application's core infrastructure:
+
+- **config/** - Application configuration, themes, secure API key management
+- **constants/** - Global constant definitions
+- **utils/** - Common utility functions
+- **models/** - Infrastructure data models (API response formats, etc.)
+- **services/** - Core services (HTTP, storage, analytics, etc.)
+
+### Shared Module
+
+Provides cross-feature shared components:
+
+- **widgets/** - Reusable UI components
+- **models/** - Cross-feature business domain models (user preferences, etc.)
+
+### Data Flow Architecture
+
+```
+UI Layer (Screens/Widgets)
+    ↕
+Business Logic Layer (Services)
+    ↕
+Data Layer (Repository)
+    ↕
+External APIs (Google APIs)
+```
+
+#### Data Flow Description
+
+1. **UI Layer** - Handles user interaction and screen rendering
+2. **Business Logic Layer** - Handles business logic and state management
+3. **Data Layer** - Handles data access and API calls
+4. **External APIs** - Google Places API, Google Maps API
 
 ## Lint Rules
 
@@ -164,42 +275,61 @@ linter:
 ```
 
 ### State Management
-* **Built-in Solutions:** Prefer Flutter's built-in state management solutions.
-  Do not use a third-party package unless explicitly requested.
-* **Streams:** Use `Streams` and `StreamBuilder` for handling a sequence of
-  asynchronous events.
-* **Futures:** Use `Futures` and `FutureBuilder` for handling a single
-  asynchronous operation that will complete in the future.
-* **ValueNotifier:** Use `ValueNotifier` with `ValueListenableBuilder` for
-  simple, local state that involves a single value.
 
-  ```dart
-  // Define a ValueNotifier to hold the state.
-  final ValueNotifier<int> _counter = ValueNotifier<int>(0);
+This project uses **Riverpod** for state management:
 
-  // Use ValueListenableBuilder to listen and rebuild.
-  ValueListenableBuilder<int>(
-    valueListenable: _counter,
-    builder: (context, value, child) {
-      return Text('Count: $value');
-    },
-  );
-    ```
+```dart
+// Example: Places state management
+@immutable
+class PlacesState {
+  final List<Place> places;
+  final bool isLoading;
+  final String? error;
 
-* **ChangeNotifier:** For state that is more complex or shared across multiple
-  widgets, use `ChangeNotifier`.
-* **ListenableBuilder:** Use `ListenableBuilder` to listen to changes from a
-  `ChangeNotifier` or other `Listenable`.
-* **MVVM:** When a more robust solution is needed, structure the app using the
-  Model-View-ViewModel (MVVM) pattern.
-* **Dependency Injection:** Use simple manual constructor dependency injection
-  to make a class's dependencies explicit in its API, and to manage dependencies
-  between different layers of the application.
-* **Provider:** If a dependency injection solution beyond manual constructor
-  injection is explicitly requested, `provider` can be used to make services,
-  repositories, or complex state objects available to the UI layer without tight
-  coupling (note: this document generally defaults against third-party packages
-  for state management unless explicitly requested).
+  const PlacesState({
+    this.places = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  PlacesState copyWith({
+    List<Place>? places,
+    bool? isLoading,
+    String? error,
+  }) {
+    return PlacesState(
+      places: places ?? this.places,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class PlacesNotifier extends StateNotifier<PlacesState> {
+  PlacesNotifier(this._placesService) : super(const PlacesState());
+
+  final PlacesService _placesService;
+
+  Future<void> searchNearbyPlaces(LatLng location) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final places = await _placesService.searchNearby(location);
+      state = state.copyWith(places: places, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+}
+
+// Provider definition
+final placesNotifierProvider = StateNotifierProvider<PlacesNotifier, PlacesState>(
+  (ref) => PlacesNotifier(ref.read(placesServiceProvider)),
+);
+```
 
 ### Data Flow
 * **Data Structures:** Define data structures (classes) to represent the data
@@ -284,6 +414,96 @@ linter:
   }
   ```
 
+### Dependency Management
+
+#### Core Dependencies
+- **flutter** - Core framework
+- **flutter_riverpod** - State management
+- **http** - HTTP requests
+- **shared_preferences** - Local storage
+
+#### Feature Dependencies
+- **google_maps_flutter** - Map display
+- **geolocator** - Location services
+- **permission_handler** - Permission management
+- **supabase_flutter** - Backend services (authentication, database)
+- **google_sign_in** - Google login integration
+- **sign_in_with_apple** - Apple login integration
+- **in_app_purchase** - In-app purchases (subscription management)
+- **go_router** - Routing management
+
+#### Development Dependencies
+- **flutter_test** - Testing framework
+- **mocktail** - Mock framework (null-safety support)
+- **flutter_lints** - Code linting rules
+
+### Build & Deployment
+
+#### Development Environment
+```bash
+flutter run --debug
+```
+
+#### Production Environment
+```bash
+flutter build apk --release    # Android
+flutter build ios --release    # iOS
+```
+
+### Security Architecture
+
+#### API Key Management
+
+```dart
+// lib/core/config/api_keys.dart
+class ApiKeys {
+  // Use environment variables, never hardcode
+  static const String googlePlacesApiKey = String.fromEnvironment(
+    'GOOGLE_PLACES_API_KEY',
+    defaultValue: '',
+  );
+
+  static const String googleMapsApiKey = String.fromEnvironment(
+    'GOOGLE_MAPS_API_KEY',
+    defaultValue: '',
+  );
+
+  // Security check
+  static bool get isConfigured {
+    return googlePlacesApiKey.isNotEmpty &&
+           googleMapsApiKey.isNotEmpty;
+  }
+
+  // Secure access method
+  static String get currentPlacesApiKey {
+    if (googlePlacesApiKey.isEmpty) {
+      throw ApiKeyNotConfiguredException('GOOGLE_PLACES_API_KEY');
+    }
+    return googlePlacesApiKey;
+  }
+}
+```
+
+#### Environment Variable Management
+
+```
+project_root/
+├── .env                    # Local environment variables (not committed)
+├── .env.example           # Environment variable template (can be committed)
+├── .gitignore            # Exclude sensitive files
+└── scripts/              # Automation scripts (optional)
+    └── run_dev.sh           # Development run script
+```
+
+#### Security Checklist
+
+- [ ] API keys use environment variables
+- [ ] .env file added to .gitignore
+- [ ] CI/CD uses GitHub Secrets
+- [ ] Application validates keys on startup
+- [ ] Different environments use different keys
+- [ ] Regularly rotate API keys
+
 
 ## Code Generation
 * **Build Runner:** If the project uses code generation, ensure that
@@ -303,6 +523,18 @@ linter:
 * **Unit Tests:** Use `package:test` for unit tests.
 * **Running E2E Tests:** To run e2e tests, use command `patrol test`.
 * **E2E Tests:** Use `package:patrol` for e2e tests.
+
+### Testing Architecture
+
+```
+test/
+├── unit/                     # Unit tests
+│   ├── services/
+│   ├── models/
+│   └── utils/
+└── integration/              # Integration tests
+    └── app_test.dart
+```
 
 ### Testing Best practices
 * **Convention:** Follow the Arrange-Act-Assert (or Given-When-Then) pattern.
