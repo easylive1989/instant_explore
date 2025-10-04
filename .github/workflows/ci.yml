@@ -29,7 +29,7 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format frontent/lib --output=none --set-exit-if-changed .
+        run: dart format frontend/lib --output=none --set-exit-if-changed .
 
       - name: Analyze project source
         run: flutter analyze --fatal-infos
