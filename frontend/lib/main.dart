@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/api_config.dart';
-import 'providers/service_providers.dart';
-import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
@@ -28,7 +26,7 @@ class InstantExploreApp extends ConsumerWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const AuthWrapper(),
+      home: const HomeScreen(),
     );
   }
 
@@ -45,49 +43,6 @@ class InstantExploreApp extends ConsumerWidget {
       });
     } else {
       debugPrint('⚠️ Supabase 未配置，跳過初始化');
-    }
-  }
-}
-
-class AuthWrapper extends ConsumerStatefulWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
-}
-
-class _AuthWrapperState extends ConsumerState<AuthWrapper> {
-  @override
-  void initState() {
-    super.initState();
-    _setupAuthListener();
-  }
-
-  void _setupAuthListener() {
-    final authService = ref.read(authServiceProvider);
-
-    // 統一使用 authService 的認證狀態監聽
-    authService.authStateChanges.listen((data) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    try {
-      final authService = ref.watch(authServiceProvider);
-
-      // 統一使用 authService 檢查登入狀態
-      if (authService.isSignedIn) {
-        return const HomeScreen();
-      } else {
-        return const LoginScreen();
-      }
-    } catch (e) {
-      debugPrint('❌ AuthWrapper build error: $e');
-      return const LoginScreen();
     }
   }
 }
