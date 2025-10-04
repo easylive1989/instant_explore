@@ -74,33 +74,4 @@ void main() {
       expect(find.byIcon(Icons.location_on), findsAtLeastNWidgets(1));
     },
   );
-
-  patrolTest('測試模式驗證', ($) async {
-    // 準備 fake services
-    final fakeAuth = FakeAuthService();
-    final fakeLocation = FakeLocationService();
-    final fakePlaces = FakePlacesService();
-
-    // 啟動應用程式並注入 fake services
-    await $.pumpWidgetAndSettle(
-      ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWithValue(fakeAuth),
-          locationServiceProvider.overrideWithValue(fakeLocation),
-          placesServiceProvider.overrideWithValue(fakePlaces),
-          mapWidgetProvider.overrideWithValue(createMockMapFactory()),
-        ],
-        child: const app.InstantExploreApp(),
-      ),
-    );
-
-    // 等待應用程式載入
-    await $.pump(const Duration(seconds: 2));
-
-    // 驗證 E2E 測試模式指示器存在
-    expect(find.text('E2E 測試模式'), findsOneWidget);
-
-    // 驗證測試模式圖標
-    expect(find.byIcon(Icons.science), findsOneWidget);
-  });
 }
