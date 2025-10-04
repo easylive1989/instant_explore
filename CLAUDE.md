@@ -285,30 +285,6 @@ linter:
   ```
 
 
-### Logging
-* **Structured Logging:** Use the `log` function from `dart:developer` for
-  structured logging that integrates with Dart DevTools.
-
-  ```dart
-  import 'dart:developer' as developer;
-
-  // For simple messages
-  developer.log('User logged in successfully.');
-
-  // For structured error logging
-  try {
-    // ... code that might fail
-  } catch (e, s) {
-    developer.log(
-      'Failed to fetch data',
-      name: 'myapp.network',
-      level: 1000, // SEVERE
-      error: e,
-      stackTrace: s,
-    );
-  }
-  ```
-
 ## Code Generation
 * **Build Runner:** If the project uses code generation, ensure that
   `build_runner` is listed as a dev dependency in `pubspec.yaml`.
@@ -325,10 +301,8 @@ linter:
 * **Running Tests:** To run tests, use the `run_tests` tool if it is available,
   otherwise use `flutter test`.
 * **Unit Tests:** Use `package:test` for unit tests.
-* **Widget Tests:** Use `package:flutter_test` for widget tests.
-* **Integration Tests:** Use `package:integration_test` for integration tests.
-* **Assertions:** Prefer using `package:checks` for more expressive and readable
-  assertions over the default `matchers`.
+* **Running E2E Tests:** To run e2e tests, use command `patrol test --target=integration_test/app_e2e_test.dart`.
+* **E2E Tests:** Use `package:patrol` for e2e tests.
 
 ### Testing Best practices
 * **Convention:** Follow the Arrange-Act-Assert (or Given-When-Then) pattern.
@@ -719,11 +693,6 @@ textTheme: const TextTheme(
   labelSmall: TextStyle(fontSize: 11.0, color: Colors.grey),
 ),
 ```
-
-## Documentation
-
-* **`dartdoc`:** Write `dartdoc`-style comments for all public APIs.
-
 
 ### Documentation Philosophy
 
