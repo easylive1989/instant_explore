@@ -7,7 +7,7 @@ Instant Explore 採用 **Feature-First** 架構設計，以功能模組為核心
 ### 架構原則
 
 1. **模組化** - 每個功能獨立封裝，降低耦合度
-2. **可擴展** - 新功能可以輕鬆添加，不影響現有模組  
+2. **可擴展** - 新功能可以輕鬆添加，不影響現有模組
 3. **可測試** - 清晰的依賴關係，便於單元測試
 4. **可維護** - 程式碼組織清晰，便於團隊協作
 5. **安全性** - 敏感資訊使用環境變數管理，絕不提交到版本控制
@@ -51,7 +51,6 @@ instant_explore/
 │   │       ├── places/       # 地點推薦功能
 │   │       ├── voting/       # 多人投票功能
 │   │       ├── navigation/   # 導航功能
-│   │       ├── auth/         # 用戶認證功能
 │   │       └── subscription/ # 訂閱管理功能
 │   ├── test/                 # 測試檔案
 │   ├── assets/               # 靜態資源
@@ -103,31 +102,6 @@ features/[feature_name]/
 - **widgets/** - 可重用的 UI 元件
 - **models/** - 跨功能的業務領域模型（使用者偏好設定等）
 
-### Features 模組
-
-#### 1. Location 模組
-- **職責：** 位置服務、GPS 定位、位置權限管理
-- **主要功能：** 取得使用者位置、位置更新監聽
-
-#### 2. Places 模組
-- **職責：** 地點搜尋、推薦演算法、地點資訊管理
-- **主要功能：** 附近地點搜尋、分類篩選、距離篩選
-
-#### 3. Voting 模組
-- **職責：** 多人協作決策、群組管理、投票機制
-- **主要功能：** 建立群組、加入投票、結果統計
-
-#### 4. Navigation 模組
-- **職責：** 路線規劃、導航整合、交通方式選擇
-- **主要功能：** 路線計算、導航啟動、ETA 預估
-
-#### 5. Auth 模組
-- **職責：** 用戶認證、帳戶管理、登入狀態維護
-- **主要功能：** 註冊登入、帳戶資訊管理、認證狀態同步
-
-#### 6. Subscription 模組
-- **職責：** 訂閱管理、付費功能權限、使用配額追蹤
-- **主要功能：** 訂閱狀態檢查、搜尋次數追蹤、付費功能解鎖
 
 ## 🔄 資料流架構
 
@@ -159,13 +133,13 @@ class PlacesState {
   final List<Place> places;
   final bool isLoading;
   final String? error;
-  
+
   const PlacesState({
     this.places = const [],
     this.isLoading = false,
     this.error,
   });
-  
+
   PlacesState copyWith({
     List<Place>? places,
     bool? isLoading,
@@ -181,18 +155,18 @@ class PlacesState {
 
 class PlacesNotifier extends StateNotifier<PlacesState> {
   PlacesNotifier(this._placesService) : super(const PlacesState());
-  
+
   final PlacesService _placesService;
-  
+
   Future<void> searchNearbyPlaces(LatLng location) async {
     state = state.copyWith(isLoading: true, error: null);
-    
+
     try {
       final places = await _placesService.searchNearby(location);
       state = state.copyWith(places: places, isLoading: false);
     } catch (e) {
       state = state.copyWith(
-        isLoading: false, 
+        isLoading: false,
         error: e.toString(),
       );
     }
@@ -213,9 +187,6 @@ test/
 │   ├── services/
 │   ├── models/
 │   └── utils/
-├── widget/                   # Widget 測試
-│   ├── screens/
-│   └── widgets/
 └── integration/              # 整合測試
     └── app_test.dart
 ```
@@ -237,6 +208,7 @@ test/
 - **sign_in_with_apple** - Apple 登入整合
 - **in_app_purchase** - 應用內購買（訂閱管理）
 - **shared_preferences** - 本地配額追蹤
+- **go_router** - 路由管理
 
 ### 開發依賴
 - **flutter_test** - 測試框架
@@ -258,7 +230,6 @@ flutter build ios --release    # iOS
 
 ### 平台特性說明
 
-
 ## 🔒 安全性架構
 
 ### API 金鑰管理
@@ -271,18 +242,18 @@ class ApiKeys {
     'GOOGLE_PLACES_API_KEY',
     defaultValue: '',
   );
-  
+
   static const String googleMapsApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY', 
+    'GOOGLE_MAPS_API_KEY',
     defaultValue: '',
   );
-  
+
   // 安全性檢查
   static bool get isConfigured {
-    return googlePlacesApiKey.isNotEmpty && 
+    return googlePlacesApiKey.isNotEmpty &&
            googleMapsApiKey.isNotEmpty;
   }
-  
+
   // 安全存取方法
   static String get currentPlacesApiKey {
     if (googlePlacesApiKey.isEmpty) {
@@ -301,8 +272,7 @@ class ApiKeys {
 ├── .env.example           # 環境變數範例（可提交）
 ├── .gitignore            # 排除敏感檔案
 └── scripts/              # 自動化腳本（可選）
-    ├── dev.sh           # 開發執行腳本
-    └── setup.sh         # 環境設定腳本
+    └── run_dev.sh           # 開發執行腳本
 ```
 
 ### 安全檢查清單
@@ -313,40 +283,3 @@ class ApiKeys {
 - [ ] 應用程式啟動時驗證金鑰
 - [ ] 不同環境使用不同金鑰
 - [ ] 定期輪換 API 金鑰
-
-## 📈 效能考量
-
-### 優化策略
-1. **圖片優化** - 使用 cached_network_image 快取圖片
-2. **API 快取** - 實作 API 回應快取機制
-3. **延遲載入** - 大型清單使用 ListView.builder
-4. **記憶體管理** - 適當的 dispose 資源清理
-5. **API 成本控制** - 使用快取減少 API 呼叫次數
-6. **行動優先設計** - 專注手機尺寸優化，避免多套 RWD 布局的複雜性
-
-### 行動優先設計的效能優勢
-- **開發效率**：單一布局設計，降低開發和維護成本
-- **效能一致性**：所有平台使用相同的 UI 渲染邏輯
-- **測試簡化**：減少跨裝置相容性測試的複雜度
-- **使用者體驗**：確保最佳化的手機體驗，符合應用程式核心使用場景
-
-### 監控指標
-- API 回應時間
-- 記憶體使用量
-- 電池消耗
-- 網路使用量
-- API 成本和使用量
-
-## 🔮 未來擴展
-
-### 計劃中的模組
-1. **Profile 模組** - 使用者個人資料管理
-2. **History 模組** - 歷史記錄和收藏
-3. **Social 模組** - 社交分享功能
-4. **Notification 模組** - 推播通知
-
-### 技術債務
-1. 持續優化 Riverpod 狀態管理模式
-2. 添加 GraphQL 支援
-3. 實作離線快取策略
-4. 添加國際化支援
