@@ -7,6 +7,8 @@ import '../services/diary_repository.dart';
 import '../services/diary_repository_impl.dart';
 import '../../images/services/image_upload_service.dart';
 import 'diary_create_screen.dart';
+import '../../../core/constants/spacing_constants.dart';
+import '../../../core/config/theme_config.dart';
 
 /// 日記詳情畫面
 class DiaryDetailScreen extends StatefulWidget {
@@ -189,189 +191,264 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
           // Content
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 日期與評分
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        dateFormat.format(_currentEntry.visitDate),
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                      if (_currentEntry.rating != null) ...[
-                        const Spacer(),
-                        ...List.generate(
-                          5,
-                          (index) => Icon(
-                            index < _currentEntry.rating!
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: Colors.amber,
-                            size: 24,
+            child: Container(
+              margin: EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: ThemeConfig.neutralBorder, width: 1),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 日期與評分
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          size: 18,
+                          color: ThemeConfig.accentColor,
+                        ),
+                        SizedBox(width: AppSpacing.sm),
+                        Text(
+                          dateFormat.format(_currentEntry.visitDate),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: ThemeConfig.neutralText,
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 地點資訊
-                  if (_currentEntry.placeName != null) ...[
-                    _buildInfoRow(
-                      icon: Icons.location_on,
-                      title: '地點',
-                      content: _currentEntry.placeName!,
-                      theme: theme,
-                    ),
-                    if (_currentEntry.placeAddress != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 32),
-                        child: Text(
-                          _currentEntry.placeAddress!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.7,
+                        if (_currentEntry.rating != null) ...[
+                          const Spacer(),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
                             ),
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // 內容
-                  if (_currentEntry.content != null &&
-                      _currentEntry.content!.isNotEmpty) ...[
-                    Text(
-                      '心得',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _currentEntry.content!,
-                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // 標籤
-                  if (_currentEntry.tags.isNotEmpty) ...[
-                    Text(
-                      '標籤',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _currentEntry.tags.map((tag) {
-                        return Chip(
-                          label: Text(tag),
-                          backgroundColor: theme.colorScheme.primaryContainer,
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // 圖片集
-                  if (_currentEntry.imagePaths.length > 1) ...[
-                    Text(
-                      '照片 (${_currentEntry.imagePaths.length})',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                      itemCount: _currentEntry.imagePaths.length,
-                      itemBuilder: (context, index) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: _imageUploadService.getImageUrl(
-                              _currentEntry.imagePaths[index],
+                            decoration: BoxDecoration(
+                              color: ThemeConfig.neutralLight,
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: theme.colorScheme.surfaceContainerHighest,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                5,
+                                (index) => Icon(
+                                  index < _currentEntry.rating!
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: ThemeConfig.accentColor,
+                                  size: 20,
+                                ),
                               ),
                             ),
-                            errorWidget: (context, url, error) => Container(
-                              color: theme.colorScheme.surfaceContainerHighest,
-                              child: const Icon(Icons.error),
-                            ),
                           ),
-                        );
-                      },
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                  ],
+                    SizedBox(height: AppSpacing.lg),
 
-                  // 地圖
-                  if (_currentEntry.latitude != null &&
-                      _currentEntry.longitude != null) ...[
-                    Text(
-                      '位置',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: LatLng(
-                              _currentEntry.latitude!,
-                              _currentEntry.longitude!,
-                            ),
-                            zoom: 15,
+                    // 地點資訊
+                    if (_currentEntry.placeName != null) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 18,
+                            color: ThemeConfig.accentColor,
                           ),
-                          markers: {
-                            Marker(
-                              markerId: MarkerId(_currentEntry.id),
-                              position: LatLng(
+                          SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _currentEntry.placeName!,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: ThemeConfig.neutralText,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (_currentEntry.placeAddress != null) ...[
+                                  SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    _currentEntry.placeAddress!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: ThemeConfig.neutralText.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+
+                    // 內容
+                    if (_currentEntry.content != null &&
+                        _currentEntry.content!.isNotEmpty) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: ThemeConfig.neutralLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _currentEntry.content!,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.8,
+                            color: ThemeConfig.neutralText,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+
+                    // 標籤
+                    if (_currentEntry.tags.isNotEmpty) ...[
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: _currentEntry.tags.map((tag) {
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: ThemeConfig.neutralBorder,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              tag,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: ThemeConfig.neutralText,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+
+                    // 圖片集
+                    if (_currentEntry.imagePaths.length > 1) ...[
+                      Text(
+                        '照片 (${_currentEntry.imagePaths.length})',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: ThemeConfig.neutralText.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: AppSpacing.sm,
+                          mainAxisSpacing: AppSpacing.sm,
+                        ),
+                        itemCount: _currentEntry.imagePaths.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: ThemeConfig.neutralBorder,
+                                width: 0.5,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(7),
+                              child: CachedNetworkImage(
+                                imageUrl: _imageUploadService.getImageUrl(
+                                  _currentEntry.imagePaths[index],
+                                ),
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: ThemeConfig.neutralLight,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: ThemeConfig.neutralLight,
+                                  child: Icon(
+                                    Icons.error_outline,
+                                    color: ThemeConfig.neutralBorder,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+
+                    // 地圖
+                    if (_currentEntry.latitude != null &&
+                        _currentEntry.longitude != null) ...[
+                      Text(
+                        '位置',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: ThemeConfig.neutralText.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: ThemeConfig.neutralBorder,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(7),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
                                 _currentEntry.latitude!,
                                 _currentEntry.longitude!,
                               ),
-                              infoWindow: InfoWindow(
-                                title: _currentEntry.placeName,
-                              ),
+                              zoom: 15,
                             ),
-                          },
-                          zoomControlsEnabled: false,
-                          myLocationButtonEnabled: false,
+                            markers: {
+                              Marker(
+                                markerId: MarkerId(_currentEntry.id),
+                                position: LatLng(
+                                  _currentEntry.latitude!,
+                                  _currentEntry.longitude!,
+                                ),
+                                infoWindow: InfoWindow(
+                                  title: _currentEntry.placeName,
+                                ),
+                              ),
+                            },
+                            zoomControlsEnabled: false,
+                            myLocationButtonEnabled: false,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 80),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -400,27 +477,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 ),
               ],
             ),
-    );
-  }
-
-  Widget _buildInfoRow({
-    required IconData icon,
-    required String title,
-    required String content,
-    required ThemeData theme,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.primary),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(content, style: theme.textTheme.bodyLarge)],
-          ),
-        ),
-      ],
     );
   }
 }

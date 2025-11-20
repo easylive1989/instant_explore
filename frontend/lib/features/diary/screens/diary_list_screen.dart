@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import '../models/diary_tag.dart';
 import '../services/diary_repository.dart';
@@ -8,6 +9,8 @@ import '../widgets/diary_card.dart';
 import '../../images/services/image_upload_service.dart';
 import 'diary_create_screen.dart';
 import 'diary_detail_screen.dart';
+import '../../../core/constants/spacing_constants.dart';
+import '../../../core/config/theme_config.dart';
 
 /// 日記列表畫面狀態
 class DiaryListState {
@@ -197,17 +200,145 @@ class DiaryListScreen extends ConsumerWidget {
       );
     }
 
+    // 按日期分組日記
+    final groupedEntries = _groupEntriesByDate(state.entries);
+
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 80),
-      itemCount: state.entries.length,
+      padding: EdgeInsets.only(top: AppSpacing.md, bottom: 80 + AppSpacing.md),
+      itemCount: groupedEntries.length,
       itemBuilder: (context, index) {
-        final entry = state.entries[index];
-        return DiaryCard(
-          entry: entry,
-          imageUploadService: imageUploadService,
-          onTap: () => _navigateToDiaryDetail(context, entry, notifier),
+        final dateGroup = groupedEntries[index];
+        return _buildTimelineGroup(
+          context,
+          dateGroup['date'] as String,
+          dateGroup['entries'] as List<DiaryEntry>,
+          notifier,
+          imageUploadService,
         );
       },
+    );
+  }
+
+  /// 按日期分組日記條目
+  List<Map<String, dynamic>> _groupEntriesByDate(List<DiaryEntry> entries) {
+    final Map<String, List<DiaryEntry>> grouped = {};
+
+    for (final entry in entries) {
+      final dateKey = DateFormat('yyyy-MM-dd').format(entry.visitDate);
+      grouped.putIfAbsent(dateKey, () => []).add(entry);
+    }
+
+    // 將分組轉換為列表並按日期排序（最新在前）
+    final List<Map<String, dynamic>> result = [];
+    final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    for (final key in sortedKeys) {
+      result.add({'date': key, 'entries': grouped[key]!});
+    }
+
+    return result;
+  }
+
+  /// 取得星期名稱
+  String _getWeekdayName(int weekday) {
+    const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+    return '星期${weekdays[weekday - 1]}';
+  }
+
+  /// 建立時間軸分組
+  Widget _buildTimelineGroup(
+    BuildContext context,
+    String date,
+    List<DiaryEntry> entries,
+    DiaryListNotifier notifier,
+    ImageUploadService imageUploadService,
+  ) {
+    final dateTime = DateTime.parse(date);
+    final displayDate = DateFormat('yyyy年MM月dd日').format(dateTime);
+    final weekday = _getWeekdayName(dateTime.weekday);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 日期標頭
+        Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.timelineCardIndent,
+            right: AppSpacing.md,
+            bottom: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Text(
+                displayDate,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: ThemeConfig.neutralText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                weekday,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: ThemeConfig.neutralText.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 時間軸上的日記卡片
+        ...entries.map(
+          (entry) =>
+              _buildTimelineItem(context, entry, notifier, imageUploadService),
+        ),
+        SizedBox(height: AppSpacing.lg),
+      ],
+    );
+  }
+
+  /// 建立時間軸項目
+  Widget _buildTimelineItem(
+    BuildContext context,
+    DiaryEntry entry,
+    DiaryListNotifier notifier,
+    ImageUploadService imageUploadService,
+  ) {
+    return Stack(
+      children: [
+        // 時間軸垂直線
+        Positioned(
+          left: AppSpacing.lg,
+          top: 0,
+          bottom: 0,
+          child: Container(
+            width: AppSpacing.timelineLineWidth,
+            color: ThemeConfig.neutralBorder,
+          ),
+        ),
+        // 時間軸節點
+        Positioned(
+          left: AppSpacing.lg - (AppSpacing.timelineDotSize / 2) + 1,
+          top: AppSpacing.lg,
+          child: Container(
+            width: AppSpacing.timelineDotSize,
+            height: AppSpacing.timelineDotSize,
+            decoration: BoxDecoration(
+              color: ThemeConfig.accentColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+          ),
+        ),
+        // 日記卡片
+        Padding(
+          padding: EdgeInsets.only(left: AppSpacing.timelineCardIndent),
+          child: DiaryCard(
+            entry: entry,
+            imageUploadService: imageUploadService,
+            onTap: () => _navigateToDiaryDetail(context, entry, notifier),
+          ),
+        ),
+      ],
     );
   }
 
