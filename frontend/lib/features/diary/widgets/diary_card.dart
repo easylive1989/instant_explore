@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
 import '../models/diary_entry.dart';
 import '../../images/services/image_upload_service.dart';
 import '../../../core/constants/spacing_constants.dart';
@@ -22,7 +21,6 @@ class DiaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateFormat = DateFormat('yyyy-MM-dd');
 
     return Container(
       margin: EdgeInsets.only(
@@ -132,12 +130,11 @@ class DiaryCard extends StatelessWidget {
                       ],
                     ],
                   ),
-                  SizedBox(height: AppSpacing.md),
-
-                  // 地點和日期 - 合併為一行
-                  Row(
-                    children: [
-                      if (entry.placeName != null) ...[
+                  // 地點資訊
+                  if (entry.placeName != null) ...[
+                    SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
                         Icon(
                           Icons.location_on_outlined,
                           size: 16,
@@ -156,22 +153,9 @@ class DiaryCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(width: AppSpacing.sm),
                       ],
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 16,
-                        color: ThemeConfig.accentColor,
-                      ),
-                      SizedBox(width: AppSpacing.xs),
-                      Text(
-                        dateFormat.format(entry.visitDate),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: ThemeConfig.neutralText.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
 
                   // 標籤 - 極簡風格
                   if (entry.tags.isNotEmpty) ...[

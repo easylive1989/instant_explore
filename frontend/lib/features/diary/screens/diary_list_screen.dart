@@ -11,6 +11,7 @@ import 'diary_create_screen.dart';
 import 'diary_detail_screen.dart';
 import '../../../core/constants/spacing_constants.dart';
 import '../../../core/config/theme_config.dart';
+import '../../home/screens/settings_screen.dart';
 
 /// 日記列表畫面狀態
 class DiaryListState {
@@ -120,6 +121,7 @@ class DiaryListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('旅食日記'),
+        centerTitle: false, // 標題靠左
         actions: [
           // 標籤篩選按鈕
           if (state.allTags.isNotEmpty)
@@ -131,16 +133,20 @@ class DiaryListScreen extends ConsumerWidget {
               ),
               onPressed: () => _showTagFilterDialog(context, state, notifier),
             ),
+          // 設定按鈕
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => _navigateToSettings(context),
+          ),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: () => notifier.loadDiaries(),
         child: _buildBody(context, state, notifier, imageUploadService),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateDiary(context, notifier),
-        icon: const Icon(Icons.add),
-        label: const Text('新增日記'),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -367,6 +373,12 @@ class DiaryListScreen extends ConsumerWidget {
     if (result == true) {
       notifier.loadDiaries();
     }
+  }
+
+  void _navigateToSettings(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
   }
 
   void _showTagFilterDialog(
