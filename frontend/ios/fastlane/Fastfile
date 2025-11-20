@@ -1,0 +1,62 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  # 共用的 App Store Connect API 設定
+  def get_api_key
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_ISSUER_ID'],
+      key_filepath: "~/.appstoreconnect/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8",
+      duration: 1200, # 20 minutes
+      in_house: false
+    )
+  end
+
+  # 共用的 Beta Review 資訊
+  def get_beta_review_info
+    {
+      contact_email: "easylive1989@gmail.com",
+      contact_first_name: "Paul",
+      contact_last_name: "Wu",
+      contact_phone: "+886-918-000-223",
+      notes: "此版本透過 CI/CD 自動建置並上傳"
+    }
+  end
+
+  desc "Upload IPA to TestFlight"
+  lane :upload_testflight do
+    # 設定檔案路徑常數 - GitHub Actions 建置的 IPA 位置
+    ipa_file = "../../build/ios/ipa/instantexplore.ipa"
+    
+    # 檢查 IPA 檔案是否存在
+    unless File.exist?(ipa_file)
+      UI.user_error!("❌ 找不到 IPA 檔案進行上傳：#{File.expand_path(ipa_file)}")
+    end
+    
+    # 上傳到 TestFlight
+    upload_to_testflight(
+      api_key: get_api_key,
+      ipa: File.expand_path(ipa_file),
+      skip_waiting_for_build_processing: true,
+      changelog: "透過 CI/CD 自動建置上傳",
+      beta_app_review_info: get_beta_review_info
+    )
+
+    UI.success("✅ iOS App 已成功上傳到 TestFlight！")
+  end
+end

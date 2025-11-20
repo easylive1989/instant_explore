@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "regular",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dart format ."
+          }
+        ]
+      }
+    ]
+  }
+}
