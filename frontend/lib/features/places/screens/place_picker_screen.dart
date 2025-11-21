@@ -99,16 +99,6 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
     setState(() {
       _selectedPlace = place;
     });
-
-    // 移動地圖到選擇的地點
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(place.location.latitude, place.location.longitude),
-          16.0,
-        ),
-      );
-    }
   }
 
   void _confirmSelection() {
@@ -117,10 +107,96 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
     }
   }
 
+  /// 建立地點列表視圖
+  Widget _buildPlacesList() {
+    if (_isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_places.isEmpty) {
+      return const Center(child: Text('附近沒有找到地點'));
+    }
+
+    return ListView.builder(
+      itemCount: _places.length,
+      itemBuilder: (context, index) {
+        final place = _places[index];
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            leading: const Icon(Icons.location_on),
+            title: Text(place.name),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  place.formattedAddress,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (place.rating != null)
+                  Row(
+                    children: [
+                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(place.rating!.toStringAsFixed(1)),
+                    ],
+                  ),
+              ],
+            ),
+            onTap: () => _onPlaceSelected(place),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 建立地圖視圖
+  Widget _buildMapView() {
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: LatLng(
+          _selectedPlace!.location.latitude,
+          _selectedPlace!.location.longitude,
+        ),
+        zoom: 16.0,
+      ),
+      onMapCreated: (controller) {
+        _mapController = controller;
+      },
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+      markers: {
+        Marker(
+          markerId: MarkerId(_selectedPlace!.id),
+          position: LatLng(
+            _selectedPlace!.location.latitude,
+            _selectedPlace!.location.longitude,
+          ),
+          infoWindow: InfoWindow(
+            title: _selectedPlace!.name,
+            snippet: _selectedPlace!.formattedAddress,
+          ),
+        ),
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: _selectedPlace != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    _selectedPlace = null;
+                  });
+                },
+              )
+            : null,
         title: const Text('選擇地點'),
         actions: [
           if (_selectedPlace != null)
@@ -157,111 +233,13 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
                   ),
                 ),
 
-                // 地圖 + 地點列表
+                // 地點列表或地圖顯示
                 Expanded(
                   child: _currentLocation == null
                       ? const Center(child: Text('正在取得位置...'))
-                      : Row(
-                          children: [
-                            // 地點列表
-                            Expanded(
-                              flex: 2,
-                              child: _isSearching
-                                  ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : _places.isEmpty
-                                  ? const Center(child: Text('附近沒有找到地點'))
-                                  : ListView.builder(
-                                      itemCount: _places.length,
-                                      itemBuilder: (context, index) {
-                                        final place = _places[index];
-                                        final isSelected =
-                                            _selectedPlace?.id == place.id;
-
-                                        return Card(
-                                          margin: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          color: isSelected
-                                              ? Theme.of(
-                                                  context,
-                                                ).colorScheme.primaryContainer
-                                              : null,
-                                          child: ListTile(
-                                            leading: const Icon(
-                                              Icons.location_on,
-                                            ),
-                                            title: Text(place.name),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  place.formattedAddress,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                if (place.rating != null)
-                                                  Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.star,
-                                                        size: 16,
-                                                        color: Colors.amber,
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        place.rating!
-                                                            .toStringAsFixed(1),
-                                                      ),
-                                                    ],
-                                                  ),
-                                              ],
-                                            ),
-                                            onTap: () =>
-                                                _onPlaceSelected(place),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            ),
-
-                            // 地圖預覽
-                            Expanded(
-                              flex: 3,
-                              child: GoogleMap(
-                                initialCameraPosition: CameraPosition(
-                                  target: _currentLocation!,
-                                  zoom: 14.0,
-                                ),
-                                onMapCreated: (controller) {
-                                  _mapController = controller;
-                                },
-                                myLocationEnabled: true,
-                                myLocationButtonEnabled: true,
-                                markers: {
-                                  // 當前選擇的地點
-                                  if (_selectedPlace != null)
-                                    Marker(
-                                      markerId: MarkerId(_selectedPlace!.id),
-                                      position: LatLng(
-                                        _selectedPlace!.location.latitude,
-                                        _selectedPlace!.location.longitude,
-                                      ),
-                                      infoWindow: InfoWindow(
-                                        title: _selectedPlace!.name,
-                                        snippet:
-                                            _selectedPlace!.formattedAddress,
-                                      ),
-                                    ),
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
+                      : _selectedPlace == null
+                      ? _buildPlacesList()
+                      : _buildMapView(),
                 ),
               ],
             ),
