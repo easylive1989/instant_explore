@@ -109,40 +109,76 @@ final diaryListProvider =
     );
 
 /// 日記列表畫面
-class DiaryListScreen extends ConsumerWidget {
+class DiaryListScreen extends ConsumerStatefulWidget {
   const DiaryListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DiaryListScreen> createState() => _DiaryListScreenState();
+}
+
+class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
+  final ScrollController _scrollController = ScrollController();
+  double _appBarOffset = -100.0;
+  double _appBarOpacity = 0.0;
+  static const double _appBarThreshold = 20;
+  static const double _appBarTransitionRange = 80.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final offset = _scrollController.offset;
+
+    // 計算進度：offset 從 80 到 160 之間，progress 從 0.0 到 1.0
+    final progress = ((offset - _appBarThreshold) / _appBarTransitionRange)
+        .clamp(0.0, 1.0);
+
+    // 計算 app bar 的位移：從 -100 到 0
+    final newOffset = -100.0 + (100.0 * progress);
+
+    // 計算透明度：從 0.0 到 1.0
+    final newOpacity = progress;
+
+    if (newOffset != _appBarOffset || newOpacity != _appBarOpacity) {
+      setState(() {
+        _appBarOffset = newOffset;
+        _appBarOpacity = newOpacity;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(diaryListProvider);
     final notifier = ref.read(diaryListProvider.notifier);
     final imageUploadService = ImageUploadService();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('旅食日記'),
-        centerTitle: false, // 標題靠左
-        actions: [
-          // 標籤篩選按鈕
-          if (state.allTags.isNotEmpty)
-            IconButton(
-              icon: Badge(
-                isLabelVisible: state.selectedTagIds.isNotEmpty,
-                label: Text('${state.selectedTagIds.length}'),
-                child: const Icon(Icons.filter_list),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: () => notifier.loadDiaries(),
+              child: _buildScrollView(
+                context,
+                state,
+                notifier,
+                imageUploadService,
               ),
-              onPressed: () => _showTagFilterDialog(context, state, notifier),
             ),
-          // 設定按鈕
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => _navigateToSettings(context),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => notifier.loadDiaries(),
-        child: _buildBody(context, state, notifier, imageUploadService),
+            _buildFloatingAppBar(context, state, notifier),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateDiary(context, notifier),
@@ -151,12 +187,13 @@ class DiaryListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBody(
+  Widget _buildScrollView(
     BuildContext context,
     DiaryListState state,
     DiaryListNotifier notifier,
     ImageUploadService imageUploadService,
   ) {
+    // 處理載入、錯誤、空狀態
     if (state.isLoading && state.entries.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -179,29 +216,107 @@ class DiaryListScreen extends ConsumerWidget {
       );
     }
 
-    if (state.entries.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    // 使用 CustomScrollView
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        // 固定標題區塊
+        _buildHeaderSection(context, state, notifier),
+        // 列表內容
+        _buildContentSection(context, state, notifier, imageUploadService),
+      ],
+    );
+  }
+
+  /// 建立 AppBar 與固定標題的 actions
+  List<Widget> _buildActions(
+    BuildContext context,
+    DiaryListState state,
+    DiaryListNotifier notifier,
+  ) {
+    return [
+      // 標籤篩選按鈕
+      if (state.allTags.isNotEmpty)
+        IconButton(
+          icon: Badge(
+            isLabelVisible: state.selectedTagIds.isNotEmpty,
+            label: Text('${state.selectedTagIds.length}'),
+            child: const Icon(Icons.filter_list),
+          ),
+          onPressed: () => _showTagFilterDialog(context, state, notifier),
+        ),
+      // 設定按鈕
+      IconButton(
+        icon: const Icon(Icons.settings_outlined),
+        onPressed: () => _navigateToSettings(context),
+      ),
+    ];
+  }
+
+  /// 建立固定標題區塊
+  Widget _buildHeaderSection(
+    BuildContext context,
+    DiaryListState state,
+    DiaryListNotifier notifier,
+  ) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
+        child: Row(
           children: [
-            Icon(
-              Icons.book_outlined,
-              size: 64,
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.5),
+            Expanded(
+              child: Text(
+                '旅食日記',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: ThemeConfig.neutralText,
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              state.selectedTagIds.isEmpty ? '還沒有日記' : '沒有符合篩選條件的日記',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.selectedTagIds.isEmpty ? '點擊下方按鈕開始記錄你的旅程' : '試試調整篩選條件',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            ..._buildActions(context, state, notifier),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// 建立內容區塊
+  Widget _buildContentSection(
+    BuildContext context,
+    DiaryListState state,
+    DiaryListNotifier notifier,
+    ImageUploadService imageUploadService,
+  ) {
+    if (state.entries.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.book_outlined,
+                size: 64,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                state.selectedTagIds.isEmpty ? '還沒有日記' : '沒有符合篩選條件的日記',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.selectedTagIds.isEmpty ? '點擊下方按鈕開始記錄你的旅程' : '試試調整篩選條件',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -209,19 +324,21 @@ class DiaryListScreen extends ConsumerWidget {
     // 按日期分組日記
     final groupedEntries = _groupEntriesByDate(state.entries);
 
-    return ListView.builder(
-      padding: EdgeInsets.only(top: AppSpacing.md, bottom: 80 + AppSpacing.md),
-      itemCount: groupedEntries.length,
-      itemBuilder: (context, index) {
-        final dateGroup = groupedEntries[index];
-        return _buildTimelineGroup(
-          context,
-          dateGroup['date'] as String,
-          dateGroup['entries'] as List<DiaryEntry>,
-          notifier,
-          imageUploadService,
-        );
-      },
+    return SliverPadding(
+      padding: EdgeInsets.only(bottom: 80 + AppSpacing.md),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          if (index >= groupedEntries.length) return null;
+          final dateGroup = groupedEntries[index];
+          return _buildTimelineGroup(
+            context,
+            dateGroup['date'] as String,
+            dateGroup['entries'] as List<DiaryEntry>,
+            notifier,
+            imageUploadService,
+          );
+        }, childCount: groupedEntries.length),
+      ),
     );
   }
 
@@ -263,42 +380,49 @@ class DiaryListScreen extends ConsumerWidget {
     final displayDate = DateFormat('yyyy年MM月dd日').format(dateTime);
     final weekday = _getWeekdayName(dateTime.weekday);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 日期標頭
-        Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.timelineCardIndent,
-            right: AppSpacing.md,
-            bottom: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Text(
-                displayDate,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: ThemeConfig.neutralText,
-                  fontWeight: FontWeight.w600,
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 日期標頭
+          Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.timelineCardIndent,
+              right: AppSpacing.md,
+              bottom: AppSpacing.sm,
+              top: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Text(
+                  displayDate,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: ThemeConfig.neutralText,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              SizedBox(width: AppSpacing.sm),
-              Text(
-                weekday,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: ThemeConfig.neutralText.withValues(alpha: 0.5),
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  weekday,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: ThemeConfig.neutralText.withValues(alpha: 0.5),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        // 時間軸上的日記卡片
-        ...entries.map(
-          (entry) =>
-              _buildTimelineItem(context, entry, notifier, imageUploadService),
-        ),
-        SizedBox(height: AppSpacing.lg),
-      ],
+          // 時間軸上的日記卡片
+          ...entries.map(
+            (entry) => _buildTimelineItem(
+              context,
+              entry,
+              notifier,
+              imageUploadService,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -379,6 +503,57 @@ class DiaryListScreen extends ConsumerWidget {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
+  }
+
+  /// 建立浮動的 AppBar
+  Widget _buildFloatingAppBar(
+    BuildContext context,
+    DiaryListState state,
+    DiaryListNotifier notifier,
+  ) {
+    return Positioned(
+      top: _appBarOffset,
+      left: 0,
+      right: 0,
+      child: Opacity(
+        opacity: _appBarOpacity,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                offset: const Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '旅食日記',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: ThemeConfig.neutralText,
+                      ),
+                    ),
+                  ),
+                  ..._buildActions(context, state, notifier),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showTagFilterDialog(
