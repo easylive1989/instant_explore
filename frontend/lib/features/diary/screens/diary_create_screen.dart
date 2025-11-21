@@ -8,6 +8,9 @@ import '../services/diary_repository.dart';
 import '../services/diary_repository_impl.dart';
 import '../widgets/tag_input.dart';
 import '../widgets/image_picker_widget.dart';
+import '../widgets/rich_text_editor.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'dart:convert';
 import '../../images/services/image_picker_service.dart';
 import '../../images/services/image_upload_service.dart';
 import '../../places/models/place.dart';
@@ -25,7 +28,7 @@ class DiaryCreateScreen extends ConsumerStatefulWidget {
 class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  late final QuillController _contentController;
 
   // 服務
   late final DiaryRepository _repository;
@@ -52,6 +55,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     _repository = DiaryRepositoryImpl();
     _imagePickerService = ImagePickerService();
     _imageUploadService = ImageUploadService();
+    _contentController = QuillController.basic();
 
     _isEditing = widget.existingEntry != null;
     if (_isEditing) {
@@ -62,7 +66,18 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   void _loadExistingEntry() {
     final entry = widget.existingEntry!;
     _titleController.text = entry.title;
-    _contentController.text = entry.content ?? '';
+
+    // 載入 Quill 內容
+    if (entry.content != null && entry.content!.isNotEmpty) {
+      try {
+        final deltaJson = jsonDecode(entry.content!);
+        _contentController.document = Document.fromJson(deltaJson);
+      } catch (e) {
+        // 如果是舊的純文字內容，直接設為純文字
+        _contentController.document = Document()..insert(0, entry.content!);
+      }
+    }
+
     _visitDate = entry.visitDate;
     _tags = List.from(entry.tags);
     _placeId = entry.placeId;
@@ -152,11 +167,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     try {
       // 1. 建立或更新日記資料
+      // 將 Quill Delta 轉換為 JSON 字串
+      final deltaJson = jsonEncode(
+        _contentController.document.toDelta().toJson(),
+      );
+
       final diaryData = DiaryEntry(
         id: widget.existingEntry?.id ?? '',
         userId: widget.existingEntry?.userId ?? '',
         title: _titleController.text.trim(),
-        content: _contentController.text.trim(),
+        content: deltaJson,
         placeId: _placeId,
         placeName: _placeName,
         placeAddress: _placeAddress,
@@ -295,17 +315,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 內容
-            TextFormField(
+            // 內容（富文本編輯器）
+            RichTextEditor(
               controller: _contentController,
-              decoration: const InputDecoration(
-                labelText: '內容',
-                hintText: '分享你的心得與感想...',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              maxLines: 8,
+              hintText: '分享你的心得與感想...',
               maxLength: 1000,
+              height: 224,
             ),
             const SizedBox(height: 24),
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/theme_config.dart';
 import 'core/config/app_config.dart';
@@ -18,6 +19,7 @@ class TravelDiaryApp extends ConsumerWidget {
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeConfig.lightTheme,
+      localizationsDelegates: [FlutterQuillLocalizations.delegate],
       darkTheme: ThemeConfig.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'dart:convert';
 import '../models/diary_entry.dart';
 import '../services/diary_repository.dart';
 import '../services/diary_repository_impl.dart';
@@ -350,7 +352,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       SizedBox(height: AppSpacing.lg),
                     ],
 
-                    // 內容
+                    // 內容（Quill 富文本）
                     if (_currentEntry.content != null &&
                         _currentEntry.content!.isNotEmpty) ...[
                       Container(
@@ -360,13 +362,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                           color: ThemeConfig.neutralLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          _currentEntry.content!,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            height: 1.8,
-                            color: ThemeConfig.neutralText,
-                          ),
-                        ),
+                        child: _buildQuillContent(_currentEntry.content!),
                       ),
                       SizedBox(height: AppSpacing.lg),
                     ],
@@ -516,5 +512,32 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         ],
       ),
     );
+  }
+
+  /// 建立 Quill 內容顯示
+  Widget _buildQuillContent(String content) {
+    try {
+      final deltaJson = jsonDecode(content);
+      final document = Document.fromJson(deltaJson);
+      final controller = QuillController(
+        document: document,
+        selection: const TextSelection.collapsed(offset: 0),
+        readOnly: true,
+      );
+
+      return QuillEditor.basic(
+        controller: controller,
+        config: const QuillEditorConfig(padding: EdgeInsets.zero),
+      );
+    } catch (e) {
+      // 如果無法解析，顯示為純文字（向後相容）
+      return Text(
+        content,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          height: 1.8,
+          color: ThemeConfig.neutralText,
+        ),
+      );
+    }
   }
 }
