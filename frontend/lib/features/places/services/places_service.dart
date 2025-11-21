@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/config/api_config.dart';
 import '../models/place.dart';
 import '../models/place_details.dart';
+import '../models/place_suggestion.dart';
 
 /// Places API 異常類別
 class PlacesApiException implements Exception {
@@ -263,6 +264,91 @@ class PlacesService {
     params.add('key=$_apiKey');
 
     return '$baseUrl?${params.join('&')}';
+  }
+
+  /// 搜尋地點自動完成建議
+  ///
+  /// [input] 搜尋文字
+  /// [latitude] 緯度（選用，用於位置偏好）
+  /// [longitude] 經度（選用，用於位置偏好）
+  /// [radius] 偏好半徑（公尺），預設 5000 公尺
+
+  Future<List<PlaceSuggestion>> searchPlacesAutocomplete({
+    required String input,
+    double? latitude,
+    double? longitude,
+    double radius = 5000,
+  }) async {
+    if (_apiKey.isEmpty) {
+      throw PlacesApiException('Google Places API Key 未設定');
+    }
+
+    if (input.trim().isEmpty) {
+      return [];
+    }
+
+    final url = Uri.parse('$_baseUrl/places:autocomplete');
+
+    final requestBody = <String, dynamic>{
+      'input': input,
+      'includedPrimaryTypes': ['restaurant'],
+    };
+
+    // 如果有提供位置，加入位置偏好
+    if (latitude != null && longitude != null) {
+      requestBody['locationBias'] = {
+        'circle': {
+          'center': {'latitude': latitude, 'longitude': longitude},
+          'radius': radius,
+        },
+      };
+    }
+
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': _apiKey,
+            },
+            body: json.encode(requestBody),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['suggestions'] == null) {
+          return [];
+        }
+
+        final suggestions =
+            (data['suggestions'] as List?)
+                ?.map((suggestionData) {
+                  try {
+                    return PlaceSuggestion.fromJson(suggestionData);
+                  } catch (e) {
+                    debugPrint('解析建議資料錯誤: $e');
+                    debugPrint('問題資料: $suggestionData');
+                    return null;
+                  }
+                })
+                .whereType<PlaceSuggestion>()
+                .toList() ??
+            [];
+
+        return suggestions;
+      } else {
+        throw PlacesApiException(
+          '搜尋自動完成失敗: ${response.body}',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      if (e is PlacesApiException) rethrow;
+      throw PlacesApiException('網路錯誤: $e');
+    }
   }
 
   /// 檢查 API 金鑰是否已設定
