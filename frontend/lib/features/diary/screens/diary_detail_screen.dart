@@ -125,7 +125,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         slivers: [
           // App Bar with Image
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 150,
             pinned: true,
             actions: [
               if (_isDeleting)
