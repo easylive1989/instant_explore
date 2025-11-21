@@ -127,6 +127,53 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
+            actions: [
+              if (_isDeleting)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                )
+              else
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editDiary();
+                    } else if (value == 'delete') {
+                      _deleteDiary();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit),
+                          SizedBox(width: 12),
+                          Text('編輯'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 12),
+                          Text('刪除', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 _currentEntry.title,
@@ -428,29 +475,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           ),
         ],
       ),
-      floatingActionButton: _isDeleting
-          ? const FloatingActionButton(
-              onPressed: null,
-              child: CircularProgressIndicator(),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  heroTag: 'delete',
-                  onPressed: _deleteDiary,
-                  backgroundColor: Colors.red,
-                  child: const Icon(Icons.delete),
-                ),
-                const SizedBox(width: 16),
-                FloatingActionButton.extended(
-                  heroTag: 'edit',
-                  onPressed: _editDiary,
-                  icon: const Icon(Icons.edit),
-                  label: const Text('編輯'),
-                ),
-              ],
-            ),
     );
   }
 }
