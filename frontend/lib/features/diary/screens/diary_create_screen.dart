@@ -154,7 +154,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       // 1. 建立或更新日記資料
       final diaryData = DiaryEntry(
         id: widget.existingEntry?.id ?? '',
-        userId: '',
+        userId: widget.existingEntry?.userId ?? '',
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         placeId: _placeId,
