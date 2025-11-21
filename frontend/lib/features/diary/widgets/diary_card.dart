@@ -82,53 +82,15 @@ class DiaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 標題與評分
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: ThemeConfig.neutralText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (entry.rating != null) ...[
-                        SizedBox(width: AppSpacing.sm),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ThemeConfig.neutralLight,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                size: 16,
-                                color: ThemeConfig.accentColor,
-                              ),
-                              SizedBox(width: AppSpacing.xs),
-                              Text(
-                                entry.rating.toString(),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: ThemeConfig.neutralText,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
+                  // 標題
+                  Text(
+                    entry.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: ThemeConfig.neutralText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   // 地點資訊
                   if (entry.placeName != null) ...[

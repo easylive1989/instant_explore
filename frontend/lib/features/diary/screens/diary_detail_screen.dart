@@ -218,32 +218,6 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                             color: ThemeConfig.neutralText,
                           ),
                         ),
-                        if (_currentEntry.rating != null) ...[
-                          const Spacer(),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ThemeConfig.neutralLight,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(
-                                5,
-                                (index) => Icon(
-                                  index < _currentEntry.rating!
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  color: ThemeConfig.accentColor,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                     SizedBox(height: AppSpacing.lg),

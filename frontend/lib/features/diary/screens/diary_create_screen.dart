@@ -6,7 +6,6 @@ import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
 import '../models/diary_entry.dart';
 import '../services/diary_repository.dart';
 import '../services/diary_repository_impl.dart';
-import '../widgets/rating_picker.dart';
 import '../widgets/tag_input.dart';
 import '../widgets/image_picker_widget.dart';
 import '../../images/services/image_picker_service.dart';
@@ -35,7 +34,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   // 表單欄位
   DateTime _visitDate = DateTime.now();
-  int? _rating;
   List<String> _tags = [];
   final List<File> _selectedImages = [];
   String? _placeId;
@@ -66,7 +64,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     _titleController.text = entry.title;
     _contentController.text = entry.content ?? '';
     _visitDate = entry.visitDate;
-    _rating = entry.rating;
     _tags = List.from(entry.tags);
     _placeId = entry.placeId;
     _placeName = entry.placeName;
@@ -166,7 +163,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         latitude: _latitude,
         longitude: _longitude,
         visitDate: _visitDate,
-        rating: _rating,
         createdAt: widget.existingEntry?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -288,18 +284,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             ),
             const Divider(),
 
-            // 評分
-            const SizedBox(height: 16),
-            const Text('評分', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            RatingPicker(
-              rating: _rating,
-              onRatingChanged: (newRating) {
-                setState(() {
-                  _rating = newRating;
-                });
-              },
-            ),
             const SizedBox(height: 24),
 
             // 照片

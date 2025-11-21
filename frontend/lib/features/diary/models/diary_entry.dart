@@ -33,9 +33,6 @@ class DiaryEntry {
   /// 造訪日期
   final DateTime visitDate;
 
-  /// 評分 (1-5 星)
-  final int? rating;
-
   /// 標籤列表
   final List<String> tags;
 
@@ -59,7 +56,6 @@ class DiaryEntry {
     this.latitude,
     this.longitude,
     required this.visitDate,
-    this.rating,
     this.tags = const [],
     this.imagePaths = const [],
     required this.createdAt,
@@ -79,7 +75,6 @@ class DiaryEntry {
       latitude: json['latitude'] as double?,
       longitude: json['longitude'] as double?,
       visitDate: DateTime.parse(json['visit_date'] as String),
-      rating: json['rating'] as int?,
       tags:
           (json['tags'] as List<dynamic>?)
               ?.map((tag) => tag as String)
@@ -108,7 +103,6 @@ class DiaryEntry {
       'latitude': latitude,
       'longitude': longitude,
       'visit_date': visitDate.toIso8601String().split('T')[0], // 只保留日期部分
-      'rating': rating,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -126,7 +120,6 @@ class DiaryEntry {
     double? latitude,
     double? longitude,
     DateTime? visitDate,
-    int? rating,
     List<String>? tags,
     List<String>? imagePaths,
     DateTime? createdAt,
@@ -143,7 +136,6 @@ class DiaryEntry {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       visitDate: visitDate ?? this.visitDate,
-      rating: rating ?? this.rating,
       tags: tags ?? this.tags,
       imagePaths: imagePaths ?? this.imagePaths,
       createdAt: createdAt ?? this.createdAt,
@@ -166,7 +158,6 @@ class DiaryEntry {
         other.latitude == latitude &&
         other.longitude == longitude &&
         other.visitDate == visitDate &&
-        other.rating == rating &&
         listEquals(other.tags, tags) &&
         listEquals(other.imagePaths, imagePaths) &&
         other.createdAt == createdAt &&
@@ -186,7 +177,6 @@ class DiaryEntry {
       latitude,
       longitude,
       visitDate,
-      rating,
       Object.hashAll(tags),
       Object.hashAll(imagePaths),
       createdAt,
@@ -197,6 +187,6 @@ class DiaryEntry {
   @override
   String toString() {
     return 'DiaryEntry(id: $id, title: $title, visitDate: $visitDate, '
-        'placeName: $placeName, rating: $rating, tags: $tags)';
+        'placeName: $placeName, tags: $tags)';
   }
 }
