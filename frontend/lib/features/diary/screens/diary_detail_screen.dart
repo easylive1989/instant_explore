@@ -9,6 +9,7 @@ import '../../images/services/image_upload_service.dart';
 import 'diary_create_screen.dart';
 import '../../../core/constants/spacing_constants.dart';
 import '../../../core/config/theme_config.dart';
+import '../../../core/utils/image_brightness_helper.dart';
 
 /// 日記詳情畫面
 class DiaryDetailScreen extends StatefulWidget {
@@ -25,11 +26,47 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   final ImageUploadService _imageUploadService = ImageUploadService();
   late DiaryEntry _currentEntry;
   bool _isDeleting = false;
+  Color _iconColor = Colors.white; // 預設白色
 
   @override
   void initState() {
     super.initState();
     _currentEntry = widget.entry;
+    _analyzeImageBrightness();
+  }
+
+  /// 分析圖片亮度並設定 icon 顏色
+  Future<void> _analyzeImageBrightness() async {
+    if (_currentEntry.imagePaths.isEmpty) {
+      // 沒有圖片時使用黑色 icon（配合淺色背景）
+      if (mounted) {
+        setState(() {
+          _iconColor = Colors.black;
+        });
+      }
+      return;
+    }
+
+    try {
+      final imageUrl = _imageUploadService.getImageUrl(
+        _currentEntry.imagePaths.first,
+      );
+      final imageProvider = CachedNetworkImageProvider(imageUrl);
+
+      final foregroundColor = await ImageBrightnessHelper.getForegroundColor(
+        imageProvider,
+        defaultColor: Colors.white,
+      );
+
+      if (mounted) {
+        setState(() {
+          _iconColor = foregroundColor;
+        });
+      }
+    } catch (e) {
+      debugPrint('分析圖片亮度失敗: $e');
+      // 保持預設白色
+    }
   }
 
   Future<void> _deleteDiary() async {
@@ -104,6 +141,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           setState(() {
             _currentEntry = updatedEntry;
           });
+          // 重新分析圖片亮度
+          _analyzeImageBrightness();
         }
       } catch (e) {
         if (mounted) {
@@ -127,6 +166,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
           SliverAppBar(
             expandedHeight: 150,
             pinned: true,
+            iconTheme: IconThemeData(color: _iconColor),
             actions: [
               if (_isDeleting)
                 const Padding(
@@ -142,7 +182,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                 )
               else
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  icon: Icon(Icons.more_vert, color: _iconColor),
                   onSelected: (value) {
                     if (value == 'edit') {
                       _editDiary();
