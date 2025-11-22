@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/ui_constants.dart';
+import 'package:travel_diary/core/constants/ui_constants.dart';
 
 /// Loading indicator widget with optional message.
 ///
@@ -36,7 +36,7 @@ class LoadingWidget extends StatelessWidget {
             ),
           ),
           if (message != null) ...[
-            SizedBox(height: UiConstants.spacingMd),
+            const SizedBox(height: UiConstants.spacingMd),
             Text(
               message!,
               style: theme.textTheme.bodyMedium,

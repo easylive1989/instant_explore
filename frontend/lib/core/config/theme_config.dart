@@ -27,7 +27,7 @@ class ThemeConfig {
         surface: Colors.white,
       ),
       scaffoldBackgroundColor: neutralLight,
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -38,7 +38,7 @@ class ThemeConfig {
         color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: neutralBorder, width: 1), // 添加邊框
+          side: const BorderSide(color: neutralBorder, width: 1), // 添加邊框
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -51,7 +51,7 @@ class ThemeConfig {
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: neutralBorder),
+          borderSide: const BorderSide(color: neutralBorder),
         ),
         filled: true,
         fillColor: Colors.white,

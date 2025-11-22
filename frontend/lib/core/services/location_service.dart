@@ -11,17 +11,17 @@ import 'package:geolocator/geolocator.dart';
 class LocationService {
   /// 檢查位置權限狀態
   Future<LocationPermission> checkPermission() async {
-    return await Geolocator.checkPermission();
+    return Geolocator.checkPermission();
   }
 
   /// 請求位置權限
   Future<LocationPermission> requestPermission() async {
-    return await Geolocator.requestPermission();
+    return Geolocator.requestPermission();
   }
 
   /// 檢查位置服務是否已啟用
   Future<bool> isLocationServiceEnabled() async {
-    return await Geolocator.isLocationServiceEnabled();
+    return Geolocator.isLocationServiceEnabled();
   }
 
   /// 確保位置權限已取得
@@ -29,7 +29,7 @@ class LocationService {
   /// 回傳 true 表示有權限，false 表示無權限
   Future<bool> ensureLocationPermission() async {
     // 檢查位置服務是否已啟用
-    bool serviceEnabled = await isLocationServiceEnabled();
+    final bool serviceEnabled = await isLocationServiceEnabled();
     if (!serviceEnabled) {
       return false;
     }
@@ -63,13 +63,13 @@ class LocationService {
   }) async {
     try {
       // 確保有位置權限
-      bool hasPermission = await ensureLocationPermission();
+      final bool hasPermission = await ensureLocationPermission();
       if (!hasPermission) {
         return null;
       }
 
       // 取得當前位置
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
           accuracy: accuracy,
           distanceFilter: 10, // 最小移動距離（公尺）
@@ -101,12 +101,12 @@ class LocationService {
 
   /// 開啟系統位置設定頁面
   Future<bool> openLocationSettings() async {
-    return await Geolocator.openLocationSettings();
+    return Geolocator.openLocationSettings();
   }
 
   /// 開啟應用程式設定頁面
   Future<bool> openAppSettings() async {
-    return await Geolocator.openAppSettings();
+    return Geolocator.openAppSettings();
   }
 
   /// 取得位置權限狀態的描述文字

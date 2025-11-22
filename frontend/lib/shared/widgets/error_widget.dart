@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide ErrorWidget;
-import '../../core/constants/ui_constants.dart';
+import 'package:travel_diary/core/constants/ui_constants.dart';
 
 /// Error display widget with optional retry action.
 ///
@@ -35,7 +35,7 @@ class ErrorDisplay extends StatelessWidget {
               size: UiConstants.iconSizeXl,
               color: colorScheme.error,
             ),
-            SizedBox(height: UiConstants.spacingMd),
+            const SizedBox(height: UiConstants.spacingMd),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -44,7 +44,7 @@ class ErrorDisplay extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              SizedBox(height: UiConstants.spacingLg),
+              const SizedBox(height: UiConstants.spacingLg),
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
@@ -89,7 +89,7 @@ class InlineError extends StatelessWidget {
             size: UiConstants.iconSizeXs,
             color: colorScheme.error,
           ),
-          SizedBox(width: UiConstants.spacingXs),
+          const SizedBox(width: UiConstants.spacingXs),
           Expanded(
             child: Text(
               message,
@@ -136,7 +136,7 @@ class EmptyState extends StatelessWidget {
               size: UiConstants.iconSizeXl * 1.5,
               color: colorScheme.outline,
             ),
-            SizedBox(height: UiConstants.spacingMd),
+            const SizedBox(height: UiConstants.spacingMd),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -145,7 +145,7 @@ class EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (action != null && actionLabel != null) ...[
-              SizedBox(height: UiConstants.spacingLg),
+              const SizedBox(height: UiConstants.spacingLg),
               ElevatedButton(
                 onPressed: action,
                 style: ElevatedButton.styleFrom(

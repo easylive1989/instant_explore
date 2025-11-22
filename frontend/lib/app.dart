@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/config/theme_config.dart';
-import 'core/config/app_config.dart';
-import 'core/config/router_config.dart';
+import 'package:travel_diary/core/config/theme_config.dart';
+import 'package:travel_diary/core/config/app_config.dart';
+import 'package:travel_diary/core/config/router_config.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -19,7 +19,7 @@ class TravelDiaryApp extends ConsumerWidget {
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeConfig.lightTheme,
-      localizationsDelegates: [FlutterQuillLocalizations.delegate],
+      localizationsDelegates: const [FlutterQuillLocalizations.delegate],
       darkTheme: ThemeConfig.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,

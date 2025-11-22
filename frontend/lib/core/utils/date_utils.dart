@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import '../constants/app_constants.dart';
+import 'package:travel_diary/core/constants/app_constants.dart';
 
 /// Date and time utility functions.
 ///

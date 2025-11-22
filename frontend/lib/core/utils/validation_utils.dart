@@ -1,4 +1,4 @@
-import '../constants/app_constants.dart';
+import 'package:travel_diary/core/constants/app_constants.dart';
 
 /// Validation utility functions.
 ///

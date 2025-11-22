@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/ui_constants.dart';
+import 'package:travel_diary/core/constants/ui_constants.dart';
 
 /// Custom button widget with consistent styling.
 ///
@@ -27,7 +27,7 @@ class CustomButton extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    Widget buttonChild = isLoading
+    final Widget buttonChild = isLoading
         ? SizedBox(
             width: UiConstants.iconSizeSm,
             height: UiConstants.iconSizeSm,

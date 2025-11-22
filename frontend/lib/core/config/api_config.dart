@@ -23,28 +23,25 @@ class ApiConfig {
 
   /// 從環境變數建立配置
   factory ApiConfig.fromEnvironment() {
-    return ApiConfig(
-      googleMapsApiKey: const String.fromEnvironment(
+    return const ApiConfig(
+      googleMapsApiKey: String.fromEnvironment(
         'GOOGLE_MAPS_API_KEY',
         defaultValue: '',
       ),
-      googleDirectionsApiKey: const String.fromEnvironment(
+      googleDirectionsApiKey: String.fromEnvironment(
         'GOOGLE_DIRECTIONS_API_KEY',
         defaultValue: '',
       ),
-      supabaseUrl: const String.fromEnvironment(
-        'SUPABASE_URL',
-        defaultValue: '',
-      ),
-      supabaseAnonKey: const String.fromEnvironment(
+      supabaseUrl: String.fromEnvironment('SUPABASE_URL', defaultValue: ''),
+      supabaseAnonKey: String.fromEnvironment(
         'SUPABASE_ANON_KEY',
         defaultValue: '',
       ),
-      googleWebClientId: const String.fromEnvironment(
+      googleWebClientId: String.fromEnvironment(
         'GOOGLE_WEB_CLIENT_ID',
         defaultValue: '',
       ),
-      googleIosClientId: const String.fromEnvironment(
+      googleIosClientId: String.fromEnvironment(
         'GOOGLE_IOS_CLIENT_ID',
         defaultValue: '',
       ),
