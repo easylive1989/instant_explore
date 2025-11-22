@@ -1,5 +1,5 @@
-import 'place.dart';
-import 'place_photo.dart';
+import 'package:travel_diary/features/places/models/place.dart';
+import 'package:travel_diary/features/places/models/place_photo.dart';
 
 /// Google Places API 地點詳細資訊模型
 ///

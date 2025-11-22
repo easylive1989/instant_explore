@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../places/models/place.dart';
-import '../../places/models/place_suggestion.dart';
-import '../../places/services/places_service.dart';
-import '../../../core/services/location_service.dart';
+import 'package:travel_diary/features/places/models/place.dart';
+import 'package:travel_diary/features/places/models/place_suggestion.dart';
+import 'package:travel_diary/features/places/providers/places_providers.dart';
+import 'package:travel_diary/core/services/location_service.dart';
 
 /// 地點選擇畫面
 class PlacePickerScreen extends ConsumerStatefulWidget {

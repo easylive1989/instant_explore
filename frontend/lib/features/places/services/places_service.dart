@@ -1,24 +1,14 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import '../../../core/config/api_config.dart';
-import '../models/place.dart';
-import '../models/place_details.dart';
-import '../models/place_suggestion.dart';
-
-/// Places API 異常類別
-class PlacesApiException implements Exception {
-  final String message;
-  final int? statusCode;
-
-  PlacesApiException(this.message, [this.statusCode]);
-
-  @override
-  String toString() =>
-      'PlacesApiException: $message${statusCode != null ? ' (HTTP $statusCode)' : ''}';
-}
+import 'package:travel_diary/core/config/api_config.dart';
+import 'package:travel_diary/features/places/models/place.dart';
+import 'package:travel_diary/features/places/models/place_details.dart';
+import 'package:travel_diary/features/places/models/place_suggestion.dart';
+import 'package:travel_diary/features/places/exceptions/places_exceptions.dart';
 
 /// Google Places API 服務類別
 ///
@@ -47,7 +37,7 @@ class PlacesService {
     int maxResults = 20,
   }) async {
     if (_apiKey.isEmpty) {
-      throw PlacesApiException('Google Places API Key 未設定');
+      throw ApiKeyException();
     }
 
     final url = Uri.parse('$_baseUrl/places:searchNearby');
@@ -63,18 +53,16 @@ class PlacesService {
       'includedTypes': ['restaurant'],
     };
 
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': _apiKey,
+      'X-Goog-FieldMask':
+          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos,places.currentOpeningHours',
+    };
+
     try {
       final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Goog-Api-Key': _apiKey,
-              'X-Goog-FieldMask':
-                  'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos,places.currentOpeningHours',
-            },
-            body: json.encode(requestBody),
-          )
+          .post(url, headers: headers, body: json.encode(requestBody))
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -82,7 +70,7 @@ class PlacesService {
 
         // 檢查 API 回應結構
         if (data['places'] == null) {
-          throw PlacesApiException('API 回應格式錯誤：缺少 places 欄位');
+          throw ApiResponseException('API 回應格式錯誤：缺少 places 欄位');
         }
 
         final places =
@@ -99,15 +87,24 @@ class PlacesService {
             [];
 
         return places;
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw ApiKeyException('API 金鑰無效或權限不足');
+      } else if (response.statusCode == 429) {
+        throw QuotaExceededException();
       } else {
-        throw PlacesApiException(
-          '搜尋附近餐廳失敗: ${response.body}',
+        throw ApiResponseException(
+          '搜尋失敗: ${response.body}',
           response.statusCode,
         );
       }
+    } on TimeoutException {
+      throw TimeoutException('請求超時');
+    } on SocketException {
+      throw NetworkException();
+    } on PlacesException {
+      rethrow;
     } catch (e) {
-      if (e is PlacesApiException) rethrow;
-      throw PlacesApiException('網路錯誤: $e');
+      throw ApiResponseException('未知錯誤: $e');
     }
   }
 
@@ -117,35 +114,43 @@ class PlacesService {
 
   Future<PlaceDetails> getPlaceDetails(String placeId) async {
     if (_apiKey.isEmpty) {
-      throw PlacesApiException('Google Places API Key 未設定');
+      throw ApiKeyException();
     }
 
     final url = Uri.parse('$_baseUrl/places/$placeId');
 
+    final headers = {
+      'X-Goog-Api-Key': _apiKey,
+      'X-Goog-FieldMask':
+          'id,displayName,formattedAddress,location,rating,priceLevel,types,photos,internationalPhoneNumber,nationalPhoneNumber,websiteUri,googleMapsUri,currentOpeningHours,reviews,editorialSummary',
+    };
+
     try {
       final response = await http
-          .get(
-            url,
-            headers: {
-              'X-Goog-Api-Key': _apiKey,
-              'X-Goog-FieldMask':
-                  'id,displayName,formattedAddress,location,rating,priceLevel,types,photos,internationalPhoneNumber,nationalPhoneNumber,websiteUri,googleMapsUri,currentOpeningHours,reviews,editorialSummary',
-            },
-          )
+          .get(url, headers: headers)
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return PlaceDetails.fromJson(data);
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw ApiKeyException('API 金鑰無效或權限不足');
+      } else if (response.statusCode == 429) {
+        throw QuotaExceededException();
       } else {
-        throw PlacesApiException(
+        throw ApiResponseException(
           '取得地點詳細資訊失敗: ${response.body}',
           response.statusCode,
         );
       }
+    } on TimeoutException {
+      throw TimeoutException('請求超時');
+    } on SocketException {
+      throw NetworkException();
+    } on PlacesException {
+      rethrow;
     } catch (e) {
-      if (e is PlacesApiException) rethrow;
-      throw PlacesApiException('網路錯誤: $e');
+      throw ApiResponseException('未知錯誤: $e');
     }
   }
 
@@ -186,9 +191,10 @@ class PlacesService {
       final selectedRestaurant = targetList[random.nextInt(targetList.length)];
 
       return selectedRestaurant;
+    } on PlacesException {
+      rethrow;
     } catch (e) {
-      if (e is PlacesApiException) rethrow;
-      throw PlacesApiException('隨機推薦餐廳失敗: $e');
+      throw ApiResponseException('隨機推薦餐廳失敗: $e');
     }
   }
 
@@ -249,7 +255,7 @@ class PlacesService {
     int? maxHeight,
   }) {
     if (_apiKey.isEmpty) {
-      throw PlacesApiException('Google Places API Key 未設定');
+      throw ApiKeyException();
     }
 
     final baseUrl = 'https://places.googleapis.com/v1/$photoName/media';
@@ -280,7 +286,7 @@ class PlacesService {
     double radius = 5000,
   }) async {
     if (_apiKey.isEmpty) {
-      throw PlacesApiException('Google Places API Key 未設定');
+      throw ApiKeyException();
     }
 
     if (input.trim().isEmpty) {
@@ -304,16 +310,14 @@ class PlacesService {
       };
     }
 
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': _apiKey,
+    };
+
     try {
       final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Goog-Api-Key': _apiKey,
-            },
-            body: json.encode(requestBody),
-          )
+          .post(url, headers: headers, body: json.encode(requestBody))
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -339,15 +343,24 @@ class PlacesService {
             [];
 
         return suggestions;
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw ApiKeyException('API 金鑰無效或權限不足');
+      } else if (response.statusCode == 429) {
+        throw QuotaExceededException();
       } else {
-        throw PlacesApiException(
+        throw ApiResponseException(
           '搜尋自動完成失敗: ${response.body}',
           response.statusCode,
         );
       }
+    } on TimeoutException {
+      throw TimeoutException('請求超時');
+    } on SocketException {
+      throw NetworkException();
+    } on PlacesException {
+      rethrow;
     } catch (e) {
-      if (e is PlacesApiException) rethrow;
-      throw PlacesApiException('網路錯誤: $e');
+      throw ApiResponseException('未知錯誤: $e');
     }
   }
 
@@ -355,11 +368,3 @@ class PlacesService {
 
   bool get isApiKeyConfigured => _apiKey.isNotEmpty;
 }
-
-/// 地點服務 Provider
-///
-/// 提供地點服務實例，在測試中可透過 overrides 注入 Fake 實作
-final placesServiceProvider = Provider<PlacesService>((ref) {
-  final apiConfig = ref.watch(apiConfigProvider);
-  return PlacesService(apiConfig);
-});

@@ -16,7 +16,7 @@ class PlaceSuggestion {
   factory PlaceSuggestion.fromJson(Map<String, dynamic> json) {
     final placePrediction = json['placePrediction'];
     if (placePrediction == null) {
-      throw FormatException('Missing placePrediction in suggestion');
+      throw const FormatException('Missing placePrediction in suggestion');
     }
 
     final textData = placePrediction['text'];
