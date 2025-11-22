@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/diary/models/diary_tag.dart';
 import 'package:travel_diary/features/diary/services/diary_repository.dart';
-import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
+import 'package:travel_diary/features/diary/providers/diary_providers.dart';
 
 /// 日記列表畫面狀態
 class DiaryListState {
@@ -92,11 +92,6 @@ class DiaryListNotifier extends StateNotifier<DiaryListState> {
     }
   }
 }
-
-/// Repository Provider（待 Task 1.2 建立）
-final diaryRepositoryProvider = Provider<DiaryRepository>((ref) {
-  return DiaryRepositoryImpl();
-});
 
 /// 日記列表 Provider
 final diaryListProvider =
