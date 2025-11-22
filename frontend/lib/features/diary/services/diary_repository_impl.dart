@@ -18,26 +18,49 @@ class DiaryRepositoryImpl implements DiaryRepository {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('User not authenticated');
 
+    // 使用 JOIN 一次性查詢所有資料（解決 N+1 查詢問題）
     final response = await _supabase
         .from('diary_entries')
-        .select()
+        .select('''
+          *,
+          diary_entry_tags(tag_id, diary_tags(id, name)),
+          diary_images(storage_path, display_order)
+        ''')
         .eq('user_id', userId)
         .order('visit_date', ascending: false);
 
-    final entries = (response as List)
-        .map((json) => DiaryEntry.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final entries = (response as List).map((json) {
+      final data = json as Map<String, dynamic>;
 
-    // 為每個日記載入標籤和圖片
-    for (var entry in entries) {
-      final tags = await getTagsForDiary(entry.id);
-      final images = await getImagesForDiary(entry.id);
+      // 提取標籤
+      final tags =
+          (data['diary_entry_tags'] as List?)
+              ?.map((tagData) {
+                final tag = tagData['diary_tags'];
+                return tag != null ? tag['name'] as String : null;
+              })
+              .whereType<String>()
+              .toList() ??
+          [];
 
-      entries[entries.indexOf(entry)] = entry.copyWith(
-        tags: tags.map((tag) => tag.name).toList(),
-        imagePaths: images.map((img) => img.storagePath).toList(),
+      // 提取圖片路徑（按 display_order 排序）
+      final imagesList = (data['diary_images'] as List?) ?? [];
+      imagesList.sort(
+        (a, b) =>
+            (a['display_order'] as int).compareTo(b['display_order'] as int),
       );
-    }
+      final imagePaths = imagesList
+          .map((img) => img['storage_path'] as String)
+          .toList();
+
+      // 移除關聯資料，避免 DiaryEntry.fromJson 解析錯誤
+      data.remove('diary_entry_tags');
+      data.remove('diary_images');
+
+      return DiaryEntry.fromJson(
+        data,
+      ).copyWith(tags: tags, imagePaths: imagePaths);
+    }).toList();
 
     return entries;
   }
@@ -51,7 +74,7 @@ class DiaryRepositoryImpl implements DiaryRepository {
       return getAllDiaryEntries();
     }
 
-    // 查詢有指定標籤的日記
+    // 查詢有指定標籤的日記 ID
     final response = await _supabase
         .from('diary_entry_tags')
         .select('diary_entry_id')
@@ -63,28 +86,50 @@ class DiaryRepositoryImpl implements DiaryRepository {
 
     if (diaryIds.isEmpty) return [];
 
-    // 取得日記詳情
+    // 使用 JOIN 一次性查詢所有資料（解決 N+1 查詢問題）
     final entriesResponse = await _supabase
         .from('diary_entries')
-        .select()
+        .select('''
+          *,
+          diary_entry_tags(tag_id, diary_tags(id, name)),
+          diary_images(storage_path, display_order)
+        ''')
         .inFilter('id', diaryIds.toList())
         .eq('user_id', userId)
         .order('visit_date', ascending: false);
 
-    final entries = (entriesResponse as List)
-        .map((json) => DiaryEntry.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final entries = (entriesResponse as List).map((json) {
+      final data = json as Map<String, dynamic>;
 
-    // 為每個日記載入標籤和圖片
-    for (var entry in entries) {
-      final tags = await getTagsForDiary(entry.id);
-      final images = await getImagesForDiary(entry.id);
+      // 提取標籤
+      final tags =
+          (data['diary_entry_tags'] as List?)
+              ?.map((tagData) {
+                final tag = tagData['diary_tags'];
+                return tag != null ? tag['name'] as String : null;
+              })
+              .whereType<String>()
+              .toList() ??
+          [];
 
-      entries[entries.indexOf(entry)] = entry.copyWith(
-        tags: tags.map((tag) => tag.name).toList(),
-        imagePaths: images.map((img) => img.storagePath).toList(),
+      // 提取圖片路徑（按 display_order 排序）
+      final imagesList = (data['diary_images'] as List?) ?? [];
+      imagesList.sort(
+        (a, b) =>
+            (a['display_order'] as int).compareTo(b['display_order'] as int),
       );
-    }
+      final imagePaths = imagesList
+          .map((img) => img['storage_path'] as String)
+          .toList();
+
+      // 移除關聯資料，避免 DiaryEntry.fromJson 解析錯誤
+      data.remove('diary_entry_tags');
+      data.remove('diary_images');
+
+      return DiaryEntry.fromJson(
+        data,
+      ).copyWith(tags: tags, imagePaths: imagePaths);
+    }).toList();
 
     return entries;
   }
