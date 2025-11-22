@@ -197,9 +197,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit),
+                          Icon(Icons.edit, color: Colors.black),
                           SizedBox(width: 12),
-                          Text('編輯'),
+                          Text('編輯', style: TextStyle(color: Colors.black)),
                         ],
                       ),
                     ),
