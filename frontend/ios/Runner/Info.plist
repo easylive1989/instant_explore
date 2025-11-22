@@ -56,7 +56,17 @@
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
-	
+
+	<!-- Photo Library permissions -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>旅食日記需要存取您的相片庫，以便選擇照片上傳到日記中記錄美好時光。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>旅食日記需要將編輯後的照片儲存到您的相片庫。</string>
+
+	<!-- Camera permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>旅食日記需要使用相機拍攝照片，以記錄您的旅程和美食體驗。</string>
+
 	<!-- URL Schemes for Google Sign In -->
 	<key>CFBundleURLTypes</key>
 	<array>
