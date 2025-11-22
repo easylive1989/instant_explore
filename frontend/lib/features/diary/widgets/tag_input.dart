@@ -6,6 +6,7 @@ class TagInput extends StatefulWidget {
   final ValueChanged<List<String>> onTagsChanged;
   final String? hintText;
   final int maxTags;
+  final List<String>? suggestedTags;
 
   const TagInput({
     super.key,
@@ -13,11 +14,26 @@ class TagInput extends StatefulWidget {
     required this.onTagsChanged,
     this.hintText,
     this.maxTags = 10,
+    this.suggestedTags,
   });
 
   @override
   State<TagInput> createState() => _TagInputState();
 }
+
+/// 預設的常用標籤建議
+const List<String> kDefaultSuggestedTags = [
+  '早餐',
+  '午餐',
+  '晚餐',
+  '咖啡廳',
+  '日式',
+  '中式',
+  '西式',
+  '甜點',
+  '飲料',
+  '美景',
+];
 
 class _TagInputState extends State<TagInput> {
   final TextEditingController _controller = TextEditingController();
@@ -60,6 +76,11 @@ class _TagInputState extends State<TagInput> {
     widget.onTagsChanged(updatedTags);
   }
 
+  List<String> get _availableSuggestions {
+    final suggestions = widget.suggestedTags ?? kDefaultSuggestedTags;
+    return suggestions.where((tag) => !widget.tags.contains(tag)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -67,41 +88,118 @@ class _TagInputState extends State<TagInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 標籤顯示區域
-        if (widget.tags.isNotEmpty)
+        // 已選標籤顯示區域
+        if (widget.tags.isNotEmpty) ...[
           Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
+            spacing: 6.0,
+            runSpacing: 6.0,
             children: widget.tags.map((tag) {
               return Chip(
                 label: Text(tag),
-                deleteIcon: const Icon(Icons.close, size: 18),
+                labelStyle: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                backgroundColor: theme.colorScheme.primaryContainer,
+                deleteIconColor: theme.colorScheme.onPrimaryContainer,
+                deleteIcon: const Icon(Icons.close, size: 16),
                 onDeleted: () => _removeTag(tag),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
               );
             }).toList(),
           ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
+
+        // 常用標籤建議
+        if (_availableSuggestions.isNotEmpty &&
+            widget.tags.length < widget.maxTags) ...[
+          Text(
+            '常用標籤',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6.0,
+            runSpacing: 6.0,
+            children: _availableSuggestions.take(8).map((tag) {
+              return ActionChip(
+                label: Text(tag),
+                labelStyle: theme.textTheme.bodySmall,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                side: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  width: 0.5,
+                ),
+                avatar: Icon(
+                  Icons.add,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+                onPressed: () => _addTag(tag),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+        ],
+
         // 輸入框
         TextField(
           controller: _controller,
           focusNode: _focusNode,
           decoration: InputDecoration(
-            hintText: widget.hintText ?? '輸入標籤後按 Enter',
+            hintText: widget.hintText ?? '輸入自訂標籤後按 Enter',
+            hintStyle: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             border: const OutlineInputBorder(),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
             suffixIcon: IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add, size: 20),
               onPressed: () => _addTag(_controller.text),
+              tooltip: '新增標籤',
             ),
           ),
           onSubmitted: _addTag,
           textInputAction: TextInputAction.done,
+          style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 8),
-        Text(
-          '${widget.tags.length}/${widget.maxTags} 個標籤',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${widget.tags.length}/${widget.maxTags} 個標籤',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (widget.tags.isNotEmpty)
+              TextButton(
+                onPressed: () => widget.onTagsChanged([]),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  '清除全部',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ),
+          ],
         ),
       ],
     );
