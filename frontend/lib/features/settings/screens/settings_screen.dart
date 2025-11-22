@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/providers/auth_state_provider.dart';
+import 'package:travel_diary/features/tags/screens/tag_management_screen.dart';
 
 /// 設定畫面
 ///
@@ -101,6 +102,23 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const Divider(height: 1),
           ],
+
+          // 標籤管理
+          ListTile(
+            leading: const Icon(Icons.label_outline),
+            title: const Text('標籤管理'),
+            subtitle: const Text('管理您的自訂標籤'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const TagManagementScreen(),
+                ),
+              );
+            },
+          ),
+
+          const Divider(),
 
           // 關於
           ListTile(

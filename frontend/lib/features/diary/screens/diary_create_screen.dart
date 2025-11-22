@@ -6,7 +6,7 @@ import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/diary/services/diary_repository.dart';
 import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
-import 'package:travel_diary/features/diary/widgets/tag_input.dart';
+import 'package:travel_diary/features/tags/widgets/tag_selector.dart';
 import 'package:travel_diary/features/diary/widgets/image_picker_widget.dart';
 import 'package:travel_diary/features/diary/widgets/rich_text_editor.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -37,7 +37,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   // 表單欄位
   DateTime _visitDate = DateTime.now();
-  List<String> _tags = [];
+  List<String> _selectedTagIds = [];
   final List<File> _selectedImages = [];
   String? _placeId;
   String? _placeName;
@@ -63,7 +63,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     }
   }
 
-  void _loadExistingEntry() {
+  Future<void> _loadExistingEntry() async {
     final entry = widget.existingEntry!;
     _titleController.text = entry.title;
 
@@ -79,12 +79,22 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     }
 
     _visitDate = entry.visitDate;
-    _tags = List.from(entry.tags);
     _placeId = entry.placeId;
     _placeName = entry.placeName;
     _placeAddress = entry.placeAddress;
     _latitude = entry.latitude;
     _longitude = entry.longitude;
+
+    // 載入標籤 ID
+    try {
+      final diaryTags = await _repository.getTagsForDiary(entry.id);
+      setState(() {
+        _selectedTagIds = diaryTags.map((tag) => tag.id).toList();
+      });
+    } catch (e) {
+      // 標籤載入失敗時使用空列表
+      _selectedTagIds = [];
+    }
     // 注意:現有圖片不會載入到 _selectedImages,因為它們已經在 Storage
   }
 
@@ -239,9 +249,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       }
 
       // 4. 處理標籤
-      for (final tagName in _tags) {
-        final tag = await _repository.createTag(tagName);
-        await _repository.addTagToDiary(savedEntry.id, tag.id);
+      for (final tagId in _selectedTagIds) {
+        await _repository.addTagToDiary(savedEntry.id, tagId);
       }
 
       if (mounted) {
@@ -536,14 +545,13 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 標籤
-            TagInput(
-              tags: _tags,
-              onTagsChanged: (newTags) {
+            TagSelector(
+              selectedTagIds: _selectedTagIds,
+              onTagsChanged: (newTagIds) {
                 setState(() {
-                  _tags = newTags;
+                  _selectedTagIds = newTagIds;
                 });
               },
-              hintText: '新增標籤 (例如:早餐、咖啡廳、日式)',
               maxTags: 10,
             ),
           ],
