@@ -356,7 +356,10 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
     for (final key in sortedKeys) {
-      result.add({'date': key, 'entries': grouped[key]!});
+      // 同一天內按時間降序排序（最新在前）
+      final entriesInDay = grouped[key]!;
+      entriesInDay.sort((a, b) => b.visitDate.compareTo(a.visitDate));
+      result.add({'date': key, 'entries': entriesInDay});
     }
 
     return result;

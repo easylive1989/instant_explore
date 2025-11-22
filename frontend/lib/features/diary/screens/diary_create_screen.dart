@@ -130,7 +130,34 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     if (pickedDate != null) {
       setState(() {
-        _visitDate = pickedDate;
+        // 保留原本的時間部分,只更新日期
+        _visitDate = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          _visitDate.hour,
+          _visitDate.minute,
+        );
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_visitDate),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        // 保留原本的日期部分,只更新時間
+        _visitDate = DateTime(
+          _visitDate.year,
+          _visitDate.month,
+          _visitDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
       });
     }
   }
@@ -290,6 +317,17 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               subtitle: Text(DateFormat('yyyy-MM-dd').format(_visitDate)),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: _selectDate,
+            ),
+            const Divider(),
+
+            // 造訪時間
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.access_time),
+              title: const Text('造訪時間'),
+              subtitle: Text(DateFormat('HH:mm').format(_visitDate)),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: _selectTime,
             ),
             const Divider(),
 

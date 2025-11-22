@@ -18,6 +18,7 @@ class AppConstants {
   static const String dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';
   static const String displayDateFormat = 'yyyy年MM月dd日';
   static const String displayDateTimeFormat = 'yyyy年MM月dd日 HH:mm';
+  static const String displayTimeFormat = 'HH:mm';
 
   /// Pagination
   static const int defaultPageSize = 20;

@@ -30,7 +30,7 @@ class DiaryEntry {
   /// 經度
   final double? longitude;
 
-  /// 造訪日期
+  /// 造訪日期時間(精確到分鐘)
   final DateTime visitDate;
 
   /// 標籤列表
@@ -102,7 +102,7 @@ class DiaryEntry {
       'place_address': placeAddress,
       'latitude': latitude,
       'longitude': longitude,
-      'visit_date': visitDate.toIso8601String().split('T')[0], // 只保留日期部分
+      'visit_date': visitDate.toIso8601String(), // 完整的日期時間
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

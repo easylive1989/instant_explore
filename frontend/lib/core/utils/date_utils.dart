@@ -17,6 +17,11 @@ class DateUtils {
     return DateFormat(AppConstants.displayDateTimeFormat).format(dateTime);
   }
 
+  /// Format a DateTime to display time only (HH:mm)
+  static String formatDisplayTime(DateTime dateTime) {
+    return DateFormat(AppConstants.displayTimeFormat).format(dateTime);
+  }
+
   /// Format a DateTime to ISO date format (yyyy-MM-dd)
   static String formatIsoDate(DateTime date) {
     return DateFormat(AppConstants.dateFormat).format(date);
