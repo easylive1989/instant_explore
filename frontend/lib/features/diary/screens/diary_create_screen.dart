@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
@@ -129,46 +130,78 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     });
   }
 
-  Future<void> _selectDate() async {
-    final pickedDate = await showDatePicker(
+  Future<void> _selectDateTime() async {
+    DateTime tempPickedDate = _visitDate;
+
+    await showCupertinoModalPopup<void>(
       context: context,
-      initialDate: _visitDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        // 保留原本的時間部分,只更新日期
-        _visitDate = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          _visitDate.hour,
-          _visitDate.minute,
+      builder: (context) {
+        return Container(
+          height: 300,
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          child: Column(
+            children: [
+              // 頂部按鈕列
+              Container(
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemBackground.resolveFrom(context),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: CupertinoColors.separator.resolveFrom(context),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        '取消',
+                        style: TextStyle(
+                          color: CupertinoColors.systemRed.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+                    CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          _visitDate = tempPickedDate;
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        '確認',
+                        style: TextStyle(
+                          color: CupertinoColors.activeBlue.resolveFrom(
+                            context,
+                          ),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 日期時間選擇器
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  initialDateTime: _visitDate,
+                  minimumDate: DateTime(2000),
+                  maximumDate: DateTime.now(),
+                  use24hFormat: true,
+                  onDateTimeChanged: (newDateTime) {
+                    tempPickedDate = newDateTime;
+                  },
+                ),
+              ),
+            ],
+          ),
         );
-      });
-    }
-  }
-
-  Future<void> _selectTime() async {
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_visitDate),
+      },
     );
-
-    if (pickedTime != null) {
-      setState(() {
-        // 保留原本的日期部分,只更新時間
-        _visitDate = DateTime(
-          _visitDate.year,
-          _visitDate.month,
-          _visitDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-      });
-    }
   }
 
   Future<void> _selectPlace() async {
@@ -354,86 +387,41 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           const SizedBox(height: 16),
 
           // 日期與時間
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _selectDate,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline,
+          InkWell(
+            onTap: _selectDateTime,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.event,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      DateFormat('yyyy-MM-dd HH:mm').format(_visitDate),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '日期',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              DateFormat('yyyy-MM-dd').format(_visitDate),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: InkWell(
-                  onTap: _selectTime,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '時間',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              DateFormat('HH:mm').format(_visitDate),
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
