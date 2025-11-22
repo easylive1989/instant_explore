@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../features/auth/screens/login_screen.dart';
-import '../../features/home/screens/main_navigation_screen.dart';
+import 'package:travel_diary/features/auth/screens/login_screen.dart';
+import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
 
 /// Router configuration using go_router for declarative navigation.
 ///
@@ -43,8 +43,8 @@ class RouterConfig {
         ),
         GoRoute(
           path: '/',
-          name: 'home',
-          builder: (context, state) => const MainNavigationScreen(),
+          name: 'diary-list',
+          builder: (context, state) => const DiaryListScreen(),
         ),
       ],
       errorBuilder: (context, state) => Scaffold(

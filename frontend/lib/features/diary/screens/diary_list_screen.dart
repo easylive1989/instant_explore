@@ -7,9 +7,9 @@ import 'package:travel_diary/features/diary/screens/widgets/timeline_group_widge
 import 'package:travel_diary/features/diary/screens/widgets/floating_app_bar.dart';
 import 'package:travel_diary/features/diary/screens/widgets/tag_filter_dialog.dart';
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
-import 'package:travel_diary/features/home/screens/settings_screen.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
+import 'package:travel_diary/features/settings/screens/settings_screen.dart';
 
 /// 日記列表畫面
 class DiaryListScreen extends ConsumerStatefulWidget {
