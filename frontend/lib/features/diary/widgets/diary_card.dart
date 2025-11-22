@@ -4,7 +4,6 @@ import '../models/diary_entry.dart';
 import '../../images/services/image_upload_service.dart';
 import '../../../core/constants/spacing_constants.dart';
 import '../../../core/config/theme_config.dart';
-import '../../../core/utils/date_utils.dart' as date_utils;
 
 /// 日記卡片元件 - 極簡風格
 class DiaryCard extends StatelessWidget {
@@ -83,30 +82,15 @@ class DiaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 標題與時間
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: ThemeConfig.neutralText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(width: AppSpacing.sm),
-                      Text(
-                        date_utils.DateUtils.formatDisplayTime(entry.visitDate),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: ThemeConfig.accentColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  // 標題
+                  Text(
+                    entry.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: ThemeConfig.neutralText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   // 地點資訊
                   if (entry.placeName != null) ...[

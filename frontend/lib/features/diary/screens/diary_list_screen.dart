@@ -436,6 +436,8 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     DiaryListNotifier notifier,
     ImageUploadService imageUploadService,
   ) {
+    final timeText = DateFormat('HH:mm').format(entry.visitDate);
+
     return Stack(
       children: [
         // 時間軸垂直線
@@ -462,9 +464,22 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
             ),
           ),
         ),
+        // 時間標籤 (在節點右側,垂直對齊圓點中心)
+        Positioned(
+          left: AppSpacing.lg + AppSpacing.timelineDotSize + AppSpacing.xs,
+          top: -1,
+          child: Text(
+            timeText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: ThemeConfig.accentColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 11,
+            ),
+          ),
+        ),
         // 日記卡片
         Padding(
-          padding: EdgeInsets.only(left: AppSpacing.xl),
+          padding: EdgeInsets.only(left: AppSpacing.xl, top: AppSpacing.lg),
           child: DiaryCard(
             entry: entry,
             imageUploadService: imageUploadService,
