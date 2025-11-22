@@ -87,6 +87,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateDiary(notifier),
+        shape: const CircleBorder(),
+        backgroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add),
       ),
     );

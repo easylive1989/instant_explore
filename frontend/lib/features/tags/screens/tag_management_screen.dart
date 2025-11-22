@@ -192,6 +192,9 @@ class _TagManagementScreenState extends ConsumerState<TagManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateTagDialog,
+        shape: const CircleBorder(),
+        backgroundColor: Colors.white,
+        foregroundColor: theme.colorScheme.primary,
         child: const Icon(Icons.add),
       ),
     );
