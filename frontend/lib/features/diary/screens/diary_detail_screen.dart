@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
-import 'package:travel_diary/features/diary/services/diary_repository.dart';
-import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
+import 'package:travel_diary/features/diary/providers/diary_providers.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
 import 'package:travel_diary/core/utils/image_brightness_helper.dart';
+import 'package:travel_diary/core/utils/ui_utils.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_detail_header.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_info_section.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_content_section.dart';
@@ -15,18 +15,16 @@ import 'package:travel_diary/features/diary/screens/widgets/diary_photo_grid.dar
 import 'package:travel_diary/features/diary/screens/widgets/diary_map_section.dart';
 
 /// 日記詳情畫面
-class DiaryDetailScreen extends StatefulWidget {
+class DiaryDetailScreen extends ConsumerStatefulWidget {
   final DiaryEntry entry;
 
   const DiaryDetailScreen({super.key, required this.entry});
 
   @override
-  State<DiaryDetailScreen> createState() => _DiaryDetailScreenState();
+  ConsumerState<DiaryDetailScreen> createState() => _DiaryDetailScreenState();
 }
 
-class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
-  final DiaryRepository _repository = DiaryRepositoryImpl();
-  final ImageUploadService _imageUploadService = ImageUploadService();
+class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   late DiaryEntry _currentEntry;
   bool _isDeleting = false;
   Color _iconColor = Colors.white; // 預設白色
@@ -51,7 +49,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     }
 
     try {
-      final imageUrl = _imageUploadService.getImageUrl(
+      final imageUploadService = ref.read(imageUploadServiceProvider);
+
+      final imageUrl = imageUploadService.getImageUrl(
         _currentEntry.imagePaths.first,
       );
       final imageProvider = CachedNetworkImageProvider(imageUrl);
@@ -73,46 +73,34 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
   }
 
   Future<void> _deleteDiary() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('確認刪除'),
-        content: const Text('確定要刪除這篇日記嗎?此操作無法復原。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('刪除'),
-          ),
-        ],
-      ),
+    final confirmed = await UiUtils.showConfirmDialog(
+      context,
+      title: '確認刪除',
+      content: '確定要刪除這篇日記嗎?此操作無法復原。',
+      confirmText: '刪除',
+      isDangerous: true,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     setState(() {
       _isDeleting = true;
     });
 
     try {
+      final imageUploadService = ref.read(imageUploadServiceProvider);
+      final repository = ref.read(diaryRepositoryProvider);
+
       // 刪除圖片
       if (_currentEntry.imagePaths.isNotEmpty) {
-        await _imageUploadService.deleteMultipleImages(
-          _currentEntry.imagePaths,
-        );
+        await imageUploadService.deleteMultipleImages(_currentEntry.imagePaths);
       }
 
       // 刪除日記
-      await _repository.deleteDiaryEntry(_currentEntry.id);
+      await repository.deleteDiaryEntry(_currentEntry.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('日記已刪除')));
+        UiUtils.showSuccessSnackBar(context, '日記已刪除');
         Navigator.of(context).pop(true); // 返回 true 表示已刪除
       }
     } catch (e) {
@@ -120,9 +108,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         setState(() {
           _isDeleting = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
+        UiUtils.showErrorSnackBar(context, '刪除失敗: $e');
       }
     }
   }
@@ -137,7 +123,9 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
     if (result == true && mounted) {
       // 重新載入日記資料
       try {
-        final updatedEntry = await _repository.getDiaryEntryById(
+        final repository = ref.read(diaryRepositoryProvider);
+
+        final updatedEntry = await repository.getDiaryEntryById(
           _currentEntry.id,
         );
         if (updatedEntry != null) {
@@ -149,9 +137,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('重新載入失敗: $e')));
+          UiUtils.showErrorSnackBar(context, '重新載入失敗: $e');
         }
       }
     }
@@ -159,6 +145,8 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final imageUploadService = ref.read(imageUploadServiceProvider);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -169,7 +157,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
             isDeleting: _isDeleting,
             onEdit: _editDiary,
             onDelete: _deleteDiary,
-            imageUploadService: _imageUploadService,
+            imageUploadService: imageUploadService,
           ),
 
           // Content
@@ -195,7 +183,7 @@ class _DiaryDetailScreenState extends State<DiaryDetailScreen> {
                     // 圖片集
                     DiaryPhotoGrid(
                       imagePaths: _currentEntry.imagePaths,
-                      imageUploadService: _imageUploadService,
+                      imageUploadService: imageUploadService,
                     ),
 
                     // 地圖

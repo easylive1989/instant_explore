@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/diary_entry.dart';
-import '../models/diary_tag.dart';
-import '../models/diary_image.dart';
-import 'diary_repository.dart';
+import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_tag.dart';
+import 'package:travel_diary/features/diary/models/diary_image.dart';
+import 'package:travel_diary/features/diary/services/diary_repository.dart';
 
 /// Supabase 實作的日記資料存取層
 class DiaryRepositoryImpl implements DiaryRepository {

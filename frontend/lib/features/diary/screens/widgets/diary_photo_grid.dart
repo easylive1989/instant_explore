@@ -64,7 +64,7 @@ class DiaryPhotoGrid extends StatelessWidget {
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: ThemeConfig.neutralLight,
-                    child: Icon(
+                    child: const Icon(
                       Icons.error_outline,
                       color: ThemeConfig.neutralBorder,
                     ),

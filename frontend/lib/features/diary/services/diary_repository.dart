@@ -1,6 +1,6 @@
-import '../models/diary_entry.dart';
-import '../models/diary_tag.dart';
-import '../models/diary_image.dart';
+import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_tag.dart';
+import 'package:travel_diary/features/diary/models/diary_image.dart';
 
 /// 日記資料存取層介面
 abstract class DiaryRepository {

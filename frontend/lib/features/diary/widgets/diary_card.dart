@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../models/diary_entry.dart';
-import '../../images/services/image_upload_service.dart';
-import '../../../core/constants/spacing_constants.dart';
-import '../../../core/config/theme_config.dart';
+import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/images/services/image_upload_service.dart';
+import 'package:travel_diary/core/constants/spacing_constants.dart';
+import 'package:travel_diary/core/config/theme_config.dart';
 
 /// 日記卡片元件 - 極簡風格
 class DiaryCard extends StatelessWidget {
@@ -23,7 +23,7 @@ class DiaryCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
         left: AppSpacing.md,
         right: AppSpacing.md,
         bottom: AppSpacing.md,
@@ -42,7 +42,7 @@ class DiaryCard extends StatelessWidget {
             // 圖片 - 帶圓角和內邊距
             if (entry.imagePaths.isNotEmpty)
               Padding(
-                padding: EdgeInsets.all(AppSpacing.sm),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: AspectRatio(
@@ -60,7 +60,7 @@ class DiaryCard extends StatelessWidget {
                       ),
                       errorWidget: (context, url, error) => Container(
                         color: ThemeConfig.neutralLight,
-                        child: Icon(
+                        child: const Icon(
                           Icons.image_not_supported,
                           size: 48,
                           color: ThemeConfig.neutralBorder,
@@ -94,15 +94,15 @@ class DiaryCard extends StatelessWidget {
                   ),
                   // 地點資訊
                   if (entry.placeName != null) ...[
-                    SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.location_on_outlined,
                           size: 16,
                           color: ThemeConfig.accentColor,
                         ),
-                        SizedBox(width: AppSpacing.xs),
+                        const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             entry.placeName!,
@@ -121,13 +121,13 @@ class DiaryCard extends StatelessWidget {
 
                   // 標籤 - 極簡風格
                   if (entry.tags.isNotEmpty) ...[
-                    SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md),
                     Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.sm,
                       children: entry.tags.take(3).map((tag) {
                         return Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.sm,
                             vertical: AppSpacing.xs,
                           ),

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
-import '../models/diary_entry.dart';
-import '../services/diary_repository.dart';
-import '../services/diary_repository_impl.dart';
-import '../widgets/tag_input.dart';
-import '../widgets/image_picker_widget.dart';
-import '../widgets/rich_text_editor.dart';
+import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/services/diary_repository.dart';
+import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
+import 'package:travel_diary/features/diary/widgets/tag_input.dart';
+import 'package:travel_diary/features/diary/widgets/image_picker_widget.dart';
+import 'package:travel_diary/features/diary/widgets/rich_text_editor.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:convert';
-import '../../images/services/image_picker_service.dart';
-import '../../images/services/image_upload_service.dart';
-import '../../places/models/place.dart';
+import 'package:travel_diary/features/images/services/image_picker_service.dart';
+import 'package:travel_diary/features/images/services/image_upload_service.dart';
+import 'package:travel_diary/features/places/models/place.dart';
 
 /// 日記新增/編輯畫面
 class DiaryCreateScreen extends ConsumerStatefulWidget {
