@@ -448,7 +448,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         // 時間軸節點
         Positioned(
           left: AppSpacing.lg - (AppSpacing.timelineDotSize / 2) + 1,
-          top: AppSpacing.lg,
+          top: 0,
           child: Container(
             width: AppSpacing.timelineDotSize,
             height: AppSpacing.timelineDotSize,
@@ -461,7 +461,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         ),
         // 日記卡片
         Padding(
-          padding: EdgeInsets.only(left: AppSpacing.timelineCardIndent),
+          padding: EdgeInsets.only(left: AppSpacing.xl),
           child: DiaryCard(
             entry: entry,
             imageUploadService: imageUploadService,
