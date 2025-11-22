@@ -7,6 +7,7 @@ class ImagePickerWidget extends StatelessWidget {
   final VoidCallback onAddImage;
   final ValueChanged<int> onRemoveImage;
   final int maxImages;
+  final double? imageSize;
 
   const ImagePickerWidget({
     super.key,
@@ -14,34 +15,36 @@ class ImagePickerWidget extends StatelessWidget {
     required this.onAddImage,
     required this.onRemoveImage,
     this.maxImages = 5,
+    this.imageSize,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final canAddMore = images.length < maxImages;
+    final size = imageSize ?? 100.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '照片 (${images.length}/$maxImages)',
-          style: theme.textTheme.titleMedium,
+          style: theme.textTheme.titleSmall,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         SizedBox(
-          height: 120,
+          height: size,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: images.length + (canAddMore ? 1 : 0),
             itemBuilder: (context, index) {
               // 新增按鈕
               if (index == images.length && canAddMore) {
-                return _buildAddButton(context);
+                return _buildAddButton(context, size);
               }
 
               // 圖片預覽
-              return _buildImagePreview(context, images[index], index);
+              return _buildImagePreview(context, images[index], index, size);
             },
           ),
         ),
@@ -49,7 +52,7 @@ class ImagePickerWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAddButton(BuildContext context) {
+  Widget _buildAddButton(BuildContext context, double size) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -58,9 +61,9 @@ class ImagePickerWidget extends StatelessWidget {
         onTap: onAddImage,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          width: 120,
+          width: size,
           decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outline, width: 2),
+            border: Border.all(color: theme.colorScheme.outline, width: 1.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -68,14 +71,15 @@ class ImagePickerWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_photo_alternate,
-                size: 40,
+                size: size * 0.35,
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(height: 4),
               Text(
-                '新增照片',
+                '新增',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -85,7 +89,12 @@ class ImagePickerWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildImagePreview(BuildContext context, File image, int index) {
+  Widget _buildImagePreview(
+    BuildContext context,
+    File image,
+    int index,
+    double size,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Stack(
@@ -95,8 +104,8 @@ class ImagePickerWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Image.file(
               image,
-              width: 120,
-              height: 120,
+              width: size,
+              height: size,
               fit: BoxFit.cover,
             ),
           ),
@@ -107,12 +116,12 @@ class ImagePickerWidget extends StatelessWidget {
             child: GestureDetector(
               onTap: () => onRemoveImage(index),
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.close, color: Colors.white, size: 20),
+                child: const Icon(Icons.close, color: Colors.white, size: 16),
               ),
             ),
           ),
@@ -121,16 +130,16 @@ class ImagePickerWidget extends StatelessWidget {
             bottom: 4,
             left: 4,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.black.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '${index + 1}',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),

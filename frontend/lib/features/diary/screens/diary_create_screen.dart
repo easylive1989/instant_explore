@@ -291,6 +291,34 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _buildBasicInfoCard(),
+            const SizedBox(height: 24),
+            _buildContentCreationCard(),
+            const SizedBox(height: 24),
+            _buildAdditionalInfoCard(),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 基本資訊卡片
+  Widget _buildBasicInfoCard() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // 標題
             TextFormField(
               controller: _titleController,
@@ -309,40 +337,173 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 造訪日期
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('造訪日期'),
-              subtitle: Text(DateFormat('yyyy-MM-dd').format(_visitDate)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: _selectDate,
+            // 日期與時間（合併為單行）
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectDate,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '日期',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                DateFormat('yyyy-MM-dd').format(_visitDate),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectTime,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '時間',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                DateFormat('HH:mm').format(_visitDate),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const Divider(),
-
-            // 造訪時間
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.access_time),
-              title: const Text('造訪時間'),
-              subtitle: Text(DateFormat('HH:mm').format(_visitDate)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: _selectTime,
-            ),
-            const Divider(),
+            const SizedBox(height: 12),
 
             // 地點選擇
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.location_on),
-              title: const Text('地點'),
-              subtitle: Text(_placeName ?? '點擊選擇地點'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            InkWell(
               onTap: _selectPlace,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '地點',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            _placeName ?? '點擊選擇地點',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: _placeName == null
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant
+                                      : null,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const Divider(),
+          ],
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 24),
+  /// 內容創作卡片
+  Widget _buildContentCreationCard() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 內容（富文本編輯器）- 優先級最高，置頂
+            RichTextEditor(
+              controller: _contentController,
+              hintText: '分享你的心得與感想...',
+              maxLength: 1000,
+              height: 200,
+            ),
+            const SizedBox(height: 16),
 
             // 照片
             ImagePickerWidget(
@@ -350,18 +511,30 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               onAddImage: _pickImages,
               onRemoveImage: _removeImage,
               maxImages: 5,
+              imageSize: 90,
             ),
-            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // 內容（富文本編輯器）
-            RichTextEditor(
-              controller: _contentController,
-              hintText: '分享你的心得與感想...',
-              maxLength: 1000,
-              height: 224,
-            ),
-            const SizedBox(height: 24),
-
+  /// 額外資訊卡片
+  Widget _buildAdditionalInfoCard() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // 標籤
             TagInput(
               tags: _tags,
@@ -373,7 +546,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               hintText: '新增標籤 (例如:早餐、咖啡廳、日式)',
               maxTags: 10,
             ),
-            const SizedBox(height: 32),
           ],
         ),
       ),
