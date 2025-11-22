@@ -7,7 +7,6 @@ import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/diary/services/diary_repository.dart';
 import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
 import 'package:travel_diary/features/tags/widgets/tag_selector.dart';
-import 'package:travel_diary/features/diary/widgets/image_picker_widget.dart';
 import 'package:travel_diary/features/diary/widgets/rich_text_editor.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:convert';
@@ -300,11 +299,11 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildBasicInfoCard(),
-            const SizedBox(height: 24),
-            _buildContentCreationCard(),
-            const SizedBox(height: 24),
-            _buildAdditionalInfoCard(),
+            _buildGroup1(),
+            const SizedBox(height: 16),
+            _buildGroup2(),
+            const SizedBox(height: 16),
+            _buildGroup3(),
             const SizedBox(height: 32),
           ],
         ),
@@ -312,248 +311,360 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
   }
 
-  /// 基本資訊卡片
-  Widget _buildBasicInfoCard() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+  /// Group 1: 標題內文與時間
+  Widget _buildGroup1() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
+        border: Border.all(
           color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 標題
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: '標題',
-                hintText: '今天去了哪裡?',
-                border: OutlineInputBorder(),
-              ),
-              maxLength: 100,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return '請輸入標題';
-                }
-                return null;
-              },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 標題
+          TextFormField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: '標題',
+              hintText: '今天去了哪裡?',
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 16),
+            maxLength: 100,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return '請輸入標題';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
 
-            // 日期與時間（合併為單行）
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: _selectDate,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '日期',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                DateFormat('yyyy-MM-dd').format(_visitDate),
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: _selectTime,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '時間',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                DateFormat('HH:mm').format(_visitDate),
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+          // 內容(富文本編輯器)
+          RichTextEditor(
+            controller: _contentController,
+            hintText: '分享你的心得與感想...',
+            maxLength: 1000,
+            height: 200,
+          ),
+          const SizedBox(height: 16),
 
-            // 地點選擇
-            InkWell(
-              onTap: _selectPlace,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+          // 日期與時間
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: _selectDate,
                   borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '地點',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          Text(
-                            _placeName ?? '點擊選擇地點',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: _placeName == null
-                                      ? Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant
-                                      : null,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
                       ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '日期',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              DateFormat('yyyy-MM-dd').format(_visitDate),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: InkWell(
+                  onTap: _selectTime,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '時間',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              DateFormat('HH:mm').format(_visitDate),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  /// 內容創作卡片
-  Widget _buildContentCreationCard() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+  /// Group 2: 地點與圖片混合顯示
+  Widget _buildGroup2() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
+        border: Border.all(
           color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 內容（富文本編輯器）- 優先級最高，置頂
-            RichTextEditor(
-              controller: _contentController,
-              hintText: '分享你的心得與感想...',
-              maxLength: 1000,
-              height: 200,
-            ),
-            const SizedBox(height: 16),
-
-            // 照片
-            ImagePickerWidget(
-              images: _selectedImages,
-              onAddImage: _pickImages,
-              onRemoveImage: _removeImage,
-              maxImages: 5,
-              imageSize: 90,
-            ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('地點與照片', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          _buildPlaceAndImageGrid(),
+        ],
       ),
     );
   }
 
-  /// 額外資訊卡片
-  Widget _buildAdditionalInfoCard() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+  /// Group 3: 標籤
+  Widget _buildGroup3() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
+        border: Border.all(
           color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 標籤
-            TagSelector(
-              selectedTagIds: _selectedTagIds,
-              onTagsChanged: (newTagIds) {
-                setState(() {
-                  _selectedTagIds = newTagIds;
-                });
-              },
-              maxTags: 10,
+      child: TagSelector(
+        selectedTagIds: _selectedTagIds,
+        onTagsChanged: (newTagIds) {
+          setState(() {
+            _selectedTagIds = newTagIds;
+          });
+        },
+        maxTags: 10,
+      ),
+    );
+  }
+
+  /// 地點與圖片混合網格
+  Widget _buildPlaceAndImageGrid() {
+    const imageSize = 90.0;
+    const spacing = 8.0;
+
+    return Wrap(
+      spacing: spacing,
+      runSpacing: spacing,
+      children: [
+        // 地點縮圖 (第一個位置)
+        _buildPlaceThumbnail(imageSize),
+        // 圖片
+        ..._selectedImages.asMap().entries.map(
+          (entry) => _buildImageThumbnail(entry.value, entry.key, imageSize),
+        ),
+        // 添加圖片按鈕
+        if (_selectedImages.length < 5) _buildAddImageButton(imageSize),
+      ],
+    );
+  }
+
+  /// 地點縮圖
+  Widget _buildPlaceThumbnail(double size) {
+    final hasPlace =
+        _placeId != null && _latitude != null && _longitude != null;
+
+    return GestureDetector(
+      onTap: _selectPlace,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: hasPlace
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: hasPlace
+            ? Stack(
+                children: [
+                  // 地點資訊卡片
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 4),
+                        if (_placeName != null)
+                          Text(
+                            _placeName!,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                      ],
+                    ),
+                  ),
+                  // 刪除按鈕
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _placeId = null;
+                          _placeName = null;
+                          _placeAddress = null;
+                          _latitude = null;
+                          _longitude = null;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_location_alt,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 32,
+                  ),
+                  const SizedBox(height: 4),
+                  Text('選擇地點', style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+      ),
+    );
+  }
+
+  /// 圖片縮圖
+  Widget _buildImageThumbnail(File image, int index, double size) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            image,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () => _removeImage(index),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 添加圖片按鈕
+  Widget _buildAddImageButton(double size) {
+    return GestureDetector(
+      onTap: _pickImages,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_photo_alternate,
+              color: Theme.of(context).colorScheme.primary,
+              size: 32,
+            ),
+            const SizedBox(height: 4),
+            Text('添加照片', style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
