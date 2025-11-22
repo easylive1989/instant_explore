@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/auth_service.dart';
+import 'package:travel_diary/features/auth/services/auth_service.dart';
 
 /// 登入畫面
 class LoginScreen extends ConsumerStatefulWidget {
@@ -82,30 +82,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 64),
 
                 // Google Sign In Button
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _signInWithGoogle,
-                          icon: const Icon(Icons.login, size: 24),
-                          label: const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            child: Text(
-                              '使用 Google 帳號登入',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black87,
-                            elevation: 2,
-                          ),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _signInWithGoogle,
+                      icon: const Icon(Icons.login, size: 24),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        child: Text(
+                          '使用 Google 帳號登入',
+                          style: TextStyle(fontSize: 16),
                         ),
                       ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 48),
 
                 // Privacy Notice

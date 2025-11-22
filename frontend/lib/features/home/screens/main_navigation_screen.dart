@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../diary/screens/diary_list_screen.dart';
+import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
 
 /// 主導航畫面
 ///

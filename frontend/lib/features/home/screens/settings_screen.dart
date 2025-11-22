@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/services/auth_service.dart';
-import '../../auth/providers/auth_state_provider.dart';
+import 'package:travel_diary/features/auth/services/auth_service.dart';
+import 'package:travel_diary/features/auth/providers/auth_state_provider.dart';
 
 /// 設定畫面
 ///
