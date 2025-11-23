@@ -82,19 +82,8 @@ class DiaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 標題
-                  Text(
-                    entry.title,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: ThemeConfig.neutralText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  // 地點資訊
+                  // 地點資訊（移到上方）
                   if (entry.placeName != null) ...[
-                    const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
                         const Icon(
@@ -117,41 +106,19 @@ class DiaryCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppSpacing.sm),
                   ],
 
-                  // 標籤 - 極簡風格
-                  if (entry.tags.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: entry.tags.take(3).map((tag) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ThemeConfig.neutralLight,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: ThemeConfig.neutralBorder,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: ThemeConfig.neutralText.withValues(
-                                alpha: 0.7,
-                              ),
-                              fontSize: 12,
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                  // 標題（移到下方）
+                  Text(
+                    entry.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: ThemeConfig.neutralText,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
