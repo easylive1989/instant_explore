@@ -118,10 +118,38 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 }
 
                 if (state.entries.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Text('尚無日記，點擊右下角新增'),
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/empty_diary_state.png',
+                            width: 200,
+                            height: 200,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            '尚無日記，點擊右下角新增',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: ThemeConfig.neutralText.withValues(
+                                    alpha: 0.6,
+                                  ),
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          // Arrow pointing to FAB
+                          CustomPaint(
+                            size: const Size(100, 60),
+                            painter: CurledArrowPainter(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -239,4 +267,47 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
       notifier.loadDiaries();
     }
   }
+}
+
+class CurledArrowPainter extends CustomPainter {
+  final Color color;
+
+  CurledArrowPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    // Start from top left (near the text)
+    path.moveTo(size.width * 0.2, 0);
+
+    // Draw a curled line to bottom right
+    path.cubicTo(
+      size.width * 0.5,
+      size.height * 0.2, // Control point 1
+      size.width * 0.1,
+      size.height * 0.8, // Control point 2 (loop back)
+      size.width * 0.8,
+      size.height * 0.8, // End point
+    );
+
+    canvas.drawPath(path, paint);
+
+    // Draw arrow head
+    final arrowPath = Path();
+    arrowPath.moveTo(size.width * 0.8, size.height * 0.8);
+    arrowPath.relativeLineTo(-10, -5);
+    arrowPath.moveTo(size.width * 0.8, size.height * 0.8);
+    arrowPath.relativeLineTo(-10, 5);
+
+    canvas.drawPath(arrowPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
