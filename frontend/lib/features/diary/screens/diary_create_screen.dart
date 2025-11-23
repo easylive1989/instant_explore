@@ -69,13 +69,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     // 載入 Quill 內容
     if (entry.content != null && entry.content!.isNotEmpty) {
-      try {
-        final deltaJson = jsonDecode(entry.content!);
-        _contentController.document = Document.fromJson(deltaJson);
-      } catch (e) {
-        // 如果是舊的純文字內容，直接設為純文字
-        _contentController.document = Document()..insert(0, entry.content!);
-      }
+      final deltaJson = jsonDecode(entry.content!);
+      _contentController.document = Document.fromJson(deltaJson);
     }
 
     _visitDate = entry.visitDate;
