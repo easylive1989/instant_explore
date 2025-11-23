@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:travel_diary/shared/widgets/full_image_viewer.dart';
 
 /// 圖片選擇與預覽元件
 class ImagePickerWidget extends StatelessWidget {
@@ -97,55 +98,68 @@ class ImagePickerWidget extends StatelessWidget {
   ) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: Stack(
-        children: [
-          // 圖片
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              image,
-              width: size,
-              height: size,
-              fit: BoxFit.cover,
+      child: GestureDetector(
+        onTap: () {
+          // 開啟圖片查看器
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => FullImageViewer.files(
+                filePaths: images.map((f) => f.path).toList(),
+                initialIndex: index,
+              ),
             ),
-          ),
-          // 刪除按鈕
-          Positioned(
-            top: 4,
-            right: 4,
-            child: GestureDetector(
-              onTap: () => onRemoveImage(index),
+          );
+        },
+        child: Stack(
+          children: [
+            // 圖片
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                image,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+              ),
+            ),
+            // 刪除按鈕
+            Positioned(
+              top: 4,
+              right: 4,
+              child: GestureDetector(
+                onTap: () => onRemoveImage(index),
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 16),
+                ),
+              ),
+            ),
+            // 順序標記
+            Positioned(
+              bottom: 4,
+              left: 4,
               child: Container(
-                padding: const EdgeInsets.all(3),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.close, color: Colors.white, size: 16),
-              ),
-            ),
-          ),
-          // 順序標記
-          Positioned(
-            bottom: 4,
-            left: 4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '${index + 1}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

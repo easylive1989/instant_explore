@@ -4,6 +4,7 @@ import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
 import 'package:travel_diary/core/utils/iterator_extensions.dart';
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
+import 'package:travel_diary/shared/widgets/full_image_viewer.dart';
 
 class DiaryPhotoGrid extends StatelessWidget {
   final List<String> imagePaths;
@@ -39,25 +40,44 @@ class DiaryPhotoGrid extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: imagePaths
-                .map((path) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(7),
-                    child: CachedNetworkImage(
-                      width: 150,
-                      height: 150,
-                      imageUrl: imageUploadService.getImageUrl(path),
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: ThemeConfig.neutralLight,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                .asMap()
+                .entries
+                .map((entry) {
+                  final index = entry.key;
+                  final path = entry.value;
+                  return GestureDetector(
+                    onTap: () {
+                      // 開啟圖片查看器
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => FullImageViewer.network(
+                            imageUrls: imagePaths
+                                .map((p) => imageUploadService.getImageUrl(p))
+                                .toList(),
+                            initialIndex: index,
+                          ),
                         ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: ThemeConfig.neutralLight,
-                        child: const Icon(
-                          Icons.error_outline,
-                          color: ThemeConfig.neutralBorder,
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(7),
+                      child: CachedNetworkImage(
+                        width: 150,
+                        height: 150,
+                        imageUrl: imageUploadService.getImageUrl(path),
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: ThemeConfig.neutralLight,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: ThemeConfig.neutralLight,
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: ThemeConfig.neutralBorder,
+                          ),
                         ),
                       ),
                     ),
