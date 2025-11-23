@@ -5,15 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
-import 'package:travel_diary/features/diary/services/diary_repository.dart';
-import 'package:travel_diary/features/diary/services/diary_repository_impl.dart';
 import 'package:travel_diary/features/tags/widgets/tag_selector.dart';
 import 'package:travel_diary/features/diary/widgets/rich_text_editor.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'dart:convert';
-import 'package:travel_diary/features/images/services/image_picker_service.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/features/places/models/place.dart';
+import 'package:travel_diary/features/diary/providers/diary_form_provider.dart';
+import 'package:travel_diary/features/diary/providers/diary_crud_provider.dart';
+import 'package:travel_diary/features/diary/providers/diary_providers.dart';
+import 'dart:convert';
 
 /// 日記新增/編輯畫面
 class DiaryCreateScreen extends ConsumerStatefulWidget {
@@ -27,88 +25,51 @@ class DiaryCreateScreen extends ConsumerStatefulWidget {
 
 class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  late final QuillController _contentController;
-
-  // 服務
-  late final DiaryRepository _repository;
-  late final ImagePickerService _imagePickerService;
-  late final ImageUploadService _imageUploadService;
-
-  // 表單欄位
-  DateTime _visitDate = DateTime.now();
-  List<String> _selectedTagIds = [];
-  final List<File> _selectedImages = [];
-  String? _placeId;
-  String? _placeName;
-  String? _placeAddress;
-  double? _latitude;
-  double? _longitude;
-
-  // 狀態
-  bool _isSaving = false;
   bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
-    _repository = DiaryRepositoryImpl();
-    _imagePickerService = ImagePickerService();
-    _imageUploadService = ImageUploadService();
-    _contentController = QuillController.basic();
-
     _isEditing = widget.existingEntry != null;
-    if (_isEditing) {
-      _loadExistingEntry();
-    }
+
+    // 延遲初始化,確保 provider 可用
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isEditing) {
+        _loadExistingEntry();
+      }
+    });
   }
 
   Future<void> _loadExistingEntry() async {
     final entry = widget.existingEntry!;
-    _titleController.text = entry.title;
 
-    // 載入 Quill 內容
-    if (entry.content != null && entry.content!.isNotEmpty) {
-      final deltaJson = jsonDecode(entry.content!);
-      _contentController.document = Document.fromJson(deltaJson);
-    }
-
-    _visitDate = entry.visitDate;
-    _placeId = entry.placeId;
-    _placeName = entry.placeName;
-    _placeAddress = entry.placeAddress;
-    _latitude = entry.latitude;
-    _longitude = entry.longitude;
+    // 使用 form provider 載入資料
+    ref.read(diaryFormProvider.notifier).loadFromEntry(entry);
 
     // 載入標籤 ID
     try {
-      final diaryTags = await _repository.getTagsForDiary(entry.id);
-      setState(() {
-        _selectedTagIds = diaryTags.map((tag) => tag.id).toList();
-      });
+      final repository = ref.read(diaryRepositoryProvider);
+      final diaryTags = await repository.getTagsForDiary(entry.id);
+      ref
+          .read(diaryFormProvider.notifier)
+          .updateTags(diaryTags.map((tag) => tag.id).toList());
     } catch (e) {
       // 標籤載入失敗時使用空列表
-      _selectedTagIds = [];
     }
-    // 注意:現有圖片不會載入到 _selectedImages,因為它們已經在 Storage
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    super.dispose();
+    // 注意:現有圖片不會載入到 selectedImages,因為它們已經在 Storage
   }
 
   Future<void> _pickImages() async {
     try {
-      final images = await _imagePickerService.pickMultipleImagesFromGallery(
-        maxImages: 5 - _selectedImages.length,
+      final formState = ref.read(diaryFormProvider);
+      final imagePickerService = ref.read(imagePickerServiceProvider);
+
+      final images = await imagePickerService.pickMultipleImagesFromGallery(
+        maxImages: 5 - formState.selectedImages.length,
       );
+
       if (images.isNotEmpty) {
-        setState(() {
-          _selectedImages.addAll(images);
-        });
+        ref.read(diaryFormProvider.notifier).addImages(images);
       }
     } catch (e) {
       if (mounted) {
@@ -120,13 +81,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
+    ref.read(diaryFormProvider.notifier).removeImage(index);
   }
 
   Future<void> _selectDateTime() async {
-    DateTime tempPickedDate = _visitDate;
+    final formState = ref.read(diaryFormProvider);
+    DateTime tempPickedDate = formState.visitDate;
 
     await showCupertinoModalPopup<void>(
       context: context,
@@ -161,9 +121,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                     ),
                     CupertinoButton(
                       onPressed: () {
-                        setState(() {
-                          _visitDate = tempPickedDate;
-                        });
+                        ref
+                            .read(diaryFormProvider.notifier)
+                            .updateVisitDate(tempPickedDate);
                         Navigator.of(context).pop();
                       },
                       child: Text(
@@ -183,7 +143,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               Expanded(
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: _visitDate,
+                  initialDateTime: formState.visitDate,
                   minimumDate: DateTime(2000),
                   maximumDate: DateTime.now(),
                   use24hFormat: true,
@@ -205,109 +165,99 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
 
     if (selectedPlace != null) {
-      setState(() {
-        _placeId = selectedPlace.id;
-        _placeName = selectedPlace.name;
-        _placeAddress = selectedPlace.formattedAddress;
-        _latitude = selectedPlace.location.latitude;
-        _longitude = selectedPlace.location.longitude;
-      });
+      ref
+          .read(diaryFormProvider.notifier)
+          .updatePlace(
+            placeId: selectedPlace.id,
+            placeName: selectedPlace.name,
+            placeAddress: selectedPlace.formattedAddress,
+            latitude: selectedPlace.location.latitude,
+            longitude: selectedPlace.location.longitude,
+          );
     }
   }
 
   Future<void> _saveDiary() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_placeId == null) {
+    final formState = ref.read(diaryFormProvider);
+
+    if (formState.placeId == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('請選擇地點')));
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
+    // 將 Quill Delta 轉換為 JSON 字串
+    final deltaJson = jsonEncode(
+      formState.contentController.document.toDelta().toJson(),
+    );
 
-    try {
-      // 1. 建立或更新日記資料
-      // 將 Quill Delta 轉換為 JSON 字串
-      final deltaJson = jsonEncode(
-        _contentController.document.toDelta().toJson(),
-      );
+    DiaryEntry? savedEntry;
 
-      final diaryData = DiaryEntry(
-        id: widget.existingEntry?.id ?? '',
-        userId: widget.existingEntry?.userId ?? '',
-        title: _titleController.text.trim(),
-        content: deltaJson,
-        placeId: _placeId,
-        placeName: _placeName,
-        placeAddress: _placeAddress,
-        latitude: _latitude,
-        longitude: _longitude,
-        visitDate: _visitDate,
-        createdAt: widget.existingEntry?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      DiaryEntry savedEntry;
-      if (_isEditing) {
-        savedEntry = await _repository.updateDiaryEntry(diaryData);
-      } else {
-        savedEntry = await _repository.createDiaryEntry(diaryData);
-      }
-
-      // 2. 上傳圖片
-      if (_selectedImages.isNotEmpty) {
-        final uploadedPaths = await _imageUploadService.uploadMultipleImages(
-          imageFiles: _selectedImages,
-          diaryId: savedEntry.id,
-        );
-
-        // 3. 將圖片記錄到資料庫
-        for (int i = 0; i < uploadedPaths.length; i++) {
-          await _repository.addImageToDiary(
-            diaryId: savedEntry.id,
-            storagePath: uploadedPaths[i],
-            displayOrder: i,
+    if (_isEditing) {
+      savedEntry = await ref
+          .read(diaryCrudProvider.notifier)
+          .updateDiary(
+            diaryId: widget.existingEntry!.id,
+            userId: widget.existingEntry!.userId,
+            title: formState.title,
+            contentJson: deltaJson,
+            visitDate: formState.visitDate,
+            tagIds: formState.selectedTagIds,
+            newImages: formState.selectedImages,
+            placeId: formState.placeId,
+            placeName: formState.placeName,
+            placeAddress: formState.placeAddress,
+            latitude: formState.latitude,
+            longitude: formState.longitude,
+            createdAt: widget.existingEntry!.createdAt,
           );
-        }
-      }
+    } else {
+      savedEntry = await ref
+          .read(diaryCrudProvider.notifier)
+          .createDiary(
+            title: formState.title,
+            contentJson: deltaJson,
+            visitDate: formState.visitDate,
+            tagIds: formState.selectedTagIds,
+            images: formState.selectedImages,
+            placeId: formState.placeId,
+            placeName: formState.placeName,
+            placeAddress: formState.placeAddress,
+            latitude: formState.latitude,
+            longitude: formState.longitude,
+          );
+    }
 
-      // 4. 處理標籤
-      for (final tagId in _selectedTagIds) {
-        await _repository.addTagToDiary(savedEntry.id, tagId);
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_isEditing ? '日記已更新' : '日記已建立')));
-        Navigator.of(context).pop(true); // 返回 true 表示已儲存
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('儲存失敗: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+    if (savedEntry != null && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_isEditing ? '日記已更新' : '日記已建立')));
+      Navigator.of(context).pop(true); // 返回 true 表示已儲存
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final formState = ref.watch(diaryFormProvider);
+    final crudState = ref.watch(diaryCrudProvider);
+
+    // 監聽 CRUD 狀態錯誤
+    ref.listen<DiaryCrudState>(diaryCrudProvider, (previous, next) {
+      if (next.error != null && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.error!)));
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? '編輯日記' : '新增日記'),
         actions: [
-          if (_isSaving)
+          if (crudState.isLoading)
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -327,11 +277,11 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildGroup1(),
+            _buildGroup1(formState),
             const SizedBox(height: 16),
-            _buildGroup2(),
+            _buildGroup2(formState),
             const SizedBox(height: 16),
-            _buildGroup3(),
+            _buildGroup3(formState),
             const SizedBox(height: 32),
           ],
         ),
@@ -340,7 +290,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   /// Group 1: 標題內文與時間
-  Widget _buildGroup1() {
+  Widget _buildGroup1(DiaryFormState formState) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -356,13 +306,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         children: [
           // 標題
           TextFormField(
-            controller: _titleController,
+            initialValue: formState.title,
             decoration: const InputDecoration(
               labelText: '標題',
               hintText: '今天去了哪裡?',
               border: OutlineInputBorder(),
             ),
             maxLength: 100,
+            onChanged: (value) {
+              ref.read(diaryFormProvider.notifier).updateTitle(value);
+            },
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return '請輸入標題';
@@ -374,7 +327,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
           // 內容(富文本編輯器)
           RichTextEditor(
-            controller: _contentController,
+            controller: formState.contentController,
             hintText: '分享你的心得與感想...',
             maxLength: 1000,
             height: 200,
@@ -403,7 +356,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(_visitDate),
+                      DateFormat(
+                        'yyyy-MM-dd HH:mm',
+                      ).format(formState.visitDate),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -424,7 +379,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   /// Group 2: 地點與圖片混合顯示
-  Widget _buildGroup2() {
+  Widget _buildGroup2(DiaryFormState formState) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -440,14 +395,14 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         children: [
           Text('地點與照片', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
-          _buildPlaceAndImageGrid(),
+          _buildPlaceAndImageGrid(formState),
         ],
       ),
     );
   }
 
   /// Group 3: 標籤
-  Widget _buildGroup3() {
+  Widget _buildGroup3(DiaryFormState formState) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -459,11 +414,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         ),
       ),
       child: TagSelector(
-        selectedTagIds: _selectedTagIds,
+        selectedTagIds: formState.selectedTagIds,
         onTagsChanged: (newTagIds) {
-          setState(() {
-            _selectedTagIds = newTagIds;
-          });
+          ref.read(diaryFormProvider.notifier).updateTags(newTagIds);
         },
         maxTags: 10,
       ),
@@ -471,7 +424,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   /// 地點與圖片混合網格
-  Widget _buildPlaceAndImageGrid() {
+  Widget _buildPlaceAndImageGrid(DiaryFormState formState) {
     const imageSize = 90.0;
     const spacing = 8.0;
 
@@ -480,21 +433,24 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       runSpacing: spacing,
       children: [
         // 地點縮圖 (第一個位置)
-        _buildPlaceThumbnail(imageSize),
+        _buildPlaceThumbnail(formState, imageSize),
         // 圖片
-        ..._selectedImages.asMap().entries.map(
+        ...formState.selectedImages.asMap().entries.map(
           (entry) => _buildImageThumbnail(entry.value, entry.key, imageSize),
         ),
         // 添加圖片按鈕
-        if (_selectedImages.length < 5) _buildAddImageButton(imageSize),
+        if (formState.selectedImages.length < 5)
+          _buildAddImageButton(imageSize),
       ],
     );
   }
 
   /// 地點縮圖
-  Widget _buildPlaceThumbnail(double size) {
+  Widget _buildPlaceThumbnail(DiaryFormState formState, double size) {
     final hasPlace =
-        _placeId != null && _latitude != null && _longitude != null;
+        formState.placeId != null &&
+        formState.latitude != null &&
+        formState.longitude != null;
 
     return GestureDetector(
       onTap: _selectPlace,
@@ -526,9 +482,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                           size: 32,
                         ),
                         const SizedBox(height: 4),
-                        if (_placeName != null)
+                        if (formState.placeName != null)
                           Text(
-                            _placeName!,
+                            formState.placeName!,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(
@@ -549,13 +505,15 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                     right: 4,
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _placeId = null;
-                          _placeName = null;
-                          _placeAddress = null;
-                          _latitude = null;
-                          _longitude = null;
-                        });
+                        ref
+                            .read(diaryFormProvider.notifier)
+                            .updatePlace(
+                              placeId: null,
+                              placeName: null,
+                              placeAddress: null,
+                              latitude: null,
+                              longitude: null,
+                            );
                       },
                       child: Container(
                         padding: const EdgeInsets.all(4),
