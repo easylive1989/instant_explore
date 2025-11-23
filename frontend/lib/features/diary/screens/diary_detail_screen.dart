@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/diary/providers/diary_providers.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
-import 'package:travel_diary/core/utils/image_brightness_helper.dart';
 import 'package:travel_diary/core/utils/ui_utils.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_detail_header.dart';
-import 'package:travel_diary/features/diary/screens/widgets/diary_info_section.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_content_section.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_photo_grid.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_map_section.dart';
@@ -27,49 +24,11 @@ class DiaryDetailScreen extends ConsumerStatefulWidget {
 class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   late DiaryEntry _currentEntry;
   bool _isDeleting = false;
-  Color _iconColor = Colors.white; // 預設白色
 
   @override
   void initState() {
     super.initState();
     _currentEntry = widget.entry;
-    _analyzeImageBrightness();
-  }
-
-  /// 分析圖片亮度並設定 icon 顏色
-  Future<void> _analyzeImageBrightness() async {
-    if (_currentEntry.imagePaths.isEmpty) {
-      // 沒有圖片時使用黑色 icon（配合淺色背景）
-      if (mounted) {
-        setState(() {
-          _iconColor = Colors.black;
-        });
-      }
-      return;
-    }
-
-    try {
-      final imageUploadService = ref.read(imageUploadServiceProvider);
-
-      final imageUrl = imageUploadService.getImageUrl(
-        _currentEntry.imagePaths.first,
-      );
-      final imageProvider = CachedNetworkImageProvider(imageUrl);
-
-      final foregroundColor = await ImageBrightnessHelper.getForegroundColor(
-        imageProvider,
-        defaultColor: Colors.white,
-      );
-
-      if (mounted) {
-        setState(() {
-          _iconColor = foregroundColor;
-        });
-      }
-    } catch (e) {
-      debugPrint('分析圖片亮度失敗: $e');
-      // 保持預設白色
-    }
   }
 
   Future<void> _deleteDiary() async {
@@ -132,8 +91,6 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           setState(() {
             _currentEntry = updatedEntry;
           });
-          // 重新分析圖片亮度
-          _analyzeImageBrightness();
         }
       } catch (e) {
         if (mounted) {
@@ -150,14 +107,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App Bar with Image
+          // Header - 純色背景
           DiaryDetailHeader(
             entry: _currentEntry,
-            iconColor: _iconColor,
             isDeleting: _isDeleting,
             onEdit: _editDiary,
             onDelete: _deleteDiary,
-            imageUploadService: imageUploadService,
           ),
 
           // Content
@@ -174,24 +129,20 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 日期、地點、標籤
-                    DiaryInfoSection(entry: _currentEntry),
-
-                    // 內容（Quill 富文本）
+                    // 1. 內容（Quill 富文本）
                     DiaryContentSection(content: _currentEntry.content),
 
-                    // 圖片集
+                    // 2. 照片集（顯示所有照片）
                     DiaryPhotoGrid(
                       imagePaths: _currentEntry.imagePaths,
                       imageUploadService: imageUploadService,
                     ),
 
-                    // 地圖
+                    // 3. 地點資訊 + 地圖（整合）
                     DiaryMapSection(entry: _currentEntry),
 
-                    // 標籤（移到最下面）
+                    // 4. 標籤
                     if (_currentEntry.tags.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.lg),
                       Wrap(
                         spacing: AppSpacing.sm,
                         runSpacing: AppSpacing.sm,

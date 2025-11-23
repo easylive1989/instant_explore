@@ -11,7 +11,9 @@ class DiaryMapSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (entry.latitude == null || entry.longitude == null) {
+    // 如果沒有地點資訊，不顯示整個區塊
+    if (entry.placeName == null &&
+        (entry.latitude == null || entry.longitude == null)) {
       return const SizedBox.shrink();
     }
 
@@ -20,39 +22,74 @@ class DiaryMapSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '位置',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: ThemeConfig.neutralText.withValues(alpha: 0.7),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: ThemeConfig.neutralBorder, width: 1),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(7),
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(entry.latitude!, entry.longitude!),
-                zoom: 15,
+        // 地點資訊
+        if (entry.placeName != null) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                size: 18,
+                color: ThemeConfig.accentColor,
               ),
-              markers: {
-                Marker(
-                  markerId: MarkerId(entry.id),
-                  position: LatLng(entry.latitude!, entry.longitude!),
-                  infoWindow: InfoWindow(title: entry.placeName),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.placeName!,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: ThemeConfig.neutralText,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (entry.placeAddress != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        entry.placeAddress!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: ThemeConfig.neutralText.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              },
-              zoomControlsEnabled: false,
-              myLocationButtonEnabled: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+
+        // 地圖
+        if (entry.latitude != null && entry.longitude != null) ...[
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: ThemeConfig.neutralBorder, width: 1),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(entry.latitude!, entry.longitude!),
+                  zoom: 15,
+                ),
+                markers: {
+                  Marker(
+                    markerId: MarkerId(entry.id),
+                    position: LatLng(entry.latitude!, entry.longitude!),
+                    infoWindow: InfoWindow(title: entry.placeName),
+                  ),
+                },
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
       ],
     );
   }
