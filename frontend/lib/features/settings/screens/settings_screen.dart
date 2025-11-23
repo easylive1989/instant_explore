@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/providers/auth_state_provider.dart';
 import 'package:travel_diary/features/tags/screens/tag_management_screen.dart';
+import 'package:travel_diary/shared/widgets/settings_section.dart';
+import 'package:travel_diary/shared/widgets/settings_tile.dart';
 
 /// 設定畫面
 ///
@@ -62,133 +64,147 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text('settings.title'.tr())),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
         children: [
           // 使用者資訊
           if (user != null) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundColor: theme.colorScheme.primary,
-                    child: Text(
-                      user.email?.substring(0, 1).toUpperCase() ?? 'U',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.email ?? 'settings.account'.tr(),
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'auth.loginSuccess'.tr(),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.6,
-                            ),
+            SettingsSection(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 32,
+                        backgroundColor: theme.colorScheme.primary,
+                        child: Text(
+                          user.email?.substring(0, 1).toUpperCase() ?? 'U',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: theme.colorScheme.onPrimary,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.email ?? 'settings.account'.tr(),
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'settings.planTrial'.tr(),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Divider(height: 1),
+            const SizedBox(height: 16),
           ],
 
-          // 語言設定
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text('settings.language'.tr()),
-            subtitle: Text('settings.languageHint'.tr()),
-            trailing: DropdownButton<Locale>(
-              value: context.locale,
-              underline: const SizedBox(),
-              items: context.supportedLocales.map((locale) {
-                // 使用該語言本身的名稱顯示，不翻譯
-                String languageName;
-                switch (locale.toString()) {
-                  case 'zh_TW':
-                    languageName = '繁體中文';
-                    break;
-                  case 'en':
-                    languageName = 'English';
-                    break;
-                  default:
-                    languageName = locale.toString();
-                }
-                return DropdownMenuItem(
-                  value: locale,
-                  child: Text(languageName),
-                );
-              }).toList(),
-              onChanged: (newLocale) {
-                if (newLocale != null) {
-                  context.setLocale(newLocale);
-                }
-              },
-            ),
-          ),
-
-          const Divider(),
-
-          // 標籤管理
-          ListTile(
-            leading: const Icon(Icons.label_outline),
-            title: Text('settings.tagManagement'.tr()),
-            subtitle: Text('settings.tagManagementHint'.tr()),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const TagManagementScreen(),
+          // 應用程式設定
+          SettingsSection(
+            children: [
+              SettingsTile(
+                leading: const Icon(Icons.language),
+                title: 'settings.language'.tr(),
+                subtitle: 'settings.languageHint'.tr(),
+                trailing: DropdownButton<Locale>(
+                  value: context.locale,
+                  underline: const SizedBox(),
+                  items: context.supportedLocales.map((locale) {
+                    // 使用該語言本身的名稱顯示，不翻譯
+                    String languageName;
+                    switch (locale.toString()) {
+                      case 'zh_TW':
+                        languageName = '繁體中文';
+                        break;
+                      case 'en':
+                        languageName = 'English';
+                        break;
+                      default:
+                        languageName = locale.toString();
+                    }
+                    return DropdownMenuItem(
+                      value: locale,
+                      child: Text(languageName),
+                    );
+                  }).toList(),
+                  onChanged: (newLocale) {
+                    if (newLocale != null) {
+                      context.setLocale(newLocale);
+                    }
+                  },
                 ),
-              );
-            },
+              ),
+              Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              SettingsTile(
+                leading: const Icon(Icons.label_outline),
+                title: 'settings.tagManagement'.tr(),
+                subtitle: 'settings.tagManagementHint'.tr(),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const TagManagementScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
+          const SizedBox(height: 16),
 
-          const Divider(),
-
-          // 關於
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: Text('settings.about'.tr()),
-            subtitle: Text('${'settings.version'.tr()} 1.0.0'),
-            onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'app.name'.tr(),
-                applicationVersion: '1.0.0',
-                applicationLegalese: '© 2025 ${'app.name'.tr()}',
-                children: [
-                  const SizedBox(height: 16),
-                  Text('app.tagline'.tr()),
-                ],
-              );
-            },
-          ),
-
-          const Divider(),
-
-          // 登出
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: Text(
-              'auth.logout'.tr(),
-              style: const TextStyle(color: Colors.red),
-            ),
-            onTap: () => _signOut(context, ref),
+          // 系統功能
+          SettingsSection(
+            children: [
+              SettingsTile(
+                leading: const Icon(Icons.info_outline),
+                title: 'settings.about'.tr(),
+                subtitle: '${'settings.version'.tr()} 1.0.0',
+                onTap: () {
+                  showAboutDialog(
+                    context: context,
+                    applicationName: 'app.name'.tr(),
+                    applicationVersion: '1.0.0',
+                    applicationLegalese: '© 2025 ${'app.name'.tr()}',
+                    children: [
+                      const SizedBox(height: 16),
+                      Text('app.tagline'.tr()),
+                    ],
+                  );
+                },
+              ),
+              Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              SettingsTile(
+                leading: const Icon(Icons.logout),
+                title: 'auth.logout'.tr(),
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                onTap: () => _signOut(context, ref),
+              ),
+            ],
           ),
         ],
       ),
