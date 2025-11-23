@@ -22,13 +22,9 @@ class DiaryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
-  late DiaryEntry _currentEntry;
-  bool _isDeleting = false;
-
   @override
   void initState() {
     super.initState();
-    _currentEntry = widget.entry;
   }
 
   Future<void> _deleteDiary() async {
@@ -42,75 +38,60 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
 
     if (!confirmed) return;
 
-    setState(() {
-      _isDeleting = true;
-    });
+    // 使用 Provider 處理刪除邏輯
+    final success = await ref
+        .read(diaryDetailProvider(widget.entry).notifier)
+        .deleteDiary();
 
-    try {
-      final imageUploadService = ref.read(imageUploadServiceProvider);
-      final repository = ref.read(diaryRepositoryProvider);
-
-      // 刪除圖片
-      if (_currentEntry.imagePaths.isNotEmpty) {
-        await imageUploadService.deleteMultipleImages(_currentEntry.imagePaths);
-      }
-
-      // 刪除日記
-      await repository.deleteDiaryEntry(_currentEntry.id);
-
-      if (mounted) {
-        UiUtils.showSuccessSnackBar(context, '日記已刪除');
-        Navigator.of(context).pop(true); // 返回 true 表示已刪除
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isDeleting = false;
-        });
-        UiUtils.showErrorSnackBar(context, '刪除失敗: $e');
-      }
+    if (mounted && success) {
+      UiUtils.showSuccessSnackBar(context, '日記已刪除');
+      Navigator.of(context).pop(true); // 返回 true 表示已刪除
     }
   }
 
   Future<void> _editDiary() async {
+    final detailState = ref.read(diaryDetailProvider(widget.entry));
+
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (context) => DiaryCreateScreen(existingEntry: _currentEntry),
+        builder: (context) =>
+            DiaryCreateScreen(existingEntry: detailState.entry),
       ),
     );
 
     if (result == true && mounted) {
-      // 重新載入日記資料
-      try {
-        final repository = ref.read(diaryRepositoryProvider);
-
-        final updatedEntry = await repository.getDiaryEntryById(
-          _currentEntry.id,
-        );
-        if (updatedEntry != null) {
-          setState(() {
-            _currentEntry = updatedEntry;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          UiUtils.showErrorSnackBar(context, '重新載入失敗: $e');
-        }
-      }
+      // 使用 Provider 重新載入日記資料
+      await ref.read(diaryDetailProvider(widget.entry).notifier).reloadDiary();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final imageUploadService = ref.read(imageUploadServiceProvider);
+    // 監聽 Provider 狀態
+    final detailState = ref.watch(diaryDetailProvider(widget.entry));
+
+    // 監聽錯誤訊息
+    ref.listen<DiaryDetailState>(diaryDetailProvider(widget.entry), (
+      previous,
+      next,
+    ) {
+      if (next.error != null && mounted) {
+        UiUtils.showErrorSnackBar(context, next.error!);
+      }
+    });
+
+    // 取得圖片 URL 列表
+    final imageUrls = ref
+        .read(diaryDetailProvider(widget.entry).notifier)
+        .getImageUrls();
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           // Header - 純色背景
           DiaryDetailHeader(
-            entry: _currentEntry,
-            isDeleting: _isDeleting,
+            entry: detailState.entry,
+            isDeleting: detailState.isDeleting,
             onEdit: _editDiary,
             onDelete: _deleteDiary,
           ),
@@ -130,23 +111,20 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 1. 內容（Quill 富文本）
-                    DiaryContentSection(content: _currentEntry.content),
+                    DiaryContentSection(content: detailState.entry.content),
 
                     // 2. 照片集（顯示所有照片）
-                    DiaryPhotoGrid(
-                      imagePaths: _currentEntry.imagePaths,
-                      imageUploadService: imageUploadService,
-                    ),
+                    DiaryPhotoGrid(imageUrls: imageUrls),
 
                     // 3. 地點資訊 + 地圖（整合）
-                    DiaryMapSection(entry: _currentEntry),
+                    DiaryMapSection(entry: detailState.entry),
 
                     // 4. 標籤
-                    if (_currentEntry.tags.isNotEmpty) ...[
+                    if (detailState.entry.tags.isNotEmpty) ...[
                       Wrap(
                         spacing: AppSpacing.sm,
                         runSpacing: AppSpacing.sm,
-                        children: _currentEntry.tags.map((tag) {
+                        children: detailState.entry.tags.map((tag) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.md,

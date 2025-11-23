@@ -4,6 +4,9 @@ import 'package:travel_diary/features/diary/services/diary_repository_impl.dart'
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/features/images/services/image_picker_service.dart';
 
+// Export diary detail provider
+export 'diary_detail_provider.dart';
+
 /// Diary Repository Provider
 final diaryRepositoryProvider = Provider<DiaryRepository>((ref) {
   return DiaryRepositoryImpl();

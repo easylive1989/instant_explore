@@ -3,22 +3,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
 import 'package:travel_diary/core/utils/iterator_extensions.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/shared/widgets/full_image_viewer.dart';
 
 class DiaryPhotoGrid extends StatelessWidget {
-  final List<String> imagePaths;
-  final ImageUploadService imageUploadService;
+  final List<String> imageUrls;
 
-  const DiaryPhotoGrid({
-    super.key,
-    required this.imagePaths,
-    required this.imageUploadService,
-  });
+  const DiaryPhotoGrid({super.key, required this.imageUrls});
 
   @override
   Widget build(BuildContext context) {
-    if (imagePaths.isEmpty) {
+    if (imageUrls.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -28,7 +22,7 @@ class DiaryPhotoGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '照片 (${imagePaths.length})',
+          '照片 (${imageUrls.length})',
           style: theme.textTheme.titleSmall?.copyWith(
             color: ThemeConfig.neutralText.withValues(alpha: 0.7),
             fontWeight: FontWeight.w500,
@@ -39,21 +33,19 @@ class DiaryPhotoGrid extends StatelessWidget {
           height: 150,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: imagePaths
+            children: imageUrls
                 .asMap()
                 .entries
                 .map((entry) {
                   final index = entry.key;
-                  final path = entry.value;
+                  final url = entry.value;
                   return GestureDetector(
                     onTap: () {
                       // 開啟圖片查看器
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => FullImageViewer.network(
-                            imageUrls: imagePaths
-                                .map((p) => imageUploadService.getImageUrl(p))
-                                .toList(),
+                            imageUrls: imageUrls,
                             initialIndex: index,
                           ),
                         ),
@@ -64,7 +56,7 @@ class DiaryPhotoGrid extends StatelessWidget {
                       child: CachedNetworkImage(
                         width: 150,
                         height: 150,
-                        imageUrl: imageUploadService.getImageUrl(path),
+                        imageUrl: url,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: ThemeConfig.neutralLight,
