@@ -9,12 +9,6 @@ final tagRepositoryProvider = Provider<TagRepository>((ref) {
   return TagRepositoryImpl();
 });
 
-/// 標籤列表 Provider（自動載入）
-final tagListProvider = FutureProvider<List<Tag>>((ref) async {
-  final repository = ref.watch(tagRepositoryProvider);
-  return repository.getAllUserTags();
-});
-
 /// 標籤狀態
 @immutable
 class TagState {

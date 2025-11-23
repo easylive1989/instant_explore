@@ -43,7 +43,7 @@ class TagSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final tagsAsync = ref.watch(tagListProvider);
+    final tagState = ref.watch(tagNotifierProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,16 +71,17 @@ class TagSelector extends ConsumerWidget {
         const SizedBox(height: 12),
 
         // 標籤內容
-        tagsAsync.when(
-          data: (tags) => _buildTagContent(context, theme, tags),
-          loading: () => const Center(
+        if (tagState.isLoading)
+          const Center(
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: CircularProgressIndicator(),
             ),
-          ),
-          error: (error, stack) => _buildErrorWidget(context, theme, error),
-        ),
+          )
+        else if (tagState.error != null)
+          _buildErrorWidget(context, theme, tagState.error!)
+        else
+          _buildTagContent(context, theme, tagState.tags),
       ],
     );
   }
