@@ -188,6 +188,36 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
 
                     // 地圖
                     DiaryMapSection(entry: _currentEntry),
+
+                    // 標籤（移到最下面）
+                    if (_currentEntry.tags.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: _currentEntry.tags.map((tag) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: ThemeConfig.neutralBorder,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              tag,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: ThemeConfig.neutralText),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ],
                 ),
               ),
