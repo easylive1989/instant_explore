@@ -285,6 +285,14 @@ class DiaryRepositoryImpl implements DiaryRepository {
   }
 
   @override
+  Future<void> removeAllTagsFromDiary(String diaryId) async {
+    await _supabase
+        .from('diary_entry_tags')
+        .delete()
+        .eq('diary_entry_id', diaryId);
+  }
+
+  @override
   Future<List<DiaryTag>> getTagsForDiary(String diaryId) async {
     final response = await _supabase
         .from('diary_entry_tags')

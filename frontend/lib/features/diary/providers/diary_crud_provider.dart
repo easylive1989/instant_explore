@@ -154,7 +154,8 @@ class DiaryCrudNotifier extends StateNotifier<DiaryCrudState> {
         }
       }
 
-      // 4. 處理標籤(簡化版:先刪除所有再重新添加)
+      // 4. 處理標籤(先刪除所有再重新添加)
+      await _repository.removeAllTagsFromDiary(savedEntry.id);
       for (final tagId in tagIds) {
         await _repository.addTagToDiary(savedEntry.id, tagId);
       }

@@ -41,6 +41,9 @@ abstract class DiaryRepository {
   /// 從日記移除標籤
   Future<void> removeTagFromDiary(String diaryId, String tagId);
 
+  /// 移除日記的所有標籤
+  Future<void> removeAllTagsFromDiary(String diaryId);
+
   /// 取得日記的所有標籤
   Future<List<DiaryTag>> getTagsForDiary(String diaryId);
 
