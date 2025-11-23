@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/diary/providers/diary_list_provider.dart';
@@ -114,7 +115,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 }
 
                 if (state.error != null && state.entries.isEmpty) {
-                  return Center(child: Text('載入失敗: ${state.error}'));
+                  return Center(
+                    child: Text('${'diary.loadFailed'.tr()}: ${state.error}'),
+                  );
                 }
 
                 if (state.entries.isEmpty) {
@@ -132,7 +135,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           ),
                           const SizedBox(height: AppSpacing.md),
                           Text(
-                            '尚無日記，點擊右下角新增',
+                            'diary.emptyHint'.tr(),
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
                                   color: ThemeConfig.neutralText.withValues(
@@ -190,7 +193,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '旅食日記',
+                    'app.name'.tr(),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: ThemeConfig.neutralText,
@@ -198,7 +201,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '記錄美好的旅遊回憶',
+                    'app.tagline'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: ThemeConfig.neutralText.withValues(alpha: 0.6),
                     ),
@@ -233,7 +236,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 spacing: 8,
                 children: [
                   ActionChip(
-                    label: const Text('清除篩選'),
+                    label: Text('diary.clearFilter'.tr()),
                     avatar: const Icon(Icons.close, size: 16),
                     onPressed: () => notifier.clearTagFilters(),
                   ),

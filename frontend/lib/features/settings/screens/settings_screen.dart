@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
@@ -14,17 +15,17 @@ class SettingsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('確認登出'),
-        content: const Text('確定要登出嗎？'),
+        title: Text('auth.logoutConfirmTitle'.tr()),
+        content: Text('auth.logoutConfirmMessage'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('登出'),
+            child: Text('auth.logout'.tr()),
           ),
         ],
       ),
@@ -39,12 +40,15 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('已登出')));
+        ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('登出失敗: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('${'auth.loginFailed'.tr()}: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -56,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('設定')),
+      appBar: AppBar(title: Text('settings.title'.tr())),
       body: ListView(
         children: [
           // 使用者資訊
@@ -82,12 +86,12 @@ class SettingsScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user.email ?? '使用者',
+                          user.email ?? 'settings.account'.tr(),
                           style: theme.textTheme.titleMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '已登入',
+                          'auth.loginSuccess'.tr(),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurface.withValues(
                               alpha: 0.6,
@@ -103,11 +107,47 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(height: 1),
           ],
 
+          // 語言設定
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text('settings.language'.tr()),
+            subtitle: Text('settings.languageHint'.tr()),
+            trailing: DropdownButton<Locale>(
+              value: context.locale,
+              underline: const SizedBox(),
+              items: context.supportedLocales.map((locale) {
+                // 使用該語言本身的名稱顯示，不翻譯
+                String languageName;
+                switch (locale.toString()) {
+                  case 'zh_TW':
+                    languageName = '繁體中文';
+                    break;
+                  case 'en':
+                    languageName = 'English';
+                    break;
+                  default:
+                    languageName = locale.toString();
+                }
+                return DropdownMenuItem(
+                  value: locale,
+                  child: Text(languageName),
+                );
+              }).toList(),
+              onChanged: (newLocale) {
+                if (newLocale != null) {
+                  context.setLocale(newLocale);
+                }
+              },
+            ),
+          ),
+
+          const Divider(),
+
           // 標籤管理
           ListTile(
             leading: const Icon(Icons.label_outline),
-            title: const Text('標籤管理'),
-            subtitle: const Text('管理您的自訂標籤'),
+            title: Text('settings.tagManagement'.tr()),
+            subtitle: Text('settings.tagManagementHint'.tr()),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
@@ -123,17 +163,17 @@ class SettingsScreen extends ConsumerWidget {
           // 關於
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('關於'),
-            subtitle: const Text('版本 1.0.0'),
+            title: Text('settings.about'.tr()),
+            subtitle: Text('${'settings.version'.tr()} 1.0.0'),
             onTap: () {
               showAboutDialog(
                 context: context,
-                applicationName: '旅食日記',
+                applicationName: 'app.name'.tr(),
                 applicationVersion: '1.0.0',
-                applicationLegalese: '© 2025 旅食日記',
+                applicationLegalese: '© 2025 ${'app.name'.tr()}',
                 children: [
                   const SizedBox(height: 16),
-                  const Text('記錄每一次美好的旅程與美食體驗'),
+                  Text('app.tagline'.tr()),
                 ],
               );
             },
@@ -144,7 +184,10 @@ class SettingsScreen extends ConsumerWidget {
           // 登出
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('登出', style: TextStyle(color: Colors.red)),
+            title: Text(
+              'auth.logout'.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
             onTap: () => _signOut(context, ref),
           ),
         ],

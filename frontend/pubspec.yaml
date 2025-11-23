@@ -58,6 +58,7 @@ dependencies:
   go_router: ^17.0.0
   palette_generator: ^0.3.3+7
   flutter_quill: ^11.5.0
+  easy_localization: ^3.0.7
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -81,6 +82,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/translations/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

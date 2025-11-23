@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
@@ -26,13 +27,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // 登入成功，不需要手動導航，AuthStateListener 會處理
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('登入成功！')));
+        ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('登入失敗: ${e.toString()}'),
+            content: Text('${'auth.loginFailed'.tr()}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -64,7 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // App Name
                 Text(
-                  '旅食日記',
+                  'app.name'.tr(),
                   style: theme.textTheme.displayMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -74,7 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Subtitle
                 Text(
-                  '記錄每一次美好的旅程',
+                  'app.tagline'.tr(),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
@@ -90,14 +91,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _signInWithGoogle,
                       icon: const Icon(Icons.login, size: 24),
-                      label: const Padding(
-                        padding: EdgeInsets.symmetric(
+                      label: Padding(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 12,
                           horizontal: 16,
                         ),
                         child: Text(
-                          '使用 Google 帳號登入',
-                          style: TextStyle(fontSize: 16),
+                          'auth.googleSignIn'.tr(),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -111,7 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Privacy Notice
                 Text(
-                  '登入即表示您同意我們的服務條款與隱私政策',
+                  'settings.terms'.tr(),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),

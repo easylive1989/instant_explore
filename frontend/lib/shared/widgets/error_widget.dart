@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart' hide ErrorWidget;
 import 'package:travel_diary/core/constants/ui_constants.dart';
 
@@ -5,13 +6,13 @@ import 'package:travel_diary/core/constants/ui_constants.dart';
 ///
 /// Provides a consistent error state UI across the application.
 class ErrorDisplay extends StatelessWidget {
-  const ErrorDisplay({
+  ErrorDisplay({
     required this.message,
     super.key,
     this.onRetry,
     this.icon,
-    this.retryButtonText = '重試',
-  });
+    String? retryButtonText,
+  }) : retryButtonText = retryButtonText ?? 'common.retry'.tr();
 
   final String message;
   final VoidCallback? onRetry;
