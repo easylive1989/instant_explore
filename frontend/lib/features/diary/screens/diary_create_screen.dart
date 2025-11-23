@@ -25,12 +25,18 @@ class DiaryCreateScreen extends ConsumerStatefulWidget {
 
 class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
   bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
     _isEditing = widget.existingEntry != null;
+
+    // 監聽標題變化並更新 provider
+    _titleController.addListener(() {
+      ref.read(diaryFormProvider.notifier).updateTitle(_titleController.text);
+    });
 
     // 延遲初始化,確保 provider 可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -40,11 +46,20 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadExistingEntry() async {
     final entry = widget.existingEntry!;
 
     // 使用 form provider 載入資料
     ref.read(diaryFormProvider.notifier).loadFromEntry(entry);
+
+    // 更新標題 controller
+    _titleController.text = entry.title;
 
     // 載入標籤 ID
     try {
@@ -306,16 +321,13 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         children: [
           // 標題
           TextFormField(
-            initialValue: formState.title,
+            controller: _titleController,
             decoration: const InputDecoration(
               labelText: '標題',
               hintText: '今天去了哪裡?',
               border: OutlineInputBorder(),
             ),
             maxLength: 100,
-            onChanged: (value) {
-              ref.read(diaryFormProvider.notifier).updateTitle(value);
-            },
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return '請輸入標題';
