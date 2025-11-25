@@ -34,11 +34,76 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
+  # E2E 測試 (Patrol)
+  e2e-test:
+    name: E2E Tests with Patrol
+    runs-on: macos-latest
+    needs: [test]
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.35.6"
+          channel: "stable"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Install Patrol CLI
+        run: dart pub global activate patrol_cli
+
+      - name: Set up local Supabase
+        run: |
+          # Install Supabase CLI
+          brew install supabase/tap/supabase
+
+          # Initialize and start local Supabase
+          supabase init --force || true
+          supabase start
+
+          # Wait for Supabase to be ready
+          sleep 10
+
+          # Get the anon key from Supabase
+          export LOCAL_SUPABASE_KEY=$(supabase status -o json | jq -r '.anon_key')
+          echo "LOCAL_SUPABASE_KEY=$LOCAL_SUPABASE_KEY" >> $GITHUB_ENV
+
+      - name: Run Patrol E2E tests on iOS Simulator
+        run: |
+          patrol test \
+            --target integration_test \
+            --dart-define=SUPABASE_URL=http://localhost:54321 \
+            --dart-define=SUPABASE_ANON_KEY=${{ env.LOCAL_SUPABASE_KEY }} \
+            --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
+            --dart-define=GOOGLE_DIRECTIONS_API_KEY=${{ secrets.GOOGLE_DIRECTIONS_API_KEY }} \
+            --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
+            --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+        continue-on-error: true
+
+      - name: Upload test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patrol-screenshots
+          path: frontend/build/app/outputs/patrol_screenshots/
+          retention-days: 7
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
   # Android 建置與部署
   build-android:
     name: Build & Deploy Android AAB
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [test, e2e-test]
     defaults:
       run:
         working-directory: frontend
@@ -127,7 +192,7 @@ jobs:
   build-ios:
     name: Build & Deploy iOS IPA
     runs-on: macos-latest
-    needs: [test]
+    needs: [test, e2e-test]
     defaults:
       run:
         working-directory: frontend
@@ -241,7 +306,7 @@ jobs:
   build-status:
     name: Build Status Report
     runs-on: ubuntu-latest
-    needs: [test, build-android, build-ios]
+    needs: [test, e2e-test, build-android, build-ios]
     if: always()
 
     steps:
@@ -249,10 +314,12 @@ jobs:
         run: |
           echo "## 🚀 建置狀態報告"
           echo "- 單元測試: ${{ needs.test.result }}"
+          echo "- E2E 測試: ${{ needs.e2e-test.result }}"
           echo "- Android 建置: ${{ needs.build-android.result }}"
           echo "- iOS 建置: ${{ needs.build-ios.result }}"
 
           if [ "${{ needs.test.result }}" = "success" ] && \
+             [ "${{ needs.e2e-test.result }}" = "success" ] && \
              [ "${{ needs.build-android.result }}" = "success" ] && \
              [ "${{ needs.build-ios.result }}" = "success" ]; then
             echo "✅ 所有測試和建置成功完成！"
