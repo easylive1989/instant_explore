@@ -35,7 +35,14 @@
     "logoutConfirmTitle": "Confirm Logout",
     "logoutConfirmMessage": "Are you sure you want to logout?",
     "googleSignIn": "Sign in with Google",
-    "appleSignIn": "Sign in with Apple"
+    "appleSignIn": "Sign in with Apple",
+    "deleteAccount": "Delete Account",
+    "deleteAccountHint": "Permanently delete your account and all data",
+    "deleteAccountConfirmTitle": "Confirm Account Deletion",
+    "deleteAccountConfirmMessage": "Are you sure you want to delete your account? This will permanently delete all your data, including diaries, photos, and settings.",
+    "deleteAccountWarning": "This action cannot be undone!",
+    "deleteAccountSuccess": "Account deleted",
+    "deleteAccountFailed": "Failed to delete account"
   },
   "diary": {
     "title": "Diary",
