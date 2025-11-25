@@ -60,3 +60,8 @@ fvm flutter run \
     --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
     --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID \
     --dart-define=GOOGLE_IOS_CLIENT_ID=$GOOGLE_IOS_CLIENT_ID
+
+FLUTTER_PID=$!
+
+# 等待 Flutter 進程結束
+wait $FLUTTER_PID
