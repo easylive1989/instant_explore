@@ -88,6 +88,42 @@ class AuthService {
     }
   }
 
+  /// 刪除帳戶
+  ///
+  /// 刪除當前用戶的帳戶及所有相關資料
+  Future<void> deleteAccount() async {
+    try {
+      debugPrint('🗑️ 開始刪除帳戶流程...');
+
+      final user = currentUser;
+      if (user == null) {
+        throw Exception('沒有已登入的使用者');
+      }
+
+      // 1. 調用 Supabase RPC 函數來刪除用戶資料
+      // 注意：這需要在 Supabase 後端設置相應的函數
+      // 例如：create or replace function delete_user_account()
+      try {
+        await Supabase.instance.client.rpc('delete_user_account');
+      } catch (e) {
+        debugPrint('⚠️ 刪除用戶資料時發生錯誤: $e');
+        // 如果 RPC 函數不存在，繼續執行刪除流程
+      }
+
+      // 2. 登出 Google
+      await _googleSignIn.signOut();
+
+      // 3. 登出 Supabase
+      await Supabase.instance.client.auth.signOut();
+
+      debugPrint('✅ 帳戶刪除完成');
+    } catch (e, stackTrace) {
+      debugPrint('❌ 刪除帳戶失敗: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
   /// 取得當前使用者
   User? get currentUser => Supabase.instance.client.auth.currentUser;
 

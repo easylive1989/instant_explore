@@ -56,6 +56,66 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('auth.deleteAccountConfirmTitle'.tr()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('auth.deleteAccountConfirmMessage'.tr()),
+            const SizedBox(height: 16),
+            Text(
+              'auth.deleteAccountWarning'.tr(),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.red,
+            ),
+            child: Text('auth.deleteAccount'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      await authService.deleteAccount();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth.deleteAccountSuccess'.tr())),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'auth.deleteAccountFailed'.tr()}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -203,6 +263,21 @@ class SettingsScreen extends ConsumerWidget {
                 iconColor: Colors.red,
                 textColor: Colors.red,
                 onTap: () => _signOut(context, ref),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 危險操作
+          SettingsSection(
+            children: [
+              SettingsTile(
+                leading: const Icon(Icons.delete_forever),
+                title: 'auth.deleteAccount'.tr(),
+                subtitle: 'auth.deleteAccountHint'.tr(),
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                onTap: () => _deleteAccount(context, ref),
               ),
             ],
           ),
