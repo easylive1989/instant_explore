@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:travel_diary/core/utils/go_router_refresh_stream.dart';
+import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/screens/login_screen.dart';
 import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
 
@@ -14,10 +16,15 @@ class RouterConfig {
   RouterConfig._();
 
   /// Create the GoRouter instance
-  static GoRouter createRouter() {
+  static GoRouter createRouter(Ref ref) {
+    // 監聽認證狀態變化，當狀態改變時重新評估路由
+    final authService = ref.watch(authServiceProvider);
+    final authStateStream = authService.authStateChanges;
+
     return GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: false,
+      refreshListenable: GoRouterRefreshStream(authStateStream),
       redirect: (context, state) {
         final supabase = Supabase.instance.client;
         final isAuthenticated = supabase.auth.currentSession != null;
@@ -73,5 +80,5 @@ class RouterConfig {
 
 /// Provider for the GoRouter instance
 final routerProvider = Provider<GoRouter>((ref) {
-  return RouterConfig.createRouter();
+  return RouterConfig.createRouter(ref);
 });
