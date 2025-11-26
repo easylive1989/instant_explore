@@ -42,7 +42,21 @@
     "deleteAccountConfirmMessage": "Are you sure you want to delete your account? This will permanently delete all your data, including diaries, photos, and settings.",
     "deleteAccountWarning": "This action cannot be undone!",
     "deleteAccountSuccess": "Account deleted",
-    "deleteAccountFailed": "Failed to delete account"
+    "deleteAccountFailed": "Failed to delete account",
+    "register": "Register",
+    "registerSuccess": "Registration successful!",
+    "registerFailed": "Registration failed",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match",
+    "emailAlreadyUsed": "This email is already registered",
+    "createAccount": "Create Account",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "or": "or",
+    "signInWithEmail": "Sign in with Email"
   },
   "diary": {
     "title": "Diary",
@@ -142,6 +156,10 @@
     "passwordTooShort": "Password too short",
     "titleTooShort": "Title too short",
     "titleTooLong": "Title too long",
-    "contentTooShort": "Content too short"
+    "contentTooShort": "Content too short",
+    "passwordRequirement": "Password must be at least 8 characters with uppercase, lowercase and numbers",
+    "passwordNoUppercase": "Password must contain at least one uppercase letter",
+    "passwordNoLowercase": "Password must contain at least one lowercase letter",
+    "passwordNoNumber": "Password must contain at least one number"
   }
 }

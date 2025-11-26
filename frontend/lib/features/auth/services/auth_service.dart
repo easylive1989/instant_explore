@@ -134,6 +134,58 @@ class AuthService {
   Stream<AuthState> get authStateChanges =>
       Supabase.instance.client.auth.onAuthStateChange;
 
+  /// 使用電子郵件和密碼註冊
+  Future<AuthResponse> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('📧 開始電子郵件註冊流程...');
+
+      final AuthResponse response = await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        debugPrint('✅ 註冊成功');
+        debugPrint('👤 使用者: ${response.user!.email}');
+        return response;
+      } else {
+        throw Exception('註冊失敗');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ 註冊失敗: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  /// 使用電子郵件和密碼登入
+  Future<AuthResponse> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('📧 開始電子郵件登入流程...');
+
+      final AuthResponse response = await Supabase.instance.client.auth
+          .signInWithPassword(email: email, password: password);
+
+      if (response.user != null) {
+        debugPrint('✅ 登入成功');
+        debugPrint('👤 使用者: ${response.user!.email}');
+        return response;
+      } else {
+        throw Exception('登入失敗');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ 登入失敗: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
   /// 清理資源（真實服務通常不需要特殊清理）
   void dispose() {
     // 真實的 AuthService 通常不需要特殊的清理邏輯

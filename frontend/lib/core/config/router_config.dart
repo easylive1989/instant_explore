@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:travel_diary/core/utils/go_router_refresh_stream.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/screens/login_screen.dart';
+import 'package:travel_diary/features/auth/screens/register_screen.dart';
 import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
 
 /// Router configuration using go_router for declarative navigation.
@@ -29,14 +30,15 @@ class RouterConfig {
         final supabase = Supabase.instance.client;
         final isAuthenticated = supabase.auth.currentSession != null;
         final isGoingToLogin = state.matchedLocation == '/login';
+        final isGoingToRegister = state.matchedLocation == '/register';
 
         // Redirect to login if not authenticated and not already going there
-        if (!isAuthenticated && !isGoingToLogin) {
+        if (!isAuthenticated && !isGoingToLogin && !isGoingToRegister) {
           return '/login';
         }
 
-        // Redirect to home if authenticated and going to login
-        if (isAuthenticated && isGoingToLogin) {
+        // Redirect to home if authenticated and going to login/register
+        if (isAuthenticated && (isGoingToLogin || isGoingToRegister)) {
           return '/';
         }
 
@@ -47,6 +49,11 @@ class RouterConfig {
           path: '/login',
           name: 'login',
           builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/register',
+          name: 'register',
+          builder: (context, state) => const RegisterScreen(),
         ),
         GoRoute(
           path: '/',

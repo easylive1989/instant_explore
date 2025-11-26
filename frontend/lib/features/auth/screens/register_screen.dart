@@ -7,28 +7,30 @@ import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/shared/widgets/divider_with_text.dart';
 import 'package:travel_diary/shared/widgets/password_field.dart';
 
-/// 登入畫面
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+/// 註冊畫面
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _signInWithEmail() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -39,21 +41,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signInWithEmail(
+      final response = await authService.signUpWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
+        // Check if user is authenticated after signup
+        if (response.user != null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('auth.registerSuccess'.tr())));
+          // User is now logged in, router will automatically redirect to home
+          // The router's redirect logic will handle navigation to '/'
+        }
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'auth.registerFailed'.tr();
+
+        // Handle specific error cases
+        if (e.toString().contains('already registered') ||
+            e.toString().contains('already exists')) {
+          errorMessage = 'auth.emailAlreadyUsed'.tr();
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${'auth.loginFailed'.tr()}: ${e.toString()}'),
+            content: Text('$errorMessage: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -77,7 +92,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final response = await authService.signInWithGoogle();
 
       if (response != null && mounted) {
-        // 登入成功，不需要手動導航，AuthStateListener 會處理
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
@@ -118,53 +132,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Icon(Icons.book, size: 100, color: theme.colorScheme.primary),
                   const SizedBox(height: 24),
 
-                  // App Name
+                  // Title
                   Text(
-                    'app.name'.tr(),
+                    'auth.createAccount'.tr(),
                     style: theme.textTheme.displayMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 8),
-
-                  // Subtitle
-                  Text(
-                    'app.tagline'.tr(),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
                   const SizedBox(height: 48),
-
-                  // Google Sign In Button
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _signInWithGoogle,
-                        icon: const Icon(Icons.login, size: 24),
-                        label: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            'auth.googleSignIn'.tr(),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
-                          elevation: 2,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 24),
-
-                  // Divider with "or"
-                  DividerWithText(text: 'auth.or'.tr()),
-                  const SizedBox(height: 24),
 
                   // Email Field
                   TextFormField(
@@ -189,46 +165,89 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     controller: _passwordController,
                     labelText: 'auth.password'.tr(),
                     hintText: 'auth.passwordPlaceholder'.tr(),
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      final error = ValidationUtils.validatePassword(value);
+                      return error?.tr();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Confirm Password Field
+                  PasswordField(
+                    controller: _confirmPasswordController,
+                    labelText: 'auth.confirmPassword'.tr(),
+                    hintText: 'auth.confirmPasswordPlaceholder'.tr(),
                     textInputAction: TextInputAction.done,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'validation.required'.tr();
-                      }
-                      return null;
+                      final error = ValidationUtils.validatePasswordConfirm(
+                        value,
+                        _passwordController.text,
+                      );
+                      return error?.tr();
                     },
-                    onFieldSubmitted: (_) => _signInWithEmail(),
+                    onFieldSubmitted: (_) => _register(),
                   ),
                   const SizedBox(height: 24),
 
-                  // Login Button
-                  if (!_isLoading)
+                  // Register Button
+                  if (_isLoading)
+                    const CircularProgressIndicator()
+                  else
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _signInWithEmail,
+                        onPressed: _register,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          'auth.login'.tr(),
+                          'auth.register'.tr(),
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
                   const SizedBox(height: 24),
 
-                  // Link to Register
+                  // Divider with "or"
+                  DividerWithText(text: 'auth.or'.tr()),
+                  const SizedBox(height: 24),
+
+                  // Google Sign In Button
+                  if (!_isLoading)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _signInWithGoogle,
+                        icon: const Icon(Icons.login, size: 24),
+                        label: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text(
+                            'auth.googleSignIn'.tr(),
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black87,
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+
+                  // Link to Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'auth.noAccount'.tr(),
+                        'auth.haveAccount'.tr(),
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
-                        onPressed: () => context.go('/register'),
+                        onPressed: () => context.go('/login'),
                         child: Text(
-                          'auth.register'.tr(),
+                          'auth.login'.tr(),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary,
@@ -236,16 +255,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Privacy Notice
-                  Text(
-                    'settings.terms'.tr(),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

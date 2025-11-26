@@ -42,7 +42,21 @@
     "deleteAccountConfirmMessage": "確定要刪除您的帳戶嗎？這將永久刪除您的所有資料，包括日記、照片和設定。",
     "deleteAccountWarning": "此操作無法復原！",
     "deleteAccountSuccess": "帳戶已刪除",
-    "deleteAccountFailed": "刪除帳戶失敗"
+    "deleteAccountFailed": "刪除帳戶失敗",
+    "register": "註冊",
+    "registerSuccess": "註冊成功！",
+    "registerFailed": "註冊失敗",
+    "confirmPassword": "確認密碼",
+    "passwordMismatch": "密碼不符",
+    "emailAlreadyUsed": "此電子郵件已被使用",
+    "createAccount": "建立帳號",
+    "haveAccount": "已經有帳號？",
+    "noAccount": "還沒有帳號？",
+    "emailPlaceholder": "請輸入電子郵件",
+    "passwordPlaceholder": "請輸入密碼",
+    "confirmPasswordPlaceholder": "請再次輸入密碼",
+    "or": "或",
+    "signInWithEmail": "使用電子郵件登入"
   },
   "diary": {
     "title": "日記",
@@ -142,6 +156,10 @@
     "passwordTooShort": "密碼長度不足",
     "titleTooShort": "標題太短",
     "titleTooLong": "標題太長",
-    "contentTooShort": "內容太短"
+    "contentTooShort": "內容太短",
+    "passwordRequirement": "密碼至少須 8 個字元，包含大小寫字母和數字",
+    "passwordNoUppercase": "密碼需包含至少一個大寫字母",
+    "passwordNoLowercase": "密碼需包含至少一個小寫字母",
+    "passwordNoNumber": "密碼需包含至少一個數字"
   }
 }

@@ -97,4 +97,58 @@ class ValidationUtils {
   static String sanitize(String input) {
     return input.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
+
+  /// Validate password strength (medium requirement: 8+ chars, uppercase, lowercase, number)
+  static String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'validation.required';
+    }
+
+    if (value.length < 8) {
+      return 'validation.passwordTooShort';
+    }
+
+    // Check for uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'validation.passwordNoUppercase';
+    }
+
+    // Check for lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'validation.passwordNoLowercase';
+    }
+
+    // Check for number
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return 'validation.passwordNoNumber';
+    }
+
+    return null;
+  }
+
+  /// Validate password confirmation matches
+  static String? validatePasswordConfirm(String? value, String password) {
+    if (value == null || value.isEmpty) {
+      return 'validation.required';
+    }
+
+    if (value != password) {
+      return 'auth.passwordMismatch';
+    }
+
+    return null;
+  }
+
+  /// Validate email for authentication
+  static String? validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'validation.required';
+    }
+
+    if (!isValidEmail(value.trim())) {
+      return 'validation.emailInvalid';
+    }
+
+    return null;
+  }
 }
