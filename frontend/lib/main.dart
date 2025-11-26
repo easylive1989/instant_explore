@@ -6,6 +6,10 @@ import 'package:travel_diary/app.dart';
 import 'package:travel_diary/core/config/api_config.dart';
 
 void main() async {
+  runApp(await init());
+}
+
+Future<Widget> init() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize EasyLocalization
@@ -14,14 +18,12 @@ void main() async {
   // Initialize Supabase
   await _initializeSupabase();
 
-  runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('zh', 'TW'),
-      saveLocale: true,
-      child: const ProviderScope(child: TravelDiaryApp()),
-    ),
+  return EasyLocalization(
+    supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
+    path: 'assets/translations',
+    fallbackLocale: const Locale('zh', 'TW'),
+    saveLocale: true,
+    child: const ProviderScope(child: TravelDiaryApp()),
   );
 }
 
