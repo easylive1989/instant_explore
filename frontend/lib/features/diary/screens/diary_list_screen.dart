@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:travel_diary/features/diary/providers/diary_list_provider.dart';
 import 'package:travel_diary/features/diary/utils/diary_date_grouper.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
@@ -10,7 +11,6 @@ import 'package:travel_diary/features/diary/screens/widgets/tag_filter_dialog.da
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
-import 'package:travel_diary/features/settings/screens/settings_screen.dart';
 
 /// 日記列表畫面
 class DiaryListScreen extends ConsumerStatefulWidget {
@@ -203,9 +203,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
   }
 
   void _navigateToSettings() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
+    context.push('/settings');
   }
 
   Future<void> _navigateToCreateDiary(DiaryListNotifier notifier) async {

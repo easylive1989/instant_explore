@@ -15,9 +15,9 @@ import 'dart:convert';
 
 /// 日記新增/編輯畫面
 class DiaryCreateScreen extends ConsumerStatefulWidget {
-  final DiaryEntry? existingEntry;
+  final String? diaryId;
 
-  const DiaryCreateScreen({super.key, this.existingEntry});
+  const DiaryCreateScreen({super.key, this.diaryId});
 
   @override
   ConsumerState<DiaryCreateScreen> createState() => _DiaryCreateScreenState();
@@ -27,11 +27,13 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   bool _isEditing = false;
+  bool _isLoadingEntry = false;
+  DiaryEntry? _existingEntry; // 編輯模式時儲存載入的 entry
 
   @override
   void initState() {
     super.initState();
-    _isEditing = widget.existingEntry != null;
+    _isEditing = widget.diaryId != null;
 
     // 監聽標題變化並更新 provider
     _titleController.addListener(() {
@@ -53,25 +55,57 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   Future<void> _loadExistingEntry() async {
-    final entry = widget.existingEntry!;
+    setState(() {
+      _isLoadingEntry = true;
+    });
 
-    // 使用 form provider 載入資料
-    ref.read(diaryFormProvider.notifier).loadFromEntry(entry);
-
-    // 更新標題 controller
-    _titleController.text = entry.title;
-
-    // 載入標籤 ID
     try {
+      // 從 repository 載入日記資料
       final repository = ref.read(diaryRepositoryProvider);
-      final diaryTags = await repository.getTagsForDiary(entry.id);
-      ref
-          .read(diaryFormProvider.notifier)
-          .updateTags(diaryTags.map((tag) => tag.id).toList());
+      final entry = await repository.getDiaryEntryById(widget.diaryId!);
+
+      if (entry == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('找不到日記資料')));
+          Navigator.of(context).pop();
+        }
+        return;
+      }
+
+      // 儲存 entry 以供後續使用
+      _existingEntry = entry;
+
+      // 使用 form provider 載入資料
+      ref.read(diaryFormProvider.notifier).loadFromEntry(entry);
+
+      // 更新標題 controller
+      _titleController.text = entry.title;
+
+      // 載入標籤 ID
+      try {
+        final diaryTags = await repository.getTagsForDiary(entry.id);
+        ref
+            .read(diaryFormProvider.notifier)
+            .updateTags(diaryTags.map((tag) => tag.id).toList());
+      } catch (e) {
+        // 標籤載入失敗時使用空列表
+      }
+      // 注意:現有圖片不會載入到 selectedImages,因為它們已經在 Storage
     } catch (e) {
-      // 標籤載入失敗時使用空列表
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('載入日記失敗: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingEntry = false;
+        });
+      }
     }
-    // 注意:現有圖片不會載入到 selectedImages,因為它們已經在 Storage
   }
 
   Future<void> _pickImages() async {
@@ -211,12 +245,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     DiaryEntry? savedEntry;
 
-    if (_isEditing) {
+    if (_isEditing && _existingEntry != null) {
       savedEntry = await ref
           .read(diaryCrudProvider.notifier)
           .updateDiary(
-            diaryId: widget.existingEntry!.id,
-            userId: widget.existingEntry!.userId,
+            diaryId: _existingEntry!.id,
+            userId: _existingEntry!.userId,
             title: formState.title,
             contentJson: deltaJson,
             visitDate: formState.visitDate,
@@ -227,7 +261,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             placeAddress: formState.placeAddress,
             latitude: formState.latitude,
             longitude: formState.longitude,
-            createdAt: widget.existingEntry!.createdAt,
+            createdAt: _existingEntry!.createdAt,
           );
     } else {
       savedEntry = await ref
@@ -267,6 +301,11 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         ).showSnackBar(SnackBar(content: Text(next.error!)));
       }
     });
+
+    // 載入中狀態
+    if (_isLoadingEntry) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       appBar: AppBar(

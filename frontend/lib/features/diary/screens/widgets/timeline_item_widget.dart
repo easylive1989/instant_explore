@@ -105,7 +105,9 @@ class TimelineItemWidget extends StatelessWidget {
   /// 導航到日記詳情
   Future<void> _navigateToDiaryDetail(BuildContext context) async {
     final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (context) => DiaryDetailScreen(entry: entry)),
+      MaterialPageRoute(
+        builder: (context) => DiaryDetailScreen(diaryId: entry.id),
+      ),
     );
 
     if (result == true) {

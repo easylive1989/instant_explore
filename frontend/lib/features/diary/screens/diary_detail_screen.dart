@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
-import 'package:travel_diary/features/diary/providers/diary_providers.dart';
+import 'package:travel_diary/features/diary/providers/diary_detail_provider.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
@@ -13,9 +12,9 @@ import 'package:travel_diary/features/diary/screens/widgets/diary_map_section.da
 
 /// 日記詳情畫面
 class DiaryDetailScreen extends ConsumerStatefulWidget {
-  final DiaryEntry entry;
+  final String diaryId;
 
-  const DiaryDetailScreen({super.key, required this.entry});
+  const DiaryDetailScreen({super.key, required this.diaryId});
 
   @override
   ConsumerState<DiaryDetailScreen> createState() => _DiaryDetailScreenState();
@@ -25,6 +24,10 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   @override
   void initState() {
     super.initState();
+    // 載入日記資料
+    Future.microtask(() {
+      ref.read(diaryDetailByIdProvider(widget.diaryId).notifier).loadDiary();
+    });
   }
 
   Future<void> _deleteDiary() async {
@@ -40,7 +43,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
 
     // 使用 Provider 處理刪除邏輯
     final success = await ref
-        .read(diaryDetailProvider(widget.entry).notifier)
+        .read(diaryDetailByIdProvider(widget.diaryId).notifier)
         .deleteDiary();
 
     if (mounted && success) {
@@ -50,28 +53,27 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   }
 
   Future<void> _editDiary() async {
-    final detailState = ref.read(diaryDetailProvider(widget.entry));
-
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (context) =>
-            DiaryCreateScreen(existingEntry: detailState.entry),
+        builder: (context) => DiaryCreateScreen(diaryId: widget.diaryId),
       ),
     );
 
     if (result == true && mounted) {
       // 使用 Provider 重新載入日記資料
-      await ref.read(diaryDetailProvider(widget.entry).notifier).reloadDiary();
+      await ref
+          .read(diaryDetailByIdProvider(widget.diaryId).notifier)
+          .reloadDiary();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     // 監聽 Provider 狀態
-    final detailState = ref.watch(diaryDetailProvider(widget.entry));
+    final detailState = ref.watch(diaryDetailByIdProvider(widget.diaryId));
 
     // 監聽錯誤訊息
-    ref.listen<DiaryDetailState>(diaryDetailProvider(widget.entry), (
+    ref.listen<DiaryDetailByIdState>(diaryDetailByIdProvider(widget.diaryId), (
       previous,
       next,
     ) {
@@ -80,10 +82,51 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
       }
     });
 
+    // 載入中狀態
+    if (detailState.isLoading) {
+      return const Scaffold(body: Center(child: CupertinoActivityIndicator()));
+    }
+
+    // 錯誤狀態
+    if (detailState.error != null && detailState.entry == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('錯誤')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('載入失敗: ${detailState.error}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref
+                      .read(diaryDetailByIdProvider(widget.diaryId).notifier)
+                      .loadDiary();
+                },
+                child: const Text('重試'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 資料不存在
+    if (detailState.entry == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('錯誤')),
+        body: const Center(child: Text('找不到日記資料')),
+      );
+    }
+
     // 取得圖片 URL 列表
     final imageUrls = ref
-        .read(diaryDetailProvider(widget.entry).notifier)
+        .read(diaryDetailByIdProvider(widget.diaryId).notifier)
         .getImageUrls();
+
+    final entry = detailState.entry!;
 
     return Scaffold(
       body: SafeArea(
@@ -91,7 +134,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           slivers: [
             // Header - Cupertino Navigation Bar
             CupertinoSliverNavigationBar(
-              largeTitle: Text(detailState.entry.title),
+              largeTitle: Text(entry.title),
               trailing: _buildNavigationBarActions(detailState),
               backgroundColor: ThemeConfig.neutralLight,
             ),
@@ -114,20 +157,20 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 1. 內容（Quill 富文本）
-                      DiaryContentSection(content: detailState.entry.content),
+                      DiaryContentSection(content: entry.content),
 
                       // 2. 照片集（顯示所有照片）
                       DiaryPhotoGrid(imageUrls: imageUrls),
 
                       // 3. 地點資訊 + 地圖（整合）
-                      DiaryMapSection(entry: detailState.entry),
+                      DiaryMapSection(entry: entry),
 
                       // 4. 標籤
-                      if (detailState.entry.tags.isNotEmpty) ...[
+                      if (entry.tags.isNotEmpty) ...[
                         Wrap(
                           spacing: AppSpacing.sm,
                           runSpacing: AppSpacing.sm,
-                          children: detailState.entry.tags.map((tag) {
+                          children: entry.tags.map((tag) {
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.md,
@@ -161,7 +204,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     );
   }
 
-  Widget _buildNavigationBarActions(DiaryDetailState state) {
+  Widget _buildNavigationBarActions(DiaryDetailByIdState state) {
     if (state.isDeleting) {
       return const Padding(
         padding: EdgeInsets.all(8.0),
@@ -183,7 +226,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     );
   }
 
-  void _showActionSheet(DiaryDetailState state) {
+  void _showActionSheet(DiaryDetailByIdState state) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (context) => CupertinoActionSheet(
