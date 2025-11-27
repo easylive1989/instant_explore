@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
@@ -6,7 +7,6 @@ import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
 import 'package:travel_diary/core/utils/ui_utils.dart';
-import 'package:travel_diary/features/diary/screens/widgets/diary_detail_header.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_content_section.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_photo_grid.dart';
 import 'package:travel_diary/features/diary/screens/widgets/diary_map_section.dart';
@@ -86,73 +86,131 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
         .getImageUrls();
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Header - 純色背景
-          DiaryDetailHeader(
-            entry: detailState.entry,
-            isDeleting: detailState.isDeleting,
-            onEdit: _editDiary,
-            onDelete: _deleteDiary,
-          ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // Header - Cupertino Navigation Bar
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(detailState.entry.title),
+              trailing: _buildNavigationBarActions(detailState),
+              backgroundColor: ThemeConfig.neutralLight,
+            ),
 
-          // Content
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: ThemeConfig.neutralBorder, width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. 內容（Quill 富文本）
-                    DiaryContentSection(content: detailState.entry.content),
+            // Content
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: ThemeConfig.neutralBorder,
+                    width: 1,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. 內容（Quill 富文本）
+                      DiaryContentSection(content: detailState.entry.content),
 
-                    // 2. 照片集（顯示所有照片）
-                    DiaryPhotoGrid(imageUrls: imageUrls),
+                      // 2. 照片集（顯示所有照片）
+                      DiaryPhotoGrid(imageUrls: imageUrls),
 
-                    // 3. 地點資訊 + 地圖（整合）
-                    DiaryMapSection(entry: detailState.entry),
+                      // 3. 地點資訊 + 地圖（整合）
+                      DiaryMapSection(entry: detailState.entry),
 
-                    // 4. 標籤
-                    if (detailState.entry.tags.isNotEmpty) ...[
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: detailState.entry.tags.map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: ThemeConfig.neutralBorder,
-                                width: 1,
+                      // 4. 標籤
+                      if (detailState.entry.tags.isNotEmpty) ...[
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: detailState.entry.tags.map((tag) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
                               ),
-                            ),
-                            child: Text(
-                              tag,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: ThemeConfig.neutralText),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: ThemeConfig.neutralBorder,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                tag,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: ThemeConfig.neutralText),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationBarActions(DiaryDetailState state) {
+    if (state.isDeleting) {
+      return const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CupertinoActivityIndicator(),
+        ),
+      );
+    }
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: () => _showActionSheet(state),
+      child: const Icon(
+        CupertinoIcons.ellipsis_circle,
+        color: ThemeConfig.neutralText,
+      ),
+    );
+  }
+
+  void _showActionSheet(DiaryDetailState state) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _editDiary();
+            },
+            child: const Text('編輯'),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteDiary();
+            },
+            child: const Text('刪除'),
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('取消'),
+        ),
       ),
     );
   }
