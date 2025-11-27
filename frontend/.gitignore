@@ -46,3 +46,9 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/.env
+
+# Environment variables (sensitive data)
+.env
+.env.local
+.env.test
+.env.*.local

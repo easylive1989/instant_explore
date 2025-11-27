@@ -10,6 +10,7 @@ class ApiConfig {
   final String googleDirectionsApiKey;
   final String supabaseUrl;
   final String supabaseAnonKey;
+  final String supabaseServiceRoleKey;
   final String googleWebClientId;
   final String googleIosClientId;
   const ApiConfig({
@@ -17,6 +18,7 @@ class ApiConfig {
     required this.googleDirectionsApiKey,
     required this.supabaseUrl,
     required this.supabaseAnonKey,
+    required this.supabaseServiceRoleKey,
     required this.googleWebClientId,
     required this.googleIosClientId,
   });
@@ -35,6 +37,10 @@ class ApiConfig {
       supabaseUrl: String.fromEnvironment('SUPABASE_URL', defaultValue: ''),
       supabaseAnonKey: String.fromEnvironment(
         'SUPABASE_ANON_KEY',
+        defaultValue: '',
+      ),
+      supabaseServiceRoleKey: String.fromEnvironment(
+        'SUPABASE_SERVICE_ROLE_KEY',
         defaultValue: '',
       ),
       googleWebClientId: String.fromEnvironment(

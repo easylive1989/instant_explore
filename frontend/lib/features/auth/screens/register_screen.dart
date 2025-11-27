@@ -144,6 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   // Email Field
                   TextFormField(
+                    key: const Key('register_email_field'),
                     controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'auth.email'.tr(),
@@ -162,6 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   // Password Field
                   PasswordField(
+                    key: const Key('register_password_field'),
                     controller: _passwordController,
                     labelText: 'auth.password'.tr(),
                     hintText: 'auth.passwordPlaceholder'.tr(),
@@ -175,6 +177,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   // Confirm Password Field
                   PasswordField(
+                    key: const Key('register_confirm_password_field'),
                     controller: _confirmPasswordController,
                     labelText: 'auth.confirmPassword'.tr(),
                     hintText: 'auth.confirmPasswordPlaceholder'.tr(),
@@ -197,6 +200,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
+                        key: const Key('register_submit_button'),
                         onPressed: _register,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),

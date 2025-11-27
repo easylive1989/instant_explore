@@ -226,6 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
+                        key: const Key('login_register_button'),
                         onPressed: () => context.go('/register'),
                         child: Text(
                           'auth.register'.tr(),
