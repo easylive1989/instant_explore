@@ -86,10 +86,10 @@ class DiaryCard extends StatelessWidget {
                   if (entry.placeName != null) ...[
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
                           size: 16,
-                          color: ThemeConfig.accentColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(

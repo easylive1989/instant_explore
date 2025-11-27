@@ -63,10 +63,10 @@ class DiaryMapSection extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.location_on_outlined,
                 size: 18,
-                color: ThemeConfig.accentColor,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -159,16 +159,16 @@ class DiaryMapSection extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.open_in_new,
                           size: 14,
-                          color: ThemeConfig.accentColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '在 Google 地圖中開啟',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: ThemeConfig.accentColor,
+                            color: Theme.of(context).colorScheme.primary,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),

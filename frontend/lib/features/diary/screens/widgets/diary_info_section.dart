@@ -20,10 +20,10 @@ class DiaryInfoSection extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.location_on_outlined,
                 size: 18,
-                color: ThemeConfig.accentColor,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(

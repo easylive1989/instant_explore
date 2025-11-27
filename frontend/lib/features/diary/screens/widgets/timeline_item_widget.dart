@@ -33,7 +33,7 @@ class TimelineItemWidget extends StatelessWidget {
         _buildTimelineLine(),
 
         // 時間軸節點（圓點）
-        _buildTimelineDot(),
+        _buildTimelineDot(context),
 
         // 時間標籤
         _buildTimeLabel(context, timeText),
@@ -58,7 +58,7 @@ class TimelineItemWidget extends StatelessWidget {
   }
 
   /// 建立時間軸節點
-  Widget _buildTimelineDot() {
+  Widget _buildTimelineDot(BuildContext context) {
     return Positioned(
       left: AppSpacing.lg - (AppSpacing.timelineDotSize / 2) + 1,
       top: 0,
@@ -66,7 +66,7 @@ class TimelineItemWidget extends StatelessWidget {
         width: AppSpacing.timelineDotSize,
         height: AppSpacing.timelineDotSize,
         decoration: BoxDecoration(
-          color: ThemeConfig.accentColor,
+          color: Theme.of(context).colorScheme.primary,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 2),
         ),
@@ -82,7 +82,7 @@ class TimelineItemWidget extends StatelessWidget {
       child: Text(
         timeText,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: ThemeConfig.accentColor,
+          color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w500,
           fontSize: 11,
         ),

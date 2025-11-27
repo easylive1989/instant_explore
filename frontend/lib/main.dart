@@ -31,7 +31,6 @@ Future<Widget> init() async {
 Future<void> _initializeSupabase() async {
   final apiConfig = ApiConfig.fromEnvironment();
 
-  print('paul ${apiConfig.supabaseUrl}');
   if (apiConfig.isSupabaseConfigured) {
     try {
       await Supabase.initialize(

@@ -6,7 +6,7 @@ import 'helpers/supabase_admin_helper.dart';
 import 'helpers/test_user_helper.dart';
 
 void main() {
-  late SupabaseAdminHelper adminHelper = SupabaseAdminHelper();
+  late final SupabaseAdminHelper adminHelper = SupabaseAdminHelper();
 
   setUp(() async {
     // 確保測試帳號不存在（清理可能的殘留）

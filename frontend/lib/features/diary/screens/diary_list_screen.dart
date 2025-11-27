@@ -10,7 +10,6 @@ import 'package:travel_diary/features/diary/screens/widgets/timeline_group_widge
 import 'package:travel_diary/features/diary/screens/widgets/tag_filter_dialog.dart';
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
-import 'package:travel_diary/core/config/theme_config.dart';
 
 /// 日記列表畫面
 class DiaryListScreen extends ConsumerStatefulWidget {
@@ -45,8 +44,8 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateDiary(notifier),
         shape: const CircleBorder(),
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         child: const Icon(Icons.add),
       ),
     );
@@ -63,7 +62,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         CupertinoSliverNavigationBar(
           largeTitle: Text('app.name'.tr()),
           trailing: _buildNavigationBarActions(state),
-          backgroundColor: ThemeConfig.neutralLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
         SliverToBoxAdapter(child: _buildHeaderSection(state, notifier)),
         SliverPadding(
@@ -99,9 +98,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                             'diary.emptyHint'.tr(),
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
-                                  color: ThemeConfig.neutralText.withValues(
-                                    alpha: 0.6,
-                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                           const SizedBox(height: AppSpacing.lg),
@@ -152,22 +151,22 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
             child: state.selectedTagIds.isNotEmpty
                 ? Badge(
                     label: Text('${state.selectedTagIds.length}'),
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.slider_horizontal_3,
-                      color: ThemeConfig.neutralText,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   )
-                : const Icon(
+                : Icon(
                     CupertinoIcons.slider_horizontal_3,
-                    color: ThemeConfig.neutralText,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
           ),
         CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => _navigateToSettings(),
-          child: const Icon(
+          child: Icon(
             CupertinoIcons.settings,
-            color: ThemeConfig.neutralText,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
