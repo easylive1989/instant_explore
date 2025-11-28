@@ -72,7 +72,6 @@ patrol test \
   --dart-define=GOOGLE_IOS_CLIENT_ID=${GOOGLE_IOS_CLIENT_ID:-""} \
   --dart-define=GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-""} \
   --dart-define=GOOGLE_DIRECTIONS_API_KEY=${GOOGLE_DIRECTIONS_API_KEY:-""} \
-  --target integration_test/email_register_test.dart
 
 TEST_EXIT_CODE=$?
 
