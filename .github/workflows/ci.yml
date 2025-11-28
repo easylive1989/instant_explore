@@ -36,8 +36,8 @@ jobs:
 
   # E2E 整合測試
   e2e-test:
-    name: E2E Tests on iOS Simulator
-    runs-on: macos-14
+    name: E2E Tests on Android Emulator
+    runs-on: ubuntu-latest
     needs: [analyze]
     defaults:
       run:
@@ -46,6 +46,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -58,11 +69,6 @@ jobs:
 
       - name: Install Patrol CLI
         run: dart pub global activate patrol_cli
-
-      - name: Install Supabase CLI
-        run: |
-          brew install supabase/tap/supabase
-          supabase --version
 
       - name: Start Supabase
         run: |
@@ -79,31 +85,33 @@ jobs:
           echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_OUTPUT
           echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_OUTPUT
 
-      - name: Start iOS Simulator
-        uses: futureware-tech/simulator-action@v4
+      - name: Enable KVM (for Android Emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run E2E tests on Android Emulator with coverage
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          model: "iPhone 15"
-
-      - name: Wait for Simulator to be ready
-        run: |
-          xcrun simctl list devices | grep "iPhone 15"
-          sleep 10
-
-      - name: Run E2E tests on iOS Simulator with coverage
-        run: |
-          export PATH="$PATH:$HOME/.pub-cache/bin"
-          patrol test \
-            --show-flutter-logs \
-            --verbose \
-            --coverage \
-            --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
-            --dart-define=SUPABASE_ANON_KEY=${{ steps.supabase-creds.outputs.SUPABASE_ANON_KEY }} \
-            --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ steps.supabase-creds.outputs.SUPABASE_SERVICE_ROLE_KEY }} \
-            --dart-define=GOOGLE_WEB_CLIENT_ID= \
-            --dart-define=GOOGLE_IOS_CLIENT_ID= \
-            --dart-define=GOOGLE_MAPS_API_KEY= \
-            --dart-define=GOOGLE_DIRECTIONS_API_KEY= \
-            --target integration_test/email_register_test.dart
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            cd frontend
+            export PATH="$PATH:$HOME/.pub-cache/bin"
+            patrol test \
+              --show-flutter-logs \
+              --verbose \
+              --coverage \
+              --dart-define=SUPABASE_URL=http://10.0.2.2:54321 \
+              --dart-define=SUPABASE_ANON_KEY=${{ steps.supabase-creds.outputs.SUPABASE_ANON_KEY }} \
+              --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ steps.supabase-creds.outputs.SUPABASE_SERVICE_ROLE_KEY }} \
+              --dart-define=GOOGLE_WEB_CLIENT_ID= \
+              --dart-define=GOOGLE_IOS_CLIENT_ID= \
+              --dart-define=GOOGLE_MAPS_API_KEY= \
+              --dart-define=GOOGLE_DIRECTIONS_API_KEY= 
 
       - name: Convert coverage to LCOV format
         run: |
