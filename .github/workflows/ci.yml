@@ -89,12 +89,13 @@ jobs:
           xcrun simctl list devices | grep "iPhone 15"
           sleep 10
 
-      - name: Run E2E tests on iOS Simulator
+      - name: Run E2E tests on iOS Simulator with coverage
         run: |
           export PATH="$PATH:$HOME/.pub-cache/bin"
           patrol test \
             --show-flutter-logs \
             --verbose \
+            --coverage \
             --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
             --dart-define=SUPABASE_ANON_KEY=${{ steps.supabase-creds.outputs.SUPABASE_ANON_KEY }} \
             --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ steps.supabase-creds.outputs.SUPABASE_SERVICE_ROLE_KEY }} \
@@ -103,6 +104,25 @@ jobs:
             --dart-define=GOOGLE_MAPS_API_KEY= \
             --dart-define=GOOGLE_DIRECTIONS_API_KEY= \
             --target integration_test/email_register_test.dart
+
+      - name: Convert coverage to LCOV format
+        run: |
+          flutter pub global activate coverage
+          flutter pub global run coverage:format_coverage \
+            --lcov \
+            --in=coverage \
+            --out=coverage/lcov.info \
+            --packages=.packages \
+            --report-on=lib
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: e2e-tests
+          name: e2e-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       - name: Stop Supabase
         if: always()
