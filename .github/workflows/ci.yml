@@ -79,8 +79,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            cd frontend && \
-            export PATH="$PATH:$HOME/.pub-cache/bin" && \
+            export PATH="$PATH:$HOME/.pub-cache/bin"
             patrol test \
               --show-flutter-logs \
               --verbose \
