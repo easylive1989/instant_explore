@@ -73,13 +73,13 @@ jobs:
 
       - name: Run E2E tests on Android Emulator with coverage
         uses: reactivecircus/android-emulator-runner@v2
+        working-directory: frontend
         with:
           api-level: 26
           target: google_apis
           arch: x86_64
           profile: pixel_6
           script: |
-            cd frontend
             export PATH="$PATH:$HOME/.pub-cache/bin"
             patrol test \
               --show-flutter-logs \
