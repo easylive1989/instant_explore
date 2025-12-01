@@ -47,11 +47,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -69,21 +64,6 @@ jobs:
 
       - name: Install Patrol CLI
         run: dart pub global activate patrol_cli
-
-      - name: Start Supabase
-        run: |
-          cd ../supabase
-          supabase start
-          supabase status
-
-      - name: Extract Supabase credentials
-        id: supabase-creds
-        run: |
-          cd ../supabase
-          ANON_KEY=$(supabase status -o json | jq -r '.anon_key')
-          SERVICE_ROLE_KEY=$(supabase status -o json | jq -r '.service_role_key')
-          echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_OUTPUT
-          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_OUTPUT
 
       - name: Enable KVM (for Android Emulator)
         run: |
@@ -105,9 +85,9 @@ jobs:
               --show-flutter-logs \
               --verbose \
               --coverage \
-              --dart-define=SUPABASE_URL=http://10.0.2.2:54321 \
-              --dart-define=SUPABASE_ANON_KEY=${{ steps.supabase-creds.outputs.SUPABASE_ANON_KEY }} \
-              --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ steps.supabase-creds.outputs.SUPABASE_SERVICE_ROLE_KEY }} \
+              --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_TEST_URL }} \
+              --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_TEST_ANON_KEY }} \
+              --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }} \
               --dart-define=GOOGLE_WEB_CLIENT_ID= \
               --dart-define=GOOGLE_IOS_CLIENT_ID= \
               --dart-define=GOOGLE_MAPS_API_KEY= \
@@ -131,12 +111,6 @@ jobs:
           name: e2e-coverage
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
-
-      - name: Stop Supabase
-        if: always()
-        run: |
-          cd ../supabase
-          supabase stop
 
   # Android 建置與部署
   build-android:

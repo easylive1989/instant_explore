@@ -16,15 +16,6 @@ if [ ! -f "pubspec.yaml" ]; then
     exit 1
 fi
 
-# 檢查 Supabase 是否運行
-echo "📡 Checking Supabase status..."
-if ! curl -s http://127.0.0.1:54321/health > /dev/null 2>&1; then
-    echo "❌ Local Supabase is not running!"
-    echo "   Please start it first: supabase start"
-    exit 1
-fi
-echo "✅ Supabase is running"
-
 # 載入環境變數
 if [ -f .env.test ]; then
     echo "📝 Loading test environment variables..."
@@ -33,9 +24,9 @@ else
     echo "❌ .env.test file not found!"
     echo "   Please create .env.test with the following content:"
     echo ""
-    echo "   SUPABASE_URL=http://10.0.2.2:54321"
-    echo "   SUPABASE_ANON_KEY=<your-anon-key>"
-    echo "   SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>"
+    echo "   SUPABASE_URL=https://kypcxxjqsinamcqrjeog.supabase.co"
+    echo "   SUPABASE_ANON_KEY=<your-remote-anon-key>"
+    echo "   SUPABASE_SERVICE_ROLE_KEY=<your-remote-service-role-key>"
     echo "   GOOGLE_WEB_CLIENT_ID="
     echo "   GOOGLE_IOS_CLIENT_ID="
     echo "   GOOGLE_MAPS_API_KEY="
@@ -58,6 +49,18 @@ if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
     exit 1
 fi
 echo "✅ Environment variables validated"
+
+# 檢查遠端 Supabase 連線
+echo "📡 Checking remote Supabase connection..."
+HEALTH_URL="${SUPABASE_URL}/rest/v1/"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$HEALTH_URL")
+if ! echo "$HTTP_CODE" | grep -q "200\|401"; then
+    echo "❌ Cannot connect to remote Supabase at $SUPABASE_URL"
+    echo "   Received HTTP code: $HTTP_CODE"
+    echo "   Please check your network connection and SUPABASE_URL"
+    exit 1
+fi
+echo "✅ Connected to remote Supabase"
 
 # 執行測試
 echo "🧪 Running email registration test..."
@@ -82,10 +85,10 @@ else
     echo "❌ Test failed with exit code $TEST_EXIT_CODE"
     echo ""
     echo "Troubleshooting tips:"
-    echo "1. Check Supabase logs for errors"
-    echo "2. Verify that email registration is enabled in Supabase"
-    echo "3. Ensure the emulator can connect to host (use 10.0.2.2 for Android)"
-    echo "4. Check the test report at: build/app/reports/androidTests/connected/index.html"
+    echo "1. Check your network connection to remote Supabase"
+    echo "2. Verify that email registration is enabled in Supabase Dashboard"
+    echo "3. Check if test user was properly cleaned up"
+    echo "4. Review test logs for specific error messages"
 fi
 
 exit $TEST_EXIT_CODE
