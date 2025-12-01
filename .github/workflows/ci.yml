@@ -73,14 +73,14 @@ jobs:
 
       - name: Run E2E tests on Android Emulator with coverage
         uses: reactivecircus/android-emulator-runner@v2
-        working-directory: frontend
         with:
           api-level: 26
           target: google_apis
           arch: x86_64
           profile: pixel_6
           script: |
-            export PATH="$PATH:$HOME/.pub-cache/bin"
+            cd frontend && \
+            export PATH="$PATH:$HOME/.pub-cache/bin" && \
             patrol test \
               --show-flutter-logs \
               --verbose \
@@ -91,8 +91,7 @@ jobs:
               --dart-define=GOOGLE_WEB_CLIENT_ID= \
               --dart-define=GOOGLE_IOS_CLIENT_ID= \
               --dart-define=GOOGLE_MAPS_API_KEY= \
-              --dart-define=GOOGLE_DIRECTIONS_API_KEY= 
-
+              --dart-define=GOOGLE_DIRECTIONS_API_KEY=
       - name: Convert coverage to LCOV format
         run: |
           flutter pub global activate coverage
