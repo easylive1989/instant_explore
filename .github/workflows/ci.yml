@@ -34,10 +34,10 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
-  # E2E 整合測試
+  # E2E 整合測試 (Firebase Test Lab)
   e2e-test:
-    name: E2E Tests on iOS Simulator
-    runs-on: macos-14
+    name: E2E Tests on Firebase Test Lab
+    runs-on: ubuntu-latest
     needs: [analyze]
     defaults:
       run:
@@ -46,6 +46,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -59,44 +73,36 @@ jobs:
       - name: Install Patrol CLI
         run: dart pub global activate patrol_cli
 
-      - name: Start iOS Simulator
-        uses: futureware-tech/simulator-action@v4
-        with:
-          model: "iPhone 15"
-
-      - name: Run E2E tests on iOS Simulator with coverage
+      - name: Build Android app and test APKs
         run: |
           export PATH="$PATH:$HOME/.pub-cache/bin"
-          patrol test \
-            --show-flutter-logs \
-            --verbose \
-            --coverage \
+          patrol build android \
+            --target integration_test/test_bundle.dart \
             --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_TEST_URL }} \
             --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_TEST_ANON_KEY }} \
             --dart-define=SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }} \
-            --dart-define=GOOGLE_WEB_CLIENT_ID= \
-            --dart-define=GOOGLE_IOS_CLIENT_ID= \
-            --dart-define=GOOGLE_MAPS_API_KEY= \
-            --dart-define=GOOGLE_DIRECTIONS_API_KEY=
+            --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
+            --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }} \
+            --dart-define=GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
+            --dart-define=GOOGLE_DIRECTIONS_API_KEY=${{ secrets.GOOGLE_DIRECTIONS_API_KEY }}
 
-      - name: Convert coverage to LCOV format
+      - name: Run tests on Firebase Test Lab
         run: |
-          flutter pub global activate coverage
-          flutter pub global run coverage:format_coverage \
-            --lcov \
-            --in=coverage \
-            --out=coverage/lcov.info \
-            --packages=.packages \
-            --report-on=lib
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app build/app/outputs/apk/debug/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device model=Pixel8,version=34,locale=en,orientation=portrait \
+            --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./frontend/coverage/lcov.info
-          flags: e2e-tests
-          name: e2e-coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+      # TODO: Re-enable coverage reporting.
+      # The output from Firebase Test Lab is different and needs a new process to be handled.
+      # - name: Convert coverage to LCOV format
+      #   run: |
+      #     ...
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   ...
 
   # Android 建置與部署
   build-android:
