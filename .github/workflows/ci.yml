@@ -71,7 +71,7 @@ jobs:
         run: flutter pub get
 
       - name: Install Patrol CLI
-        run: dart pub global activate patrol_cli 3.15.0
+        run: dart pub global activate patrol_cli 3.11.0
 
       - name: Build Android app and test APKs
         run: |
