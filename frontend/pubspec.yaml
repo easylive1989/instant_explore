@@ -75,7 +75,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.3
 
   # E2E testing with Patrol
-  patrol: ^3.11.0
+  patrol: ^3.20.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
