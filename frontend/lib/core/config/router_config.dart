@@ -9,9 +9,9 @@ import 'package:travel_diary/features/auth/screens/register_screen.dart';
 import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
 import 'package:travel_diary/features/diary/screens/diary_detail_screen.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
+import 'package:travel_diary/features/images/widgets/full_image_viewer.dart';
 import 'package:travel_diary/features/settings/screens/settings_screen.dart';
 import 'package:travel_diary/features/tags/screens/tag_management_screen.dart';
-import 'package:travel_diary/shared/widgets/full_image_viewer.dart';
 
 /// Router configuration using go_router for declarative navigation.
 ///

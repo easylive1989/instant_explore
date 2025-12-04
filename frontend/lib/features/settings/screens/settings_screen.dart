@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/providers/auth_state_provider.dart';
-import 'package:travel_diary/shared/widgets/settings_section.dart';
-import 'package:travel_diary/shared/widgets/settings_tile.dart';
+import 'package:travel_diary/features/settings/widgets/settings_section.dart';
+import 'package:travel_diary/features/settings/widgets/settings_tile.dart';
 
 /// 設定畫面
 ///

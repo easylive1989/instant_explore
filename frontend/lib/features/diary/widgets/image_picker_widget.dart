@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:travel_diary/shared/widgets/full_image_viewer.dart';
+import 'package:travel_diary/features/images/widgets/full_image_viewer.dart';
 
 /// 圖片選擇與預覽元件
 class ImagePickerWidget extends StatelessWidget {
