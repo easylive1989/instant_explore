@@ -11,6 +11,7 @@ import 'package:travel_diary/features/places/models/place.dart';
 import 'package:travel_diary/features/diary/providers/diary_form_provider.dart';
 import 'package:travel_diary/features/diary/providers/diary_crud_provider.dart';
 import 'package:travel_diary/features/diary/providers/diary_providers.dart';
+import 'package:travel_diary/features/images/providers/image_providers.dart';
 import 'dart:convert';
 
 /// 日記新增/編輯畫面

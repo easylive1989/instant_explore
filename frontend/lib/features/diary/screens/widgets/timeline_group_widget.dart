@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_entry_view_data.dart';
 import 'package:travel_diary/features/diary/providers/diary_list_provider.dart';
 import 'package:travel_diary/features/diary/utils/diary_date_grouper.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/features/diary/screens/widgets/timeline_item_widget.dart';
 
 /// 時間軸日期分組 Widget
@@ -17,13 +16,11 @@ class TimelineGroupWidget extends StatelessWidget {
     required this.date,
     required this.entries,
     required this.notifier,
-    required this.imageUploadService,
   });
 
   final String date; // 格式：'yyyy-MM-dd'
-  final List<DiaryEntry> entries;
+  final List<DiaryEntryViewData> entries;
   final DiaryListNotifier notifier;
-  final ImageUploadService imageUploadService;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +38,7 @@ class TimelineGroupWidget extends StatelessWidget {
 
           // 時間軸上的日記卡片
           ...entries.map(
-            (entry) => TimelineItemWidget(
-              entry: entry,
-              notifier: notifier,
-              imageUploadService: imageUploadService,
-            ),
+            (entry) => TimelineItemWidget(entry: entry, notifier: notifier),
           ),
         ],
       ),

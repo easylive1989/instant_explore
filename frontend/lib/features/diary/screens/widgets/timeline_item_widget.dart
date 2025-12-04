@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_entry_view_data.dart';
 import 'package:travel_diary/features/diary/providers/diary_list_provider.dart';
 import 'package:travel_diary/features/diary/widgets/diary_card.dart';
 import 'package:travel_diary/features/diary/screens/diary_detail_screen.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
 
 /// 時間軸單一項目 Widget
 ///
@@ -16,12 +15,10 @@ class TimelineItemWidget extends StatelessWidget {
     super.key,
     required this.entry,
     required this.notifier,
-    required this.imageUploadService,
   });
 
-  final DiaryEntry entry;
+  final DiaryEntryViewData entry;
   final DiaryListNotifier notifier;
-  final ImageUploadService imageUploadService;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +93,6 @@ class TimelineItemWidget extends StatelessWidget {
       padding: const EdgeInsets.only(left: AppSpacing.xl, top: AppSpacing.lg),
       child: DiaryCard(
         entry: entry,
-        imageUploadService: imageUploadService,
         onTap: () => _navigateToDiaryDetail(context),
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_entry_view_data.dart';
 
 /// 日記日期分組工具
 class DiaryDateGrouper {
@@ -7,8 +7,10 @@ class DiaryDateGrouper {
   ///
   /// 返回格式：[{date: '2025-01-22', entries: [...]}, ...]
   /// 日期從新到舊排序
-  static List<Map<String, dynamic>> groupByDate(List<DiaryEntry> entries) {
-    final Map<String, List<DiaryEntry>> grouped = {};
+  static List<Map<String, dynamic>> groupByDate(
+    List<DiaryEntryViewData> entries,
+  ) {
+    final Map<String, List<DiaryEntryViewData>> grouped = {};
 
     // 按日期分組
     for (final entry in entries) {

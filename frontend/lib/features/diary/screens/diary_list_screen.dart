@@ -8,7 +8,6 @@ import 'package:travel_diary/features/diary/utils/diary_date_grouper.dart';
 import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
 import 'package:travel_diary/features/diary/screens/widgets/timeline_group_widget.dart';
 import 'package:travel_diary/features/diary/screens/widgets/tag_filter_dialog.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 
 /// 日記列表畫面
@@ -32,13 +31,12 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(diaryListProvider);
     final notifier = ref.read(diaryListProvider.notifier);
-    final imageUploadService = ImageUploadService();
 
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => notifier.loadDiaries(),
-          child: _buildScrollView(state, notifier, imageUploadService),
+          child: _buildScrollView(state, notifier),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -51,11 +49,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     );
   }
 
-  Widget _buildScrollView(
-    DiaryListState state,
-    DiaryListNotifier notifier,
-    ImageUploadService imageUploadService,
-  ) {
+  Widget _buildScrollView(DiaryListState state, DiaryListNotifier notifier) {
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
@@ -127,7 +121,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                   date: group['date'],
                   entries: group['entries'],
                   notifier: notifier,
-                  imageUploadService: imageUploadService,
                 );
               },
               childCount: state.entries.isEmpty

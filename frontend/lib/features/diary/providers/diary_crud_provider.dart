@@ -5,6 +5,7 @@ import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/diary/services/diary_repository.dart';
 import 'package:travel_diary/features/images/services/image_upload_service.dart';
 import 'package:travel_diary/features/diary/providers/diary_providers.dart';
+import 'package:travel_diary/features/images/providers/image_providers.dart';
 
 /// 日記 CRUD 狀態
 @immutable

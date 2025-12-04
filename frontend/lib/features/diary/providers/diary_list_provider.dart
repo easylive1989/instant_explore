@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
+import 'package:travel_diary/features/diary/models/diary_entry_view_data.dart';
 import 'package:travel_diary/features/diary/models/diary_tag.dart';
 import 'package:travel_diary/features/diary/services/diary_repository.dart';
 import 'package:travel_diary/features/diary/providers/diary_providers.dart';
+import 'package:travel_diary/features/images/providers/image_providers.dart';
+import 'package:travel_diary/features/images/services/image_upload_service.dart';
 
 /// 日記列表畫面狀態
 class DiaryListState {
-  final List<DiaryEntry> entries;
+  final List<DiaryEntryViewData> entries;
   final List<DiaryTag> allTags;
   final List<String> selectedTagIds;
   final bool isLoading;
@@ -21,7 +23,7 @@ class DiaryListState {
   });
 
   DiaryListState copyWith({
-    List<DiaryEntry>? entries,
+    List<DiaryEntryViewData>? entries,
     List<DiaryTag>? allTags,
     List<String>? selectedTagIds,
     bool? isLoading,
@@ -40,8 +42,10 @@ class DiaryListState {
 /// 日記列表狀態管理器
 class DiaryListNotifier extends StateNotifier<DiaryListState> {
   final DiaryRepository _repository;
+  final ImageUploadService _imageUploadService;
 
-  DiaryListNotifier(this._repository) : super(const DiaryListState()) {
+  DiaryListNotifier(this._repository, this._imageUploadService)
+    : super(const DiaryListState()) {
     loadDiaries();
   }
 
@@ -50,13 +54,30 @@ class DiaryListNotifier extends StateNotifier<DiaryListState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final entries = state.selectedTagIds.isEmpty
+      final diaryEntries = state.selectedTagIds.isEmpty
           ? await _repository.getAllDiaryEntries()
           : await _repository.getDiaryEntriesByTags(state.selectedTagIds);
 
       final tags = await _repository.getAllTags();
 
-      state = state.copyWith(entries: entries, allTags: tags, isLoading: false);
+      final viewDataEntries = diaryEntries.map((entry) {
+        final imageUrl = entry.imagePaths.isNotEmpty
+            ? _imageUploadService.getImageUrl(entry.imagePaths.first)
+            : null;
+        return DiaryEntryViewData(
+          id: entry.id,
+          title: entry.title,
+          visitDate: entry.visitDate,
+          placeName: entry.placeName,
+          imageUrl: imageUrl,
+        );
+      }).toList();
+
+      state = state.copyWith(
+        entries: viewDataEntries,
+        allTags: tags,
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -85,6 +106,9 @@ class DiaryListNotifier extends StateNotifier<DiaryListState> {
   /// 刪除日記
   Future<void> deleteDiary(String diaryId) async {
     try {
+      // Note: Deleting images associated with the diary is not handled here.
+      // This might be a separate concern, possibly handled via backend triggers
+      // or a more complex deletion service. For now, we only delete the entry.
       await _repository.deleteDiaryEntry(diaryId);
       await loadDiaries();
     } catch (e) {
@@ -96,5 +120,8 @@ class DiaryListNotifier extends StateNotifier<DiaryListState> {
 /// 日記列表 Provider
 final diaryListProvider =
     StateNotifierProvider<DiaryListNotifier, DiaryListState>(
-      (ref) => DiaryListNotifier(ref.read(diaryRepositoryProvider)),
+      (ref) => DiaryListNotifier(
+        ref.read(diaryRepositoryProvider),
+        ref.read(imageUploadServiceProvider),
+      ),
     );

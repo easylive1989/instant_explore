@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:travel_diary/features/diary/models/diary_entry.dart';
-import 'package:travel_diary/features/images/services/image_upload_service.dart';
+import 'package:travel_diary/features/diary/models/diary_entry_view_data.dart';
 import 'package:travel_diary/core/constants/spacing_constants.dart';
 import 'package:travel_diary/core/config/theme_config.dart';
 
 /// 日記卡片元件 - 極簡風格
 class DiaryCard extends StatelessWidget {
-  final DiaryEntry entry;
+  final DiaryEntryViewData entry;
   final VoidCallback onTap;
-  final ImageUploadService imageUploadService;
 
-  const DiaryCard({
-    super.key,
-    required this.entry,
-    required this.onTap,
-    required this.imageUploadService,
-  });
+  const DiaryCard({super.key, required this.entry, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +33,7 @@ class DiaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 圖片 - 帶圓角和內邊距
-            if (entry.imagePaths.isNotEmpty)
+            if (entry.imageUrl != null)
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: ClipRRect(
@@ -48,9 +41,7 @@ class DiaryCard extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
                     child: CachedNetworkImage(
-                      imageUrl: imageUploadService.getImageUrl(
-                        entry.imagePaths.first,
-                      ),
+                      imageUrl: entry.imageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: ThemeConfig.neutralLight,
@@ -75,7 +66,7 @@ class DiaryCard extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.md,
-                entry.imagePaths.isEmpty ? AppSpacing.md : AppSpacing.sm,
+                entry.imageUrl == null ? AppSpacing.md : AppSpacing.sm,
                 AppSpacing.md,
                 AppSpacing.md,
               ),
