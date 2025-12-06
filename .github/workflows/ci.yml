@@ -34,11 +34,33 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
+  # 更新 Supabase 資料庫
+  push-supabase-db:
+    name: Push Supabase DB Schema
+    runs-on: ubuntu-latest
+    needs: [analyze]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push database migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+
   # Android 建置與部署
   build-android:
     name: Build & Deploy Android AAB
     runs-on: ubuntu-latest
-    needs: [analyze]
+    needs: [push-supabase-db]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     defaults:
       run:
@@ -128,7 +150,7 @@ jobs:
   build-ios:
     name: Build & Deploy iOS IPA
     runs-on: macos-latest
-    needs: [analyze]
+    needs: [push-supabase-db]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     defaults:
       run:
@@ -243,18 +265,20 @@ jobs:
   build-status:
     name: Build Status Report
     runs-on: ubuntu-latest
-    needs: [analyze, build-android, build-ios]
+    needs: [analyze, push-supabase-db, build-android, build-ios]
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     steps:
       - name: Report Status
         run: |
           echo "## 🚀 建置狀態報告"
-          echo "- 單元測試: ${{ needs.analyze.result }}"
+          echo "- 程式碼檢查: ${{ needs.analyze.result }}"
+          echo "- Supabase DB 推送: ${{ needs.push-supabase-db.result }}"
           echo "- Android 建置: ${{ needs.build-android.result }}"
           echo "- iOS 建置: ${{ needs.build-ios.result }}"
 
           if [ "${{ needs.analyze.result }}" = "success" ] && \
+             [ "${{ needs.push-supabase-db.result }}" = "success" ] && \
              [ "${{ needs.build-android.result }}" = "success" ] && \
              [ "${{ needs.build-ios.result }}" = "success" ]; then
             echo "✅ 所有測試和建置成功完成！"
