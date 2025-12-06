@@ -9,9 +9,6 @@ class DiaryEntry {
   /// 使用者 ID
   final String userId;
 
-  /// 標題
-  final String title;
-
   /// 內容
   final String? content;
 
@@ -48,7 +45,6 @@ class DiaryEntry {
   const DiaryEntry({
     required this.id,
     required this.userId,
-    required this.title,
     this.content,
     this.placeId,
     this.placeName,
@@ -67,7 +63,6 @@ class DiaryEntry {
     return DiaryEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      title: json['title'] as String,
       content: json['content'] as String?,
       placeId: json['place_id'] as String?,
       placeName: json['place_name'] as String?,
@@ -95,7 +90,6 @@ class DiaryEntry {
     return {
       'id': id,
       'user_id': userId,
-      'title': title,
       'content': content,
       'place_id': placeId,
       'place_name': placeName,
@@ -112,7 +106,6 @@ class DiaryEntry {
   DiaryEntry copyWith({
     String? id,
     String? userId,
-    String? title,
     String? content,
     String? placeId,
     String? placeName,
@@ -128,7 +121,6 @@ class DiaryEntry {
     return DiaryEntry(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      title: title ?? this.title,
       content: content ?? this.content,
       placeId: placeId ?? this.placeId,
       placeName: placeName ?? this.placeName,
@@ -150,7 +142,6 @@ class DiaryEntry {
     return other is DiaryEntry &&
         other.id == id &&
         other.userId == userId &&
-        other.title == title &&
         other.content == content &&
         other.placeId == placeId &&
         other.placeName == placeName &&
@@ -169,7 +160,6 @@ class DiaryEntry {
     return Object.hash(
       id,
       userId,
-      title,
       content,
       placeId,
       placeName,
@@ -186,7 +176,7 @@ class DiaryEntry {
 
   @override
   String toString() {
-    return 'DiaryEntry(id: $id, title: $title, visitDate: $visitDate, '
+    return 'DiaryEntry(id: $id, visitDate: $visitDate, '
         'placeName: $placeName, tags: $tags)';
   }
 }

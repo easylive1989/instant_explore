@@ -66,7 +66,6 @@ class DiaryListNotifier extends StateNotifier<DiaryListState> {
             : null;
         return DiaryEntryViewData(
           id: entry.id,
-          title: entry.title,
           visitDate: entry.visitDate,
           placeName: entry.placeName,
           imageUrl: imageUrl,

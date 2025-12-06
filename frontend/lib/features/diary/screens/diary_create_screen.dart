@@ -26,7 +26,6 @@ class DiaryCreateScreen extends ConsumerStatefulWidget {
 
 class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
   bool _isBottomSheetExpanded = false;
   double? _sheetHeight;
   bool _isEditing = false;
@@ -38,11 +37,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     super.initState();
     _isEditing = widget.diaryId != null;
 
-    // 監聽標題變化並更新 provider
-    _titleController.addListener(() {
-      ref.read(diaryFormProvider.notifier).updateTitle(_titleController.text);
-    });
-
     // 延遲初始化,確保 provider 可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isEditing) {
@@ -53,7 +47,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
     super.dispose();
   }
 
@@ -82,9 +75,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
       // 使用 form provider 載入資料
       ref.read(diaryFormProvider.notifier).loadFromEntry(entry);
-
-      // 更新標題 controller
-      _titleController.text = entry.title;
 
       // 載入標籤 ID
       try {
@@ -254,7 +244,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           .updateDiary(
             diaryId: _existingEntry!.id,
             userId: _existingEntry!.userId,
-            title: formState.title,
             contentJson: deltaJson,
             visitDate: formState.visitDate,
             tagIds: formState.selectedTagIds,
@@ -270,7 +259,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       savedEntry = await ref
           .read(diaryCrudProvider.notifier)
           .createDiary(
-            title: formState.title,
             contentJson: deltaJson,
             visitDate: formState.visitDate,
             tagIds: formState.selectedTagIds,
@@ -440,58 +428,33 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 標題
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: '標題',
-                  hintText: '今天去了哪裡?',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return '請輸入標題';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            InkWell(
-              onTap: _selectDateTime,
+        InkWell(
+          onTap: _selectDateTime,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
               borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.event,
-                      size: 24,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      DateFormat('MM/dd').format(formState.visitDate),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.event,
+                  size: 24,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  DateFormat('yyyy/MM/dd').format(formState.visitDate),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -499,7 +462,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         RichTextEditor(
           controller: formState.contentController,
           hintText: '分享你的心得與感想...',
-          height: MediaQuery.sizeOf(context).height - 400,
+          height: MediaQuery.sizeOf(context).height - 370,
         ),
         const SizedBox(height: 16),
       ],

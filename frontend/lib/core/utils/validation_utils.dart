@@ -15,17 +15,6 @@ class ValidationUtils {
     return emailRegex.hasMatch(email);
   }
 
-  /// Validate diary title
-  static String? validateDiaryTitle(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return '請輸入標題';
-    }
-    if (value.length > AppConstants.maxTitleLength) {
-      return '標題不能超過 ${AppConstants.maxTitleLength} 個字元';
-    }
-    return null;
-  }
-
   /// Validate diary content
   static String? validateDiaryContent(String? value) {
     if (value != null && value.length > AppConstants.maxContentLength) {

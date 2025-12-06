@@ -8,7 +8,6 @@ import 'package:travel_diary/features/diary/models/diary_entry.dart';
 /// 日記表單狀態
 @immutable
 class DiaryFormState {
-  final String title;
   final QuillController contentController;
   final DateTime visitDate;
   final List<String> selectedTagIds;
@@ -20,7 +19,6 @@ class DiaryFormState {
   final double? longitude;
 
   DiaryFormState({
-    this.title = '',
     required this.contentController,
     DateTime? visitDate,
     this.selectedTagIds = const [],
@@ -33,7 +31,6 @@ class DiaryFormState {
   }) : visitDate = visitDate ?? DateTime.now();
 
   DiaryFormState copyWith({
-    String? title,
     QuillController? contentController,
     DateTime? visitDate,
     List<String>? selectedTagIds,
@@ -45,7 +42,6 @@ class DiaryFormState {
     double? Function()? longitude,
   }) {
     return DiaryFormState(
-      title: title ?? this.title,
       contentController: contentController ?? this.contentController,
       visitDate: visitDate ?? this.visitDate,
       selectedTagIds: selectedTagIds ?? this.selectedTagIds,
@@ -73,11 +69,6 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
   void dispose() {
     state.contentController.dispose();
     super.dispose();
-  }
-
-  /// 更新標題
-  void updateTitle(String title) {
-    state = state.copyWith(title: title);
   }
 
   /// 更新內容 Controller
@@ -137,7 +128,6 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
       );
 
       state = state.copyWith(
-        title: entry.title,
         contentController: controller,
         visitDate: entry.visitDate,
         placeId: () => entry.placeId,
@@ -148,7 +138,6 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
       );
     } else {
       state = state.copyWith(
-        title: entry.title,
         visitDate: entry.visitDate,
         placeId: () => entry.placeId,
         placeName: () => entry.placeName,

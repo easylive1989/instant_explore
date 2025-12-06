@@ -73,43 +73,17 @@ class DiaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 地點資訊（移到上方）
-                  if (entry.placeName != null) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Expanded(
-                          child: Text(
-                            entry.placeName!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: ThemeConfig.neutralText.withValues(
-                                alpha: 0.7,
-                              ),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                  // 地點名稱作為標題
+                  if (entry.placeName != null)
+                    Text(
+                      entry.placeName!,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: ThemeConfig.neutralText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
-
-                  // 標題（移到下方）
-                  Text(
-                    entry.title,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: ThemeConfig.neutralText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 ],
               ),
             ),

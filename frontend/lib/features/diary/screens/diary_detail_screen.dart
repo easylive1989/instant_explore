@@ -134,7 +134,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           slivers: [
             // Header - Cupertino Navigation Bar
             CupertinoSliverNavigationBar(
-              largeTitle: Text(entry.title),
+              largeTitle: Text(entry.placeName ?? '日記詳情'),
               trailing: _buildNavigationBarActions(detailState),
               backgroundColor: ThemeConfig.neutralLight,
             ),

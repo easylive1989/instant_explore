@@ -5,14 +5,12 @@ import 'package:flutter/foundation.dart';
 @immutable
 class DiaryEntryViewData {
   final String id;
-  final String title;
   final DateTime visitDate;
   final String? placeName;
   final String? imageUrl;
 
   const DiaryEntryViewData({
     required this.id,
-    required this.title,
     required this.visitDate,
     this.placeName,
     this.imageUrl,

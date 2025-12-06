@@ -39,7 +39,6 @@ class DiaryCrudNotifier extends StateNotifier<DiaryCrudState> {
 
   /// 建立新日記(包含圖片上傳)
   Future<DiaryEntry?> createDiary({
-    required String title,
     required String contentJson,
     required DateTime visitDate,
     required List<String> tagIds,
@@ -57,7 +56,6 @@ class DiaryCrudNotifier extends StateNotifier<DiaryCrudState> {
       final diaryData = DiaryEntry(
         id: '',
         userId: '',
-        title: title,
         content: contentJson,
         placeId: placeId,
         placeName: placeName,
@@ -105,7 +103,6 @@ class DiaryCrudNotifier extends StateNotifier<DiaryCrudState> {
   Future<DiaryEntry?> updateDiary({
     required String diaryId,
     required String userId,
-    required String title,
     required String contentJson,
     required DateTime visitDate,
     required List<String> tagIds,
@@ -124,7 +121,6 @@ class DiaryCrudNotifier extends StateNotifier<DiaryCrudState> {
       final diaryData = DiaryEntry(
         id: diaryId,
         userId: userId,
-        title: title,
         content: contentJson,
         placeId: placeId,
         placeName: placeName,

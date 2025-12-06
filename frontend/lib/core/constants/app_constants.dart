@@ -43,6 +43,5 @@ class AppConstants {
   static const int maxTagsPerDiary = 10;
 
   /// Diary constraints
-  static const int maxTitleLength = 100;
   static const int maxContentLength = 5000;
 }
