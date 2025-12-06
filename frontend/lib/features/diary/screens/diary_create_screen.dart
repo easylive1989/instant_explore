@@ -27,6 +27,8 @@ class DiaryCreateScreen extends ConsumerStatefulWidget {
 class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
+  bool _isBottomSheetExpanded = false;
+  double? _sheetHeight;
   bool _isEditing = false;
   bool _isLoadingEntry = false;
   DiaryEntry? _existingEntry; // 編輯模式時儲存載入的 entry
@@ -308,6 +310,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final double screenHeight = MediaQuery.of(context).size.height;
+    const double collapsedHeight = 85.0;
+    final double expandedHeight = screenHeight * 0.7;
+
+    _sheetHeight ??= collapsedHeight;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? '編輯日記' : '新增日記'),
@@ -324,20 +332,103 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               ),
             )
           else
-            TextButton(onPressed: _saveDiary, child: const Text('儲存')),
+            IconButton(onPressed: _saveDiary, icon: const Icon(Icons.check)),
         ],
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, collapsedHeight + 20),
+          child: _buildGroup1(formState),
+        ),
+      ),
+      bottomSheet: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        height: _sheetHeight!,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1.0,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
           children: [
-            _buildGroup1(formState),
-            const SizedBox(height: 16),
-            _buildGroup2(formState),
-            const SizedBox(height: 16),
-            _buildGroup3(formState),
-            const SizedBox(height: 32),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                setState(() {
+                  _isBottomSheetExpanded = !_isBottomSheetExpanded;
+                  _sheetHeight = _isBottomSheetExpanded
+                      ? expandedHeight
+                      : collapsedHeight;
+                });
+              },
+              onVerticalDragUpdate: (details) {
+                setState(() {
+                  _sheetHeight = _sheetHeight! - details.delta.dy;
+                  _sheetHeight = _sheetHeight!.clamp(
+                    collapsedHeight,
+                    expandedHeight,
+                  );
+                });
+              },
+              onVerticalDragEnd: (details) {
+                final midPoint = (expandedHeight + collapsedHeight) / 2;
+                final shouldExpand =
+                    details.primaryVelocity! < -300 ||
+                    (details.primaryVelocity!.abs() < 300 &&
+                        _sheetHeight! > midPoint);
+
+                setState(() {
+                  _isBottomSheetExpanded = shouldExpand;
+                  _sheetHeight = shouldExpand
+                      ? expandedHeight
+                      : collapsedHeight;
+                });
+              },
+              child: SizedBox(
+                height: 40,
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 4,
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                physics: const NeverScrollableScrollPhysics(),
+                children: <Widget>[
+                  _buildGroup2(formState),
+                  const SizedBox(height: 16),
+                  _buildGroup3(formState),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -346,87 +437,72 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   /// Group 1: 標題內文與時間
   Widget _buildGroup1(DiaryFormState formState) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 標題
-          TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: '標題',
-              hintText: '今天去了哪裡?',
-              border: OutlineInputBorder(),
-            ),
-            maxLength: 100,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '請輸入標題';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // 內容(富文本編輯器)
-          RichTextEditor(
-            controller: formState.contentController,
-            hintText: '分享你的心得與感想...',
-            maxLength: 1000,
-            height: 200,
-          ),
-          const SizedBox(height: 16),
-
-          // 日期與時間
-          InkWell(
-            onTap: _selectDateTime,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 標題
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: '標題',
+                  hintText: '今天去了哪裡?',
+                  border: OutlineInputBorder(),
                 ),
-                borderRadius: BorderRadius.circular(8),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '請輸入標題';
+                  }
+                  return null;
+                },
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.event,
-                    size: 24,
-                    color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: _selectDateTime,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      DateFormat(
-                        'yyyy-MM-dd HH:mm',
-                      ).format(formState.visitDate),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.event,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      DateFormat('MM/dd').format(formState.visitDate),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // 內容(富文本編輯器)
+        RichTextEditor(
+          controller: formState.contentController,
+          hintText: '分享你的心得與感想...',
+          height: MediaQuery.sizeOf(context).height - 400,
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
