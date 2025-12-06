@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/tags/widgets/tag_selector.dart';
@@ -13,6 +12,7 @@ import 'package:travel_diary/features/diary/providers/diary_crud_provider.dart';
 import 'package:travel_diary/features/diary/providers/diary_providers.dart';
 import 'package:travel_diary/features/images/providers/image_providers.dart';
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 
 /// 日記新增/編輯畫面
 class DiaryCreateScreen extends ConsumerStatefulWidget {
@@ -62,9 +62,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
       if (entry == null) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('找不到日記資料')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.tr('diary_create.diary_not_found'))),
+          );
           Navigator.of(context).pop();
         }
         return;
@@ -88,9 +88,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       // 注意:現有圖片不會載入到 selectedImages,因為它們已經在 Storage
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('載入日記失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr(
+                'diary_create.load_diary_failed',
+                args: [e.toString()],
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -115,9 +122,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('選擇圖片失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr(
+                'diary_create.pick_image_failed',
+                args: [e.toString()],
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -155,7 +169,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                     CupertinoButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
-                        '取消',
+                        context.tr('common.cancel'),
                         style: TextStyle(
                           color: CupertinoColors.systemRed.resolveFrom(context),
                         ),
@@ -169,7 +183,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                         Navigator.of(context).pop();
                       },
                       child: Text(
-                        '確認',
+                        context.tr('common.confirm'),
                         style: TextStyle(
                           color: CupertinoColors.activeBlue.resolveFrom(
                             context,
@@ -225,9 +239,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     final formState = ref.read(diaryFormProvider);
 
     if (formState.placeId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('請選擇地點')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr('diary_create.select_place_first'))),
+      );
       return;
     }
 
@@ -272,9 +286,15 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     }
 
     if (savedEntry != null && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_isEditing ? '日記已更新' : '日記已建立')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEditing
+                ? context.tr('diary_create.diary_updated')
+                : context.tr('diary_create.diary_created'),
+          ),
+        ),
+      );
       Navigator.of(context).pop(true); // 返回 true 表示已儲存
     }
   }
@@ -306,7 +326,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? '編輯日記' : '新增日記'),
+        title: Text(
+          _isEditing ? context.tr('diary.edit') : context.tr('diary.create'),
+        ),
         actions: [
           if (crudState.isLoading)
             const Center(
@@ -461,7 +483,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         // 內容(富文本編輯器)
         RichTextEditor(
           controller: formState.contentController,
-          hintText: '分享你的心得與感想...',
+          hintText: context.tr('diary.contentHint'),
           height: MediaQuery.sizeOf(context).height - 370,
         ),
         const SizedBox(height: 16),
@@ -484,7 +506,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('地點與照片', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            context.tr('diary.locationAndPhotos'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           _buildPlaceAndImageGrid(formState),
         ],
@@ -633,7 +658,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                     size: 32,
                   ),
                   const SizedBox(height: 4),
-                  Text('選擇地點', style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    context.tr('diary.selectLocation'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ],
               ),
       ),
@@ -696,7 +724,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               size: 32,
             ),
             const SizedBox(height: 4),
-            Text('添加照片', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              context.tr('diary.addPhotos'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),

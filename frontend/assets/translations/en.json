@@ -87,6 +87,14 @@
     "locationAndPhotos": "Location & Photos",
     "clearFilter": "Clear Filter"
   },
+  "diary_create": {
+    "diary_not_found": "Diary not found",
+    "load_diary_failed": "Failed to load diary: {error}",
+    "pick_image_failed": "Failed to pick images: {error}",
+    "select_place_first": "Please select a location",
+    "diary_updated": "Diary updated",
+    "diary_created": "Diary created"
+  },
   "places": {
     "title": "Places",
     "search": "Search Places",

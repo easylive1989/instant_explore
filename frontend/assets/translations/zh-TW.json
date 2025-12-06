@@ -87,6 +87,14 @@
     "locationAndPhotos": "地點與照片",
     "clearFilter": "清除篩選"
   },
+  "diary_create": {
+    "diary_not_found": "找不到日記資料",
+    "load_diary_failed": "載入日記失敗: {error}",
+    "pick_image_failed": "選擇圖片失敗: {error}",
+    "select_place_first": "請選擇地點",
+    "diary_updated": "日記已更新",
+    "diary_created": "日記已建立"
+  },
   "places": {
     "title": "地點",
     "search": "搜尋地點",
