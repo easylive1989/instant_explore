@@ -98,13 +98,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                                 ),
                           ),
                           const SizedBox(height: AppSpacing.lg),
-                          // Arrow pointing to FAB
-                          CustomPaint(
-                            size: const Size(100, 60),
-                            painter: CurledArrowPainter(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
                         ],
                       ),
                     ),
