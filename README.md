@@ -1,7 +1,6 @@
 # Travel Diary 旅食日記
 
 [![CI/CD Pipeline](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml/badge.svg)](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/easylive1989/instant_explore/branch/master/graph/badge.svg)](https://codecov.io/gh/easylive1989/instant_explore)
 
 一款專為旅遊與美食愛好者設計的日記應用程式,讓您輕鬆記錄每一次的精彩旅程與美食體驗。透過地圖標記、照片、評分與標籤,完整保存您的美好回憶。
 
