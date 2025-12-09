@@ -95,6 +95,17 @@
     "diary_updated": "Diary updated",
     "diary_created": "Diary created"
   },
+  "place_picker": {
+    "get_location_failed": "Failed to get location: {error}",
+    "search_failed": "Search failed: {error}",
+    "get_details_failed": "Failed to get place details: {error}",
+    "no_places_found": "No places found",
+    "no_nearby_places_found": "No nearby places found",
+    "select_place": "Select Place",
+    "confirm": "Confirm",
+    "search_places": "Search places...",
+    "getting_location": "Getting location..."
+  },
   "places": {
     "title": "Places",
     "search": "Search Places",

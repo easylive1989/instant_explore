@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -62,9 +63,16 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('無法取得位置: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr(
+                'place_picker.get_location_failed',
+                args: [e.toString()],
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -78,7 +86,7 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
 
     try {
       final placesService = ref.read(placesServiceProvider);
-      final places = await placesService.searchNearbyRestaurants(
+      final places = await placesService.searchNearbyPlaces(
         latitude: _currentLocation!.latitude,
         longitude: _currentLocation!.longitude,
         radius: 5000, // 5 公里
@@ -94,9 +102,13 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
         _isSearching = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('搜尋失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('place_picker.search_failed', args: [e.toString()]),
+            ),
+          ),
+        );
       }
     }
   }
@@ -155,9 +167,13 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
         _isLoadingSuggestion = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('搜尋失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('place_picker.search_failed', args: [e.toString()]),
+            ),
+          ),
+        );
       }
     }
   }
@@ -200,9 +216,16 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('取得地點詳細資訊失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr(
+                'place_picker.get_details_failed',
+                args: [e.toString()],
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -214,7 +237,7 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
     }
 
     if (_suggestions.isEmpty) {
-      return const Center(child: Text('未找到符合的餐廳'));
+      return Center(child: Text(context.tr('place_picker.no_places_found')));
     }
 
     return ListView.builder(
@@ -245,7 +268,9 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
     }
 
     if (_places.isEmpty) {
-      return const Center(child: Text('附近沒有找到地點'));
+      return Center(
+        child: Text(context.tr('place_picker.no_nearby_places_found')),
+      );
     }
 
     return ListView.builder(
@@ -328,10 +353,13 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
                 },
               )
             : null,
-        title: const Text('選擇地點'),
+        title: Text(context.tr('place_picker.select_place')),
         actions: [
           if (_selectedPlace != null)
-            TextButton(onPressed: _confirmSelection, child: const Text('確定')),
+            TextButton(
+              onPressed: _confirmSelection,
+              child: Text(context.tr('place_picker.confirm')),
+            ),
         ],
       ),
       body: _isLoading
@@ -344,7 +372,7 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: '搜尋地點...',
+                      hintText: context.tr('place_picker.search_places'),
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
@@ -368,7 +396,11 @@ class _PlacePickerScreenState extends ConsumerState<PlacePickerScreen> {
                 // 地點列表、搜尋建議或地圖顯示
                 Expanded(
                   child: _currentLocation == null
-                      ? const Center(child: Text('正在取得位置...'))
+                      ? Center(
+                          child: Text(
+                            context.tr('place_picker.getting_location'),
+                          ),
+                        )
                       : _selectedPlace != null
                       ? _buildMapView()
                       : _searchController.text.isNotEmpty

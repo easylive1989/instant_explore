@@ -95,6 +95,17 @@
     "diary_updated": "日記已更新",
     "diary_created": "日記已建立"
   },
+  "place_picker": {
+    "get_location_failed": "無法取得位置: {error}",
+    "search_failed": "搜尋失敗: {error}",
+    "get_details_failed": "取得地點詳細資訊失敗: {error}",
+    "no_places_found": "未找到符合的地點",
+    "no_nearby_places_found": "附近沒有找到地點",
+    "select_place": "選擇地點",
+    "confirm": "確定",
+    "search_places": "搜尋地點...",
+    "getting_location": "正在取得位置..."
+  },
   "places": {
     "title": "地點",
     "search": "搜尋地點",

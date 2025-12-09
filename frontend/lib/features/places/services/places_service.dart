@@ -30,7 +30,7 @@ class PlacesService {
   /// [radius] 搜尋半徑（公尺），預設 2000 公尺
   /// [maxResults] 最大結果數量，預設 20
 
-  Future<List<Place>> searchNearbyRestaurants({
+  Future<List<Place>> searchNearbyPlaces({
     required double latitude,
     required double longitude,
     double radius = 2000,
@@ -50,7 +50,6 @@ class PlacesService {
         },
       },
       'maxResultCount': maxResults,
-      'includedTypes': ['restaurant'],
     };
 
     final headers = {
@@ -160,41 +159,32 @@ class PlacesService {
   /// [longitude] 經度
   /// [radius] 搜尋半徑（公尺），預設 2000 公尺
 
-  Future<Place?> getRandomNearbyRestaurant({
+  Future<Place?> getRandomNearbyPlace({
     required double latitude,
     required double longitude,
     double radius = 2000,
   }) async {
     try {
-      final restaurants = await searchNearbyRestaurants(
+      final places = await searchNearbyPlaces(
         latitude: latitude,
         longitude: longitude,
         radius: radius,
         maxResults: 20,
       );
 
-      if (restaurants.isEmpty) {
+      if (places.isEmpty) {
         return null;
       }
 
-      // 過濾掉沒有評分或評分太低的餐廳（可選）
-      final filteredRestaurants = restaurants.where((restaurant) {
-        return restaurant.rating == null || restaurant.rating! >= 3.0;
-      }).toList();
-
-      final targetList = filteredRestaurants.isNotEmpty
-          ? filteredRestaurants
-          : restaurants;
-
-      // 隨機選擇一家餐廳
+      // 隨機選擇一個地點
       final random = Random();
-      final selectedRestaurant = targetList[random.nextInt(targetList.length)];
+      final selectedPlace = places[random.nextInt(places.length)];
 
-      return selectedRestaurant;
+      return selectedPlace;
     } on PlacesException {
       rethrow;
     } catch (e) {
-      throw ApiResponseException('隨機推薦餐廳失敗: $e');
+      throw ApiResponseException('隨機推薦地點失敗: $e');
     }
   }
 
@@ -295,10 +285,7 @@ class PlacesService {
 
     final url = Uri.parse('$_baseUrl/places:autocomplete');
 
-    final requestBody = <String, dynamic>{
-      'input': input,
-      'includedPrimaryTypes': ['restaurant'],
-    };
+    final requestBody = <String, dynamic>{'input': input};
 
     // 如果有提供位置，加入位置偏好
     if (latitude != null && longitude != null) {
