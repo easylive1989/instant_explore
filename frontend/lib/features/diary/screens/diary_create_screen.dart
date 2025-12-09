@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:travel_diary/core/services/gemini_service.dart';
 import 'package:travel_diary/features/places/screens/place_picker_screen.dart';
 import 'package:travel_diary/features/diary/models/diary_entry.dart';
 import 'package:travel_diary/features/tags/widgets/tag_selector.dart';
@@ -30,6 +31,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   double? _sheetHeight;
   bool _isEditing = false;
   bool _isLoadingEntry = false;
+  bool _isGenerating = false; // AI 生成狀態
   DiaryEntry? _existingEntry; // 編輯模式時儲存載入的 entry
 
   @override
@@ -299,6 +301,57 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     }
   }
 
+  Future<void> _generateAIDescription() async {
+    final formState = ref.read(diaryFormProvider);
+    if (formState.placeId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr('diary_create.select_place_first'))),
+      );
+      return;
+    }
+
+    setState(() {
+      _isGenerating = true;
+    });
+
+    try {
+      final place = Place(
+        id: formState.placeId!,
+        name: formState.placeName ?? '',
+        formattedAddress: formState.placeAddress ?? '',
+        location: PlaceLocation(
+          latitude: formState.latitude!,
+          longitude: formState.longitude!,
+        ),
+        types: [],
+        photos: [],
+      );
+
+      final geminiService = ref.read(geminiServiceProvider);
+      final description = await geminiService.generateDiaryDescription(place);
+
+      final controller = formState.contentController;
+      controller.document.delete(0, controller.document.length);
+      controller.document.insert(0, description);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('diary_create.generate_failed', args: [e.toString()]),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(diaryFormProvider);
@@ -479,12 +532,34 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              context.tr('diary.content'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (_isGenerating)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              IconButton(
+                onPressed: _generateAIDescription,
+                icon: const Icon(Icons.auto_awesome),
+                tooltip: context.tr('diary_create.generate_with_ai'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
 
         // 內容(富文本編輯器)
         RichTextEditor(
           controller: formState.contentController,
           hintText: context.tr('diary.contentHint'),
-          height: MediaQuery.sizeOf(context).height - 370,
+          height: MediaQuery.sizeOf(context).height - 450,
         ),
         const SizedBox(height: 16),
       ],

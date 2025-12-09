@@ -13,6 +13,7 @@ class ApiConfig {
   final String supabaseServiceRoleKey;
   final String googleWebClientId;
   final String googleIosClientId;
+  final String geminiApiKey;
   const ApiConfig({
     required this.googleMapsApiKey,
     required this.googleDirectionsApiKey,
@@ -21,6 +22,7 @@ class ApiConfig {
     required this.supabaseServiceRoleKey,
     required this.googleWebClientId,
     required this.googleIosClientId,
+    required this.geminiApiKey,
   });
 
   /// 從環境變數建立配置
@@ -51,6 +53,7 @@ class ApiConfig {
         'GOOGLE_IOS_CLIENT_ID',
         defaultValue: '',
       ),
+      geminiApiKey: String.fromEnvironment('GEMINI_API_KEY', defaultValue: ''),
     );
   }
 
@@ -70,11 +73,13 @@ class ApiConfig {
     if (googleWebClientId.isEmpty) {
       missingKeys.add('GOOGLE_WEB_CLIENT_ID');
     }
+    if (geminiApiKey.isEmpty) {
+      missingKeys.add('GEMINI_API_KEY');
+    }
 
     if (missingKeys.isNotEmpty) {
       debugPrint('⚠️ 警告: 以下 API 金鑰未設定: ${missingKeys.join(', ')}');
-      debugPrint('請在執行時使用 --dart-define 參數設定環境變數');
-      debugPrint('範例: flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_key');
+      debugPrint('請在 .env 檔案中設定對應的環境變數');
       return false;
     }
 
@@ -88,11 +93,15 @@ class ApiConfig {
   bool get isSupabaseConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
+  /// 取得 Gemini 是否已配置
+  bool get isGeminiConfigured => geminiApiKey.isNotEmpty;
+
   @override
   String toString() {
     return 'ApiConfig('
         'googleMapsConfigured: $isGoogleMapsConfigured, '
-        'supabaseConfigured: $isSupabaseConfigured'
+        'supabaseConfigured: $isSupabaseConfigured, '
+        'geminiConfigured: $isGeminiConfigured'
         ')';
   }
 }

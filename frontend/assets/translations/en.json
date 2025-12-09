@@ -67,6 +67,7 @@
     "titleHint": "Where did you go today?",
     "contentLabel": "Content",
     "contentHint": "Share your thoughts and feelings...",
+    "content": "Content",
     "dateLabel": "Date",
     "timeLabel": "Time",
     "locationLabel": "Location",
@@ -88,6 +89,8 @@
     "clearFilter": "Clear Filter"
   },
   "diary_create": {
+    "generate_with_ai": "Generate with AI",
+    "generate_failed": "Failed to generate content: {error}",
     "diary_not_found": "Diary not found",
     "load_diary_failed": "Failed to load diary: {error}",
     "pick_image_failed": "Failed to pick images: {error}",

@@ -62,6 +62,7 @@ dependencies:
   photo_view: ^0.15.0
   path_provider: ^2.1.5
   url_launcher: ^6.3.1
+  google_generative_ai: ^0.4.7
 
 dev_dependencies:
   flutter_test:

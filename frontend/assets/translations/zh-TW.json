@@ -67,6 +67,7 @@
     "titleHint": "今天去了哪裡？",
     "contentLabel": "內容",
     "contentHint": "分享你的心得與感想...",
+    "content": "內容",
     "dateLabel": "日期",
     "timeLabel": "時間",
     "locationLabel": "地點",
@@ -88,6 +89,8 @@
     "clearFilter": "清除篩選"
   },
   "diary_create": {
+    "generate_with_ai": "AI 生成",
+    "generate_failed": "內容生成失敗: {error}",
     "diary_not_found": "找不到日記資料",
     "load_diary_failed": "載入日記失敗: {error}",
     "pick_image_failed": "選擇圖片失敗: {error}",
