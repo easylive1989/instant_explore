@@ -261,6 +261,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             diaryId: _existingEntry!.id,
             userId: _existingEntry!.userId,
             contentJson: deltaJson,
+            aiContent: formState.aiContent,
             visitDate: formState.visitDate,
             tagIds: formState.selectedTagIds,
             newImages: formState.selectedImages,
@@ -276,6 +277,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           .read(diaryCrudProvider.notifier)
           .createDiary(
             contentJson: deltaJson,
+            aiContent: formState.aiContent,
             visitDate: formState.visitDate,
             tagIds: formState.selectedTagIds,
             images: formState.selectedImages,
@@ -330,9 +332,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       final geminiService = ref.read(geminiServiceProvider);
       final description = await geminiService.generateDiaryDescription(place);
 
-      final controller = formState.contentController;
-      controller.document.delete(0, controller.document.length);
-      controller.document.insert(0, description);
+      ref.read(diaryFormProvider.notifier).updateAiContent(description);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -402,7 +402,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, collapsedHeight + 20),
-          child: _buildGroup1(formState),
+          child: SingleChildScrollView(child: _buildGroup1(formState)),
         ),
       ),
       bottomSheet: AnimatedContainer(
@@ -532,27 +532,30 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              context.tr('diary.content'),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            if (_isGenerating)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else
-              IconButton(
-                onPressed: _generateAIDescription,
-                icon: const Icon(Icons.auto_awesome),
-                tooltip: context.tr('diary_create.generate_with_ai'),
+        if (formState.aiContent != null && formState.aiContent!.isNotEmpty)
+          _buildAiContentBox(formState.aiContent!)
+        else
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.tr('diary.content'),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-          ],
-        ),
+              if (_isGenerating)
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                IconButton(
+                  onPressed: _generateAIDescription,
+                  icon: const Icon(Icons.auto_awesome),
+                  tooltip: context.tr('diary_create.generate_with_ai'),
+                ),
+            ],
+          ),
         const SizedBox(height: 8),
 
         // 內容(富文本編輯器)
@@ -805,6 +808,64 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// AI-generated content box
+  Widget _buildAiContentBox(String content) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                size: 20,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('diary_create.ai_generated_content'),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                iconSize: 18,
+                onPressed: () {
+                  ref.read(diaryFormProvider.notifier).updateAiContent(null);
+                  _generateAIDescription();
+                },
+                tooltip: context.tr('diary_create.insert_ai_content'),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                iconSize: 18,
+                onPressed: () {
+                  ref.read(diaryFormProvider.notifier).updateAiContent(null);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(content),
+        ],
       ),
     );
   }

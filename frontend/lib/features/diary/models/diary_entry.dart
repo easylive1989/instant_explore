@@ -12,6 +12,9 @@ class DiaryEntry {
   /// 內容
   final String? content;
 
+  /// AI-generated content
+  final String? aiContent;
+
   /// Google Place ID
   final String? placeId;
 
@@ -46,6 +49,7 @@ class DiaryEntry {
     required this.id,
     required this.userId,
     this.content,
+    this.aiContent,
     this.placeId,
     this.placeName,
     this.placeAddress,
@@ -64,6 +68,7 @@ class DiaryEntry {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       content: json['content'] as String?,
+      aiContent: json['ai_content'] as String?,
       placeId: json['place_id'] as String?,
       placeName: json['place_name'] as String?,
       placeAddress: json['place_address'] as String?,
@@ -91,6 +96,7 @@ class DiaryEntry {
       'id': id,
       'user_id': userId,
       'content': content,
+      'ai_content': aiContent,
       'place_id': placeId,
       'place_name': placeName,
       'place_address': placeAddress,
@@ -107,6 +113,7 @@ class DiaryEntry {
     String? id,
     String? userId,
     String? content,
+    String? aiContent,
     String? placeId,
     String? placeName,
     String? placeAddress,
@@ -122,6 +129,7 @@ class DiaryEntry {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       content: content ?? this.content,
+      aiContent: aiContent ?? this.aiContent,
       placeId: placeId ?? this.placeId,
       placeName: placeName ?? this.placeName,
       placeAddress: placeAddress ?? this.placeAddress,
@@ -143,6 +151,7 @@ class DiaryEntry {
         other.id == id &&
         other.userId == userId &&
         other.content == content &&
+        other.aiContent == aiContent &&
         other.placeId == placeId &&
         other.placeName == placeName &&
         other.placeAddress == placeAddress &&
@@ -161,6 +170,7 @@ class DiaryEntry {
       id,
       userId,
       content,
+      aiContent,
       placeId,
       placeName,
       placeAddress,

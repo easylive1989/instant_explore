@@ -9,6 +9,7 @@ import 'package:travel_diary/features/diary/models/diary_entry.dart';
 @immutable
 class DiaryFormState {
   final QuillController contentController;
+  final String? aiContent;
   final DateTime visitDate;
   final List<String> selectedTagIds;
   final List<File> selectedImages;
@@ -20,6 +21,7 @@ class DiaryFormState {
 
   DiaryFormState({
     required this.contentController,
+    this.aiContent,
     DateTime? visitDate,
     this.selectedTagIds = const [],
     this.selectedImages = const [],
@@ -32,6 +34,7 @@ class DiaryFormState {
 
   DiaryFormState copyWith({
     QuillController? contentController,
+    String? aiContent,
     DateTime? visitDate,
     List<String>? selectedTagIds,
     List<File>? selectedImages,
@@ -43,6 +46,7 @@ class DiaryFormState {
   }) {
     return DiaryFormState(
       contentController: contentController ?? this.contentController,
+      aiContent: aiContent ?? this.aiContent,
       visitDate: visitDate ?? this.visitDate,
       selectedTagIds: selectedTagIds ?? this.selectedTagIds,
       selectedImages: selectedImages ?? this.selectedImages,
@@ -69,6 +73,11 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
   void dispose() {
     state.contentController.dispose();
     super.dispose();
+  }
+
+  /// 更新 AI 內容
+  void updateAiContent(String? content) {
+    state = state.copyWith(aiContent: content);
   }
 
   /// 更新內容 Controller
@@ -129,6 +138,7 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
 
       state = state.copyWith(
         contentController: controller,
+        aiContent: entry.aiContent,
         visitDate: entry.visitDate,
         placeId: () => entry.placeId,
         placeName: () => entry.placeName,
@@ -138,6 +148,7 @@ class DiaryFormNotifier extends StateNotifier<DiaryFormState> {
       );
     } else {
       state = state.copyWith(
+        aiContent: entry.aiContent,
         visitDate: entry.visitDate,
         placeId: () => entry.placeId,
         placeName: () => entry.placeName,
