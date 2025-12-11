@@ -2,8 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:travel_diary/app.dart';
-import 'package:travel_diary/core/config/api_config.dart';
+import 'package:context_app/app.dart';
+import 'package:context_app/core/config/api_config.dart';
 
 void main() async {
   runApp(await init());

@@ -14,7 +14,7 @@ class ConfigScreen extends StatelessWidget {
             child: Image.network(
               'https://lh3.googleusercontent.com/aida-public/AB6AXuBX7GRLPDCXu8WU4L2MUkeBDrb9N4OUUIzo9_4NR0abnYqTxYZapoblKGWTWRRdPDpcPFY5oeJHwGtHnC09dwvIHcjoRtTAxX9MuojVLfPIf6ueV-TjN-qRiEQleYifAkPUwMCCvqWE-xnyzpczPYkKQJIh5N70q13wDi_wknivXlY17kNIaeLNK_0KzkDgFP3ps5n-aOt5acrzDyb-NIjZI0TSSFVE7QK8a5VIniyAgYhb9_MVr8uV0CID0hj1DKpXh-7WTOt2',
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.4),
+              color: const Color(0x66000000),
               colorBlendMode: BlendMode.darken,
             ),
           ),
@@ -39,13 +39,13 @@ class ConfigScreen extends StatelessWidget {
             right: 0,
             child: Container(
               padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    const Color(0xFF101922),
-                    const Color(0xFF101922).withOpacity(0.8),
+                    Color(0xFF101922),
+                    Color(0xCC101922),
                     Colors.transparent,
                   ],
                 ),
@@ -158,12 +158,12 @@ class ConfigOption extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isSelected
-            ? const Color(0xFF137fec).withOpacity(0.1)
-            : const Color(0xFF192633).withOpacity(0.8),
+        color: isSelected ? const Color(0x1A137FEC) : const Color(0xCC192633),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected ? const Color(0xFF137fec) : Colors.white.withOpacity(0.1),
+          color: isSelected
+              ? const Color(0xFF137fec)
+              : Colors.white.withAlpha(0x1A),
           width: 2,
         ),
       ),
@@ -173,7 +173,9 @@ class ConfigOption extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF137fec) : Colors.white.withOpacity(0.1),
+              color: isSelected
+                  ? const Color(0xFF137fec)
+                  : Colors.white.withAlpha(0x1A),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white),

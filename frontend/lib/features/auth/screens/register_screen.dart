@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:travel_diary/core/utils/validation_utils.dart';
-import 'package:travel_diary/features/auth/services/auth_service.dart';
-import 'package:travel_diary/features/auth/widgets/divider_with_text.dart';
-import 'package:travel_diary/features/auth/widgets/password_field.dart';
+import 'package:context_app/core/utils/validation_utils.dart';
+import 'package:context_app/features/auth/services/auth_service.dart';
+import 'package:context_app/features/auth/widgets/divider_with_text.dart';
+import 'package:context_app/features/auth/widgets/password_field.dart';
 
 /// 註冊畫面
 class RegisterScreen extends ConsumerStatefulWidget {

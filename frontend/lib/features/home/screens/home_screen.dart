@@ -20,20 +20,20 @@ class HomeScreen extends ConsumerWidget {
                     child: Image.network(
                       'https://lh3.googleusercontent.com/aida-public/AB6AXuAVquA33CmpY8z_jSAhTaWCpD7_N9E1YheF1AMZemrva1YGHu-BWyECtoKx7y4fT7lbYD-kfqtvI2x6OHu0beZ2wnVEHjEZXhVhhMBj_UoGip60sjAuGyw_cnw98oSRIl8XL6Ino-uTdOJJ6cHlhJHiV-6Dn8AEh6eYA-T_iJp1LGYJxxbDorHRciFevGtjt9QlLHGPcod0QIB1RrZdYtfY9QGFofoKK3v4Lcwt-KYu6iZpcWxDgy8_v3ZV9jDeJb4K7DgyrhfQ',
                       fit: BoxFit.cover,
-                      color: Colors.black.withOpacity(0.6),
+                      color: const Color(0x99000000),
                       colorBlendMode: BlendMode.darken,
                     ),
                   ),
                   Positioned.fill(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFF101922).withOpacity(0.9),
-                            const Color(0xFF101922).withOpacity(0.2),
-                            const Color(0xFF101922).withOpacity(0.9),
+                            Color(0xE6101922),
+                            Color(0x33101922),
+                            Color(0xE6101922),
                           ],
                         ),
                       ),
@@ -44,16 +44,16 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           // 2. Main Content Container (Glass Layer)
-          SafeArea(
+          const SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Top Section: Context & Status
                   Column(
                     children: [
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           StatusIndicator(
@@ -66,12 +66,12 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       HeaderCard(),
                     ],
                   ),
                   // Bottom Section: Primary Action & Helper
-                  const Column(
+                  Column(
                     children: [
                       ExploreButton(),
                       SizedBox(height: 16),
@@ -99,9 +99,9 @@ class StatusIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha(0x0D),
         borderRadius: BorderRadius.circular(9999),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withAlpha(0x0D)),
       ),
       child: Row(
         children: [
@@ -130,15 +130,10 @@ class HeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withAlpha(0x1A),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-          ),
-        ],
+        border: Border.all(color: Colors.white.withAlpha(0x1A)),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,11 +165,7 @@ class HeaderCard extends StatelessWidget {
           SizedBox(height: 12),
           Text(
             '12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              height: 1.5,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
           ),
         ],
       ),
@@ -190,9 +181,7 @@ class ExploreButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const NearbyPlacesScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const NearbyPlacesScreen()),
         );
       },
       style: ElevatedButton.styleFrom(
@@ -201,7 +190,7 @@ class ExploreButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(9999),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-        shadowColor: const Color(0xFF137fec).withOpacity(0.4),
+        shadowColor: const Color(0x66137fec),
         elevation: 10,
       ),
       child: const Row(
@@ -236,10 +225,7 @@ class HelperText extends StatelessWidget {
         SizedBox(width: 8),
         Text(
           'Tap to start AI audio guide',
-          style: TextStyle(
-            color: Colors.white54,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.white54, fontSize: 12),
         ),
       ],
     );

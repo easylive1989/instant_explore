@@ -13,12 +13,18 @@ class PlayerScreen extends StatelessWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.white,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const Text(
@@ -89,13 +95,13 @@ class PlayerScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF101922).withOpacity(0.85),
+                color: const Color(0xD9101922),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(32),
                   topRight: Radius.circular(32),
                 ),
                 border: Border(
-                  top: BorderSide(color: Colors.white.withOpacity(0.1)),
+                  top: BorderSide(color: Colors.white.withAlpha(0x1A)),
                 ),
               ),
               child: Column(
@@ -124,15 +130,29 @@ class PlayerScreen extends StatelessWidget {
                     children: [
                       LinearProgressIndicator(
                         value: 0.35,
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF137fec)),
+                        backgroundColor: Colors.white.withAlpha(0x33),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF137fec),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('04:12', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                          Text('12:30', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          Text(
+                            '04:12',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            '12:30',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -143,15 +163,27 @@ class PlayerScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.replay_10, color: Colors.white, size: 32),
+                        icon: const Icon(
+                          Icons.replay_10,
+                          color: Colors.white,
+                          size: 32,
+                        ),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(Icons.pause_circle_filled, color: Color(0xFF137fec), size: 64),
+                        icon: const Icon(
+                          Icons.pause_circle_filled,
+                          color: Color(0xFF137fec),
+                          size: 64,
+                        ),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(Icons.forward_10, color: Colors.white, size: 32),
+                        icon: const Icon(
+                          Icons.forward_10,
+                          color: Colors.white,
+                          size: 32,
+                        ),
                         onPressed: () {},
                       ),
                     ],
