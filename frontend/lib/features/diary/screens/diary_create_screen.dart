@@ -14,6 +14,8 @@ import 'package:travel_diary/features/diary/providers/diary_providers.dart';
 import 'package:travel_diary/features/images/providers/image_providers.dart';
 import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
 
 /// 日記新增/編輯畫面
 class DiaryCreateScreen extends ConsumerStatefulWidget {
@@ -34,10 +36,15 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   bool _isGenerating = false; // AI 生成狀態
   DiaryEntry? _existingEntry; // 編輯模式時儲存載入的 entry
 
+  // TTS state
+  late FlutterTts _flutterTts;
+  bool _isSpeaking = false;
+
   @override
   void initState() {
     super.initState();
     _isEditing = widget.diaryId != null;
+    _initializeTts();
 
     // 延遲初始化,確保 provider 可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,8 +54,20 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     });
   }
 
+  void _initializeTts() {
+    _flutterTts = FlutterTts();
+    _flutterTts.setCompletionHandler(() {
+      if (mounted) {
+        setState(() {
+          _isSpeaking = false;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _flutterTts.stop();
     super.dispose();
   }
 
@@ -861,6 +880,17 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   ref.read(diaryFormProvider.notifier).updateAiContent(null);
                 },
               ),
+              IconButton(
+                icon: Icon(_isSpeaking ? Icons.stop : Icons.volume_up),
+                iconSize: 18,
+                onPressed: () {
+                  if (_isSpeaking) {
+                    _stop();
+                  } else {
+                    _speak(content);
+                  }
+                },
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -868,5 +898,21 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _speak(String text) async {
+    if (text.isNotEmpty) {
+      setState(() {
+        _isSpeaking = true;
+      });
+      await _flutterTts.speak(text);
+    }
+  }
+
+  Future<void> _stop() async {
+    await _flutterTts.stop();
+    setState(() {
+      _isSpeaking = false;
+    });
   }
 }
