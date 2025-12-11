@@ -149,8 +149,9 @@ Travel Diary (旅食日記) adopts a **Feature-First** architecture design, orga
 3. **Testability** - Clear dependency relationships facilitate unit testing
 4. **Maintainability** - Clear code organization facilitates team collaboration
 5. **Security** - Sensitive information is managed via environment variables, never committed to version control
-6. **Mobile-First** - Focus on mobile use cases to ensure optimal experience
-7. **Privacy-First** - User diaries are private by default, with secure data storage
+6. **Domain-Driven Design (DDD)** - Emphasize a rich understanding of the domain, using domain models to guide development
+7. **Mobile-First** - Focus on mobile use cases to ensure optimal experience
+8. **Privacy-First** - User diaries are private by default, with secure data storage
 
 ### Project Structure
 
