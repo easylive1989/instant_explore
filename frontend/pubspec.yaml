@@ -1,5 +1,5 @@
-name: travel_diary
-description: "旅食日記 - 旅遊與美食記錄應用程式"
+name: context_app
+description: "Context 讀景 — 你的 AI 口袋歷史學家"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
