@@ -6,12 +6,7 @@ import 'package:travel_diary/core/utils/go_router_refresh_stream.dart';
 import 'package:travel_diary/features/auth/services/auth_service.dart';
 import 'package:travel_diary/features/auth/screens/login_screen.dart';
 import 'package:travel_diary/features/auth/screens/register_screen.dart';
-import 'package:travel_diary/features/diary/screens/diary_list_screen.dart';
-import 'package:travel_diary/features/diary/screens/diary_detail_screen.dart';
-import 'package:travel_diary/features/diary/screens/diary_create_screen.dart';
-import 'package:travel_diary/features/images/widgets/full_image_viewer.dart';
-import 'package:travel_diary/features/settings/screens/settings_screen.dart';
-import 'package:travel_diary/features/tags/screens/tag_management_screen.dart';
+import 'package:travel_diary/features/home/screens/home_screen.dart';
 
 /// Router configuration using go_router for declarative navigation.
 ///
@@ -63,60 +58,9 @@ class RouterConfig {
         ),
         GoRoute(
           path: '/',
-          name: 'diary-list',
-          builder: (context, state) => const DiaryListScreen(),
-          routes: [
-            // Settings
-            GoRoute(
-              path: 'settings',
-              name: 'settings',
-              builder: (context, state) => const SettingsScreen(),
-              routes: [
-                // Tag Management
-                GoRoute(
-                  path: 'tags',
-                  name: 'tag-management',
-                  builder: (context, state) => const TagManagementScreen(),
-                ),
-              ],
-            ),
-            // Diary Detail (supports deep linking, but uses Navigator.push for return values)
-            GoRoute(
-              path: 'diary/:id',
-              name: 'diary-detail',
-              builder: (context, state) {
-                final diaryId = state.pathParameters['id']!;
-                return DiaryDetailScreen(diaryId: diaryId);
-              },
-            ),
-            // Create Diary
-            GoRoute(
-              path: 'diary/create',
-              name: 'diary-create',
-              builder: (context, state) => const DiaryCreateScreen(),
-            ),
-            // Edit Diary
-            GoRoute(
-              path: 'diary/:id/edit',
-              name: 'diary-edit',
-              builder: (context, state) {
-                final diaryId = state.pathParameters['id']!;
-                return DiaryCreateScreen(diaryId: diaryId);
-              },
-            ),
-            // Full Image Viewer
-            GoRoute(
-              path: 'images',
-              name: 'image-viewer',
-              builder: (context, state) {
-                final extra = state.extra as Map<String, dynamic>;
-                return FullImageViewer.network(
-                  imageUrls: extra['imageUrls'] as List<String>,
-                  initialIndex: extra['initialIndex'] as int,
-                );
-              },
-            ),
-          ],
+          name: 'home',
+          builder: (context, state) => const HomeScreen(),
+          routes: const [],
         ),
       ],
       errorBuilder: (context, state) => Scaffold(
