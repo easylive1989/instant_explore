@@ -1,1 +1,0 @@
-alter table public.diary_entries add column ai_content text null;
