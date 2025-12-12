@@ -1,7 +1,7 @@
 import 'package:context_app/core/config/api_config.dart';
-import 'package:context_app/features/player/screens/config_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/places/providers.dart';
 
@@ -152,9 +152,7 @@ class PlaceCard extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
         onTap: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => const ConfigScreen()));
+          context.pushNamed('config', extra: place);
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

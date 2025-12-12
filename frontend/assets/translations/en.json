@@ -5,5 +5,15 @@
   "explore_nearby": "Explore Nearby",
   "tap_to_start": "Tap to start AI audio guide",
   "gion_district": "Gion District",
-  "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?"
+  "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?",
+  "config_screen": {
+    "title": "Select Narration Depth",
+    "start_button": "Start Guide"
+  },
+  "narration_style": {
+    "brief": "Brief",
+    "brief_description": "~30 sec • Quick Overview",
+    "deep_dive": "Deep Dive",
+    "deep_dive_description": "~10 min • Full History"
+  }
 }

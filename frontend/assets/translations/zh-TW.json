@@ -5,5 +5,15 @@
   "explore_nearby": "探索周邊",
   "tap_to_start": "點擊以開始 AI 語音導覽",
   "gion_district": "祇園地區",
-  "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。"
+  "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。",
+  "config_screen": {
+    "title": "選擇解說深度",
+    "start_button": "開始導覽"
+  },
+  "narration_style": {
+    "brief": "摘要版",
+    "brief_description": "~30 秒 • 快速概覽",
+    "deep_dive": "深度版",
+    "deep_dive_description": "~10 分鐘 • 完整歷史"
+  }
 }
