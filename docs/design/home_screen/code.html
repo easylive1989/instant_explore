@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Historical Tour Guide - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-dark": "#1c2630",
+            },
+            fontFamily: {
+              "display": ["Inter", "Noto Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+            animation: {
+                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          },
+        },
+      }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', 'Noto Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-white h-screen w-full overflow-hidden relative">
+<div class="absolute inset-0 z-0 h-full w-full bg-[#101922]">
+<div class="absolute inset-0 bg-cover bg-center opacity-40 grayscale mix-blend-overlay" data-alt="Abstract dark map texture showing street layouts of Kyoto" data-location="Kyoto, Japan" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAVquA33CmpY8z_jSAhTaWCpD7_N9E1YheF1AMZemrva1YGHu-BWyECtoKx7y4fT7lbYD-kfqtvI2x6OHu0beZ2wnVEHjEZXhVhhMBj_UoGip60sjAuGyw_cnw98oSRIl8XL6Ino-uTdOJJ6cHlhJHiV-6Dn8AEh6eYA-T_iJp1LGYJxxbDorHRciFevGtjt9QlLHGPcod0QIB1RrZdYtfY9QGFofoKK3v4Lcwt-KYu6iZpcWxDgy8_v3ZV9jDeJb4K7DgyrhfQ");'>
+</div>
+<div class="absolute inset-0 bg-gradient-to-b from-[#101922] via-[#101922]/40 to-[#101922]"></div>
+<div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary/5 rounded-full blur-3xl animate-pulse-slow pointer-events-none"></div>
+</div>
+<div class="relative z-10 flex flex-col h-full w-full max-w-md mx-auto">
+<div class="pt-14 px-5 pb-6 shrink-0 flex justify-between items-center">
+<h1 class="text-4xl font-bold text-white tracking-tight drop-shadow-sm leading-tight">Explore</h1>
+<button class="flex items-center gap-2 bg-primary hover:bg-[#0f6bd0] active:scale-95 transition-all text-white pl-4 pr-5 py-2.5 rounded-full shadow-lg shadow-black/20 border border-white/10 group">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+<span class="text-sm font-bold tracking-wide">Refresh</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar px-5 py-4 space-y-4 pb-24">
+<button class="w-full text-left group glass-card rounded-2xl p-3 flex gap-4 transition-all duration-200 hover:bg-white/10 active:scale-[0.98] shadow-lg">
+<div class="w-24 h-24 shrink-0 rounded-xl bg-gray-800 overflow-hidden relative border border-white/5">
+<img alt="Yasaka Shrine" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXxF-rTSN6PyOFmO7wLIVVdvcSXHxwgnBLQLEZl2IUqYsI6sMxxi4tIW-ng6pa48SSwXsAP3k8FhvKE68A-bgzciyAo_NNJ1QMNuuMAHULMQqY-cl117016WcuEI54MWMg7T_jJjsEnDnhhj6iqqkKXIuW7C5EV3mvyMQqsP-AP9y7mOeXN_hy9Xm1S_jynSw3a2wmC_Km4itlmIwafVaBv6bNNXLGjfRWfoNJ_rSebtVuGxX6LcUTHxqRWUtJIKX2BW9lQ-jt"/>
+</div>
+<div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+<div class="flex justify-between items-start mb-1">
+<h2 class="text-lg font-bold text-white group-hover:text-primary transition-colors truncate pr-2">Yasaka Shrine</h2>
+<div class="flex items-center gap-1 bg-primary/20 px-1.5 py-0.5 rounded text-primary text-[10px] font-bold shrink-0">
+<span class="material-symbols-outlined text-[12px]">near_me</span>
+<span>120m</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Shinto Shrine</span>
+<span class="w-0.5 h-0.5 rounded-full bg-gray-500"></span>
+<span class="text-[10px] text-gray-400">Open 24h</span>
+</div>
+<p class="text-gray-300 text-xs leading-relaxed line-clamp-2">
+            The spiritual heart of Gion. Discover why thousands gather here for the festival.
+            </p>
+</div>
+</button>
+<button class="w-full text-left group glass-card rounded-2xl p-3 flex gap-4 transition-all duration-200 hover:bg-white/10 active:scale-[0.98] shadow-lg">
+<div class="w-24 h-24 shrink-0 rounded-xl bg-gray-800 overflow-hidden relative border border-white/5">
+<img alt="Hanamikoji Street" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7uflnWSWHdWpyiuqXxCMJfdRrABCmdf9QQTapLr7-GftWW1mzwA9QeHDj8jwYCx2wZ6DFQ2UItlQKKVw1W8bqgN4b_sthh84l4CZq_K5KtbhcTsl7DDNvnzBVuERrw2CaxZAuFQfcrCxW_DKnUEQnXSWGZUMWNrCyODvxikINjbxV8B75PbAu0gyGdNPc9ryXKG5XINUioatDa2pk0lCWZlIiu5Z9cgInK_Rc3h_JhcrmcMXoDCScV-Q35x5nvA7fSv0TJSsw"/>
+</div>
+<div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+<div class="flex justify-between items-start mb-1">
+<h2 class="text-lg font-bold text-white group-hover:text-primary transition-colors truncate pr-2">Hanamikoji St.</h2>
+<div class="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-gray-300 text-[10px] font-bold shrink-0">
+<span class="material-symbols-outlined text-[12px]">near_me</span>
+<span>350m</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Preserved Street</span>
+</div>
+<p class="text-gray-300 text-xs leading-relaxed line-clamp-2">
+            Step back in time. Real Geisha culture thrives amidst these tea houses.
+            </p>
+</div>
+</button>
+<button class="w-full text-left group glass-card rounded-2xl p-3 flex gap-4 transition-all duration-200 hover:bg-white/10 active:scale-[0.98] shadow-lg">
+<div class="w-24 h-24 shrink-0 rounded-xl bg-gray-800 overflow-hidden relative border border-white/5">
+<img alt="Kennin-ji Temple" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY0p9JqndFBt9q9vmpZlaCyvxgdllx301OLxh7ad3aDCsD09I-_xsdmIDWcOcm9QXDfKrO-6HQfAyaF5bMRbKD3cndq53_aLa_bVNh2wD7QdAToGyLfw7xzWbA1ITvG0w2h_u-F7WxvZAFfktVVhj5B3ouTHnRfAD3JtuF1FM2KIpF9teYV5HzNQEqIOfb2QsqPDvrg0dbsNdFHOIK5OdhgjwBA58fQqpnsaMki1OYrnTjDJVUd6qqL086Tq-EeFmee0XiWfvE"/>
+</div>
+<div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+<div class="flex justify-between items-start mb-1">
+<h2 class="text-lg font-bold text-white group-hover:text-primary transition-colors truncate pr-2">Kennin-ji Temple</h2>
+<div class="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-gray-300 text-[10px] font-bold shrink-0">
+<span class="material-symbols-outlined text-[12px]">near_me</span>
+<span>0.5km</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Zen Temple</span>
+</div>
+<p class="text-gray-300 text-xs leading-relaxed line-clamp-2">
+            Kyoto's oldest Zen temple. Look up to see the Twin Dragons painted on the ceiling.
+            </p>
+</div>
+</button>
+<button class="w-full text-left group glass-card rounded-2xl p-3 flex gap-4 transition-all duration-200 hover:bg-white/10 active:scale-[0.98] shadow-lg">
+<div class="w-24 h-24 shrink-0 rounded-xl bg-gray-800 overflow-hidden relative border border-white/5">
+<img alt="Kodai-ji Temple" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-47vzPebDJD32HLqpBUzT-ozySVRuY--yFSuXRN0FS1dPV3Bmcp_DTJd7g5G3Lv4-aLqozffSnb0jPSXO5vvTo3MoP8Sj0pvK12Dy_GosMx8KWPPRXoY1akgsZLgtmPIisirn1mv4cG31NSjmzyAcE6dAybsUJ-EDz7FGemsGzYKoQupOzvrdI9l94_Z2FxEbe4LR-im_os7CmzlegU56FlvJCAtdVwD_MF0sfJn2NCp9cNo6TCPG-wCaMHNwtloAozuvTEEG"/>
+</div>
+<div class="flex-1 min-w-0 py-1 flex flex-col justify-center">
+<div class="flex justify-between items-start mb-1">
+<h2 class="text-lg font-bold text-white group-hover:text-primary transition-colors truncate pr-2">Kodai-ji Temple</h2>
+<div class="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded text-gray-300 text-[10px] font-bold shrink-0">
+<span class="material-symbols-outlined text-[12px]">near_me</span>
+<span>0.8km</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Historical Site</span>
+</div>
+<p class="text-gray-300 text-xs leading-relaxed line-clamp-2">
+            Established by Nene in memory of Toyotomi Hideyoshi, featuring stunning gardens.
+            </p>
+</div>
+</button>
+<div class="h-4"></div>
+</div>
+<div class="shrink-0 h-[84px] bg-[#101922]/90 backdrop-blur-xl border-t border-white/10 flex items-start justify-around px-2 pt-3 pb-8">
+<button class="flex flex-col items-center gap-1 w-20 group">
+<div class="p-1 rounded-full bg-primary/20 group-hover:bg-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary text-[24px]">location_on</span>
+</div>
+<span class="text-[10px] font-medium text-primary">Nearby</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-20 group opacity-60 hover:opacity-100 transition-opacity">
+<div class="p-1 rounded-full group-hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-white text-[24px]">auto_stories</span>
+</div>
+<span class="text-[10px] font-medium text-white">Passport</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-20 group opacity-60 hover:opacity-100 transition-opacity">
+<div class="p-1 rounded-full group-hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-white text-[24px]">settings</span>
+</div>
+<span class="text-[10px] font-medium text-white">Settings</span>
+</button>
+</div>
+</div>
+
+</body></html>

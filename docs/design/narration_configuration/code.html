@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Narration Configuration</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#192633",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Smooth gradient fade for the bottom content area */
+        .content-fade {
+            background: linear-gradient(to top, #101922 85%, rgba(16, 25, 34, 0.6) 95%, rgba(16, 25, 34, 0) 100%);
+        }
+        body {
+            font-family: 'Inter', "Noto Sans", sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-screen w-full flex-col overflow-hidden bg-background-dark group/design-root">
+<!-- Background Image Layer -->
+<!-- Immersive background image covering the screen with dimming overlay -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-black/40 z-10"></div> <!-- Dimming overlay -->
+<div class="h-full w-full bg-cover bg-center" data-alt="Kyoto Imperial Palace traditional architecture surrounded by trees at dusk" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBX7GRLPDCXu8WU4L2MUkeBDrb9N4OUUIzo9_4NR0abnYqTxYZapoblKGWTWRRdPDpcPFY5oeJHwGtHnC09dwvIHcjoRtTAxX9MuojVLfPIf6ueV-TjN-qRiEQleYifAkPUwMCCvqWE-xnyzpczPYkKQJIh5N70q13wDi_wknivXlY17kNIaeLNK_0KzkDgFP3ps5n-aOt5acrzDyb-NIjZI0TSSFVE7QK8a5VIniyAgYhb9_MVr8uV0CID0hj1DKpXh-7WTOt2");'>
+</div>
+</div>
+<!-- Top Navigation -->
+<div class="relative z-20 flex items-center justify-between p-4 pt-12 pb-2">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-sm hover:bg-black/40 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back_ios_new</span>
+</button>
+<!-- Empty div for balance if needed, or actions -->
+<div class="w-10"></div>
+</div>
+<!-- Middle Spacer / Visual Breathing Room -->
+<!-- Pushes the interactive elements to the bottom for single-hand use -->
+<div class="flex-1"></div>
+<!-- Bottom Interaction Area -->
+<!-- Contains Title, Selection Cards, and Start Button -->
+<div class="relative z-20 content-fade flex flex-col px-5 pb-8 pt-12">
+<!-- Location Title -->
+<div class="mb-2">
+<h1 class="text-white text-3xl font-bold leading-tight tracking-tight drop-shadow-md">Kyoto Imperial Palace</h1>
+<div class="flex items-center gap-1 mt-1 text-gray-300">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-sm font-medium">Kyoto, Japan</span>
+</div>
+</div>
+<div class="h-6"></div>
+<!-- Configuration Section -->
+<div class="flex flex-col gap-4">
+<h2 class="text-white/90 text-lg font-bold leading-tight px-1">選擇解說深度</h2>
+<!-- Option 1: Brief (Inactive State) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-dark/80 backdrop-blur-md border border-white/5 p-4 shadow-sm transition-all active:scale-[0.98]">
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-bold leading-tight">摘要版 (Brief)</p>
+<p class="text-gray-400 text-sm font-normal leading-normal mt-0.5">~30 sec • Quick Overview</p>
+</div>
+</div>
+<!-- Radio Circle (Unchecked) -->
+<div class="size-6 rounded-full border-2 border-gray-500"></div>
+</div>
+</div>
+<!-- Option 2: Deep Dive (Active/Selected State) -->
+<!-- Highlighted with primary color border and background tint -->
+<div class="relative overflow-hidden rounded-xl bg-[#137fec]/10 border-2 border-primary p-4 shadow-[0_0_15px_rgba(19,127,236,0.15)] transition-all active:scale-[0.98]">
+<div class="absolute -right-4 -top-4 text-primary/5">
+<span class="material-symbols-outlined text-[100px]">auto_stories</span>
+</div>
+<div class="relative z-10 flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined">headphones</span>
+</div>
+<div class="flex flex-col">
+<p class="text-white text-base font-bold leading-tight">深度版 (Deep Dive)</p>
+<p class="text-blue-200 text-sm font-normal leading-normal mt-0.5">~10 min • Full History</p>
+</div>
+</div>
+<!-- Radio Circle (Checked) -->
+<div class="flex size-6 items-center justify-center rounded-full bg-primary text-white shadow-sm">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+</div>
+<div class="h-6"></div>
+<!-- Primary Action Button -->
+<button class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 px-6 text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 active:scale-[0.98]">
+<span class="material-symbols-outlined">play_arrow</span>
+<span class="text-lg font-bold tracking-wide">開始導覽</span>
+</button>
+<!-- Safe Area Bottom Spacer for iOS Home Bar -->
+<div class="h-6"></div>
+</div>
+</div>
+</body></html>
