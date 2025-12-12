@@ -1,9 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
+import 'package:context_app/features/player/providers.dart';
 
-class PlayerScreen extends StatelessWidget {
+class PlayerScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationStyle narrationStyle;
 
@@ -14,12 +18,40 @@ class PlayerScreen extends StatelessWidget {
   });
 
   @override
+  ConsumerState<PlayerScreen> createState() => _PlayerScreenState();
+}
+
+class _PlayerScreenState extends ConsumerState<PlayerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 初始化播放器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final locale =
+          easy.EasyLocalization.of(context)?.locale.toString() ?? 'zh-TW';
+      ref
+          .read(playerControllerProvider.notifier)
+          .initialize(widget.place, widget.narrationStyle, language: locale);
+    });
+  }
+
+  /// 格式化時間顯示（秒 -> MM:SS）
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final playerState = ref.watch(playerControllerProvider);
+    final playerController = ref.read(playerControllerProvider.notifier);
+
     // Colors from design
     const primaryColor = Color(0xFF137fec);
     const backgroundColor = Color(0xFF101922);
     const surfaceColor = Color(0xFF182430);
-    // 0.3 alpha of primaryColor (0xFF137FEC) -> 0x4D137FEC
     const primaryColorShadow = Color(0x4D137FEC);
 
     return Scaffold(
@@ -45,7 +77,7 @@ class PlayerScreen extends StatelessWidget {
                           color: Colors.white,
                           size: 20,
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.pop(),
                       ),
                       Text(
                         'AUDIO GUIDE',
@@ -65,113 +97,10 @@ class PlayerScreen extends StatelessWidget {
                 ),
                 // Transcript Area
                 Expanded(
-                  child: Stack(
-                    children: [
-                      // Transcript List
-                      ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        children: [
-                          const SizedBox(
-                            height: 24,
-                          ), // Spacing for top gradient
-                          const Text(
-                            'Ancient Romans walked these same stones, marveling at the scale of the structure before them.',
-                            style: TextStyle(
-                              color: Color(0xFF94A3B8), // slate-400
-                              fontSize: 20,
-                              height: 1.6,
-                              fontFamily:
-                                  'Inter', // Fallback to system if not available
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          // Active Text
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Positioned(
-                                left: -20,
-                                top: 6,
-                                bottom: 6,
-                                width: 4,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: primaryColor,
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                              ),
-                              const Text(
-                                'As you stand before the massive granite columns, notice the inscription above the portico.',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-                          const Text(
-                            'It reads \'M. AGRIPPA L.F. COS TERTIUM FECIT\', referring to the original builder, Marcus Agrippa.',
-                            style: TextStyle(
-                              color: Color(0xFF94A3B8), // slate-400
-                              fontSize: 20,
-                              height: 1.6,
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          const Text(
-                            'Though the current building was actually constructed by Emperor Hadrian over a century later.',
-                            style: TextStyle(
-                              color: Color(0xFF94A3B8), // slate-400
-                              fontSize: 20,
-                              height: 1.6,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 200,
-                          ), // Bottom spacing for panel
-                        ],
-                      ),
-                      // Top Gradient Fade
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 100,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [backgroundColor, Colors.transparent],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Bottom Gradient Fade (just above the panel)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: 120,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [backgroundColor, Colors.transparent],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: _buildTranscriptArea(
+                    playerState,
+                    backgroundColor,
+                    primaryColor,
                   ),
                 ),
               ],
@@ -183,198 +112,387 @@ class PlayerScreen extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(32),
-                topRight: Radius.circular(32),
+            child: _buildControlPanel(
+              context,
+              playerState,
+              playerController,
+              primaryColor,
+              primaryColorShadow,
+              surfaceColor,
+              backgroundColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 建立轉錄文本區域
+  Widget _buildTranscriptArea(
+    dynamic playerState,
+    Color backgroundColor,
+    Color primaryColor,
+  ) {
+    // 載入中狀態
+    if (playerState.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: primaryColor),
+            const SizedBox(height: 16),
+            const Text(
+              '正在生成導覽內容...',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 錯誤狀態
+    if (playerState.hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                playerState.errorMessage ?? '發生錯誤',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
               ),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF101922).withValues(alpha: 0.85),
-                    border: Border(
-                      top: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.05),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  ref
+                      .read(playerControllerProvider.notifier)
+                      .initialize(widget.place, widget.narrationStyle);
+                },
+                child: const Text('重試'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 顯示導覽文本
+    final narration = playerState.narration;
+    if (narration?.content == null) {
+      return const SizedBox.shrink();
+    }
+
+    final content = narration!.content!;
+    final currentSegmentIndex = playerState.currentSegmentIndex;
+
+    return Stack(
+      children: [
+        // Transcript List
+        ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          itemCount: content.segments.length + 2, // +2 for top/bottom spacing
+          itemBuilder: (context, index) {
+            // 頂部空白
+            if (index == 0) {
+              return const SizedBox(height: 24);
+            }
+
+            // 底部空白
+            if (index == content.segments.length + 1) {
+              return const SizedBox(height: 200);
+            }
+
+            // 文本段落
+            final segmentIndex = index - 1;
+            final segment = content.segments[segmentIndex];
+            final isActive = currentSegmentIndex == segmentIndex;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: isActive
+                  ? Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        // Stop Info
-                        const Text(
-                          'STOP 3',
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.0,
+                        Positioned(
+                          left: -20,
+                          top: 6,
+                          bottom: 6,
+                          width: 4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'The Pantheon - Exterior',
-                          style: TextStyle(
+                        Text(
+                          segment,
+                          style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Progress Bar
-                        SizedBox(
-                          height: 6,
-                          child: Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF334155), // slate-700
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                              ),
-                              FractionallySizedBox(
-                                widthFactor: 0.35,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: primaryColor,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '04:12',
-                              style: TextStyle(
-                                color: Color(0xFF94A3B8), // slate-400
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              '12:30',
-                              style: TextStyle(
-                                color: Color(0xFF94A3B8), // slate-400
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Controls
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.replay_10, size: 32),
-                              color: const Color(0xFF94A3B8),
-                              onPressed: () {},
-                            ),
-                            Container(
-                              height: 64,
-                              width: 64,
-                              decoration: const BoxDecoration(
-                                color: primaryColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primaryColorShadow,
-                                    blurRadius: 16,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.pause,
-                                  size: 32,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {},
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.forward_10, size: 32),
-                              color: const Color(0xFF94A3B8),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Save Button
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              // Save action placeholder
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: surfaceColor, // #182430
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF59E0B).withValues(
-                                        alpha: 0.1,
-                                      ), // Amber with opacity
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(
-                                      Icons.bookmark_add,
-                                      color: Color(0xFFF59E0B), // Amber-500
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Text(
-                                    'Save to Knowledge Passport',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
                           ),
                         ),
                       ],
+                    )
+                  : Text(
+                      segment,
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 20,
+                        height: 1.6,
+                      ),
                     ),
-                  ),
+            );
+          },
+        ),
+        // Top Gradient Fade
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [backgroundColor, Colors.transparent],
                 ),
               ),
             ),
           ),
-        ],
+        ),
+        // Bottom Gradient Fade
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 120,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [backgroundColor, Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 建立控制面板
+  Widget _buildControlPanel(
+    BuildContext context,
+    dynamic playerState,
+    dynamic playerController,
+    Color primaryColor,
+    Color primaryColorShadow,
+    Color surfaceColor,
+    Color backgroundColor,
+  ) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(32),
+        topRight: Radius.circular(32),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          decoration: BoxDecoration(
+            color: backgroundColor.withValues(alpha: 0.85),
+            border: Border(
+              top: BorderSide(
+                color: Colors.white.withValues(alpha: 0.05),
+                width: 1,
+              ),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Place Name
+                Text(
+                  widget.place.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 24),
+
+                // Progress Bar
+                SizedBox(
+                  height: 6,
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF334155),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: playerState.progress.clamp(0.0, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _formatDuration(playerState.currentPosition),
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      _formatDuration(playerState.duration),
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Controls
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.replay_10, size: 32),
+                      color: const Color(0xFF94A3B8),
+                      onPressed: playerState.isLoading || playerState.hasError
+                          ? null
+                          : () => playerController.seekBackward(),
+                    ),
+                    Container(
+                      height: 64,
+                      width: 64,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColorShadow,
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          playerState.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          size: 32,
+                          color: Colors.white,
+                        ),
+                        onPressed: playerState.isLoading || playerState.hasError
+                            ? null
+                            : () => playerController.playPause(),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.forward_10, size: 32),
+                      color: const Color(0xFF94A3B8),
+                      onPressed: playerState.isLoading || playerState.hasError
+                          ? null
+                          : () => playerController.seekForward(),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Save Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      context.pushNamed(
+                        'passport_success',
+                        extra: widget.place,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFFF59E0B,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.bookmark_add,
+                              color: Color(0xFFF59E0B),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Save to Knowledge Passport',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

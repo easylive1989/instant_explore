@@ -6,6 +6,7 @@ import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/player/screens/config_screen.dart';
 import 'package:context_app/features/player/screens/player_screen.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
+import 'package:context_app/features/passport/screens/save_success_screen.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -35,6 +36,23 @@ class RouterConfig {
             final place = params['place'] as Place;
             final narrationStyle = params['narrationStyle'] as NarrationStyle;
             return PlayerScreen(place: place, narrationStyle: narrationStyle);
+          },
+        ),
+        GoRoute(
+          path: '/passport/success',
+          name: 'passport_success',
+          builder: (context, state) {
+            final place = state.extra as Place;
+            return SaveSuccessScreen(
+              place: place,
+              onViewPassport: () {
+                // TODO: Navigate to passport screen
+                context.go('/'); // Temporary: go home
+              },
+              onContinueTour: () {
+                context.pop();
+              },
+            );
           },
         ),
       ],

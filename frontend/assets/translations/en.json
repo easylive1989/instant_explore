@@ -15,5 +15,14 @@
     "brief_description": "~30 sec • Quick Overview",
     "deep_dive": "Deep Dive",
     "deep_dive_description": "~10 min • Full History"
+  },
+  "player_screen": {
+    "audio_guide": "AUDIO GUIDE",
+    "loading": "Generating narration content...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save_to_passport": "Save to Knowledge Passport",
+    "error_generating": "Failed to generate narration",
+    "error_playing": "Playback error"
   }
 }

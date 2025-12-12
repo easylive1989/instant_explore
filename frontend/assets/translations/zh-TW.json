@@ -15,5 +15,14 @@
     "brief_description": "~30 秒 • 快速概覽",
     "deep_dive": "深度版",
     "deep_dive_description": "~10 分鐘 • 完整歷史"
+  },
+  "player_screen": {
+    "audio_guide": "AUDIO GUIDE",
+    "loading": "正在生成導覽內容...",
+    "error": "發生錯誤",
+    "retry": "重試",
+    "save_to_passport": "儲存至知識護照",
+    "error_generating": "無法生成導覽內容",
+    "error_playing": "播放錯誤"
   }
 }
