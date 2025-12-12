@@ -1,3 +1,9 @@
 {
-
+  "gps_strong": "GPS Strong",
+  "audio_ready": "Audio Ready",
+  "current_location": "Current Location",
+  "explore_nearby": "Explore Nearby",
+  "tap_to_start": "Tap to start AI audio guide",
+  "gion_district": "Gion District",
+  "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?"
 }

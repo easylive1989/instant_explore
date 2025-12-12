@@ -1,3 +1,9 @@
 {
-
+  "gps_strong": "GPS 信號強",
+  "audio_ready": "音訊就緒",
+  "current_location": "目前位置",
+  "explore_nearby": "探索周邊",
+  "tap_to_start": "點擊以開始 AI 語音導覽",
+  "gion_district": "祇園地區",
+  "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。"
 }

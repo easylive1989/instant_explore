@@ -1,12 +1,17 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/places/screens/nearby_places_screen.dart';
+
+import 'package:context_app/features/places/providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentLocation = ref.watch(currentLocationProvider);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -44,34 +49,41 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           // 2. Main Content Container (Glass Layer)
-          const SafeArea(
+          SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Top Section: Context & Status
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  currentLocation.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) => Center(child: Text('Error: $err')),
+                    data: (location) {
+                      return Column(
                         children: [
-                          StatusIndicator(
-                            icon: Icons.signal_cellular_alt,
-                            label: 'GPS Strong',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              StatusIndicator(
+                                icon: Icons.signal_cellular_alt,
+                                label: 'gps_strong'.tr(),
+                              ),
+                              StatusIndicator(
+                                icon: Icons.headphones,
+                                label: 'audio_ready'.tr(),
+                              ),
+                            ],
                           ),
-                          StatusIndicator(
-                            icon: Icons.headphones,
-                            label: 'Audio Ready',
-                          ),
+                          const SizedBox(height: 20),
+                          HeaderCard(location: location),
                         ],
-                      ),
-                      SizedBox(height: 20),
-                      HeaderCard(),
-                    ],
+                      );
+                    },
                   ),
                   // Bottom Section: Primary Action & Helper
-                  Column(
+                  const Column(
                     children: [
                       ExploreButton(),
                       SizedBox(height: 16),
@@ -123,7 +135,8 @@ class StatusIndicator extends StatelessWidget {
 }
 
 class HeaderCard extends StatelessWidget {
-  const HeaderCard({super.key});
+  final dynamic location;
+  const HeaderCard({super.key, this.location});
 
   @override
   Widget build(BuildContext context) {
@@ -135,37 +148,43 @@ class HeaderCard extends StatelessWidget {
         border: Border.all(color: Colors.white.withAlpha(0x1A)),
         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Current Location',
-                style: TextStyle(
+                'current_location'.tr(),
+                style: const TextStyle(
                   color: Color(0xFF137fec),
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
                 ),
               ),
-              Icon(Icons.info, color: Colors.white54, size: 20),
+              const Icon(Icons.info, color: Colors.white54, size: 20),
             ],
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Gion District',
-            style: TextStyle(
+            location != null
+                ? '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}'
+                : 'gion_district'.tr(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            '12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?',
-            style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+            'sites_nearby_hook'.tr(),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -193,14 +212,14 @@ class ExploreButton extends StatelessWidget {
         shadowColor: const Color(0x66137fec),
         elevation: 10,
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.explore, color: Colors.white, size: 28),
-          SizedBox(width: 12),
+          const Icon(Icons.explore, color: Colors.white, size: 28),
+          const SizedBox(width: 12),
           Text(
-            '探索周邊',
-            style: TextStyle(
+            'explore_nearby'.tr(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -218,14 +237,14 @@ class HelperText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.touch_app, color: Colors.white54, size: 14),
-        SizedBox(width: 8),
+        const Icon(Icons.touch_app, color: Colors.white54, size: 14),
+        const SizedBox(width: 8),
         Text(
-          'Tap to start AI audio guide',
-          style: TextStyle(color: Colors.white54, fontSize: 12),
+          'tap_to_start'.tr(),
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
         ),
       ],
     );

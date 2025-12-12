@@ -78,6 +78,7 @@ dev_dependencies:
 
   # E2E testing with Patrol
   patrol: ^3.20.0
+  mocktail: ^1.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
