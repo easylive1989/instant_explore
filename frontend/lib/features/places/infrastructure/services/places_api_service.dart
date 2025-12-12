@@ -1,0 +1,62 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:context_app/features/places/models/place.dart';
+
+class PlacesApiService {
+  final String _apiKey;
+  static const String _baseUrl =
+      'https://places.googleapis.com/v1/places:searchNearby';
+
+  PlacesApiService(this._apiKey);
+
+  Future<List<Place>> searchNearby(
+    PlaceLocation location, {
+    int maxResultCount = 10,
+    double radius = 1000.0,
+  }) async {
+    if (_apiKey.isEmpty) {
+      throw Exception('Google Maps API Key is not configured.');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': _apiKey,
+      'X-Goog-FieldMask':
+          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
+    };
+
+    final body = jsonEncode({
+      'maxResultCount': maxResultCount,
+      'locationRestriction': {
+        'circle': {
+          'center': {
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+          },
+          'radius': radius,
+        },
+      },
+    });
+
+    final response = await http.post(
+      Uri.parse(_baseUrl),
+      headers: headers,
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final placesJson = data['places'] as List?;
+      if (placesJson != null) {
+        return placesJson
+            .map((placeJson) => Place.fromJson(placeJson))
+            .toList();
+      }
+      return [];
+    } else {
+      throw Exception(
+        'Failed to load nearby places: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
+}

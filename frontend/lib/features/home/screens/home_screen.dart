@@ -1,8 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/features/player/screens/config_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/features/places/screens/nearby_places_screen.dart';
-
+import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/places/providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -10,12 +10,12 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentLocation = ref.watch(currentLocationProvider);
+    final nearbyPlaces = ref.watch(nearbyPlacesProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF101922),
       body: Stack(
         children: [
-          // 1. Immersive Background Layer
           Positioned.fill(
             child: Container(
               color: const Color(0xFF101922),
@@ -44,54 +44,86 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height / 3,
+                    left: MediaQuery.of(context).size.width / 2 - 150,
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF137fec).withValues(alpha: 0.05),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF137fec,
+                            ).withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          // 2. Main Content Container (Glass Layer)
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Top Section: Context & Status
-                  currentLocation.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (err, stack) => Center(child: Text('Error: $err')),
-                    data: (location) {
-                      return Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              StatusIndicator(
-                                icon: Icons.signal_cellular_alt,
-                                label: 'gps_strong'.tr(),
-                              ),
-                              StatusIndicator(
-                                icon: Icons.headphones,
-                                label: 'audio_ready'.tr(),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          HeaderCard(location: location),
-                        ],
-                      );
-                    },
-                  ),
-                  // Bottom Section: Primary Action & Helper
-                  const Column(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ExploreButton(),
-                      SizedBox(height: 16),
-                      HelperText(),
+                      const Text(
+                        'Explore',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () => ref.refresh(nearbyPlacesProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Refresh'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color(0xFF137fec),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: nearbyPlaces.when(
+                    data: (places) => ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: places.length,
+                      itemBuilder: (context, index) {
+                        final place = places[index];
+                        return PlaceCard(place: place);
+                      },
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => Center(
+                      child: Text(
+                        'Error: $error',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -100,153 +132,100 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class StatusIndicator extends StatelessWidget {
-  final IconData icon;
-  final String label;
+class PlaceCard extends ConsumerWidget {
+  final Place place;
 
-  const StatusIndicator({super.key, required this.icon, required this.label});
+  const PlaceCard({super.key, required this.place});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withAlpha(0x0D),
-        borderRadius: BorderRadius.circular(9999),
-        border: Border.all(color: Colors.white.withAlpha(0x0D)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF137fec), size: 20),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final apiConfig = ref.watch(apiConfigProvider);
+
+    final photoUrl = place.primaryPhoto?.getPhotoUrl(
+      maxWidth: 400,
+      apiKey: apiConfig.googleMapsApiKey,
     );
-  }
-}
 
-class HeaderCard extends StatelessWidget {
-  final dynamic location;
-  const HeaderCard({super.key, this.location});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withAlpha(0x1A),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withAlpha(0x1A)),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Card(
+      color: Colors.white.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const ConfigScreen()));
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
             children: [
-              Text(
-                'current_location'.tr(),
-                style: const TextStyle(
-                  color: Color(0xFF137fec),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: photoUrl != null
+                    ? Image.network(
+                        photoUrl,
+                        width: 96,
+                        height: 96,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 96,
+                        height: 96,
+                        color: Colors.grey[800],
+                        child: const Icon(Icons.image_not_supported),
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            place.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      place.types.isNotEmpty
+                          ? place.types.first.replaceAll('_', ' ').toUpperCase()
+                          : 'PLACE',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      place.formattedAddress,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-              const Icon(Icons.info, color: Colors.white54, size: 20),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            location != null
-                ? '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}'
-                : 'gion_district'.tr(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'sites_nearby_hook'.tr(),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ExploreButton extends StatelessWidget {
-  const ExploreButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const NearbyPlacesScreen()),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF137fec),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(9999),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-        shadowColor: const Color(0x66137fec),
-        elevation: 10,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.explore, color: Colors.white, size: 28),
-          const SizedBox(width: 12),
-          Text(
-            'explore_nearby'.tr(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HelperText extends StatelessWidget {
-  const HelperText({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.touch_app, color: Colors.white54, size: 14),
-        const SizedBox(width: 8),
-        Text(
-          'tap_to_start'.tr(),
-          style: const TextStyle(color: Colors.white54, fontSize: 12),
-        ),
-      ],
     );
   }
 }
