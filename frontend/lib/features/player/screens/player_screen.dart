@@ -133,7 +133,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           color: Colors.white,
                           size: 20,
                         ),
-                        onPressed: () => context.pop(),
+                        onPressed: () => context.go('/'),
                       ),
                       Text(
                         'player_screen.audio_guide'.tr(),
