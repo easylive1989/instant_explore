@@ -99,20 +99,12 @@ class TimelineEntry extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  Container(width: 2, height: 20, color: Colors.white24),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF137fec),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF101922),
-                        width: 2,
-                      ),
-                    ),
+                  const Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: Color(0xFF137fec),
                   ),
-                  Container(width: 2, height: 200, color: Colors.white24),
+                  Container(width: 2, height: 260, color: Colors.white24),
                 ],
               ),
               const SizedBox(width: 16),
