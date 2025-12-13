@@ -29,6 +29,9 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
+  final ScrollController _scrollController = ScrollController();
+  int? _lastSegmentIndex;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +56,37 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             .initialize(widget.place, widget.narrationStyle, language: locale);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// 自動滾動到當前播放的段落
+  void _scrollToCurrentSegment(int? segmentIndex) {
+    if (segmentIndex == null ||
+        segmentIndex == _lastSegmentIndex ||
+        !_scrollController.hasClients) {
+      return;
+    }
+
+    _lastSegmentIndex = segmentIndex;
+
+    // 計算目標位置
+    // 每個段落的平均高度約為 120px（文本高度 + padding）
+    // 加上頂部的 24px padding
+    const itemHeight = 120.0;
+    const topPadding = 24.0;
+    final targetOffset = topPadding + (segmentIndex * itemHeight);
+
+    // 平滑滾動到目標位置
+    _scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   /// 格式化時間顯示（秒 -> MM:SS）
@@ -100,6 +134,16 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _showAiOverLimitDialog();
+        });
+      }
+
+      // 監聽當前段落索引變化並自動滾動
+      final previousIndex = previous?.currentSegmentIndex;
+      final currentIndex = current.currentSegmentIndex;
+      if (previousIndex != currentIndex && currentIndex != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _scrollToCurrentSegment(currentIndex);
         });
       }
     });
@@ -287,6 +331,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       children: [
         // Transcript List
         ListView.builder(
+          physics: const ClampingScrollPhysics(),
+          controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           itemCount: content.segments.length + 2, // +2 for top/bottom spacing
           itemBuilder: (context, index) {
