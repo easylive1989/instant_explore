@@ -40,10 +40,12 @@ class RouterConfig {
             final place = params['place'] as Place;
             final narrationStyle = params['narrationStyle'] as NarrationStyle;
             final initialContent = params['initialContent'] as String?;
+            final enableSave = params['enableSave'] as bool? ?? true;
             return PlayerScreen(
               place: place,
               narrationStyle: narrationStyle,
               initialContent: initialContent,
+              enableSave: enableSave,
             );
           },
         ),

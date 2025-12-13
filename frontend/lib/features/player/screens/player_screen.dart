@@ -14,12 +14,14 @@ class PlayerScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationStyle narrationStyle;
   final String? initialContent;
+  final bool enableSave;
 
   const PlayerScreen({
     super.key,
     required this.place,
     required this.narrationStyle,
     this.initialContent,
+    this.enableSave = true,
   });
 
   @override
@@ -521,94 +523,95 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 const SizedBox(height: 24),
 
                 // Save Button
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap:
-                        (playerState.isLoading ||
-                            playerState.hasError ||
-                            playerState.narration == null)
-                        ? null
-                        : () async {
-                            final userId =
-                                Supabase.instance.client.auth.currentUser?.id;
-                            if (userId == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('請先登入')),
-                              );
-                              return;
-                            }
-
-                            try {
-                              await playerController.saveToPassport(userId);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('已儲存至知識護照')),
-                                );
-                                context.pushNamed(
-                                  'passport_success',
-                                  extra: widget.place,
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('儲存失敗: $e')),
-                                );
-                              }
-                            }
-                          },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Opacity(
-                      opacity:
+                if (widget.enableSave)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap:
                           (playerState.isLoading ||
                               playerState.hasError ||
                               playerState.narration == null)
-                          ? 0.5
-                          : 1.0,
-                      child: Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: surfaceColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            width: 1,
+                          ? null
+                          : () async {
+                              final userId =
+                                  Supabase.instance.client.auth.currentUser?.id;
+                              if (userId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('請先登入')),
+                                );
+                                return;
+                              }
+
+                              try {
+                                await playerController.saveToPassport(userId);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('已儲存至知識護照')),
+                                  );
+                                  context.pushNamed(
+                                    'passport_success',
+                                    extra: widget.place,
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('儲存失敗: $e')),
+                                  );
+                                }
+                              }
+                            },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Opacity(
+                        opacity:
+                            (playerState.isLoading ||
+                                playerState.hasError ||
+                                playerState.narration == null)
+                            ? 0.5
+                            : 1.0,
+                        child: Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: surfaceColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              width: 1,
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFF59E0B,
-                                ).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFFF59E0B,
+                                  ).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Icon(
+                                  Icons.bookmark_add,
+                                  color: Color(0xFFF59E0B),
+                                  size: 20,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.bookmark_add,
-                                color: Color(0xFFF59E0B),
-                                size: 20,
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Save to Knowledge Passport',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Save to Knowledge Passport',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

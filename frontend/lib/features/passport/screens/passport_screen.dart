@@ -132,6 +132,7 @@ class TimelineEntry extends StatelessWidget {
                           'place': place,
                           'narrationStyle': entry.narrationStyle,
                           'initialContent': entry.narrationText,
+                          'enableSave': false,
                         },
                       );
                     },
