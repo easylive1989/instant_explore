@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Immersive Player</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-dark": "#182430",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }.no-scrollbar {
+            -ms-overflow-style: none;scrollbar-width: none;}
+        .glass-panel {
+            background: rgba(16, 25, 34, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white h-screen overflow-hidden selection:bg-primary selection:text-white">
+<div class="relative flex h-full w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-background-light dark:bg-background-dark">
+<header class="flex items-center justify-between p-4 z-10 bg-transparent">
+<button class="flex size-10 items-center justify-center rounded-full text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-sm font-medium tracking-wide text-slate-500 dark:text-slate-400 uppercase opacity-80">Audio Guide</h1>
+<button class="flex size-10 items-center justify-center rounded-full text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</header>
+<main class="flex-1 relative flex flex-col justify-center px-6 overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none"></div>
+<div class="overflow-y-auto no-scrollbar py-20 space-y-8 h-full flex flex-col">
+<div class="shrink-0 h-4"></div>
+<p class="text-xl md:text-2xl text-slate-400 dark:text-slate-600 font-normal leading-relaxed transition-colors duration-500">
+                Ancient Romans walked these same stones, marveling at the scale of the structure before them.
+            </p>
+<div class="relative">
+<div class="absolute -left-4 top-1 w-1 h-full bg-primary rounded-full opacity-100"></div>
+<p class="text-2xl md:text-3xl text-slate-900 dark:text-white font-semibold leading-snug transition-all duration-300">
+                    As you stand before the massive granite columns, notice the inscription above the portico.
+                </p>
+</div>
+<p class="text-xl md:text-2xl text-slate-400 dark:text-slate-600 font-normal leading-relaxed transition-colors duration-500">
+                It reads 'M. AGRIPPA L.F. COS TERTIUM FECIT', referring to the original builder, Marcus Agrippa.
+            </p>
+<p class="text-xl md:text-2xl text-slate-400 dark:text-slate-600 font-normal leading-relaxed transition-colors duration-500">
+               Though the current building was actually constructed by Emperor Hadrian over a century later.
+            </p>
+<div class="shrink-0 h-32"></div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none"></div>
+</main>
+<div class="flex flex-col z-20 pb-8 pt-4 px-6 glass-panel rounded-t-[2rem]">
+<div class="flex flex-col items-center mb-6">
+<p class="text-primary font-bold text-xs tracking-wider uppercase mb-1">Stop 3</p>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold text-center">The Pantheon - Exterior</h2>
+</div>
+<div class="w-full mb-2 group cursor-pointer">
+<div class="relative w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-[35%] bg-primary rounded-full"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+<span>04:12</span>
+<span>12:30</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 mb-6">
+<button class="p-3 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">replay_10</span>
+</button>
+<button class="flex items-center justify-center size-16 bg-primary text-white rounded-full shadow-lg shadow-primary/30 hover:bg-blue-600 hover:scale-105 transition-all active:scale-95">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="p-3 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">forward_10</span>
+</button>
+</div>
+<div class="mt-2">
+<button class="w-full h-14 bg-surface-dark dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl flex items-center justify-center gap-3 text-slate-900 dark:text-white font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-all group active:scale-[0.98]">
+<div class="flex items-center justify-center size-8 rounded-full bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
+<span class="material-symbols-outlined text-amber-500 text-xl" style="font-variation-settings: 'FILL' 1;">bookmark_add</span>
+</div>
+<span>Save to Knowledge Passport</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

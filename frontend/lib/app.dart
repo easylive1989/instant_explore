@@ -1,9 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:travel_diary/core/config/theme_config.dart';
-import 'package:travel_diary/core/config/router_config.dart';
+import 'package:context_app/core/config/theme_config.dart';
+import 'package:context_app/core/config/router_config.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -16,17 +15,14 @@ class TravelDiaryApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'app.name'.tr(),
+      title: 'Context 讀景',
       debugShowCheckedModeBanner: false,
       theme: ThemeConfig.lightTheme,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
-      localizationsDelegates: [
-        ...context.localizationDelegates,
-        FlutterQuillLocalizations.delegate,
-      ],
+      localizationsDelegates: context.localizationDelegates,
       darkTheme: ThemeConfig.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark, // Force dark mode to match design
       routerConfig: router,
     );
   }

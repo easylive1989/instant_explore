@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:travel_diary/features/auth/services/auth_service.dart';
+import 'package:context_app/features/auth/services/auth_service.dart';
 
 /// 認證狀態 Provider
 /// 監聽 Supabase 的認證狀態變化

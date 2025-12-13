@@ -1,51 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:travel_diary/core/utils/go_router_refresh_stream.dart';
-import 'package:travel_diary/features/auth/services/auth_service.dart';
-import 'package:travel_diary/features/auth/screens/login_screen.dart';
-import 'package:travel_diary/features/auth/screens/register_screen.dart';
-import 'package:travel_diary/features/home/screens/home_screen.dart';
+import 'package:context_app/features/main_screen.dart';
+import 'package:context_app/features/places/models/place.dart';
+import 'package:context_app/features/player/screens/config_screen.dart';
+import 'package:context_app/features/player/screens/player_screen.dart';
+import 'package:context_app/features/player/models/narration_style.dart';
+import 'package:context_app/features/passport/screens/save_success_screen.dart';
+import 'package:context_app/features/auth/screens/login_screen.dart';
+import 'package:context_app/features/auth/screens/register_screen.dart';
+import 'package:context_app/features/auth/services/auth_service.dart';
+import 'package:context_app/core/config/go_router_refresh_stream.dart';
 
-/// Router configuration using go_router for declarative navigation.
-///
-/// Handles authentication redirects and defines all app routes.
-/// Uses a hybrid approach:
-/// - go_router for main screens without return values
-/// - Navigator.push for screens that need to return values
+/// Router refresh provider
+/// 監聽認證狀態變化並通知 GoRouter 重新評估路由
+final routerRefreshProvider = Provider<GoRouterRefreshStream>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return GoRouterRefreshStream(authService.authStateChanges);
+});
+
 class RouterConfig {
   RouterConfig._();
 
-  /// Create the GoRouter instance
   static GoRouter createRouter(Ref ref) {
-    // 監聽認證狀態變化，當狀態改變時重新評估路由
-    final authService = ref.watch(authServiceProvider);
-    final authStateStream = authService.authStateChanges;
+    // 使用 provider 管理的 refresh stream
+    final refreshListenable = ref.watch(routerRefreshProvider);
 
     return GoRouter(
       initialLocation: '/',
-      debugLogDiagnostics: false,
-      refreshListenable: GoRouterRefreshStream(authStateStream),
-      redirect: (context, state) {
-        final supabase = Supabase.instance.client;
-        final isAuthenticated = supabase.auth.currentSession != null;
-        final isGoingToLogin = state.matchedLocation == '/login';
-        final isGoingToRegister = state.matchedLocation == '/register';
-
-        // Redirect to login if not authenticated and not already going there
-        if (!isAuthenticated && !isGoingToLogin && !isGoingToRegister) {
-          return '/login';
-        }
-
-        // Redirect to home if authenticated and going to login/register
-        if (isAuthenticated && (isGoingToLogin || isGoingToRegister)) {
-          return '/';
-        }
-
-        return null; // No redirect needed
-      },
+      refreshListenable: refreshListenable,
       routes: [
+        GoRoute(
+          path: '/',
+          name: 'home',
+          builder: (context, state) {
+            final tab = state.uri.queryParameters['tab'];
+            final index = tab == 'passport' ? 1 : 0;
+            return MainScreen(initialIndex: index);
+          },
+        ),
         GoRoute(
           path: '/login',
           name: 'login',
@@ -57,37 +50,78 @@ class RouterConfig {
           builder: (context, state) => const RegisterScreen(),
         ),
         GoRoute(
-          path: '/',
-          name: 'home',
-          builder: (context, state) => const HomeScreen(),
-          routes: const [],
+          path: '/config',
+          name: 'config',
+          builder: (context, state) {
+            final extra = state.extra;
+            final place = extra is Place
+                ? extra
+                : Place.fromJson(extra as Map<String, dynamic>);
+            return ConfigScreen(place: place);
+          },
+        ),
+        GoRoute(
+          path: '/player',
+          name: 'player',
+          builder: (context, state) {
+            final params = state.extra as Map<String, dynamic>;
+            final placeData = params['place'];
+            final place = placeData is Place
+                ? placeData
+                : Place.fromJson(placeData as Map<String, dynamic>);
+            final narrationStyle = params['narrationStyle'] as NarrationStyle;
+            final initialContent = params['initialContent'] as String?;
+            final enableSave = params['enableSave'] as bool? ?? true;
+            return PlayerScreen(
+              place: place,
+              narrationStyle: narrationStyle,
+              initialContent: initialContent,
+              enableSave: enableSave,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/passport/success',
+          name: 'passport_success',
+          builder: (context, state) {
+            final place = state.extra as Place;
+            return SaveSuccessScreen(
+              place: place,
+              onViewPassport: () {
+                context.go('/?tab=passport');
+              },
+              onContinueTour: () {
+                context.go('/');
+              },
+            );
+          },
         ),
       ],
-      errorBuilder: (context, state) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Page not found: ${state.matchedLocation}',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.go('/'),
-                child: const Text('Go Home'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      redirect: (context, state) {
+        // 直接從 authService 讀取最新的認證狀態，避免 provider 異步更新延遲
+        final authService = ref.read(authServiceProvider);
+        final isSignedIn = authService.isSignedIn;
+        final loggingIn = state.matchedLocation == '/login';
+        final registering = state.matchedLocation == '/register';
+
+        // If not signed in and not on a public page, redirect to login
+        if (!isSignedIn && !loggingIn && !registering) {
+          return '/login';
+        }
+        // If signed in and on a public page, redirect to home
+        if (isSignedIn && (loggingIn || registering)) {
+          return '/';
+        }
+
+        // No redirect needed
+        return null;
+      },
+      errorBuilder: (context, state) =>
+          Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
     );
   }
 }
 
-/// Provider for the GoRouter instance
 final routerProvider = Provider<GoRouter>((ref) {
   return RouterConfig.createRouter(ref);
 });

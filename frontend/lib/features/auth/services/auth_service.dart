@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:travel_diary/core/config/api_config.dart';
+import 'package:context_app/core/config/api_config.dart';
 
 /// 認證服務類別
 ///
