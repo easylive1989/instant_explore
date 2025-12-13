@@ -27,12 +27,36 @@
     "retry": "重試",
     "save_to_passport": "儲存至知識護照",
     "error_generating": "無法生成導覽內容",
-    "error_playing": "播放錯誤"
+    "error_playing": "播放錯誤",
+    "please_login": "請先登入",
+    "saved_to_passport": "已儲存至知識護照",
+    "save_failed": "儲存失敗",
+    "suggested_retry": "建議 {delay} 後重試"
   },
   "bottom_nav": {
     "home": "首頁",
     "passport": "護照",
-    "profile": "設定"
+    "settings": "設定"
+  },
+  "passport": {
+    "title": "知識護照",
+    "title_uppercase": "知識護照",
+    "no_entries": "尚未儲存任何導覽",
+    "load_error": "載入失敗",
+    "item_saved": "已儲存！",
+    "added_to_passport": "已新增至您的知識護照",
+    "view_button": "查看知識護照",
+    "continue_tour": "繼續導覽"
+  },
+  "explore": {
+    "title": "探索",
+    "refresh": "重新整理"
+  },
+  "common": {
+    "language_english": "English",
+    "language_chinese_traditional": "繁體中文",
+    "error_prefix": "錯誤",
+    "place_label": "地點"
   },
   "auth": {
     "login": "登入",
@@ -57,7 +81,9 @@
     "welcomeBack": "歡迎回來",
     "signInSubtitle": "登入以存取您的知識護照",
     "createAccountSubtitle": "註冊以開始您的歷史之旅",
-    "forgotPassword": "忘記密碼？"
+    "forgotPassword": "忘記密碼？",
+    "show_password": "顯示密碼",
+    "hide_password": "隱藏密碼"
   },
   "validation": {
     "required": "此欄位為必填",
@@ -66,20 +92,22 @@
     "passwordMismatch": "密碼不相符"
   },
   "settings": {
-    "title": "Settings",
+    "title": "設定",
     "subtitle": "設定",
-    "preferences": "Preferences",
-    "change_language": "Change Language",
+    "preferences": "偏好設定",
+    "change_language": "語言設定",
     "change_language_subtitle": "修改語言",
-    "account": "Account",
-    "logout": "Log Out",
+    "account": "帳號",
+    "logout": "登出",
     "logout_subtitle": "登出",
     "logout_confirm": "您確定要登出嗎？",
-    "delete_account": "Delete Account",
+    "delete_account": "刪除帳號",
     "delete_account_subtitle": "刪除帳號",
     "delete_account_confirm": "您確定要刪除帳號嗎？此動作無法復原。",
     "cancel": "取消",
     "confirm": "確認",
-    "terms": "繼續即表示您同意我們的服務條款和隱私權政策。"
+    "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
+    "app_version": "版本 1.2.0 (Build 45)",
+    "copyright": "© 2023 Historical Guide AI"
   }
 }

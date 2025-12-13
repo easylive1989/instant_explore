@@ -49,8 +49,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'bottom_nav.passport'.tr(),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
-            label: 'bottom_nav.profile'.tr(),
+            icon: const Icon(Icons.settings),
+            label: 'bottom_nav.settings'.tr(),
           ),
         ],
         currentIndex: _selectedIndex,

@@ -2,6 +2,7 @@ import 'package:context_app/core/config/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/places/providers.dart';
 
@@ -22,14 +23,6 @@ class ExploreScreen extends ConsumerWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.network(
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAVquA33CmpY8z_jSAhTaWCpD7_N9E1YheF1AMZemrva1YGHu-BWyECtoKx7y4fT7lbYD-kfqtvI2x6OHu0beZ2wnVEHjEZXhVhhMBj_UoGip60sjAuGyw_cnw98oSRIl8XL6Ino-uTdOJJ6cHlhJHiV-6Dn8AEh6eYA-T_iJp1LGYJxxbDorHRciFevGtjt9QlLHGPcod0QIB1RrZdYtfY9QGFofoKK3v4Lcwt-KYu6iZpcWxDgy8_v3ZV9jDeJb4K7DgyrhfQ',
-                      fit: BoxFit.cover,
-                      color: const Color(0x99000000),
-                      colorBlendMode: BlendMode.darken,
-                    ),
-                  ),
-                  Positioned.fill(
                     child: Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -40,30 +33,6 @@ class ExploreScreen extends ConsumerWidget {
                             Color(0x33101922),
                             Color(0xE6101922),
                           ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height / 3,
-                    left: MediaQuery.of(context).size.width / 2 - 150,
-                    child: Container(
-                      width: 300,
-                      height: 300,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF137fec).withValues(alpha: 0.05),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF137fec,
-                            ).withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
                         ),
                       ),
                     ),
@@ -80,9 +49,9 @@ class ExploreScreen extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Explore',
-                        style: TextStyle(
+                      Text(
+                        'explore.title'.tr(),
+                        style: const TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -91,7 +60,7 @@ class ExploreScreen extends ConsumerWidget {
                       ElevatedButton.icon(
                         onPressed: () => ref.refresh(nearbyPlacesProvider),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh'),
+                        label: Text('explore.refresh'.tr()),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
                           backgroundColor: const Color(0xFF137fec),
@@ -117,7 +86,7 @@ class ExploreScreen extends ConsumerWidget {
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Center(
                       child: Text(
-                        'Error: $error',
+                        '${'common.error_prefix'.tr()}: $error',
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),
@@ -200,7 +169,7 @@ class PlaceCard extends ConsumerWidget {
                     Text(
                       place.types.isNotEmpty
                           ? place.types.first.replaceAll('_', ' ').toUpperCase()
-                          : 'PLACE',
+                          : 'common.place_label'.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 10,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Password input field with visibility toggle
 class PasswordField extends StatefulWidget {
@@ -89,7 +90,9 @@ class _PasswordFieldState extends State<PasswordField> {
             color: hasCustomStyling ? Colors.white54 : null,
           ),
           onPressed: _togglePasswordVisibility,
-          tooltip: _obscureText ? 'Show password' : 'Hide password',
+          tooltip: _obscureText
+              ? 'auth.show_password'.tr()
+              : 'auth.hide_password'.tr(),
         ),
       ),
       validator: widget.validator,

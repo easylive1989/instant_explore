@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/places/models/place.dart';
 
 class SaveSuccessScreen extends StatelessWidget {
@@ -30,9 +31,9 @@ class SaveSuccessScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: const Text(
-          'KNOWLEDGE PASSPORT',
-          style: TextStyle(
+        title: Text(
+          'passport.title_uppercase'.tr(),
+          style: const TextStyle(
             color: textSecondaryColor,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -100,9 +101,9 @@ class SaveSuccessScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              const Text(
-                'Item Saved!',
-                style: TextStyle(
+              Text(
+                'passport.item_saved'.tr(),
+                style: const TextStyle(
                   color: textColor,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -112,7 +113,7 @@ class SaveSuccessScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               Text(
-                '"${place.name}" has been added to your Knowledge Passport.',
+                '"${place.name}" ${'passport.added_to_passport'.tr()}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: textSecondaryColor,
@@ -210,18 +211,18 @@ class SaveSuccessScreen extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'View Knowledge Passport',
-                          style: TextStyle(
+                          'passport.view_button'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, size: 20),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward, size: 20),
                       ],
                     ),
                   ),
@@ -237,9 +238,9 @@ class SaveSuccessScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Continue Tour',
-                      style: TextStyle(
+                    child: Text(
+                      'passport.continue_tour'.tr(),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),

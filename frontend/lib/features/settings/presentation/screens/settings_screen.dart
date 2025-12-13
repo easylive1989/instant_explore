@@ -19,9 +19,11 @@ class SettingsScreen extends ConsumerWidget {
     // Listen for state changes (e.g., successful logout)
     ref.listen<AsyncValue<void>>(settingsControllerProvider, (previous, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${next.error}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'common.error_prefix'.tr()}: ${next.error}'),
+          ),
+        );
       }
       // Assuming auth state change listener in main app will handle navigation upon logout
     });
@@ -35,26 +37,13 @@ class SettingsScreen extends ConsumerWidget {
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: Colors.grey[800], height: 1.0),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'settings.title'.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'settings.subtitle'.tr(),
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+        title: Text(
+          'settings.title'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: state.isLoading
@@ -76,8 +65,8 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           context.locale.languageCode == 'en'
-                              ? 'English'
-                              : '繁體中文',
+                              ? 'common.language_english'.tr()
+                              : 'common.language_chinese_traditional'.tr(),
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
@@ -147,13 +136,16 @@ class SettingsScreen extends ConsumerWidget {
                 Center(
                   child: Column(
                     children: [
-                      const Text(
-                        'Version 1.2.0 (Build 45)',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      Text(
+                        'settings.app_version'.tr(),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '© 2023 Historical Guide AI',
+                        'settings.copyright'.tr(),
                         style: TextStyle(color: Colors.grey[700], fontSize: 10),
                       ),
                     ],

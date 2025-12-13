@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/passport/providers.dart';
 import 'package:context_app/features/passport/models/passport_entry.dart';
 import 'package:context_app/features/places/models/place.dart';
@@ -18,25 +18,22 @@ class PassportScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFF101922),
       appBar: AppBar(
         backgroundColor: const Color(0xFF101922),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Knowledge Passport',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text('知識護照', style: TextStyle(color: Colors.white70, fontSize: 12)),
-          ],
+        title: Text(
+          'passport.title'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: passportAsyncValue.when(
         data: (entries) {
           if (entries.isEmpty) {
-            return const Center(
-              child: Text('尚未儲存任何導覽', style: TextStyle(color: Colors.white70)),
+            return Center(
+              child: Text(
+                'passport.no_entries'.tr(),
+                style: const TextStyle(color: Colors.white70),
+              ),
             );
           }
           return ListView.builder(
@@ -51,7 +48,7 @@ class PassportScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Text(
-            '載入失敗: $error',
+            '${'passport.load_error'.tr()}: $error',
             style: const TextStyle(color: Colors.red),
           ),
         ),

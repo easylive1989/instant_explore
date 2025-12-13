@@ -136,7 +136,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onPressed: () => context.pop(),
                       ),
                       Text(
-                        'AUDIO GUIDE',
+                        'player_screen.audio_guide'.tr(),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 12,
@@ -197,9 +197,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           children: [
             CircularProgressIndicator(color: primaryColor),
             const SizedBox(height: 16),
-            const Text(
-              '正在生成導覽內容...',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+            Text(
+              'player_screen.loading'.tr(),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],
         ),
@@ -214,7 +214,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
       // 取得錯誤訊息
       final errorMessage =
-          errorType?.message ?? playerState.errorMessage ?? '發生錯誤';
+          errorType?.message ??
+          playerState.errorMessage ??
+          'player_screen.error'.tr();
 
       return Center(
         child: Padding(
@@ -235,7 +237,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   errorType != NarrationErrorType.aiQuotaExceeded) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '建議 ${_formatRetryDelay(errorType!.suggestedRetryDelay!)} 後重試',
+                  'player_screen.suggested_retry'.tr(
+                    namedArgs: {
+                      'delay': _formatRetryDelay(
+                        errorType!.suggestedRetryDelay!,
+                      ),
+                    },
+                  ),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 14,
@@ -537,7 +545,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                   Supabase.instance.client.auth.currentUser?.id;
                               if (userId == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('請先登入')),
+                                  SnackBar(
+                                    content: Text(
+                                      'player_screen.please_login'.tr(),
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
@@ -546,7 +558,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 await playerController.saveToPassport(userId);
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('已儲存至知識護照')),
+                                    SnackBar(
+                                      content: Text(
+                                        'player_screen.saved_to_passport'.tr(),
+                                      ),
+                                    ),
                                   );
                                   context.pushNamed(
                                     'passport_success',
@@ -556,7 +572,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('儲存失敗: $e')),
+                                    SnackBar(
+                                      content: Text(
+                                        '${'player_screen.save_failed'.tr()}: $e',
+                                      ),
+                                    ),
                                   );
                                 }
                               }
@@ -598,9 +618,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Text(
-                                'Save to Knowledge Passport',
-                                style: TextStyle(
+                              Text(
+                                'player_screen.save_to_passport'.tr(),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,

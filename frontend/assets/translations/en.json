@@ -27,12 +27,36 @@
     "retry": "Retry",
     "save_to_passport": "Save to Knowledge Passport",
     "error_generating": "Failed to generate narration",
-    "error_playing": "Playback error"
+    "error_playing": "Playback error",
+    "please_login": "Please login first",
+    "saved_to_passport": "Saved to Knowledge Passport",
+    "save_failed": "Save failed",
+    "suggested_retry": "Suggested retry after {delay}"
   },
   "bottom_nav": {
     "home": "Home",
     "passport": "Passport",
-    "profile": "Profile"
+    "settings": "Settings"
+  },
+  "passport": {
+    "title": "Knowledge Passport",
+    "title_uppercase": "KNOWLEDGE PASSPORT",
+    "no_entries": "No saved tours yet",
+    "load_error": "Failed to load",
+    "item_saved": "Item Saved!",
+    "added_to_passport": "has been added to your Knowledge Passport.",
+    "view_button": "View Knowledge Passport",
+    "continue_tour": "Continue Tour"
+  },
+  "explore": {
+    "title": "Explore",
+    "refresh": "Refresh"
+  },
+  "common": {
+    "language_english": "English",
+    "language_chinese_traditional": "繁體中文",
+    "error_prefix": "Error",
+    "place_label": "PLACE"
   },
   "auth": {
     "login": "Sign In",
@@ -57,7 +81,9 @@
     "welcomeBack": "Welcome back",
     "signInSubtitle": "Sign in to access your Knowledge Passport",
     "createAccountSubtitle": "Sign up to start your journey through history",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "show_password": "Show password",
+    "hide_password": "Hide password"
   },
   "validation": {
     "required": "This field is required",
@@ -80,6 +106,8 @@
     "delete_account_confirm": "Are you sure you want to delete your account? This action cannot be undone.",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "terms": "By continuing, you agree to our Terms of Service and Privacy Policy."
+    "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
+    "app_version": "Version 1.2.0 (Build 45)",
+    "copyright": "© 2023 Historical Guide AI"
   }
 }
