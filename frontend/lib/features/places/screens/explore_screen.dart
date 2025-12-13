@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/places/providers.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+class ExploreScreen extends ConsumerWidget {
+  const ExploreScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

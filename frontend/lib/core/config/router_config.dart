@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:context_app/features/main/main_screen.dart';
+import 'package:context_app/features/main_screen.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/player/screens/config_screen.dart';
 import 'package:context_app/features/player/screens/player_screen.dart';
