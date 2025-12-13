@@ -26,6 +26,9 @@ class Narration {
   /// 當前播放位置（秒）
   final int currentPosition;
 
+  /// TTS 當前播放的字符位置
+  final int currentCharPosition;
+
   /// 總時長（秒）
   final int duration;
 
@@ -39,6 +42,7 @@ class Narration {
     this.content,
     required this.state,
     this.currentPosition = 0,
+    this.currentCharPosition = 0,
     this.duration = 0,
     this.errorMessage,
   });
@@ -76,6 +80,9 @@ class Narration {
         state: PlaybackState.playing,
         // 如果是播放完成後重新播放，重置到開頭
         currentPosition: state == PlaybackState.completed ? 0 : currentPosition,
+        currentCharPosition: state == PlaybackState.completed
+            ? 0
+            : currentCharPosition,
       );
     }
     return this;
@@ -130,6 +137,18 @@ class Narration {
     return this;
   }
 
+  /// 更新 TTS 播放的字符位置
+  ///
+  /// [charPosition] 當前播放到的字符位置
+  /// 返回更新後的 Narration 實例
+  Narration updateCharPosition(int charPosition) {
+    // 業務規則：只有在 playing 狀態才更新字符位置
+    if (state == PlaybackState.playing) {
+      return copyWith(currentCharPosition: charPosition);
+    }
+    return this;
+  }
+
   /// 發生錯誤
   Narration error(String message) {
     return copyWith(state: PlaybackState.error, errorMessage: message);
@@ -138,11 +157,13 @@ class Narration {
   /// 取得當前應該高亮的段落索引
   ///
   /// 如果沒有內容或尚未開始播放，返回 null
+  /// 使用字符位置來計算段落索引，提供更精確的同步
   int? getCurrentSegmentIndex() {
     if (content == null || state == PlaybackState.loading) {
       return null;
     }
-    return content!.getCurrentSegmentIndex(currentPosition);
+    // 使用字符位置計算（精確）
+    return content!.getSegmentIndexByCharPosition(currentCharPosition);
   }
 
   /// 建立副本並更新指定屬性
@@ -153,6 +174,7 @@ class Narration {
     NarrationContent? content,
     PlaybackState? state,
     int? currentPosition,
+    int? currentCharPosition,
     int? duration,
     String? errorMessage,
   }) {
@@ -163,6 +185,7 @@ class Narration {
       content: content ?? this.content,
       state: state ?? this.state,
       currentPosition: currentPosition ?? this.currentPosition,
+      currentCharPosition: currentCharPosition ?? this.currentCharPosition,
       duration: duration ?? this.duration,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -185,6 +208,7 @@ class Narration {
         other.content == content &&
         other.state == state &&
         other.currentPosition == currentPosition &&
+        other.currentCharPosition == currentCharPosition &&
         other.duration == duration &&
         other.errorMessage == errorMessage;
   }
@@ -198,6 +222,7 @@ class Narration {
       content,
       state,
       currentPosition,
+      currentCharPosition,
       duration,
       errorMessage,
     );

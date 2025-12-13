@@ -122,9 +122,11 @@ class PlayerController extends StateNotifier<PlayerState> {
     _ttsCompleteSubscription = _ttsService.onComplete.listen((_) {
       _stopProgressTimer();
       if (state.narration != null) {
-        final updatedNarration = state.narration!.updateProgress(
-          state.narration!.duration,
-        );
+        // 設置到最後一個字符並完成播放
+        final totalLength = state.narration!.content?.text.length ?? 0;
+        final updatedNarration = state.narration!
+            .updateProgress(state.narration!.duration)
+            .updateCharPosition(totalLength);
         state = state.updateNarration(updatedNarration);
       }
     });
@@ -132,6 +134,11 @@ class PlayerController extends StateNotifier<PlayerState> {
     // 監聽播放開始事件
     _ttsStartSubscription = _ttsService.onStart.listen((_) {
       _startProgressTimer();
+      // 重置字符位置到開頭
+      if (state.narration != null) {
+        final updatedNarration = state.narration!.updateCharPosition(0);
+        state = state.updateNarration(updatedNarration);
+      }
     });
 
     // 監聽錯誤事件
@@ -139,10 +146,15 @@ class PlayerController extends StateNotifier<PlayerState> {
       state = state.error(NarrationErrorType.ttsPlaybackError, message: error);
     });
 
-    // 監聽進度事件（可選，用於更精確的進度追蹤）
+    // 監聽進度事件（字符級別的精確追蹤）
     _ttsProgressSubscription = _ttsService.onProgress.listen((progress) {
-      // TTS 進度更新（字符級別）
-      // 我們使用定時器追蹤時間進度，這裡可以用於段落高亮
+      // 使用 TTS 提供的字符級別進度更新段落索引
+      if (state.narration != null && state.isPlaying) {
+        final updatedNarration = state.narration!.updateCharPosition(
+          progress.currentPosition, // 字符位置
+        );
+        state = state.updateNarration(updatedNarration);
+      }
     });
   }
 
@@ -252,6 +264,10 @@ class PlayerController extends StateNotifier<PlayerState> {
   }
 
   /// 開始進度定時器
+  ///
+  /// 職責分離：
+  /// - 定時器：追蹤播放時間（用於進度條顯示）
+  /// - TTS 進度回調：追蹤字符位置（用於段落索引計算）
   void _startProgressTimer() {
     _stopProgressTimer();
 
@@ -259,7 +275,8 @@ class PlayerController extends StateNotifier<PlayerState> {
       if (state.narration != null && state.isPlaying) {
         final newPosition = state.currentPosition + 1;
 
-        // 更新 Narration 進度
+        // 更新播放時間進度（用於進度條）
+        // 段落索引由 TTS 進度回調的字符位置決定
         final updatedNarration = state.narration!.updateProgress(newPosition);
         state = state.updateNarration(updatedNarration);
       }

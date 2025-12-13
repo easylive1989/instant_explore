@@ -49,11 +49,7 @@ void main() {
       place: place,
       style: NarrationStyle.brief,
       state: PlaybackState.ready,
-      content: const NarrationContent(
-        text: 'Narration text',
-        segments: [],
-        estimatedDuration: 10,
-      ),
+      content: NarrationContent.fromText('Narration text'),
     );
 
     when(() => mockRepository.addPassportEntry(any())).thenAnswer((_) async {});

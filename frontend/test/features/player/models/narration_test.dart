@@ -33,17 +33,13 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
       );
-      const content = NarrationContent(
-        text: 'Test content',
-        segments: ['Test content'],
-        estimatedDuration: 10,
-      );
+      final content = NarrationContent.fromText('Test content');
 
       final readyNarration = narration.ready(content);
 
       expect(readyNarration.state, PlaybackState.ready);
       expect(readyNarration.content, content);
-      expect(readyNarration.duration, 10);
+      expect(readyNarration.duration, content.estimatedDuration);
     });
 
     test('play transitions from ready to playing', () {
@@ -52,11 +48,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
       );
-      const content = NarrationContent(
-        text: 'Test content',
-        segments: ['Test content'],
-        estimatedDuration: 10,
-      );
+      final content = NarrationContent.fromText('Test content');
       narration = narration.ready(content);
 
       final playingNarration = narration.play();
@@ -70,11 +62,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: const NarrationContent(
-          text: 'test',
-          segments: [],
-          estimatedDuration: 10,
-        ),
+        content: NarrationContent.fromText('test'),
       );
 
       final pausedNarration = narration.pause();
@@ -88,11 +76,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: const NarrationContent(
-          text: 'test',
-          segments: [],
-          estimatedDuration: 100,
-        ),
+        content: NarrationContent.fromText('test'),
         duration: 100,
         currentPosition: 10,
       );
@@ -110,11 +94,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: const NarrationContent(
-          text: 'test',
-          segments: [],
-          estimatedDuration: 100,
-        ),
+        content: NarrationContent.fromText('test'),
         duration: 100,
         currentPosition: 50,
       );
@@ -132,11 +112,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: const NarrationContent(
-          text: 'test',
-          segments: [],
-          estimatedDuration: 100,
-        ),
+        content: NarrationContent.fromText('test'),
         duration: 100,
       );
 

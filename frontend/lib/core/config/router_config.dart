@@ -53,7 +53,10 @@ class RouterConfig {
           path: '/config',
           name: 'config',
           builder: (context, state) {
-            final place = state.extra as Place;
+            final extra = state.extra;
+            final place = extra is Place
+                ? extra
+                : Place.fromJson(extra as Map<String, dynamic>);
             return ConfigScreen(place: place);
           },
         ),
@@ -62,7 +65,10 @@ class RouterConfig {
           name: 'player',
           builder: (context, state) {
             final params = state.extra as Map<String, dynamic>;
-            final place = params['place'] as Place;
+            final placeData = params['place'];
+            final place = placeData is Place
+                ? placeData
+                : Place.fromJson(placeData as Map<String, dynamic>);
             final narrationStyle = params['narrationStyle'] as NarrationStyle;
             final initialContent = params['initialContent'] as String?;
             final enableSave = params['enableSave'] as bool? ?? true;
