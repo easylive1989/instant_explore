@@ -29,7 +29,6 @@
     "error_generating": "Failed to generate narration",
     "error_playing": "Playback error",
     "please_login": "Please login first",
-    "saved_to_passport": "Saved to Journey of Exploration",
     "save_failed": "Save failed",
     "suggested_retry": "Suggested retry after {delay}"
   },

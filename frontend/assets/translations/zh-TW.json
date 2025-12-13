@@ -29,7 +29,6 @@
     "error_generating": "無法生成導覽內容",
     "error_playing": "播放錯誤",
     "please_login": "請先登入",
-    "saved_to_passport": "已儲存至探索歷程",
     "save_failed": "儲存失敗",
     "suggested_retry": "建議 {delay} 後重試"
   },

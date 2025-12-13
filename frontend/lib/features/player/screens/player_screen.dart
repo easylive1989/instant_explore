@@ -556,19 +556,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
                               try {
                                 await playerController.saveToPassport(userId);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'player_screen.saved_to_passport'.tr(),
-                                      ),
-                                    ),
-                                  );
-                                  context.pushNamed(
-                                    'passport_success',
-                                    extra: widget.place,
-                                  );
-                                }
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
