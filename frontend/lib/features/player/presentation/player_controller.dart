@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/places/models/place.dart';
+import 'package:context_app/features/player/application/narration_generation_exception.dart';
+import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:context_app/features/player/application/start_narration_use_case.dart';
 import 'package:context_app/features/player/presentation/player_state.dart';
@@ -55,11 +57,15 @@ class PlayerController extends StateNotifier<PlayerState> {
       state = state.ready(narration);
       _log.info('Player initialized and ready');
     } on NarrationGenerationException catch (e) {
-      _log.severe('Failed to initialize player: ${e.message}');
-      state = state.error(e.message);
-    } catch (e) {
-      _log.severe('Unexpected error during initialization: $e');
-      state = state.error('初始化播放器失敗：$e');
+      _log.severe('Failed to initialize: ${e.type}, raw: ${e.rawMessage}');
+      state = state.error(e.type, message: e.rawMessage);
+
+      if (e.context != null && e.context!.isNotEmpty) {
+        _log.info('Error context: ${e.context}');
+      }
+    } catch (e, stackTrace) {
+      _log.severe('Unexpected error during initialization', e, stackTrace);
+      state = state.error(NarrationErrorType.unknown, message: e.toString());
     }
   }
 
@@ -86,7 +92,7 @@ class PlayerController extends StateNotifier<PlayerState> {
     // 監聽錯誤事件
     _ttsErrorSubscription = _ttsService.onError.listen((error) {
       _log.severe('TTS error: $error');
-      state = state.error('播放錯誤：$error');
+      state = state.error(NarrationErrorType.ttsPlaybackError, message: error);
     });
 
     // 監聽進度事件（可選，用於更精確的進度追蹤）
@@ -137,11 +143,17 @@ class PlayerController extends StateNotifier<PlayerState> {
       if (success) {
         state = state.updateNarration(updatedNarration);
       } else {
-        state = state.error('播放失敗');
+        state = state.error(
+          NarrationErrorType.ttsPlaybackError,
+          message: '播放失敗',
+        );
       }
     } catch (e) {
       _log.severe('Failed to play: $e');
-      state = state.error('播放失敗：$e');
+      state = state.error(
+        NarrationErrorType.ttsPlaybackError,
+        message: '播放失敗：$e',
+      );
     }
   }
 
@@ -166,7 +178,10 @@ class PlayerController extends StateNotifier<PlayerState> {
       _stopProgressTimer();
     } catch (e) {
       _log.severe('Failed to pause: $e');
-      state = state.error('暫停失敗：$e');
+      state = state.error(
+        NarrationErrorType.ttsPlaybackError,
+        message: '暫停失敗：$e',
+      );
     }
   }
 

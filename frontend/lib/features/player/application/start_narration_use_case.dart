@@ -1,9 +1,15 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:context_app/core/services/gemini_service.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/places/models/place.dart';
+import 'package:context_app/features/player/application/narration_generation_exception.dart';
 import 'package:context_app/features/player/models/narration.dart';
 import 'package:context_app/features/player/models/narration_content.dart';
+import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
@@ -50,7 +56,9 @@ class StartNarrationUseCase {
       );
 
       if (generatedText.isEmpty) {
-        throw NarrationGenerationException('Generated narration text is empty');
+        throw NarrationGenerationException.contentFailed(
+          rawMessage: 'Generated narration text is empty',
+        );
       }
 
       // 3. 建立 NarrationContent 值對象
@@ -73,25 +81,49 @@ class StartNarrationUseCase {
       _log.info('Narration ready to play: ${readyNarration.id}');
       return readyNarration;
     } on NarrationGenerationException {
+      // 已經是我們的異常，直接重新拋出
       _log.severe('Failed to generate narration content');
       rethrow;
+    } on InvalidApiKey catch (e) {
+      _log.severe('Invalid API key', e);
+      throw NarrationGenerationException.configuration(
+        rawMessage: 'Invalid API key: ${e.toString()}',
+      );
+    } on UnsupportedUserLocation catch (e) {
+      _log.severe('Unsupported user location', e);
+      throw NarrationGenerationException.unsupportedLocation(
+        rawMessage: 'Unsupported location: ${e.toString()}',
+      );
+    } on ServerException catch (e) {
+      _log.severe('Server error', e);
+      // 檢查是否為配額超限錯誤
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('resource_exhausted') ||
+          errorString.contains('429') ||
+          errorString.contains('quota exceeded') ||
+          errorString.contains('rate limit')) {
+        throw NarrationGenerationException.quotaExceeded(
+          rawMessage: e.toString(),
+          retryAfterSeconds: 900, // 15 分鐘
+        );
+      }
+      throw NarrationGenerationException.server(rawMessage: e.toString());
+    } on SocketException catch (e) {
+      _log.severe('Network error (socket)', e);
+      throw NarrationGenerationException.network(rawMessage: e.toString());
+    } on TimeoutException catch (e) {
+      _log.severe('Network error (timeout)', e);
+      throw NarrationGenerationException.network(rawMessage: e.toString());
     } catch (e, stackTrace) {
-      _log.severe('Failed to start narration', e, stackTrace);
+      _log.severe(
+        'Unexpected error during narration generation',
+        e,
+        stackTrace,
+      );
       throw NarrationGenerationException(
-        'Failed to generate narration: ${e.toString()}',
+        type: NarrationErrorType.unknown,
+        rawMessage: e.toString(),
       );
     }
   }
-}
-
-/// 導覽生成異常
-///
-/// 當導覽內容生成失敗時拋出
-class NarrationGenerationException implements Exception {
-  final String message;
-
-  NarrationGenerationException(this.message);
-
-  @override
-  String toString() => 'NarrationGenerationException: $message';
 }

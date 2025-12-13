@@ -1,4 +1,5 @@
 import 'package:context_app/features/player/models/narration.dart';
+import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/playback_state.dart';
 
 /// 播放器狀態
@@ -17,7 +18,10 @@ class PlayerState {
   /// 總時長（秒）
   final int duration;
 
-  /// 錯誤訊息
+  /// 錯誤類型（當 playbackState 為 error 時）
+  final NarrationErrorType? errorType;
+
+  /// 錯誤訊息（可選，用於 debug 或顯示額外資訊）
   final String? errorMessage;
 
   const PlayerState({
@@ -25,6 +29,7 @@ class PlayerState {
     this.playbackState = PlaybackState.loading,
     this.currentPosition = 0,
     this.duration = 0,
+    this.errorType,
     this.errorMessage,
   });
 
@@ -68,8 +73,12 @@ class PlayerState {
   }
 
   /// 建立錯誤狀態
-  PlayerState error(String message) {
-    return copyWith(playbackState: PlaybackState.error, errorMessage: message);
+  PlayerState error(NarrationErrorType type, {String? message}) {
+    return copyWith(
+      playbackState: PlaybackState.error,
+      errorType: type,
+      errorMessage: message,
+    );
   }
 
   /// 更新播放進度
@@ -99,6 +108,7 @@ class PlayerState {
     PlaybackState? playbackState,
     int? currentPosition,
     int? duration,
+    NarrationErrorType? errorType,
     String? errorMessage,
   }) {
     return PlayerState(
@@ -106,6 +116,7 @@ class PlayerState {
       playbackState: playbackState ?? this.playbackState,
       currentPosition: currentPosition ?? this.currentPosition,
       duration: duration ?? this.duration,
+      errorType: errorType ?? this.errorType,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -155,6 +166,7 @@ class PlayerState {
         other.playbackState == playbackState &&
         other.currentPosition == currentPosition &&
         other.duration == duration &&
+        other.errorType == errorType &&
         other.errorMessage == errorMessage;
   }
 
@@ -165,6 +177,7 @@ class PlayerState {
       playbackState,
       currentPosition,
       duration,
+      errorType,
       errorMessage,
     );
   }

@@ -1,3 +1,4 @@
+import 'package:context_app/features/player/application/narration_generation_exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/core/services/gemini_service.dart';

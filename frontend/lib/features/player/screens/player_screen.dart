@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
+import 'package:context_app/core/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/places/models/place.dart';
+import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:context_app/features/player/providers.dart';
 
@@ -43,10 +45,47 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
+  /// 格式化重試延遲時間
+  String _formatRetryDelay(int seconds) {
+    if (seconds < 60) {
+      return '$seconds 秒';
+    } else {
+      return '${seconds ~/ 60} 分鐘';
+    }
+  }
+
+  /// 顯示 AI 超限對話框
+  void _showAiOverLimitDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => const AiOverLimitDialog(),
+    ).then((_) {
+      // 對話框關閉後，導航回 config screen
+      if (mounted) {
+        context.pushReplacementNamed('config', extra: widget.place);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final playerState = ref.watch(playerControllerProvider);
     final playerController = ref.read(playerControllerProvider.notifier);
+
+    // 監聽錯誤狀態並顯示對應的對話框
+    ref.listen(playerControllerProvider, (previous, current) {
+      // 當狀態從非錯誤變為錯誤時，且需要特殊對話框
+      if ((previous == null || !previous.hasError) &&
+          current.hasError &&
+          current.errorType != null &&
+          current.errorType!.requiresSpecialDialog) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _showAiOverLimitDialog();
+        });
+      }
+    });
 
     // Colors from design
     const primaryColor = Color(0xFF137fec);
@@ -152,6 +191,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     // 錯誤狀態
     if (playerState.hasError) {
+      final locale =
+          easy.EasyLocalization.of(context)?.locale.toString() ?? 'zh-TW';
+      final errorType = playerState.errorType;
+
+      // 取得錯誤訊息
+      final errorMessage =
+          errorType?.message ?? playerState.errorMessage ?? '發生錯誤';
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -161,19 +208,41 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
               Text(
-                playerState.errorMessage ?? '發生錯誤',
+                errorMessage,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  ref
-                      .read(playerControllerProvider.notifier)
-                      .initialize(widget.place, widget.narrationStyle);
-                },
-                child: const Text('重試'),
-              ),
+
+              // 顯示建議的重試時間
+              if (errorType?.suggestedRetryDelay != null &&
+                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '建議 ${_formatRetryDelay(errorType!.suggestedRetryDelay!)} 後重試',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+
+              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示）
+              if (errorType?.isRetryable == true &&
+                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    ref
+                        .read(playerControllerProvider.notifier)
+                        .initialize(
+                          widget.place,
+                          widget.narrationStyle,
+                          language: locale,
+                        );
+                  },
+                  child: const Text('重試'),
+                ),
+              ],
             ],
           ),
         ),
