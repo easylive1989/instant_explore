@@ -25,27 +25,27 @@
     "loading": "Generating narration content...",
     "error": "An error occurred",
     "retry": "Retry",
-    "save_to_passport": "Save to Knowledge Passport",
+    "save_to_passport": "Save to Journey of Exploration",
     "error_generating": "Failed to generate narration",
     "error_playing": "Playback error",
     "please_login": "Please login first",
-    "saved_to_passport": "Saved to Knowledge Passport",
+    "saved_to_passport": "Saved to Journey of Exploration",
     "save_failed": "Save failed",
     "suggested_retry": "Suggested retry after {delay}"
   },
   "bottom_nav": {
     "home": "Home",
-    "passport": "Passport",
+    "passport": "Journey",
     "settings": "Settings"
   },
   "passport": {
-    "title": "Knowledge Passport",
-    "title_uppercase": "KNOWLEDGE PASSPORT",
+    "title": "Journey of Exploration",
+    "title_uppercase": "JOURNEY OF EXPLORATION",
     "no_entries": "No saved tours yet",
     "load_error": "Failed to load",
     "item_saved": "Item Saved!",
-    "added_to_passport": "has been added to your Knowledge Passport.",
-    "view_button": "View Knowledge Passport",
+    "added_to_passport": "has been added to your Journey of Exploration.",
+    "view_button": "View Journey of Exploration",
     "continue_tour": "Continue Tour"
   },
   "explore": {
@@ -79,7 +79,7 @@
     "haveAccount": "Already have an account?",
     "createAccount": "Create Account",
     "welcomeBack": "Welcome back",
-    "signInSubtitle": "Sign in to access your Knowledge Passport",
+    "signInSubtitle": "Sign in to access yourJourney of Exploration",
     "createAccountSubtitle": "Sign up to start your journey through history",
     "forgotPassword": "Forgot password?",
     "show_password": "Show password",
@@ -107,7 +107,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
-    "app_version": "Version 1.2.0 (Build 45)",
-    "copyright": "© 2023 Historical Guide AI"
+    "app_version": "Version information unavailable",
+    "copyright": "© 2025 Context 讀景"
   }
 }

@@ -25,27 +25,27 @@
     "loading": "正在生成導覽內容...",
     "error": "發生錯誤",
     "retry": "重試",
-    "save_to_passport": "儲存至知識護照",
+    "save_to_passport": "儲存至探索歷程",
     "error_generating": "無法生成導覽內容",
     "error_playing": "播放錯誤",
     "please_login": "請先登入",
-    "saved_to_passport": "已儲存至知識護照",
+    "saved_to_passport": "已儲存至探索歷程",
     "save_failed": "儲存失敗",
     "suggested_retry": "建議 {delay} 後重試"
   },
   "bottom_nav": {
     "home": "首頁",
-    "passport": "護照",
+    "passport": "歷程",
     "settings": "設定"
   },
   "passport": {
-    "title": "知識護照",
-    "title_uppercase": "知識護照",
+    "title": "探索歷程",
+    "title_uppercase": "探索歷程",
     "no_entries": "尚未儲存任何導覽",
     "load_error": "載入失敗",
     "item_saved": "已儲存！",
-    "added_to_passport": "已新增至您的知識護照",
-    "view_button": "查看知識護照",
+    "added_to_passport": "已新增至您的探索歷程",
+    "view_button": "查看探索歷程",
     "continue_tour": "繼續導覽"
   },
   "explore": {
@@ -79,7 +79,7 @@
     "haveAccount": "已有帳號？",
     "createAccount": "建立帳號",
     "welcomeBack": "歡迎回來",
-    "signInSubtitle": "登入以存取您的知識護照",
+    "signInSubtitle": "登入以存取您的探索歷程",
     "createAccountSubtitle": "註冊以開始您的歷史之旅",
     "forgotPassword": "忘記密碼？",
     "show_password": "顯示密碼",
@@ -107,7 +107,7 @@
     "cancel": "取消",
     "confirm": "確認",
     "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
-    "app_version": "版本 1.2.0 (Build 45)",
-    "copyright": "© 2023 Historical Guide AI"
+    "app_version": "版本資訊無法取得",
+    "copyright": "© 2025 Context 讀景"
   }
 }

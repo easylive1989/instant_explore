@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/settings/presentation/providers/settings_controller.dart';
+import 'package:context_app/features/settings/presentation/providers/app_info_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -10,6 +11,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
+    final appVersionAsync = ref.watch(appVersionStringProvider);
 
     // Colors
     const primaryColor = Color(0xFF137FEC);
@@ -65,8 +67,8 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           context.locale.languageCode == 'en'
-                              ? 'common.language_english'.tr()
-                              : 'common.language_chinese_traditional'.tr(),
+                              ? 'English'
+                              : '繁體中文',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
@@ -136,11 +138,25 @@ class SettingsScreen extends ConsumerWidget {
                 Center(
                   child: Column(
                     children: [
-                      Text(
-                        'settings.app_version'.tr(),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                      appVersionAsync.when(
+                        data: (version) => Text(
+                          version,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                        loading: () => const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 1),
+                        ),
+                        error: (_, __) => Text(
+                          'settings.app_version'.tr(),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
