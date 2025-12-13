@@ -43,12 +43,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,13 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      final response = await authService.signInWithGoogle();
-
-      if (response != null && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
-      }
+      await authService.signInWithGoogle();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

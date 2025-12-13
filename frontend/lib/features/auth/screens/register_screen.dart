@@ -71,12 +71,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           );
         }
-      } else if (next is AsyncData && !next.isLoading) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('auth.registerSuccess'.tr())));
-        }
       }
     });
 
