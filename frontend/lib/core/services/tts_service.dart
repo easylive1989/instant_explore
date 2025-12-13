@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:logging/logging.dart';
 
 /// TTS 語音合成服務
 ///
 /// 封裝 flutter_tts 套件，提供統一的文字轉語音介面
 class TtsService {
-  final _log = Logger('TtsService');
   final FlutterTts _tts = FlutterTts();
 
   /// 播放進度回調（當前播放到的字符位置和文本長度）
@@ -72,22 +70,18 @@ class TtsService {
 
       // 設定事件處理器
       _tts.setStartHandler(() {
-        _log.info('TTS started');
         _startController.add(null);
       });
 
       _tts.setCompletionHandler(() {
-        _log.info('TTS completed');
         _completeController.add(null);
       });
 
       _tts.setPauseHandler(() {
-        _log.info('TTS paused');
         _pauseController.add(null);
       });
 
       _tts.setErrorHandler((message) {
-        _log.warning('TTS error: $message');
         _errorController.add(message);
       });
 
@@ -108,9 +102,7 @@ class TtsService {
       });
 
       _isInitialized = true;
-      _log.info('TTS service initialized');
     } catch (e) {
-      _log.severe('Failed to initialize TTS: $e');
       _errorController.add('初始化 TTS 失敗: $e');
       rethrow;
     }
@@ -126,19 +118,14 @@ class TtsService {
     }
 
     if (text.isEmpty) {
-      _log.warning('Cannot speak empty text');
       return false;
     }
 
     try {
       _currentText = text;
-      _log.info(
-        'Speaking text: ${text.substring(0, text.length > 50 ? 50 : text.length)}...',
-      );
       final result = await _tts.speak(text);
       return result == 1; // 1 表示成功
     } catch (e) {
-      _log.severe('Failed to speak: $e');
       _errorController.add('播放失敗: $e');
       return false;
     }
@@ -147,10 +134,8 @@ class TtsService {
   /// 暫停播放
   Future<void> pause() async {
     try {
-      _log.info('Pausing TTS');
       await _tts.pause();
     } catch (e) {
-      _log.severe('Failed to pause: $e');
       _errorController.add('暫停失敗: $e');
     }
   }
@@ -158,11 +143,9 @@ class TtsService {
   /// 停止播放
   Future<void> stop() async {
     try {
-      _log.info('Stopping TTS');
       await _tts.stop();
       _currentText = '';
     } catch (e) {
-      _log.severe('Failed to stop: $e');
       _errorController.add('停止失敗: $e');
     }
   }
@@ -172,10 +155,8 @@ class TtsService {
   /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')
   Future<void> setLanguage(String language) async {
     try {
-      _log.info('Setting language to: $language');
       await _tts.setLanguage(language);
     } catch (e) {
-      _log.severe('Failed to set language: $e');
       _errorController.add('設定語言失敗: $e');
     }
   }
@@ -187,10 +168,8 @@ class TtsService {
   Future<void> setRate(double rate) async {
     try {
       final clampedRate = rate.clamp(0.0, 1.0);
-      _log.info('Setting speech rate to: $clampedRate');
       await _tts.setSpeechRate(clampedRate);
     } catch (e) {
-      _log.severe('Failed to set rate: $e');
       _errorController.add('設定語速失敗: $e');
     }
   }
@@ -201,10 +180,8 @@ class TtsService {
   Future<void> setVolume(double volume) async {
     try {
       final clampedVolume = volume.clamp(0.0, 1.0);
-      _log.info('Setting volume to: $clampedVolume');
       await _tts.setVolume(clampedVolume);
     } catch (e) {
-      _log.severe('Failed to set volume: $e');
       _errorController.add('設定音量失敗: $e');
     }
   }
@@ -216,10 +193,8 @@ class TtsService {
   Future<void> setPitch(double pitch) async {
     try {
       final clampedPitch = pitch.clamp(0.5, 2.0);
-      _log.info('Setting pitch to: $clampedPitch');
       await _tts.setPitch(clampedPitch);
     } catch (e) {
-      _log.severe('Failed to set pitch: $e');
       _errorController.add('設定音調失敗: $e');
     }
   }
@@ -229,7 +204,6 @@ class TtsService {
     try {
       return await _tts.getLanguages;
     } catch (e) {
-      _log.severe('Failed to get languages: $e');
       return [];
     }
   }
@@ -239,7 +213,6 @@ class TtsService {
     try {
       return await _tts.getVoices;
     } catch (e) {
-      _log.severe('Failed to get voices: $e');
       return [];
     }
   }
@@ -251,7 +224,6 @@ class TtsService {
       // 我們需要自己追蹤狀態
       return false;
     } catch (e) {
-      _log.severe('Failed to check playing state: $e');
       return false;
     }
   }
@@ -259,7 +231,6 @@ class TtsService {
   /// 釋放資源
   Future<void> dispose() async {
     try {
-      _log.info('Disposing TTS service');
       await stop();
       await _progressController.close();
       await _completeController.close();
@@ -268,7 +239,7 @@ class TtsService {
       await _errorController.close();
       _isInitialized = false;
     } catch (e) {
-      _log.severe('Failed to dispose: $e');
+      // Ignore errors during disposal
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logging/logging.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/player/application/narration_generation_exception.dart';
@@ -14,7 +13,6 @@ import 'package:context_app/features/player/presentation/player_state.dart';
 /// 使用 StateNotifier 管理播放器狀態
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<PlayerState> {
-  final _log = Logger('PlayerController');
   final StartNarrationUseCase _startNarrationUseCase;
   final TtsService _ttsService;
 
@@ -40,8 +38,6 @@ class PlayerController extends StateNotifier<PlayerState> {
     NarrationStyle style, {
     String language = 'zh-TW',
   }) async {
-    _log.info('Initializing player for place: ${place.name}');
-
     // 設定為載入中狀態
     state = state.loading();
 
@@ -55,16 +51,9 @@ class PlayerController extends StateNotifier<PlayerState> {
 
       // 更新狀態為就緒
       state = state.ready(narration);
-      _log.info('Player initialized and ready');
     } on NarrationGenerationException catch (e) {
-      _log.severe('Failed to initialize: ${e.type}, raw: ${e.rawMessage}');
       state = state.error(e.type, message: e.rawMessage);
-
-      if (e.context != null && e.context!.isNotEmpty) {
-        _log.info('Error context: ${e.context}');
-      }
-    } catch (e, stackTrace) {
-      _log.severe('Unexpected error during initialization', e, stackTrace);
+    } catch (e) {
       state = state.error(NarrationErrorType.unknown, message: e.toString());
     }
   }
@@ -73,7 +62,6 @@ class PlayerController extends StateNotifier<PlayerState> {
   void _setupTtsListeners() {
     // 監聽播放完成事件
     _ttsCompleteSubscription = _ttsService.onComplete.listen((_) {
-      _log.info('TTS playback completed');
       _stopProgressTimer();
       if (state.narration != null) {
         final updatedNarration = state.narration!.updateProgress(
@@ -85,13 +73,11 @@ class PlayerController extends StateNotifier<PlayerState> {
 
     // 監聽播放開始事件
     _ttsStartSubscription = _ttsService.onStart.listen((_) {
-      _log.info('TTS playback started');
       _startProgressTimer();
     });
 
     // 監聽錯誤事件
     _ttsErrorSubscription = _ttsService.onError.listen((error) {
-      _log.severe('TTS error: $error');
       state = state.error(NarrationErrorType.ttsPlaybackError, message: error);
     });
 
@@ -99,14 +85,12 @@ class PlayerController extends StateNotifier<PlayerState> {
     _ttsProgressSubscription = _ttsService.onProgress.listen((progress) {
       // TTS 進度更新（字符級別）
       // 我們使用定時器追蹤時間進度，這裡可以用於段落高亮
-      _log.fine('TTS progress: ${progress.progress * 100}%');
     });
   }
 
   /// 播放/暫停切換
   void playPause() {
     if (state.narration == null) {
-      _log.warning('Cannot play/pause: narration not initialized');
       return;
     }
 
@@ -120,11 +104,8 @@ class PlayerController extends StateNotifier<PlayerState> {
   /// 開始播放
   Future<void> play() async {
     if (state.narration == null) {
-      _log.warning('Cannot play: narration not initialized');
       return;
     }
-
-    _log.info('Starting playback');
 
     try {
       // 更新 Narration 聚合狀態
@@ -149,7 +130,6 @@ class PlayerController extends StateNotifier<PlayerState> {
         );
       }
     } catch (e) {
-      _log.severe('Failed to play: $e');
       state = state.error(
         NarrationErrorType.ttsPlaybackError,
         message: '播放失敗：$e',
@@ -160,11 +140,8 @@ class PlayerController extends StateNotifier<PlayerState> {
   /// 暫停播放
   Future<void> pause() async {
     if (state.narration == null) {
-      _log.warning('Cannot pause: narration not initialized');
       return;
     }
-
-    _log.info('Pausing playback');
 
     try {
       // 暫停 TTS
@@ -177,7 +154,6 @@ class PlayerController extends StateNotifier<PlayerState> {
       // 停止進度定時器
       _stopProgressTimer();
     } catch (e) {
-      _log.severe('Failed to pause: $e');
       state = state.error(
         NarrationErrorType.ttsPlaybackError,
         message: '暫停失敗：$e',
@@ -198,11 +174,8 @@ class PlayerController extends StateNotifier<PlayerState> {
   /// 快進/快退指定秒數
   void _seekBy(int seconds) {
     if (state.narration == null) {
-      _log.warning('Cannot seek: narration not initialized');
       return;
     }
-
-    _log.info('Seeking by $seconds seconds');
 
     try {
       // 更新 Narration 聚合
@@ -215,11 +188,8 @@ class PlayerController extends StateNotifier<PlayerState> {
       // 注意：flutter_tts 不支援精確的 seek 操作
       // 需要重新開始播放並跳到指定位置
       // 這是一個簡化實現，實際可能需要更複雜的邏輯
-      _log.warning(
-        'TTS seek not fully implemented - position updated but playback not adjusted',
-      );
     } catch (e) {
-      _log.severe('Failed to seek: $e');
+      // Ignore seek errors
     }
   }
 
@@ -246,8 +216,6 @@ class PlayerController extends StateNotifier<PlayerState> {
 
   @override
   void dispose() {
-    _log.info('Disposing player controller');
-
     // 停止播放
     _ttsService.stop();
 

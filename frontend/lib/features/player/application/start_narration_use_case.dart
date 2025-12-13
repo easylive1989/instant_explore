@@ -10,7 +10,6 @@ import 'package:context_app/features/player/models/narration_content.dart';
 import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
 /// 開始導覽用例
@@ -18,7 +17,6 @@ import 'package:uuid/uuid.dart';
 /// 負責生成導覽內容並初始化播放器
 /// 遵循 Clean Architecture Use Case 模式
 class StartNarrationUseCase {
-  final _log = Logger('StartNarrationUseCase');
   final GeminiService _geminiService;
   final TtsService _ttsService;
   final _uuid = const Uuid();
@@ -37,8 +35,6 @@ class StartNarrationUseCase {
     required NarrationStyle style,
     String language = 'zh-TW',
   }) async {
-    _log.info('Starting narration for place: ${place.name}, style: $style');
-
     try {
       // 1. 建立初始的 Narration 聚合（loading 狀態）
       final narration = Narration.create(
@@ -48,7 +44,6 @@ class StartNarrationUseCase {
       );
 
       // 2. 使用 GeminiService 生成導覽內容
-      _log.info('Generating narration content...');
       final generatedText = await _geminiService.generateNarration(
         place: place,
         style: style,
@@ -63,13 +58,8 @@ class StartNarrationUseCase {
 
       // 3. 建立 NarrationContent 值對象
       final content = NarrationContent.fromText(generatedText);
-      _log.info(
-        'Narration content created: ${content.segments.length} segments, '
-        '${content.estimatedDuration}s estimated duration',
-      );
 
       // 4. 初始化 TtsService
-      _log.info('Initializing TTS service...');
       await _ttsService.initialize();
 
       // 設定 TTS 語言
@@ -78,24 +68,19 @@ class StartNarrationUseCase {
       // 5. 更新 Narration 為 ready 狀態
       final readyNarration = narration.ready(content);
 
-      _log.info('Narration ready to play: ${readyNarration.id}');
       return readyNarration;
     } on NarrationGenerationException {
       // 已經是我們的異常，直接重新拋出
-      _log.severe('Failed to generate narration content');
       rethrow;
     } on InvalidApiKey catch (e) {
-      _log.severe('Invalid API key', e);
       throw NarrationGenerationException.configuration(
         rawMessage: 'Invalid API key: ${e.toString()}',
       );
     } on UnsupportedUserLocation catch (e) {
-      _log.severe('Unsupported user location', e);
       throw NarrationGenerationException.unsupportedLocation(
         rawMessage: 'Unsupported location: ${e.toString()}',
       );
     } on ServerException catch (e) {
-      _log.severe('Server error', e);
       // 檢查是否為配額超限錯誤
       final errorString = e.toString().toLowerCase();
       if (errorString.contains('resource_exhausted') ||
@@ -109,17 +94,10 @@ class StartNarrationUseCase {
       }
       throw NarrationGenerationException.server(rawMessage: e.toString());
     } on SocketException catch (e) {
-      _log.severe('Network error (socket)', e);
       throw NarrationGenerationException.network(rawMessage: e.toString());
     } on TimeoutException catch (e) {
-      _log.severe('Network error (timeout)', e);
       throw NarrationGenerationException.network(rawMessage: e.toString());
-    } catch (e, stackTrace) {
-      _log.severe(
-        'Unexpected error during narration generation',
-        e,
-        stackTrace,
-      );
+    } catch (e) {
       throw NarrationGenerationException(
         type: NarrationErrorType.unknown,
         rawMessage: e.toString(),
