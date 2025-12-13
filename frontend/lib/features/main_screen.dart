@@ -15,6 +15,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
+  Locale? _currentLocale;
 
   static const List<Widget> _widgetOptions = <Widget>[
     ExploreScreen(),
@@ -26,6 +27,20 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check if locale has changed
+    final locale = context.locale;
+    if (_currentLocale != locale) {
+      _currentLocale = locale;
+      // Trigger rebuild when locale changes
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   void _onItemTapped(int index) {
