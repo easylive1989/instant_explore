@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:context_app/features/places/models/place.dart';
-import 'package:context_app/features/places/models/place_photo.dart';
 import 'package:context_app/features/player/models/narration.dart';
 import 'package:context_app/features/player/models/narration_content.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
@@ -34,7 +33,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
       );
-      final content = NarrationContent(
+      const content = NarrationContent(
         text: 'Test content',
         segments: ['Test content'],
         estimatedDuration: 10,
@@ -53,7 +52,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
       );
-      final content = NarrationContent(
+      const content = NarrationContent(
         text: 'Test content',
         segments: ['Test content'],
         estimatedDuration: 10,
@@ -66,12 +65,12 @@ void main() {
     });
 
     test('pause transitions from playing to paused', () {
-      var narration = Narration(
+      final narration = Narration(
         id: '1',
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: NarrationContent(
+        content: const NarrationContent(
           text: 'test',
           segments: [],
           estimatedDuration: 10,
@@ -89,7 +88,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: NarrationContent(
+        content: const NarrationContent(
           text: 'test',
           segments: [],
           estimatedDuration: 100,
@@ -111,7 +110,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: NarrationContent(
+        content: const NarrationContent(
           text: 'test',
           segments: [],
           estimatedDuration: 100,
@@ -133,7 +132,7 @@ void main() {
         place: place,
         style: NarrationStyle.brief,
         state: PlaybackState.playing,
-        content: NarrationContent(
+        content: const NarrationContent(
           text: 'test',
           segments: [],
           estimatedDuration: 100,

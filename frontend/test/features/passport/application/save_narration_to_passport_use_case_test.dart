@@ -49,7 +49,7 @@ void main() {
       place: place,
       style: NarrationStyle.brief,
       state: PlaybackState.ready,
-      content: NarrationContent(
+      content: const NarrationContent(
         text: 'Narration text',
         segments: [],
         estimatedDuration: 10,

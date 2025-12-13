@@ -24,5 +24,26 @@
     "save_to_passport": "Save to Knowledge Passport",
     "error_generating": "Failed to generate narration",
     "error_playing": "Playback error"
+  },
+  "bottom_nav": {
+    "home": "Home",
+    "passport": "Passport",
+    "profile": "Profile"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Settings",
+    "preferences": "Preferences",
+    "change_language": "Change Language",
+    "change_language_subtitle": "Change Language",
+    "account": "Account",
+    "logout": "Log Out",
+    "logout_subtitle": "Log Out",
+    "logout_confirm": "Are you sure you want to log out?",
+    "delete_account": "Delete Account",
+    "delete_account_subtitle": "Delete Account",
+    "delete_account_confirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/places/screens/explore_screen.dart';
 import 'package:context_app/features/passport/screens/passport_screen.dart';
+import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -17,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     ExploreScreen(),
     PassportScreen(),
+    SettingsScreen(),
   ];
 
   @override
@@ -36,15 +39,26 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Passport'),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: 'bottom_nav.home'.tr(),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.book),
+            label: 'bottom_nav.passport'.tr(),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'bottom_nav.profile'.tr(),
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFF137fec),
         onTap: _onItemTapped,
         backgroundColor: const Color(0xFF101922),
         unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
