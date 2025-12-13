@@ -6,6 +6,10 @@
   "tap_to_start": "點擊以開始 AI 語音導覽",
   "gion_district": "祇園地區",
   "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。",
+  "app": {
+    "name": "Context 讀景",
+    "tagline": "您的 AI 口袋歷史學家"
+  },
   "config_screen": {
     "title": "選擇解說深度",
     "start_button": "開始導覽"
@@ -30,6 +34,37 @@
     "passport": "護照",
     "profile": "設定"
   },
+  "auth": {
+    "login": "登入",
+    "loginSuccess": "登入成功",
+    "loginFailed": "登入失敗",
+    "register": "註冊",
+    "registerSuccess": "註冊成功",
+    "registerFailed": "註冊失敗",
+    "emailAlreadyUsed": "此 Email 已被註冊",
+    "googleSignIn": "使用 Google 繼續",
+    "appleSignIn": "使用 Apple 繼續",
+    "email": "電子郵件",
+    "emailPlaceholder": "輸入您的電子郵件",
+    "password": "密碼",
+    "passwordPlaceholder": "輸入您的密碼",
+    "confirmPassword": "確認密碼",
+    "confirmPasswordPlaceholder": "再次輸入密碼",
+    "or": "或透過以下方式繼續",
+    "noAccount": "還沒有帳號？",
+    "haveAccount": "已有帳號？",
+    "createAccount": "建立帳號",
+    "welcomeBack": "歡迎回來",
+    "signInSubtitle": "登入以存取您的知識護照",
+    "createAccountSubtitle": "註冊以開始您的歷史之旅",
+    "forgotPassword": "忘記密碼？"
+  },
+  "validation": {
+    "required": "此欄位為必填",
+    "emailInvalid": "請輸入有效的電子郵件",
+    "passwordMinLength": "密碼長度至少需 6 個字元",
+    "passwordMismatch": "密碼不相符"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "設定",
@@ -44,6 +79,7 @@
     "delete_account_subtitle": "刪除帳號",
     "delete_account_confirm": "您確定要刪除帳號嗎？此動作無法復原。",
     "cancel": "取消",
-    "confirm": "確認"
+    "confirm": "確認",
+    "terms": "繼續即表示您同意我們的服務條款和隱私權政策。"
   }
 }

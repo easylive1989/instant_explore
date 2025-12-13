@@ -77,7 +77,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final response = await authService.signInWithGoogle();
 
       if (response != null && mounted) {
-        // 登入成功，不需要手動導航，AuthStateListener 會處理
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('auth.loginSuccess'.tr())));
@@ -102,78 +101,102 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // Custom colors from design
+    const backgroundColor = Color(0xFF101922);
+    const surfaceColor = Color(0xFF1C2630);
+    const primaryColor = Color(0xFF137FEC);
+    const primaryWithOpacity = Color(0x33137FEC); // 20% opacity approx
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // App Logo/Icon
-                  Icon(Icons.book, size: 100, color: theme.colorScheme.primary),
+                  // Logo Container
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: primaryWithOpacity,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.travel_explore,
+                      size: 32,
+                      color: primaryColor,
+                    ),
+                  ),
                   const SizedBox(height: 24),
 
-                  // App Name
+                  // Welcome back
                   Text(
-                    'app.name'.tr(),
-                    style: theme.textTheme.displayMedium?.copyWith(
+                    'auth.welcomeBack'.tr(),
+                    style: const TextStyle(
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
 
                   // Subtitle
                   Text(
-                    'app.tagline'.tr(),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    'auth.signInSubtitle'.tr(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
 
-                  // Google Sign In Button
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _signInWithGoogle,
-                        icon: const Icon(Icons.login, size: 24),
-                        label: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            'auth.googleSignIn'.tr(),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
-                          elevation: 2,
-                        ),
+                  // Email Label
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'auth.email'.tr(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
                       ),
                     ),
-                  const SizedBox(height: 24),
-
-                  // Divider with "or"
-                  DividerWithText(text: 'auth.or'.tr()),
-                  const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 8),
 
                   // Email Field
                   TextFormField(
                     controller: _emailController,
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      labelText: 'auth.email'.tr(),
                       hintText: 'auth.emailPlaceholder'.tr(),
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.email),
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                      filled: true,
+                      fillColor: surfaceColor,
+                      contentPadding: const EdgeInsets.all(16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: primaryColor),
+                      ),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
@@ -182,12 +205,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       return error?.tr();
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+
+                  // Password Label & Forgot Password
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'auth.password'.tr(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: Implement forgot password
+                        },
+                        child: Text(
+                          'auth.forgotPassword'.tr(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
 
                   // Password Field
                   PasswordField(
                     controller: _passwordController,
-                    labelText: 'auth.password'.tr(),
                     hintText: 'auth.passwordPlaceholder'.tr(),
                     textInputAction: TextInputAction.done,
                     validator: (value) {
@@ -197,56 +248,146 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       return null;
                     },
                     onFieldSubmitted: (_) => _signInWithEmail(),
+                    // Custom decoration properties to match design
+                    fillColor: surfaceColor,
+                    borderRadius: 12.0,
+                    contentPadding: const EdgeInsets.all(16),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Login Button
-                  if (!_isLoading)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _signInWithEmail,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                  // Sign In Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _signInWithEmail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          'auth.login'.tr(),
-                          style: const TextStyle(fontSize: 16),
+                        elevation: 0,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'auth.login'.tr(),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Divider
+                  DividerWithText(text: 'auth.or'.tr()),
+                  const SizedBox(height: 32),
+
+                  // Google Sign In
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _signInWithGoogle,
+                      icon: Image.asset(
+                        'assets/images/google_logo.png',
+                        height: 20,
+                        width: 20,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.g_mobiledata, // Fallback icon
+                            size: 24,
+                            color: Colors.white,
+                          );
+                        },
+                      ),
+                      label: Text(
+                        'auth.googleSignIn'.tr(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: surfaceColor,
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
-                  const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 16),
 
-                  // Link to Register
+                  // Apple Sign In (Visual only)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          null, // Disabled as functionality not implemented
+                      icon: const Icon(
+                        Icons.apple,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                      label: Text(
+                        'auth.appleSignIn'.tr(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.white.withValues(
+                          alpha: 0.7,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+
+                  // Register Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'auth.noAccount'.tr(),
-                        style: theme.textTheme.bodyMedium,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 14,
+                        ),
                       ),
                       TextButton(
-                        key: const Key('login_register_button'),
                         onPressed: () => context.go('/register'),
                         child: Text(
-                          'auth.register'.tr(),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
+                          'auth.createAccount'.tr(),
+                          style: const TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Privacy Notice
-                  Text(
-                    'settings.terms'.tr(),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

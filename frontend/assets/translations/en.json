@@ -6,6 +6,10 @@
   "tap_to_start": "Tap to start AI audio guide",
   "gion_district": "Gion District",
   "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?",
+  "app": {
+    "name": "Context 讀景",
+    "tagline": "Your AI Pocket Historian"
+  },
   "config_screen": {
     "title": "Select Narration Depth",
     "start_button": "Start Guide"
@@ -30,6 +34,37 @@
     "passport": "Passport",
     "profile": "Profile"
   },
+  "auth": {
+    "login": "Sign In",
+    "loginSuccess": "Login Successful",
+    "loginFailed": "Login Failed",
+    "register": "Sign Up",
+    "registerSuccess": "Registration Successful",
+    "registerFailed": "Registration Failed",
+    "emailAlreadyUsed": "Email already in use",
+    "googleSignIn": "Continue with Google",
+    "appleSignIn": "Continue with Apple",
+    "email": "Email address",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "or": "Or continue with",
+    "noAccount": "Not a member?",
+    "haveAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to access your Knowledge Passport",
+    "createAccountSubtitle": "Sign up to start your journey through history",
+    "forgotPassword": "Forgot password?"
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailInvalid": "Please enter a valid email",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords do not match"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Settings",
@@ -44,6 +79,7 @@
     "delete_account_subtitle": "Delete Account",
     "delete_account_confirm": "Are you sure you want to delete your account? This action cannot be undone.",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "terms": "By continuing, you agree to our Terms of Service and Privacy Policy."
   }
 }

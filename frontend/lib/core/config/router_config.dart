@@ -8,14 +8,27 @@ import 'package:context_app/features/player/screens/player_screen.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:context_app/features/passport/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
-import 'package:context_app/features/auth/providers/auth_state_provider.dart';
+import 'package:context_app/features/auth/screens/register_screen.dart';
+import 'package:context_app/features/auth/services/auth_service.dart';
+import 'package:context_app/core/config/go_router_refresh_stream.dart';
+
+/// Router refresh provider
+/// 監聽認證狀態變化並通知 GoRouter 重新評估路由
+final routerRefreshProvider = Provider<GoRouterRefreshStream>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return GoRouterRefreshStream(authService.authStateChanges);
+});
 
 class RouterConfig {
   RouterConfig._();
 
   static GoRouter createRouter(Ref ref) {
+    // 使用 provider 管理的 refresh stream
+    final refreshListenable = ref.watch(routerRefreshProvider);
+
     return GoRouter(
       initialLocation: '/',
+      refreshListenable: refreshListenable,
       routes: [
         GoRoute(
           path: '/',
@@ -30,6 +43,11 @@ class RouterConfig {
           path: '/login',
           name: 'login',
           builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/register',
+          name: 'register',
+          builder: (context, state) => const RegisterScreen(),
         ),
         GoRoute(
           path: '/config',
@@ -74,15 +92,18 @@ class RouterConfig {
         ),
       ],
       redirect: (context, state) {
-        final isSignedIn = ref.read(isSignedInProvider);
+        // 直接從 authService 讀取最新的認證狀態，避免 provider 異步更新延遲
+        final authService = ref.read(authServiceProvider);
+        final isSignedIn = authService.isSignedIn;
         final loggingIn = state.matchedLocation == '/login';
+        final registering = state.matchedLocation == '/register';
 
-        // If not signed in and not on the login page, redirect to login
-        if (!isSignedIn && !loggingIn) {
+        // If not signed in and not on a public page, redirect to login
+        if (!isSignedIn && !loggingIn && !registering) {
           return '/login';
         }
-        // If signed in and on the login page, redirect to home
-        if (isSignedIn && loggingIn) {
+        // If signed in and on a public page, redirect to home
+        if (isSignedIn && (loggingIn || registering)) {
           return '/';
         }
 
