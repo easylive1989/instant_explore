@@ -6,7 +6,9 @@ import 'package:context_app/features/places/domain/services/location_service.dar
 import 'package:context_app/features/places/models/place.dart';
 
 class MockLocationService extends Mock implements LocationService {}
+
 class MockPlacesRepository extends Mock implements PlacesRepository {}
+
 class FakePlaceLocation extends Fake implements PlaceLocation {}
 
 void main() {
@@ -21,25 +23,48 @@ void main() {
   setUp(() {
     mockLocationService = MockLocationService();
     mockPlacesRepository = MockPlacesRepository();
-    useCase = SearchNearbyPlacesUseCase(mockLocationService, mockPlacesRepository);
+    useCase = SearchNearbyPlacesUseCase(
+      mockLocationService,
+      mockPlacesRepository,
+    );
   });
 
+  test(
+    'should get current location and return nearby places from the repository',
+    () async {
+      // arrange
+      final testLocation = PlaceLocation(latitude: 12.34, longitude: 56.78);
+      final testPlaces = [
+        Place(
+          id: '1',
+          name: 'Test Place 1',
+          formattedAddress: '',
+          location: testLocation,
+          types: [],
+          photos: [],
+        ),
+        Place(
+          id: '2',
+          name: 'Test Place 2',
+          formattedAddress: '',
+          location: testLocation,
+          types: [],
+          photos: [],
+        ),
+      ];
 
-  test('should get current location and return nearby places from the repository', () async {
-    // arrange
-    final testLocation = PlaceLocation(latitude: 12.34, longitude: 56.78);
-    final testPlaces = [
-      Place(id: '1', name: 'Test Place 1', formattedAddress: '', location: testLocation, types: [], photos: []),
-      Place(id: '2', name: 'Test Place 2', formattedAddress: '', location: testLocation, types: [], photos: []),
-    ];
+      when(
+        () => mockLocationService.getCurrentLocation(),
+      ).thenAnswer((_) async => testLocation);
+      when(
+        () => mockPlacesRepository.getNearbyPlaces(testLocation),
+      ).thenAnswer((_) async => testPlaces);
 
-    when(() => mockLocationService.getCurrentLocation()).thenAnswer((_) async => testLocation);
-    when(() => mockPlacesRepository.getNearbyPlaces(testLocation)).thenAnswer((_) async => testPlaces);
+      // act
+      final result = await useCase.execute();
 
-    // act
-    final result = await useCase.execute();
-
-    // assert
-    expect(result, testPlaces);
-  });
+      // assert
+      expect(result, testPlaces);
+    },
+  );
 }

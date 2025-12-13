@@ -96,6 +96,12 @@ class ApiConfig {
   /// 取得 Gemini 是否已配置
   bool get isGeminiConfigured => geminiApiKey.isNotEmpty;
 
+  /// 取得 Google Places API 金鑰 (使用 Google Maps API 金鑰)
+  String get googlePlacesApiKey => googleMapsApiKey;
+
+  /// 取得 Google Places 是否已配置
+  bool get isPlacesConfigured => googleMapsApiKey.isNotEmpty;
+
   @override
   String toString() {
     return 'ApiConfig('

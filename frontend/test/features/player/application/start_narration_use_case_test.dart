@@ -53,15 +53,18 @@ void main() {
 
     test('should successfully generate narration with brief style', () async {
       // Arrange
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => testGeneratedText);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.brief,
+          language: 'zh-TW',
+        ),
+      ).thenAnswer((_) async => testGeneratedText);
 
       when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage('zh-TW'))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockTtsService.setLanguage('zh-TW'),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase.execute(
@@ -80,129 +83,152 @@ void main() {
       expect(result.duration, greaterThan(0));
 
       // Verify method calls
-      verify(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).called(1);
+      verify(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.brief,
+          language: 'zh-TW',
+        ),
+      ).called(1);
       verify(() => mockTtsService.initialize()).called(1);
       verify(() => mockTtsService.setLanguage('zh-TW')).called(1);
     });
 
-    test('should successfully generate narration with deepDive style',
-        () async {
-      // Arrange
-      when(() => mockGeminiService.generateNarration(
+    test(
+      'should successfully generate narration with deepDive style',
+      () async {
+        // Arrange
+        when(
+          () => mockGeminiService.generateNarration(
             place: testPlace,
             style: NarrationStyle.deepDive,
             language: 'en-US',
-          )).thenAnswer((_) async => testGeneratedText);
+          ),
+        ).thenAnswer((_) async => testGeneratedText);
 
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage('en-US'))
-          .thenAnswer((_) async => {});
+        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
+        when(
+          () => mockTtsService.setLanguage('en-US'),
+        ).thenAnswer((_) async => {});
 
-      // Act
-      final result = await useCase.execute(
-        place: testPlace,
-        style: NarrationStyle.deepDive,
-        language: 'en-US',
-      );
-
-      // Assert
-      expect(result.place, equals(testPlace));
-      expect(result.style, equals(NarrationStyle.deepDive));
-      expect(result.state, equals(PlaybackState.ready));
-      expect(result.content, isNotNull);
-
-      verify(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.deepDive,
-            language: 'en-US',
-          )).called(1);
-      verify(() => mockTtsService.setLanguage('en-US')).called(1);
-    });
-
-    test('should throw NarrationGenerationException when generated text is empty',
-        () async {
-      // Arrange
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => '');
-
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-
-      // Act & Assert
-      expect(
-        () => useCase.execute(
+        // Act
+        final result = await useCase.execute(
           place: testPlace,
-          style: NarrationStyle.brief,
-          language: 'zh-TW',
-        ),
-        throwsA(isA<NarrationGenerationException>()),
-      );
-    });
+          style: NarrationStyle.deepDive,
+          language: 'en-US',
+        );
+
+        // Assert
+        expect(result.place, equals(testPlace));
+        expect(result.style, equals(NarrationStyle.deepDive));
+        expect(result.state, equals(PlaybackState.ready));
+        expect(result.content, isNotNull);
+
+        verify(
+          () => mockGeminiService.generateNarration(
+            place: testPlace,
+            style: NarrationStyle.deepDive,
+            language: 'en-US',
+          ),
+        ).called(1);
+        verify(() => mockTtsService.setLanguage('en-US')).called(1);
+      },
+    );
 
     test(
-        'should throw NarrationGenerationException when GeminiService throws error',
-        () async {
-      // Arrange
-      when(() => mockGeminiService.generateNarration(
+      'should throw NarrationGenerationException when generated text is empty',
+      () async {
+        // Arrange
+        when(
+          () => mockGeminiService.generateNarration(
             place: testPlace,
             style: NarrationStyle.brief,
             language: 'zh-TW',
-          )).thenThrow(Exception('Network error'));
+          ),
+        ).thenAnswer((_) async => '');
 
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
+        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
 
-      // Act & Assert
-      expect(
-        () => useCase.execute(
-          place: testPlace,
-          style: NarrationStyle.brief,
-          language: 'zh-TW',
-        ),
-        throwsA(isA<NarrationGenerationException>()),
-      );
-    });
-
-    test('should throw NarrationGenerationException when TtsService fails',
-        () async {
-      // Arrange
-      when(() => mockGeminiService.generateNarration(
+        // Act & Assert
+        expect(
+          () => useCase.execute(
             place: testPlace,
             style: NarrationStyle.brief,
             language: 'zh-TW',
-          )).thenAnswer((_) async => testGeneratedText);
+          ),
+          throwsA(isA<NarrationGenerationException>()),
+        );
+      },
+    );
 
-      when(() => mockTtsService.initialize()).thenThrow(
-        Exception('TTS initialization failed'),
-      );
+    test(
+      'should throw NarrationGenerationException when GeminiService throws error',
+      () async {
+        // Arrange
+        when(
+          () => mockGeminiService.generateNarration(
+            place: testPlace,
+            style: NarrationStyle.brief,
+            language: 'zh-TW',
+          ),
+        ).thenThrow(Exception('Network error'));
 
-      // Act & Assert
-      expect(
-        () => useCase.execute(
-          place: testPlace,
-          style: NarrationStyle.brief,
-          language: 'zh-TW',
-        ),
-        throwsA(isA<NarrationGenerationException>()),
-      );
-    });
+        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
+
+        // Act & Assert
+        expect(
+          () => useCase.execute(
+            place: testPlace,
+            style: NarrationStyle.brief,
+            language: 'zh-TW',
+          ),
+          throwsA(isA<NarrationGenerationException>()),
+        );
+      },
+    );
+
+    test(
+      'should throw NarrationGenerationException when TtsService fails',
+      () async {
+        // Arrange
+        when(
+          () => mockGeminiService.generateNarration(
+            place: testPlace,
+            style: NarrationStyle.brief,
+            language: 'zh-TW',
+          ),
+        ).thenAnswer((_) async => testGeneratedText);
+
+        when(
+          () => mockTtsService.initialize(),
+        ).thenThrow(Exception('TTS initialization failed'));
+
+        // Act & Assert
+        expect(
+          () => useCase.execute(
+            place: testPlace,
+            style: NarrationStyle.brief,
+            language: 'zh-TW',
+          ),
+          throwsA(isA<NarrationGenerationException>()),
+        );
+      },
+    );
 
     test('should use default language zh-TW when not specified', () async {
       // Arrange
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => testGeneratedText);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.brief,
+          language: 'zh-TW',
+        ),
+      ).thenAnswer((_) async => testGeneratedText);
 
       when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage('zh-TW'))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockTtsService.setLanguage('zh-TW'),
+      ).thenAnswer((_) async => {});
 
       // Act
       await useCase.execute(
@@ -217,15 +243,16 @@ void main() {
 
     test('should create unique narration ID for each execution', () async {
       // Arrange
-      when(() => mockGeminiService.generateNarration(
-            place: any(named: 'place'),
-            style: any(named: 'style'),
-            language: any(named: 'language'),
-          )).thenAnswer((_) async => testGeneratedText);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: any(named: 'place'),
+          style: any(named: 'style'),
+          language: any(named: 'language'),
+        ),
+      ).thenAnswer((_) async => testGeneratedText);
 
       when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage(any()))
-          .thenAnswer((_) async => {});
+      when(() => mockTtsService.setLanguage(any())).thenAnswer((_) async => {});
 
       // Act
       final result1 = await useCase.execute(
@@ -250,15 +277,18 @@ void main() {
 第四句話。
 ''';
 
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => textWithMultipleSegments);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.brief,
+          language: 'zh-TW',
+        ),
+      ).thenAnswer((_) async => textWithMultipleSegments);
 
       when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage('zh-TW'))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockTtsService.setLanguage('zh-TW'),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase.execute(
@@ -280,15 +310,16 @@ void main() {
       const shortText = '這是短文本。'; // ~6 characters
       final longText = '這' * 100; // 100 characters
 
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.brief,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => shortText);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.brief,
+          language: 'zh-TW',
+        ),
+      ).thenAnswer((_) async => shortText);
 
       when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage(any()))
-          .thenAnswer((_) async => {});
+      when(() => mockTtsService.setLanguage(any())).thenAnswer((_) async => {});
 
       // Act
       final resultShort = await useCase.execute(
@@ -296,11 +327,13 @@ void main() {
         style: NarrationStyle.brief,
       );
 
-      when(() => mockGeminiService.generateNarration(
-            place: testPlace,
-            style: NarrationStyle.deepDive,
-            language: 'zh-TW',
-          )).thenAnswer((_) async => longText);
+      when(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          style: NarrationStyle.deepDive,
+          language: 'zh-TW',
+        ),
+      ).thenAnswer((_) async => longText);
 
       final resultLong = await useCase.execute(
         place: testPlace,

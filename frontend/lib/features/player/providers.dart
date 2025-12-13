@@ -5,6 +5,7 @@ import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:context_app/features/player/application/start_narration_use_case.dart';
 import 'package:context_app/features/player/presentation/player_controller.dart';
 import 'package:context_app/features/player/presentation/player_state.dart';
+import 'package:context_app/features/passport/application/save_narration_to_passport_use_case.dart';
 
 /// 導覽風格選擇 Provider
 ///
@@ -43,6 +44,13 @@ final startNarrationUseCaseProvider = Provider<StartNarrationUseCase>((ref) {
 final playerControllerProvider =
     StateNotifierProvider.autoDispose<PlayerController, PlayerState>((ref) {
       final startNarrationUseCase = ref.watch(startNarrationUseCaseProvider);
+      final saveNarrationToPassportUseCase = ref.watch(
+        saveNarrationToPassportUseCaseProvider,
+      );
       final ttsService = ref.watch(ttsServiceProvider);
-      return PlayerController(startNarrationUseCase, ttsService);
+      return PlayerController(
+        startNarrationUseCase,
+        saveNarrationToPassportUseCase,
+        ttsService,
+      );
     });

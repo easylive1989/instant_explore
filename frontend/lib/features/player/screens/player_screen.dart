@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,11 +13,13 @@ import 'package:context_app/features/player/providers.dart';
 class PlayerScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationStyle narrationStyle;
+  final String? initialContent;
 
   const PlayerScreen({
     super.key,
     required this.place,
     required this.narrationStyle,
+    this.initialContent,
   });
 
   @override
@@ -32,9 +35,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       if (!mounted) return;
       final locale =
           easy.EasyLocalization.of(context)?.locale.toString() ?? 'zh-TW';
-      ref
-          .read(playerControllerProvider.notifier)
-          .initialize(widget.place, widget.narrationStyle, language: locale);
+
+      if (widget.initialContent != null) {
+        ref
+            .read(playerControllerProvider.notifier)
+            .initializeWithContent(
+              widget.place,
+              widget.narrationStyle,
+              widget.initialContent!,
+              language: locale,
+            );
+      } else {
+        ref
+            .read(playerControllerProvider.notifier)
+            .initialize(widget.place, widget.narrationStyle, language: locale);
+      }
     });
   }
 
@@ -509,51 +524,87 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {
-                      context.pushNamed(
-                        'passport_success',
-                        extra: widget.place,
-                      );
-                    },
+                    onTap:
+                        (playerState.isLoading ||
+                            playerState.hasError ||
+                            playerState.narration == null)
+                        ? null
+                        : () async {
+                            final userId =
+                                Supabase.instance.client.auth.currentUser?.id;
+                            if (userId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('請先登入')),
+                              );
+                              return;
+                            }
+
+                            try {
+                              await playerController.saveToPassport(userId);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('已儲存至知識護照')),
+                                );
+                                context.pushNamed(
+                                  'passport_success',
+                                  extra: widget.place,
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('儲存失敗: $e')),
+                                );
+                              }
+                            }
+                          },
                     borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: surfaceColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          width: 1,
+                    child: Opacity(
+                      opacity:
+                          (playerState.isLoading ||
+                              playerState.hasError ||
+                              playerState.narration == null)
+                          ? 0.5
+                          : 1.0,
+                      child: Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: surfaceColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFF59E0B,
-                              ).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFF59E0B,
+                                ).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.bookmark_add,
+                                color: Color(0xFFF59E0B),
+                                size: 20,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.bookmark_add,
-                              color: Color(0xFFF59E0B),
-                              size: 20,
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Save to Knowledge Passport',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Save to Knowledge Passport',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/places/models/place.dart';
 import 'package:context_app/features/player/application/narration_generation_exception.dart';
+import 'package:context_app/features/player/models/narration.dart';
+import 'package:context_app/features/player/models/narration_content.dart';
 import 'package:context_app/features/player/models/narration_error_type.dart';
 import 'package:context_app/features/player/models/narration_style.dart';
 import 'package:context_app/features/player/application/start_narration_use_case.dart';
 import 'package:context_app/features/player/presentation/player_state.dart';
+import 'package:context_app/features/passport/application/save_narration_to_passport_use_case.dart';
+import 'package:uuid/uuid.dart';
 
 /// 播放器控制器
 ///
@@ -14,6 +18,7 @@ import 'package:context_app/features/player/presentation/player_state.dart';
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<PlayerState> {
   final StartNarrationUseCase _startNarrationUseCase;
+  final SaveNarrationToPassportUseCase _saveNarrationToPassportUseCase;
   final TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;
@@ -23,8 +28,11 @@ class PlayerController extends StateNotifier<PlayerState> {
 
   Timer? _progressTimer;
 
-  PlayerController(this._startNarrationUseCase, this._ttsService)
-    : super(PlayerState.initial()) {
+  PlayerController(
+    this._startNarrationUseCase,
+    this._saveNarrationToPassportUseCase,
+    this._ttsService,
+  ) : super(PlayerState.initial()) {
     _setupTtsListeners();
   }
 
@@ -55,6 +63,56 @@ class PlayerController extends StateNotifier<PlayerState> {
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
       state = state.error(NarrationErrorType.unknown, message: e.toString());
+    }
+  }
+
+  /// 使用現有內容初始化（用於回放已儲存的導覽）
+  Future<void> initializeWithContent(
+    Place place,
+    NarrationStyle style,
+    String contentText, {
+    String language = 'zh-TW',
+  }) async {
+    state = state.loading();
+
+    try {
+      // 模擬生成過程，實際上直接構建物件
+      const uuid = Uuid();
+      final narration = Narration.create(
+        id: uuid.v4(),
+        place: place,
+        style: style,
+      );
+
+      final content = NarrationContent.fromText(contentText);
+
+      // 初始化 TTS
+      await _ttsService.initialize();
+      await _ttsService.setLanguage(language);
+
+      final readyNarration = narration.ready(content);
+
+      state = state.ready(readyNarration);
+    } catch (e) {
+      state = state.error(NarrationErrorType.unknown, message: e.toString());
+    }
+  }
+
+  /// 儲存導覽到護照
+  Future<void> saveToPassport(String userId) async {
+    if (state.narration == null) {
+      return;
+    }
+
+    try {
+      await _saveNarrationToPassportUseCase.execute(
+        userId: userId,
+        narration: state.narration!,
+      );
+    } catch (e) {
+      // 這裡可以選擇透過 state 通知 UI 錯誤，或者拋出異常讓 UI 處理
+      // 為了簡單起見，我們暫時不改變 state，但理想情況下應該有 toast 通知
+      rethrow;
     }
   }
 

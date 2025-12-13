@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:context_app/features/passport/providers.dart';
+import 'package:context_app/features/passport/models/passport_entry.dart';
+import 'package:context_app/features/places/models/place.dart';
 
-class PassportScreen extends StatelessWidget {
+class PassportScreen extends ConsumerWidget {
   const PassportScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final passportAsyncValue = ref.watch(myPassportProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFF101922),
       appBar: AppBar(
@@ -23,59 +32,44 @@ class PassportScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: const [
-          TimelineEntry(
-            date: 'Today',
-            time: '14:30 PM',
-            title: 'Taipei Confucius Temple',
-            location: 'Dalongdong, Taipei',
-            imageUrl:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuBm5_u-3C6swZe5P_gCEBwFTUssW4fUg3WFicrwiQJ7b7GLyWDvSpDqQDWtGSv3_hToP0SguL12LMrjc3MPSQVQf_Kjqlcj_SWagoT3HTrrY3Ine72NWmUbXHWiRSn3KnJzl5IwBFekCi2y3AA2qg0HVPHKm-L2P91Os1hB9K3fpDSNzFrgo8d5_uAq8rpLHio6LSUnpV1Dkpg2C7urU531UM7NPHni-eCwVOPKJss41ycQfckH41TiuJqOB-qb9VeUF3LTP2qx',
-            question: 'Why are there no images of deities here?',
-            answer:
-                'Unlike Taoist temples, Confucian temples focus on "spirit tablets" rather than idols. This reflects Confucius\'s emphasis on honoring ancestors and sages through respectful rituals rather than worshiping divine figures. The absence of imagery encourages focus on his teachings.',
+      body: passportAsyncValue.when(
+        data: (entries) {
+          if (entries.isEmpty) {
+            return const Center(
+              child: Text('尚未儲存任何導覽', style: TextStyle(color: Colors.white70)),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              return TimelineEntry(entry: entry);
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text(
+            '載入失敗: $error',
+            style: const TextStyle(color: Colors.red),
           ),
-          TimelineEntry(
-            date: 'Yesterday',
-            time: '10:15 AM',
-            title: 'Longshan Temple',
-            location: 'Wanhua District, Taipei',
-            imageUrl:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuA2yHSCuvyRzTW_dJpuOi1hoAfS6HaD2MonBFuRKnpPoNbvKUTiLIQQJW0hj_nW0YPW7p-8_MF4uPOOtb7z88hHbccikZ0xu--t56-63Du79yol2c97X5nlAeEwmfuLjRH1dNg4wLaJzbBZwDQMevge4iUwZsaK7V8lmE6Ey_aINL-rKedZh5jCYJ8ajGSgFLNkLeMVLQ1Kfw-xPLRBqhnlzHpPcNpyGMB40lLhei_DHuZGqbBuivFDugSMnbR1nGvzM1lQe-ii',
-            question: 'What is the significance of the dragon pillars?',
-            answer:
-                'These pillars, known as "Dragon Columns," represent the balance of power and spiritual protection. The dragon is a symbol of imperial power and auspiciousness. In Longshan Temple, the unique pair of bronze dragon pillars in the main hall date back to 1920 and are considered masterpieces of Taiwanese craftsmanship.',
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class TimelineEntry extends StatelessWidget {
-  final String date;
-  final String time;
-  final String title;
-  final String location;
-  final String imageUrl;
-  final String question;
-  final String answer;
+  final PassportEntry entry;
 
-  const TimelineEntry({
-    super.key,
-    required this.date,
-    required this.time,
-    required this.title,
-    required this.location,
-    required this.imageUrl,
-    required this.question,
-    required this.answer,
-  });
+  const TimelineEntry({super.key, required this.entry});
 
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat('yyyy/MM/dd');
+    final timeFormat = DateFormat('HH:mm');
+
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, bottom: 24.0),
       child: Column(
@@ -84,96 +78,155 @@ class TimelineEntry extends StatelessWidget {
           Row(
             children: [
               Text(
-                date,
+                dateFormat.format(entry.createdAt),
                 style: const TextStyle(
                   color: Color(0xFF137fec),
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(time, style: const TextStyle(color: Colors.white70)),
+              Text(
+                timeFormat.format(entry.createdAt),
+                style: const TextStyle(color: Colors.white70),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Column(
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: Color(0xFF137fec),
-                  ),
-                  Container(width: 2, height: 260, color: Colors.white24),
-                ],
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              location,
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            imageUrl,
-                            width: 48,
-                            height: 48,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
+                    const Icon(
+                      Icons.circle,
+                      size: 12,
+                      color: Color(0xFF137fec),
                     ),
-                    const SizedBox(height: 16),
-                    Container(
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: Colors.white24,
+                        margin: const EdgeInsets.only(top: 4, bottom: 4),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Construct a partial Place object
+                      final place = Place(
+                        id: entry.placeId,
+                        name: entry.placeName,
+                        formattedAddress: entry.placeAddress,
+                        location: PlaceLocation(latitude: 0, longitude: 0),
+                        types: [],
+                        photos: [],
+                      );
+
+                      context.pushNamed(
+                        'player',
+                        extra: {
+                          'place': place,
+                          'narrationStyle': entry.narrationStyle,
+                          'initialContent': entry.narrationText,
+                        },
+                      );
+                    },
+                    child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1C2732),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            question,
+                            entry.placeName,
                             style: const TextStyle(
                               color: Colors.white,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           Text(
-                            answer,
+                            entry.placeAddress,
                             style: const TextStyle(color: Colors.white70),
+                          ),
+                          const SizedBox(height: 12),
+                          if (entry.placeImageUrl != null &&
+                              entry.placeImageUrl!.isNotEmpty) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: CachedNetworkImage(
+                                imageUrl: entry.placeImageUrl!,
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  height: 150,
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 150,
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.white24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF137fec,
+                              ).withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              entry.narrationStyle.name,
+                              style: const TextStyle(
+                                color: Color(0xFF137fec),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            entry.narrationText,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

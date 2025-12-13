@@ -18,7 +18,11 @@ class RouterConfig {
         GoRoute(
           path: '/',
           name: 'home',
-          builder: (context, state) => const MainScreen(),
+          builder: (context, state) {
+            final tab = state.uri.queryParameters['tab'];
+            final index = tab == 'passport' ? 1 : 0;
+            return MainScreen(initialIndex: index);
+          },
         ),
         GoRoute(
           path: '/config',
@@ -35,7 +39,12 @@ class RouterConfig {
             final params = state.extra as Map<String, dynamic>;
             final place = params['place'] as Place;
             final narrationStyle = params['narrationStyle'] as NarrationStyle;
-            return PlayerScreen(place: place, narrationStyle: narrationStyle);
+            final initialContent = params['initialContent'] as String?;
+            return PlayerScreen(
+              place: place,
+              narrationStyle: narrationStyle,
+              initialContent: initialContent,
+            );
           },
         ),
         GoRoute(
@@ -46,8 +55,7 @@ class RouterConfig {
             return SaveSuccessScreen(
               place: place,
               onViewPassport: () {
-                // TODO: Navigate to passport screen
-                context.go('/'); // Temporary: go home
+                context.go('/?tab=passport');
               },
               onContinueTour: () {
                 context.pop();
