@@ -106,17 +106,17 @@ void main() {
         )
             .ready(content)
             .play()
-            .updateProgress(2) // 使用小於 duration 的值
+            .updateProgress(0) // 使用小於 duration 的值
             .updateCharPosition(8) // 第三句開頭
             .pause();
 
-        expect(narration.currentPosition, 2);
+        expect(narration.currentPosition, 0);
         expect(narration.currentCharPosition, 8);
 
         final resumedNarration = narration.play();
 
         expect(resumedNarration.state, PlaybackState.playing);
-        expect(resumedNarration.currentPosition, 2);
+        expect(resumedNarration.currentPosition, 0);
         expect(resumedNarration.currentCharPosition, 8);
       });
     });

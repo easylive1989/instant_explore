@@ -40,8 +40,8 @@ class NarrationContent {
   ///
   /// 自動將文本分段並估算播放時長
   /// [text] 完整的導覽文本
-  /// [charsPerSecond] 每秒朗讀的字數，預設為5（適合中文）
-  factory NarrationContent.fromText(String text, {int charsPerSecond = 5}) {
+  /// [charsPerSecond] 每秒朗讀的字數，預設為18（根據實測數據調整）
+  factory NarrationContent.fromText(String text, {int charsPerSecond = 18}) {
     // 按照句號、問號、驚嘆號分段
     final segments = _splitIntoSegments(text);
 
