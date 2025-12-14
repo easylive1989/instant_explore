@@ -6,8 +6,46 @@ class PlacesApiService {
   final String _apiKey;
   static const String _baseUrl =
       'https://places.googleapis.com/v1/places:searchNearby';
+  static const String _textSearchUrl =
+      'https://places.googleapis.com/v1/places:searchText';
 
   PlacesApiService(this._apiKey);
+
+  Future<List<Place>> searchByText(String query) async {
+    if (_apiKey.isEmpty) {
+      throw Exception('Google Maps API Key is not configured.');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': _apiKey,
+      'X-Goog-FieldMask':
+          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
+    };
+
+    final body = jsonEncode({'textQuery': query});
+
+    final response = await http.post(
+      Uri.parse(_textSearchUrl),
+      headers: headers,
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final placesJson = data['places'] as List?;
+      if (placesJson != null) {
+        return placesJson
+            .map((placeJson) => Place.fromJson(placeJson))
+            .toList();
+      }
+      return [];
+    } else {
+      throw Exception(
+        'Failed to search places: ${response.statusCode} ${response.body}',
+      );
+    }
+  }
 
   Future<List<Place>> searchNearby(
     PlaceLocation location, {

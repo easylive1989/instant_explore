@@ -24,4 +24,9 @@ class PlacesRepositoryImpl implements PlacesRepository {
   Future<List<Place>> getNearbyPlaces(PlaceLocation location) async {
     return _apiService.searchNearby(location, includedTypes: _includedTypes);
   }
+
+  @override
+  Future<List<Place>> searchPlaces(String query) async {
+    return _apiService.searchByText(query);
+  }
 }

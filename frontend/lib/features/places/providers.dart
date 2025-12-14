@@ -1,5 +1,6 @@
 import 'package:context_app/core/config/api_config.dart';
 import 'package:context_app/features/places/application/search_nearby_places_use_case.dart';
+import 'package:context_app/features/places/application/search_places_use_case.dart';
 import 'package:context_app/features/places/infrastructure/geolocator_service.dart';
 import 'package:context_app/features/places/infrastructure/services/places_api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,8 +33,48 @@ final searchNearbyPlacesUseCaseProvider = Provider<SearchNearbyPlacesUseCase>((
   return SearchNearbyPlacesUseCase(locationService, repository);
 });
 
-// UI-facing Providers
-final nearbyPlacesProvider = FutureProvider<List<Place>>((ref) async {
-  final useCase = ref.watch(searchNearbyPlacesUseCaseProvider);
-  return useCase.execute();
+final searchPlacesUseCaseProvider = Provider<SearchPlacesUseCase>((ref) {
+  final repository = ref.watch(placesRepositoryProvider);
+  return SearchPlacesUseCase(repository);
 });
+
+// UI-facing Providers
+final placesControllerProvider =
+    AsyncNotifierProvider<PlacesController, List<Place>>(() {
+      return PlacesController();
+    });
+
+class PlacesController extends AsyncNotifier<List<Place>> {
+  @override
+  Future<List<Place>> build() async {
+    return _loadNearbyPlaces();
+  }
+
+  Future<List<Place>> _loadNearbyPlaces() async {
+    final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
+    return useCase.execute();
+  }
+
+  Future<void> search(String query) async {
+    if (query.isEmpty) {
+      // If query is empty, reload nearby places
+      state = const AsyncValue.loading();
+      state = await AsyncValue.guard(() => _loadNearbyPlaces());
+      return;
+    }
+
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final useCase = ref.read(searchPlacesUseCaseProvider);
+      return useCase.execute(query);
+    });
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    // Reset to nearby places on refresh if we want that behavior,
+    // or just re-execute the last action.
+    // For simplicity, let's reload nearby places as the default "home" state.
+    state = await AsyncValue.guard(() => _loadNearbyPlaces());
+  }
+}
