@@ -1,3 +1,4 @@
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,13 +37,13 @@ class ConfigScreen extends ConsumerWidget {
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(
-                        color: const Color(0xFF101922),
+                        color: AppColors.backgroundDark,
                         child: const Center(child: CircularProgressIndicator()),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFF101922),
+                        color: AppColors.backgroundDark,
                         child: const Icon(
                           Icons.image_not_supported,
                           size: 48,
@@ -51,7 +52,7 @@ class ConfigScreen extends ConsumerWidget {
                       );
                     },
                   )
-                : Container(color: const Color(0xFF101922)),
+                : Container(color: AppColors.backgroundDark),
           ),
 
           // Top Navigation
@@ -81,7 +82,7 @@ class ConfigScreen extends ConsumerWidget {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Color(0xFF101922),
+                    AppColors.backgroundDark,
                     Color(0xCC101922),
                     Colors.transparent,
                   ],
@@ -170,7 +171,7 @@ class ConfigScreen extends ConsumerWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF137fec),
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -228,7 +229,7 @@ class ConfigOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF137fec)
+                ? AppColors.primary
                 : Colors.white.withAlpha(0x1A),
             width: 2,
           ),
@@ -240,7 +241,7 @@ class ConfigOption extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF137fec)
+                    ? AppColors.primary
                     : Colors.white.withAlpha(0x1A),
                 shape: BoxShape.circle,
               ),
@@ -271,7 +272,7 @@ class ConfigOption extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Color(0xFF137fec))
+              const Icon(Icons.check_circle, color: AppColors.primary)
             else
               const Icon(Icons.radio_button_unchecked, color: Colors.white54),
           ],

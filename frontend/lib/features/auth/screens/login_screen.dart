@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:context_app/core/utils/validation_utils.dart';
 import 'package:context_app/features/auth/services/auth_service.dart';
 import 'package:context_app/features/auth/widgets/divider_with_text.dart';
@@ -48,7 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'auth.loginFailed'.tr()}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -74,7 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'auth.loginFailed'.tr()}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -89,14 +90,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Custom colors from design
-    const backgroundColor = Color(0xFF101922);
-    const surfaceColor = Color(0xFF1C2630);
-    const primaryColor = Color(0xFF137FEC);
-    const primaryWithOpacity = Color(0x33137FEC); // 20% opacity approx
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundDark,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -112,13 +107,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: primaryWithOpacity,
+                      // Removed const
+                      color: AppColors.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(
                       Icons.travel_explore,
                       size: 32,
-                      color: primaryColor,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -129,7 +125,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.textPrimaryDark,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -138,9 +134,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     'auth.signInSubtitle'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppColors.textTertiaryDark,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -153,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: AppColors.textPrimaryDark,
                       ),
                     ),
                   ),
@@ -162,14 +158,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Email Field
                   TextFormField(
                     controller: _emailController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimaryDark),
                     decoration: InputDecoration(
                       hintText: 'auth.emailPlaceholder'.tr(),
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppColors.textPrimaryDark.withValues(alpha: 0.4),
                       ),
                       filled: true,
-                      fillColor: surfaceColor,
+                      fillColor: AppColors.surfaceDark,
                       contentPadding: const EdgeInsets.all(16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -177,13 +173,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
+                        borderSide: const BorderSide(color: AppColors.white10),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: primaryColor),
+                        borderSide: const BorderSide(color: AppColors.primary),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -204,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: AppColors.textPrimaryDark,
                         ),
                       ),
                       GestureDetector(
@@ -216,7 +210,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: primaryColor,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -237,7 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     onFieldSubmitted: (_) => _signInWithEmail(),
                     // Custom decoration properties to match design
-                    fillColor: surfaceColor,
+                    fillColor: AppColors.surfaceDark,
                     borderRadius: 12.0,
                     contentPadding: const EdgeInsets.all(16),
                   ),
@@ -250,8 +244,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _signInWithEmail,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.textPrimaryDark,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -262,7 +256,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.textPrimaryDark,
                                 strokeWidth: 2,
                               ),
                             )
@@ -295,7 +289,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           return const Icon(
                             Icons.g_mobiledata, // Fallback icon
                             size: 24,
-                            color: Colors.white,
+                            color: AppColors.textPrimaryDark,
                           );
                         },
                       ),
@@ -307,11 +301,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: surfaceColor,
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
+                        foregroundColor: AppColors.textPrimaryDark,
+                        backgroundColor: AppColors.surfaceDark,
+                        side: const BorderSide(color: AppColors.white10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -341,10 +333,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.white.withValues(
-                          alpha: 0.7,
-                        ),
+                        backgroundColor: AppColors.textPrimaryDark,
+                        disabledBackgroundColor: AppColors.textPrimaryDark
+                            .withValues(alpha: 0.7), // Replaced withOpacity
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -359,8 +350,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       Text(
                         'auth.noAccount'.tr(),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                        style: const TextStyle(
+                          color: AppColors.textTertiaryDark,
                           fontSize: 14,
                         ),
                       ),
@@ -369,7 +360,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text(
                           'auth.createAccount'.tr(),
                           style: const TextStyle(
-                            color: primaryColor,
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),

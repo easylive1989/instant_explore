@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,9 +150,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     });
 
     // Colors from design
-    const primaryColor = Color(0xFF137fec);
-    const backgroundColor = Color(0xFF101922);
-    const surfaceColor = Color(0xFF182430);
+    const primaryColor = AppColors.primary;
+    const backgroundColor = AppColors.backgroundDark;
+    const surfaceColor = AppColors.surfaceDarkPlayer;
     const primaryColorShadow = Color(0x4D137FEC);
 
     return Scaffold(
@@ -268,7 +269,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
               const SizedBox(height: 16),
               Text(
                 errorMessage,
@@ -383,7 +384,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   : Text(
                       segment,
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textSecondaryDark,
                         fontSize: 20,
                         height: 1.6,
                       ),
@@ -508,7 +509,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     Text(
                       _formatDuration(playerState.currentPosition),
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textSecondaryDark,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -516,7 +517,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     Text(
                       _formatDuration(playerState.duration),
                       style: const TextStyle(
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textSecondaryDark,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -532,7 +533,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.replay_10, size: 32),
-                      color: const Color(0xFF94A3B8),
+                      color: AppColors.textSecondaryDark,
                       onPressed: playerState.isLoading || playerState.hasError
                           ? null
                           : () => playerController.seekBackward(),
@@ -566,7 +567,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.forward_10, size: 32),
-                      color: const Color(0xFF94A3B8),
+                      color: AppColors.textSecondaryDark,
                       onPressed: playerState.isLoading || playerState.hasError
                           ? null
                           : () => playerController.seekForward(),
@@ -639,14 +640,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFFF59E0B,
-                                  ).withValues(alpha: 0.1),
+                                  color: AppColors.amber.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Icon(
                                   Icons.bookmark_add,
-                                  color: Color(0xFFF59E0B),
+                                  color: AppColors.amber,
                                   size: 20,
                                 ),
                               ),

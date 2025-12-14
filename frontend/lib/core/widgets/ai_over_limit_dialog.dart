@@ -1,3 +1,4 @@
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AiOverLimitDialog extends StatelessWidget {
@@ -6,13 +7,13 @@ class AiOverLimitDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Colors from design
-    const surfaceColor = Color(0xFF182430);
-    const errorBgColor = Color(0x1AF44336); // Red-500/10
-    const errorIconColor = Color(0xFFEF5350); // Red-400
-    const textColor = Colors.white;
-    const textSecondaryColor = Color(0xFF94A3B8); // slate-400
+    const surfaceColor = AppColors.surfaceDarkPlayer;
+    const errorBgColor = AppColors.errorBg;
+    const errorIconColor = AppColors.error;
+    const textColor = AppColors.textPrimaryDark;
+    const textSecondaryColor = AppColors.textSecondaryDark;
     const buttonColor = Colors.white;
-    const buttonTextColor = Color(0xFF0F172A); // slate-900
+    const buttonTextColor = AppColors.textPrimaryLight;
 
     return Dialog(
       backgroundColor: Colors.transparent,

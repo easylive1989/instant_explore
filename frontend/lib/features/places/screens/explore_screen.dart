@@ -1,4 +1,5 @@
 import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,12 +15,12 @@ class ExploreScreen extends ConsumerWidget {
     final nearbyPlaces = ref.watch(nearbyPlacesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF101922),
+      backgroundColor: AppColors.backgroundDark,
       body: Stack(
         children: [
           Positioned.fill(
             child: Container(
-              color: const Color(0xFF101922),
+              color: AppColors.backgroundDark,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -54,7 +55,7 @@ class ExploreScreen extends ConsumerWidget {
                         style: const TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.textPrimaryDark,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -63,7 +64,7 @@ class ExploreScreen extends ConsumerWidget {
                         label: Text('explore.refresh'.tr()),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: const Color(0xFF137fec),
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -87,7 +88,9 @@ class ExploreScreen extends ConsumerWidget {
                     error: (error, stack) => Center(
                       child: Text(
                         '${'common.error_prefix'.tr()}: $error',
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(
+                          color: AppColors.textPrimaryDark,
+                        ),
                       ),
                     ),
                   ),
@@ -156,7 +159,7 @@ class PlaceCard extends ConsumerWidget {
                           child: Text(
                             place.name,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.textPrimaryDark,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -171,7 +174,7 @@ class PlaceCard extends ConsumerWidget {
                           ? place.types.first.replaceAll('_', ' ').toUpperCase()
                           : 'common.place_label'.tr(),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: AppColors.textPrimaryDark.withValues(alpha: 0.6),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -180,7 +183,7 @@ class PlaceCard extends ConsumerWidget {
                     Text(
                       place.formattedAddress,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: AppColors.textPrimaryDark.withValues(alpha: 0.8),
                         fontSize: 12,
                       ),
                       maxLines: 2,

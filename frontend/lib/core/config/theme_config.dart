@@ -1,3 +1,4 @@
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Theme configuration for the application.
@@ -7,20 +8,16 @@ import 'package:flutter/material.dart';
 class ThemeConfig {
   ThemeConfig._();
 
-  /// Seed color for generating the color scheme (Nature-inspired Teal)
-  static const Color seedColor = Color(0xFF00796B); // Teal 700
+  /// Seed color for generating the color scheme
+  static const Color seedColor = AppColors.primary;
 
   /// Neutral Colors
-  static const Color neutralLight = Color(
-    0xFFF8F9FA,
-  ); // Very light grey for background
+  static const Color neutralLight = AppColors.backgroundLight;
   static const Color neutralBorder = Color(
     0xFFE0E0E0,
   ); // Light grey for borders
-  static const Color neutralText = Color(0xFF212121); // Almost black for text
-  static const Color neutralTextSecondary = Color(
-    0xFF757575,
-  ); // Grey for secondary text
+  static const Color neutralText = AppColors.textPrimaryLight;
+  static const Color neutralTextSecondary = AppColors.textSecondaryLight;
 
   /// Light theme configuration
   static ThemeData get lightTheme {
@@ -165,12 +162,14 @@ class ThemeConfig {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
+      surface: AppColors.surfaceDark,
+      error: AppColors.error,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: const Color(0xFF121212),
+      scaffoldBackgroundColor: AppColors.backgroundDark,
 
       appBarTheme: const AppBarTheme(
         centerTitle: true,
@@ -181,14 +180,11 @@ class ThemeConfig {
 
       cardTheme: CardThemeData(
         elevation: 0,
-        color: const Color(0xFF1E1E1E),
+        color: AppColors.surfaceDark,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1,
-          ),
+          side: const BorderSide(color: AppColors.white10, width: 1),
         ),
       ),
 
@@ -204,18 +200,18 @@ class ThemeConfig {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E1E1E),
+        fillColor: AppColors.surfaceDark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          borderSide: const BorderSide(color: AppColors.white10),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          borderSide: const BorderSide(color: AppColors.white10),
         ),
       ),
 

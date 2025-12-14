@@ -1,3 +1,4 @@
+import 'package:context_app/core/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,9 +16,9 @@ class PassportScreen extends ConsumerWidget {
     final passportAsyncValue = ref.watch(myPassportProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF101922),
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF101922),
+        backgroundColor: AppColors.backgroundDark,
         title: Text(
           'passport.title'.tr(),
           style: const TextStyle(
@@ -49,7 +50,7 @@ class PassportScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Text(
             '${'passport.load_error'.tr()}: $error',
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.error),
           ),
         ),
       ),
@@ -77,7 +78,7 @@ class TimelineEntry extends StatelessWidget {
               Text(
                 dateFormat.format(entry.createdAt),
                 style: const TextStyle(
-                  color: Color(0xFF137fec),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -98,7 +99,7 @@ class TimelineEntry extends StatelessWidget {
                     const Icon(
                       Icons.circle,
                       size: 12,
-                      color: Color(0xFF137fec),
+                      color: AppColors.primary,
                     ),
                     Expanded(
                       child: Container(
@@ -136,7 +137,7 @@ class TimelineEntry extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1C2732),
+                        color: AppColors.surfaceDarkCard,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.1),
@@ -195,15 +196,13 @@ class TimelineEntry extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF137fec,
-                              ).withValues(alpha: 0.2),
+                              color: AppColors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               entry.narrationStyle.name,
                               style: const TextStyle(
-                                color: Color(0xFF137fec),
+                                color: AppColors.primary,
                                 fontSize: 12,
                               ),
                             ),
