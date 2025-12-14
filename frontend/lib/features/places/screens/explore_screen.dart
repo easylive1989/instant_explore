@@ -58,10 +58,9 @@ class ExploreScreen extends ConsumerWidget {
                           color: AppColors.textPrimaryDark,
                         ),
                       ),
-                      ElevatedButton.icon(
+                      IconButton(
                         onPressed: () => ref.refresh(nearbyPlacesProvider),
                         icon: const Icon(Icons.refresh),
-                        label: Text('explore.refresh'.tr()),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
                           backgroundColor: AppColors.primary,
