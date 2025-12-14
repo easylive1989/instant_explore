@@ -41,12 +41,15 @@ platform :ios do
   desc "Upload IPA to TestFlight"
   lane :upload_testflight do
     # 設定檔案路徑常數 - GitHub Actions 建置的 IPA 位置
-    ipa_file = "../../build/ios/ipa/instantexplore.ipa"
-    
-    # 檢查 IPA 檔案是否存在
-    unless File.exist?(ipa_file)
-      UI.user_error!("❌ 找不到 IPA 檔案進行上傳：#{File.expand_path(ipa_file)}")
+    ipa_dir = "../../build/ios/ipa"
+    ipa_files = Dir[File.join(ipa_dir, "*.ipa")]
+
+    if ipa_files.empty?
+      UI.user_error!("❌ 找不到 IPA 檔案進行上傳：#{File.expand_path(ipa_dir)}")
     end
+
+    ipa_file = ipa_files.first
+    UI.message("✅ 找到 IPA 檔案：#{ipa_file}")
     
     # 上傳到 TestFlight
     upload_to_testflight(
