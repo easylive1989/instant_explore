@@ -7,7 +7,7 @@
   "gion_district": "Gion District",
   "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?",
   "app": {
-    "name": "Context 讀景",
+    "name": "Contexture",
     "tagline": "Your AI Pocket Historian"
   },
   "config_screen": {
@@ -107,6 +107,6 @@
     "confirm": "Confirm",
     "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
     "app_version": "Version information unavailable",
-    "copyright": "© 2025 Context 讀景"
+    "copyright": "© 2025 Contexture"
   }
 }

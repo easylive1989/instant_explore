@@ -15,7 +15,7 @@ class TravelDiaryApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Context 讀景',
+      onGenerateTitle: (context) => 'name'.tr(),
       debugShowCheckedModeBanner: false,
       theme: ThemeConfig.lightTheme,
       locale: context.locale,

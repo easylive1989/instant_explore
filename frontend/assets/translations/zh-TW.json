@@ -7,7 +7,7 @@
   "gion_district": "祇園地區",
   "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。",
   "app": {
-    "name": "Context 讀景",
+    "name": "讀景",
     "tagline": "您的 AI 口袋歷史學家"
   },
   "config_screen": {
@@ -107,6 +107,6 @@
     "confirm": "確認",
     "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
     "app_version": "版本資訊無法取得",
-    "copyright": "© 2025 Context 讀景"
+    "copyright": "© 2025 Contexture 讀景"
   }
 }
