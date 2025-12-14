@@ -8,8 +8,11 @@ class SearchNearbyPlacesUseCase {
 
   SearchNearbyPlacesUseCase(this._locationService, this._placesRepository);
 
-  Future<List<Place>> execute() async {
+  Future<List<Place>> execute({String? languageCode}) async {
     final location = await _locationService.getCurrentLocation();
-    return _placesRepository.getNearbyPlaces(location);
+    return _placesRepository.getNearbyPlaces(
+      location,
+      languageCode: languageCode,
+    );
   }
 }

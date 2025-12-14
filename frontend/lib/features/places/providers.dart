@@ -50,31 +50,35 @@ class PlacesController extends AsyncNotifier<List<Place>> {
     return _loadNearbyPlaces();
   }
 
-  Future<List<Place>> _loadNearbyPlaces() async {
+  Future<List<Place>> _loadNearbyPlaces({String? languageCode}) async {
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    return useCase.execute();
+    return useCase.execute(languageCode: languageCode);
   }
 
-  Future<void> search(String query) async {
+  Future<void> search(String query, {String? languageCode}) async {
     if (query.isEmpty) {
       // If query is empty, reload nearby places
       state = const AsyncValue.loading();
-      state = await AsyncValue.guard(() => _loadNearbyPlaces());
+      state = await AsyncValue.guard(
+        () => _loadNearbyPlaces(languageCode: languageCode),
+      );
       return;
     }
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(searchPlacesUseCaseProvider);
-      return useCase.execute(query);
+      return useCase.execute(query, languageCode: languageCode);
     });
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({String? languageCode}) async {
     state = const AsyncValue.loading();
     // Reset to nearby places on refresh if we want that behavior,
     // or just re-execute the last action.
     // For simplicity, let's reload nearby places as the default "home" state.
-    state = await AsyncValue.guard(() => _loadNearbyPlaces());
+    state = await AsyncValue.guard(
+      () => _loadNearbyPlaces(languageCode: languageCode),
+    );
   }
 }

@@ -11,7 +11,7 @@ class PlacesApiService {
 
   PlacesApiService(this._apiKey);
 
-  Future<List<Place>> searchByText(String query) async {
+  Future<List<Place>> searchByText(String query, {String? languageCode}) async {
     if (_apiKey.isEmpty) {
       throw Exception('Google Maps API Key is not configured.');
     }
@@ -23,7 +23,12 @@ class PlacesApiService {
           'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
     };
 
-    final body = jsonEncode({'textQuery': query});
+    final Map<String, dynamic> requestBody = {'textQuery': query};
+    if (languageCode != null) {
+      requestBody['languageCode'] = languageCode;
+    }
+
+    final body = jsonEncode(requestBody);
 
     final response = await http.post(
       Uri.parse(_textSearchUrl),
@@ -52,6 +57,7 @@ class PlacesApiService {
     int maxResultCount = 10,
     double radius = 1000.0,
     List<String>? includedTypes,
+    String? languageCode,
   }) async {
     if (_apiKey.isEmpty) {
       throw Exception('Google Maps API Key is not configured.');
@@ -79,6 +85,9 @@ class PlacesApiService {
 
     if (includedTypes != null && includedTypes.isNotEmpty) {
       requestBody['includedTypes'] = includedTypes;
+    }
+    if (languageCode != null) {
+      requestBody['languageCode'] = languageCode;
     }
 
     final body = jsonEncode(requestBody);

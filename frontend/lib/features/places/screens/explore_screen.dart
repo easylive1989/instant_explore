@@ -76,9 +76,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           IconButton(
                             onPressed: () {
                               _searchController.clear();
+                              final languageCode =
+                                  EasyLocalization.of(
+                                    context,
+                                  )?.locale.toLanguageTag() ??
+                                  'zh-TW';
                               ref
                                   .read(placesControllerProvider.notifier)
-                                  .refresh();
+                                  .refresh(languageCode: languageCode);
                             },
                             icon: const Icon(Icons.refresh),
                             style: ElevatedButton.styleFrom(
@@ -122,17 +127,27 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                   ),
                                   onPressed: () {
                                     _searchController.clear();
+                                    final languageCode =
+                                        EasyLocalization.of(
+                                          context,
+                                        )?.locale.toLanguageTag() ??
+                                        'zh-TW';
                                     ref
                                         .read(placesControllerProvider.notifier)
-                                        .search('');
+                                        .search('', languageCode: languageCode);
                                   },
                                 )
                               : null,
                         ),
                         onSubmitted: (value) {
+                          final languageCode =
+                              EasyLocalization.of(
+                                context,
+                              )?.locale.toLanguageTag() ??
+                              'zh-TW';
                           ref
                               .read(placesControllerProvider.notifier)
-                              .search(value);
+                              .search(value, languageCode: languageCode);
                         },
                       ),
                     ],

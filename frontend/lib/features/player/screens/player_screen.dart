@@ -40,7 +40,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final locale =
-          easy.EasyLocalization.of(context)?.locale.toString() ?? 'zh-TW';
+          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
 
       if (widget.initialContent != null) {
         ref
@@ -254,7 +254,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     // 錯誤狀態
     if (playerState.hasError) {
       final locale =
-          easy.EasyLocalization.of(context)?.locale.toString() ?? 'zh-TW';
+          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
       final errorType = playerState.errorType;
 
       // 取得錯誤訊息

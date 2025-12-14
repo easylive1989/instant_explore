@@ -6,7 +6,7 @@ class SearchPlacesUseCase {
 
   SearchPlacesUseCase(this._placesRepository);
 
-  Future<List<Place>> execute(String query) async {
-    return _placesRepository.searchPlaces(query);
+  Future<List<Place>> execute(String query, {String? languageCode}) async {
+    return _placesRepository.searchPlaces(query, languageCode: languageCode);
   }
 }
