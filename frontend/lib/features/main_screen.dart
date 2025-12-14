@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/features/places/screens/explore_screen.dart';
-import 'package:context_app/features/passport/screens/passport_screen.dart';
+import 'package:context_app/features/explore/screens/explore_screen.dart';
+import 'package:context_app/features/journey/screens/journey_screen.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     ExploreScreen(),
-    PassportScreen(),
+    JourneyScreen(),
     SettingsScreen(),
   ];
 

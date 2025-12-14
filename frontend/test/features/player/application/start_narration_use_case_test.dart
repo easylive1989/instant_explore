@@ -1,12 +1,12 @@
-import 'package:context_app/features/player/application/narration_generation_exception.dart';
+import 'package:context_app/features/narration/application/narration_generation_exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/core/services/gemini_service.dart';
 import 'package:context_app/core/services/tts_service.dart';
-import 'package:context_app/features/places/models/place.dart';
-import 'package:context_app/features/player/models/narration_style.dart';
-import 'package:context_app/features/player/models/playback_state.dart';
-import 'package:context_app/features/player/application/start_narration_use_case.dart';
+import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/playback_state.dart';
+import 'package:context_app/features/narration/application/start_narration_use_case.dart';
 
 // Mock classes
 class MockGeminiService extends Mock implements GeminiService {}

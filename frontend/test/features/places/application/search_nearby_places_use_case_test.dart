@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:context_app/features/places/application/search_nearby_places_use_case.dart';
-import 'package:context_app/features/places/domain/repositories/places_repository.dart';
-import 'package:context_app/features/places/domain/services/location_service.dart';
-import 'package:context_app/features/places/models/place.dart';
+import 'package:context_app/features/explore/application/search_nearby_places_use_case.dart';
+import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
+import 'package:context_app/features/explore/domain/services/location_service.dart';
+import 'package:context_app/features/explore/models/place.dart';
 
 class MockLocationService extends Mock implements LocationService {}
 

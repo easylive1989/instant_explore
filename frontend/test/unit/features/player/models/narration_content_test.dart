@@ -1,4 +1,4 @@
-import 'package:context_app/features/player/models/narration_content.dart';
+import 'package:context_app/features/narration/models/narration_content.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

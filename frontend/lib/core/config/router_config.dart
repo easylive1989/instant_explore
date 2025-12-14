@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/features/main_screen.dart';
-import 'package:context_app/features/places/models/place.dart';
-import 'package:context_app/features/player/screens/config_screen.dart';
-import 'package:context_app/features/player/screens/player_screen.dart';
-import 'package:context_app/features/player/models/narration_style.dart';
-import 'package:context_app/features/passport/screens/save_success_screen.dart';
+import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/narration/screens/select_narration_style_screen.dart';
+import 'package:context_app/features/narration/screens/narration_screen.dart';
+import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/journey/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
 import 'package:context_app/features/auth/services/auth_service.dart';
@@ -57,7 +57,7 @@ class RouterConfig {
             final place = extra is Place
                 ? extra
                 : Place.fromJson(extra as Map<String, dynamic>);
-            return ConfigScreen(place: place);
+            return SelectNarrationStyleScreen(place: place);
           },
         ),
         GoRoute(
@@ -72,7 +72,7 @@ class RouterConfig {
             final narrationStyle = params['narrationStyle'] as NarrationStyle;
             final initialContent = params['initialContent'] as String?;
             final enableSave = params['enableSave'] as bool? ?? true;
-            return PlayerScreen(
+            return NarrationScreen(
               place: place,
               narrationStyle: narrationStyle,
               initialContent: initialContent,

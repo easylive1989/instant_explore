@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:context_app/features/places/models/place.dart';
-import 'package:context_app/features/player/models/narration.dart';
-import 'package:context_app/features/player/models/narration_content.dart';
-import 'package:context_app/features/player/models/narration_style.dart';
-import 'package:context_app/features/player/models/playback_state.dart';
+import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/narration/models/narration.dart';
+import 'package:context_app/features/narration/models/narration_content.dart';
+import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/playback_state.dart';
 
 void main() {
   group('Narration Aggregate', () {

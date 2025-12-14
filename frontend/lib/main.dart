@@ -23,7 +23,7 @@ Future<Widget> init() async {
     path: 'assets/translations',
     fallbackLocale: const Locale('zh', 'TW'),
     saveLocale: true,
-    child: const ProviderScope(child: TravelDiaryApp()),
+    child: const ProviderScope(child: ContextureApp()),
   );
 }
 

@@ -7,8 +7,8 @@ import 'package:context_app/core/config/router_config.dart';
 /// Main application widget using go_router for navigation.
 ///
 /// This widget sets up the app theme, routing, and global configuration.
-class TravelDiaryApp extends ConsumerWidget {
-  const TravelDiaryApp({super.key});
+class ContextureApp extends ConsumerWidget {
+  const ContextureApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
