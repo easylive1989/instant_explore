@@ -7,8 +7,21 @@ class PlacesRepositoryImpl implements PlacesRepository {
 
   PlacesRepositoryImpl(this._apiService);
 
+  static const List<String> _includedTypes = [
+    'tourist_attraction',
+    'historical_landmark',
+    'art_gallery',
+    'museum',
+    'park',
+    'national_park',
+    'city_hall',
+    'library',
+    'aquarium',
+    'zoo',
+  ];
+
   @override
   Future<List<Place>> getNearbyPlaces(PlaceLocation location) async {
-    return _apiService.searchNearby(location);
+    return _apiService.searchNearby(location, includedTypes: _includedTypes);
   }
 }

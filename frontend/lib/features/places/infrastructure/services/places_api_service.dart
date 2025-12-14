@@ -13,6 +13,7 @@ class PlacesApiService {
     PlaceLocation location, {
     int maxResultCount = 10,
     double radius = 1000.0,
+    List<String>? includedTypes,
   }) async {
     if (_apiKey.isEmpty) {
       throw Exception('Google Maps API Key is not configured.');
@@ -25,7 +26,7 @@ class PlacesApiService {
           'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
     };
 
-    final body = jsonEncode({
+    final Map<String, dynamic> requestBody = {
       'maxResultCount': maxResultCount,
       'locationRestriction': {
         'circle': {
@@ -36,7 +37,13 @@ class PlacesApiService {
           'radius': radius,
         },
       },
-    });
+    };
+
+    if (includedTypes != null && includedTypes.isNotEmpty) {
+      requestBody['includedTypes'] = includedTypes;
+    }
+
+    final body = jsonEncode(requestBody);
 
     final response = await http.post(
       Uri.parse(_baseUrl),
