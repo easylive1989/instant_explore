@@ -57,7 +57,10 @@ class StartNarrationUseCase {
       }
 
       // 3. 建立 NarrationContent 值對象
-      final content = NarrationContent.fromText(generatedText);
+      final content = NarrationContent.fromText(
+        generatedText,
+        language: language,
+      );
 
       // 4. 初始化 TtsService
       await _ttsService.initialize();

@@ -84,7 +84,10 @@ class PlayerController extends StateNotifier<NarrationState> {
         style: style,
       );
 
-      final content = NarrationContent.fromText(contentText);
+      final content = NarrationContent.fromText(
+        contentText,
+        language: language,
+      );
 
       // 初始化 TTS
       await _ttsService.initialize();

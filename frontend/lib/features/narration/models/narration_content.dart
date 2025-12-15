@@ -40,13 +40,19 @@ class NarrationContent {
   ///
   /// 自動將文本分段並估算播放時長
   /// [text] 完整的導覽文本
-  /// [charsPerSecond] 每秒朗讀的字數，預設為18（根據實測數據調整）
-  factory NarrationContent.fromText(String text, {int charsPerSecond = 18}) {
+  /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')，用於決定語速
+  factory NarrationContent.fromText(String text, {String language = 'zh-TW'}) {
     // 按照句號、問號、驚嘆號分段
     final segments = _splitIntoSegments(text);
 
     // 建立段落字符位置映射表
     final segmentCharRanges = _buildSegmentCharRanges(text, segments);
+
+    // 根據語言決定每秒字數
+    // 中文：約 4 字/秒 (TTS rate 0.5)
+    // 英文/其他：約 18 字/秒
+    final int charsPerSecond =
+        language.toLowerCase().startsWith('zh') ? 4 : 18;
 
     // 估算播放時長：字數 / 每秒字數
     final estimatedDuration = (text.length / charsPerSecond).ceil();
