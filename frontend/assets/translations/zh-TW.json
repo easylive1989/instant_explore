@@ -45,7 +45,11 @@
     "item_saved": "已儲存！",
     "added_to_passport": "已新增至您的探索歷程",
     "view_button": "查看探索歷程",
-    "continue_tour": "繼續導覽"
+    "continue_tour": "繼續導覽",
+    "delete_title": "刪除紀錄",
+    "delete_message": "確定要刪除此紀錄嗎？",
+    "delete_confirm": "刪除",
+    "cancel": "取消"
   },
   "explore": {
     "title": "探索",

@@ -51,8 +51,7 @@ class NarrationContent {
     // 根據語言決定每秒字數
     // 中文：約 4 字/秒 (TTS rate 0.5)
     // 英文/其他：約 18 字/秒
-    final int charsPerSecond =
-        language.toLowerCase().startsWith('zh') ? 4 : 18;
+    final int charsPerSecond = language.toLowerCase().startsWith('zh') ? 4 : 18;
 
     // 估算播放時長：字數 / 每秒字數
     final estimatedDuration = (text.length / charsPerSecond).ceil();

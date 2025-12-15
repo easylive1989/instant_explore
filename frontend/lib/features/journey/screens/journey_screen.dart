@@ -58,13 +58,68 @@ class JourneyScreen extends ConsumerWidget {
   }
 }
 
-class TimelineEntry extends StatelessWidget {
+class TimelineEntry extends ConsumerWidget {
   final JourneyEntry entry;
 
   const TimelineEntry({super.key, required this.entry});
 
+  Future<void> _showDeleteConfirmDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.surfaceDark,
+          title: Text(
+            'passport.delete_title'.tr(),
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'passport.delete_message'.tr(),
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'passport.cancel'.tr(),
+                style: const TextStyle(color: Colors.white60),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                'passport.delete_confirm'.tr(),
+                style: const TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(deleteJourneyEntryUseCaseProvider).execute(entry.id);
+        // 刷新列表
+        ref.invalidate(myPassportProvider);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${'common.error_prefix'.tr()}: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('yyyy/MM/dd');
     final timeFormat = DateFormat('HH:mm');
 
@@ -146,13 +201,34 @@ class TimelineEntry extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            entry.placeName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  entry.placeName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () =>
+                                    _showDeleteConfirmDialog(context, ref),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  color: Colors.transparent, // 擴大點擊區域
+                                  child: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.white38,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Text(
