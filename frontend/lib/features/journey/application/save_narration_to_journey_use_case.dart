@@ -6,12 +6,12 @@ import 'package:context_app/features/journey/data/supabase_journey_repository.da
 import 'package:uuid/uuid.dart';
 import 'package:context_app/core/config/api_config.dart';
 
-class SaveNarrationToJourenyUseCase {
+class SaveNarrationToJourneyUseCase {
   final JourneyRepository _repository;
   final ApiConfig _apiConfig;
   final Uuid _uuid;
 
-  SaveNarrationToJourenyUseCase(this._repository, this._apiConfig)
+  SaveNarrationToJourneyUseCase(this._repository, this._apiConfig)
     : _uuid = const Uuid();
 
   Future<void> execute({
@@ -47,8 +47,8 @@ class SaveNarrationToJourenyUseCase {
 }
 
 final saveNarrationToPassportUseCaseProvider =
-    Provider<SaveNarrationToJourenyUseCase>((ref) {
+    Provider<SaveNarrationToJourneyUseCase>((ref) {
       final repository = ref.watch(passportRepositoryProvider);
       final apiConfig = ref.watch(apiConfigProvider);
-      return SaveNarrationToJourenyUseCase(repository, apiConfig);
+      return SaveNarrationToJourneyUseCase(repository, apiConfig);
     });

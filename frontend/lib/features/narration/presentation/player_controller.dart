@@ -18,7 +18,7 @@ import 'package:uuid/uuid.dart';
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<NarrationState> {
   final StartNarrationUseCase _startNarrationUseCase;
-  final SaveNarrationToJourenyUseCase _saveNarrationToPassportUseCase;
+  final SaveNarrationToJourneyUseCase _saveNarrationToPassportUseCase;
   final TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;

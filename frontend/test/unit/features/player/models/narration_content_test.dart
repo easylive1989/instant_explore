@@ -44,9 +44,9 @@ void main() {
 
       test('should estimate duration correctly', () {
         const text = '12345'; // 5 characters
-        final content = NarrationContent.fromText(text, charsPerSecond: 5);
+        final content = NarrationContent.fromText(text, language: 'zh-TW'); // charsPerSecond = 4
 
-        expect(content.estimatedDuration, 1); // 5/5 = 1 second
+        expect(content.estimatedDuration, 2); // 5/4 = 1.25 -> ceil = 2
       });
     });
 
@@ -121,25 +121,23 @@ void main() {
     group('getCurrentSegmentIndex (deprecated)', () {
       test('should still work for backward compatibility', () {
         const text = '第一句。第二句。第三句。';
-        // 使用 charsPerSecond: 1 使估算更可預測
-        // 12 個字符 / 1 字符/秒 = 12 秒
-        // 3 個段落，每個段落 4 秒
-        final content = NarrationContent.fromText(text, charsPerSecond: 1);
+        // 使用 language: 'zh-TW' (charsPerSecond = 4)
+        // 12 個字符 / 4 字符/秒 = 3 秒
+        // 3 個段落，每個段落 1 秒
+        final content = NarrationContent.fromText(text, language: 'zh-TW');
 
         // 基於時間的估算（已棄用）
-        // 0-3 秒：第 0 個段落
+        // 0 秒：第 0 個段落
         // ignore: deprecated_member_use_from_same_package
         expect(content.getCurrentSegmentIndex(0), 0);
-        // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(3), 0);
 
-        // 4-7 秒：第 1 個段落
+        // 1 秒：第 1 個段落
         // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(4), 1);
+        expect(content.getCurrentSegmentIndex(1), 1);
 
-        // 8-11 秒：第 2 個段落
+        // 2 秒：第 2 個段落
         // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(8), 2);
+        expect(content.getCurrentSegmentIndex(2), 2);
       });
     });
 

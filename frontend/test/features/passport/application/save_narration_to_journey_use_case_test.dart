@@ -19,7 +19,7 @@ class FakePassportEntry extends Fake implements JourneyEntry {}
 void main() {
   late MockPassportRepository mockRepository;
   late MockApiConfig mockApiConfig;
-  late SaveNarrationToJourenyUseCase useCase;
+  late SaveNarrationToJourneyUseCase useCase;
 
   setUpAll(() {
     registerFallbackValue(FakePassportEntry());
@@ -28,7 +28,7 @@ void main() {
   setUp(() {
     mockRepository = MockPassportRepository();
     mockApiConfig = MockApiConfig();
-    useCase = SaveNarrationToJourenyUseCase(mockRepository, mockApiConfig);
+    useCase = SaveNarrationToJourneyUseCase(mockRepository, mockApiConfig);
 
     // Default mock behavior
     when(() => mockApiConfig.isPlacesConfigured).thenReturn(false);
