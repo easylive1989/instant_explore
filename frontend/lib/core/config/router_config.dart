@@ -91,7 +91,7 @@ class RouterConfig {
                 context.go('/?tab=passport');
               },
               onContinueTour: () {
-                context.go('/');
+                context.pop();
               },
             );
           },
