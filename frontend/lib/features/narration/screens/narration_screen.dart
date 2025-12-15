@@ -260,9 +260,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
       // 取得錯誤訊息
       final errorMessage =
-          errorType?.message ??
-          playerState.errorMessage ??
-          'player_screen.error'.tr();
+          playerState.errorMessage ?? 'player_screen.error'.tr();
 
       return Center(
         child: Padding(
@@ -336,7 +334,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           physics: const ClampingScrollPhysics(),
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          itemCount: content.segments.length + 2, // +2 for top/bottom spacing
+          itemCount: content.segments.length + 2,
+          // +2 for top/bottom spacing
           itemBuilder: (context, index) {
             // 頂部空白
             if (index == 0) {
