@@ -76,15 +76,16 @@ void main() {
       test('should reset positions when replaying from completed state', () {
         final content = createTestContent();
         // 先更新字符位置，再更新進度到 duration（會自動轉為 completed）
-        final narration = Narration.create(
-          id: 'test-id',
-          place: createTestPlace(),
-          style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateCharPosition(50)
-            .updateProgress(content.estimatedDuration); // 會自動轉為 completed
+        final narration =
+            Narration.create(
+                  id: 'test-id',
+                  place: createTestPlace(),
+                  style: NarrationStyle.brief,
+                )
+                .ready(content)
+                .play()
+                .updateCharPosition(50)
+                .updateProgress(content.estimatedDuration); // 會自動轉為 completed
 
         expect(narration.state, PlaybackState.completed);
         expect(narration.currentPosition, content.estimatedDuration);
@@ -99,16 +100,17 @@ void main() {
 
       test('should preserve positions when resuming from paused state', () {
         final content = createTestContent();
-        final narration = Narration.create(
-          id: 'test-id',
-          place: createTestPlace(),
-          style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateProgress(0) // 使用小於 duration 的值
-            .updateCharPosition(8) // 第三句開頭
-            .pause();
+        final narration =
+            Narration.create(
+                  id: 'test-id',
+                  place: createTestPlace(),
+                  style: NarrationStyle.brief,
+                )
+                .ready(content)
+                .play()
+                .updateProgress(0) // 使用小於 duration 的值
+                .updateCharPosition(8) // 第三句開頭
+                .pause();
 
         expect(narration.currentPosition, 0);
         expect(narration.currentCharPosition, 8);
@@ -169,9 +171,7 @@ void main() {
           id: 'test-id',
           place: createTestPlace(),
           style: NarrationStyle.brief,
-        )
-            .ready(createTestContent())
-            .copyWith(state: PlaybackState.completed);
+        ).ready(createTestContent()).copyWith(state: PlaybackState.completed);
 
         final updated = narration.updateCharPosition(10);
 
@@ -252,10 +252,7 @@ void main() {
           id: 'test-id',
           place: createTestPlace(),
           style: NarrationStyle.brief,
-        )
-            .ready(createTestContent())
-            .play()
-            .updateCharPosition(25);
+        ).ready(createTestContent()).play().updateCharPosition(25);
 
         final updated = narration.copyWith(currentPosition: 50);
 
@@ -265,32 +262,28 @@ void main() {
     });
 
     group('equality', () {
-      test('should be equal when all fields match including currentCharPosition',
-          () {
-        final place = createTestPlace();
-        final content = createTestContent();
+      test(
+        'should be equal when all fields match including currentCharPosition',
+        () {
+          final place = createTestPlace();
+          final content = createTestContent();
 
-        final narration1 = Narration.create(
-          id: 'test-id',
-          place: place,
-          style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateCharPosition(10);
+          final narration1 = Narration.create(
+            id: 'test-id',
+            place: place,
+            style: NarrationStyle.brief,
+          ).ready(content).play().updateCharPosition(10);
 
-        final narration2 = Narration.create(
-          id: 'test-id',
-          place: place,
-          style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateCharPosition(10);
+          final narration2 = Narration.create(
+            id: 'test-id',
+            place: place,
+            style: NarrationStyle.brief,
+          ).ready(content).play().updateCharPosition(10);
 
-        expect(narration1, equals(narration2));
-        expect(narration1.hashCode, equals(narration2.hashCode));
-      });
+          expect(narration1, equals(narration2));
+          expect(narration1.hashCode, equals(narration2.hashCode));
+        },
+      );
 
       test('should not be equal when currentCharPosition differs', () {
         final place = createTestPlace();
@@ -300,19 +293,13 @@ void main() {
           id: 'test-id',
           place: place,
           style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateCharPosition(10);
+        ).ready(content).play().updateCharPosition(10);
 
         final narration2 = Narration.create(
           id: 'test-id',
           place: place,
           style: NarrationStyle.brief,
-        )
-            .ready(content)
-            .play()
-            .updateCharPosition(20);
+        ).ready(content).play().updateCharPosition(20);
 
         expect(narration1, isNot(equals(narration2)));
       });
@@ -330,8 +317,7 @@ void main() {
         expect(narration.state, PlaybackState.ready);
         expect(narration.updateCharPosition(10).currentCharPosition, 0);
 
-        final paused =
-            narration.play().updateCharPosition(5).pause();
+        final paused = narration.play().updateCharPosition(5).pause();
         expect(paused.state, PlaybackState.paused);
         expect(paused.updateCharPosition(10).currentCharPosition, 5);
 

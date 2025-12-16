@@ -44,7 +44,10 @@ void main() {
 
       test('should estimate duration correctly', () {
         const text = '12345'; // 5 characters
-        final content = NarrationContent.fromText(text, language: 'zh-TW'); // charsPerSecond = 4
+        final content = NarrationContent.fromText(
+          text,
+          language: 'zh-TW',
+        ); // charsPerSecond = 4
 
         expect(content.estimatedDuration, 2); // 5/4 = 1.25 -> ceil = 2
       });
@@ -173,8 +176,10 @@ void main() {
 
         expect(content.segments.length, 100);
         expect(content.getSegmentIndexByCharPosition(0), 0);
-        expect(content.getSegmentIndexByCharPosition(content.text.length - 1),
-            99);
+        expect(
+          content.getSegmentIndexByCharPosition(content.text.length - 1),
+          99,
+        );
       });
     });
   });
