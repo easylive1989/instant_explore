@@ -8,7 +8,7 @@ import 'package:context_app/features/narration/application/narration_generation_
 import 'package:context_app/features/narration/models/narration.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
 import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:uuid/uuid.dart';
 
@@ -26,13 +26,13 @@ class StartNarrationUseCase {
   /// 執行用例：生成並準備導覽
   ///
   /// [place] 地點資訊
-  /// [style] 導覽風格
+  /// [aspect] 導覽介紹面向
   /// [language] 語言代碼（預設為 'zh-TW'）
   /// 返回準備就緒的 Narration 聚合
   /// 拋出異常如果生成失敗
   Future<Narration> execute({
     required Place place,
-    required NarrationStyle style,
+    required NarrationAspect aspect,
     String language = 'zh-TW',
   }) async {
     try {
@@ -40,13 +40,13 @@ class StartNarrationUseCase {
       final narration = Narration.create(
         id: _uuid.v4(),
         place: place,
-        style: style,
+        aspect: aspect,
       );
 
       // 2. 使用 GeminiService 生成導覽內容
       final generatedText = await _geminiService.generateNarration(
         place: place,
-        style: style,
+        aspect: aspect,
         language: language,
       );
 

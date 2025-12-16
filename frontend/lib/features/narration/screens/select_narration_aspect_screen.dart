@@ -5,18 +5,23 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/core/config/api_config.dart';
 import 'package:context_app/features/explore/models/place.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/providers.dart';
 
-class SelectNarrationStyleScreen extends ConsumerWidget {
+class SelectNarrationAspectScreen extends ConsumerWidget {
   final Place place;
 
-  const SelectNarrationStyleScreen({super.key, required this.place});
+  const SelectNarrationAspectScreen({super.key, required this.place});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final apiConfig = ref.watch(apiConfigProvider);
-    final selectedStyle = ref.watch(narrationStyleProvider);
+    final selectedAspect = ref.watch(narrationAspectProvider);
+
+    // 根據景點類型取得可用的介紹面向
+    final availableAspects = NarrationAspect.getAspectsForCategory(
+      place.category,
+    );
 
     final photoUrl = place.primaryPhoto?.getPhotoUrl(
       maxWidth: 800,
@@ -102,6 +107,39 @@ class SelectNarrationStyleScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
 
+                  // Place Category Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: place.category.color.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: place.category.color, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          place.category.icon,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          place.category.translationKey.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   // Place Address
                   Row(
                     children: [
@@ -128,7 +166,7 @@ class SelectNarrationStyleScreen extends ConsumerWidget {
 
                   // Title
                   Text(
-                    'config_screen.title'.tr(),
+                    'config_screen.select_aspect_title'.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -137,26 +175,20 @@ class SelectNarrationStyleScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Brief Option
-                  ConfigOption(
-                    style: NarrationStyle.brief,
-                    isSelected: selectedStyle == NarrationStyle.brief,
-                    onTap: () {
-                      ref.read(narrationStyleProvider.notifier).state =
-                          NarrationStyle.brief;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Deep Dive Option
-                  ConfigOption(
-                    style: NarrationStyle.deepDive,
-                    isSelected: selectedStyle == NarrationStyle.deepDive,
-                    onTap: () {
-                      ref.read(narrationStyleProvider.notifier).state =
-                          NarrationStyle.deepDive;
-                    },
-                  ),
+                  // Aspect Options
+                  ...availableAspects.map((aspect) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: AspectOption(
+                        aspect: aspect,
+                        isSelected: selectedAspect == aspect,
+                        onTap: () {
+                          ref.read(narrationAspectProvider.notifier).state =
+                              aspect;
+                        },
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 24),
 
                   // Start Button
@@ -166,7 +198,7 @@ class SelectNarrationStyleScreen extends ConsumerWidget {
                         'player',
                         extra: {
                           'place': place,
-                          'narrationStyle': selectedStyle,
+                          'narrationAspect': selectedAspect,
                         },
                       );
                     },
@@ -205,14 +237,14 @@ class SelectNarrationStyleScreen extends ConsumerWidget {
   }
 }
 
-class ConfigOption extends StatelessWidget {
-  final NarrationStyle style;
+class AspectOption extends StatelessWidget {
+  final NarrationAspect aspect;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const ConfigOption({
+  const AspectOption({
     super.key,
-    required this.style,
+    required this.aspect,
     required this.isSelected,
     required this.onTap,
   });
@@ -230,7 +262,7 @@ class ConfigOption extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : Colors.white.withAlpha(0x1A),
+                : Colors.white.withValues(alpha: 0.1),
             width: 2,
           ),
         ),
@@ -242,10 +274,10 @@ class ConfigOption extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primary
-                    : Colors.white.withAlpha(0x1A),
+                    : Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(style.icon, color: Colors.white),
+              child: Icon(aspect.icon, color: Colors.white),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -253,7 +285,7 @@ class ConfigOption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    style.translationKey.tr(),
+                    aspect.translationKey.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -262,7 +294,7 @@ class ConfigOption extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    style.descriptionKey.tr(),
+                    aspect.descriptionKey.tr(),
                     style: TextStyle(
                       color: isSelected ? Colors.blue[200] : Colors.white70,
                       fontSize: 14,

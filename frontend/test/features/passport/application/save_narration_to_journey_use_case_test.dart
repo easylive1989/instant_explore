@@ -4,9 +4,10 @@ import 'package:context_app/features/journey/application/save_narration_to_journ
 import 'package:context_app/features/journey/domain/journey_repository.dart';
 import 'package:context_app/features/journey/models/journey_entry.dart';
 import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 import 'package:context_app/features/narration/models/narration.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/models/playback_state.dart';
 import 'package:context_app/core/config/api_config.dart';
 
@@ -41,13 +42,14 @@ void main() {
     location: PlaceLocation(latitude: 0, longitude: 0),
     types: [],
     photos: [],
+    category: PlaceCategory.modernUrban,
   );
 
   test('execute saves entry successfully', () async {
     final narration = Narration(
       id: '1',
       place: place,
-      style: NarrationStyle.brief,
+      aspect: NarrationAspect.historicalBackground,
       state: PlaybackState.ready,
       content: NarrationContent.fromText('Narration text'),
     );
@@ -63,7 +65,7 @@ void main() {
     final narration = Narration(
       id: '1',
       place: place,
-      style: NarrationStyle.brief,
+      aspect: NarrationAspect.historicalBackground,
       state: PlaybackState.loading,
       content: null,
     );

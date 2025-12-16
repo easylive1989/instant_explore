@@ -4,7 +4,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:context_app/core/services/gemini_service.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/explore/models/place.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/models/playback_state.dart';
 import 'package:context_app/features/narration/application/start_narration_use_case.dart';
 
@@ -16,8 +17,8 @@ class MockTtsService extends Mock implements TtsService {}
 // Fake class for Place (required for mocktail any() matcher)
 class FakePlace extends Fake implements Place {}
 
-// Fake class for NarrationStyle (required for mocktail any() matcher)
-class FakeNarrationStyle extends Fake {}
+// Fake class for NarrationAspect (required for mocktail any() matcher)
+class FakeNarrationAspect extends Fake {}
 
 void main() {
   late StartNarrationUseCase useCase;
@@ -27,7 +28,7 @@ void main() {
   setUpAll(() {
     // Register fallback values for mocktail
     registerFallbackValue(FakePlace());
-    registerFallbackValue(NarrationStyle.brief);
+    registerFallbackValue(NarrationAspect.historicalBackground);
   });
 
   setUp(() {
@@ -44,6 +45,7 @@ void main() {
       location: PlaceLocation(latitude: 25.0, longitude: 121.0),
       types: const ['tourist_attraction'],
       photos: const [],
+      category: PlaceCategory.historicalCultural,
     );
 
     const testGeneratedText = '''
@@ -56,7 +58,7 @@ void main() {
       when(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => testGeneratedText);
@@ -69,13 +71,13 @@ void main() {
       // Act
       final result = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         language: 'zh-TW',
       );
 
       // Assert
       expect(result.place, equals(testPlace));
-      expect(result.style, equals(NarrationStyle.brief));
+      expect(result.aspect, equals(NarrationAspect.historicalBackground));
       expect(result.state, equals(PlaybackState.ready));
       expect(result.content, isNotNull);
       expect(result.content!.text, equals(testGeneratedText));
@@ -86,7 +88,7 @@ void main() {
       verify(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
       ).called(1);
@@ -95,13 +97,13 @@ void main() {
     });
 
     test(
-      'should successfully generate narration with deepDive style',
+      'should successfully generate narration with architecture aspect',
       () async {
         // Arrange
         when(
           () => mockGeminiService.generateNarration(
             place: testPlace,
-            style: NarrationStyle.deepDive,
+            aspect: NarrationAspect.architecture,
             language: 'en-US',
           ),
         ).thenAnswer((_) async => testGeneratedText);
@@ -114,20 +116,20 @@ void main() {
         // Act
         final result = await useCase.execute(
           place: testPlace,
-          style: NarrationStyle.deepDive,
+          aspect: NarrationAspect.architecture,
           language: 'en-US',
         );
 
         // Assert
         expect(result.place, equals(testPlace));
-        expect(result.style, equals(NarrationStyle.deepDive));
+        expect(result.aspect, equals(NarrationAspect.architecture));
         expect(result.state, equals(PlaybackState.ready));
         expect(result.content, isNotNull);
 
         verify(
           () => mockGeminiService.generateNarration(
             place: testPlace,
-            style: NarrationStyle.deepDive,
+            aspect: NarrationAspect.architecture,
             language: 'en-US',
           ),
         ).called(1);
@@ -142,7 +144,7 @@ void main() {
         when(
           () => mockGeminiService.generateNarration(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
         ).thenAnswer((_) async => '');
@@ -153,7 +155,7 @@ void main() {
         expect(
           () => useCase.execute(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
           throwsA(isA<NarrationGenerationException>()),
@@ -168,7 +170,7 @@ void main() {
         when(
           () => mockGeminiService.generateNarration(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
         ).thenThrow(Exception('Network error'));
@@ -179,7 +181,7 @@ void main() {
         expect(
           () => useCase.execute(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
           throwsA(isA<NarrationGenerationException>()),
@@ -194,7 +196,7 @@ void main() {
         when(
           () => mockGeminiService.generateNarration(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
         ).thenAnswer((_) async => testGeneratedText);
@@ -207,7 +209,7 @@ void main() {
         expect(
           () => useCase.execute(
             place: testPlace,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
           ),
           throwsA(isA<NarrationGenerationException>()),
@@ -220,7 +222,7 @@ void main() {
       when(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => testGeneratedText);
@@ -233,7 +235,7 @@ void main() {
       // Act
       await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         // language not specified, should use default 'zh-TW'
       );
 
@@ -246,7 +248,7 @@ void main() {
       when(
         () => mockGeminiService.generateNarration(
           place: any(named: 'place'),
-          style: any(named: 'style'),
+          aspect: any(named: 'aspect'),
           language: any(named: 'language'),
         ),
       ).thenAnswer((_) async => testGeneratedText);
@@ -257,11 +259,11 @@ void main() {
       // Act
       final result1 = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
       final result2 = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
 
       // Assert
@@ -280,7 +282,7 @@ void main() {
       when(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => textWithMultipleSegments);
@@ -293,7 +295,7 @@ void main() {
       // Act
       final result = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         language: 'zh-TW',
       );
 
@@ -313,7 +315,7 @@ void main() {
       when(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => shortText);
@@ -324,20 +326,20 @@ void main() {
       // Act
       final resultShort = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
 
       when(
         () => mockGeminiService.generateNarration(
           place: testPlace,
-          style: NarrationStyle.deepDive,
+          aspect: NarrationAspect.architecture,
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => longText);
 
       final resultLong = await useCase.execute(
         place: testPlace,
-        style: NarrationStyle.deepDive,
+        aspect: NarrationAspect.architecture,
       );
 
       // Assert - longer text should have longer duration

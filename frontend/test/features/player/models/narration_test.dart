@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 import 'package:context_app/features/narration/models/narration.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/models/playback_state.dart';
 
 void main() {
@@ -14,13 +15,14 @@ void main() {
       location: PlaceLocation(latitude: 0, longitude: 0),
       types: [],
       photos: [],
+      category: PlaceCategory.historicalCultural,
     );
 
     test('create factory returns Narration in loading state', () {
       final narration = Narration.create(
         id: 'narration-1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
 
       expect(narration.state, PlaybackState.loading);
@@ -31,7 +33,7 @@ void main() {
       final narration = Narration.create(
         id: 'narration-1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
       final content = NarrationContent.fromText('Test content');
 
@@ -46,7 +48,7 @@ void main() {
       var narration = Narration.create(
         id: 'narration-1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
       );
       final content = NarrationContent.fromText('Test content');
       narration = narration.ready(content);
@@ -60,7 +62,7 @@ void main() {
       final narration = Narration(
         id: '1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         state: PlaybackState.playing,
         content: NarrationContent.fromText('test'),
       );
@@ -74,7 +76,7 @@ void main() {
       final narration = Narration(
         id: '1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         state: PlaybackState.playing,
         content: NarrationContent.fromText('test'),
         duration: 100,
@@ -92,7 +94,7 @@ void main() {
       final narration = Narration(
         id: '1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         state: PlaybackState.playing,
         content: NarrationContent.fromText('test'),
         duration: 100,
@@ -110,7 +112,7 @@ void main() {
       final narration = Narration(
         id: '1',
         place: place,
-        style: NarrationStyle.brief,
+        aspect: NarrationAspect.historicalBackground,
         state: PlaybackState.playing,
         content: NarrationContent.fromText('test'),
         duration: 100,

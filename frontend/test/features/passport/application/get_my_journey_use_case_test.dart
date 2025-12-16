@@ -3,7 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/journey/application/get_my_journey_use_case.dart';
 import 'package:context_app/features/journey/domain/journey_repository.dart';
 import 'package:context_app/features/journey/models/journey_entry.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
 
@@ -24,7 +24,7 @@ void main() {
     placeAddress: 'Address 1',
     placeImageUrl: 'http://example.com/image.jpg',
     narrationText: 'Text',
-    narrationStyle: NarrationStyle.brief,
+    narrationAspect: NarrationAspect.historicalBackground,
     createdAt: DateTime.now(),
   );
 

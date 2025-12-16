@@ -38,7 +38,7 @@ class SaveNarrationToJourneyUseCase {
       placeAddress: narration.place.formattedAddress,
       placeImageUrl: imageUrl,
       narrationText: narration.content!.text,
-      narrationStyle: narration.style,
+      narrationAspect: narration.aspect,
       createdAt: DateTime.now(),
     );
 

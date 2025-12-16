@@ -8,19 +8,19 @@ import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:context_app/core/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/explore/models/place.dart';
 import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/providers.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
-  final NarrationStyle narrationStyle;
+  final NarrationAspect narrationAspect;
   final String? initialContent;
   final bool enableSave;
 
   const NarrationScreen({
     super.key,
     required this.place,
-    required this.narrationStyle,
+    required this.narrationAspect,
     this.initialContent,
     this.enableSave = true,
   });
@@ -48,14 +48,14 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             .read(playerControllerProvider.notifier)
             .initializeWithContent(
               widget.place,
-              widget.narrationStyle,
+              widget.narrationAspect,
               widget.initialContent!,
               language: locale,
             );
       } else {
         ref
             .read(playerControllerProvider.notifier)
-            .initialize(widget.place, widget.narrationStyle, language: locale);
+            .initialize(widget.place, widget.narrationAspect, language: locale);
       }
     });
   }
@@ -305,7 +305,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                         .read(playerControllerProvider.notifier)
                         .initialize(
                           widget.place,
-                          widget.narrationStyle,
+                          widget.narrationAspect,
                           language: locale,
                         );
                   },
@@ -476,6 +476,17 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // Narration Aspect
+                Text(
+                  widget.narrationAspect.translationKey.tr(),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
 

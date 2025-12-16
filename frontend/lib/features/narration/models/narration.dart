@@ -1,5 +1,5 @@
 import 'package:context_app/features/explore/models/place.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
 import 'package:context_app/features/narration/models/playback_state.dart';
 
@@ -14,8 +14,8 @@ class Narration {
   /// 地點資訊
   final Place place;
 
-  /// 導覽風格
-  final NarrationStyle style;
+  /// 導覽介紹面向
+  final NarrationAspect aspect;
 
   /// 導覽內容
   final NarrationContent? content;
@@ -38,7 +38,7 @@ class Narration {
   const Narration({
     required this.id,
     required this.place,
-    required this.style,
+    required this.aspect,
     this.content,
     required this.state,
     this.currentPosition = 0,
@@ -51,12 +51,12 @@ class Narration {
   factory Narration.create({
     required String id,
     required Place place,
-    required NarrationStyle style,
+    required NarrationAspect aspect,
   }) {
     return Narration(
       id: id,
       place: place,
-      style: style,
+      aspect: aspect,
       state: PlaybackState.loading,
     );
   }
@@ -170,7 +170,7 @@ class Narration {
   Narration copyWith({
     String? id,
     Place? place,
-    NarrationStyle? style,
+    NarrationAspect? aspect,
     NarrationContent? content,
     PlaybackState? state,
     int? currentPosition,
@@ -181,7 +181,7 @@ class Narration {
     return Narration(
       id: id ?? this.id,
       place: place ?? this.place,
-      style: style ?? this.style,
+      aspect: aspect ?? this.aspect,
       content: content ?? this.content,
       state: state ?? this.state,
       currentPosition: currentPosition ?? this.currentPosition,
@@ -193,7 +193,7 @@ class Narration {
 
   @override
   String toString() {
-    return 'Narration(id: $id, place: ${place.name}, style: $style, '
+    return 'Narration(id: $id, place: ${place.name}, aspect: $aspect, '
         'state: $state, position: $currentPosition/$duration)';
   }
 
@@ -204,7 +204,7 @@ class Narration {
     return other is Narration &&
         other.id == id &&
         other.place == place &&
-        other.style == style &&
+        other.aspect == aspect &&
         other.content == content &&
         other.state == state &&
         other.currentPosition == currentPosition &&
@@ -218,7 +218,7 @@ class Narration {
     return Object.hash(
       id,
       place,
-      style,
+      aspect,
       content,
       state,
       currentPosition,

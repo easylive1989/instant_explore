@@ -4,6 +4,7 @@ import 'package:context_app/features/explore/application/search_nearby_places_us
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
 import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 
 class MockLocationService extends Mock implements LocationService {}
 
@@ -42,6 +43,7 @@ void main() {
           location: testLocation,
           types: [],
           photos: [],
+          category: PlaceCategory.modernUrban,
         ),
         Place(
           id: '2',
@@ -50,6 +52,7 @@ void main() {
           location: testLocation,
           types: [],
           photos: [],
+          category: PlaceCategory.modernUrban,
         ),
       ];
 

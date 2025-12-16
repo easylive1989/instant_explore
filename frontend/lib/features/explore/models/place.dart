@@ -1,4 +1,5 @@
 import 'package:context_app/features/explore/models/place_photo.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 
 /// Google Places API 地點資料模型
 ///
@@ -15,6 +16,7 @@ class Place {
   final String? internationalPhoneNumber;
   final String? websiteUri;
   final bool? currentOpeningHours;
+  final PlaceCategory category;
 
   Place({
     required this.id,
@@ -28,9 +30,11 @@ class Place {
     this.internationalPhoneNumber,
     this.websiteUri,
     this.currentOpeningHours,
+    required this.category,
   });
 
   factory Place.fromJson(Map<String, dynamic> json) {
+    final types = _extractTypes(json['types']);
     return Place(
       id: json['id'] ?? '',
       name: _extractDisplayName(json['displayName']) ?? json['name'] ?? '',
@@ -38,7 +42,7 @@ class Place {
       location: PlaceLocation.fromJson(json['location'] ?? {}),
       rating: json['rating']?.toDouble(),
       priceLevel: _parsePriceLevel(json['priceLevel']),
-      types: _extractTypes(json['types']),
+      types: types,
       photos:
           (json['photos'] as List?)
               ?.map((photo) => PlacePhoto.fromJson(photo))
@@ -47,6 +51,7 @@ class Place {
       internationalPhoneNumber: json['internationalPhoneNumber'],
       websiteUri: json['websiteUri'],
       currentOpeningHours: json['currentOpeningHours']?['openNow'],
+      category: PlaceCategory.fromPlaceTypes(types),
     );
   }
 
@@ -113,6 +118,7 @@ class Place {
       'internationalPhoneNumber': internationalPhoneNumber,
       'websiteUri': websiteUri,
       'currentOpeningHours': currentOpeningHours,
+      'category': category.toApiString(),
     };
   }
 

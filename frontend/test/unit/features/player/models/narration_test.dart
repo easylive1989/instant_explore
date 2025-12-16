@@ -1,7 +1,8 @@
 import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 import 'package:context_app/features/narration/models/narration.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/models/playback_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,6 +17,7 @@ void main() {
         location: PlaceLocation(latitude: 25.0330, longitude: 121.5654),
         types: const ['tourist_attraction'],
         photos: const [],
+        category: PlaceCategory.historicalCultural,
       );
     }
 
@@ -30,12 +32,12 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: place,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         );
 
         expect(narration.id, 'test-id');
         expect(narration.place, place);
-        expect(narration.style, NarrationStyle.brief);
+        expect(narration.aspect, NarrationAspect.historicalBackground);
         expect(narration.state, PlaybackState.loading);
         expect(narration.currentPosition, 0);
         expect(narration.currentCharPosition, 0);
@@ -48,7 +50,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         );
 
         final content = createTestContent();
@@ -65,7 +67,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent());
 
         final playingNarration = narration.play();
@@ -80,7 +82,7 @@ void main() {
             Narration.create(
                   id: 'test-id',
                   place: createTestPlace(),
-                  style: NarrationStyle.brief,
+                  aspect: NarrationAspect.historicalBackground,
                 )
                 .ready(content)
                 .play()
@@ -104,7 +106,7 @@ void main() {
             Narration.create(
                   id: 'test-id',
                   place: createTestPlace(),
-                  style: NarrationStyle.brief,
+                  aspect: NarrationAspect.historicalBackground,
                 )
                 .ready(content)
                 .play()
@@ -128,7 +130,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent()).play();
 
         final updated = narration.updateCharPosition(10);
@@ -141,7 +143,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent());
 
         expect(narration.state, PlaybackState.ready);
@@ -156,7 +158,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent()).play().pause();
 
         expect(narration.state, PlaybackState.paused);
@@ -170,7 +172,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent()).copyWith(state: PlaybackState.completed);
 
         final updated = narration.updateCharPosition(10);
@@ -184,7 +186,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         );
 
         expect(narration.getCurrentSegmentIndex(), isNull);
@@ -194,7 +196,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         );
 
         expect(narration.state, PlaybackState.loading);
@@ -205,7 +207,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent()).play();
 
         // 第一句："第一句。" (字符 0-3)
@@ -236,7 +238,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent());
 
         final updated = narration.copyWith(currentCharPosition: 42);
@@ -244,14 +246,14 @@ void main() {
         expect(updated.currentCharPosition, 42);
         expect(updated.id, narration.id);
         expect(updated.place, narration.place);
-        expect(updated.style, narration.style);
+        expect(updated.aspect, narration.aspect);
       });
 
       test('should preserve currentCharPosition when not specified', () {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent()).play().updateCharPosition(25);
 
         final updated = narration.copyWith(currentPosition: 50);
@@ -271,13 +273,13 @@ void main() {
           final narration1 = Narration.create(
             id: 'test-id',
             place: place,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
           ).ready(content).play().updateCharPosition(10);
 
           final narration2 = Narration.create(
             id: 'test-id',
             place: place,
-            style: NarrationStyle.brief,
+            aspect: NarrationAspect.historicalBackground,
           ).ready(content).play().updateCharPosition(10);
 
           expect(narration1, equals(narration2));
@@ -292,13 +294,13 @@ void main() {
         final narration1 = Narration.create(
           id: 'test-id',
           place: place,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(content).play().updateCharPosition(10);
 
         final narration2 = Narration.create(
           id: 'test-id',
           place: place,
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(content).play().updateCharPosition(20);
 
         expect(narration1, isNot(equals(narration2)));
@@ -310,7 +312,7 @@ void main() {
         final narration = Narration.create(
           id: 'test-id',
           place: createTestPlace(),
-          style: NarrationStyle.brief,
+          aspect: NarrationAspect.historicalBackground,
         ).ready(createTestContent());
 
         // Test all non-playing states

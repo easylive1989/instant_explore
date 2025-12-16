@@ -6,7 +6,7 @@ import 'package:context_app/features/narration/application/narration_generation_
 import 'package:context_app/features/narration/models/narration.dart';
 import 'package:context_app/features/narration/models/narration_content.dart';
 import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/application/start_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/application/save_narration_to_journey_use_case.dart';
@@ -39,11 +39,11 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 初始化並開始生成導覽
   ///
   /// [place] 地點資訊
-  /// [style] 導覽風格
+  /// [aspect] 導覽介紹面向
   /// [language] 語言代碼（預設為 'zh-TW'）
   Future<void> initialize(
     Place place,
-    NarrationStyle style, {
+    NarrationAspect aspect, {
     String language = 'zh-TW',
   }) async {
     // 設定為載入中狀態
@@ -53,7 +53,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       // 使用 StartNarrationUseCase 生成導覽
       final narration = await _startNarrationUseCase.execute(
         place: place,
-        style: style,
+        aspect: aspect,
         language: language,
       );
 
@@ -69,7 +69,7 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 使用現有內容初始化（用於回放已儲存的導覽）
   Future<void> initializeWithContent(
     Place place,
-    NarrationStyle style,
+    NarrationAspect aspect,
     String contentText, {
     String language = 'zh-TW',
   }) async {
@@ -81,7 +81,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       final narration = Narration.create(
         id: uuid.v4(),
         place: place,
-        style: style,
+        aspect: aspect,
       );
 
       final content = NarrationContent.fromText(

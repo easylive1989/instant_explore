@@ -1,19 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/core/services/gemini_service.dart';
 import 'package:context_app/core/services/tts_service.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 import 'package:context_app/features/narration/application/start_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/player_controller.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/application/save_narration_to_journey_use_case.dart';
 
-/// 導覽風格選擇 Provider
+/// 導覽介紹面向選擇 Provider
 ///
-/// 管理用戶選擇的導覽風格
-/// 預設為深度版（deepDive）
+/// 管理用戶選擇的導覽介紹面向
+/// 預設為歷史背景（historicalBackground）
 /// 使用 autoDispose 確保離開頁面時自動重置
-final narrationStyleProvider = StateProvider.autoDispose<NarrationStyle>((ref) {
-  return NarrationStyle.deepDive;
+final narrationAspectProvider = StateProvider.autoDispose<NarrationAspect>((
+  ref,
+) {
+  return NarrationAspect.historicalBackground;
 });
 
 /// TtsService Provider

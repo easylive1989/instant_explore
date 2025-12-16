@@ -1,4 +1,4 @@
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 
 class JourneyEntry {
   final String id;
@@ -8,7 +8,7 @@ class JourneyEntry {
   final String placeAddress;
   final String? placeImageUrl;
   final String narrationText;
-  final NarrationStyle narrationStyle;
+  final NarrationAspect narrationAspect;
   final DateTime createdAt;
 
   const JourneyEntry({
@@ -19,7 +19,7 @@ class JourneyEntry {
     required this.placeAddress,
     this.placeImageUrl,
     required this.narrationText,
-    required this.narrationStyle,
+    required this.narrationAspect,
     required this.createdAt,
   });
 
@@ -32,10 +32,9 @@ class JourneyEntry {
       placeAddress: json['place_address'] as String,
       placeImageUrl: json['place_image_url'] as String?,
       narrationText: json['narration_text'] as String,
-      narrationStyle: NarrationStyle.values.firstWhere(
-        (e) => e.name == json['narration_style'],
-        orElse: () => NarrationStyle.brief,
-      ),
+      narrationAspect:
+          NarrationAspect.fromString(json['narration_style'] as String) ??
+          NarrationAspect.historicalBackground,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -49,7 +48,7 @@ class JourneyEntry {
       'place_address': placeAddress,
       'place_image_url': placeImageUrl,
       'narration_text': narrationText,
-      'narration_style': narrationStyle.name,
+      'narration_style': narrationAspect.toApiString(),
       'created_at': createdAt.toIso8601String(),
     };
   }

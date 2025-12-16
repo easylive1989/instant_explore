@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:context_app/features/journey/models/journey_entry.dart';
-import 'package:context_app/features/narration/models/narration_style.dart';
+import 'package:context_app/features/narration/models/narration_aspect.dart';
 
 void main() {
   group('PassportEntry', () {
@@ -13,7 +13,7 @@ void main() {
       placeAddress: '123 Test St',
       placeImageUrl: 'http://example.com/image.jpg',
       narrationText: 'This is a test narration.',
-      narrationStyle: NarrationStyle.brief,
+      narrationAspect: NarrationAspect.historicalBackground,
       createdAt: testDate,
     );
 
@@ -25,7 +25,7 @@ void main() {
       'place_address': '123 Test St',
       'place_image_url': 'http://example.com/image.jpg',
       'narration_text': 'This is a test narration.',
-      'narration_style': 'brief',
+      'narration_style': 'historical_background',
       'created_at': '2023-10-27T10:00:00.000Z',
     };
 
@@ -39,7 +39,7 @@ void main() {
       expect(result.placeAddress, entry.placeAddress);
       expect(result.placeImageUrl, entry.placeImageUrl);
       expect(result.narrationText, entry.narrationText);
-      expect(result.narrationStyle, entry.narrationStyle);
+      expect(result.narrationAspect, entry.narrationAspect);
       expect(result.createdAt, entry.createdAt);
     });
 
@@ -48,16 +48,16 @@ void main() {
       expect(result, json);
     });
 
-    test('fromJson handles deep_dive style correctly', () {
-      final deepDiveJson = {...json, 'narration_style': 'deepDive'};
-      final result = JourneyEntry.fromJson(deepDiveJson);
-      expect(result.narrationStyle, NarrationStyle.deepDive);
+    test('fromJson handles architecture aspect correctly', () {
+      final architectureJson = {...json, 'narration_style': 'architecture'};
+      final result = JourneyEntry.fromJson(architectureJson);
+      expect(result.narrationAspect, NarrationAspect.architecture);
     });
 
-    test('fromJson defaults to brief on unknown style', () {
+    test('fromJson defaults to historicalBackground on unknown aspect', () {
       final unknownJson = {...json, 'narration_style': 'unknown'};
       final result = JourneyEntry.fromJson(unknownJson);
-      expect(result.narrationStyle, NarrationStyle.brief);
+      expect(result.narrationAspect, NarrationAspect.historicalBackground);
     });
   });
 }

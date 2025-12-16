@@ -7,6 +7,7 @@ import 'package:context_app/core/config/app_colors.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/models/journey_entry.dart';
 import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/models/place_category.dart';
 
 class TimelineEntry extends ConsumerStatefulWidget {
   final JourneyEntry entry;
@@ -149,13 +150,14 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               ),
                               types: [],
                               photos: [],
+                              category: PlaceCategory.fromPlaceTypes([]),
                             );
 
                             context.pushNamed(
                               'player',
                               extra: {
                                 'place': place,
-                                'narrationStyle': widget.entry.narrationStyle,
+                                'narrationAspect': widget.entry.narrationAspect,
                                 'initialContent': widget.entry.narrationText,
                                 'enableSave': false,
                               },
@@ -258,7 +260,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              widget.entry.narrationStyle.name,
+                              widget.entry.narrationAspect.name,
                               style: const TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 12,
