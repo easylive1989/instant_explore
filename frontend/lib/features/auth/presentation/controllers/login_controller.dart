@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:context_app/features/auth/application/login_with_email_use_case.dart';
-import 'package:context_app/features/auth/application/login_with_google_use_case.dart';
+import 'package:context_app/features/auth/domain/use_cases/login_with_email_use_case.dart';
+import 'package:context_app/features/auth/domain/use_cases/login_with_google_use_case.dart';
 
 class LoginController extends StateNotifier<AsyncValue<void>> {
   final LoginWithEmailUseCase _loginWithEmailUseCase;

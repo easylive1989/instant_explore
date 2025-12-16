@@ -1,6 +1,6 @@
-import 'package:context_app/features/narration/models/narration.dart';
-import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/playback_state.dart';
+import 'package:context_app/features/narration/domain/models/narration.dart';
+import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/domain/models/playback_state.dart';
 
 /// 播放器狀態
 ///

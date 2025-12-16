@@ -1,0 +1,79 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
+import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
+import 'package:context_app/features/journey/domain/models/journey_entry.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/narration/domain/models/narration.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/playback_state.dart';
+import 'package:context_app/core/config/api_config.dart';
+
+class MockPassportRepository extends Mock implements JourneyRepository {}
+
+class MockApiConfig extends Mock implements ApiConfig {}
+
+class FakePassportEntry extends Fake implements JourneyEntry {}
+
+void main() {
+  late MockPassportRepository mockRepository;
+  late MockApiConfig mockApiConfig;
+  late SaveNarrationToJourneyUseCase useCase;
+
+  setUpAll(() {
+    registerFallbackValue(FakePassportEntry());
+  });
+
+  setUp(() {
+    mockRepository = MockPassportRepository();
+    mockApiConfig = MockApiConfig();
+    useCase = SaveNarrationToJourneyUseCase(mockRepository, mockApiConfig);
+
+    // Default mock behavior
+    when(() => mockApiConfig.isPlacesConfigured).thenReturn(false);
+  });
+
+  final place = Place(
+    id: 'place-1',
+    name: 'Test Place',
+    formattedAddress: 'Address',
+    location: PlaceLocation(latitude: 0, longitude: 0),
+    types: [],
+    photos: [],
+    category: PlaceCategory.modernUrban,
+  );
+
+  test('execute saves entry successfully', () async {
+    final narration = Narration(
+      id: '1',
+      place: place,
+      aspect: NarrationAspect.historicalBackground,
+      state: PlaybackState.ready,
+      content: NarrationContent.fromText('Narration text'),
+    );
+
+    when(() => mockRepository.addJourneyEntry(any())).thenAnswer((_) async {});
+
+    await useCase.execute(userId: 'user-1', narration: narration);
+
+    verify(() => mockRepository.addJourneyEntry(any())).called(1);
+  });
+
+  test('execute throws exception if narration content is null', () async {
+    final narration = Narration(
+      id: '1',
+      place: place,
+      aspect: NarrationAspect.historicalBackground,
+      state: PlaybackState.loading,
+      content: null,
+    );
+
+    expect(
+      () => useCase.execute(userId: 'user-1', narration: narration),
+      throwsException,
+    );
+    verifyNever(() => mockRepository.addJourneyEntry(any()));
+  });
+}

@@ -1,4 +1,4 @@
-import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
 
 abstract class PlacesRepository {
   Future<List<Place>> getNearbyPlaces(

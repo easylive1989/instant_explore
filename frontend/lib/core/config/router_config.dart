@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/features/main_screen.dart';
-import 'package:context_app/features/explore/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/screens/select_narration_aspect_screen.dart';
 import 'package:context_app/features/narration/screens/narration_screen.dart';
-import 'package:context_app/features/narration/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/journey/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
-import 'package:context_app/features/auth/services/auth_service.dart';
+import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:context_app/core/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider

@@ -1,5 +1,5 @@
-import 'package:context_app/features/journey/domain/journey_repository.dart';
-import 'package:context_app/features/journey/models/journey_entry.dart';
+import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
+import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

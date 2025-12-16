@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:context_app/features/auth/application/register_with_email_use_case.dart';
-import 'package:context_app/features/auth/services/auth_service.dart';
+import 'package:context_app/features/auth/domain/use_cases/register_with_email_use_case.dart';
+import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockAuthService extends Mock implements AuthService {}

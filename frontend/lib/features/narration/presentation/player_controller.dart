@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/core/services/tts_service.dart';
-import 'package:context_app/features/explore/models/place.dart';
-import 'package:context_app/features/narration/application/narration_generation_exception.dart';
-import 'package:context_app/features/narration/models/narration.dart';
-import 'package:context_app/features/narration/models/narration_content.dart';
-import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/narration_aspect.dart';
-import 'package:context_app/features/narration/application/start_narration_use_case.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
-import 'package:context_app/features/journey/application/save_narration_to_journey_use_case.dart';
+import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 import 'package:uuid/uuid.dart';
 
 /// 播放器控制器

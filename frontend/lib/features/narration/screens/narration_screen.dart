@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:context_app/core/widgets/ai_over_limit_dialog.dart';
-import 'package:context_app/features/explore/models/place.dart';
-import 'package:context_app/features/narration/models/narration_error_type.dart';
-import 'package:context_app/features/narration/models/narration_aspect.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/providers.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
