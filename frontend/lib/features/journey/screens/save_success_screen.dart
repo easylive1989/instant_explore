@@ -43,7 +43,7 @@ class SaveSuccessScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () => context.go('/'),
+            onPressed: () => context.pop(),
             icon: const Icon(Icons.close, color: textSecondaryColor, size: 24),
           ),
           const SizedBox(width: 8),
@@ -229,7 +229,7 @@ class SaveSuccessScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: onContinueTour ?? () => context.go('/'),
+                    onPressed: onContinueTour ?? () => context.pop(),
                     style: TextButton.styleFrom(
                       backgroundColor: const Color(0xFF1E293B), // slate-800
                       foregroundColor: const Color(0xFFE2E8F0), // slate-200

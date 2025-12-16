@@ -32,6 +32,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
 class _NarrationScreenState extends ConsumerState<NarrationScreen> {
   final ScrollController _scrollController = ScrollController();
   int? _lastSegmentIndex;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -259,9 +260,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
       // 取得錯誤訊息
       final errorMessage =
-          errorType?.message ??
-          playerState.errorMessage ??
-          'player_screen.error'.tr();
+          playerState.errorMessage ?? 'player_screen.error'.tr();
 
       return Center(
         child: Padding(
@@ -335,7 +334,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           physics: const ClampingScrollPhysics(),
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          itemCount: content.segments.length + 2, // +2 for top/bottom spacing
+          itemCount: content.segments.length + 2,
+          // +2 for top/bottom spacing
           itemBuilder: (context, index) {
             // 頂部空白
             if (index == 0) {
@@ -585,7 +585,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                       onTap:
                           (playerState.isLoading ||
                               playerState.hasError ||
-                              playerState.narration == null)
+                              playerState.narration == null ||
+                              _isSaving)
                           ? null
                           : () async {
                               final userId =
@@ -601,8 +602,18 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                                 return;
                               }
 
+                              setState(() {
+                                _isSaving = true;
+                              });
+
                               try {
                                 await playerController.saveToPassport(userId);
+                                if (context.mounted) {
+                                  context.pushNamed(
+                                    'passport_success',
+                                    extra: widget.place,
+                                  );
+                                }
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -613,6 +624,10 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                                     ),
                                   );
                                 }
+                              } finally {
+                                setState(() {
+                                  _isSaving = false;
+                                });
                               }
                             },
                       borderRadius: BorderRadius.circular(12),
@@ -620,7 +635,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                         opacity:
                             (playerState.isLoading ||
                                 playerState.hasError ||
-                                playerState.narration == null)
+                                playerState.narration == null ||
+                                _isSaving)
                             ? 0.5
                             : 1.0,
                         child: Container(
@@ -635,30 +651,43 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: AppColors.amber.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Icon(
-                                  Icons.bookmark_add,
-                                  color: AppColors.amber,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'player_screen.save_to_passport'.tr(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                            children: _isSaving
+                                ? const [
+                                    SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ]
+                                : [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.amber.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                        Icons.bookmark_add,
+                                        color: AppColors.amber,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'player_screen.save_to_passport'.tr(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                           ),
                         ),
                       ),

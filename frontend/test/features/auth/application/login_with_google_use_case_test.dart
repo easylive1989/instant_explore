@@ -15,24 +15,34 @@ void main() {
     useCase = LoginWithGoogleUseCase(mockAuthService);
   });
 
-  test('execute calls signInWithGoogle and returns AuthResponse on success', () async {
-    final mockResponse = AuthResponse(session: null, user: null);
-    when(() => mockAuthService.signInWithGoogle()).thenAnswer((_) async => mockResponse);
+  test(
+    'execute calls signInWithGoogle and returns AuthResponse on success',
+    () async {
+      final mockResponse = AuthResponse(session: null, user: null);
+      when(
+        () => mockAuthService.signInWithGoogle(),
+      ).thenAnswer((_) async => mockResponse);
 
-    final result = await useCase.execute();
+      final result = await useCase.execute();
 
-    expect(result, mockResponse);
-    verify(() => mockAuthService.signInWithGoogle()).called(1);
-  });
+      expect(result, mockResponse);
+      verify(() => mockAuthService.signInWithGoogle()).called(1);
+    },
+  );
 
-  test('execute calls signInWithGoogle and returns null on cancellation', () async {
-    when(() => mockAuthService.signInWithGoogle()).thenAnswer((_) async => null);
+  test(
+    'execute calls signInWithGoogle and returns null on cancellation',
+    () async {
+      when(
+        () => mockAuthService.signInWithGoogle(),
+      ).thenAnswer((_) async => null);
 
-    final result = await useCase.execute();
+      final result = await useCase.execute();
 
-    expect(result, isNull);
-    verify(() => mockAuthService.signInWithGoogle()).called(1);
-  });
+      expect(result, isNull);
+      verify(() => mockAuthService.signInWithGoogle()).called(1);
+    },
+  );
 
   test('execute rethrows exception on failure', () async {
     final exception = Exception('Google sign in failed');

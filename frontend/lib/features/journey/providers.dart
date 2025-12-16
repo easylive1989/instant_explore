@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 export 'package:context_app/features/journey/data/supabase_journey_repository.dart';
 export 'package:context_app/features/journey/application/get_my_journey_use_case.dart';
 export 'package:context_app/features/journey/application/save_narration_to_journey_use_case.dart';
+export 'package:context_app/features/journey/application/delete_journey_entry_use_case.dart';
 
 final myPassportProvider = FutureProvider.autoDispose<List<JourneyEntry>>((
   ref,

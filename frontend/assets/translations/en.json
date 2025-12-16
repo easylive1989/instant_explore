@@ -45,7 +45,11 @@
     "item_saved": "Item Saved!",
     "added_to_passport": "has been added to your Journey of Exploration.",
     "view_button": "View Journey of Exploration",
-    "continue_tour": "Continue Tour"
+    "continue_tour": "Continue Tour",
+    "delete_title": "Delete Entry",
+    "delete_message": "Are you sure you want to delete this entry?",
+    "delete_confirm": "Delete",
+    "cancel": "Cancel"
   },
   "explore": {
     "title": "Explore",
