@@ -3,14 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
-import 'package:context_app/features/narration/domain/models/narration.dart';
-import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
+import 'package:context_app/features/narration/domain/use_cases/replay_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
-import 'package:uuid/uuid.dart';
 
 /// 播放器控制器
 ///
@@ -18,6 +16,7 @@ import 'package:uuid/uuid.dart';
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<NarrationState> {
   final StartNarrationUseCase _startNarrationUseCase;
+  final ReplayNarrationUseCase _replayNarrationUseCase;
   final SaveNarrationToJourneyUseCase _saveNarrationToPassportUseCase;
   final TtsService _ttsService;
 
@@ -30,6 +29,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   PlayerController(
     this._startNarrationUseCase,
+    this._replayNarrationUseCase,
     this._saveNarrationToPassportUseCase,
     this._ttsService,
   ) : super(NarrationState.initial()) {
@@ -76,26 +76,16 @@ class PlayerController extends StateNotifier<NarrationState> {
     state = state.loading();
 
     try {
-      // 模擬生成過程，實際上直接構建物件
-      const uuid = Uuid();
-      final narration = Narration.create(
-        id: uuid.v4(),
+      final narration = await _replayNarrationUseCase.execute(
         place: place,
         aspect: aspect,
-      );
-
-      final content = NarrationContent.fromText(
-        contentText,
+        contentText: contentText,
         language: language,
       );
 
-      // 初始化 TTS
-      await _ttsService.initialize();
-      await _ttsService.setLanguage(language);
-
-      final readyNarration = narration.ready(content);
-
-      state = state.ready(readyNarration);
+      state = state.ready(narration);
+    } on NarrationGenerationException catch (e) {
+      state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
       state = state.error(NarrationErrorType.unknown, message: e.toString());
     }
