@@ -36,16 +36,14 @@ final ttsServiceProvider = Provider<TtsService>((ref) {
 /// 提供開始導覽的用例
 final startNarrationUseCaseProvider = Provider<StartNarrationUseCase>((ref) {
   final geminiService = ref.watch(geminiServiceProvider);
-  final ttsService = ref.watch(ttsServiceProvider);
-  return StartNarrationUseCase(geminiService, ttsService);
+  return StartNarrationUseCase(geminiService);
 });
 
 /// ReplayNarrationUseCase Provider
 ///
 /// 提供重播導覽的用例
 final replayNarrationUseCaseProvider = Provider<ReplayNarrationUseCase>((ref) {
-  final ttsService = ref.watch(ttsServiceProvider);
-  return ReplayNarrationUseCase(ttsService);
+  return ReplayNarrationUseCase();
 });
 
 /// PlayerController Provider

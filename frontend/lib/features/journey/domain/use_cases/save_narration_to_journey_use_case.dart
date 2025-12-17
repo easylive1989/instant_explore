@@ -18,10 +18,6 @@ class SaveNarrationToJourneyUseCase {
     required String userId,
     required Narration narration,
   }) async {
-    if (narration.content == null) {
-      throw Exception('Cannot save narration without content');
-    }
-
     String? imageUrl;
     if (narration.place.primaryPhoto != null && _apiConfig.isPlacesConfigured) {
       imageUrl = narration.place.primaryPhoto!.getPhotoUrl(
@@ -37,7 +33,7 @@ class SaveNarrationToJourneyUseCase {
       placeName: narration.place.name,
       placeAddress: narration.place.formattedAddress,
       placeImageUrl: imageUrl,
-      narrationText: narration.content!.text,
+      narrationText: narration.content.text,
       narrationAspect: narration.aspect,
       createdAt: DateTime.now(),
     );

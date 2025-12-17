@@ -8,7 +8,6 @@ import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/models/playback_state.dart';
 import 'package:context_app/core/config/api_config.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
@@ -50,7 +49,6 @@ void main() {
       id: '1',
       place: place,
       aspect: NarrationAspect.historicalBackground,
-      state: PlaybackState.ready,
       content: NarrationContent.fromText('Narration text'),
     );
 
@@ -61,19 +59,25 @@ void main() {
     verify(() => mockRepository.addJourneyEntry(any())).called(1);
   });
 
-  test('execute throws exception if narration content is null', () async {
+  test('execute creates journey entry with correct data', () async {
     final narration = Narration(
       id: '1',
       place: place,
-      aspect: NarrationAspect.historicalBackground,
-      state: PlaybackState.loading,
-      content: null,
+      aspect: NarrationAspect.architecture,
+      content: NarrationContent.fromText('Architecture narration'),
     );
 
-    expect(
-      () => useCase.execute(userId: 'user-1', narration: narration),
-      throwsException,
-    );
-    verifyNever(() => mockRepository.addJourneyEntry(any()));
+    JourneyEntry? capturedEntry;
+    when(() => mockRepository.addJourneyEntry(any())).thenAnswer((invocation) async {
+      capturedEntry = invocation.positionalArguments[0] as JourneyEntry;
+    });
+
+    await useCase.execute(userId: 'user-1', narration: narration);
+
+    expect(capturedEntry, isNotNull);
+    expect(capturedEntry!.userId, equals('user-1'));
+    expect(capturedEntry!.placeId, equals('place-1'));
+    expect(capturedEntry!.placeName, equals('Test Place'));
+    expect(capturedEntry!.narrationText, equals('Architecture narration'));
   });
 }

@@ -2,28 +2,20 @@ import 'package:context_app/features/narration/domain/use_cases/narration_genera
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/core/services/gemini_service.dart';
-import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/models/playback_state.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
 
 // Mock classes
 class MockGeminiService extends Mock implements GeminiService {}
 
-class MockTtsService extends Mock implements TtsService {}
-
 // Fake class for Place (required for mocktail any() matcher)
 class FakePlace extends Fake implements Place {}
-
-// Fake class for NarrationAspect (required for mocktail any() matcher)
-class FakeNarrationAspect extends Fake {}
 
 void main() {
   late StartNarrationUseCase useCase;
   late MockGeminiService mockGeminiService;
-  late MockTtsService mockTtsService;
 
   setUpAll(() {
     // Register fallback values for mocktail
@@ -33,8 +25,7 @@ void main() {
 
   setUp(() {
     mockGeminiService = MockGeminiService();
-    mockTtsService = MockTtsService();
-    useCase = StartNarrationUseCase(mockGeminiService, mockTtsService);
+    useCase = StartNarrationUseCase(mockGeminiService);
   });
 
   group('StartNarrationUseCase', () {
@@ -53,7 +44,7 @@ void main() {
 許多遊客來到這裡參觀。這是一個著名的景點。
 ''';
 
-    test('should successfully generate narration with brief style', () async {
+    test('should successfully generate narration', () async {
       // Arrange
       when(
         () => mockGeminiService.generateNarration(
@@ -62,11 +53,6 @@ void main() {
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => testGeneratedText);
-
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(
-        () => mockTtsService.setLanguage('zh-TW'),
-      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase.execute(
@@ -78,11 +64,9 @@ void main() {
       // Assert
       expect(result.place, equals(testPlace));
       expect(result.aspect, equals(NarrationAspect.historicalBackground));
-      expect(result.state, equals(PlaybackState.ready));
       expect(result.content, isNotNull);
-      expect(result.content!.text, equals(testGeneratedText));
-      expect(result.content!.segments.length, greaterThan(0));
-      expect(result.duration, greaterThan(0));
+      expect(result.content.text, equals(testGeneratedText));
+      expect(result.content.segments.length, greaterThan(0));
 
       // Verify method calls
       verify(
@@ -92,8 +76,6 @@ void main() {
           language: 'zh-TW',
         ),
       ).called(1);
-      verify(() => mockTtsService.initialize()).called(1);
-      verify(() => mockTtsService.setLanguage('zh-TW')).called(1);
     });
 
     test(
@@ -108,11 +90,6 @@ void main() {
           ),
         ).thenAnswer((_) async => testGeneratedText);
 
-        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-        when(
-          () => mockTtsService.setLanguage('en-US'),
-        ).thenAnswer((_) async => {});
-
         // Act
         final result = await useCase.execute(
           place: testPlace,
@@ -123,7 +100,6 @@ void main() {
         // Assert
         expect(result.place, equals(testPlace));
         expect(result.aspect, equals(NarrationAspect.architecture));
-        expect(result.state, equals(PlaybackState.ready));
         expect(result.content, isNotNull);
 
         verify(
@@ -133,7 +109,6 @@ void main() {
             language: 'en-US',
           ),
         ).called(1);
-        verify(() => mockTtsService.setLanguage('en-US')).called(1);
       },
     );
 
@@ -148,8 +123,6 @@ void main() {
             language: 'zh-TW',
           ),
         ).thenAnswer((_) async => '');
-
-        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
 
         // Act & Assert
         expect(
@@ -175,36 +148,6 @@ void main() {
           ),
         ).thenThrow(Exception('Network error'));
 
-        when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-
-        // Act & Assert
-        expect(
-          () => useCase.execute(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-          throwsA(isA<NarrationGenerationException>()),
-        );
-      },
-    );
-
-    test(
-      'should throw NarrationGenerationException when TtsService fails',
-      () async {
-        // Arrange
-        when(
-          () => mockGeminiService.generateNarration(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-        ).thenAnswer((_) async => testGeneratedText);
-
-        when(
-          () => mockTtsService.initialize(),
-        ).thenThrow(Exception('TTS initialization failed'));
-
         // Act & Assert
         expect(
           () => useCase.execute(
@@ -227,11 +170,6 @@ void main() {
         ),
       ).thenAnswer((_) async => testGeneratedText);
 
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(
-        () => mockTtsService.setLanguage('zh-TW'),
-      ).thenAnswer((_) async => {});
-
       // Act
       await useCase.execute(
         place: testPlace,
@@ -240,7 +178,13 @@ void main() {
       );
 
       // Assert
-      verify(() => mockTtsService.setLanguage('zh-TW')).called(1);
+      verify(
+        () => mockGeminiService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: 'zh-TW',
+        ),
+      ).called(1);
     });
 
     test('should create unique narration ID for each execution', () async {
@@ -252,9 +196,6 @@ void main() {
           language: any(named: 'language'),
         ),
       ).thenAnswer((_) async => testGeneratedText);
-
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage(any())).thenAnswer((_) async => {});
 
       // Act
       final result1 = await useCase.execute(
@@ -287,11 +228,6 @@ void main() {
         ),
       ).thenAnswer((_) async => textWithMultipleSegments);
 
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(
-        () => mockTtsService.setLanguage('zh-TW'),
-      ).thenAnswer((_) async => {});
-
       // Act
       final result = await useCase.execute(
         place: testPlace,
@@ -300,11 +236,11 @@ void main() {
       );
 
       // Assert
-      expect(result.content!.segments.length, equals(4));
-      expect(result.content!.segments[0], equals('第一句話。'));
-      expect(result.content!.segments[1], equals('第二句話！'));
-      expect(result.content!.segments[2], equals('第三句話？'));
-      expect(result.content!.segments[3], equals('第四句話。'));
+      expect(result.content.segments.length, equals(4));
+      expect(result.content.segments[0], equals('第一句話。'));
+      expect(result.content.segments[1], equals('第二句話！'));
+      expect(result.content.segments[2], equals('第三句話？'));
+      expect(result.content.segments[3], equals('第四句話。'));
     });
 
     test('should estimate duration based on text length', () async {
@@ -319,9 +255,6 @@ void main() {
           language: 'zh-TW',
         ),
       ).thenAnswer((_) async => shortText);
-
-      when(() => mockTtsService.initialize()).thenAnswer((_) async => {});
-      when(() => mockTtsService.setLanguage(any())).thenAnswer((_) async => {});
 
       // Act
       final resultShort = await useCase.execute(
@@ -342,8 +275,11 @@ void main() {
         aspect: NarrationAspect.architecture,
       );
 
-      // Assert - longer text should have longer duration
-      expect(resultLong.duration, greaterThan(resultShort.duration));
+      // Assert - longer text should have longer estimated duration
+      expect(
+        resultLong.content.estimatedDuration,
+        greaterThan(resultShort.content.estimatedDuration),
+      );
     });
   });
 }

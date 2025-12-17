@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:context_app/core/services/gemini_service.dart';
-import 'package:context_app/core/services/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration.dart';
@@ -14,21 +13,20 @@ import 'package:uuid/uuid.dart';
 
 /// 開始導覽用例
 ///
-/// 負責生成導覽內容並初始化播放器
+/// 負責生成導覽內容
 /// 遵循 Clean Architecture Use Case 模式
 class StartNarrationUseCase {
   final GeminiService _geminiService;
-  final TtsService _ttsService;
   final _uuid = const Uuid();
 
-  StartNarrationUseCase(this._geminiService, this._ttsService);
+  StartNarrationUseCase(this._geminiService);
 
-  /// 執行用例：生成並準備導覽
+  /// 執行用例：生成導覽內容
   ///
   /// [place] 地點資訊
   /// [aspect] 導覽介紹面向
   /// [language] 語言代碼（預設為 'zh-TW'）
-  /// 返回準備就緒的 Narration 聚合
+  /// 返回完整的 Narration 聚合
   /// 拋出異常如果生成失敗
   Future<Narration> execute({
     required Place place,
@@ -36,14 +34,7 @@ class StartNarrationUseCase {
     String language = 'zh-TW',
   }) async {
     try {
-      // 1. 建立初始的 Narration 聚合（loading 狀態）
-      final narration = Narration.create(
-        id: _uuid.v4(),
-        place: place,
-        aspect: aspect,
-      );
-
-      // 2. 使用 GeminiService 生成導覽內容
+      // 1. 使用 GeminiService 生成導覽內容
       final generatedText = await _geminiService.generateNarration(
         place: place,
         aspect: aspect,
@@ -56,22 +47,19 @@ class StartNarrationUseCase {
         );
       }
 
-      // 3. 建立 NarrationContent 值對象
+      // 2. 建立 NarrationContent 值對象
       final content = NarrationContent.fromText(
         generatedText,
         language: language,
       );
 
-      // 4. 初始化 TtsService
-      await _ttsService.initialize();
-
-      // 設定 TTS 語言
-      await _ttsService.setLanguage(language);
-
-      // 5. 更新 Narration 為 ready 狀態
-      final readyNarration = narration.ready(content);
-
-      return readyNarration;
+      // 3. 建立並返回 Narration 聚合
+      return Narration(
+        id: _uuid.v4(),
+        place: place,
+        aspect: aspect,
+        content: content,
+      );
     } on NarrationGenerationException {
       // 已經是我們的異常，直接重新拋出
       rethrow;

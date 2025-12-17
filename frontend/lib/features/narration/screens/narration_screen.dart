@@ -320,11 +320,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     // 顯示導覽文本
     final narration = playerState.narration;
-    if (narration?.content == null) {
+    if (narration == null) {
       return const SizedBox.shrink();
     }
 
-    final content = narration!.content!;
+    final content = narration.content;
     final currentSegmentIndex = playerState.currentSegmentIndex;
 
     return Stack(
@@ -518,7 +518,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _formatDuration(playerState.currentPosition),
+                      _formatDuration(playerState.currentPositionSeconds),
                       style: const TextStyle(
                         color: AppColors.textSecondaryDark,
                         fontSize: 12,
@@ -526,7 +526,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                       ),
                     ),
                     Text(
-                      _formatDuration(playerState.duration),
+                      _formatDuration(playerState.durationSeconds),
                       style: const TextStyle(
                         color: AppColors.textSecondaryDark,
                         fontSize: 12,
