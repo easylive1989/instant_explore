@@ -17,7 +17,7 @@ import 'package:context_app/features/journey/domain/use_cases/save_narration_to_
 class PlayerController extends StateNotifier<NarrationState> {
   final StartNarrationUseCase _startNarrationUseCase;
   final ReplayNarrationUseCase _replayNarrationUseCase;
-  final SaveNarrationToJourneyUseCase _saveNarrationToPassportUseCase;
+  final SaveNarrationToJourneyUseCase _saveNarrationToJourneyUseCase;
   final TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;
@@ -30,7 +30,7 @@ class PlayerController extends StateNotifier<NarrationState> {
   PlayerController(
     this._startNarrationUseCase,
     this._replayNarrationUseCase,
-    this._saveNarrationToPassportUseCase,
+    this._saveNarrationToJourneyUseCase,
     this._ttsService,
   ) : super(NarrationState.initial()) {
     _setupTtsListeners();
@@ -91,14 +91,14 @@ class PlayerController extends StateNotifier<NarrationState> {
     }
   }
 
-  /// 儲存導覽到護照
-  Future<void> saveToPassport(String userId) async {
+  /// 儲存導覽到歷程
+  Future<void> saveToJourney(String userId) async {
     if (state.narration == null) {
       return;
     }
 
     try {
-      await _saveNarrationToPassportUseCase.execute(
+      await _saveNarrationToJourneyUseCase.execute(
         userId: userId,
         narration: state.narration!,
       );

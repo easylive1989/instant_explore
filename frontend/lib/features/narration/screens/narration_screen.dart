@@ -618,7 +618,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                               });
 
                               try {
-                                await playerController.saveToPassport(userId);
+                                await playerController.saveToJourney(userId);
                                 if (context.mounted) {
                                   context.pushNamed(
                                     'passport_success',
