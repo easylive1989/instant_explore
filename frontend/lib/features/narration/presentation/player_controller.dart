@@ -224,38 +224,6 @@ class PlayerController extends StateNotifier<NarrationState> {
     }
   }
 
-  /// 快進 10 秒
-  void seekForward() {
-    _seekBy(10);
-  }
-
-  /// 快退 10 秒
-  void seekBackward() {
-    _seekBy(-10);
-  }
-
-  /// 快進/快退指定秒數
-  void _seekBy(int seconds) {
-    if (state.narration == null) {
-      return;
-    }
-
-    try {
-      // 更新 Narration 聚合
-      final updatedNarration = seconds > 0
-          ? state.narration!.seekForward(seconds)
-          : state.narration!.seekBackward(seconds.abs());
-
-      state = state.updateNarration(updatedNarration);
-
-      // 注意：flutter_tts 不支援精確的 seek 操作
-      // 需要重新開始播放並跳到指定位置
-      // 這是一個簡化實現，實際可能需要更複雜的邏輯
-    } catch (e) {
-      // Ignore seek errors
-    }
-  }
-
   /// 開始進度定時器
   ///
   /// 職責分離：

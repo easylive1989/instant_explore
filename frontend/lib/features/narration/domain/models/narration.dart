@@ -97,30 +97,6 @@ class Narration {
     return this;
   }
 
-  /// 快進指定秒數
-  Narration seekForward(int seconds) {
-    // 業務規則：只有在 ready、playing、paused 狀態才能快進
-    if (state == PlaybackState.ready ||
-        state == PlaybackState.playing ||
-        state == PlaybackState.paused) {
-      final newPosition = (currentPosition + seconds).clamp(0, duration);
-      return copyWith(currentPosition: newPosition);
-    }
-    return this;
-  }
-
-  /// 快退指定秒數
-  Narration seekBackward(int seconds) {
-    // 業務規則：只有在 ready、playing、paused 狀態才能快退
-    if (state == PlaybackState.ready ||
-        state == PlaybackState.playing ||
-        state == PlaybackState.paused) {
-      final newPosition = (currentPosition - seconds).clamp(0, duration);
-      return copyWith(currentPosition: newPosition);
-    }
-    return this;
-  }
-
   /// 更新播放進度
   Narration updateProgress(int position) {
     // 業務規則：只有在 playing 狀態才更新進度

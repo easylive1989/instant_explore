@@ -540,15 +540,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
                 // Controls
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.replay_10, size: 32),
-                      color: AppColors.textSecondaryDark,
-                      onPressed: playerState.isLoading || playerState.hasError
-                          ? null
-                          : () => playerController.seekBackward(),
-                    ),
                     Container(
                       height: 64,
                       width: 64,
@@ -575,13 +568,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                             ? null
                             : () => playerController.playPause(),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.forward_10, size: 32),
-                      color: AppColors.textSecondaryDark,
-                      onPressed: playerState.isLoading || playerState.hasError
-                          ? null
-                          : () => playerController.seekForward(),
                     ),
                   ],
                 ),

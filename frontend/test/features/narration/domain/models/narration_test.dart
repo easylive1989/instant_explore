@@ -137,43 +137,7 @@ void main() {
       });
     });
 
-    group('seek and progress', () {
-      test('seekForward updates position correctly', () {
-        final narration = Narration(
-          id: 'test-id',
-          place: createTestPlace(),
-          aspect: NarrationAspect.historicalBackground,
-          state: PlaybackState.playing,
-          content: createTestContent(),
-          duration: 100,
-          currentPosition: 10,
-        );
-
-        final forwarded = narration.seekForward(15);
-        expect(forwarded.currentPosition, 25);
-
-        final clamped = narration.seekForward(200);
-        expect(clamped.currentPosition, 100);
-      });
-
-      test('seekBackward updates position correctly', () {
-        final narration = Narration(
-          id: 'test-id',
-          place: createTestPlace(),
-          aspect: NarrationAspect.historicalBackground,
-          state: PlaybackState.playing,
-          content: createTestContent(),
-          duration: 100,
-          currentPosition: 50,
-        );
-
-        final backward = narration.seekBackward(15);
-        expect(backward.currentPosition, 35);
-
-        final clamped = narration.seekBackward(200);
-        expect(clamped.currentPosition, 0);
-      });
-
+    group('progress', () {
       test('updateProgress updates position and completes if needed', () {
         final narration = Narration(
           id: 'test-id',
