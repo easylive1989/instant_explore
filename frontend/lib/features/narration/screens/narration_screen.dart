@@ -477,17 +477,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
-                // Narration Aspect
-                Text(
-                  widget.narrationAspect.translationKey.tr(),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: 24),
 
                 // Progress Bar
