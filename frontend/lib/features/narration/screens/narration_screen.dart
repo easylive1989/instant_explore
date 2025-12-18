@@ -156,12 +156,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                         onPressed: () => context.go('/'),
                       ),
                       Text(
-                        'player_screen.audio_guide'.tr(),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1.2,
+                        widget.place.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       IconButton(
