@@ -132,7 +132,13 @@ class NarrationState {
   bool get hasError => playerState.hasError;
 
   /// 播放進度百分比 (0.0 - 1.0)
-  double get progress => playerState.progress;
+  /// 基於已播放的文字量計算
+  double get progress {
+    if (narration == null) return 0.0;
+    final totalChars = narration!.content.text.length;
+    if (totalChars == 0) return 0.0;
+    return (playerState.currentCharPosition / totalChars).clamp(0.0, 1.0);
+  }
 
   /// 當前播放位置（秒）
   int get currentPositionSeconds => playerState.currentPosition.inSeconds;

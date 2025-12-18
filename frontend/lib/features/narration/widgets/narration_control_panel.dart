@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:context_app/core/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/save_to_passport_button.dart';
@@ -24,13 +23,6 @@ class NarrationControlPanel extends ConsumerWidget {
     required this.backgroundColor,
     this.enableSave = true,
   });
-
-  /// 格式化時間顯示（秒 -> MM:SS）
-  String _formatDuration(int seconds) {
-    final minutes = seconds ~/ 60;
-    final secs = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,30 +75,7 @@ class NarrationControlPanel extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _formatDuration(playerState.currentPositionSeconds),
-                      style: const TextStyle(
-                        color: AppColors.textSecondaryDark,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      _formatDuration(playerState.durationSeconds),
-                      style: const TextStyle(
-                        color: AppColors.textSecondaryDark,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
 
                 // Controls
                 Row(
