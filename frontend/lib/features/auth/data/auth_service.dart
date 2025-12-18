@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/core/config/api_config.dart';
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 /// 認證服務類別
 ///
@@ -67,6 +71,76 @@ class AuthService {
 
       rethrow;
     }
+  }
+
+  /// Apple 登入
+  Future<AuthResponse?> signInWithApple() async {
+    try {
+      debugPrint('🍎 開始 Apple 登入流程...');
+
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      // 1. Request Apple ID credential
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+        // 指定 Service ID（Client ID）
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: 'com.paulchwu.instantexplore.service',
+          redirectUri: Uri.parse('${_apiConfig.supabaseUrl}/auth/v1/callback'),
+        ),
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw Exception('無法取得 Apple ID Token');
+      }
+
+      debugPrint('✅ Apple 登入成功，正在與 Supabase 整合...');
+
+      // 2. 使用 Apple ID Token 登入 Supabase
+      final AuthResponse response = await Supabase.instance.client.auth
+          .signInWithIdToken(
+            provider: OAuthProvider.apple,
+            idToken: idToken,
+            accessToken: credential.authorizationCode,
+            nonce: rawNonce,
+          );
+
+      if (response.user != null) {
+        debugPrint('✅ Supabase 認證成功');
+        debugPrint('👤 使用者: ${response.user!.email}');
+        return response;
+      } else {
+        throw Exception('Supabase 認證失敗');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ Apple 登入失敗: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  /// 產生隨機 nonce
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
+  }
+
+  /// 計算 SHA256
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   /// 登出

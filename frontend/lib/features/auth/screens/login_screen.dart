@@ -88,6 +88,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      await authService.signInWithApple();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'auth.loginFailed'.tr()}: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -312,13 +338,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Apple Sign In (Visual only)
+                  // Apple Sign In
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton.icon(
-                      onPressed:
-                          null, // Disabled as functionality not implemented
+                      onPressed: _isLoading ? null : _signInWithApple,
                       icon: const Icon(
                         Icons.apple,
                         size: 24,
@@ -335,7 +360,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.textPrimaryDark,
                         disabledBackgroundColor: AppColors.textPrimaryDark
-                            .withValues(alpha: 0.7), // Replaced withOpacity
+                            .withValues(alpha: 0.7),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
