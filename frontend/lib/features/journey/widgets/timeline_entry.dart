@@ -160,6 +160,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                                 'narrationAspect': widget.entry.narrationAspect,
                                 'initialContent': widget.entry.narrationText,
                                 'enableSave': false,
+                                'language': widget.entry.language, // 傳遞儲存的語言
                               },
                             );
                           },

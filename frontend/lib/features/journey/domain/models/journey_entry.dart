@@ -10,6 +10,7 @@ class JourneyEntry {
   final String narrationText;
   final NarrationAspect narrationAspect;
   final DateTime createdAt;
+  final String language; // 語言代碼 (例如: 'zh-TW', 'en-US')，必填
 
   const JourneyEntry({
     required this.id,
@@ -21,6 +22,7 @@ class JourneyEntry {
     required this.narrationText,
     required this.narrationAspect,
     required this.createdAt,
+    required this.language, // 必填參數
   });
 
   factory JourneyEntry.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class JourneyEntry {
           NarrationAspect.fromString(json['narration_style'] as String) ??
           NarrationAspect.historicalBackground,
       createdAt: DateTime.parse(json['created_at'] as String),
+      language: json['language'] as String,
     );
   }
 
@@ -50,6 +53,7 @@ class JourneyEntry {
       'narration_text': narrationText,
       'narration_style': narrationAspect.toApiString(),
       'created_at': createdAt.toIso8601String(),
+      'language': language,
     };
   }
 }

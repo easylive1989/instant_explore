@@ -17,6 +17,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
   final NarrationAspect narrationAspect;
   final String? initialContent;
   final bool enableSave;
+  final String? language; // 語言參數（可選）
 
   const NarrationScreen({
     super.key,
@@ -24,6 +25,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
     required this.narrationAspect,
     this.initialContent,
     this.enableSave = true,
+    this.language,
   });
 
   @override
@@ -40,8 +42,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     // 初始化播放器
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      // 使用傳入的語言（來自 JourneyEntry），若無則使用當前應用語言
       final locale =
-          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
+          widget.language ??
+          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
+          'zh-TW';
 
       if (widget.initialContent != null) {
         ref

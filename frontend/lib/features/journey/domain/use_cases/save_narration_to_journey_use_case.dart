@@ -17,6 +17,7 @@ class SaveNarrationToJourneyUseCase {
   Future<void> execute({
     required String userId,
     required Narration narration,
+    required String language,
   }) async {
     String? imageUrl;
     if (narration.place.primaryPhoto != null && _apiConfig.isPlacesConfigured) {
@@ -36,6 +37,7 @@ class SaveNarrationToJourneyUseCase {
       narrationText: narration.content.text,
       narrationAspect: narration.aspect,
       createdAt: DateTime.now(),
+      language: language,
     );
 
     await _repository.addJourneyEntry(entry);

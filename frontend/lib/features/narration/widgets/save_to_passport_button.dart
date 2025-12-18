@@ -1,7 +1,7 @@
 import 'package:context_app/core/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,17 +44,28 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                 final userId = Supabase.instance.client.auth.currentUser?.id;
                 if (userId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('player_screen.please_login'.tr())),
+                    SnackBar(
+                      content: Text(easy.tr('player_screen.please_login')),
+                    ),
                   );
                   return;
                 }
+
+                // 取得當前語言
+                final locale =
+                    easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
+                    'zh-TW';
 
                 setState(() {
                   _isSaving = true;
                 });
 
                 try {
-                  await playerController.saveToJourney(userId);
+                  // 儲存時傳入語言（必填）
+                  await playerController.saveToJourney(
+                    userId,
+                    language: locale,
+                  );
                   if (context.mounted) {
                     context.pushNamed('passport_success', extra: widget.place);
                   }
@@ -63,7 +74,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          '${'player_screen.save_failed'.tr()}: $e',
+                          '${easy.tr('player_screen.save_failed')}: $e',
                         ),
                       ),
                     );
@@ -124,7 +135,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'player_screen.save_to_passport'.tr(),
+                        easy.tr('player_screen.save_to_passport'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,

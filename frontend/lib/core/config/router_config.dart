@@ -73,11 +73,13 @@ class RouterConfig {
                 params['narrationAspect'] as NarrationAspect;
             final initialContent = params['initialContent'] as String?;
             final enableSave = params['enableSave'] as bool? ?? true;
+            final language = params['language'] as String?; // 讀取語言參數
             return NarrationScreen(
               place: place,
               narrationAspect: narrationAspect,
               initialContent: initialContent,
               enableSave: enableSave,
+              language: language, // 傳遞語言參數
             );
           },
         ),

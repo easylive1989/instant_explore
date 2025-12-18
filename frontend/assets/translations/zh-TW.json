@@ -12,6 +12,7 @@
   },
   "config_screen": {
     "title": "選擇解說深度",
+    "select_aspect_title": "選擇導覽面向",
     "start_button": "開始導覽"
   },
   "narration_style": {

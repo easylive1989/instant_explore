@@ -12,6 +12,7 @@
   },
   "config_screen": {
     "title": "Select Narration Depth",
+    "select_aspect_title": "Select Narration Aspect",
     "start_button": "Start Guide"
   },
   "narration_style": {

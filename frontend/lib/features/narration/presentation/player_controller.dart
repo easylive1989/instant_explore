@@ -108,7 +108,7 @@ class PlayerController extends StateNotifier<NarrationState> {
   }
 
   /// 儲存導覽到歷程
-  Future<void> saveToJourney(String userId) async {
+  Future<void> saveToJourney(String userId, {required String language}) async {
     if (state.narration == null) {
       return;
     }
@@ -117,6 +117,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _saveNarrationToJourneyUseCase.execute(
         userId: userId,
         narration: state.narration!,
+        language: language,
       );
     } catch (e) {
       // 這裡可以選擇透過 state 通知 UI 錯誤，或者拋出異常讓 UI 處理
