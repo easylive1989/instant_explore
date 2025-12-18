@@ -139,7 +139,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
           itemBuilder: (context, index) {
             // 頂部空白 - 不需要 AutoScrollTag
             if (index == 0) {
-              return const SizedBox(height: 24);
+              return const SizedBox(height: 60);
             }
 
             // 底部空白 - 不需要 AutoScrollTag

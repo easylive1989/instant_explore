@@ -79,7 +79,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     // 使用 scrollToIndex 滑動到指定段落（定位到螢幕頂部）
     _scrollController.scrollToIndex(
       segmentIndex + 1, // +1 因為 index 0 是頂部空白項
-      preferPosition: AutoScrollPosition.begin, // 定位到螢幕頂部
+      preferPosition: AutoScrollPosition.middle, // 定位到螢幕頂部
       duration: const Duration(milliseconds: 300),
     );
   }
@@ -132,71 +132,66 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Stack(
+      body: Column(
         children: [
           // Main Content
-          SafeArea(
-            child: Column(
-              children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
+          Expanded(
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: () => context.go('/'),
                         ),
-                        onPressed: () => context.go('/'),
-                      ),
-                      Text(
-                        widget.place.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        Expanded(
+                          child: Text(
+                            widget.place.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.more_horiz, color: Colors.white),
-                        onPressed: () {},
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                // Transcript Area
-                Expanded(
-                  child: NarrationTranscriptArea(
-                    scrollController: _scrollController,
-                    backgroundColor: backgroundColor,
-                    primaryColor: primaryColor,
-                    place: widget.place,
-                    narrationAspect: widget.narrationAspect,
+                  // Transcript Area
+                  Expanded(
+                    child: NarrationTranscriptArea(
+                      scrollController: _scrollController,
+                      backgroundColor: backgroundColor,
+                      primaryColor: primaryColor,
+                      place: widget.place,
+                      narrationAspect: widget.narrationAspect,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
           // Bottom Control Panel
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: NarrationControlPanel(
-              place: widget.place,
-              primaryColor: primaryColor,
-              primaryColorShadow: primaryColorShadow,
-              surfaceColor: surfaceColor,
-              backgroundColor: backgroundColor,
-              enableSave: widget.enableSave,
-            ),
+          NarrationControlPanel(
+            place: widget.place,
+            primaryColor: primaryColor,
+            primaryColorShadow: primaryColorShadow,
+            surfaceColor: surfaceColor,
+            backgroundColor: backgroundColor,
+            enableSave: widget.enableSave,
           ),
         ],
       ),
