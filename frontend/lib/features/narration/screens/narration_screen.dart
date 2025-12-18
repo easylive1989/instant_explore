@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:context_app/core/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
@@ -30,7 +31,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
 }
 
 class _NarrationScreenState extends ConsumerState<NarrationScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final AutoScrollController _scrollController = AutoScrollController();
   int? _lastSegmentIndex;
   bool _isSaving = false;
 
@@ -76,18 +77,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     _lastSegmentIndex = segmentIndex;
 
-    // 計算目標位置
-    // 每個段落的平均高度約為 120px（文本高度 + padding）
-    // 加上頂部的 24px padding
-    const itemHeight = 120.0;
-    const topPadding = 24.0;
-    final targetOffset = topPadding + (segmentIndex * itemHeight);
-
-    // 平滑滾動到目標位置
-    _scrollController.animateTo(
-      targetOffset,
+    // 使用 scrollToIndex 滑動到指定段落（定位到螢幕頂部）
+    _scrollController.scrollToIndex(
+      segmentIndex + 1, // +1 因為 index 0 是頂部空白項
+      preferPosition: AutoScrollPosition.begin, // 定位到螢幕頂部
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
     );
   }
 
@@ -337,58 +331,63 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           itemCount: content.segments.length + 2,
           // +2 for top/bottom spacing
           itemBuilder: (context, index) {
-            // 頂部空白
+            // 頂部空白 - 不需要 AutoScrollTag
             if (index == 0) {
               return const SizedBox(height: 24);
             }
 
-            // 底部空白
+            // 底部空白 - 不需要 AutoScrollTag
             if (index == content.segments.length + 1) {
               return const SizedBox(height: 200);
             }
 
-            // 文本段落
+            // 文本段落 - 使用 AutoScrollTag 包裝
             final segmentIndex = index - 1;
             final segment = content.segments[segmentIndex];
             final isActive = currentSegmentIndex == segmentIndex;
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: isActive
-                  ? Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Positioned(
-                          left: -20,
-                          top: 6,
-                          bottom: 6,
-                          width: 4,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(2),
+            return AutoScrollTag(
+              key: ValueKey(index),
+              controller: _scrollController,
+              index: index,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 32.0),
+                child: isActive
+                    ? Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            left: -20,
+                            top: 6,
+                            bottom: 6,
+                            width: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
                           ),
-                        ),
-                        Text(
-                          segment,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            height: 1.4,
+                          Text(
+                            segment,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
                           ),
+                        ],
+                      )
+                    : Text(
+                        segment,
+                        style: const TextStyle(
+                          color: AppColors.textSecondaryDark,
+                          fontSize: 20,
+                          height: 1.6,
                         ),
-                      ],
-                    )
-                  : Text(
-                      segment,
-                      style: const TextStyle(
-                        color: AppColors.textSecondaryDark,
-                        fontSize: 20,
-                        height: 1.6,
                       ),
-                    ),
+              ),
             );
           },
         ),
