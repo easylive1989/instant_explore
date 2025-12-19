@@ -10,12 +10,8 @@ class Place {
   final String formattedAddress;
   final PlaceLocation location;
   final double? rating;
-  final int? priceLevel;
   final List<String> types;
   final List<PlacePhoto> photos;
-  final String? internationalPhoneNumber;
-  final String? websiteUri;
-  final bool? currentOpeningHours;
   final PlaceCategory category;
 
   Place({
@@ -24,12 +20,8 @@ class Place {
     required this.formattedAddress,
     required this.location,
     this.rating,
-    this.priceLevel,
     required this.types,
     required this.photos,
-    this.internationalPhoneNumber,
-    this.websiteUri,
-    this.currentOpeningHours,
     required this.category,
   });
 
@@ -41,16 +33,12 @@ class Place {
       formattedAddress: json['formattedAddress'] ?? '',
       location: PlaceLocation.fromJson(json['location'] ?? {}),
       rating: json['rating']?.toDouble(),
-      priceLevel: _parsePriceLevel(json['priceLevel']),
       types: types,
       photos:
           (json['photos'] as List?)
               ?.map((photo) => PlacePhoto.fromJson(photo))
               .toList() ??
           [],
-      internationalPhoneNumber: json['internationalPhoneNumber'],
-      websiteUri: json['websiteUri'],
-      currentOpeningHours: json['currentOpeningHours']?['openNow'],
       category: PlaceCategory.fromPlaceTypes(types),
     );
   }
@@ -83,28 +71,6 @@ class Place {
     return [];
   }
 
-  /// 解析價格等級
-  static int? _parsePriceLevel(dynamic priceLevel) {
-    if (priceLevel == null) return null;
-    if (priceLevel is String) {
-      switch (priceLevel) {
-        case 'PRICE_LEVEL_FREE':
-          return 0;
-        case 'PRICE_LEVEL_INEXPENSIVE':
-          return 1;
-        case 'PRICE_LEVEL_MODERATE':
-          return 2;
-        case 'PRICE_LEVEL_EXPENSIVE':
-          return 3;
-        case 'PRICE_LEVEL_VERY_EXPENSIVE':
-          return 4;
-        default:
-          return null;
-      }
-    }
-    return priceLevel is int ? priceLevel : null;
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -112,60 +78,15 @@ class Place {
       'formattedAddress': formattedAddress,
       'location': location.toJson(),
       'rating': rating,
-      'priceLevel': priceLevel,
       'types': types,
       'photos': photos.map((photo) => photo.toJson()).toList(),
-      'internationalPhoneNumber': internationalPhoneNumber,
-      'websiteUri': websiteUri,
-      'currentOpeningHours': currentOpeningHours,
       'category': category.toApiString(),
     };
-  }
-
-  /// 取得價格等級顯示文字
-  String get priceRangeText {
-    if (priceLevel == null) return '價格未知';
-    switch (priceLevel!) {
-      case 0:
-        return '免費';
-      case 1:
-        return '\$';
-      case 2:
-        return '\$\$';
-      case 3:
-        return '\$\$\$';
-      case 4:
-        return '\$\$\$\$';
-      default:
-        return '價格未知';
-    }
-  }
-
-  /// 取得評分顯示文字
-  String get ratingText {
-    if (rating == null) return '無評分';
-    return '${rating!.toStringAsFixed(1)} ⭐';
-  }
-
-  /// 判斷是否為餐廳
-  bool get isRestaurant {
-    return types.any(
-      (type) =>
-          type.contains('restaurant') ||
-          type.contains('food') ||
-          type.contains('meal_takeaway') ||
-          type.contains('meal_delivery'),
-    );
   }
 
   /// 取得第一張照片（如果有的話）
   PlacePhoto? get primaryPhoto {
     return photos.isNotEmpty ? photos.first : null;
-  }
-
-  @override
-  String toString() {
-    return 'Place(id: $id, name: $name, rating: $rating, priceLevel: $priceLevel)';
   }
 
   @override
