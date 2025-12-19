@@ -37,7 +37,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
         onTap:
             (playerState.isLoading ||
                 playerState.hasError ||
-                playerState.narration == null ||
+                playerState.content == null ||
                 _isSaving)
             ? null
             : () async {
@@ -92,7 +92,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
           opacity:
               (playerState.isLoading ||
                   playerState.hasError ||
-                  playerState.narration == null ||
+                  playerState.content == null ||
                   _isSaving)
               ? 0.5
               : 1.0,

@@ -25,7 +25,8 @@ class JourneyEntry {
       userId: json['user_id'] as String,
       place: SavedPlace.fromJson(json['place'] as Map<String, dynamic>),
       narrationContent: NarrationContent.fromJson(
-          json['narration_content'] as Map<String, dynamic>),
+        json['narration_content'] as Map<String, dynamic>,
+      ),
       createdAt: DateTime.parse(json['created_at'] as String),
       language: Language.fromString(json['language'] as String),
     );

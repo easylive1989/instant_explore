@@ -21,12 +21,7 @@ class SavedPlace {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'address': address,
-      'image_url': imageUrl,
-    };
+    return {'id': id, 'name': name, 'address': address, 'image_url': imageUrl};
   }
 
   @override

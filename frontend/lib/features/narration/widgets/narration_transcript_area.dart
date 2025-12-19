@@ -119,12 +119,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
     }
 
     // 顯示導覽文本
-    final narration = playerState.narration;
-    if (narration == null) {
+    final content = playerState.content;
+    if (content == null) {
       return const SizedBox.shrink();
     }
-
-    final content = narration.content;
     final currentSegmentIndex = playerState.currentSegmentIndex;
 
     return Stack(

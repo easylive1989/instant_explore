@@ -142,9 +142,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                         : () {
                             // Construct a partial Place object
                             final place = Place(
-                              id: widget.entry.placeId,
-                              name: widget.entry.placeName,
-                              formattedAddress: widget.entry.placeAddress,
+                              id: widget.entry.place.id,
+                              name: widget.entry.place.name,
+                              formattedAddress: widget.entry.place.address,
                               location: PlaceLocation(
                                 latitude: 0,
                                 longitude: 0,
@@ -158,10 +158,10 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               'player',
                               extra: {
                                 'place': place,
-                                'narrationAspect': widget.entry.narrationAspect,
-                                'initialContent': widget.entry.narrationText,
+                                'initialContent':
+                                    widget.entry.narrationContent.text,
                                 'enableSave': false,
-                                'language': widget.entry.language, // 傳遞儲存的語言
+                                'language': widget.entry.language.code,
                               },
                             );
                           },
@@ -183,7 +183,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  widget.entry.placeName,
+                                  widget.entry.place.name,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -218,16 +218,16 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            widget.entry.placeAddress,
+                            widget.entry.place.address,
                             style: const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 12),
-                          if (widget.entry.placeImageUrl != null &&
-                              widget.entry.placeImageUrl!.isNotEmpty) ...[
+                          if (widget.entry.place.imageUrl != null &&
+                              widget.entry.place.imageUrl!.isNotEmpty) ...[
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: CachedNetworkImage(
-                                imageUrl: widget.entry.placeImageUrl!,
+                                imageUrl: widget.entry.place.imageUrl!,
                                 height: 150,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
@@ -252,26 +252,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              widget.entry.narrationAspect.name,
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
                           Text(
-                            widget.entry.narrationText,
+                            widget.entry.narrationContent.text,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

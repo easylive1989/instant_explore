@@ -3,7 +3,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/journey/domain/use_cases/get_my_journey_use_case.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/core/domain/models/language.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
 
@@ -16,17 +18,20 @@ void main() {
     useCase = GetMyJourneyUseCase(mockRepository);
   });
 
+  const testPlace = SavedPlace(
+    id: 'place-1',
+    name: 'Place 1',
+    address: 'Address 1',
+    imageUrl: 'http://example.com/image.jpg',
+  );
+
   final testEntry = JourneyEntry(
     id: '1',
     userId: 'user-1',
-    placeId: 'place-1',
-    placeName: 'Place 1',
-    placeAddress: 'Address 1',
-    placeImageUrl: 'http://example.com/image.jpg',
-    narrationText: 'Text',
-    narrationAspect: NarrationAspect.historicalBackground,
+    place: testPlace,
+    narrationContent: NarrationContent.fromText('Text'),
     createdAt: DateTime.now(),
-    language: 'zh-TW',
+    language: Language.fromString('zh-TW'),
   );
 
   test('execute returns list of passport entries', () async {

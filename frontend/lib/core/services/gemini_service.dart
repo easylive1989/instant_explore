@@ -7,7 +7,7 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_prompt_builder.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/core/domain/models/language.dart';
+import 'package:context_app/core/domain/models/language.dart' as app_lang;
 
 class GeminiService implements NarrationService {
   final ApiConfig _apiConfig;
@@ -24,7 +24,7 @@ class GeminiService implements NarrationService {
   Future<NarrationContent> generateNarration({
     required Place place,
     required NarrationAspect aspect,
-    required Language language,
+    required app_lang.Language language,
   }) async {
     if (!_apiConfig.isGeminiConfigured) {
       throw Exception('Gemini API key is not configured.');

@@ -193,6 +193,13 @@ class NarrationState {
 
   @override
   int get hashCode {
-    return Object.hash(place, aspect, content, playerState, errorType, errorMessage);
+    return Object.hash(
+      place,
+      aspect,
+      content,
+      playerState,
+      errorType,
+      errorMessage,
+    );
   }
 }

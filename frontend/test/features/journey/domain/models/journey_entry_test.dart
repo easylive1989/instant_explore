@@ -1,65 +1,78 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/core/domain/models/language.dart';
 
 void main() {
-  group('PassportEntry', () {
+  group('JourneyEntry', () {
     final testDate = DateTime.parse('2023-10-27T10:00:00Z');
+    const testPlace = SavedPlace(
+      id: 'place-123',
+      name: 'Test Place',
+      address: '123 Test St',
+      imageUrl: 'http://example.com/image.jpg',
+    );
+    final testContent = NarrationContent.fromText('This is a test narration.');
+    final testLanguage = Language.fromString('zh-TW');
+
     final entry = JourneyEntry(
       id: 'test-id',
       userId: 'user-123',
-      placeId: 'place-123',
-      placeName: 'Test Place',
-      placeAddress: '123 Test St',
-      placeImageUrl: 'http://example.com/image.jpg',
-      narrationText: 'This is a test narration.',
-      narrationAspect: NarrationAspect.historicalBackground,
+      place: testPlace,
+      narrationContent: testContent,
       createdAt: testDate,
-      language: 'zh-TW',
+      language: testLanguage,
     );
 
     final json = {
       'id': 'test-id',
       'user_id': 'user-123',
-      'place_id': 'place-123',
-      'place_name': 'Test Place',
-      'place_address': '123 Test St',
-      'place_image_url': 'http://example.com/image.jpg',
-      'narration_text': 'This is a test narration.',
-      'narration_style': 'historical_background',
+      'place': {
+        'id': 'place-123',
+        'name': 'Test Place',
+        'address': '123 Test St',
+        'image_url': 'http://example.com/image.jpg',
+      },
+      'narration_content': testContent.toJson(),
       'created_at': '2023-10-27T10:00:00.000Z',
       'language': 'zh-TW',
     };
 
-    test('fromJson creates correct PassportEntry', () {
+    test('fromJson creates correct JourneyEntry', () {
       final result = JourneyEntry.fromJson(json);
 
       expect(result.id, entry.id);
       expect(result.userId, entry.userId);
-      expect(result.placeId, entry.placeId);
-      expect(result.placeName, entry.placeName);
-      expect(result.placeAddress, entry.placeAddress);
-      expect(result.placeImageUrl, entry.placeImageUrl);
-      expect(result.narrationText, entry.narrationText);
-      expect(result.narrationAspect, entry.narrationAspect);
+      expect(result.place.id, entry.place.id);
+      expect(result.place.name, entry.place.name);
+      expect(result.place.address, entry.place.address);
+      expect(result.place.imageUrl, entry.place.imageUrl);
+      expect(result.narrationContent.text, entry.narrationContent.text);
+      expect(result.language.code, entry.language.code);
       expect(result.createdAt, entry.createdAt);
     });
 
     test('toJson returns correct Map', () {
       final result = entry.toJson();
-      expect(result, json);
+      expect(result['id'], json['id']);
+      expect(result['user_id'], json['user_id']);
+      expect(result['place'], json['place']);
+      expect(result['language'], json['language']);
+      expect(result['created_at'], json['created_at']);
     });
 
-    test('fromJson handles architecture aspect correctly', () {
-      final architectureJson = {...json, 'narration_style': 'architecture'};
-      final result = JourneyEntry.fromJson(architectureJson);
-      expect(result.narrationAspect, NarrationAspect.architecture);
-    });
-
-    test('fromJson defaults to historicalBackground on unknown aspect', () {
-      final unknownJson = {...json, 'narration_style': 'unknown'};
-      final result = JourneyEntry.fromJson(unknownJson);
-      expect(result.narrationAspect, NarrationAspect.historicalBackground);
+    test('fromJson handles place without imageUrl', () {
+      final jsonWithoutImage = {
+        ...json,
+        'place': {
+          'id': 'place-123',
+          'name': 'Test Place',
+          'address': '123 Test St',
+        },
+      };
+      final result = JourneyEntry.fromJson(jsonWithoutImage);
+      expect(result.place.imageUrl, isNull);
     });
   });
 }

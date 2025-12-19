@@ -35,8 +35,8 @@ final ttsServiceProvider = Provider<TtsService>((ref) {
 ///
 /// 提供開始導覽的用例
 final startNarrationUseCaseProvider = Provider<StartNarrationUseCase>((ref) {
-  final geminiService = ref.watch(geminiServiceProvider);
-  return StartNarrationUseCase(geminiService);
+  final narrationService = ref.watch(narrationServiceProvider);
+  return StartNarrationUseCase(narrationService);
 });
 
 /// ReplayNarrationUseCase Provider

@@ -51,7 +51,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     try {
       // 使用 StartNarrationUseCase 生成導覽內容
-      final narration = await _startNarrationUseCase.execute(
+      final content = await _startNarrationUseCase.execute(
         place: place,
         aspect: aspect,
         language: language,
@@ -62,10 +62,10 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _ttsService.setLanguage(language);
 
       // 計算時長（從 estimatedDuration 轉換為 Duration）
-      final duration = Duration(seconds: narration.content.estimatedDuration);
+      final duration = Duration(seconds: content.estimatedDuration);
 
       // 更新狀態為就緒
-      state = state.ready(narration, duration: duration);
+      state = state.ready(place, aspect, content, duration: duration);
     } on NarrationGenerationException catch (e) {
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
@@ -84,7 +84,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     try {
       // 使用 ReplayNarrationUseCase 建立導覽內容
-      final narration = await _replayNarrationUseCase.execute(
+      final content = await _replayNarrationUseCase.execute(
         place: place,
         aspect: aspect,
         contentText: contentText,
@@ -96,10 +96,10 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _ttsService.setLanguage(language);
 
       // 計算時長（從 estimatedDuration 轉換為 Duration）
-      final duration = Duration(seconds: narration.content.estimatedDuration);
+      final duration = Duration(seconds: content.estimatedDuration);
 
       // 更新狀態為就緒
-      state = state.ready(narration, duration: duration);
+      state = state.ready(place, aspect, content, duration: duration);
     } on NarrationGenerationException catch (e) {
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
@@ -109,14 +109,17 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   /// 儲存導覽到歷程
   Future<void> saveToJourney(String userId, {required String language}) async {
-    if (state.narration == null) {
+    if (state.content == null || state.place == null || state.aspect == null) {
       return;
     }
 
     try {
+      // 直接傳遞個別參數給 use case
       await _saveNarrationToJourneyUseCase.execute(
         userId: userId,
-        narration: state.narration!,
+        place: state.place!,
+        aspect: state.aspect!,
+        content: state.content!,
         language: language,
       );
     } catch (e) {
@@ -131,9 +134,9 @@ class PlayerController extends StateNotifier<NarrationState> {
     // 監聽播放完成事件
     _ttsCompleteSubscription = _ttsService.onComplete.listen((_) {
       _stopProgressTimer();
-      if (state.narration != null) {
+      if (state.content != null) {
         // 設置到最後一個字符並完成播放
-        final totalLength = state.narration!.content.text.length;
+        final totalLength = state.content!.text.length;
         state = state.updateCharPosition(totalLength).completed();
       }
     });
@@ -153,7 +156,7 @@ class PlayerController extends StateNotifier<NarrationState> {
     // 監聽進度事件（字符級別的精確追蹤）
     _ttsProgressSubscription = _ttsService.onProgress.listen((progress) {
       // 使用 TTS 提供的字符級別進度更新段落索引
-      if (state.narration != null && state.isPlaying) {
+      if (state.content != null && state.isPlaying) {
         state = state.updateCharPosition(progress.currentPosition);
       }
     });
@@ -161,7 +164,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   /// 播放/暫停切換
   void playPause() {
-    if (state.narration == null) {
+    if (state.content == null) {
       return;
     }
 
@@ -174,7 +177,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   /// 開始播放
   Future<void> play() async {
-    if (state.narration == null) {
+    if (state.content == null) {
       return;
     }
 
@@ -185,7 +188,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       }
 
       // 播放 TTS
-      final success = await _ttsService.speak(state.narration!.content.text);
+      final success = await _ttsService.speak(state.content!.text);
 
       if (success) {
         // 更新狀態為播放中
@@ -206,7 +209,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   /// 暫停播放
   Future<void> pause() async {
-    if (state.narration == null) {
+    if (state.content == null) {
       return;
     }
 
@@ -236,7 +239,7 @@ class PlayerController extends StateNotifier<NarrationState> {
     _stopProgressTimer();
 
     _progressTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.narration != null && state.isPlaying) {
+      if (state.content != null && state.isPlaying) {
         // 計算新的播放位置
         final newPosition =
             state.playerState.currentPosition + const Duration(seconds: 1);
