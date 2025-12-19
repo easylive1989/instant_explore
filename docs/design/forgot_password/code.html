@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Forgot Password - AI Historical Tour Guide</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#1c2630",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: 100dvh;
+        }@media (min-height: 800px) {
+            body {
+                min-height: 100dvh;
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-gray-100 antialiased flex flex-col justify-center px-6 py-12 lg:px-8">
+<div class="sm:mx-auto sm:w-full sm:max-w-sm">
+<div class="mx-auto h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary shadow-sm dark:bg-primary/20">
+<span class="material-symbols-outlined text-[32px]">travel_explore</span>
+</div>
+<h2 class="text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Forgot Password?
+        </h2>
+<p class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
+            Don't worry, it happens. Please enter the email associated with your account.
+        </p>
+</div>
+<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+<form action="#" class="space-y-6" method="POST">
+<div>
+<label class="block text-sm font-medium leading-6 text-slate-900 dark:text-gray-200" for="email">Email address</label>
+<div class="mt-2">
+<input autocomplete="email" class="block w-full rounded-xl border-0 py-3.5 pl-4 text-slate-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary dark:bg-surface-dark dark:ring-gray-700 dark:text-white sm:text-sm sm:leading-6 transition-shadow" id="email" name="email" placeholder="explorer@history.com" required="" type="email"/>
+</div>
+</div>
+<button class="flex w-full justify-center rounded-xl bg-primary px-3 py-3.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all active:scale-[0.99]" type="submit">
+                Send Reset Link
+            </button>
+</form>
+<p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
+            Remember your password?
+            <a class="font-semibold leading-6 text-primary hover:text-primary/80 transition-colors" href="#">Back to Login</a>
+</p>
+</div>
+
+</body></html>
