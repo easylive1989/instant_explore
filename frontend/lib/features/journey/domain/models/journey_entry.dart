@@ -1,44 +1,33 @@
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/core/domain/models/language.dart';
 
 class JourneyEntry {
   final String id;
   final String userId;
-  final String placeId;
-  final String placeName;
-  final String placeAddress;
-  final String? placeImageUrl;
-  final String narrationText;
-  final NarrationAspect narrationAspect;
+  final SavedPlace place;
+  final NarrationContent narrationContent;
   final DateTime createdAt;
-  final String language; // 語言代碼 (例如: 'zh-TW', 'en-US')，必填
+  final Language language;
 
   const JourneyEntry({
     required this.id,
     required this.userId,
-    required this.placeId,
-    required this.placeName,
-    required this.placeAddress,
-    this.placeImageUrl,
-    required this.narrationText,
-    required this.narrationAspect,
+    required this.place,
+    required this.narrationContent,
     required this.createdAt,
-    required this.language, // 必填參數
+    required this.language,
   });
 
   factory JourneyEntry.fromJson(Map<String, dynamic> json) {
     return JourneyEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      placeId: json['place_id'] as String,
-      placeName: json['place_name'] as String,
-      placeAddress: json['place_address'] as String,
-      placeImageUrl: json['place_image_url'] as String?,
-      narrationText: json['narration_text'] as String,
-      narrationAspect:
-          NarrationAspect.fromString(json['narration_style'] as String) ??
-          NarrationAspect.historicalBackground,
+      place: SavedPlace.fromJson(json['place'] as Map<String, dynamic>),
+      narrationContent: NarrationContent.fromJson(
+          json['narration_content'] as Map<String, dynamic>),
       createdAt: DateTime.parse(json['created_at'] as String),
-      language: json['language'] as String,
+      language: Language.fromString(json['language'] as String),
     );
   }
 
@@ -46,14 +35,10 @@ class JourneyEntry {
     return {
       'id': id,
       'user_id': userId,
-      'place_id': placeId,
-      'place_name': placeName,
-      'place_address': placeAddress,
-      'place_image_url': placeImageUrl,
-      'narration_text': narrationText,
-      'narration_style': narrationAspect.toApiString(),
+      'place': place.toJson(),
+      'narration_content': narrationContent.toJson(),
       'created_at': createdAt.toIso8601String(),
-      'language': language,
+      'language': language.toString(),
     };
   }
 }

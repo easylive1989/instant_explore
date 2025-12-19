@@ -4,9 +4,12 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:context_app/core/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_prompt_builder.dart';
+import 'package:context_app/features/narration/domain/services/narration_service.dart';
+import 'package:context_app/core/domain/models/language.dart';
 
-class GeminiService {
+class GeminiService implements NarrationService {
   final ApiConfig _apiConfig;
 
   GeminiService(this._apiConfig);
@@ -17,10 +20,11 @@ class GeminiService {
   /// [aspect] 導覽介紹面向
   /// [language] 語言代碼（'zh-TW' 或 'en-US'）
   /// 返回適合語音播放的導覽文本
-  Future<String> generateNarration({
+  @override
+  Future<NarrationContent> generateNarration({
     required Place place,
     required NarrationAspect aspect,
-    required String language,
+    required Language language,
   }) async {
     if (!_apiConfig.isGeminiConfigured) {
       throw Exception('Gemini API key is not configured.');
@@ -35,7 +39,7 @@ class GeminiService {
     final promptBuilder = NarrationPromptBuilder(
       place: place,
       aspect: aspect,
-      language: language,
+      language: language.code,
     );
     final prompt = promptBuilder.build();
 
@@ -52,7 +56,7 @@ class GeminiService {
         '${generatedText.substring(0, generatedText.length > 100 ? 100 : generatedText.length)}...',
       );
 
-      return generatedText;
+      return NarrationContent.fromText(generatedText, language: language.code);
     } catch (e) {
       debugPrint('Error generating narration: $e');
       rethrow;
@@ -60,7 +64,7 @@ class GeminiService {
   }
 }
 
-final geminiServiceProvider = Provider<GeminiService>((ref) {
+final narrationServiceProvider = Provider<NarrationService>((ref) {
   final apiConfig = ref.watch(apiConfigProvider);
   return GeminiService(apiConfig);
 });

@@ -64,6 +64,30 @@ class NarrationContent {
     );
   }
 
+  factory NarrationContent.fromJson(Map<String, dynamic> json) {
+    final text = json['text'] as String;
+    final segments = (json['segments'] as List).cast<String>();
+    final estimatedDuration = json['estimated_duration'] as int;
+
+    // Rebuild ranges from text and segments
+    final ranges = _buildSegmentCharRanges(text, segments);
+
+    return NarrationContent._(
+      text: text,
+      segments: segments,
+      estimatedDuration: estimatedDuration,
+      segmentCharRanges: ranges,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'segments': segments,
+      'estimated_duration': estimatedDuration,
+    };
+  }
+
   /// 將文本分段
   ///
   /// 按照標點符號（。！？）分段，保持每段1-2句話
@@ -192,5 +216,21 @@ class NarrationContent {
     return 'NarrationContent(text: ${text.length} chars, '
         'segments: ${segments.length}, '
         'duration: ${estimatedDuration}s)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is NarrationContent &&
+        other.text == text &&
+        // Simple list equality check - sufficient for value object
+        other.segments.length == segments.length &&
+        other.estimatedDuration == estimatedDuration;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(text, estimatedDuration, segments.length);
   }
 }

@@ -1,15 +1,19 @@
-import 'package:context_app/features/narration/domain/models/narration.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
 import 'package:context_app/features/narration/presentation/playback_state.dart';
 import 'package:context_app/features/narration/presentation/player_state.dart';
 
 /// 導覽播放狀態
 ///
-/// 聚合領域模型（Narration）和播放狀態（PlayerState）
+/// 聚合導覽內容和播放狀態
 /// 封裝播放器 UI 所需的所有狀態資訊
 class NarrationState {
-  /// 當前導覽內容（領域模型）
-  final Narration? narration;
+  // Replace the aggregated Narration object with flattened fields or necessary components
+  final Place? place;
+  final NarrationAspect? aspect;
+  final NarrationContent? content;
 
   /// 播放器狀態（播放運行時狀態）
   final PlayerState playerState;
@@ -21,7 +25,9 @@ class NarrationState {
   final String? errorMessage;
 
   const NarrationState({
-    this.narration,
+    this.place,
+    this.aspect,
+    this.content,
     required this.playerState,
     this.errorType,
     this.errorMessage,
@@ -38,9 +44,16 @@ class NarrationState {
   }
 
   /// 建立就緒狀態
-  NarrationState ready(Narration narration, {required Duration duration}) {
+  NarrationState ready(
+    Place place,
+    NarrationAspect aspect,
+    NarrationContent content, {
+    required Duration duration,
+  }) {
     return copyWith(
-      narration: narration,
+      place: place,
+      aspect: aspect,
+      content: content,
       playerState: PlayerState.ready(duration: duration),
       errorMessage: null,
     );
@@ -100,13 +113,17 @@ class NarrationState {
 
   /// 建立副本並更新指定屬性
   NarrationState copyWith({
-    Narration? narration,
+    Place? place,
+    NarrationAspect? aspect,
+    NarrationContent? content,
     PlayerState? playerState,
     NarrationErrorType? errorType,
     String? errorMessage,
   }) {
     return NarrationState(
-      narration: narration ?? this.narration,
+      place: place ?? this.place,
+      aspect: aspect ?? this.aspect,
+      content: content ?? this.content,
       playerState: playerState ?? this.playerState,
       errorType: errorType ?? this.errorType,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -134,8 +151,8 @@ class NarrationState {
   /// 播放進度百分比 (0.0 - 1.0)
   /// 基於已播放的文字量計算
   double get progress {
-    if (narration == null) return 0.0;
-    final totalChars = narration!.content.text.length;
+    if (content == null) return 0.0;
+    final totalChars = content!.text.length;
     if (totalChars == 0) return 0.0;
     return (playerState.currentCharPosition / totalChars).clamp(0.0, 1.0);
   }
@@ -148,8 +165,8 @@ class NarrationState {
 
   /// 當前段落索引（用於高亮顯示）
   int? get currentSegmentIndex {
-    if (narration == null) return null;
-    return narration!.content.getSegmentIndexByCharPosition(
+    if (content == null) return null;
+    return content!.getSegmentIndexByCharPosition(
       playerState.currentCharPosition,
     );
   }
@@ -157,7 +174,7 @@ class NarrationState {
   @override
   String toString() {
     return 'NarrationState(playerState: $playerState, '
-        'narration: ${narration?.id}, '
+        'place: ${place?.name}, aspect: $aspect, '
         'hasError: $hasError)';
   }
 
@@ -166,7 +183,9 @@ class NarrationState {
     if (identical(this, other)) return true;
 
     return other is NarrationState &&
-        other.narration == narration &&
+        other.place == place &&
+        other.aspect == aspect &&
+        other.content == content &&
         other.playerState == playerState &&
         other.errorType == errorType &&
         other.errorMessage == errorMessage;
@@ -174,6 +193,6 @@ class NarrationState {
 
   @override
   int get hashCode {
-    return Object.hash(narration, playerState, errorType, errorMessage);
+    return Object.hash(place, aspect, content, playerState, errorType, errorMessage);
   }
 }
