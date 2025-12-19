@@ -15,6 +15,7 @@ void main() {
       narrationText: 'This is a test narration.',
       narrationAspect: NarrationAspect.historicalBackground,
       createdAt: testDate,
+      language: 'zh-TW',
     );
 
     final json = {
@@ -27,6 +28,7 @@ void main() {
       'narration_text': 'This is a test narration.',
       'narration_style': 'historical_background',
       'created_at': '2023-10-27T10:00:00.000Z',
+      'language': 'zh-TW',
     };
 
     test('fromJson creates correct PassportEntry', () {

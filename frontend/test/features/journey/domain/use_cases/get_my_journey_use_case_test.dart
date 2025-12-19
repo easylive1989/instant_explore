@@ -26,6 +26,7 @@ void main() {
     narrationText: 'Text',
     narrationAspect: NarrationAspect.historicalBackground,
     createdAt: DateTime.now(),
+    language: 'zh-TW',
   );
 
   test('execute returns list of passport entries', () async {

@@ -54,7 +54,11 @@ void main() {
 
     when(() => mockRepository.addJourneyEntry(any())).thenAnswer((_) async {});
 
-    await useCase.execute(userId: 'user-1', narration: narration);
+    await useCase.execute(
+      userId: 'user-1',
+      narration: narration,
+      language: 'zh-TW',
+    );
 
     verify(() => mockRepository.addJourneyEntry(any())).called(1);
   });
@@ -72,12 +76,17 @@ void main() {
       capturedEntry = invocation.positionalArguments[0] as JourneyEntry;
     });
 
-    await useCase.execute(userId: 'user-1', narration: narration);
+    await useCase.execute(
+      userId: 'user-1',
+      narration: narration,
+      language: 'zh-TW',
+    );
 
     expect(capturedEntry, isNotNull);
     expect(capturedEntry!.userId, equals('user-1'));
     expect(capturedEntry!.placeId, equals('place-1'));
     expect(capturedEntry!.placeName, equals('Test Place'));
     expect(capturedEntry!.narrationText, equals('Architecture narration'));
+    expect(capturedEntry!.language, equals('zh-TW'));
   });
 }
