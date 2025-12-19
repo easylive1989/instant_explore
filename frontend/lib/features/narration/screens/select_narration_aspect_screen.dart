@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/core/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/providers.dart';
 
