@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:http/http.dart' as http;
 import 'package:context_app/features/explore/domain/models/place.dart';
 

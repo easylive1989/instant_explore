@@ -1,3 +1,4 @@
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';

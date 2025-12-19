@@ -1,6 +1,6 @@
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
-import 'package:context_app/features/explore/domain/models/place.dart';
 
 class GeolocatorService implements LocationService {
   @override

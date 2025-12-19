@@ -1,5 +1,6 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/narration/domain/models/narration.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';

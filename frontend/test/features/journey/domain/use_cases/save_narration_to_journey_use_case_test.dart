@@ -1,3 +1,4 @@
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';

@@ -1,3 +1,4 @@
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
