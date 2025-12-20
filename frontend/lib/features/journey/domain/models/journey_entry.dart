@@ -19,25 +19,45 @@ class JourneyEntry {
     required this.language,
   });
 
+  /// 從資料庫的扁平結構解析
   factory JourneyEntry.fromJson(Map<String, dynamic> json) {
+    final languageStr = json['language'] as String? ?? 'zh-TW';
+
+    // 從扁平欄位建立 SavedPlace
+    final place = SavedPlace(
+      id: json['place_id'] as String,
+      name: json['place_name'] as String,
+      address: json['place_address'] as String,
+      imageUrl: json['place_image_url'] as String?,
+    );
+
+    // 從扁平欄位建立 NarrationContent
+    final narrationText = json['narration_text'] as String;
+    final narrationContent = NarrationContent.fromText(
+      narrationText,
+      language: languageStr,
+    );
+
     return JourneyEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      place: SavedPlace.fromJson(json['place'] as Map<String, dynamic>),
-      narrationContent: NarrationContent.fromJson(
-        json['narration_content'] as Map<String, dynamic>,
-      ),
+      place: place,
+      narrationContent: narrationContent,
       createdAt: DateTime.parse(json['created_at'] as String),
-      language: Language.fromString(json['language'] as String),
+      language: Language.fromString(languageStr),
     );
   }
 
+  /// 轉換為資料庫的扁平結構
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
-      'place': place.toJson(),
-      'narration_content': narrationContent.toJson(),
+      'place_id': place.id,
+      'place_name': place.name,
+      'place_address': place.address,
+      'place_image_url': place.imageUrl,
+      'narration_text': narrationContent.text,
       'created_at': createdAt.toIso8601String(),
       'language': language.toString(),
     };

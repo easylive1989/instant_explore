@@ -25,16 +25,15 @@ void main() {
       language: testLanguage,
     );
 
+    // 使用資料庫的扁平結構
     final json = {
       'id': 'test-id',
       'user_id': 'user-123',
-      'place': {
-        'id': 'place-123',
-        'name': 'Test Place',
-        'address': '123 Test St',
-        'image_url': 'http://example.com/image.jpg',
-      },
-      'narration_content': testContent.toJson(),
+      'place_id': 'place-123',
+      'place_name': 'Test Place',
+      'place_address': '123 Test St',
+      'place_image_url': 'http://example.com/image.jpg',
+      'narration_text': 'This is a test narration.',
       'created_at': '2023-10-27T10:00:00.000Z',
       'language': 'zh-TW',
     };
@@ -57,19 +56,26 @@ void main() {
       final result = entry.toJson();
       expect(result['id'], json['id']);
       expect(result['user_id'], json['user_id']);
-      expect(result['place'], json['place']);
+      expect(result['place_id'], json['place_id']);
+      expect(result['place_name'], json['place_name']);
+      expect(result['place_address'], json['place_address']);
+      expect(result['place_image_url'], json['place_image_url']);
+      expect(result['narration_text'], json['narration_text']);
       expect(result['language'], json['language']);
       expect(result['created_at'], json['created_at']);
     });
 
     test('fromJson handles place without imageUrl', () {
       final jsonWithoutImage = {
-        ...json,
-        'place': {
-          'id': 'place-123',
-          'name': 'Test Place',
-          'address': '123 Test St',
-        },
+        'id': 'test-id',
+        'user_id': 'user-123',
+        'place_id': 'place-123',
+        'place_name': 'Test Place',
+        'place_address': '123 Test St',
+        'place_image_url': null,
+        'narration_text': 'This is a test narration.',
+        'created_at': '2023-10-27T10:00:00.000Z',
+        'language': 'zh-TW',
       };
       final result = JourneyEntry.fromJson(jsonWithoutImage);
       expect(result.place.imageUrl, isNull);
