@@ -23,7 +23,7 @@ void main() {
 
   // 使用者位置 (台北 101 附近)
   final userLocation = PlaceLocation(latitude: 25.0330, longitude: 121.5654);
-  final testLanguage = Language.traditionalChinese;
+  const testLanguage = Language.traditionalChinese;
   const testRadius = 1000.0;
 
   setUpAll(() {
