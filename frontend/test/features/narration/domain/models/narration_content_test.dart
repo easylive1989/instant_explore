@@ -15,7 +15,7 @@ void main() {
         expect(content.segments[2], '這是第三句。');
       });
 
-      test('should throw NarrationException for empty text', () {
+      test('should throw NarrationContentException for empty text', () {
         const text = '';
 
         expect(
@@ -24,7 +24,7 @@ void main() {
         );
       });
 
-      test('should throw NarrationException for text too short', () {
+      test('should throw NarrationContentException for text too short', () {
         const text = '短文';
 
         expect(
@@ -52,14 +52,11 @@ void main() {
         expect(content.segments[3], 'What is this?');
       });
 
-      test('should estimate duration correctly', () {
-        const text = '這是一段測試用的文字內容。'; // 13 characters
-        final content = NarrationContent.create(
-          text,
-          language: 'zh-TW',
-        ); // charsPerSecond = 4
+      test('should set language correctly', () {
+        const text = '這是一段測試用的文字內容。';
+        final content = NarrationContent.create(text, language: 'en-US');
 
-        expect(content.estimatedDuration, 4); // 13/4 = 3.25 -> ceil = 4
+        expect(content.language, 'en-US');
       });
     });
 
@@ -123,29 +120,6 @@ void main() {
       });
     });
 
-    group('getCurrentSegmentIndex (deprecated)', () {
-      test('should still work for backward compatibility', () {
-        const text = '這是第一句。這是第二句。這是第三句。';
-        // 使用 language: 'zh-TW' (charsPerSecond = 4)
-        // 18 個字符 / 4 字符/秒 = 4.5 秒
-        // 3 個段落，每個段落約 1.5 秒
-        final content = NarrationContent.create(text, language: 'zh-TW');
-
-        // 基於時間的估算（已棄用）
-        // 0 秒：第 0 個段落
-        // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(0), 0);
-
-        // 2 秒：第 1 個段落
-        // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(2), 1);
-
-        // 4 秒：第 2 個段落
-        // ignore: deprecated_member_use_from_same_package
-        expect(content.getCurrentSegmentIndex(4), 2);
-      });
-    });
-
     group('edge cases', () {
       test('should handle text without punctuation', () {
         const text = 'This is text without punctuation here';
@@ -174,6 +148,34 @@ void main() {
           content.getSegmentIndexByCharPosition(content.text.length - 1),
           99,
         );
+      });
+    });
+
+    group('JSON serialization', () {
+      test('should serialize to JSON correctly', () {
+        const text = '這是一段測試用的文字內容。';
+        final content = NarrationContent.create(text, language: 'zh-TW');
+
+        final json = content.toJson();
+
+        expect(json['text'], text);
+        expect(json['segments'], ['這是一段測試用的文字內容。']);
+        expect(json['language'], 'zh-TW');
+        expect(json.containsKey('estimated_duration'), false);
+      });
+
+      test('should deserialize from JSON correctly', () {
+        final json = {
+          'text': '這是一段測試用的文字內容。',
+          'segments': ['這是一段測試用的文字內容。'],
+          'language': 'zh-TW',
+        };
+
+        final content = NarrationContent.fromJson(json);
+
+        expect(content.text, '這是一段測試用的文字內容。');
+        expect(content.segments, ['這是一段測試用的文字內容。']);
+        expect(content.language, 'zh-TW');
       });
     });
   });

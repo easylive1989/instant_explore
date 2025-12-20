@@ -22,10 +22,6 @@ class NarrationContent {
   /// 每個段落約1-2句話
   final List<String> segments;
 
-  /// 預估播放時長（秒）
-  /// 根據文本長度和語速估算
-  final int estimatedDuration;
-
   /// 語言代碼 (e.g., 'zh-TW', 'en-US')
   final String language;
 
@@ -37,16 +33,15 @@ class NarrationContent {
   const NarrationContent._({
     required this.text,
     required this.segments,
-    required this.estimatedDuration,
     required this.language,
     required List<_SegmentCharRange> segmentCharRanges,
   }) : _segmentCharRanges = segmentCharRanges;
 
   /// 從完整文本創建 NarrationContent
   ///
-  /// 自動將文本分段並估算播放時長
+  /// 自動將文本分段
   /// [text] 完整的導覽文本
-  /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')，用於決定語速
+  /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')
   ///
   /// 拋出 [NarrationContentException] 如果：
   /// - 文本為空或只有空白字符
@@ -82,18 +77,9 @@ class NarrationContent {
     // 建立段落字符位置映射表
     final segmentCharRanges = _buildSegmentCharRanges(text, segments);
 
-    // 根據語言決定每秒字數
-    // 中文：約 4 字/秒 (TTS rate 0.5)
-    // 英文/其他：約 18 字/秒
-    final int charsPerSecond = language.toLowerCase().startsWith('zh') ? 4 : 18;
-
-    // 估算播放時長：字數 / 每秒字數
-    final estimatedDuration = (text.length / charsPerSecond).ceil();
-
     return NarrationContent._(
       text: text,
       segments: segments,
-      estimatedDuration: estimatedDuration,
       language: language,
       segmentCharRanges: segmentCharRanges,
     );
@@ -102,7 +88,6 @@ class NarrationContent {
   factory NarrationContent.fromJson(Map<String, dynamic> json) {
     final text = json['text'] as String;
     final segments = (json['segments'] as List).cast<String>();
-    final estimatedDuration = json['estimated_duration'] as int;
     final language = json['language'] as String? ?? 'zh-TW';
 
     // Rebuild ranges from text and segments
@@ -111,19 +96,13 @@ class NarrationContent {
     return NarrationContent._(
       text: text,
       segments: segments,
-      estimatedDuration: estimatedDuration,
       language: language,
       segmentCharRanges: ranges,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'segments': segments,
-      'estimated_duration': estimatedDuration,
-      'language': language,
-    };
+    return {'text': text, 'segments': segments, 'language': language};
   }
 
   /// 將文本分段
@@ -229,31 +208,10 @@ class NarrationContent {
     return 0;
   }
 
-  /// 根據當前播放位置獲取當前段落索引（基於時間估算）
-  ///
-  /// [currentPosition] 當前播放位置（秒）
-  /// 返回當前應該高亮的段落索引
-  ///
-  /// @Deprecated('使用 getSegmentIndexByCharPosition 以獲得更精確的同步')
-  @Deprecated('使用 getSegmentIndexByCharPosition 以獲得更精確的同步')
-  int getCurrentSegmentIndex(int currentPosition) {
-    if (segments.isEmpty || estimatedDuration == 0) return 0;
-
-    // 估算每個段落的時長
-    final durationPerSegment = estimatedDuration / segments.length;
-
-    // 計算當前段落索引
-    final index = (currentPosition / durationPerSegment).floor();
-
-    // 確保索引在有效範圍內
-    return index.clamp(0, segments.length - 1);
-  }
-
   @override
   String toString() {
     return 'NarrationContent(text: ${text.length} chars, '
-        'segments: ${segments.length}, '
-        'duration: ${estimatedDuration}s)';
+        'segments: ${segments.length})';
   }
 
   @override
@@ -263,12 +221,11 @@ class NarrationContent {
     return other is NarrationContent &&
         other.text == text &&
         // Simple list equality check - sufficient for value object
-        other.segments.length == segments.length &&
-        other.estimatedDuration == estimatedDuration;
+        other.segments.length == segments.length;
   }
 
   @override
   int get hashCode {
-    return Object.hash(text, estimatedDuration, segments.length);
+    return Object.hash(text, segments.length);
   }
 }

@@ -26,8 +26,6 @@ class PlayerController extends StateNotifier<NarrationState> {
   StreamSubscription<String>? _ttsErrorSubscription;
   StreamSubscription<TtsProgress>? _ttsProgressSubscription;
 
-  Timer? _progressTimer;
-
   PlayerController(
     this._createNarrationUseCase,
     this._saveNarrationToJourneyUseCase,
@@ -50,7 +48,7 @@ class PlayerController extends StateNotifier<NarrationState> {
     state = state.loading();
 
     try {
-      // 使用 StartNarrationUseCase 生成導覽內容
+      // 使用 CreateNarrationUseCase 生成導覽內容
       final content = await _createNarrationUseCase.execute(
         place: place,
         aspect: aspect,
@@ -61,11 +59,8 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _ttsService.initialize();
       await _ttsService.setLanguage(language);
 
-      // 計算時長（從 estimatedDuration 轉換為 Duration）
-      final duration = Duration(seconds: content.estimatedDuration);
-
       // 更新狀態為就緒
-      state = state.ready(place, aspect, content, duration: duration);
+      state = state.ready(place, aspect, content);
     } on NarrationServiceException catch (e) {
       // 處理 AI 服務相關錯誤
       state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
@@ -113,11 +108,8 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _ttsService.initialize();
       await _ttsService.setLanguage(content.language);
 
-      // 計算時長（從 estimatedDuration 轉換為 Duration）
-      final duration = Duration(seconds: content.estimatedDuration);
-
       // 更新狀態為就緒（aspect 為 null 因為是回放模式）
-      state = state.ready(place, null, content, duration: duration);
+      state = state.ready(place, null, content);
     } on NarrationContentException catch (e) {
       state = state.error(
         NarrationStateErrorType.contentGenerationFailed,
@@ -157,7 +149,6 @@ class PlayerController extends StateNotifier<NarrationState> {
   void _setupTtsListeners() {
     // 監聽播放完成事件
     _ttsCompleteSubscription = _ttsService.onComplete.listen((_) {
-      _stopProgressTimer();
       if (state.content != null) {
         // 設置到最後一個字符並完成播放
         final totalLength = state.content!.text.length;
@@ -167,7 +158,6 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     // 監聽播放開始事件
     _ttsStartSubscription = _ttsService.onStart.listen((_) {
-      _startProgressTimer();
       // 重置字符位置到開頭
       state = state.updateCharPosition(0);
     });
@@ -182,7 +172,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     // 監聽進度事件（字符級別的精確追蹤）
     _ttsProgressSubscription = _ttsService.onProgress.listen((progress) {
-      // 使用 TTS 提供的字符級別進度更新段落索引
+      // 使用 TTS 提供的字符級別進度更新段落索引和進度
       if (state.content != null && state.isPlaying) {
         state = state.updateCharPosition(progress.currentPosition);
       }
@@ -246,42 +236,12 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為暫停
       state = state.paused();
-
-      // 停止進度定時器
-      _stopProgressTimer();
     } catch (e) {
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,
         message: '暫停失敗：$e',
       );
     }
-  }
-
-  /// 開始進度定時器
-  ///
-  /// 職責分離：
-  /// - 定時器：追蹤播放時間（用於進度條顯示）
-  /// - TTS 進度回調：追蹤字符位置（用於段落索引計算）
-  void _startProgressTimer() {
-    _stopProgressTimer();
-
-    _progressTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.content != null && state.isPlaying) {
-        // 計算新的播放位置
-        final newPosition =
-            state.playerState.currentPosition + const Duration(seconds: 1);
-
-        // 更新播放時間進度（用於進度條）
-        // 段落索引由 TTS 進度回調的字符位置決定
-        state = state.updateProgress(newPosition);
-      }
-    });
-  }
-
-  /// 停止進度定時器
-  void _stopProgressTimer() {
-    _progressTimer?.cancel();
-    _progressTimer = null;
   }
 
   @override
@@ -294,9 +254,6 @@ class PlayerController extends StateNotifier<NarrationState> {
     _ttsStartSubscription?.cancel();
     _ttsErrorSubscription?.cancel();
     _ttsProgressSubscription?.cancel();
-
-    // 停止定時器
-    _stopProgressTimer();
 
     super.dispose();
   }

@@ -271,44 +271,5 @@ void main() {
       expect(result.segments[2], equals('第三句話？'));
       expect(result.segments[3], equals('第四句話。'));
     });
-
-    test('should estimate duration based on text length', () async {
-      // Arrange
-      const shortText = '這是短文本，測試用。'; // ~10 characters (meets minimum)
-      final longText = '這' * 100 + '。'; // 101 characters with punctuation
-
-      when(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: any(named: 'language'),
-        ),
-      ).thenAnswer((_) async => shortText);
-
-      // Act
-      final resultShort = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-      );
-
-      when(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.architecture,
-          language: any(named: 'language'),
-        ),
-      ).thenAnswer((_) async => longText);
-
-      final resultLong = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.architecture,
-      );
-
-      // Assert - longer text should have longer estimated duration
-      expect(
-        resultLong.estimatedDuration,
-        greaterThan(resultShort.estimatedDuration),
-      );
-    });
   });
 }

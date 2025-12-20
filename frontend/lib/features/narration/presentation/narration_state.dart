@@ -47,14 +47,13 @@ class NarrationState {
   NarrationState ready(
     Place place,
     NarrationAspect? aspect,
-    NarrationContent content, {
-    required Duration duration,
-  }) {
+    NarrationContent content,
+  ) {
     return copyWith(
       place: place,
       aspect: aspect,
       content: content,
-      playerState: PlayerState.ready(duration: duration),
+      playerState: PlayerState.ready(),
       errorMessage: null,
     );
   }
@@ -78,7 +77,7 @@ class NarrationState {
     return copyWith(
       playerState: playerState.copyWith(
         state: PlaybackState.completed,
-        currentPosition: playerState.duration,
+        currentCharPosition: content?.text.length ?? 0,
       ),
     );
   }
@@ -92,22 +91,17 @@ class NarrationState {
     );
   }
 
-  /// 更新播放進度
-  NarrationState updateProgress(Duration position) {
+  /// 更新字符位置（用於段落同步和進度計算）
+  NarrationState updateCharPosition(int charPosition) {
     // 檢查是否播放完成
-    final isComplete = position >= playerState.duration;
+    final totalChars = content?.text.length ?? 0;
+    final isComplete = totalChars > 0 && charPosition >= totalChars;
+
     return copyWith(
       playerState: playerState.copyWith(
-        currentPosition: position,
+        currentCharPosition: charPosition,
         state: isComplete ? PlaybackState.completed : playerState.state,
       ),
-    );
-  }
-
-  /// 更新字符位置（用於段落同步）
-  NarrationState updateCharPosition(int charPosition) {
-    return copyWith(
-      playerState: playerState.copyWith(currentCharPosition: charPosition),
     );
   }
 
@@ -156,12 +150,6 @@ class NarrationState {
     if (totalChars == 0) return 0.0;
     return (playerState.currentCharPosition / totalChars).clamp(0.0, 1.0);
   }
-
-  /// 當前播放位置（秒）
-  int get currentPositionSeconds => playerState.currentPosition.inSeconds;
-
-  /// 總時長（秒）
-  int get durationSeconds => playerState.duration.inSeconds;
 
   /// 當前段落索引（用於高亮顯示）
   int? get currentSegmentIndex {
