@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/explore/providers.dart';
+import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -17,6 +18,24 @@ class ExploreScreen extends ConsumerStatefulWidget {
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 同步 EasyLocalization 的語言到 languageProvider
+    // 使用 addPostFrameCallback 延遲更新，避免在 widget build 期間修改 provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncLanguage();
+    });
+  }
+
+  /// 同步 EasyLocalization 語言到 Provider
+  void _syncLanguage() {
+    if (!mounted) return;
+    final localeTag =
+        EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
+    ref.read(currentLanguageProvider.notifier).updateLanguage(localeTag);
+  }
 
   @override
   void dispose() {
@@ -77,14 +96,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           IconButton(
                             onPressed: () {
                               _searchController.clear();
-                              final languageCode =
-                                  EasyLocalization.of(
-                                    context,
-                                  )?.locale.toLanguageTag() ??
-                                  'zh-TW';
                               ref
                                   .read(placesControllerProvider.notifier)
-                                  .refresh(languageCode: languageCode);
+                                  .refresh();
                             },
                             icon: const Icon(Icons.refresh),
                             style: ElevatedButton.styleFrom(
@@ -128,27 +142,17 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                   ),
                                   onPressed: () {
                                     _searchController.clear();
-                                    final languageCode =
-                                        EasyLocalization.of(
-                                          context,
-                                        )?.locale.toLanguageTag() ??
-                                        'zh-TW';
                                     ref
                                         .read(placesControllerProvider.notifier)
-                                        .search('', languageCode: languageCode);
+                                        .search('');
                                   },
                                 )
                               : null,
                         ),
                         onSubmitted: (value) {
-                          final languageCode =
-                              EasyLocalization.of(
-                                context,
-                              )?.locale.toLanguageTag() ??
-                              'zh-TW';
                           ref
                               .read(placesControllerProvider.notifier)
-                              .search(value, languageCode: languageCode);
+                              .search(value);
                         },
                       ),
                     ],

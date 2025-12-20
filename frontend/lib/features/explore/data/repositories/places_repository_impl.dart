@@ -2,6 +2,7 @@ import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 class PlacesRepositoryImpl implements PlacesRepository {
   final PlacesApiService _apiService;
@@ -24,17 +25,20 @@ class PlacesRepositoryImpl implements PlacesRepository {
   @override
   Future<List<Place>> getNearbyPlaces(
     PlaceLocation location, {
-    String? languageCode,
+    required Language language,
   }) async {
     return _apiService.searchNearby(
       location,
       includedTypes: _includedTypes,
-      languageCode: languageCode,
+      languageCode: language.code,
     );
   }
 
   @override
-  Future<List<Place>> searchPlaces(String query, {String? languageCode}) async {
-    return _apiService.searchByText(query, languageCode: languageCode);
+  Future<List<Place>> searchPlaces(
+    String query, {
+    required Language language,
+  }) async {
+    return _apiService.searchByText(query, languageCode: language.code);
   }
 }

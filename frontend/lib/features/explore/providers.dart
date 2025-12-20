@@ -8,6 +8,7 @@ import 'package:context_app/features/explore/domain/repositories/places_reposito
 import 'package:context_app/features/explore/domain/services/location_service.dart';
 import 'package:context_app/features/explore/data/repositories/places_repository_impl.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
 
 // Infrastructure Providers
 final locationServiceProvider = Provider<LocationService>((ref) {
@@ -50,35 +51,31 @@ class PlacesController extends AsyncNotifier<List<Place>> {
     return _loadNearbyPlaces();
   }
 
-  Future<List<Place>> _loadNearbyPlaces({String? languageCode}) async {
+  Future<List<Place>> _loadNearbyPlaces() async {
+    final language = ref.read(currentLanguageProvider);
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    return useCase.execute(languageCode: languageCode);
+    return useCase.execute(language: language);
   }
 
-  Future<void> search(String query, {String? languageCode}) async {
+  Future<void> search(String query) async {
+    final language = ref.read(currentLanguageProvider);
+
     if (query.isEmpty) {
       // If query is empty, reload nearby places
       state = const AsyncValue.loading();
-      state = await AsyncValue.guard(
-        () => _loadNearbyPlaces(languageCode: languageCode),
-      );
+      state = await AsyncValue.guard(() => _loadNearbyPlaces());
       return;
     }
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(searchPlacesUseCaseProvider);
-      return useCase.execute(query, languageCode: languageCode);
+      return useCase.execute(query, language: language);
     });
   }
 
-  Future<void> refresh({String? languageCode}) async {
+  Future<void> refresh() async {
     state = const AsyncValue.loading();
-    // Reset to nearby places on refresh if we want that behavior,
-    // or just re-execute the last action.
-    // For simplicity, let's reload nearby places as the default "home" state.
-    state = await AsyncValue.guard(
-      () => _loadNearbyPlaces(languageCode: languageCode),
-    );
+    state = await AsyncValue.guard(() => _loadNearbyPlaces());
   }
 }

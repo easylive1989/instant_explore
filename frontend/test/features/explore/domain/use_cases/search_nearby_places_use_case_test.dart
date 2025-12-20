@@ -1,4 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
@@ -13,6 +14,8 @@ class MockPlacesRepository extends Mock implements PlacesRepository {}
 
 class FakePlaceLocation extends Fake implements PlaceLocation {}
 
+class FakeLanguage extends Fake implements Language {}
+
 void main() {
   late SearchNearbyPlacesUseCase useCase;
   late MockLocationService mockLocationService;
@@ -20,6 +23,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakePlaceLocation());
+    registerFallbackValue(FakeLanguage());
   });
 
   setUp(() {
@@ -36,6 +40,7 @@ void main() {
     () async {
       // arrange
       final testLocation = PlaceLocation(latitude: 12.34, longitude: 56.78);
+      final testLanguage = Language.traditionalChinese;
       final testPlaces = [
         Place(
           id: '1',
@@ -61,14 +66,23 @@ void main() {
         () => mockLocationService.getCurrentLocation(),
       ).thenAnswer((_) async => testLocation);
       when(
-        () => mockPlacesRepository.getNearbyPlaces(testLocation),
+        () => mockPlacesRepository.getNearbyPlaces(
+          testLocation,
+          language: testLanguage,
+        ),
       ).thenAnswer((_) async => testPlaces);
 
       // act
-      final result = await useCase.execute();
+      final result = await useCase.execute(language: testLanguage);
 
       // assert
       expect(result, testPlaces);
+      verify(
+        () => mockPlacesRepository.getNearbyPlaces(
+          testLocation,
+          language: testLanguage,
+        ),
+      ).called(1);
     },
   );
 }
