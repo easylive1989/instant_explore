@@ -1,3 +1,5 @@
+import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+
 /// 段落字符位置範圍
 class _SegmentCharRange {
   /// 段落起始字符位置
@@ -45,9 +47,37 @@ class NarrationContent {
   /// 自動將文本分段並估算播放時長
   /// [text] 完整的導覽文本
   /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')，用於決定語速
-  factory NarrationContent.fromText(String text, {String language = 'zh-TW'}) {
+  ///
+  /// 拋出 [NarrationContentException] 如果：
+  /// - 文本為空或只有空白字符
+  /// - 文本長度少於 10 個字符
+  /// - 無法分段（segments 為空）
+  factory NarrationContent.create(String text, {String language = 'zh-TW'}) {
+    // 驗證文本不為空
+    final trimmedText = text.trim();
+    if (trimmedText.isEmpty) {
+      throw NarrationContentException.contentFailed(
+        rawMessage: 'Narration text is empty',
+      );
+    }
+
+    // 驗證文本長度（最少需要 10 個字符）
+    if (trimmedText.length < 10) {
+      throw NarrationContentException.contentFailed(
+        rawMessage:
+            'Narration is too short: ${trimmedText.length} chars (min: 10)',
+      );
+    }
+
     // 按照句號、問號、驚嘆號分段
     final segments = _splitIntoSegments(text);
+
+    // 驗證分段結果
+    if (segments.isEmpty) {
+      throw NarrationContentException.contentFailed(
+        rawMessage: 'Failed to segment narration',
+      );
+    }
 
     // 建立段落字符位置映射表
     final segmentCharRanges = _buildSegmentCharRanges(text, segments);

@@ -33,7 +33,7 @@ class JourneyEntry {
 
     // 從扁平欄位建立 NarrationContent
     final narrationText = json['narration_text'] as String;
-    final narrationContent = NarrationContent.fromText(
+    final narrationContent = NarrationContent.create(
       narrationText,
       language: languageStr,
     );

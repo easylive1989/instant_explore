@@ -13,7 +13,7 @@ void main() {
       address: '123 Test St',
       imageUrl: 'http://example.com/image.jpg',
     );
-    final testContent = NarrationContent.fromText('This is a test narration.');
+    final testContent = NarrationContent.create('This is a test narration.');
     final testLanguage = Language.fromString('zh-TW');
 
     final entry = JourneyEntry(

@@ -1,13 +1,13 @@
 import 'dart:async';
+import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
-import 'package:context_app/features/narration/domain/models/narration_exception.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
@@ -69,8 +69,8 @@ class PlayerController extends StateNotifier<NarrationState> {
     } on NarrationServiceException catch (e) {
       // 處理 AI 服務相關錯誤
       state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
-    } on NarrationException catch (e) {
-      // 處理 UseCase 層級錯誤
+    } on NarrationContentException catch (e) {
+      // 處理內容驗證錯誤
       state = state.error(
         NarrationStateErrorType.contentGenerationFailed,
         message: e.rawMessage,
@@ -118,7 +118,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒（aspect 為 null 因為是回放模式）
       state = state.ready(place, null, content, duration: duration);
-    } on NarrationException catch (e) {
+    } on NarrationContentException catch (e) {
       state = state.error(
         NarrationStateErrorType.contentGenerationFailed,
         message: e.rawMessage,

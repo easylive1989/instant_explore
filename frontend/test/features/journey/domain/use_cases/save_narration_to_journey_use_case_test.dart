@@ -46,7 +46,7 @@ void main() {
 
   test('execute saves entry successfully', () async {
     const aspect = NarrationAspect.historicalBackground;
-    final content = NarrationContent.fromText('Narration text');
+    final content = NarrationContent.create('Narration text');
 
     when(() => mockRepository.addJourneyEntry(any())).thenAnswer((_) async {});
 
@@ -63,7 +63,7 @@ void main() {
 
   test('execute creates journey entry with correct data', () async {
     const aspect = NarrationAspect.architecture;
-    final content = NarrationContent.fromText('Architecture narration');
+    final content = NarrationContent.create('Architecture narration');
 
     JourneyEntry? capturedEntry;
     when(() => mockRepository.addJourneyEntry(any())).thenAnswer((invocation) async {

@@ -1,5 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/domain/models/narration_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -137,7 +137,7 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
-        throwsA(isA<NarrationException>()),
+        throwsA(isA<NarrationContentException>()),
       );
     });
 
@@ -158,7 +158,7 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: 'zh-TW',
         ),
-        throwsA(isA<NarrationException>()),
+        throwsA(isA<NarrationContentException>()),
       );
     });
 
