@@ -2,8 +2,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/features/settings/domain/models/language.dart'
-    as app_lang;
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 建立導覽用例
 ///
@@ -26,7 +25,7 @@ class CreateNarrationUseCase {
   ///
   /// [place] 地點資訊
   /// [aspect] 導覽介紹面向
-  /// [language] 語言代碼（預設為 'zh-TW'）
+  /// [language] 語言（預設為繁體中文）
   /// 返回生成的 NarrationContent
   ///
   /// 可能拋出：
@@ -35,14 +34,14 @@ class CreateNarrationUseCase {
   Future<NarrationContent> execute({
     required Place place,
     required NarrationAspect aspect,
-    String language = 'zh-TW',
+    required Language language,
   }) async {
     // 呼叫 NarrationService 取得導覽文本
     // NarrationServiceException 會直接透傳給上層
     final text = await _narrationService.generateNarration(
       place: place,
       aspect: aspect,
-      language: app_lang.Language.fromString(language),
+      language: language,
     );
 
     // 使用 NarrationContent.create 組成並驗證內容

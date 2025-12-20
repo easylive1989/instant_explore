@@ -4,6 +4,7 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/transcript_segment_item.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +109,11 @@ class NarrationTranscriptArea extends ConsumerWidget {
                   onPressed: () {
                     ref
                         .read(playerControllerProvider.notifier)
-                        .initialize(place, narrationAspect!, language: locale);
+                        .initialize(
+                          place,
+                          narrationAspect!,
+                          language: Language.fromString(locale),
+                        );
                   },
                   child: const Text('重試'),
                 ),

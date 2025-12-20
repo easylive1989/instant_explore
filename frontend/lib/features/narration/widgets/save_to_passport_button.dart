@@ -1,6 +1,7 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                   // 儲存時傳入語言（必填）
                   await playerController.saveToJourney(
                     userId,
-                    language: locale,
+                    language: Language.fromString(locale),
                   );
                   if (context.mounted) {
                     context.pushNamed('passport_success', extra: widget.place);

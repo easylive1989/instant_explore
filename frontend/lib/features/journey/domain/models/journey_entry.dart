@@ -22,6 +22,7 @@ class JourneyEntry {
   /// 從資料庫的扁平結構解析
   factory JourneyEntry.fromJson(Map<String, dynamic> json) {
     final languageStr = json['language'] as String? ?? 'zh-TW';
+    final language = Language.fromString(languageStr);
 
     // 從扁平欄位建立 SavedPlace
     final place = SavedPlace(
@@ -35,7 +36,7 @@ class JourneyEntry {
     final narrationText = json['narration_text'] as String;
     final narrationContent = NarrationContent.create(
       narrationText,
-      language: languageStr,
+      language: language,
     );
 
     return JourneyEntry(
@@ -44,7 +45,7 @@ class JourneyEntry {
       place: place,
       narrationContent: narrationContent,
       createdAt: DateTime.parse(json['created_at'] as String),
-      language: Language.fromString(languageStr),
+      language: language,
     );
   }
 

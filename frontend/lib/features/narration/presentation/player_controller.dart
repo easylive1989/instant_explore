@@ -11,6 +11,7 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 播放器控制器
 ///
@@ -38,11 +39,11 @@ class PlayerController extends StateNotifier<NarrationState> {
   ///
   /// [place] 地點資訊
   /// [aspect] 導覽介紹面向
-  /// [language] 語言代碼（預設為 'zh-TW'）
+  /// [language] 語言（預設為繁體中文）
   Future<void> initialize(
     Place place,
     NarrationAspect aspect, {
-    String language = 'zh-TW',
+    required Language language,
   }) async {
     // 設定為載入中狀態
     state = state.loading();
@@ -124,7 +125,10 @@ class PlayerController extends StateNotifier<NarrationState> {
   }
 
   /// 儲存導覽到歷程
-  Future<void> saveToJourney(String userId, {required String language}) async {
+  Future<void> saveToJourney(
+    String userId, {
+    required Language language,
+  }) async {
     if (state.content == null || state.place == null || state.aspect == null) {
       return;
     }

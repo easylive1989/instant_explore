@@ -23,7 +23,7 @@ class SaveNarrationToJourneyUseCase {
     required Place place,
     required NarrationAspect aspect,
     required NarrationContent content,
-    required String language,
+    required Language language,
   }) async {
     String? imageUrl;
     if (place.primaryPhoto != null && _apiConfig.isPlacesConfigured) {
@@ -46,7 +46,7 @@ class SaveNarrationToJourneyUseCase {
       place: savedPlace,
       narrationContent: content,
       createdAt: DateTime.now(),
-      language: Language.fromString(language),
+      language: language,
     );
 
     await _repository.addJourneyEntry(entry);

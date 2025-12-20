@@ -69,7 +69,7 @@ void main() {
         final result = await useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
+          language: Language.traditionalChinese,
         );
 
         // Assert
@@ -104,7 +104,7 @@ void main() {
         final result = await useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.architecture,
-          language: 'en-US',
+          language: Language.english,
         );
 
         // Assert
@@ -135,7 +135,7 @@ void main() {
         () => useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
+          language: Language.traditionalChinese,
         ),
         throwsA(isA<NarrationContentException>()),
       );
@@ -156,7 +156,7 @@ void main() {
         () => useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
+          language: Language.traditionalChinese,
         ),
         throwsA(isA<NarrationContentException>()),
       );
@@ -179,7 +179,7 @@ void main() {
         () => useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
+          language: Language.traditionalChinese,
         ),
         throwsA(isA<NarrationServiceException>()),
       );
@@ -206,7 +206,7 @@ void main() {
           await useCase.execute(
             place: testPlace,
             aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
+            language: Language.traditionalChinese,
           );
           fail('Should have thrown');
         } on NarrationServiceException catch (e) {
@@ -214,33 +214,6 @@ void main() {
         }
       },
     );
-
-    test('should use default language zh-TW when not specified', () async {
-      // Arrange
-      when(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: any(named: 'language'),
-        ),
-      ).thenAnswer((_) async => testGeneratedText);
-
-      // Act
-      await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-        // language not specified, should use default 'zh-TW'
-      );
-
-      // Assert
-      verify(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: Language.fromString('zh-TW'),
-        ),
-      ).called(1);
-    });
 
     test('should correctly split text into segments', () async {
       // Arrange
@@ -261,7 +234,7 @@ void main() {
       final result = await useCase.execute(
         place: testPlace,
         aspect: NarrationAspect.historicalBackground,
-        language: 'zh-TW',
+        language: Language.traditionalChinese,
       );
 
       // Assert

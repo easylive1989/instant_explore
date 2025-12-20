@@ -1,4 +1,5 @@
 import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 段落字符位置範圍
 class _SegmentCharRange {
@@ -22,8 +23,8 @@ class NarrationContent {
   /// 每個段落約1-2句話
   final List<String> segments;
 
-  /// 語言代碼 (e.g., 'zh-TW', 'en-US')
-  final String language;
+  /// 語言
+  final Language language;
 
   /// 段落字符位置範圍映射
   /// 每個元素是一個 (startIndex, endIndex) 對，表示該段落在完整文本中的字符範圍
@@ -41,13 +42,13 @@ class NarrationContent {
   ///
   /// 自動將文本分段
   /// [text] 完整的導覽文本
-  /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')
+  /// [language] 語言（預設為繁體中文）
   ///
   /// 拋出 [NarrationContentException] 如果：
   /// - 文本為空或只有空白字符
   /// - 文本長度少於 10 個字符
   /// - 無法分段（segments 為空）
-  factory NarrationContent.create(String text, {String language = 'zh-TW'}) {
+  factory NarrationContent.create(String text, {required Language language}) {
     // 驗證文本不為空
     final trimmedText = text.trim();
     if (trimmedText.isEmpty) {
@@ -88,7 +89,8 @@ class NarrationContent {
   factory NarrationContent.fromJson(Map<String, dynamic> json) {
     final text = json['text'] as String;
     final segments = (json['segments'] as List).cast<String>();
-    final language = json['language'] as String? ?? 'zh-TW';
+    final languageCode = json['language'] as String? ?? 'zh-TW';
+    final language = Language.fromString(languageCode);
 
     // Rebuild ranges from text and segments
     final ranges = _buildSegmentCharRanges(text, segments);
@@ -102,7 +104,7 @@ class NarrationContent {
   }
 
   Map<String, dynamic> toJson() {
-    return {'text': text, 'segments': segments, 'language': language};
+    return {'text': text, 'segments': segments, 'language': language.code};
   }
 
   /// 將文本分段

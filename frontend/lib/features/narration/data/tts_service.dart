@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// TTS 語音合成服務
 ///
@@ -152,10 +153,10 @@ class TtsService {
 
   /// 設定語言
   ///
-  /// [language] 語言代碼 (例如: 'zh-TW', 'en-US')
-  Future<void> setLanguage(String language) async {
+  /// [language] 語言
+  Future<void> setLanguage(Language language) async {
     try {
-      await _tts.setLanguage(language);
+      await _tts.setLanguage(language.code);
     } catch (e) {
       _errorController.add('設定語言失敗: $e');
     }

@@ -29,7 +29,10 @@ void main() {
     id: '1',
     userId: 'user-1',
     place: testPlace,
-    narrationContent: NarrationContent.create('這是一段測試用的導覽內容。'),
+    narrationContent: NarrationContent.create(
+      '這是一段測試用的導覽內容。',
+      language: Language.traditionalChinese,
+    ),
     createdAt: DateTime.now(),
     language: Language.fromString('zh-TW'),
   );
