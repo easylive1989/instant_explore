@@ -48,7 +48,11 @@ final placesControllerProvider =
 class PlacesController extends AsyncNotifier<List<Place>> {
   @override
   Future<List<Place>> build() async {
-    return _loadNearbyPlaces();
+    // 使用 ref.watch 監聽語言變化
+    // 當語言改變時，會自動觸發重新載入
+    final language = ref.watch(currentLanguageProvider);
+    final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
+    return useCase.execute(language: language);
   }
 
   Future<List<Place>> _loadNearbyPlaces() async {
