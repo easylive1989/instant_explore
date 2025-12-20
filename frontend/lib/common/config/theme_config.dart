@@ -1,4 +1,4 @@
-import 'package:context_app/core/config/app_colors.dart';
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Theme configuration for the application.

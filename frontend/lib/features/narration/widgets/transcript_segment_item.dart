@@ -1,10 +1,11 @@
-import 'package:context_app/core/config/app_colors.dart';
+import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 /// 單個轉錄文本段落項目
 class TranscriptSegmentItem extends StatelessWidget {
-  final String segment;
+  final NarrationSegment segment;
   final bool isActive;
   final Color primaryColor;
   final AutoScrollController scrollController;
@@ -44,7 +45,7 @@ class TranscriptSegmentItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    segment,
+                    segment.text,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -55,7 +56,7 @@ class TranscriptSegmentItem extends StatelessWidget {
                 ],
               )
             : Text(
-                segment,
+                segment.text,
                 style: const TextStyle(
                   color: AppColors.textSecondaryDark,
                   fontSize: 20,

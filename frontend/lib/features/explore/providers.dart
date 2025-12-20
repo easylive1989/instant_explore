@@ -1,4 +1,4 @@
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';

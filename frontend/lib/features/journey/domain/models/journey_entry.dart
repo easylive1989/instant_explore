@@ -1,59 +1,66 @@
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 class JourneyEntry {
   final String id;
   final String userId;
-  final String placeId;
-  final String placeName;
-  final String placeAddress;
-  final String? placeImageUrl;
-  final String narrationText;
-  final NarrationAspect narrationAspect;
+  final SavedPlace place;
+  final NarrationContent narrationContent;
   final DateTime createdAt;
-  final String language; // 語言代碼 (例如: 'zh-TW', 'en-US')，必填
+  final Language language;
 
   const JourneyEntry({
     required this.id,
     required this.userId,
-    required this.placeId,
-    required this.placeName,
-    required this.placeAddress,
-    this.placeImageUrl,
-    required this.narrationText,
-    required this.narrationAspect,
+    required this.place,
+    required this.narrationContent,
     required this.createdAt,
-    required this.language, // 必填參數
+    required this.language,
   });
 
+  /// 從資料庫的扁平結構解析
   factory JourneyEntry.fromJson(Map<String, dynamic> json) {
+    final languageStr = json['language'] as String? ?? 'zh-TW';
+    final language = Language.fromString(languageStr);
+
+    // 從扁平欄位建立 SavedPlace
+    final place = SavedPlace(
+      id: json['place_id'] as String,
+      name: json['place_name'] as String,
+      address: json['place_address'] as String,
+      imageUrl: json['place_image_url'] as String?,
+    );
+
+    // 從扁平欄位建立 NarrationContent
+    final narrationText = json['narration_text'] as String;
+    final narrationContent = NarrationContent.create(
+      narrationText,
+      language: language,
+    );
+
     return JourneyEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      placeId: json['place_id'] as String,
-      placeName: json['place_name'] as String,
-      placeAddress: json['place_address'] as String,
-      placeImageUrl: json['place_image_url'] as String?,
-      narrationText: json['narration_text'] as String,
-      narrationAspect:
-          NarrationAspect.fromString(json['narration_style'] as String) ??
-          NarrationAspect.historicalBackground,
+      place: place,
+      narrationContent: narrationContent,
       createdAt: DateTime.parse(json['created_at'] as String),
-      language: json['language'] as String,
+      language: language,
     );
   }
 
+  /// 轉換為資料庫的扁平結構
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
-      'place_id': placeId,
-      'place_name': placeName,
-      'place_address': placeAddress,
-      'place_image_url': placeImageUrl,
-      'narration_text': narrationText,
-      'narration_style': narrationAspect.toApiString(),
+      'place_id': place.id,
+      'place_name': place.name,
+      'place_address': place.address,
+      'place_image_url': place.imageUrl,
+      'narration_text': narrationContent.text,
       'created_at': createdAt.toIso8601String(),
-      'language': language,
+      'language': language.toString(),
     };
   }
 }

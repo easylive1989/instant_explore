@@ -1,32 +1,40 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:context_app/core/services/gemini_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/services/narration_service.dart';
+import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 // Mock classes
-class MockGeminiService extends Mock implements GeminiService {}
+class MockNarrationService extends Mock implements NarrationService {}
 
 // Fake class for Place (required for mocktail any() matcher)
 class FakePlace extends Fake implements Place {}
 
+// Fake class for Language
+class FakeLanguage extends Fake implements Language {}
+
 void main() {
-  late StartNarrationUseCase useCase;
-  late MockGeminiService mockGeminiService;
+  late CreateNarrationUseCase useCase;
+  late MockNarrationService mockNarrationService;
 
   setUpAll(() {
     // Register fallback values for mocktail
     registerFallbackValue(FakePlace());
     registerFallbackValue(NarrationAspect.historicalBackground);
+    registerFallbackValue(FakeLanguage());
   });
 
   setUp(() {
-    mockGeminiService = MockGeminiService();
-    useCase = StartNarrationUseCase(mockGeminiService);
+    mockNarrationService = MockNarrationService();
+    useCase = CreateNarrationUseCase(mockNarrationService);
   });
 
   group('StartNarrationUseCase', () {
@@ -45,49 +53,50 @@ void main() {
 許多遊客來到這裡參觀。這是一個著名的景點。
 ''';
 
-    test('should successfully generate narration', () async {
-      // Arrange
-      when(
-        () => mockGeminiService.generateNarration(
+    test(
+      'should successfully generate narration and create NarrationContent',
+      () async {
+        // Arrange - Service now returns String
+        when(
+          () => mockNarrationService.generateNarration(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: any(named: 'language'),
+          ),
+        ).thenAnswer((_) async => testGeneratedText);
+
+        // Act
+        final result = await useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
-        ),
-      ).thenAnswer((_) async => testGeneratedText);
+          language: Language.traditionalChinese,
+        );
 
-      // Act
-      final result = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-        language: 'zh-TW',
-      );
+        // Assert
+        expect(result, isA<NarrationContent>());
+        expect(result.text, equals(testGeneratedText));
+        expect(result.segments.length, greaterThan(0));
 
-      // Assert
-      expect(result.place, equals(testPlace));
-      expect(result.aspect, equals(NarrationAspect.historicalBackground));
-      expect(result.content, isNotNull);
-      expect(result.content.text, equals(testGeneratedText));
-      expect(result.content.segments.length, greaterThan(0));
-
-      // Verify method calls
-      verify(
-        () => mockGeminiService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
-        ),
-      ).called(1);
-    });
+        // Verify method calls
+        verify(
+          () => mockNarrationService.generateNarration(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: any(named: 'language'),
+          ),
+        ).called(1);
+      },
+    );
 
     test(
       'should successfully generate narration with architecture aspect',
       () async {
         // Arrange
         when(
-          () => mockGeminiService.generateNarration(
+          () => mockNarrationService.generateNarration(
             place: testPlace,
             aspect: NarrationAspect.architecture,
-            language: 'en-US',
+            language: any(named: 'language'),
           ),
         ).thenAnswer((_) async => testGeneratedText);
 
@@ -95,124 +104,116 @@ void main() {
         final result = await useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.architecture,
-          language: 'en-US',
+          language: Language.english,
         );
 
         // Assert
-        expect(result.place, equals(testPlace));
-        expect(result.aspect, equals(NarrationAspect.architecture));
-        expect(result.content, isNotNull);
+        expect(result, isA<NarrationContent>());
 
         verify(
-          () => mockGeminiService.generateNarration(
+          () => mockNarrationService.generateNarration(
             place: testPlace,
             aspect: NarrationAspect.architecture,
-            language: 'en-US',
+            language: any(named: 'language'),
           ),
         ).called(1);
       },
     );
 
-    test(
-      'should throw NarrationGenerationException when generated text is empty',
-      () async {
-        // Arrange
-        when(
-          () => mockGeminiService.generateNarration(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-        ).thenAnswer((_) async => '');
-
-        // Act & Assert
-        expect(
-          () => useCase.execute(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-          throwsA(isA<NarrationGenerationException>()),
-        );
-      },
-    );
-
-    test(
-      'should throw NarrationGenerationException when GeminiService throws error',
-      () async {
-        // Arrange
-        when(
-          () => mockGeminiService.generateNarration(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-        ).thenThrow(Exception('Network error'));
-
-        // Act & Assert
-        expect(
-          () => useCase.execute(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-          throwsA(isA<NarrationGenerationException>()),
-        );
-      },
-    );
-
-    test('should use default language zh-TW when not specified', () async {
+    test('should throw NarrationException when text is empty', () async {
       // Arrange
       when(
-        () => mockGeminiService.generateNarration(
+        () => mockNarrationService.generateNarration(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
-        ),
-      ).thenAnswer((_) async => testGeneratedText);
-
-      // Act
-      await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-        // language not specified, should use default 'zh-TW'
-      );
-
-      // Assert
-      verify(
-        () => mockGeminiService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
-        ),
-      ).called(1);
-    });
-
-    test('should create unique narration ID for each execution', () async {
-      // Arrange
-      when(
-        () => mockGeminiService.generateNarration(
-          place: any(named: 'place'),
-          aspect: any(named: 'aspect'),
           language: any(named: 'language'),
         ),
-      ).thenAnswer((_) async => testGeneratedText);
+      ).thenAnswer((_) async => '');
 
-      // Act
-      final result1 = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: Language.traditionalChinese,
+        ),
+        throwsA(isA<NarrationContentException>()),
       );
-      final result2 = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-      );
-
-      // Assert
-      expect(result1.id, isNotEmpty);
-      expect(result2.id, isNotEmpty);
-      expect(result1.id, isNot(equals(result2.id)));
     });
+
+    test('should throw NarrationException when text is too short', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenAnswer((_) async => '短');
+
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: Language.traditionalChinese,
+        ),
+        throwsA(isA<NarrationContentException>()),
+      );
+    });
+
+    test('should rethrow NarrationServiceException from service', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenThrow(
+        NarrationServiceException.quotaExceeded(rawMessage: 'Quota exceeded'),
+      );
+
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: Language.traditionalChinese,
+        ),
+        throwsA(isA<NarrationServiceException>()),
+      );
+    });
+
+    test(
+      'should rethrow NarrationServiceException with correct error type',
+      () async {
+        // Arrange
+        when(
+          () => mockNarrationService.generateNarration(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: any(named: 'language'),
+          ),
+        ).thenThrow(
+          NarrationServiceException.unsupportedLocation(
+            rawMessage: 'Location not supported',
+          ),
+        );
+
+        // Act & Assert
+        try {
+          await useCase.execute(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: Language.traditionalChinese,
+          );
+          fail('Should have thrown');
+        } on NarrationServiceException catch (e) {
+          expect(e.type, equals(NarrationServiceErrorType.unsupportedLocation));
+        }
+      },
+    );
 
     test('should correctly split text into segments', () async {
       // Arrange
@@ -222,10 +223,10 @@ void main() {
 ''';
 
       when(
-        () => mockGeminiService.generateNarration(
+        () => mockNarrationService.generateNarration(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
+          language: any(named: 'language'),
         ),
       ).thenAnswer((_) async => textWithMultipleSegments);
 
@@ -233,54 +234,15 @@ void main() {
       final result = await useCase.execute(
         place: testPlace,
         aspect: NarrationAspect.historicalBackground,
-        language: 'zh-TW',
+        language: Language.traditionalChinese,
       );
 
       // Assert
-      expect(result.content.segments.length, equals(4));
-      expect(result.content.segments[0], equals('第一句話。'));
-      expect(result.content.segments[1], equals('第二句話！'));
-      expect(result.content.segments[2], equals('第三句話？'));
-      expect(result.content.segments[3], equals('第四句話。'));
-    });
-
-    test('should estimate duration based on text length', () async {
-      // Arrange
-      const shortText = '這是短文本。'; // ~6 characters
-      final longText = '這' * 100; // 100 characters
-
-      when(
-        () => mockGeminiService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: 'zh-TW',
-        ),
-      ).thenAnswer((_) async => shortText);
-
-      // Act
-      final resultShort = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-      );
-
-      when(
-        () => mockGeminiService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.architecture,
-          language: 'zh-TW',
-        ),
-      ).thenAnswer((_) async => longText);
-
-      final resultLong = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.architecture,
-      );
-
-      // Assert - longer text should have longer estimated duration
-      expect(
-        resultLong.content.estimatedDuration,
-        greaterThan(resultShort.content.estimatedDuration),
-      );
+      expect(result.segments.length, equals(4));
+      expect(result.segments[0].text, equals('第一句話。'));
+      expect(result.segments[1].text, equals('第二句話！'));
+      expect(result.segments[2].text, equals('第三句話？'));
+      expect(result.segments[3].text, equals('第四句話。'));
     });
   });
 }

@@ -1,9 +1,10 @@
-import 'package:context_app/core/config/app_colors.dart';
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/transcript_segment_item.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +16,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
   final Color backgroundColor;
   final Color primaryColor;
   final Place place;
-  final NarrationAspect narrationAspect;
+  final NarrationAspect? narrationAspect;
 
   const NarrationTranscriptArea({
     super.key,
@@ -23,7 +24,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
     required this.backgroundColor,
     required this.primaryColor,
     required this.place,
-    required this.narrationAspect,
+    this.narrationAspect,
   });
 
   /// 格式化重試延遲時間
@@ -82,7 +83,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
 
               // 顯示建議的重試時間
               if (errorType?.suggestedRetryDelay != null &&
-                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                  errorType != NarrationStateErrorType.aiQuotaExceeded) ...[
                 const SizedBox(height: 8),
                 Text(
                   'player_screen.suggested_retry'.tr(
@@ -99,15 +100,20 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 ),
               ],
 
-              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示）
+              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示，且有 narrationAspect 時）
               if (errorType?.isRetryable == true &&
-                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                  errorType != NarrationStateErrorType.aiQuotaExceeded &&
+                  narrationAspect != null) ...[
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
                     ref
                         .read(playerControllerProvider.notifier)
-                        .initialize(place, narrationAspect, language: locale);
+                        .initialize(
+                          place,
+                          narrationAspect!,
+                          language: Language.fromString(locale),
+                        );
                   },
                   child: const Text('重試'),
                 ),
@@ -119,12 +125,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
     }
 
     // 顯示導覽文本
-    final narration = playerState.narration;
-    if (narration == null) {
+    final content = playerState.content;
+    if (content == null) {
       return const SizedBox.shrink();
     }
-
-    final content = narration.content;
     final currentSegmentIndex = playerState.currentSegmentIndex;
 
     return Stack(

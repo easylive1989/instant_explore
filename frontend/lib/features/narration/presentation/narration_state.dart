@@ -1,27 +1,33 @@
-import 'package:context_app/features/narration/domain/models/narration.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/narration/presentation/playback_state.dart';
 import 'package:context_app/features/narration/presentation/player_state.dart';
 
 /// 導覽播放狀態
 ///
-/// 聚合領域模型（Narration）和播放狀態（PlayerState）
+/// 聚合導覽內容和播放狀態
 /// 封裝播放器 UI 所需的所有狀態資訊
 class NarrationState {
-  /// 當前導覽內容（領域模型）
-  final Narration? narration;
+  // Replace the aggregated Narration object with flattened fields or necessary components
+  final Place? place;
+  final NarrationAspect? aspect;
+  final NarrationContent? content;
 
   /// 播放器狀態（播放運行時狀態）
   final PlayerState playerState;
 
   /// 錯誤類型（當 playerState.state 為 error 時）
-  final NarrationErrorType? errorType;
+  final NarrationStateErrorType? errorType;
 
   /// 錯誤訊息（可選，用於 debug 或顯示額外資訊）
   final String? errorMessage;
 
   const NarrationState({
-    this.narration,
+    this.place,
+    this.aspect,
+    this.content,
     required this.playerState,
     this.errorType,
     this.errorMessage,
@@ -38,10 +44,16 @@ class NarrationState {
   }
 
   /// 建立就緒狀態
-  NarrationState ready(Narration narration, {required Duration duration}) {
+  NarrationState ready(
+    Place place,
+    NarrationAspect? aspect,
+    NarrationContent content,
+  ) {
     return copyWith(
-      narration: narration,
-      playerState: PlayerState.ready(duration: duration),
+      place: place,
+      aspect: aspect,
+      content: content,
+      playerState: PlayerState.ready(),
       errorMessage: null,
     );
   }
@@ -65,13 +77,13 @@ class NarrationState {
     return copyWith(
       playerState: playerState.copyWith(
         state: PlaybackState.completed,
-        currentPosition: playerState.duration,
+        currentCharPosition: content?.text.length ?? 0,
       ),
     );
   }
 
   /// 建立錯誤狀態
-  NarrationState error(NarrationErrorType type, {String? message}) {
+  NarrationState error(NarrationStateErrorType type, {String? message}) {
     return copyWith(
       playerState: playerState.copyWith(state: PlaybackState.error),
       errorType: type,
@@ -79,34 +91,33 @@ class NarrationState {
     );
   }
 
-  /// 更新播放進度
-  NarrationState updateProgress(Duration position) {
+  /// 更新字符位置（用於段落同步和進度計算）
+  NarrationState updateCharPosition(int charPosition) {
     // 檢查是否播放完成
-    final isComplete = position >= playerState.duration;
+    final totalChars = content?.text.length ?? 0;
+    final isComplete = totalChars > 0 && charPosition >= totalChars;
+
     return copyWith(
       playerState: playerState.copyWith(
-        currentPosition: position,
+        currentCharPosition: charPosition,
         state: isComplete ? PlaybackState.completed : playerState.state,
       ),
     );
   }
 
-  /// 更新字符位置（用於段落同步）
-  NarrationState updateCharPosition(int charPosition) {
-    return copyWith(
-      playerState: playerState.copyWith(currentCharPosition: charPosition),
-    );
-  }
-
   /// 建立副本並更新指定屬性
   NarrationState copyWith({
-    Narration? narration,
+    Place? place,
+    NarrationAspect? aspect,
+    NarrationContent? content,
     PlayerState? playerState,
-    NarrationErrorType? errorType,
+    NarrationStateErrorType? errorType,
     String? errorMessage,
   }) {
     return NarrationState(
-      narration: narration ?? this.narration,
+      place: place ?? this.place,
+      aspect: aspect ?? this.aspect,
+      content: content ?? this.content,
       playerState: playerState ?? this.playerState,
       errorType: errorType ?? this.errorType,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -134,22 +145,16 @@ class NarrationState {
   /// 播放進度百分比 (0.0 - 1.0)
   /// 基於已播放的文字量計算
   double get progress {
-    if (narration == null) return 0.0;
-    final totalChars = narration!.content.text.length;
+    if (content == null) return 0.0;
+    final totalChars = content!.text.length;
     if (totalChars == 0) return 0.0;
     return (playerState.currentCharPosition / totalChars).clamp(0.0, 1.0);
   }
 
-  /// 當前播放位置（秒）
-  int get currentPositionSeconds => playerState.currentPosition.inSeconds;
-
-  /// 總時長（秒）
-  int get durationSeconds => playerState.duration.inSeconds;
-
   /// 當前段落索引（用於高亮顯示）
   int? get currentSegmentIndex {
-    if (narration == null) return null;
-    return narration!.content.getSegmentIndexByCharPosition(
+    if (content == null) return null;
+    return content!.getSegmentIndexByCharPosition(
       playerState.currentCharPosition,
     );
   }
@@ -157,7 +162,7 @@ class NarrationState {
   @override
   String toString() {
     return 'NarrationState(playerState: $playerState, '
-        'narration: ${narration?.id}, '
+        'place: ${place?.name}, aspect: $aspect, '
         'hasError: $hasError)';
   }
 
@@ -166,7 +171,9 @@ class NarrationState {
     if (identical(this, other)) return true;
 
     return other is NarrationState &&
-        other.narration == narration &&
+        other.place == place &&
+        other.aspect == aspect &&
+        other.content == content &&
         other.playerState == playerState &&
         other.errorType == errorType &&
         other.errorMessage == errorMessage;
@@ -174,6 +181,13 @@ class NarrationState {
 
   @override
   int get hashCode {
-    return Object.hash(narration, playerState, errorType, errorMessage);
+    return Object.hash(
+      place,
+      aspect,
+      content,
+      playerState,
+      errorType,
+      errorMessage,
+    );
   }
 }

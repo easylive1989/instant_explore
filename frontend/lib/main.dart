@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/app.dart';
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/common/config/api_config.dart';
 
 void main() async {
   runApp(await init());

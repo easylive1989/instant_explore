@@ -1,31 +1,31 @@
-import 'package:context_app/core/config/app_colors.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:context_app/core/widgets/ai_over_limit_dialog.dart';
+import 'package:context_app/features/narration/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/widgets/narration_control_panel.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
-  final NarrationAspect narrationAspect;
-  final String? initialContent;
+  final NarrationAspect? narrationAspect;
+  final NarrationContent? narrationContent;
   final bool enableSave;
-  final String? language; // 語言參數（可選）
 
   const NarrationScreen({
     super.key,
     required this.place,
-    required this.narrationAspect,
-    this.initialContent,
+    this.narrationAspect,
+    this.narrationContent,
     this.enableSave = true,
-    this.language,
   });
 
   @override
@@ -42,25 +42,24 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     // 初始化播放器
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // 使用傳入的語言（來自 JourneyEntry），若無則使用當前應用語言
-      final locale =
-          widget.language ??
-          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
-          'zh-TW';
 
-      if (widget.initialContent != null) {
+      if (widget.narrationContent != null) {
+        // 使用已有的 NarrationContent 初始化（例如從 JourneyEntry 回放）
         ref
             .read(playerControllerProvider.notifier)
-            .initializeWithContent(
-              widget.place,
-              widget.narrationAspect,
-              widget.initialContent!,
-              language: locale,
-            );
+            .initializeWithContent(widget.place, widget.narrationContent!);
       } else {
+        // 生成新的導覽內容
+        final locale =
+            easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
+            'zh-TW';
         ref
             .read(playerControllerProvider.notifier)
-            .initialize(widget.place, widget.narrationAspect, language: locale);
+            .initialize(
+              widget.place,
+              widget.narrationAspect ?? NarrationAspect.historicalBackground,
+              language: Language.fromString(locale),
+            );
       }
     });
   }

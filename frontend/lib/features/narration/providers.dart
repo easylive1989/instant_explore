@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/core/services/gemini_service.dart';
-import 'package:context_app/core/services/tts_service.dart';
+import 'package:context_app/features/narration/data/gemini_service.dart';
+import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
-import 'package:context_app/features/narration/domain/use_cases/replay_narration_use_case.dart';
+import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/player_controller.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
@@ -34,16 +33,9 @@ final ttsServiceProvider = Provider<TtsService>((ref) {
 /// StartNarrationUseCase Provider
 ///
 /// 提供開始導覽的用例
-final startNarrationUseCaseProvider = Provider<StartNarrationUseCase>((ref) {
-  final geminiService = ref.watch(geminiServiceProvider);
-  return StartNarrationUseCase(geminiService);
-});
-
-/// ReplayNarrationUseCase Provider
-///
-/// 提供重播導覽的用例
-final replayNarrationUseCaseProvider = Provider<ReplayNarrationUseCase>((ref) {
-  return ReplayNarrationUseCase();
+final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
+  final narrationService = ref.watch(narrationServiceProvider);
+  return CreateNarrationUseCase(narrationService);
 });
 
 /// PlayerController Provider
@@ -53,14 +45,12 @@ final replayNarrationUseCaseProvider = Provider<ReplayNarrationUseCase>((ref) {
 final playerControllerProvider =
     StateNotifierProvider.autoDispose<PlayerController, NarrationState>((ref) {
       final startNarrationUseCase = ref.watch(startNarrationUseCaseProvider);
-      final replayNarrationUseCase = ref.watch(replayNarrationUseCaseProvider);
       final saveNarrationToPassportUseCase = ref.watch(
         saveNarrationToPassportUseCaseProvider,
       );
       final ttsService = ref.watch(ttsServiceProvider);
       return PlayerController(
         startNarrationUseCase,
-        replayNarrationUseCase,
         saveNarrationToPassportUseCase,
         ttsService,
       );

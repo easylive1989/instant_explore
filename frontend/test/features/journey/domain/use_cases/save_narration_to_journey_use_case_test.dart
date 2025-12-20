@@ -6,10 +6,10 @@ import 'package:context_app/features/journey/domain/repositories/journey_reposit
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
-import 'package:context_app/features/narration/domain/models/narration.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/common/config/api_config.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
 
@@ -46,48 +46,55 @@ void main() {
   );
 
   test('execute saves entry successfully', () async {
-    final narration = Narration(
-      id: '1',
-      place: place,
-      aspect: NarrationAspect.historicalBackground,
-      content: NarrationContent.fromText('Narration text'),
+    const aspect = NarrationAspect.historicalBackground;
+    final content = NarrationContent.create(
+      'Narration text',
+      language: Language.traditionalChinese,
     );
 
     when(() => mockRepository.addJourneyEntry(any())).thenAnswer((_) async {});
 
     await useCase.execute(
       userId: 'user-1',
-      narration: narration,
-      language: 'zh-TW',
+      place: place,
+      aspect: aspect,
+      content: content,
+      language: Language.traditionalChinese,
     );
 
     verify(() => mockRepository.addJourneyEntry(any())).called(1);
   });
 
   test('execute creates journey entry with correct data', () async {
-    final narration = Narration(
-      id: '1',
-      place: place,
-      aspect: NarrationAspect.architecture,
-      content: NarrationContent.fromText('Architecture narration'),
+    const aspect = NarrationAspect.architecture;
+    final content = NarrationContent.create(
+      'Architecture narration',
+      language: Language.traditionalChinese,
     );
 
     JourneyEntry? capturedEntry;
-    when(() => mockRepository.addJourneyEntry(any())).thenAnswer((invocation) async {
+    when(() => mockRepository.addJourneyEntry(any())).thenAnswer((
+      invocation,
+    ) async {
       capturedEntry = invocation.positionalArguments[0] as JourneyEntry;
     });
 
     await useCase.execute(
       userId: 'user-1',
-      narration: narration,
-      language: 'zh-TW',
+      place: place,
+      aspect: aspect,
+      content: content,
+      language: Language.traditionalChinese,
     );
 
     expect(capturedEntry, isNotNull);
     expect(capturedEntry!.userId, equals('user-1'));
-    expect(capturedEntry!.placeId, equals('place-1'));
-    expect(capturedEntry!.placeName, equals('Test Place'));
-    expect(capturedEntry!.narrationText, equals('Architecture narration'));
-    expect(capturedEntry!.language, equals('zh-TW'));
+    expect(capturedEntry!.place.id, equals('place-1'));
+    expect(capturedEntry!.place.name, equals('Test Place'));
+    expect(
+      capturedEntry!.narrationContent.text,
+      equals('Architecture narration'),
+    );
+    expect(capturedEntry!.language.code, equals('zh-TW'));
   });
 }
