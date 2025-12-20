@@ -55,8 +55,8 @@ class PlacesApiService {
 
   Future<List<Place>> searchNearby(
     PlaceLocation location, {
-    int maxResultCount = 10,
-    double radius = 1000.0,
+    int maxResultCount = 20,
+    required double radius,
     List<String>? includedTypes,
     String? languageCode,
   }) async {
@@ -73,6 +73,7 @@ class PlacesApiService {
 
     final Map<String, dynamic> requestBody = {
       'maxResultCount': maxResultCount,
+      'rankPreference': 'DISTANCE',
       'locationRestriction': {
         'circle': {
           'center': {

@@ -26,11 +26,13 @@ class PlacesRepositoryImpl implements PlacesRepository {
   Future<List<Place>> getNearbyPlaces(
     PlaceLocation location, {
     required Language language,
+    required double radius,
   }) async {
     return _apiService.searchNearby(
       location,
       includedTypes: _includedTypes,
       languageCode: language.code,
+      radius: radius,
     );
   }
 

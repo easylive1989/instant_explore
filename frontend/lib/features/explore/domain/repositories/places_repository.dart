@@ -6,6 +6,7 @@ abstract class PlacesRepository {
   Future<List<Place>> getNearbyPlaces(
     PlaceLocation location, {
     required Language language,
+    required double radius,
   });
 
   Future<List<Place>> searchPlaces(String query, {required Language language});
