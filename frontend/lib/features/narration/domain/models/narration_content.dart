@@ -24,6 +24,9 @@ class NarrationContent {
   /// 根據文本長度和語速估算
   final int estimatedDuration;
 
+  /// 語言代碼 (e.g., 'zh-TW', 'en-US')
+  final String language;
+
   /// 段落字符位置範圍映射
   /// 每個元素是一個 (startIndex, endIndex) 對，表示該段落在完整文本中的字符範圍
   final List<_SegmentCharRange> _segmentCharRanges;
@@ -33,6 +36,7 @@ class NarrationContent {
     required this.text,
     required this.segments,
     required this.estimatedDuration,
+    required this.language,
     required List<_SegmentCharRange> segmentCharRanges,
   }) : _segmentCharRanges = segmentCharRanges;
 
@@ -60,6 +64,7 @@ class NarrationContent {
       text: text,
       segments: segments,
       estimatedDuration: estimatedDuration,
+      language: language,
       segmentCharRanges: segmentCharRanges,
     );
   }
@@ -68,6 +73,7 @@ class NarrationContent {
     final text = json['text'] as String;
     final segments = (json['segments'] as List).cast<String>();
     final estimatedDuration = json['estimated_duration'] as int;
+    final language = json['language'] as String? ?? 'zh-TW';
 
     // Rebuild ranges from text and segments
     final ranges = _buildSegmentCharRanges(text, segments);
@@ -76,6 +82,7 @@ class NarrationContent {
       text: text,
       segments: segments,
       estimatedDuration: estimatedDuration,
+      language: language,
       segmentCharRanges: ranges,
     );
   }
@@ -85,6 +92,7 @@ class NarrationContent {
       'text': text,
       'segments': segments,
       'estimated_duration': estimatedDuration,
+      'language': language,
     };
   }
 

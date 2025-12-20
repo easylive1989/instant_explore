@@ -46,7 +46,7 @@ class NarrationState {
   /// 建立就緒狀態
   NarrationState ready(
     Place place,
-    NarrationAspect aspect,
+    NarrationAspect? aspect,
     NarrationContent content, {
     required Duration duration,
   }) {

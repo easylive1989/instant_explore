@@ -6,6 +6,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/screens/select_narration_aspect_screen.dart';
 import 'package:context_app/features/narration/screens/narration_screen.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/journey/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
@@ -70,16 +71,15 @@ class RouterConfig {
                 ? placeData
                 : Place.fromJson(placeData as Map<String, dynamic>);
             final narrationAspect =
-                params['narrationAspect'] as NarrationAspect;
-            final initialContent = params['initialContent'] as String?;
+                params['narrationAspect'] as NarrationAspect?;
+            final narrationContent =
+                params['narrationContent'] as NarrationContent?;
             final enableSave = params['enableSave'] as bool? ?? true;
-            final language = params['language'] as String?; // 讀取語言參數
             return NarrationScreen(
               place: place,
               narrationAspect: narrationAspect,
-              initialContent: initialContent,
+              narrationContent: narrationContent,
               enableSave: enableSave,
-              language: language, // 傳遞語言參數
             );
           },
         ),

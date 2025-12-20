@@ -15,7 +15,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
   final Color backgroundColor;
   final Color primaryColor;
   final Place place;
-  final NarrationAspect narrationAspect;
+  final NarrationAspect? narrationAspect;
 
   const NarrationTranscriptArea({
     super.key,
@@ -23,7 +23,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
     required this.backgroundColor,
     required this.primaryColor,
     required this.place,
-    required this.narrationAspect,
+    this.narrationAspect,
   });
 
   /// 格式化重試延遲時間
@@ -99,15 +99,16 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 ),
               ],
 
-              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示）
+              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示，且有 narrationAspect 時）
               if (errorType?.isRetryable == true &&
-                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                  errorType != NarrationErrorType.aiQuotaExceeded &&
+                  narrationAspect != null) ...[
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
                     ref
                         .read(playerControllerProvider.notifier)
-                        .initialize(place, narrationAspect, language: locale);
+                        .initialize(place, narrationAspect!, language: locale);
                   },
                   child: const Text('重試'),
                 ),

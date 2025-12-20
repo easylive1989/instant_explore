@@ -158,10 +158,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               'player',
                               extra: {
                                 'place': place,
-                                'initialContent':
-                                    widget.entry.narrationContent.text,
+                                'narrationContent':
+                                    widget.entry.narrationContent,
                                 'enableSave': false,
-                                'language': widget.entry.language.code,
                               },
                             );
                           },

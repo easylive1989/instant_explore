@@ -5,8 +5,8 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
-import 'package:context_app/features/narration/domain/use_cases/replay_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 
@@ -16,7 +16,6 @@ import 'package:context_app/features/journey/domain/use_cases/save_narration_to_
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<NarrationState> {
   final StartNarrationUseCase _startNarrationUseCase;
-  final ReplayNarrationUseCase _replayNarrationUseCase;
   final SaveNarrationToJourneyUseCase _saveNarrationToJourneyUseCase;
   final TtsService _ttsService;
 
@@ -29,7 +28,6 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   PlayerController(
     this._startNarrationUseCase,
-    this._replayNarrationUseCase,
     this._saveNarrationToJourneyUseCase,
     this._ttsService,
   ) : super(NarrationState.initial()) {
@@ -76,30 +74,20 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 使用現有內容初始化（用於回放已儲存的導覽）
   Future<void> initializeWithContent(
     Place place,
-    NarrationAspect aspect,
-    String contentText, {
-    String language = 'zh-TW',
-  }) async {
+    NarrationContent content,
+  ) async {
     state = state.loading();
 
     try {
-      // 使用 ReplayNarrationUseCase 建立導覽內容
-      final content = await _replayNarrationUseCase.execute(
-        place: place,
-        aspect: aspect,
-        contentText: contentText,
-        language: language,
-      );
-
       // 初始化 TtsService
       await _ttsService.initialize();
-      await _ttsService.setLanguage(language);
+      await _ttsService.setLanguage(content.language);
 
       // 計算時長（從 estimatedDuration 轉換為 Duration）
       final duration = Duration(seconds: content.estimatedDuration);
 
-      // 更新狀態為就緒
-      state = state.ready(place, aspect, content, duration: duration);
+      // 更新狀態為就緒（aspect 為 null 因為是回放模式）
+      state = state.ready(place, null, content, duration: duration);
     } on NarrationGenerationException catch (e) {
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
