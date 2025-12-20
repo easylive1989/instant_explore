@@ -1,5 +1,7 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration_exception.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -51,39 +53,40 @@ void main() {
 許多遊客來到這裡參觀。這是一個著名的景點。
 ''';
 
-    final testContent = NarrationContent.fromText(testGeneratedText);
+    test(
+      'should successfully generate narration and create NarrationContent',
+      () async {
+        // Arrange - Service now returns String
+        when(
+          () => mockNarrationService.generateNarration(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: any(named: 'language'),
+          ),
+        ).thenAnswer((_) async => testGeneratedText);
 
-    test('should successfully generate narration', () async {
-      // Arrange
-      when(
-        () => mockNarrationService.generateNarration(
+        // Act
+        final result = await useCase.execute(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
-          language: any(named: 'language'),
-        ),
-      ).thenAnswer((_) async => testContent);
+          language: 'zh-TW',
+        );
 
-      // Act
-      final result = await useCase.execute(
-        place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
-        language: 'zh-TW',
-      );
+        // Assert
+        expect(result, isA<NarrationContent>());
+        expect(result.text, equals(testGeneratedText));
+        expect(result.segments.length, greaterThan(0));
 
-      // Assert
-      expect(result, isA<NarrationContent>());
-      expect(result.text, equals(testGeneratedText));
-      expect(result.segments.length, greaterThan(0));
-
-      // Verify method calls
-      verify(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: any(named: 'language'),
-        ),
-      ).called(1);
-    });
+        // Verify method calls
+        verify(
+          () => mockNarrationService.generateNarration(
+            place: testPlace,
+            aspect: NarrationAspect.historicalBackground,
+            language: any(named: 'language'),
+          ),
+        ).called(1);
+      },
+    );
 
     test(
       'should successfully generate narration with architecture aspect',
@@ -95,7 +98,7 @@ void main() {
             aspect: NarrationAspect.architecture,
             language: any(named: 'language'),
           ),
-        ).thenAnswer((_) async => testContent);
+        ).thenAnswer((_) async => testGeneratedText);
 
         // Act
         final result = await useCase.execute(
@@ -117,8 +120,73 @@ void main() {
       },
     );
 
+    test('should throw NarrationException when text is empty', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenAnswer((_) async => '');
+
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: 'zh-TW',
+        ),
+        throwsA(isA<NarrationException>()),
+      );
+    });
+
+    test('should throw NarrationException when text is too short', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenAnswer((_) async => '短');
+
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: 'zh-TW',
+        ),
+        throwsA(isA<NarrationException>()),
+      );
+    });
+
+    test('should rethrow NarrationServiceException from service', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenThrow(
+        NarrationServiceException.quotaExceeded(rawMessage: 'Quota exceeded'),
+      );
+
+      // Act & Assert
+      expect(
+        () => useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: 'zh-TW',
+        ),
+        throwsA(isA<NarrationServiceException>()),
+      );
+    });
+
     test(
-      'should throw NarrationGenerationException when service throws error for empty content',
+      'should rethrow NarrationServiceException with correct error type',
       () async {
         // Arrange
         when(
@@ -127,41 +195,23 @@ void main() {
             aspect: NarrationAspect.historicalBackground,
             language: any(named: 'language'),
           ),
-        ).thenThrow(Exception('Generated narration is empty'));
+        ).thenThrow(
+          NarrationServiceException.unsupportedLocation(
+            rawMessage: 'Location not supported',
+          ),
+        );
 
         // Act & Assert
-        expect(
-          () => useCase.execute(
+        try {
+          await useCase.execute(
             place: testPlace,
             aspect: NarrationAspect.historicalBackground,
             language: 'zh-TW',
-          ),
-          throwsA(isA<NarrationGenerationException>()),
-        );
-      },
-    );
-
-    test(
-      'should throw NarrationGenerationException when NarrationService throws error',
-      () async {
-        // Arrange
-        when(
-          () => mockNarrationService.generateNarration(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: any(named: 'language'),
-          ),
-        ).thenThrow(Exception('Network error'));
-
-        // Act & Assert
-        expect(
-          () => useCase.execute(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: 'zh-TW',
-          ),
-          throwsA(isA<NarrationGenerationException>()),
-        );
+          );
+          fail('Should have thrown');
+        } on NarrationServiceException catch (e) {
+          expect(e.type, equals(NarrationServiceErrorType.unsupportedLocation));
+        }
       },
     );
 
@@ -173,7 +223,7 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: any(named: 'language'),
         ),
-      ).thenAnswer((_) async => testContent);
+      ).thenAnswer((_) async => testGeneratedText);
 
       // Act
       await useCase.execute(
@@ -199,16 +249,13 @@ void main() {
 第四句話。
 ''';
 
-      final segmentedContent =
-          NarrationContent.fromText(textWithMultipleSegments);
-
       when(
         () => mockNarrationService.generateNarration(
           place: testPlace,
           aspect: NarrationAspect.historicalBackground,
           language: any(named: 'language'),
         ),
-      ).thenAnswer((_) async => segmentedContent);
+      ).thenAnswer((_) async => textWithMultipleSegments);
 
       // Act
       final result = await useCase.execute(
@@ -227,11 +274,8 @@ void main() {
 
     test('should estimate duration based on text length', () async {
       // Arrange
-      const shortText = '這是短文本。'; // ~6 characters
-      final longText = '這' * 100; // 100 characters
-
-      final shortContent = NarrationContent.fromText(shortText);
-      final longContent = NarrationContent.fromText(longText);
+      const shortText = '這是短文本，測試用。'; // ~10 characters (meets minimum)
+      final longText = '這' * 100 + '。'; // 101 characters with punctuation
 
       when(
         () => mockNarrationService.generateNarration(
@@ -239,7 +283,7 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: any(named: 'language'),
         ),
-      ).thenAnswer((_) async => shortContent);
+      ).thenAnswer((_) async => shortText);
 
       // Act
       final resultShort = await useCase.execute(
@@ -253,7 +297,7 @@ void main() {
           aspect: NarrationAspect.architecture,
           language: any(named: 'language'),
         ),
-      ).thenAnswer((_) async => longContent);
+      ).thenAnswer((_) async => longText);
 
       final resultLong = await useCase.execute(
         place: testPlace,

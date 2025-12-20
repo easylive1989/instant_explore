@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
@@ -64,10 +66,34 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒
       state = state.ready(place, aspect, content, duration: duration);
-    } on NarrationGenerationException catch (e) {
+    } on NarrationServiceException catch (e) {
+      // 處理 AI 服務相關錯誤
+      state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
+    } on NarrationException catch (e) {
+      // 處理 UseCase 層級錯誤
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
       state = state.error(NarrationErrorType.unknown, message: e.toString());
+    }
+  }
+
+  /// 將 NarrationServiceErrorType 轉換為 NarrationErrorType
+  NarrationErrorType _mapServiceErrorType(NarrationServiceErrorType type) {
+    switch (type) {
+      case NarrationServiceErrorType.aiQuotaExceeded:
+        return NarrationErrorType.aiQuotaExceeded;
+      case NarrationServiceErrorType.networkError:
+        return NarrationErrorType.networkError;
+      case NarrationServiceErrorType.configurationError:
+        return NarrationErrorType.configurationError;
+      case NarrationServiceErrorType.serverError:
+        return NarrationErrorType.serverError;
+      case NarrationServiceErrorType.unsupportedLocation:
+        return NarrationErrorType.unsupportedLocation;
+      case NarrationServiceErrorType.emptyContent:
+        return NarrationErrorType.contentGenerationFailed;
+      case NarrationServiceErrorType.unknown:
+        return NarrationErrorType.unknown;
     }
   }
 
@@ -88,7 +114,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒（aspect 為 null 因為是回放模式）
       state = state.ready(place, null, content, duration: duration);
-    } on NarrationGenerationException catch (e) {
+    } on NarrationException catch (e) {
       state = state.error(e.type, message: e.rawMessage);
     } catch (e) {
       state = state.error(NarrationErrorType.unknown, message: e.toString());

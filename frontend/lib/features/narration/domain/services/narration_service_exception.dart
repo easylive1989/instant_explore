@@ -1,11 +1,12 @@
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 
-/// 導覽生成異常
+/// 導覽服務異常
 ///
-/// 攜帶錯誤類型和上下文資訊，但不包含 UI 層邏輯
-class NarrationGenerationException implements Exception {
+/// 用於 NarrationService 層，攜帶與 AI 服務呼叫相關的錯誤資訊
+/// 這些錯誤不屬於 UseCase 的業務邏輯錯誤
+class NarrationServiceException implements Exception {
   /// 錯誤類型
-  final NarrationErrorType type;
+  final NarrationServiceErrorType type;
 
   /// 原始錯誤訊息（用於 debug 和日誌記錄）
   final String? rawMessage;
@@ -13,19 +14,19 @@ class NarrationGenerationException implements Exception {
   /// 額外的上下文資訊
   final Map<String, dynamic>? context;
 
-  const NarrationGenerationException({
+  const NarrationServiceException({
     required this.type,
     this.rawMessage,
     this.context,
   });
 
   /// 建立 AI 配額超限異常
-  factory NarrationGenerationException.quotaExceeded({
+  factory NarrationServiceException.quotaExceeded({
     String? rawMessage,
     int? retryAfterSeconds,
   }) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.aiQuotaExceeded,
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.aiQuotaExceeded,
       rawMessage: rawMessage,
       context: retryAfterSeconds != null
           ? {'retryAfterSeconds': retryAfterSeconds}
@@ -34,47 +35,45 @@ class NarrationGenerationException implements Exception {
   }
 
   /// 建立網路錯誤異常
-  factory NarrationGenerationException.network({String? rawMessage}) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.networkError,
+  factory NarrationServiceException.network({String? rawMessage}) {
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.networkError,
       rawMessage: rawMessage,
     );
   }
 
   /// 建立配置錯誤異常
-  factory NarrationGenerationException.configuration({String? rawMessage}) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.configurationError,
+  factory NarrationServiceException.configuration({String? rawMessage}) {
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.configurationError,
       rawMessage: rawMessage,
     );
   }
 
   /// 建立伺服器錯誤異常
-  factory NarrationGenerationException.server({
+  factory NarrationServiceException.server({
     String? rawMessage,
     int? statusCode,
   }) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.serverError,
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.serverError,
       rawMessage: rawMessage,
       context: statusCode != null ? {'statusCode': statusCode} : null,
     );
   }
 
   /// 建立地理位置不支援異常
-  factory NarrationGenerationException.unsupportedLocation({
-    String? rawMessage,
-  }) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.unsupportedLocation,
+  factory NarrationServiceException.unsupportedLocation({String? rawMessage}) {
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.unsupportedLocation,
       rawMessage: rawMessage,
     );
   }
 
-  /// 建立內容生成失敗異常
-  factory NarrationGenerationException.contentFailed({String? rawMessage}) {
-    return NarrationGenerationException(
-      type: NarrationErrorType.contentGenerationFailed,
+  /// 建立內容為空異常
+  factory NarrationServiceException.emptyContent({String? rawMessage}) {
+    return NarrationServiceException(
+      type: NarrationServiceErrorType.emptyContent,
       rawMessage: rawMessage,
     );
   }
@@ -92,7 +91,7 @@ class NarrationGenerationException implements Exception {
 
   @override
   String toString() {
-    final buffer = StringBuffer('NarrationGenerationException(type: $type');
+    final buffer = StringBuffer('NarrationServiceException(type: $type');
     if (rawMessage != null) buffer.write(', rawMessage: $rawMessage');
     if (context != null && context!.isNotEmpty) {
       buffer.write(', context: $context');
