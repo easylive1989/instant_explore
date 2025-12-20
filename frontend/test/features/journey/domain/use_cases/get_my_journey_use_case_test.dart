@@ -5,7 +5,7 @@ import 'package:context_app/features/journey/domain/repositories/journey_reposit
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/core/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
 

@@ -10,7 +10,7 @@ import 'package:context_app/features/journey/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
-import 'package:context_app/core/config/go_router_refresh_stream.dart';
+import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider
 /// 監聽認證狀態變化並通知 GoRouter 重新評估路由

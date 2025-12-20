@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/core/config/theme_config.dart';
-import 'package:context_app/core/config/router_config.dart';
+import 'package:context_app/common/config/theme_config.dart';
+import 'package:context_app/common/config/router_config.dart';
 
 /// Main application widget using go_router for navigation.
 ///

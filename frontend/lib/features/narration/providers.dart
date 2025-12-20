@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/core/services/gemini_service.dart';
-import 'package:context_app/core/services/tts_service.dart';
+import 'package:context_app/features/narration/data/gemini_service.dart';
+import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
 import 'package:context_app/features/narration/domain/use_cases/replay_narration_use_case.dart';

@@ -4,11 +4,11 @@ import 'package:context_app/features/journey/domain/models/saved_place.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/core/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/journey/data/supabase_journey_repository.dart';
 import 'package:uuid/uuid.dart';
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/common/config/api_config.dart';
 
 class SaveNarrationToJourneyUseCase {
   final JourneyRepository _repository;

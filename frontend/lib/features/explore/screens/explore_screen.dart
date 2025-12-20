@@ -1,5 +1,5 @@
-import 'package:context_app/core/config/api_config.dart';
-import 'package:context_app/core/config/app_colors.dart';
+import 'package:context_app/common/config/api_config.dart';
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

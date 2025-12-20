@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/core/services/tts_service.dart';
+import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/use_cases/narration_generation_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration_error_type.dart';

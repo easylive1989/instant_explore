@@ -8,7 +8,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/common/config/api_config.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
 

@@ -8,7 +8,7 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
-import 'package:context_app/core/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 // Mock classes
 class MockNarrationService extends Mock implements NarrationService {}

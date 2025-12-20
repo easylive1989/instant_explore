@@ -7,7 +7,8 @@ import 'package:context_app/features/narration/domain/models/narration_error_typ
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/core/domain/models/language.dart' as app_lang;
+import 'package:context_app/features/settings/domain/models/language.dart'
+    as app_lang;
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 /// 開始導覽用例

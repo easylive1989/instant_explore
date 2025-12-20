@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:context_app/core/config/api_config.dart';
+import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/domain/models/narration_prompt_builder.dart';
+import 'package:context_app/features/narration/data/narration_prompt_builder.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/core/domain/models/language.dart' as app_lang;
+import 'package:context_app/features/settings/domain/models/language.dart'
+    as app_lang;
 
 class GeminiService implements NarrationService {
   final ApiConfig _apiConfig;

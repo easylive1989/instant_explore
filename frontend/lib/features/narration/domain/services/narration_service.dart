@@ -1,7 +1,7 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/core/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 
 abstract class NarrationService {
   /// 生成導覽內容
