@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
-import 'package:context_app/features/narration/domain/models/narration_exception.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
 import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
+import 'package:context_app/features/narration/domain/models/narration_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 
 /// 播放器控制器
@@ -71,29 +71,33 @@ class PlayerController extends StateNotifier<NarrationState> {
       state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
     } on NarrationException catch (e) {
       // 處理 UseCase 層級錯誤
-      state = state.error(e.type, message: e.rawMessage);
+      state = state.error(
+        NarrationStateErrorType.contentGenerationFailed,
+        message: e.rawMessage,
+      );
     } catch (e) {
-      state = state.error(NarrationErrorType.unknown, message: e.toString());
+      state = state.error(
+        NarrationStateErrorType.unknown,
+        message: e.toString(),
+      );
     }
   }
 
-  /// 將 NarrationServiceErrorType 轉換為 NarrationErrorType
-  NarrationErrorType _mapServiceErrorType(NarrationServiceErrorType type) {
+  /// 將 NarrationServiceErrorType 轉換為 NarrationStateErrorType
+  NarrationStateErrorType _mapServiceErrorType(NarrationServiceErrorType type) {
     switch (type) {
       case NarrationServiceErrorType.aiQuotaExceeded:
-        return NarrationErrorType.aiQuotaExceeded;
+        return NarrationStateErrorType.aiQuotaExceeded;
       case NarrationServiceErrorType.networkError:
-        return NarrationErrorType.networkError;
+        return NarrationStateErrorType.networkError;
       case NarrationServiceErrorType.configurationError:
-        return NarrationErrorType.configurationError;
+        return NarrationStateErrorType.configurationError;
       case NarrationServiceErrorType.serverError:
-        return NarrationErrorType.serverError;
+        return NarrationStateErrorType.serverError;
       case NarrationServiceErrorType.unsupportedLocation:
-        return NarrationErrorType.unsupportedLocation;
-      case NarrationServiceErrorType.emptyContent:
-        return NarrationErrorType.contentGenerationFailed;
+        return NarrationStateErrorType.unsupportedLocation;
       case NarrationServiceErrorType.unknown:
-        return NarrationErrorType.unknown;
+        return NarrationStateErrorType.unknown;
     }
   }
 
@@ -115,9 +119,15 @@ class PlayerController extends StateNotifier<NarrationState> {
       // 更新狀態為就緒（aspect 為 null 因為是回放模式）
       state = state.ready(place, null, content, duration: duration);
     } on NarrationException catch (e) {
-      state = state.error(e.type, message: e.rawMessage);
+      state = state.error(
+        NarrationStateErrorType.contentGenerationFailed,
+        message: e.rawMessage,
+      );
     } catch (e) {
-      state = state.error(NarrationErrorType.unknown, message: e.toString());
+      state = state.error(
+        NarrationStateErrorType.unknown,
+        message: e.toString(),
+      );
     }
   }
 
@@ -164,7 +174,10 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     // 監聽錯誤事件
     _ttsErrorSubscription = _ttsService.onError.listen((error) {
-      state = state.error(NarrationErrorType.ttsPlaybackError, message: error);
+      state = state.error(
+        NarrationStateErrorType.ttsPlaybackError,
+        message: error,
+      );
     });
 
     // 監聽進度事件（字符級別的精確追蹤）
@@ -209,13 +222,13 @@ class PlayerController extends StateNotifier<NarrationState> {
         state = state.playing();
       } else {
         state = state.error(
-          NarrationErrorType.ttsPlaybackError,
+          NarrationStateErrorType.ttsPlaybackError,
           message: '播放失敗',
         );
       }
     } catch (e) {
       state = state.error(
-        NarrationErrorType.ttsPlaybackError,
+        NarrationStateErrorType.ttsPlaybackError,
         message: '播放失敗：$e',
       );
     }
@@ -238,7 +251,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       _stopProgressTimer();
     } catch (e) {
       state = state.error(
-        NarrationErrorType.ttsPlaybackError,
+        NarrationStateErrorType.ttsPlaybackError,
         message: '暫停失敗：$e',
       );
     }

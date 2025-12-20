@@ -1,7 +1,7 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/transcript_segment_item.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
@@ -82,7 +82,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
 
               // 顯示建議的重試時間
               if (errorType?.suggestedRetryDelay != null &&
-                  errorType != NarrationErrorType.aiQuotaExceeded) ...[
+                  errorType != NarrationStateErrorType.aiQuotaExceeded) ...[
                 const SizedBox(height: 8),
                 Text(
                   'player_screen.suggested_retry'.tr(
@@ -101,7 +101,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
 
               // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示，且有 narrationAspect 時）
               if (errorType?.isRetryable == true &&
-                  errorType != NarrationErrorType.aiQuotaExceeded &&
+                  errorType != NarrationStateErrorType.aiQuotaExceeded &&
                   narrationAspect != null) ...[
                 const SizedBox(height: 24),
                 ElevatedButton(

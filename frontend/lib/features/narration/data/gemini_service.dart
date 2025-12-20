@@ -54,12 +54,6 @@ class GeminiService implements NarrationService {
       final response = await model.generateContent([Content.text(prompt)]);
       final generatedText = response.text ?? '';
 
-      if (generatedText.isEmpty) {
-        throw NarrationServiceException.emptyContent(
-          rawMessage: 'Generated narration is empty',
-        );
-      }
-
       debugPrint(
         'Generated narration (${generatedText.length} chars): '
         '${generatedText.substring(0, generatedText.length > 100 ? 100 : generatedText.length)}...',

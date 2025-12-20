@@ -1,7 +1,7 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/narration/presentation/playback_state.dart';
 import 'package:context_app/features/narration/presentation/player_state.dart';
 
@@ -19,7 +19,7 @@ class NarrationState {
   final PlayerState playerState;
 
   /// 錯誤類型（當 playerState.state 為 error 時）
-  final NarrationErrorType? errorType;
+  final NarrationStateErrorType? errorType;
 
   /// 錯誤訊息（可選，用於 debug 或顯示額外資訊）
   final String? errorMessage;
@@ -84,7 +84,7 @@ class NarrationState {
   }
 
   /// 建立錯誤狀態
-  NarrationState error(NarrationErrorType type, {String? message}) {
+  NarrationState error(NarrationStateErrorType type, {String? message}) {
     return copyWith(
       playerState: playerState.copyWith(state: PlaybackState.error),
       errorType: type,
@@ -117,7 +117,7 @@ class NarrationState {
     NarrationAspect? aspect,
     NarrationContent? content,
     PlayerState? playerState,
-    NarrationErrorType? errorType,
+    NarrationStateErrorType? errorType,
     String? errorMessage,
   }) {
     return NarrationState(

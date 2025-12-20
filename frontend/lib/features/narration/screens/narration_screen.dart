@@ -1,5 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/narration/domain/models/narration_error_type.dart';
+import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

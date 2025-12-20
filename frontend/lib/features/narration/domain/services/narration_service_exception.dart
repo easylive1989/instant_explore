@@ -70,22 +70,6 @@ class NarrationServiceException implements Exception {
     );
   }
 
-  /// 建立內容為空異常
-  factory NarrationServiceException.emptyContent({String? rawMessage}) {
-    return NarrationServiceException(
-      type: NarrationServiceErrorType.emptyContent,
-      rawMessage: rawMessage,
-    );
-  }
-
-  /// 取得重試等待時間（秒）
-  int? get retryAfterSeconds {
-    if (context != null && context!.containsKey('retryAfterSeconds')) {
-      return context!['retryAfterSeconds'] as int?;
-    }
-    return type.suggestedRetryDelay;
-  }
-
   /// 取得 HTTP 狀態碼（如果有）
   int? get statusCode => context?['statusCode'] as int?;
 
