@@ -9,7 +9,7 @@ import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
+import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
 // Mock classes
@@ -22,7 +22,7 @@ class FakePlace extends Fake implements Place {}
 class FakeLanguage extends Fake implements Language {}
 
 void main() {
-  late StartNarrationUseCase useCase;
+  late CreateNarrationUseCase useCase;
   late MockNarrationService mockNarrationService;
 
   setUpAll(() {
@@ -34,7 +34,7 @@ void main() {
 
   setUp(() {
     mockNarrationService = MockNarrationService();
-    useCase = StartNarrationUseCase(mockNarrationService);
+    useCase = CreateNarrationUseCase(mockNarrationService);
   });
 
   group('StartNarrationUseCase', () {

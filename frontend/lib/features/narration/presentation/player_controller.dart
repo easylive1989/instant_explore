@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -7,7 +8,6 @@ import 'package:context_app/features/narration/domain/services/narration_service
 import 'package:context_app/features/narration/domain/models/narration_exception.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/domain/use_cases/start_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
@@ -17,7 +17,7 @@ import 'package:context_app/features/journey/domain/use_cases/save_narration_to_
 /// 使用 StateNotifier 管理播放器狀態
 /// 負責協調 Use Cases 和 TTS Service
 class PlayerController extends StateNotifier<NarrationState> {
-  final StartNarrationUseCase _startNarrationUseCase;
+  final CreateNarrationUseCase _createNarrationUseCase;
   final SaveNarrationToJourneyUseCase _saveNarrationToJourneyUseCase;
   final TtsService _ttsService;
 
@@ -29,7 +29,7 @@ class PlayerController extends StateNotifier<NarrationState> {
   Timer? _progressTimer;
 
   PlayerController(
-    this._startNarrationUseCase,
+    this._createNarrationUseCase,
     this._saveNarrationToJourneyUseCase,
     this._ttsService,
   ) : super(NarrationState.initial()) {
@@ -51,7 +51,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     try {
       // 使用 StartNarrationUseCase 生成導覽內容
-      final content = await _startNarrationUseCase.execute(
+      final content = await _createNarrationUseCase.execute(
         place: place,
         aspect: aspect,
         language: language,

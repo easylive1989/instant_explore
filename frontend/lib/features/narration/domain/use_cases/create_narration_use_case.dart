@@ -22,10 +22,10 @@ import 'package:context_app/features/settings/domain/models/language.dart'
 /// - 網路錯誤
 /// - 伺服器錯誤
 /// - API 配置錯誤
-class StartNarrationUseCase {
+class CreateNarrationUseCase {
   final NarrationService _narrationService;
 
-  StartNarrationUseCase(this._narrationService);
+  CreateNarrationUseCase(this._narrationService);
 
   /// 執行用例：生成導覽內容
   ///
