@@ -77,13 +77,9 @@ Please generate the narration now:''';
         return 'Architecture (建築細節)';
       case NarrationAspect.customs:
         return 'Customs (文化禁忌與習俗)';
-      case NarrationAspect.relevance:
-        return 'Relevance (今昔對比)';
       // 自然景觀類
       case NarrationAspect.geology:
         return 'Geology (地理成因)';
-      case NarrationAspect.photoSpots:
-        return 'Photo Spots (最佳拍攝點)';
       case NarrationAspect.floraFauna:
         return 'Flora & Fauna (生態觀察)';
       case NarrationAspect.myths:
@@ -95,17 +91,6 @@ Please generate the narration now:''';
         return 'Statistics (數據震撼)';
       case NarrationAspect.status:
         return 'Status (經濟與社會地位)';
-      case NarrationAspect.lifestyle:
-        return 'Lifestyle (周邊生活機能)';
-      // 博物館與藝術展覽類
-      case NarrationAspect.highlights:
-        return 'Highlights (鎮館之寶)';
-      case NarrationAspect.emotion:
-        return 'Emotion (作品背後的情感)';
-      case NarrationAspect.guidance:
-        return 'Guidance (引導觀察)';
-      case NarrationAspect.context:
-        return 'Context (策展脈絡)';
       // 在地美食與夜市類
       case NarrationAspect.ingredients:
         return 'Ingredients (食材與產地)';
@@ -113,8 +98,6 @@ Please generate the narration now:''';
         return 'Etiquette (正確吃法)';
       case NarrationAspect.brandStory:
         return 'Brand Story (店家的故事)';
-      case NarrationAspect.sensory:
-        return 'Sensory (口感描述)';
     }
   }
 
@@ -128,7 +111,8 @@ Please generate the narration now:''';
       case PlaceCategory.modernUrban:
         return _getModernUrbanGuideline(aspect);
       case PlaceCategory.museumArt:
-        return _getMuseumArtGuideline(aspect);
+        // 博物館類使用人文古蹟類的指引
+        return _getHistoricalCulturalGuideline(aspect);
       case PlaceCategory.foodMarket:
         return _getFoodMarketGuideline(aspect);
     }
@@ -164,15 +148,6 @@ Focus on Customs (文化禁忌與習俗):
 - Share do's and don'ts in an engaging, non-preachy way
 - Make cultural practices feel meaningful rather than arbitrary
 ''';
-      case NarrationAspect.relevance:
-        return '''
-Focus on Relevance (今昔對比):
-- Connect the past to modern life to create resonance
-- Example: "This area was like today's Xinyi District - the most fashionable commercial center of its time."
-- Help tourists see how historical places relate to their current experience
-- Draw parallels between then and now
-- Make history feel relevant to contemporary life
-''';
       default:
         return _getDefaultGuideline();
     }
@@ -189,15 +164,6 @@ Focus on Geology (地理成因):
 - Make complex geological processes accessible and fascinating
 - Show your expertise through clear explanations
 - Help tourists see the landscape with new understanding
-''';
-      case NarrationAspect.photoSpots:
-        return '''
-Focus on Photo Spots (最佳拍攝點):
-- This is what modern tourists care about most - tell them directly where to shoot
-- Example: "Stand over here on the left - from this angle you can capture both the lake's reflection and the mountain peak in one shot."
-- Give specific positioning advice
-- Explain why certain angles work better
-- Help them create Instagram-worthy memories
 ''';
       case NarrationAspect.floraFauna:
         return '''
@@ -252,59 +218,6 @@ Focus on Status (經濟與社會地位):
 - Share what this location symbolizes culturally
 - Give context about prestige and importance
 ''';
-      case NarrationAspect.lifestyle:
-        return '''
-Focus on Lifestyle (周邊生活機能):
-- Where are the good shopping spots? Where do locals go?
-- Share practical insider knowledge
-- Recommend authentic local experiences vs. tourist traps
-- Give tips on where to eat, shop, and explore nearby
-- Help tourists experience the area like a local would
-''';
-      default:
-        return _getDefaultGuideline();
-    }
-  }
-
-  /// 博物館與藝術展覽類的內容指引
-  String _getMuseumArtGuideline(NarrationAspect aspect) {
-    switch (aspect) {
-      case NarrationAspect.highlights:
-        return '''
-Focus on Highlights (鎮館之寶):
-- Take visitors to see the most important pieces first - ensure the visit is worthwhile
-- Explain why these masterpieces matter
-- Share their historical or artistic significance
-- Make sure tourists know what they absolutely shouldn't miss
-- Create a curated experience that maximizes their limited time
-''';
-      case NarrationAspect.emotion:
-        return '''
-Focus on Emotion (作品背後的情感):
-- Share the artist's emotional state or circumstances during creation
-- Example: "Van Gogh painted this while at his most mentally fragile - you can see it in these brushstrokes..."
-- Connect artworks to human experiences and feelings
-- Help tourists feel the emotion in the art
-- Make pieces more meaningful through emotional context
-''';
-      case NarrationAspect.guidance:
-        return '''
-Focus on Guidance (引導觀察):
-- Teach tourists HOW to look at art
-- Example: "Step back three meters and squint your eyes - you'll see how the light and shadow change..."
-- Give specific viewing techniques
-- Point out details they should notice
-- Transform passive looking into active seeing
-''';
-      case NarrationAspect.context:
-        return '''
-Focus on Context (策展脈絡):
-- Why are these pieces displayed together?
-- Explain the curatorial narrative and exhibition theme
-- Help visitors understand the bigger picture
-- Connect individual pieces to the overall story
-- Make the exhibition more coherent and meaningful
-''';
       default:
         return _getDefaultGuideline();
     }
@@ -339,15 +252,6 @@ Focus on Brand Story (店家的故事):
 - Tell human stories behind the food
 - Create emotional connection to the vendors
 - Make the food more meaningful through backstory
-''';
-      case NarrationAspect.sensory:
-        return '''
-Focus on Sensory (口感描述):
-- Use vivid adjectives to preview flavors and textures
-- Example: "The outer skin is so crispy it'll crunch when you bite, and the filling will burst..."
-- Build anticipation through sensory language
-- Describe texture, taste, aroma, and appearance
-- Make mouths water with your descriptions
 ''';
       default:
         return _getDefaultGuideline();

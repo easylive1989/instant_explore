@@ -14,15 +14,9 @@ enum NarrationAspect {
   /// 文化禁忌與習俗 - 告訴遊客該怎麼做、為什麼這麼做
   customs,
 
-  /// 今昔對比 - 連結現代生活，讓遊客產生共鳴
-  relevance,
-
   // ========== 自然景觀類 (Natural Landscapes) ==========
   /// 地理成因 - 用簡單的比喻解釋地貌形成
   geology,
-
-  /// 最佳拍攝點 - 告訴遊客哪裡拍最美
-  photoSpots,
 
   /// 生態觀察 - 介紹特有動植物
   floraFauna,
@@ -40,22 +34,6 @@ enum NarrationAspect {
   /// 經濟與社會地位 - 這裡代表了這座城市的什麼地位
   status,
 
-  /// 周邊生活機能 - 哪裡好逛、哪裡是在地人去的
-  lifestyle,
-
-  // ========== 博物館與藝術展覽類 (Museums & Arts) ==========
-  /// 鎮館之寶 - 先帶大家看最重要的
-  highlights,
-
-  /// 作品背後的情感 - 藝術家創作時的心情或處境
-  emotion,
-
-  /// 引導觀察 - 教遊客「怎麼看」
-  guidance,
-
-  /// 策展脈絡 - 為什麼這些東西被擺在一起
-  context,
-
   // ========== 在地美食與夜市類 (Local Food & Night Markets) ==========
   /// 食材與產地 - 為什麼這裡的好吃
   ingredients,
@@ -64,10 +42,7 @@ enum NarrationAspect {
   etiquette,
 
   /// 店家的故事 - 老店的堅持或傳承
-  brandStory,
-
-  /// 口感描述 - 用形容詞預告味道
-  sensory;
+  brandStory;
 
   /// 根據景點類型取得可用的介紹面向
   static List<NarrationAspect> getAspectsForCategory(PlaceCategory category) {
@@ -77,12 +52,10 @@ enum NarrationAspect {
           NarrationAspect.historicalBackground,
           NarrationAspect.architecture,
           NarrationAspect.customs,
-          NarrationAspect.relevance,
         ];
       case PlaceCategory.naturalLandscape:
         return [
           NarrationAspect.geology,
-          NarrationAspect.photoSpots,
           NarrationAspect.floraFauna,
           NarrationAspect.myths,
         ];
@@ -91,21 +64,19 @@ enum NarrationAspect {
           NarrationAspect.designConcept,
           NarrationAspect.statistics,
           NarrationAspect.status,
-          NarrationAspect.lifestyle,
         ];
       case PlaceCategory.museumArt:
+        // 博物館類使用人文古蹟類的面向
         return [
-          NarrationAspect.highlights,
-          NarrationAspect.emotion,
-          NarrationAspect.guidance,
-          NarrationAspect.context,
+          NarrationAspect.historicalBackground,
+          NarrationAspect.architecture,
+          NarrationAspect.customs,
         ];
       case PlaceCategory.foodMarket:
         return [
           NarrationAspect.ingredients,
           NarrationAspect.etiquette,
           NarrationAspect.brandStory,
-          NarrationAspect.sensory,
         ];
     }
   }
@@ -125,13 +96,9 @@ enum NarrationAspect {
         return NarrationAspect.architecture;
       case 'customs':
         return NarrationAspect.customs;
-      case 'relevance':
-        return NarrationAspect.relevance;
       // 自然景觀類
       case 'geology':
         return NarrationAspect.geology;
-      case 'photo_spots':
-        return NarrationAspect.photoSpots;
       case 'flora_fauna':
         return NarrationAspect.floraFauna;
       case 'myths':
@@ -143,17 +110,6 @@ enum NarrationAspect {
         return NarrationAspect.statistics;
       case 'status':
         return NarrationAspect.status;
-      case 'lifestyle':
-        return NarrationAspect.lifestyle;
-      // 博物館與藝術展覽類
-      case 'highlights':
-        return NarrationAspect.highlights;
-      case 'emotion':
-        return NarrationAspect.emotion;
-      case 'guidance':
-        return NarrationAspect.guidance;
-      case 'context':
-        return NarrationAspect.context;
       // 在地美食與夜市類
       case 'ingredients':
         return NarrationAspect.ingredients;
@@ -161,8 +117,6 @@ enum NarrationAspect {
         return NarrationAspect.etiquette;
       case 'brand_story':
         return NarrationAspect.brandStory;
-      case 'sensory':
-        return NarrationAspect.sensory;
       default:
         return null;
     }
@@ -178,13 +132,9 @@ enum NarrationAspect {
         return 'architecture';
       case NarrationAspect.customs:
         return 'customs';
-      case NarrationAspect.relevance:
-        return 'relevance';
       // 自然景觀類
       case NarrationAspect.geology:
         return 'geology';
-      case NarrationAspect.photoSpots:
-        return 'photo_spots';
       case NarrationAspect.floraFauna:
         return 'flora_fauna';
       case NarrationAspect.myths:
@@ -196,17 +146,6 @@ enum NarrationAspect {
         return 'statistics';
       case NarrationAspect.status:
         return 'status';
-      case NarrationAspect.lifestyle:
-        return 'lifestyle';
-      // 博物館與藝術展覽類
-      case NarrationAspect.highlights:
-        return 'highlights';
-      case NarrationAspect.emotion:
-        return 'emotion';
-      case NarrationAspect.guidance:
-        return 'guidance';
-      case NarrationAspect.context:
-        return 'context';
       // 在地美食與夜市類
       case NarrationAspect.ingredients:
         return 'ingredients';
@@ -214,8 +153,6 @@ enum NarrationAspect {
         return 'etiquette';
       case NarrationAspect.brandStory:
         return 'brand_story';
-      case NarrationAspect.sensory:
-        return 'sensory';
     }
   }
 }
