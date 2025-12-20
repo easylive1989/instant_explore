@@ -228,9 +228,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          // TODO: Implement forgot password
-                        },
+                        onTap: () => context.go('/forgot-password'),
                         child: Text(
                           'auth.forgotPassword'.tr(),
                           style: const TextStyle(

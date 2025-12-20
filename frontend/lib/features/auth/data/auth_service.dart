@@ -260,6 +260,21 @@ class AuthService {
     }
   }
 
+  /// 發送密碼重置郵件
+  Future<void> resetPassword({required String email}) async {
+    try {
+      debugPrint('🔑 開始發送密碼重置郵件...');
+
+      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+
+      debugPrint('✅ 密碼重置郵件已發送至: $email');
+    } catch (e, stackTrace) {
+      debugPrint('❌ 發送密碼重置郵件失敗: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
   /// 清理資源（真實服務通常不需要特殊清理）
   void dispose() {
     // 真實的 AuthService 通常不需要特殊的清理邏輯

@@ -10,6 +10,7 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/journey/screens/save_success_screen.dart';
 import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
+import 'package:context_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
@@ -49,6 +50,11 @@ class RouterConfig {
           path: '/register',
           name: 'register',
           builder: (context, state) => const RegisterScreen(),
+        ),
+        GoRoute(
+          path: '/forgot-password',
+          name: 'forgot-password',
+          builder: (context, state) => const ForgotPasswordScreen(),
         ),
         GoRoute(
           path: '/config',
@@ -104,15 +110,19 @@ class RouterConfig {
         // 直接從 authService 讀取最新的認證狀態，避免 provider 異步更新延遲
         final authService = ref.read(authServiceProvider);
         final isSignedIn = authService.isSignedIn;
-        final loggingIn = state.matchedLocation == '/login';
-        final registering = state.matchedLocation == '/register';
+        final location = state.matchedLocation;
+
+        // 公開頁面（不需要登入）
+        final publicPages = ['/login', '/register', '/forgot-password'];
+        final isPublicPage = publicPages.contains(location);
 
         // If not signed in and not on a public page, redirect to login
-        if (!isSignedIn && !loggingIn && !registering) {
+        if (!isSignedIn && !isPublicPage) {
           return '/login';
         }
-        // If signed in and on a public page, redirect to home
-        if (isSignedIn && (loggingIn || registering)) {
+        // If signed in and on a login/register page, redirect to home
+        // (但不影響 forgot-password，已登入用戶也可以訪問)
+        if (isSignedIn && (location == '/login' || location == '/register')) {
           return '/';
         }
 
