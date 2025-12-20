@@ -1,5 +1,6 @@
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,9 +15,9 @@ void main() {
         );
 
         expect(content.segments.length, 3);
-        expect(content.segments[0], '這是第一句。');
-        expect(content.segments[1], '這是第二句。');
-        expect(content.segments[2], '這是第三句。');
+        expect(content.segments[0].text, '這是第一句。');
+        expect(content.segments[1].text, '這是第二句。');
+        expect(content.segments[2].text, '這是第三句。');
       });
 
       test('should throw NarrationContentException for empty text', () {
@@ -51,7 +52,7 @@ void main() {
         );
 
         expect(content.segments.length, 1);
-        expect(content.segments[0], '這是一句合格的話語。');
+        expect(content.segments[0].text, '這是一句合格的話語。');
       });
 
       test('should handle mixed Chinese and English punctuation', () {
@@ -62,10 +63,10 @@ void main() {
         );
 
         expect(content.segments.length, 4);
-        expect(content.segments[0], '這是中文句號。');
-        expect(content.segments[1], 'This is English.');
-        expect(content.segments[2], '這是驚嘆號！');
-        expect(content.segments[3], 'What is this?');
+        expect(content.segments[0].text, '這是中文句號。');
+        expect(content.segments[1].text, 'This is English.');
+        expect(content.segments[2].text, '這是驚嘆號！');
+        expect(content.segments[3].text, 'What is this?');
       });
 
       test('should set language correctly', () {
@@ -76,6 +77,40 @@ void main() {
         );
 
         expect(content.language, Language.english);
+      });
+
+      test('should create segments with correct position ranges', () {
+        const text = '這是第一句話。這是第二句話。';
+        final content = NarrationContent.create(
+          text,
+          language: Language.traditionalChinese,
+        );
+
+        expect(content.segments.length, 2);
+
+        // 第一句：「這是第一句話。」位置 0-7
+        expect(content.segments[0].startPosition, 0);
+        expect(content.segments[0].endPosition, 7);
+
+        // 第二句：「這是第二句話。」位置 7-14
+        expect(content.segments[1].startPosition, 7);
+        expect(content.segments[1].endPosition, 14);
+      });
+    });
+
+    group('NarrationSegment', () {
+      test('containsPosition should work correctly', () {
+        const segment = NarrationSegment(
+          text: 'Test',
+          startPosition: 10,
+          endPosition: 20,
+        );
+
+        expect(segment.containsPosition(9), false);
+        expect(segment.containsPosition(10), true);
+        expect(segment.containsPosition(15), true);
+        expect(segment.containsPosition(19), true);
+        expect(segment.containsPosition(20), false);
       });
     });
 
@@ -164,7 +199,10 @@ void main() {
 
         // 沒有標點符號，整個文本視為一個段落
         expect(content.segments.length, 1);
-        expect(content.segments[0], 'This is text without punctuation here');
+        expect(
+          content.segments[0].text,
+          'This is text without punctuation here',
+        );
       });
 
       test('should handle consecutive punctuation', () {
@@ -220,7 +258,8 @@ void main() {
         final content = NarrationContent.fromJson(json);
 
         expect(content.text, '這是一段測試用的文字內容。');
-        expect(content.segments, ['這是一段測試用的文字內容。']);
+        expect(content.segments.length, 1);
+        expect(content.segments[0].text, '這是一段測試用的文字內容。');
         expect(content.language, Language.traditionalChinese);
       });
     });

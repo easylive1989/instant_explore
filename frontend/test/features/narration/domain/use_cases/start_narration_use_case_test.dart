@@ -239,10 +239,10 @@ void main() {
 
       // Assert
       expect(result.segments.length, equals(4));
-      expect(result.segments[0], equals('第一句話。'));
-      expect(result.segments[1], equals('第二句話！'));
-      expect(result.segments[2], equals('第三句話？'));
-      expect(result.segments[3], equals('第四句話。'));
+      expect(result.segments[0].text, equals('第一句話。'));
+      expect(result.segments[1].text, equals('第二句話！'));
+      expect(result.segments[2].text, equals('第三句話？'));
+      expect(result.segments[3].text, equals('第四句話。'));
     });
   });
 }
