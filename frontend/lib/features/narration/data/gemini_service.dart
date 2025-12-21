@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:context_app/common/config/api_config.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/data/narration_prompt_builder.dart';
@@ -15,9 +15,7 @@ import 'package:context_app/features/settings/domain/models/language.dart'
     as app_lang;
 
 class GeminiService implements NarrationService {
-  final ApiConfig _apiConfig;
-
-  GeminiService(this._apiConfig);
+  GeminiService();
 
   /// 生成地點導覽內容
   ///
@@ -32,15 +30,11 @@ class GeminiService implements NarrationService {
     required app_lang.Language language,
   }) async {
     try {
-      if (!_apiConfig.isGeminiConfigured) {
-        throw NarrationServiceException.configuration(
-          rawMessage: 'Gemini API key is not configured.',
-        );
-      }
-
-      final model = GenerativeModel(
-        model: 'gemini-flash-latest',
-        apiKey: _apiConfig.geminiApiKey,
+      // 使用 Google AI (Gemini Developer API)
+      final ai = FirebaseAI.googleAI();
+      final model = ai.generativeModel(
+        model: 'gemini-2.5-flash',
+        tools: [Tool.googleSearch()],
       );
 
       // 使用 NarrationPromptBuilder 建立提示詞
@@ -63,27 +57,19 @@ class GeminiService implements NarrationService {
     } on NarrationServiceException {
       // 已經是我們的異常，直接重新拋出
       rethrow;
-    } on InvalidApiKey catch (e) {
-      throw NarrationServiceException.configuration(
-        rawMessage: 'Invalid API key: ${e.toString()}',
-      );
-    } on UnsupportedUserLocation catch (e) {
-      throw NarrationServiceException.unsupportedLocation(
-        rawMessage: 'Unsupported location: ${e.toString()}',
-      );
-    } on ServerException catch (e) {
-      // 檢查是否為配額超限錯誤
+    } on FirebaseException catch (e) {
+      // 處理 Firebase 相關異常
       final errorString = e.toString().toLowerCase();
-      if (errorString.contains('resource_exhausted') ||
-          errorString.contains('429') ||
-          errorString.contains('quota exceeded') ||
-          errorString.contains('rate limit')) {
+      if (errorString.contains('resource-exhausted') ||
+          errorString.contains('quota-exceeded')) {
         throw NarrationServiceException.quotaExceeded(
-          rawMessage: e.toString(),
-          retryAfterSeconds: 900, // 15 分鐘
+          rawMessage: e.message ?? e.toString(),
+          retryAfterSeconds: 900,
         );
       }
-      throw NarrationServiceException.server(rawMessage: e.toString());
+      throw NarrationServiceException.server(
+        rawMessage: 'Firebase Error: ${e.message} (${e.code})',
+      );
     } on SocketException catch (e) {
       throw NarrationServiceException.network(rawMessage: e.toString());
     } on TimeoutException catch (e) {
@@ -99,6 +85,5 @@ class GeminiService implements NarrationService {
 }
 
 final narrationServiceProvider = Provider<NarrationService>((ref) {
-  final apiConfig = ref.watch(apiConfigProvider);
-  return GeminiService(apiConfig);
+  return GeminiService();
 });

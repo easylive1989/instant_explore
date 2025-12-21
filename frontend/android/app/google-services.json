@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "946345911984",
+    "project_id": "instant-explore-7b442",
+    "storage_bucket": "instant-explore-7b442.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:946345911984:android:391dd6633878a093a5bd75",
+        "android_client_info": {
+          "package_name": "com.paulchwu.instantexplore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "946345911984-51f3sjj0hfbb19mur232ce0o8um4tofq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7-sLtmyKyHyDhOTXmRiDsZ2GtTndQmdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "946345911984-51f3sjj0hfbb19mur232ce0o8um4tofq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "946345911984-9gp7nsjks2em32u0mjguuv9m5oveecqg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.paulchwu.instantexplore"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>946345911984-9gp7nsjks2em32u0mjguuv9m5oveecqg.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.946345911984-9gp7nsjks2em32u0mjguuv9m5oveecqg</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC2jrXkgd5LgQCahWFvzk9Fns6xVs9z4FI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>946345911984</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.paulchwu.instantexplore</string>
+	<key>PROJECT_ID</key>
+	<string>instant-explore-7b442</string>
+	<key>STORAGE_BUCKET</key>
+	<string>instant-explore-7b442.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:946345911984:ios:b24fa1e00e4f7841a5bd75</string>
+</dict>
+</plist>
