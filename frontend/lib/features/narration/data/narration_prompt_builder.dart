@@ -37,6 +37,7 @@ Requirements:
 - Target Length: approximately 800-1200 characters
 - Estimated Duration: 3-5 minutes when read aloud
 - Tone: Engaging, vivid, and informative - as if you're speaking to a tourist standing at the location
+- Do NOT include any opening greetings, introductions, or welcome phrases (e.g., "Hello everyone", "Welcome to..."). Start directly with the content.
 
 Content Guidelines:
 $aspectGuideline
