@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/firebase_options.dart';
@@ -16,6 +17,9 @@ Future<Widget> init() async {
 
   // Initialize EasyLocalization
   await EasyLocalization.ensureInitialized();
+
+  // Initialize Hive for local caching
+  await Hive.initFlutter();
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

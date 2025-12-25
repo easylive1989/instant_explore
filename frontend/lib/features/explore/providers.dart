@@ -3,6 +3,8 @@ import 'package:context_app/features/explore/domain/use_cases/search_nearby_plac
 import 'package:context_app/features/explore/domain/use_cases/search_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
+import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
+import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
@@ -25,13 +27,18 @@ final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
   return PlacesRepositoryImpl(placesApiService);
 });
 
+final placesCacheServiceProvider = Provider<PlacesCacheService>((ref) {
+  return HivePlacesCacheService();
+});
+
 // Use Case Providers
 final searchNearbyPlacesUseCaseProvider = Provider<SearchNearbyPlacesUseCase>((
   ref,
 ) {
   final locationService = ref.watch(locationServiceProvider);
   final repository = ref.watch(placesRepositoryProvider);
-  return SearchNearbyPlacesUseCase(locationService, repository);
+  final cacheService = ref.watch(placesCacheServiceProvider);
+  return SearchNearbyPlacesUseCase(locationService, repository, cacheService);
 });
 
 final searchPlacesUseCaseProvider = Provider<SearchPlacesUseCase>((ref) {
@@ -78,8 +85,13 @@ class PlacesController extends AsyncNotifier<List<Place>> {
     });
   }
 
+  /// 強制重新整理（忽略快取）
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _loadNearbyPlaces());
+    state = await AsyncValue.guard(() async {
+      final language = ref.read(currentLanguageProvider);
+      final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
+      return useCase.forceRefresh(language: language);
+    });
   }
 }

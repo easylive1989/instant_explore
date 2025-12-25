@@ -71,6 +71,13 @@ dependencies:
   crypto: ^3.0.7
   firebase_core: ^4.3.0
   firebase_ai: ^3.6.1
+  
+  # Local caching for API optimization
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # Lazy loading for images
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:

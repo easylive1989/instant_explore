@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,20 +198,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 }
 
-class PlaceCard extends ConsumerWidget {
+class PlaceCard extends StatelessWidget {
   final Place place;
 
   const PlaceCard({super.key, required this.place});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final apiConfig = ref.watch(apiConfigProvider);
-
-    final photoUrl = place.primaryPhoto?.getPhotoUrl(
-      maxWidth: 400,
-      apiKey: apiConfig.googleMapsApiKey,
-    );
-
+  Widget build(BuildContext context) {
     return Card(
       color: Colors.white.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -226,21 +218,23 @@ class PlaceCard extends ConsumerWidget {
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: photoUrl != null
-                    ? Image.network(
-                        photoUrl,
-                        width: 96,
-                        height: 96,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 96,
-                        height: 96,
-                        color: Colors.grey[800],
-                        child: const Icon(Icons.image_not_supported),
-                      ),
+              // 使用 category icon 取代照片（完全免費）
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: place.category.color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: place.category.color.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  place.category.icon,
+                  size: 32,
+                  color: place.category.color,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

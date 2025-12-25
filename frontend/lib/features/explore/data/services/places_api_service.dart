@@ -10,6 +10,10 @@ class PlacesApiService {
   static const String _textSearchUrl =
       'https://places.googleapis.com/v1/places:searchText';
 
+  /// Basic FieldMask - 不含 rating 和 priceLevel (Pro 等級，較便宜)
+  static const String _basicFieldMask =
+      'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.photos';
+
   PlacesApiService(this._apiKey);
 
   Future<List<Place>> searchByText(String query, {String? languageCode}) async {
@@ -20,8 +24,7 @@ class PlacesApiService {
     final headers = {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': _apiKey,
-      'X-Goog-FieldMask':
-          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
+      'X-Goog-FieldMask': _basicFieldMask,
     };
 
     final Map<String, dynamic> requestBody = {'textQuery': query};
@@ -53,6 +56,8 @@ class PlacesApiService {
     }
   }
 
+  /// 搜尋附近地點（基礎版，不含 rating 和 priceLevel）
+  /// 用於列表頁，降低 API 成本
   Future<List<Place>> searchNearby(
     PlaceLocation location, {
     int maxResultCount = 20,
@@ -67,8 +72,7 @@ class PlacesApiService {
     final headers = {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': _apiKey,
-      'X-Goog-FieldMask':
-          'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.photos',
+      'X-Goog-FieldMask': _basicFieldMask,
     };
 
     final Map<String, dynamic> requestBody = {

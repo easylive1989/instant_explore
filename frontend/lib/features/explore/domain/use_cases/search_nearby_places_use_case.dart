@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
+import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -9,6 +10,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 class SearchNearbyPlacesUseCase {
   final LocationService _locationService;
   final PlacesRepository _placesRepository;
+  final PlacesCacheService _cacheService;
 
   /// 評分權重 (70%)
   static const double _ratingWeight = 0.7;
@@ -22,17 +24,59 @@ class SearchNearbyPlacesUseCase {
   // 最大搜尋半徑
   static const _maxDistance = 1000.0;
 
-  SearchNearbyPlacesUseCase(this._locationService, this._placesRepository);
+  SearchNearbyPlacesUseCase(
+    this._locationService,
+    this._placesRepository,
+    this._cacheService,
+  );
 
   Future<List<Place>> execute({required Language language}) async {
     final userLocation = await _locationService.getCurrentLocation();
+
+    // 檢查是否需要重新搜尋（快取過期或移動超過 1km）
+    final shouldRefresh = await _cacheService.shouldRefresh(userLocation);
+
+    if (!shouldRefresh) {
+      // 使用快取資料
+      final cachedPlaces = await _cacheService.getCachedPlaces();
+      if (cachedPlaces != null && cachedPlaces.isNotEmpty) {
+        return _sortByWeightedScore(cachedPlaces, userLocation);
+      }
+    }
+
+    // 呼叫 API 取得新資料
     final places = await _placesRepository.getNearbyPlaces(
       userLocation,
       language: language,
       radius: _maxDistance,
     );
 
+    // 儲存到快取
+    await _cacheService.cachePlaces(places);
+    await _cacheService.saveLastSearchLocation(userLocation);
+
     // 使用權重計分法排序
+    return _sortByWeightedScore(places, userLocation);
+  }
+
+  /// 強制重新整理（忽略快取）
+  Future<List<Place>> forceRefresh({required Language language}) async {
+    final userLocation = await _locationService.getCurrentLocation();
+
+    // 清除快取
+    await _cacheService.clearCache();
+
+    // 呼叫 API 取得新資料
+    final places = await _placesRepository.getNearbyPlaces(
+      userLocation,
+      language: language,
+      radius: _maxDistance,
+    );
+
+    // 儲存到快取
+    await _cacheService.cachePlaces(places);
+    await _cacheService.saveLastSearchLocation(userLocation);
+
     return _sortByWeightedScore(places, userLocation);
   }
 

@@ -5,12 +5,15 @@ import 'package:mocktail/mocktail.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
+import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 
 class MockLocationService extends Mock implements LocationService {}
 
 class MockPlacesRepository extends Mock implements PlacesRepository {}
+
+class MockPlacesCacheService extends Mock implements PlacesCacheService {}
 
 class FakePlaceLocation extends Fake implements PlaceLocation {}
 
@@ -20,6 +23,7 @@ void main() {
   late SearchNearbyPlacesUseCase useCase;
   late MockLocationService mockLocationService;
   late MockPlacesRepository mockPlacesRepository;
+  late MockPlacesCacheService mockPlacesCacheService;
 
   // 使用者位置 (台北 101 附近)
   final userLocation = PlaceLocation(latitude: 25.0330, longitude: 121.5654);
@@ -34,14 +38,29 @@ void main() {
   setUp(() {
     mockLocationService = MockLocationService();
     mockPlacesRepository = MockPlacesRepository();
+    mockPlacesCacheService = MockPlacesCacheService();
     useCase = SearchNearbyPlacesUseCase(
       mockLocationService,
       mockPlacesRepository,
+      mockPlacesCacheService,
     );
 
     when(
       () => mockLocationService.getCurrentLocation(),
     ).thenAnswer((_) async => userLocation);
+
+    // 預設快取為過期狀態，需要重新搜尋
+    when(
+      () => mockPlacesCacheService.shouldRefresh(any()),
+    ).thenAnswer((_) async => true);
+
+    when(
+      () => mockPlacesCacheService.cachePlaces(any()),
+    ).thenAnswer((_) async {});
+
+    when(
+      () => mockPlacesCacheService.saveLastSearchLocation(any()),
+    ).thenAnswer((_) async {});
   });
 
   /// 建立測試用 Place
