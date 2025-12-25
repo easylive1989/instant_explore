@@ -75,6 +75,7 @@ dependencies:
   # Local caching for API optimization
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_cache_manager: ^3.4.1
   
   # Lazy loading for images
   visibility_detector: ^0.4.0+2

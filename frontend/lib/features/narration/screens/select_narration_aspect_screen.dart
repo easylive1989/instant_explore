@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,28 +33,24 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
           // Background Image
           Positioned.fill(
             child: photoUrl != null
-                ? Image.network(
-                    photoUrl,
+                ? CachedNetworkImage(
+                    imageUrl: photoUrl,
                     fit: BoxFit.cover,
                     color: const Color(0x66000000),
                     colorBlendMode: BlendMode.darken,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: AppColors.backgroundDark,
-                        child: const Center(child: CircularProgressIndicator()),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: AppColors.backgroundDark,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                          color: Colors.white54,
-                        ),
-                      );
-                    },
+                    cacheManager: PlaceImageCacheManager.instance,
+                    placeholder: (context, url) => Container(
+                      color: AppColors.backgroundDark,
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: AppColors.backgroundDark,
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        size: 48,
+                        color: Colors.white54,
+                      ),
+                    ),
                   )
                 : Container(color: AppColors.backgroundDark),
           ),
