@@ -50,7 +50,10 @@
     "delete_title": "刪除紀錄",
     "delete_message": "確定要刪除此紀錄嗎？",
     "delete_confirm": "刪除",
-    "cancel": "取消"
+    "cancel": "取消",
+    "today": "今天",
+    "yesterday": "昨天",
+    "replay": "重播"
   },
   "explore": {
     "title": "探索",

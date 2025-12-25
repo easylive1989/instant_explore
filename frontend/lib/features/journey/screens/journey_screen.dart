@@ -39,7 +39,12 @@ class JourneyScreen extends ConsumerWidget {
             itemCount: entries.length,
             itemBuilder: (context, index) {
               final entry = entries[index];
-              return TimelineEntry(key: ValueKey(entry.id), entry: entry);
+              final isLast = index == entries.length - 1;
+              return TimelineEntry(
+                key: ValueKey(entry.id),
+                entry: entry,
+                isLast: isLast,
+              );
             },
           );
         },
