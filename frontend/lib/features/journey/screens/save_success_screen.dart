@@ -148,7 +148,7 @@ class SaveSuccessScreen extends StatelessWidget {
                       clipBehavior: Clip.antiAlias,
                       child: place.photos.isNotEmpty
                           ? Image.network(
-                              'https://places.googleapis.com/v1/${place.photos.first.name}/media?maxHeightPx=400&maxWidthPx=400&key=${const String.fromEnvironment("GOOGLE_PLACES_API_KEY")}',
+                              place.photos.first.url,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => const Center(
                                 child: Icon(

@@ -9,17 +9,13 @@ import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/common/config/api_config.dart';
 
 class MockPassportRepository extends Mock implements JourneyRepository {}
-
-class MockApiConfig extends Mock implements ApiConfig {}
 
 class FakePassportEntry extends Fake implements JourneyEntry {}
 
 void main() {
   late MockPassportRepository mockRepository;
-  late MockApiConfig mockApiConfig;
   late SaveNarrationToJourneyUseCase useCase;
 
   setUpAll(() {
@@ -28,11 +24,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockPassportRepository();
-    mockApiConfig = MockApiConfig();
-    useCase = SaveNarrationToJourneyUseCase(mockRepository, mockApiConfig);
-
-    // Default mock behavior
-    when(() => mockApiConfig.isPlacesConfigured).thenReturn(false);
+    useCase = SaveNarrationToJourneyUseCase(mockRepository);
   });
 
   final place = Place(

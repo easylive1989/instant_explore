@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:http/http.dart' as http;
-import 'package:context_app/features/explore/domain/models/place.dart';
 
 class PlacesApiService {
   final String _apiKey;
@@ -16,7 +16,12 @@ class PlacesApiService {
 
   PlacesApiService(this._apiKey);
 
-  Future<List<Place>> searchByText(String query, {String? languageCode}) async {
+  String get apiKey => _apiKey;
+
+  Future<List<GooglePlaceDto>> searchByText(
+    String query, {
+    String? languageCode,
+  }) async {
     if (_apiKey.isEmpty) {
       throw Exception('Google Maps API Key is not configured.');
     }
@@ -45,7 +50,7 @@ class PlacesApiService {
       final placesJson = data['places'] as List?;
       if (placesJson != null) {
         return placesJson
-            .map((placeJson) => Place.fromJson(placeJson))
+            .map((placeJson) => GooglePlaceDto.fromJson(placeJson))
             .toList();
       }
       return [];
@@ -56,9 +61,8 @@ class PlacesApiService {
     }
   }
 
-  /// 搜尋附近地點（基礎版，不含 rating 和 priceLevel）
-  /// 用於列表頁，降低 API 成本
-  Future<List<Place>> searchNearby(
+  /// 搜尋附近地點（回傳 DTO）
+  Future<List<GooglePlaceDto>> searchNearby(
     PlaceLocation location, {
     int maxResultCount = 20,
     required double radius,
@@ -109,7 +113,7 @@ class PlacesApiService {
       final placesJson = data['places'] as List?;
       if (placesJson != null) {
         return placesJson
-            .map((placeJson) => Place.fromJson(placeJson))
+            .map((placeJson) => GooglePlaceDto.fromJson(placeJson))
             .toList();
       }
       return [];

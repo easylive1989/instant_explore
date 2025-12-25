@@ -28,12 +28,15 @@ class PlacesRepositoryImpl implements PlacesRepository {
     required Language language,
     required double radius,
   }) async {
-    return _apiService.searchNearby(
+    final dtos = await _apiService.searchNearby(
       location,
       includedTypes: _includedTypes,
       languageCode: language.code,
       radius: radius,
     );
+
+    // DTO -> Domain 轉換，同時產生照片 URL
+    return dtos.map((dto) => dto.toDomain(apiKey: _apiService.apiKey)).toList();
   }
 
   @override
@@ -41,6 +44,12 @@ class PlacesRepositoryImpl implements PlacesRepository {
     String query, {
     required Language language,
   }) async {
-    return _apiService.searchByText(query, languageCode: language.code);
+    final dtos = await _apiService.searchByText(
+      query,
+      languageCode: language.code,
+    );
+
+    // DTO -> Domain 轉換，同時產生照片 URL
+    return dtos.map((dto) => dto.toDomain(apiKey: _apiService.apiKey)).toList();
   }
 }

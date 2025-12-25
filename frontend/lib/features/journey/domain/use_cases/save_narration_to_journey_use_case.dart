@@ -8,15 +8,12 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/journey/data/supabase_journey_repository.dart';
 import 'package:uuid/uuid.dart';
-import 'package:context_app/common/config/api_config.dart';
 
 class SaveNarrationToJourneyUseCase {
   final JourneyRepository _repository;
-  final ApiConfig _apiConfig;
   final Uuid _uuid;
 
-  SaveNarrationToJourneyUseCase(this._repository, this._apiConfig)
-    : _uuid = const Uuid();
+  SaveNarrationToJourneyUseCase(this._repository) : _uuid = const Uuid();
 
   Future<void> execute({
     required String userId,
@@ -26,11 +23,8 @@ class SaveNarrationToJourneyUseCase {
     required Language language,
   }) async {
     String? imageUrl;
-    if (place.primaryPhoto != null && _apiConfig.isPlacesConfigured) {
-      imageUrl = place.primaryPhoto!.getPhotoUrl(
-        maxWidth: 400,
-        apiKey: _apiConfig.googlePlacesApiKey,
-      );
+    if (place.primaryPhoto != null) {
+      imageUrl = place.primaryPhoto!.url;
     }
 
     final savedPlace = SavedPlace(
@@ -56,6 +50,5 @@ class SaveNarrationToJourneyUseCase {
 final saveNarrationToPassportUseCaseProvider =
     Provider<SaveNarrationToJourneyUseCase>((ref) {
       final repository = ref.watch(passportRepositoryProvider);
-      final apiConfig = ref.watch(apiConfigProvider);
-      return SaveNarrationToJourneyUseCase(repository, apiConfig);
+      return SaveNarrationToJourneyUseCase(repository);
     });

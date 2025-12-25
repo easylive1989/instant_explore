@@ -60,10 +60,7 @@ class RouterConfig {
           path: '/config',
           name: 'config',
           builder: (context, state) {
-            final extra = state.extra;
-            final place = extra is Place
-                ? extra
-                : Place.fromJson(extra as Map<String, dynamic>);
+            final place = state.extra as Place;
             return SelectNarrationAspectScreen(place: place);
           },
         ),
@@ -72,10 +69,7 @@ class RouterConfig {
           name: 'player',
           builder: (context, state) {
             final params = state.extra as Map<String, dynamic>;
-            final placeData = params['place'];
-            final place = placeData is Place
-                ? placeData
-                : Place.fromJson(placeData as Map<String, dynamic>);
+            final place = params['place'] as Place;
             final narrationAspect =
                 params['narrationAspect'] as NarrationAspect?;
             final narrationContent =

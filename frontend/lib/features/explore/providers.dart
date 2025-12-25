@@ -28,7 +28,8 @@ final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
 });
 
 final placesCacheServiceProvider = Provider<PlacesCacheService>((ref) {
-  return HivePlacesCacheService();
+  final apiKey = ref.watch(apiConfigProvider).googleMapsApiKey;
+  return HivePlacesCacheService(apiKey);
 });
 
 // Use Case Providers

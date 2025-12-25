@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
@@ -9,7 +10,10 @@ import 'package:hive/hive.dart';
 /// Hive 實作的地點快取服務
 ///
 /// 使用 Hive 儲存地點資料，支援 TTL 和距離判斷
+/// 內部使用 DTO 進行序列化，對外使用 Domain Model
 class HivePlacesCacheService implements PlacesCacheService {
+  final String _apiKey;
+
   static const String _boxName = 'places_cache';
   static const String _placesKey = 'cached_places';
   static const String _timestampKey = 'cache_timestamp';
@@ -22,6 +26,8 @@ class HivePlacesCacheService implements PlacesCacheService {
   static const double _refreshDistanceThreshold = 1000.0;
 
   Box? _box;
+
+  HivePlacesCacheService(this._apiKey);
 
   /// 取得或開啟 Hive Box
   Future<Box> _getBox() async {
@@ -41,8 +47,11 @@ class HivePlacesCacheService implements PlacesCacheService {
       if (placesJson == null) return null;
 
       final List<dynamic> placesList = jsonDecode(placesJson);
+      // 使用 DTO 反序列化，然後轉換為 Domain Model
+      // apiKey 從建構函式注入，不需要快取
       return placesList
-          .map((json) => Place.fromJson(json as Map<String, dynamic>))
+          .map((json) => GooglePlaceDto.fromJson(json as Map<String, dynamic>))
+          .map((dto) => dto.toDomain(apiKey: _apiKey))
           .toList();
     } catch (e) {
       // 解析失敗時返回 null，讓呼叫端重新取得資料
@@ -53,10 +62,50 @@ class HivePlacesCacheService implements PlacesCacheService {
   @override
   Future<void> cachePlaces(List<Place> places) async {
     final box = await _getBox();
-    final placesJson = jsonEncode(places.map((p) => p.toJson()).toList());
+
+    // 將 Domain Model 轉換為可序列化的格式
+    final placesData = places.map((p) => _placeToJson(p)).toList();
+    final placesJson = jsonEncode(placesData);
 
     await box.put(_placesKey, placesJson);
     await box.put(_timestampKey, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  /// 將 Place 轉換為可序列化的 JSON 格式
+  Map<String, dynamic> _placeToJson(Place place) {
+    return {
+      'id': place.id,
+      'displayName': {'text': place.name},
+      'formattedAddress': place.formattedAddress,
+      'location': {
+        'latitude': place.location.latitude,
+        'longitude': place.location.longitude,
+      },
+      'rating': place.rating,
+      'types': place.types,
+      'photos': place.photos
+          .map(
+            (photo) => {
+              'name': _extractPhotoNameFromUrl(photo.url),
+              'widthPx': photo.widthPx,
+              'heightPx': photo.heightPx,
+              'authorAttributions': photo.authorAttributions,
+            },
+          )
+          .toList(),
+    };
+  }
+
+  /// 從照片 URL 中提取 photo name
+  String _extractPhotoNameFromUrl(String url) {
+    // URL 格式: https://places.googleapis.com/v1/{name}/media?...
+    final uri = Uri.parse(url);
+    final path = uri.path;
+    // 移除 /media 後綴
+    if (path.endsWith('/media')) {
+      return path.substring(1, path.length - 6);
+    }
+    return path;
   }
 
   @override

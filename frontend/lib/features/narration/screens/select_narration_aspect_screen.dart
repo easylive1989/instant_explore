@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
@@ -17,7 +16,6 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final apiConfig = ref.watch(apiConfigProvider);
     final selectedAspect = ref.watch(narrationAspectProvider);
 
     // 根據景點類型取得可用的介紹面向
@@ -25,10 +23,7 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
       place.category,
     );
 
-    final photoUrl = place.primaryPhoto?.getPhotoUrl(
-      maxWidth: 800,
-      apiKey: apiConfig.googleMapsApiKey,
-    );
+    final photoUrl = place.primaryPhoto?.url;
 
     return Scaffold(
       body: Stack(
