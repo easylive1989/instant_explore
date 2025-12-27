@@ -65,4 +65,20 @@ extension PlaceCategoryUIExtension on PlaceCategory {
         return const Color(0xFFFF9800); // 橘色
     }
   }
+
+  /// 取得類別圖片路徑
+  String get imageAssetPath {
+    switch (this) {
+      case PlaceCategory.historicalCultural:
+        return 'assets/images/categories/historical_cultural_icon.jpg';
+      case PlaceCategory.naturalLandscape:
+        return 'assets/images/categories/natural_landscape_icon.jpg';
+      case PlaceCategory.modernUrban:
+        return 'assets/images/categories/modern_urban_icon.jpg';
+      case PlaceCategory.museumArt:
+        return 'assets/images/categories/museum_art_icon.jpg';
+      case PlaceCategory.foodMarket:
+        return 'assets/images/categories/food_market_icon.jpg';
+    }
+  }
 }

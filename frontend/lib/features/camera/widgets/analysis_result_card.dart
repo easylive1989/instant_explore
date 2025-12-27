@@ -39,16 +39,14 @@ class AnalysisResultCard extends StatelessWidget {
           // 標題區
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: place.category.color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  place.category.icon,
-                  color: place.category.color,
-                  size: 28,
+              // 使用類別圖片（與 PlaceCard 相同）
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  place.category.imageAssetPath,
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 16),
@@ -64,7 +62,8 @@ class AnalysisResultCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    // 類別標籤（與 PlaceCard 相同樣式）
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -72,15 +71,30 @@ class AnalysisResultCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: place.category.color.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        place.category.translationKey.tr(),
-                        style: TextStyle(
-                          color: place.category.color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: place.category.color.withValues(alpha: 0.5),
+                          width: 1,
                         ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            place.category.icon,
+                            size: 14,
+                            color: place.category.color,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            place.category.translationKey.tr(),
+                            style: TextStyle(
+                              color: place.category.color,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

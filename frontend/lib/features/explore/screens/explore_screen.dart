@@ -237,21 +237,13 @@ class PlaceCard extends StatelessWidget {
           child: Row(
             children: [
               // 使用 category icon 取代照片（完全免費）
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: place.category.color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: place.category.color.withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Icon(
-                  place.category.icon,
-                  size: 32,
-                  color: place.category.color,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  place.category.imageAssetPath,
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 16),
