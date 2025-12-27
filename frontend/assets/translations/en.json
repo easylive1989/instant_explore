@@ -178,5 +178,16 @@
     "brand_story_description": "Traditional values and heritage",
     "sensory": "Flavor Profile",
     "sensory_description": "What to expect in terms of taste"
+  },
+  "camera": {
+    "title": "Photo Recognition",
+    "instruction": "Capture a landmark or dish",
+    "instruction_subtitle": "AI will identify and generate a personalized guide",
+    "take_photo": "Take Photo",
+    "from_gallery": "Choose from Gallery",
+    "analyzing": "Analyzing...",
+    "analysis_error": "Analysis failed, please try again",
+    "retry": "Retry",
+    "start_narration": "Start Guide"
   }
 }

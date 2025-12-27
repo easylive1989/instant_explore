@@ -92,21 +92,39 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               color: AppColors.textPrimaryDark,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              ref
-                                  .read(placesControllerProvider.notifier)
-                                  .refresh();
-                            },
-                            icon: const Icon(Icons.refresh),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  context.pushNamed('camera');
+                                },
+                                icon: const Icon(Icons.camera_alt),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.primary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () {
+                                  _searchController.clear();
+                                  ref
+                                      .read(placesControllerProvider.notifier)
+                                      .refresh();
+                                },
+                                icon: const Icon(Icons.refresh),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.primary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

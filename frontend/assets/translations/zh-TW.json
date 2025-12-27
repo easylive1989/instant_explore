@@ -178,5 +178,16 @@
     "brand_story_description": "老店的堅持或傳承",
     "sensory": "口感描述",
     "sensory_description": "用形容詞預告味道"
+  },
+  "camera": {
+    "title": "拍照辨識",
+    "instruction": "拍攝景點或美食",
+    "instruction_subtitle": "AI 將自動辨識並生成專屬導覽",
+    "take_photo": "拍照",
+    "from_gallery": "從相簿選擇",
+    "analyzing": "正在分析中...",
+    "analysis_error": "分析失敗，請重試",
+    "retry": "重試",
+    "start_narration": "開始導覽"
   }
 }

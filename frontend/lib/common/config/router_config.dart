@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +14,7 @@ import 'package:context_app/features/auth/screens/login_screen.dart';
 import 'package:context_app/features/auth/screens/register_screen.dart';
 import 'package:context_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
+import 'package:context_app/features/camera/screens/camera_screen.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider
@@ -60,8 +63,20 @@ class RouterConfig {
           path: '/config',
           name: 'config',
           builder: (context, state) {
-            final place = state.extra as Place;
-            return SelectNarrationAspectScreen(place: place);
+            // 支援兩種傳入方式：直接傳 Place 或傳 Map（包含 capturedImageBytes）
+            final extra = state.extra;
+            if (extra is Place) {
+              return SelectNarrationAspectScreen(place: extra);
+            } else if (extra is Map<String, dynamic>) {
+              final place = extra['place'] as Place;
+              final capturedImageBytes =
+                  extra['capturedImageBytes'] as Uint8List?;
+              return SelectNarrationAspectScreen(
+                place: place,
+                capturedImageBytes: capturedImageBytes,
+              );
+            }
+            throw ArgumentError('Invalid extra type for /config route');
           },
         ),
         GoRoute(
@@ -98,6 +113,11 @@ class RouterConfig {
               },
             );
           },
+        ),
+        GoRoute(
+          path: '/camera',
+          name: 'camera',
+          builder: (context, state) => const CameraScreen(),
         ),
       ],
       redirect: (context, state) {

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
@@ -13,8 +15,13 @@ import 'package:context_app/features/narration/providers.dart';
 
 class SelectNarrationAspectScreen extends ConsumerWidget {
   final Place place;
+  final Uint8List? capturedImageBytes;
 
-  const SelectNarrationAspectScreen({super.key, required this.place});
+  const SelectNarrationAspectScreen({
+    super.key,
+    required this.place,
+    this.capturedImageBytes,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,29 +38,7 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
       body: Stack(
         children: [
           // Background Image
-          Positioned.fill(
-            child: photoUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: photoUrl,
-                    fit: BoxFit.cover,
-                    color: const Color(0x66000000),
-                    colorBlendMode: BlendMode.darken,
-                    cacheManager: PlaceImageCacheManager.instance,
-                    placeholder: (context, url) => Container(
-                      color: AppColors.backgroundDark,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: AppColors.backgroundDark,
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 48,
-                        color: Colors.white54,
-                      ),
-                    ),
-                  )
-                : Container(color: AppColors.backgroundDark),
-          ),
+          Positioned.fill(child: _buildBackgroundImage(photoUrl)),
 
           // Top Navigation
           Positioned(
@@ -229,6 +214,51 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 建立背景圖片
+  Widget _buildBackgroundImage(String? photoUrl) {
+    // 優先使用相機拍攝的圖片
+    if (capturedImageBytes != null) {
+      return ColorFiltered(
+        colorFilter: const ColorFilter.mode(
+          Color(0x66000000),
+          BlendMode.darken,
+        ),
+        child: Image.memory(
+          capturedImageBytes!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      );
+    }
+
+    // 使用網路圖片
+    if (photoUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: photoUrl,
+        fit: BoxFit.cover,
+        color: const Color(0x66000000),
+        colorBlendMode: BlendMode.darken,
+        cacheManager: PlaceImageCacheManager.instance,
+        placeholder: (context, url) => Container(
+          color: AppColors.backgroundDark,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.backgroundDark,
+          child: const Icon(
+            Icons.image_not_supported,
+            size: 48,
+            color: Colors.white54,
+          ),
+        ),
+      );
+    }
+
+    // 沒有圖片時顯示深色背景
+    return Container(color: AppColors.backgroundDark);
   }
 }
 
