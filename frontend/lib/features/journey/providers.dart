@@ -12,7 +12,7 @@ import 'package:context_app/features/journey/domain/use_cases/delete_journey_ent
 // ============================================================================
 
 /// 旅程資料儲存庫 Provider
-final passportRepositoryProvider = Provider<JourneyRepository>((ref) {
+final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return SupabaseJourneyRepository(Supabase.instance.client);
 });
 
@@ -21,15 +21,15 @@ final passportRepositoryProvider = Provider<JourneyRepository>((ref) {
 // ============================================================================
 
 /// 取得我的旅程用例 Provider
-final getMyPassportUseCaseProvider = Provider<GetMyJourneyUseCase>((ref) {
-  final repository = ref.watch(passportRepositoryProvider);
+final getMyJourneyUseCaseProvider = Provider<GetMyJourneyUseCase>((ref) {
+  final repository = ref.watch(journeyRepositoryProvider);
   return GetMyJourneyUseCase(repository);
 });
 
 /// 儲存導覽到旅程用例 Provider
-final saveNarrationToPassportUseCaseProvider =
+final saveNarrationToJourneyUseCaseProvider =
     Provider<SaveNarrationToJourneyUseCase>((ref) {
-      final repository = ref.watch(passportRepositoryProvider);
+      final repository = ref.watch(journeyRepositoryProvider);
       return SaveNarrationToJourneyUseCase(repository);
     });
 
@@ -37,7 +37,7 @@ final saveNarrationToPassportUseCaseProvider =
 final deleteJourneyEntryUseCaseProvider = Provider<DeleteJourneyEntryUseCase>((
   ref,
 ) {
-  final repository = ref.watch(passportRepositoryProvider);
+  final repository = ref.watch(journeyRepositoryProvider);
   return DeleteJourneyEntryUseCase(repository);
 });
 
@@ -46,10 +46,10 @@ final deleteJourneyEntryUseCaseProvider = Provider<DeleteJourneyEntryUseCase>((
 // ============================================================================
 
 /// 我的旅程 Provider
-final myPassportProvider = FutureProvider.autoDispose<List<JourneyEntry>>((
+final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((
   ref,
 ) async {
-  final useCase = ref.watch(getMyPassportUseCaseProvider);
+  final useCase = ref.watch(getMyJourneyUseCaseProvider);
   final userId = Supabase.instance.client.auth.currentUser?.id;
 
   if (userId == null) {

@@ -10,7 +10,7 @@ class JourneyScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final passportAsyncValue = ref.watch(myPassportProvider);
+    final journeyAsyncValue = ref.watch(myJourneyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
@@ -24,7 +24,7 @@ class JourneyScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: passportAsyncValue.when(
+      body: journeyAsyncValue.when(
         data: (entries) {
           if (entries.isEmpty) {
             return Center(

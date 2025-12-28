@@ -49,13 +49,13 @@ final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
 final playerControllerProvider =
     StateNotifierProvider.autoDispose<PlayerController, NarrationState>((ref) {
       final startNarrationUseCase = ref.watch(startNarrationUseCaseProvider);
-      final saveNarrationToPassportUseCase = ref.watch(
-        saveNarrationToPassportUseCaseProvider,
+      final saveNarrationToJourneyUseCase = ref.watch(
+        saveNarrationToJourneyUseCaseProvider,
       );
       final ttsService = ref.watch(ttsServiceProvider);
       return PlayerController(
         startNarrationUseCase,
-        saveNarrationToPassportUseCase,
+        saveNarrationToJourneyUseCase,
         ttsService,
       );
     });

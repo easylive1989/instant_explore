@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:context_app/features/auth/domain/use_cases/login_with_email_use_case.dart';
@@ -7,6 +5,9 @@ import 'package:context_app/features/auth/domain/use_cases/login_with_google_use
 import 'package:context_app/features/auth/domain/use_cases/register_with_email_use_case.dart';
 import 'package:context_app/features/auth/presentation/controllers/login_controller.dart';
 import 'package:context_app/features/auth/presentation/controllers/register_controller.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ============================================================================
 // Data Layer Providers
@@ -15,6 +16,7 @@ import 'package:context_app/features/auth/presentation/controllers/register_cont
 /// 認證服務 Provider
 ///
 /// 提供認證服務實例，在測試中可透過 overrides 注入 Fake 實作
+@protected
 final authServiceProvider = Provider<AuthService>((ref) {
   final apiConfig = ref.watch(apiConfigProvider);
   final authService = AuthService(apiConfig);
@@ -54,18 +56,21 @@ final isSignedInProvider = Provider<bool>((ref) {
 // ============================================================================
 
 /// 電子郵件登入用例 Provider
+@protected
 final loginWithEmailUseCaseProvider = Provider<LoginWithEmailUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   return LoginWithEmailUseCase(authService);
 });
 
 /// Google 登入用例 Provider
+@protected
 final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
   return LoginWithGoogleUseCase(authService);
 });
 
 /// 電子郵件註冊用例 Provider
+@protected
 final registerWithEmailUseCaseProvider = Provider<RegisterWithEmailUseCase>((
   ref,
 ) {
