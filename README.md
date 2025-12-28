@@ -54,8 +54,9 @@
 
 - **前端:** Flutter (iOS / Android / Web)
 - **後端:** Supabase (Authentication, Database, Storage)
-- **地圖服務:** Google Maps API, Google Places API
-- **AI 服務:** Google Generative AI
+- **地圖服務:** Google Maps API
+- **AI 服務:** Firebase AI (Gemini)
+- **訂閱管理:** RevenueCat
 - **架構:** Feature-First 模組化設計
 - **狀態管理:** Riverpod
 - **設計理念:** 行動優先 (Mobile-First)
@@ -64,38 +65,44 @@
 
 ```bash
 # 複製專案
-git clone https://github.com/[your-username]/instant_explore.git
+git clone https://github.com/easylive1989/instant_explore.git
 cd instant_explore/frontend
 
 # 安裝依賴
 fvm flutter pub get
 
-# 執行應用程式 (開發環境)
-fvm flutter run
-
-# 或使用開發腳本 (需要 .env 檔案)
-chmod +x scripts/run_dev.sh
-./scripts/run_dev.sh
+# 執行應用程式 (開發環境，需透過 --dart-define 傳入環境變數)
+fvm flutter run \
+  --dart-define=GOOGLE_MAPS_API_KEY=your_key \
+  --dart-define=SUPABASE_URL=your_url \
+  --dart-define=SUPABASE_ANON_KEY=your_key \
+  --dart-define=GEMINI_API_KEY=your_key
 ```
 
 ### 環境變數設定
 
-建立 `.env` 檔案並設定以下變數:
+透過 `--dart-define` 傳入以下變數:
 
-```env
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-GOOGLE_PLACES_API_KEY=your_google_places_api_key
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+| 變數名稱 | 說明 |
+|---------|------|
+| `GOOGLE_MAPS_API_KEY` | Google Maps API 金鑰 |
+| `SUPABASE_URL` | Supabase 專案 URL |
+| `SUPABASE_ANON_KEY` | Supabase Anon Key |
+| `GEMINI_API_KEY` | Google Gemini API 金鑰 |
+| `GOOGLE_WEB_CLIENT_ID` | Google OAuth Web Client ID |
+| `GOOGLE_IOS_CLIENT_ID` | Google OAuth iOS Client ID |
+| `REVENUECAT_API_KEY_ANDROID` | RevenueCat Android API 金鑰 |
+| `REVENUECAT_API_KEY_IOS` | RevenueCat iOS API 金鑰 |
 
-> 詳細設定請參考 [開發指南](doc/DEVELOPMENT.md)
+> 詳細設定請參考 `frontend/.env.example`
 
 ### 🔧 CI/CD 狀態
-- **自動化測試**: 每次 push 自動執行單元測試和程式碼檢查
-- **多平台建置**: 自動建置 Android APK、iOS 和 Web 版本
-- **安全檢查**: 自動掃描硬編碼 API 金鑰
-- **自動部署**: main/master 分支自動部署 Web 版本到 GitHub Pages
+- **程式碼檢查**: 每次 push 自動執行格式檢查與靜態分析
+- **單元測試**: 自動執行單元測試
+- **資料庫同步**: master 分支自動推送 Supabase DB Schema
+- **自動部署**:
+  - Android: 自動建置 AAB 並部署至 Google Play Internal Testing
+  - iOS: 自動建置 IPA 並上傳至 TestFlight
 
 ## 📚 專案架構
 
@@ -106,30 +113,30 @@ instant_explore/
 ├── frontend/                 # Flutter 應用程式
 │   ├── lib/
 │   │   ├── main.dart         # 應用程式入口
-│   │   ├── core/             # 核心功能 (配置、工具)
-│   │   ├── shared/           # 共用元件
-│   │   ├── features/         # 功能模組
-│   │   │   ├── diary/        # 日記功能
-│   │   │   ├── images/       # 圖片管理
-│   │   │   ├── places/       # 地點選擇
-│   │   │   ├── player/       # 語音播放與 AI 互動
-│   │   │   └── passport/     # 知識護照
-│   │   ├── providers/        # Riverpod Providers
-│   │   ├── services/         # 服務層
-│   │   └── screens/          # 畫面
-│   └── test/                 # 測試檔案
+│   │   ├── app.dart          # App 設定 (路由、主題)
+│   │   ├── common/           # 共用功能
+│   │   │   ├── config/       # 應用程式設定
+│   │   │   ├── constraints/  # UI 約束
+│   │   │   └── utils/        # 工具函式
+│   │   ├── core/             # 核心功能
+│   │   └── features/         # 功能模組
+│   │       ├── auth/         # 登入與認證
+│   │       ├── camera/       # 相機功能
+│   │       ├── explore/      # 地點探索
+│   │       ├── journey/      # 旅程足跡
+│   │       ├── narration/    # AI 語音導覽
+│   │       ├── settings/     # 設定頁面
+│   │       └── subscription/ # 訂閱管理
+│   ├── test/                 # 測試檔案
+│   └── assets/               # 靜態資源
+├── supabase/                 # Supabase 設定與 Schema
 └── docs/                     # 專案文件
 ```
-
-### 資料模型
-
-- **足跡 (Context Entry)**: 標題、內容、時間、地點、互動問題與回答
-- **知識護照 (Knowledge Passport)**: 自動生成的文化足跡日誌
-- **照片 (Images)**: 多圖支援,儲存於 Supabase Storage
 
 ## 🧪 測試
 
 ```bash
+cd frontend
 # 執行單元測試
 fvm flutter test
 ```
