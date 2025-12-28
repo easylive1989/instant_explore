@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/common/config/theme_config.dart';
 import 'package:context_app/common/config/router_config.dart';
+import 'package:context_app/features/subscription/providers.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -13,6 +14,9 @@ class ContextureApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+
+    // 啟動 RevenueCat 用戶同步（監聽認證狀態並同步 UserId）
+    ref.watch(revenueCatUserSyncProvider);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => 'name'.tr(),

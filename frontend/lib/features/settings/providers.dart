@@ -6,6 +6,7 @@ import 'package:context_app/features/settings/domain/use_cases/delete_account_us
 import 'package:context_app/features/settings/domain/use_cases/logout_use_case.dart';
 import 'package:context_app/features/settings/presentation/providers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
+import 'package:context_app/features/subscription/providers.dart';
 
 // ============================================================================
 // Use Case Providers
@@ -14,7 +15,8 @@ import 'package:context_app/features/settings/presentation/providers/language_pr
 /// 登出用例 Provider
 final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
-  return LogoutUseCase(authService);
+  final purchaseRepository = ref.watch(purchaseRepositoryProvider);
+  return LogoutUseCase(authService, purchaseRepository);
 });
 
 /// 刪除帳戶用例 Provider

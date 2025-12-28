@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/data/entitlement_repository_impl.dart';
 import 'package:context_app/features/subscription/data/purchase_repository.dart';
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
@@ -20,6 +22,21 @@ final purchaseRepositoryProvider = Provider<PurchaseRepository>((ref) {
   throw UnimplementedError(
     'purchaseRepositoryProvider must be overridden in ProviderScope',
   );
+});
+
+/// RevenueCat 用戶同步 Provider
+///
+/// 監聽認證狀態，當用戶登入時同步 RevenueCat UserId
+/// 這個 Provider 應該在 App 初始化時被讀取以啟動監聽
+final revenueCatUserSyncProvider = Provider<void>((ref) {
+  final user = ref.watch(currentUserProvider);
+  final purchaseRepository = ref.watch(purchaseRepositoryProvider);
+
+  if (user != null) {
+    // 用戶已登入，同步 RevenueCat UserId
+    purchaseRepository.setUserId(user.id);
+    debugPrint('🔄 RevenueCat 用戶同步: ${user.id}');
+  }
 });
 
 /// 用戶權益狀態 Provider
