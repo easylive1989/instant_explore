@@ -189,5 +189,24 @@
     "analysis_error": "分析失敗，請重試",
     "retry": "重試",
     "start_narration": "開始導覽"
+  },
+  "subscription": {
+    "paywall_title": "已達今日免費上限",
+    "paywall_subtitle": "免費版每日 {limit} 次 AI 導覽",
+    "remaining_usage": "今日剩餘 {remaining} 次",
+    "unlimited_access": "無限使用中",
+    "expires_at": "有效至 {date}",
+    "purchase_title": "解鎖完整體驗",
+    "day_pass": "一日券",
+    "day_pass_description": "24 小時無限 AI 導覽",
+    "trip_pass": "一週券",
+    "trip_pass_description": "7 天無限 AI 導覽，適合旅遊",
+    "purchase_button": "立即購買",
+    "restore_purchases": "恢復購買",
+    "purchase_success": "購買成功！",
+    "purchase_failed": "購買失敗，請稍後再試",
+    "view_plans": "查看方案",
+    "continue_free": "繼續使用免費版",
+    "already_has_pass": "您已有有效的通行證，無需重複購買"
   }
 }

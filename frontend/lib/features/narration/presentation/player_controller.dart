@@ -12,11 +12,13 @@ import 'package:context_app/features/narration/presentation/narration_state.dart
 import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/subscription/domain/exceptions/free_quota_exceeded_exception.dart';
 
 /// 播放器控制器
 ///
 /// 使用 StateNotifier 管理播放器狀態
 /// 負責協調 Use Cases 和 TTS Service
+/// 注意：權益檢查由 CreateNarrationUseCase 處理
 class PlayerController extends StateNotifier<NarrationState> {
   final CreateNarrationUseCase _createNarrationUseCase;
   final SaveNarrationToJourneyUseCase _saveNarrationToJourneyUseCase;
@@ -50,6 +52,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     try {
       // 使用 CreateNarrationUseCase 生成導覽內容
+      // Use Case 會處理權益檢查和消耗免費額度
       final content = await _createNarrationUseCase.execute(
         place: place,
         aspect: aspect,
@@ -62,6 +65,9 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒
       state = state.ready(place, aspect, content);
+    } on FreeQuotaExceededException {
+      // 免費額度已用完
+      state = state.error(NarrationStateErrorType.freeQuotaExceeded);
     } on NarrationServiceException catch (e) {
       // 處理 AI 服務相關錯誤
       state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
@@ -166,7 +172,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       state = state.updateCharPosition(0);
     });
 
-    // 監聽錯誤事件
+    // 監聯錯誤事件
     _ttsErrorSubscription = _ttsService.onError.listen((error) {
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,

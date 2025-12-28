@@ -215,7 +215,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 8),
             Text(
               'camera.instruction_subtitle'.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.textSecondaryDark,
                 fontSize: 14,
               ),
@@ -289,7 +289,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 16),
             Text(
               'camera.analyzing'.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.textSecondaryDark,
                 fontSize: 16,
               ),

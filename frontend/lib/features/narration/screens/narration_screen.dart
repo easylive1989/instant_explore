@@ -13,6 +13,7 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/widgets/narration_control_panel.dart';
+import 'package:context_app/features/subscription/widgets/paywall_dialog.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
@@ -102,6 +103,22 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     });
   }
 
+  /// 顯示付費牆對話框
+  void _showPaywallDialog() {
+    showPaywallDialog(
+      context,
+      onPurchaseTap: () {
+        Navigator.of(context).pop();
+        context.push('/purchase');
+      },
+    ).then((_) {
+      // 對話框關閉後，返回首頁
+      if (mounted) {
+        context.go('/');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // 監聽錯誤狀態並顯示對應的對話框
@@ -113,7 +130,13 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           current.errorType!.requiresSpecialDialog) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _showAiOverLimitDialog();
+
+          // 根據錯誤類型顯示不同的對話框
+          if (current.errorType!.requiresPaywall) {
+            _showPaywallDialog();
+          } else {
+            _showAiOverLimitDialog();
+          }
         });
       }
 

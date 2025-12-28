@@ -14,6 +14,10 @@ class ApiConfig {
   final String googleWebClientId;
   final String googleIosClientId;
   final String geminiApiKey;
+  final String revenueCatApiKeyIos;
+  final String revenueCatApiKeyAndroid;
+  final String revenueCatApiKeyTest;
+
   const ApiConfig({
     required this.googleMapsApiKey,
     required this.googleDirectionsApiKey,
@@ -23,6 +27,9 @@ class ApiConfig {
     required this.googleWebClientId,
     required this.googleIosClientId,
     required this.geminiApiKey,
+    required this.revenueCatApiKeyIos,
+    required this.revenueCatApiKeyAndroid,
+    required this.revenueCatApiKeyTest,
   });
 
   /// 從環境變數建立配置
@@ -54,8 +61,37 @@ class ApiConfig {
         defaultValue: '',
       ),
       geminiApiKey: String.fromEnvironment('GEMINI_API_KEY', defaultValue: ''),
+      revenueCatApiKeyIos: String.fromEnvironment(
+        'REVENUECAT_API_KEY_IOS',
+        defaultValue: '',
+      ),
+      revenueCatApiKeyAndroid: String.fromEnvironment(
+        'REVENUECAT_API_KEY_ANDROID',
+        defaultValue: '',
+      ),
+      revenueCatApiKeyTest: String.fromEnvironment(
+        'REVENUECAT_API_KEY_TEST',
+        defaultValue: '',
+      ),
     );
   }
+
+  /// 取得當前平台的 RevenueCat API Key
+  /// 開發環境優先使用 test key
+  String get revenueCatApiKey {
+    // 如果有 test key，在 debug 模式下優先使用
+    if (kDebugMode && revenueCatApiKeyTest.isNotEmpty) {
+      return revenueCatApiKeyTest;
+    }
+    // 根據平台返回對應的 key
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return revenueCatApiKeyIos;
+    }
+    return revenueCatApiKeyAndroid;
+  }
+
+  /// RevenueCat 是否已配置
+  bool get isRevenueCatConfigured => revenueCatApiKey.isNotEmpty;
 
   /// 檢查必要的 API 金鑰是否已設定
   bool validateKeys() {

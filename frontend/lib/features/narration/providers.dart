@@ -6,6 +6,7 @@ import 'package:context_app/features/narration/domain/use_cases/create_narration
 import 'package:context_app/features/narration/presentation/player_controller.dart';
 import 'package:context_app/features/narration/presentation/narration_state.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
+import 'package:context_app/features/subscription/providers.dart';
 
 /// 導覽介紹面向選擇 Provider
 ///
@@ -33,15 +34,18 @@ final ttsServiceProvider = Provider<TtsService>((ref) {
 /// StartNarrationUseCase Provider
 ///
 /// 提供開始導覽的用例
+/// 注入 EntitlementRepository 以檢查權益
 final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
   final narrationService = ref.watch(narrationServiceProvider);
-  return CreateNarrationUseCase(narrationService);
+  final entitlementRepository = ref.watch(entitlementRepositoryProvider);
+  return CreateNarrationUseCase(narrationService, entitlementRepository);
 });
 
 /// PlayerController Provider
 ///
 /// 管理播放器狀態和控制播放行為
 /// 使用 autoDispose 確保離開頁面時自動清理資源
+/// 注意：權益檢查由 CreateNarrationUseCase 處理
 final playerControllerProvider =
     StateNotifierProvider.autoDispose<PlayerController, NarrationState>((ref) {
       final startNarrationUseCase = ref.watch(startNarrationUseCaseProvider);

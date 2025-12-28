@@ -189,5 +189,24 @@
     "analysis_error": "Analysis failed, please try again",
     "retry": "Retry",
     "start_narration": "Start Guide"
+  },
+  "subscription": {
+    "paywall_title": "Daily Free Limit Reached",
+    "paywall_subtitle": "Free version includes {limit} AI guides per day",
+    "remaining_usage": "{remaining} guides remaining today",
+    "unlimited_access": "Unlimited Access",
+    "expires_at": "Valid until {date}",
+    "purchase_title": "Unlock Full Experience",
+    "day_pass": "Day Pass",
+    "day_pass_description": "24-hour unlimited AI guides",
+    "trip_pass": "Trip Pass",
+    "trip_pass_description": "7-day unlimited AI guides, perfect for travel",
+    "purchase_button": "Purchase Now",
+    "restore_purchases": "Restore Purchases",
+    "purchase_success": "Purchase Successful!",
+    "purchase_failed": "Purchase failed, please try again",
+    "view_plans": "View Plans",
+    "continue_free": "Continue with Free",
+    "already_has_pass": "You already have an active pass, no need to purchase again"
   }
 }

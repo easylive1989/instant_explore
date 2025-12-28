@@ -15,6 +15,7 @@ import 'package:context_app/features/auth/screens/register_screen.dart';
 import 'package:context_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:context_app/features/camera/screens/camera_screen.dart';
+import 'package:context_app/features/subscription/screens/purchase_screen.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider
@@ -118,6 +119,11 @@ class RouterConfig {
           path: '/camera',
           name: 'camera',
           builder: (context, state) => const CameraScreen(),
+        ),
+        GoRoute(
+          path: '/purchase',
+          name: 'purchase',
+          builder: (context, state) => const PurchaseScreen(),
         ),
       ],
       redirect: (context, state) {

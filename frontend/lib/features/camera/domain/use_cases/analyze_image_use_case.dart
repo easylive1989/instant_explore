@@ -36,7 +36,7 @@ class AnalyzeImageUseCase {
 
   Place _createPlaceFromResult(ImageAnalysisResult result) {
     // 產生唯一 ID（以 camera_ 前綴標識為相機拍攝的景點）
-    final uuid = const Uuid();
+    const uuid = Uuid();
     final id = 'camera_${uuid.v4()}';
 
     return Place(

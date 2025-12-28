@@ -7,6 +7,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/firebase_options.dart';
+import 'package:context_app/features/subscription/data/entitlement_repository_impl.dart';
+import 'package:context_app/features/subscription/data/purchase_repository.dart';
+
+/// 全域 ApiConfig 實例
+late final ApiConfig apiConfig;
+
+/// 全域 EntitlementRepository 實例
+late final EntitlementRepositoryImpl entitlementRepository;
+
+/// 全域 PurchaseRepository 實例
+late final PurchaseRepository purchaseRepository;
 
 void main() async {
   runApp(await init());
@@ -14,6 +25,9 @@ void main() async {
 
 Future<Widget> init() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load API configuration
+  apiConfig = ApiConfig.fromEnvironment();
 
   // Initialize EasyLocalization
   await EasyLocalization.ensureInitialized();
@@ -24,8 +38,15 @@ Future<Widget> init() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Initialize Supabase
+  // Initialize Supabase (must be before EntitlementRepository)
   await _initializeSupabase();
+
+  // Initialize EntitlementRepository (uses Supabase)
+  entitlementRepository = EntitlementRepositoryImpl(Supabase.instance.client);
+
+  // Initialize PurchaseRepository (RevenueCat)
+  purchaseRepository = PurchaseRepository(apiConfig);
+  await purchaseRepository.initialize();
 
   return EasyLocalization(
     supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
