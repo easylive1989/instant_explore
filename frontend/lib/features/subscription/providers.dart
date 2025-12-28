@@ -1,23 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:context_app/features/subscription/data/entitlement_repository_impl.dart';
 import 'package:context_app/features/subscription/data/purchase_repository.dart';
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
-import 'package:context_app/main.dart'
-    show entitlementRepository, purchaseRepository;
 
 /// EntitlementRepository Provider
 ///
-/// 提供權益倉儲（使用 main.dart 中初始化的全域實例）
+/// 提供權益倉儲（直接使用 Supabase.instance.client）
 final entitlementRepositoryProvider = Provider<EntitlementRepository>((ref) {
-  return entitlementRepository;
+  return EntitlementRepositoryImpl(Supabase.instance.client);
 });
 
 /// PurchaseRepository Provider
 ///
-/// 提供購買倉儲（使用 main.dart 中初始化的全域實例）
+/// 提供購買倉儲（在 main.dart 中透過 ProviderScope.overrides 注入）
 final purchaseRepositoryProvider = Provider<PurchaseRepository>((ref) {
-  return purchaseRepository;
+  throw UnimplementedError(
+    'purchaseRepositoryProvider must be overridden in ProviderScope',
+  );
 });
 
 /// 用戶權益狀態 Provider
