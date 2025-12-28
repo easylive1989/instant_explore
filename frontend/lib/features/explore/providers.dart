@@ -10,7 +10,7 @@ import 'package:context_app/features/explore/domain/repositories/places_reposito
 import 'package:context_app/features/explore/domain/services/location_service.dart';
 import 'package:context_app/features/explore/data/repositories/places_repository_impl.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
+import 'package:context_app/features/settings/providers.dart';
 
 // Infrastructure Providers
 final locationServiceProvider = Provider<LocationService>((ref) {

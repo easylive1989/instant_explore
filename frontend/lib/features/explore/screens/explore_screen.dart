@@ -6,7 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
+import 'package:context_app/features/settings/providers.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});

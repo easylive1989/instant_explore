@@ -30,10 +30,3 @@ class LoginController extends StateNotifier<AsyncValue<void>> {
     });
   }
 }
-
-final loginControllerProvider =
-    StateNotifierProvider<LoginController, AsyncValue<void>>((ref) {
-      final loginWithEmailUseCase = ref.watch(loginWithEmailUseCaseProvider);
-      final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
-      return LoginController(loginWithEmailUseCase, loginWithGoogleUseCase);
-    });

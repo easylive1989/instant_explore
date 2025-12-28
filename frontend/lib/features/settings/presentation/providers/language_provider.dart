@@ -28,8 +28,3 @@ class LanguageNotifier extends Notifier<Language> {
     }
   }
 }
-
-/// 當前語言 Provider
-final currentLanguageProvider = NotifierProvider<LanguageNotifier, Language>(
-  LanguageNotifier.new,
-);

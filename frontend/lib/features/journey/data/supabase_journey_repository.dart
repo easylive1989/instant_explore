@@ -1,6 +1,5 @@
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseJourneyRepository implements JourneyRepository {
@@ -30,7 +29,3 @@ class SupabaseJourneyRepository implements JourneyRepository {
     await _client.from('passport_entries').delete().eq('id', id);
   }
 }
-
-final passportRepositoryProvider = Provider<JourneyRepository>((ref) {
-  return SupabaseJourneyRepository(Supabase.instance.client);
-});

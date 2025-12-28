@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/common/config/api_config.dart';
@@ -280,13 +279,3 @@ class AuthService {
     // 真實的 AuthService 通常不需要特殊的清理邏輯
   }
 }
-
-/// 認證服務 Provider
-///
-/// 提供認證服務實例，在測試中可透過 overrides 注入 Fake 實作
-final authServiceProvider = Provider<AuthService>((ref) {
-  final apiConfig = ref.watch(apiConfigProvider);
-  final authService = AuthService(apiConfig);
-  authService.initialize();
-  return authService;
-});

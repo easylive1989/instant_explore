@@ -30,10 +30,3 @@ class SettingsController extends StateNotifier<AsyncValue<void>> {
     }
   }
 }
-
-final settingsControllerProvider =
-    StateNotifierProvider<SettingsController, AsyncValue<void>>((ref) {
-      final logoutUseCase = ref.watch(logoutUseCaseProvider);
-      final deleteAccountUseCase = ref.watch(deleteAccountUseCaseProvider);
-      return SettingsController(logoutUseCase, deleteAccountUseCase);
-    });

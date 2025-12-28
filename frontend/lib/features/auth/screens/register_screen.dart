@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/common/utils/validation_utils.dart';
-import 'package:context_app/features/auth/presentation/controllers/register_controller.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/auth/widgets/divider_with_text.dart';
 import 'package:context_app/features/auth/widgets/password_field.dart';
 

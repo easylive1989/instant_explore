@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/common/utils/validation_utils.dart';
-import 'package:context_app/features/auth/data/auth_service.dart';
+import 'package:context_app/features/auth/providers.dart';
 
 /// 忘記密碼畫面
 class ForgotPasswordScreen extends ConsumerStatefulWidget {

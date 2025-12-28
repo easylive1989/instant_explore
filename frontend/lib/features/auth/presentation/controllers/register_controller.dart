@@ -32,15 +32,3 @@ class RegisterController extends StateNotifier<AsyncValue<void>> {
     });
   }
 }
-
-final registerControllerProvider =
-    StateNotifierProvider<RegisterController, AsyncValue<void>>((ref) {
-      final registerWithEmailUseCase = ref.watch(
-        registerWithEmailUseCaseProvider,
-      );
-      final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
-      return RegisterController(
-        registerWithEmailUseCase,
-        loginWithGoogleUseCase,
-      );
-    });

@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
 
 class LogoutUseCase {
@@ -10,8 +9,3 @@ class LogoutUseCase {
     await _authService.signOut();
   }
 }
-
-final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return LogoutUseCase(authService);
-});

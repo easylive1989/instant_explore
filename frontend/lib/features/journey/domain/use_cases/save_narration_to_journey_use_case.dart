@@ -5,8 +5,6 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/features/journey/data/supabase_journey_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class SaveNarrationToJourneyUseCase {
@@ -46,9 +44,3 @@ class SaveNarrationToJourneyUseCase {
     await _repository.addJourneyEntry(entry);
   }
 }
-
-final saveNarrationToPassportUseCaseProvider =
-    Provider<SaveNarrationToJourneyUseCase>((ref) {
-      final repository = ref.watch(passportRepositoryProvider);
-      return SaveNarrationToJourneyUseCase(repository);
-    });

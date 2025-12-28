@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,10 +13,3 @@ class RegisterWithEmailUseCase {
     return _authService.signUpWithEmail(email: email, password: password);
   }
 }
-
-final registerWithEmailUseCaseProvider = Provider<RegisterWithEmailUseCase>((
-  ref,
-) {
-  final authService = ref.watch(authServiceProvider);
-  return RegisterWithEmailUseCase(authService);
-});
