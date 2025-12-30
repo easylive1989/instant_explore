@@ -99,12 +99,25 @@ class HivePlacesCacheService implements PlacesCacheService {
   /// 從照片 URL 中提取 photo name
   String _extractPhotoNameFromUrl(String url) {
     // URL 格式: https://places.googleapis.com/v1/{name}/media?...
+    // name 格式應為: places/{place_id}/photos/{photo_reference}
     final uri = Uri.parse(url);
-    final path = uri.path;
+    var path = uri.path;
+
+    // 移除開頭的 /
+    if (path.startsWith('/')) {
+      path = path.substring(1);
+    }
+
+    // 移除 v1/ 前綴（如果存在）
+    if (path.startsWith('v1/')) {
+      path = path.substring(3);
+    }
+
     // 移除 /media 後綴
     if (path.endsWith('/media')) {
-      return path.substring(1, path.length - 6);
+      path = path.substring(0, path.length - 6);
     }
+
     return path;
   }
 
