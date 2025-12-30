@@ -63,26 +63,52 @@ class RouterConfig {
         GoRoute(
           path: '/config',
           name: 'config',
+          redirect: (context, state) {
+            // 如果沒有傳入 extra 或類型不正確，導回首頁
+            final extra = state.extra;
+            if (extra == null) {
+              return '/';
+            }
+            if (extra is! Place && extra is! Map<String, dynamic>) {
+              return '/';
+            }
+            // 如果是 Map，確保包含必要的 'place' 欄位
+            if (extra is Map<String, dynamic> && extra['place'] is! Place) {
+              return '/';
+            }
+            return null;
+          },
           builder: (context, state) {
             // 支援兩種傳入方式：直接傳 Place 或傳 Map（包含 capturedImageBytes）
             final extra = state.extra;
             if (extra is Place) {
               return SelectNarrationAspectScreen(place: extra);
-            } else if (extra is Map<String, dynamic>) {
-              final place = extra['place'] as Place;
-              final capturedImageBytes =
-                  extra['capturedImageBytes'] as Uint8List?;
-              return SelectNarrationAspectScreen(
-                place: place,
-                capturedImageBytes: capturedImageBytes,
-              );
             }
-            throw ArgumentError('Invalid extra type for /config route');
+            final mapExtra = extra as Map<String, dynamic>;
+            final place = mapExtra['place'] as Place;
+            final capturedImageBytes =
+                mapExtra['capturedImageBytes'] as Uint8List?;
+            return SelectNarrationAspectScreen(
+              place: place,
+              capturedImageBytes: capturedImageBytes,
+            );
           },
         ),
         GoRoute(
           path: '/player',
           name: 'player',
+          redirect: (context, state) {
+            // 如果沒有傳入 extra 或類型不正確，導回首頁
+            final extra = state.extra;
+            if (extra == null || extra is! Map<String, dynamic>) {
+              return '/';
+            }
+            // 確保包含必要的 'place' 欄位
+            if (extra['place'] is! Place) {
+              return '/';
+            }
+            return null;
+          },
           builder: (context, state) {
             final params = state.extra as Map<String, dynamic>;
             final place = params['place'] as Place;
