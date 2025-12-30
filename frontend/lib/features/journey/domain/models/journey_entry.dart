@@ -1,4 +1,5 @@
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
@@ -7,6 +8,7 @@ class JourneyEntry {
   final String userId;
   final SavedPlace place;
   final NarrationContent narrationContent;
+  final NarrationAspect narrationAspect;
   final DateTime createdAt;
   final Language language;
 
@@ -15,6 +17,7 @@ class JourneyEntry {
     required this.userId,
     required this.place,
     required this.narrationContent,
+    required this.narrationAspect,
     required this.createdAt,
     required this.language,
   });
@@ -39,11 +42,18 @@ class JourneyEntry {
       language: language,
     );
 
+    // 解析 narration_style
+    final narrationStyleStr = json['narration_style'] as String;
+    final narrationAspect =
+        NarrationAspect.fromString(narrationStyleStr) ??
+        NarrationAspect.historicalBackground;
+
     return JourneyEntry(
       id: json['id'] as String,
       userId: json['user_id'] as String,
       place: place,
       narrationContent: narrationContent,
+      narrationAspect: narrationAspect,
       createdAt: DateTime.parse(json['created_at'] as String),
       language: language,
     );
@@ -59,6 +69,7 @@ class JourneyEntry {
       'place_address': place.address,
       'place_image_url': place.imageUrl,
       'narration_text': narrationContent.text,
+      'narration_style': narrationAspect.toApiString(),
       'created_at': createdAt.toIso8601String(),
       'language': language.toString(),
     };

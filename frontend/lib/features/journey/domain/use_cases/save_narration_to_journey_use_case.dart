@@ -37,6 +37,7 @@ class SaveNarrationToJourneyUseCase {
       userId: userId,
       place: savedPlace,
       narrationContent: content,
+      narrationAspect: aspect,
       createdAt: DateTime.now(),
       language: language,
     );

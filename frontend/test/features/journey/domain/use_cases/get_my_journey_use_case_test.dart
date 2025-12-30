@@ -4,6 +4,7 @@ import 'package:context_app/features/journey/domain/use_cases/get_my_journey_use
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
@@ -33,6 +34,7 @@ void main() {
       '這是一段測試用的導覽內容。',
       language: Language.traditionalChinese,
     ),
+    narrationAspect: NarrationAspect.historicalBackground,
     createdAt: DateTime.now(),
     language: Language.fromString('zh-TW'),
   );
