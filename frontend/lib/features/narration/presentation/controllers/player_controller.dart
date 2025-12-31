@@ -8,8 +8,8 @@ import 'package:context_app/features/narration/domain/services/narration_service
 import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/presentation/narration_state.dart';
-import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/subscription/domain/exceptions/free_quota_exceeded_exception.dart';

@@ -1,9 +1,9 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:context_app/features/narration/widgets/transcript_segment_item.dart';
+import 'package:context_app/features/narration/presentation/widgets/transcript_segment_item.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';

@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:context_app/features/narration/widgets/save_to_passport_button.dart';
+import 'package:context_app/features/narration/presentation/widgets/save_to_passport_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

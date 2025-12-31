@@ -1,19 +1,19 @@
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:context_app/features/narration/widgets/ai_over_limit_dialog.dart';
+import 'package:context_app/features/narration/presentation/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:context_app/features/narration/widgets/narration_transcript_area.dart';
-import 'package:context_app/features/narration/widgets/narration_control_panel.dart';
-import 'package:context_app/features/subscription/widgets/paywall_dialog.dart';
+import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
+import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
+import 'package:context_app/features/subscription/presentation/widgets/paywall_dialog.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;

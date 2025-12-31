@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/camera/data/image_analysis_service.dart';
 import 'package:context_app/features/camera/domain/use_cases/analyze_image_use_case.dart';
-import 'package:context_app/features/camera/presentation/camera_controller.dart';
+import 'package:context_app/features/camera/presentation/controllers/camera_controller.dart';
 
 /// 圖片分析服務 Provider
 final imageAnalysisServiceProvider = Provider<ImageAnalysisService>((ref) {

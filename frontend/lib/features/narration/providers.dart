@@ -3,8 +3,8 @@ import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
-import 'package:context_app/features/narration/presentation/player_controller.dart';
-import 'package:context_app/features/narration/presentation/narration_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 

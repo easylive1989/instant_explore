@@ -4,8 +4,8 @@ import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/settings/domain/use_cases/delete_account_use_case.dart';
 import 'package:context_app/features/settings/domain/use_cases/logout_use_case.dart';
-import 'package:context_app/features/settings/presentation/providers/settings_controller.dart';
-import 'package:context_app/features/settings/presentation/providers/language_provider.dart';
+import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
 import 'package:context_app/features/subscription/providers.dart';
 
 // ============================================================================

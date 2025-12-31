@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/journey/widgets/timeline_entry.dart'; // New import for extracted widget
+import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart'; // New import for extracted widget
 
 class JourneyScreen extends ConsumerWidget {
   const JourneyScreen({super.key});

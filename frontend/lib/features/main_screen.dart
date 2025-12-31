@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/features/explore/screens/explore_screen.dart';
-import 'package:context_app/features/journey/screens/journey_screen.dart';
+import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
+import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {

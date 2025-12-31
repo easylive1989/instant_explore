@@ -1,9 +1,9 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/presentation/narration_state_error_type.dart';
-import 'package:context_app/features/narration/presentation/playback_state.dart';
-import 'package:context_app/features/narration/presentation/player_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
+import 'package:context_app/features/narration/presentation/controllers/playback_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
 
 /// 導覽播放狀態
 ///

@@ -5,17 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/features/main_screen.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/screens/select_narration_aspect_screen.dart';
-import 'package:context_app/features/narration/screens/narration_screen.dart';
+import 'package:context_app/features/narration/presentation/screens/select_narration_aspect_screen.dart';
+import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/journey/screens/save_success_screen.dart';
-import 'package:context_app/features/auth/screens/login_screen.dart';
-import 'package:context_app/features/auth/screens/register_screen.dart';
-import 'package:context_app/features/auth/screens/forgot_password_screen.dart';
+import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
+import 'package:context_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:context_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:context_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/providers.dart';
-import 'package:context_app/features/camera/screens/camera_screen.dart';
-import 'package:context_app/features/subscription/screens/purchase_screen.dart';
+import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
+import 'package:context_app/features/subscription/presentation/screens/purchase_screen.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider

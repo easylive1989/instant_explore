@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/common/utils/validation_utils.dart';
 import 'package:context_app/features/auth/providers.dart';
-import 'package:context_app/features/auth/widgets/divider_with_text.dart';
-import 'package:context_app/features/auth/widgets/password_field.dart';
+import 'package:context_app/features/auth/presentation/widgets/divider_with_text.dart';
+import 'package:context_app/features/auth/presentation/widgets/password_field.dart';
 
 /// 註冊畫面
 class RegisterScreen extends ConsumerStatefulWidget {

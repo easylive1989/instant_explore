@@ -1,4 +1,4 @@
-import 'package:context_app/features/narration/presentation/playback_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/playback_state.dart';
 
 /// 播放器狀態
 ///
