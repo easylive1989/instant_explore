@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
 import 'package:context_app/features/explore/data/repositories/places_repository_impl.dart';
+import 'package:context_app/features/explore/data/repositories/caching_places_repository.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/settings/providers.dart';
 
@@ -24,7 +25,9 @@ final placesApiServiceProvider = Provider<PlacesApiService>((ref) {
 
 final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
   final placesApiService = ref.watch(placesApiServiceProvider);
-  return PlacesRepositoryImpl(placesApiService);
+  final cacheService = ref.watch(placesCacheServiceProvider);
+  final apiRepository = PlacesRepositoryImpl(placesApiService);
+  return CachingPlacesRepository(apiRepository, cacheService);
 });
 
 final placesCacheServiceProvider = Provider<PlacesCacheService>((ref) {
@@ -38,8 +41,7 @@ final searchNearbyPlacesUseCaseProvider = Provider<SearchNearbyPlacesUseCase>((
 ) {
   final locationService = ref.watch(locationServiceProvider);
   final repository = ref.watch(placesRepositoryProvider);
-  final cacheService = ref.watch(placesCacheServiceProvider);
-  return SearchNearbyPlacesUseCase(locationService, repository, cacheService);
+  return SearchNearbyPlacesUseCase(locationService, repository);
 });
 
 final searchPlacesUseCaseProvider = Provider<SearchPlacesUseCase>((ref) {

@@ -22,8 +22,8 @@ class HivePlacesCacheService implements PlacesCacheService {
   /// 快取有效期限（24 小時）
   static const Duration _cacheTtl = Duration(hours: 24);
 
-  /// 重新搜尋的距離門檻（1 公里）
-  static const double _refreshDistanceThreshold = 1000.0;
+  /// 重新搜尋的距離門檻（500 公尺）
+  static const double _refreshDistanceThreshold = 500.0;
 
   Box? _box;
 
