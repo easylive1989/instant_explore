@@ -29,6 +29,7 @@ class TtsService {
       StreamController<String>.broadcast();
 
   bool _isInitialized = false;
+  bool _isPaused = false;
   String _currentText = '';
 
   /// 播放進度事件流
@@ -71,14 +72,17 @@ class TtsService {
 
       // 設定事件處理器
       _tts.setStartHandler(() {
+        _isPaused = false;
         _startController.add(null);
       });
 
       _tts.setCompletionHandler(() {
+        _isPaused = false;
         _completeController.add(null);
       });
 
       _tts.setPauseHandler(() {
+        _isPaused = true;
         _pauseController.add(null);
       });
 
@@ -123,6 +127,13 @@ class TtsService {
     }
 
     try {
+      // 如果處於暫停狀態，需要先停止 TTS 引擎
+      // 這是因為在 iOS 上，暫停狀態下直接呼叫 speak() 可能會失敗
+      if (_isPaused) {
+        await _tts.stop();
+        _isPaused = false;
+      }
+
       _currentText = text;
       final result = await _tts.speak(text);
       return result == 1; // 1 表示成功
@@ -146,6 +157,7 @@ class TtsService {
     try {
       await _tts.stop();
       _currentText = '';
+      _isPaused = false;
     } catch (e) {
       _errorController.add('停止失敗: $e');
     }

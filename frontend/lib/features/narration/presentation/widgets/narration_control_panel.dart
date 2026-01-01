@@ -81,6 +81,37 @@ class NarrationControlPanel extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // 上一段按鈕區域（固定寬度，用 Opacity 控制可見性）
+                    SizedBox(
+                      width: 48 + 24, // 按鈕寬度 + margin
+                      child: playerState.shouldShowSkipButtons
+                          ? Opacity(
+                              opacity: playerState.canSkipPrevious ? 1.0 : 0.0,
+                              child: Container(
+                                height: 48,
+                                width: 48,
+                                margin: const EdgeInsets.only(right: 24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.skip_previous,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: playerState.canSkipPrevious
+                                      ? () => playerController
+                                            .skipToPreviousSegment()
+                                      : null,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+
+                    // 播放/暫停按鈕（始終置中）
                     Container(
                       height: 64,
                       width: 64,
@@ -107,6 +138,36 @@ class NarrationControlPanel extends ConsumerWidget {
                             ? null
                             : () => playerController.playPause(),
                       ),
+                    ),
+
+                    // 下一段按鈕區域（固定寬度，用 Opacity 控制可見性）
+                    SizedBox(
+                      width: 48 + 24, // 按鈕寬度 + margin
+                      child: playerState.shouldShowSkipButtons
+                          ? Opacity(
+                              opacity: playerState.canSkipNext ? 1.0 : 0.0,
+                              child: Container(
+                                height: 48,
+                                width: 48,
+                                margin: const EdgeInsets.only(left: 24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.skip_next,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: playerState.canSkipNext
+                                      ? () =>
+                                            playerController.skipToNextSegment()
+                                      : null,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ],
                 ),

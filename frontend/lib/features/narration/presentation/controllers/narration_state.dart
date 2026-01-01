@@ -159,6 +159,26 @@ class NarrationState {
     );
   }
 
+  /// 是否應該顯示跳段按鈕
+  /// 只在播放中或暫停時顯示，載入中、完成或錯誤時不顯示
+  bool get shouldShowSkipButtons => isPlaying || isPaused;
+
+  /// 是否可以跳到下一段
+  /// 當前不是最後一段時可跳
+  bool get canSkipNext {
+    if (content == null) return false;
+    final currentIndex = currentSegmentIndex ?? 0;
+    return currentIndex < content!.segments.length - 1;
+  }
+
+  /// 是否可以跳到上一段
+  /// 當前不是第一段時可跳
+  bool get canSkipPrevious {
+    if (content == null) return false;
+    final currentIndex = currentSegmentIndex ?? 0;
+    return currentIndex > 0;
+  }
+
   @override
   String toString() {
     return 'NarrationState(playerState: $playerState, '
