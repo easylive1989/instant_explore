@@ -8,11 +8,19 @@ import 'package:context_app/features/subscription/data/purchase_repository.dart'
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
 
+import 'package:context_app/features/subscription/data/revenue_cat_service.dart';
+
+/// RevenueCat Service Provider
+final revenueCatServiceProvider = Provider<RevenueCatService>((ref) {
+  return RevenueCatService();
+});
+
 /// EntitlementRepository Provider
 ///
 /// 提供權益倉儲（直接使用 Supabase.instance.client）
 final entitlementRepositoryProvider = Provider<EntitlementRepository>((ref) {
-  return EntitlementRepositoryImpl(Supabase.instance.client);
+  final revenueCatService = ref.watch(revenueCatServiceProvider);
+  return EntitlementRepositoryImpl(Supabase.instance.client, revenueCatService);
 });
 
 /// PurchaseRepository Provider

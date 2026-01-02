@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/features/subscription/domain/models/pass_type.dart';
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
+import 'package:context_app/features/subscription/data/revenue_cat_service.dart';
 
 /// 權益倉儲實作
 ///
@@ -19,9 +19,10 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
   static const String _entitlementId = 'premium_access';
 
   final SupabaseClient _supabaseClient;
+  final RevenueCatService _revenueCatService;
   final _entitlementController = StreamController<UserEntitlement>.broadcast();
 
-  EntitlementRepositoryImpl(this._supabaseClient);
+  EntitlementRepositoryImpl(this._supabaseClient, this._revenueCatService);
 
   @override
   Stream<UserEntitlement> get entitlementStream =>
@@ -34,7 +35,7 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
   Future<UserEntitlement> getEntitlement() async {
     try {
       // 1. 先從 RevenueCat 檢查付費狀態
-      final customerInfo = await Purchases.getCustomerInfo();
+      final customerInfo = await _revenueCatService.getCustomerInfo();
 
       if (customerInfo.entitlements.active.containsKey(_entitlementId)) {
         final entitlement = customerInfo.entitlements.active[_entitlementId]!;
@@ -78,7 +79,7 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
 
     try {
       // 先檢查是否有付費權益
-      final customerInfo = await Purchases.getCustomerInfo();
+      final customerInfo = await _revenueCatService.getCustomerInfo();
       if (customerInfo.entitlements.active.containsKey(_entitlementId)) {
         debugPrint('✅ 用戶有付費權益，不需消耗免費次數');
         return;
