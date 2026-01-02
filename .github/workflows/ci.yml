@@ -56,8 +56,18 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Run unit tests
-        run: flutter test
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Run unit tests with coverage
+        run: ./scripts/run_unit_test_coverage.sh
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          fail_ci_if_error: true
 
   # 更新 Supabase 資料庫
   push-supabase-db:

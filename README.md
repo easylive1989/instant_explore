@@ -1,6 +1,7 @@
 # Contexture 讀景 — 你的 AI 口袋歷史學家
 
 [![CI/CD Pipeline](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml/badge.svg)](https://github.com/easylive1989/instant_explore/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/easylive1989/instant_explore/graph/badge.svg)](https://codecov.io/gh/easylive1989/instant_explore) (Only Domain Models)
 
 別只是看風景，要讀懂風景。隨身攜帶的 AI 歷史學家，即時解說、隨時提問，為你的旅程注入深度靈魂。
 
