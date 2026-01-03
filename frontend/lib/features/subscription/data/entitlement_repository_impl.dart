@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
 import 'package:context_app/features/subscription/domain/models/pass_type.dart';
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
@@ -63,10 +65,16 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
         remainingFreeUsage: remaining.clamp(0, dailyFreeLimit),
         dailyFreeLimit: dailyFreeLimit,
       );
-    } catch (e) {
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
       debugPrint('❌ 取得權益失敗: $e');
-      // 發生錯誤時，給予一次機會（避免阻擋正常使用）
-      return UserEntitlement.free(dailyFreeLimit: dailyFreeLimit);
+      throw AppError(
+        type: SubscriptionError.verificationFailed,
+        message: '取得權益失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -74,7 +82,10 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
   Future<void> consumeFreeUsage() async {
     final userId = _userId;
     if (userId == null) {
-      throw EntitlementException('用戶未登入');
+      throw const AppError(
+        type: SubscriptionError.verificationFailed,
+        message: '用戶未登入',
+      );
     }
 
     try {
@@ -88,7 +99,7 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
       // 先檢查是否已達上限
       final currentUsed = await _getDailyUsedCount();
       if (currentUsed >= dailyFreeLimit) {
-        throw EntitlementException('已達今日免費使用上限');
+        throw const AppError(type: SubscriptionError.freeQuotaExceeded);
       }
 
       // 呼叫 Supabase RPC 消耗次數（返回新的使用量）
@@ -102,10 +113,15 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
       _entitlementController.add(entitlement);
 
       debugPrint('✅ 消耗免費次數成功');
-    } catch (e) {
-      if (e is EntitlementException) rethrow;
-      debugPrint('❌ 消耗免費次數失敗: $e');
-      throw EntitlementException('無法消耗免費次數: $e');
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: SubscriptionError.verificationFailed,
+        message: '無法消耗免費次數',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -124,19 +140,18 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
   @override
   Future<void> checkAndExpire() async {
     // RevenueCat 自動處理過期，這裡只需重新取得狀態
-    try {
-      final entitlement = await getEntitlement();
-      _entitlementController.add(entitlement);
-    } catch (e) {
-      debugPrint('⚠️ 檢查過期狀態失敗: $e');
-    }
+    final entitlement = await getEntitlement();
+    _entitlementController.add(entitlement);
   }
 
   /// 從 Supabase 取得今日已使用次數
   Future<int> _getDailyUsedCount() async {
     final userId = _userId;
     if (userId == null) {
-      return 0;
+      throw const AppError(
+        type: SubscriptionError.verificationFailed,
+        message: '用戶未登入',
+      );
     }
 
     try {
@@ -146,9 +161,13 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
       );
 
       return response as int? ?? 0;
-    } catch (e) {
-      debugPrint('⚠️ 取得使用量失敗: $e');
-      return 0;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: SubscriptionError.verificationFailed,
+        message: '取得使用量失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -156,14 +175,4 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
   void dispose() {
     _entitlementController.close();
   }
-}
-
-/// 權益例外
-class EntitlementException implements Exception {
-  final String message;
-
-  EntitlementException(this.message);
-
-  @override
-  String toString() => 'EntitlementException: $message';
 }

@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/core/errors/app_error_type.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
+import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/subscription/domain/exceptions/free_quota_exceeded_exception.dart';
 
 /// 播放器控制器
 ///
@@ -74,40 +74,48 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒
       state = state.ready(place, aspect, content);
-    } on FreeQuotaExceededException {
-      // 免費額度已用完
-      state = state.error(NarrationStateErrorType.freeQuotaExceeded);
-    } on NarrationServiceException catch (e) {
-      // 處理 AI 服務相關錯誤
-      state = state.error(_mapServiceErrorType(e.type), message: e.rawMessage);
-    } on NarrationContentException catch (e) {
-      // 處理內容驗證錯誤
-      state = state.error(
-        NarrationStateErrorType.contentGenerationFailed,
-        message: e.rawMessage,
-      );
-    } catch (e) {
-      state = state.error(
-        NarrationStateErrorType.unknown,
-        message: e.toString(),
-      );
+    } on AppError catch (e) {
+      final stateErrorType = _mapAppErrorToStateError(e.type);
+      state = state.error(stateErrorType, message: e.message);
     }
   }
 
-  /// 將 NarrationServiceErrorType 轉換為 NarrationStateErrorType
-  NarrationStateErrorType _mapServiceErrorType(NarrationServiceErrorType type) {
-    switch (type) {
-      case NarrationServiceErrorType.networkError:
-        return NarrationStateErrorType.networkError;
-      case NarrationServiceErrorType.configurationError:
-        return NarrationStateErrorType.configurationError;
-      case NarrationServiceErrorType.serverError:
-        return NarrationStateErrorType.serverError;
-      case NarrationServiceErrorType.unsupportedLocation:
-        return NarrationStateErrorType.unsupportedLocation;
-      case NarrationServiceErrorType.unknown:
-        return NarrationStateErrorType.unknown;
+  /// 將 AppErrorType 轉換為 NarrationStateErrorType
+  NarrationStateErrorType _mapAppErrorToStateError(AppErrorType type) {
+    // Narration 相關錯誤
+    if (type is NarrationError) {
+      switch (type) {
+        case NarrationError.freeQuotaExceeded:
+          return NarrationStateErrorType.freeQuotaExceeded;
+        case NarrationError.networkError:
+          return NarrationStateErrorType.networkError;
+        case NarrationError.configurationError:
+          return NarrationStateErrorType.configurationError;
+        case NarrationError.serverError:
+          return NarrationStateErrorType.serverError;
+        case NarrationError.unsupportedLocation:
+          return NarrationStateErrorType.unsupportedLocation;
+        case NarrationError.contentGenerationFailed:
+          return NarrationStateErrorType.contentGenerationFailed;
+        case NarrationError.ttsPlaybackError:
+          return NarrationStateErrorType.ttsPlaybackError;
+        case NarrationError.unknown:
+          return NarrationStateErrorType.unknown;
+      }
     }
+
+    // Subscription 相關錯誤
+    if (type is SubscriptionError) {
+      switch (type) {
+        case SubscriptionError.freeQuotaExceeded:
+          return NarrationStateErrorType.freeQuotaExceeded;
+        default:
+          return NarrationStateErrorType.unknown;
+      }
+    }
+
+    // 其他類型一律返回 unknown
+    return NarrationStateErrorType.unknown;
   }
 
   /// 使用現有內容初始化（用於回放已儲存的導覽）
@@ -117,24 +125,12 @@ class PlayerController extends StateNotifier<NarrationState> {
   ) async {
     state = state.loading();
 
-    try {
-      // 初始化 TtsService
-      await _ttsService.initialize();
-      await _ttsService.setLanguage(content.language);
+    // 初始化 TtsService
+    await _ttsService.initialize();
+    await _ttsService.setLanguage(content.language);
 
-      // 更新狀態為就緒（aspect 為 null 因為是回放模式）
-      state = state.ready(place, null, content);
-    } on NarrationContentException catch (e) {
-      state = state.error(
-        NarrationStateErrorType.contentGenerationFailed,
-        message: e.rawMessage,
-      );
-    } catch (e) {
-      state = state.error(
-        NarrationStateErrorType.unknown,
-        message: e.toString(),
-      );
-    }
+    // 更新狀態為就緒（aspect 為 null 因為是回放模式）
+    state = state.ready(place, null, content);
   }
 
   /// 儲存導覽到歷程
@@ -224,42 +220,35 @@ class PlayerController extends StateNotifier<NarrationState> {
       return;
     }
 
-    try {
-      final currentPos = state.playerState.currentCharPosition;
-      final isResuming = state.isPaused && currentPos > 0;
+    final currentPos = state.playerState.currentCharPosition;
+    final isResuming = state.isPaused && currentPos > 0;
 
-      // 如果是從完成狀態重新播放，需要從頭開始
-      if (state.isCompleted) {
-        await _ttsService.stop();
-      }
+    // 如果是從完成狀態重新播放，需要從頭開始
+    if (state.isCompleted) {
+      await _ttsService.stop();
+    }
 
-      String textToPlay;
-      if (isResuming) {
-        // 從暫停位置恢復播放：截取當前位置到結尾的文本
-        _charPositionOffset = currentPos;
-        textToPlay = state.content!.text.substring(currentPos);
-      } else {
-        // 從頭開始播放（就緒或完成狀態）
-        _charPositionOffset = 0;
-        textToPlay = state.content!.text;
-      }
+    String textToPlay;
+    if (isResuming) {
+      // 從暫停位置恢復播放：截取當前位置到結尾的文本
+      _charPositionOffset = currentPos;
+      textToPlay = state.content!.text.substring(currentPos);
+    } else {
+      // 從頭開始播放（就緒或完成狀態）
+      _charPositionOffset = 0;
+      textToPlay = state.content!.text;
+    }
 
-      // 播放 TTS
-      final success = await _ttsService.speak(textToPlay);
+    // 播放 TTS
+    final success = await _ttsService.speak(textToPlay);
 
-      if (success) {
-        // 更新狀態為播放中
-        state = state.playing();
-      } else {
-        state = state.error(
-          NarrationStateErrorType.ttsPlaybackError,
-          message: '播放失敗',
-        );
-      }
-    } catch (e) {
+    if (success) {
+      // 更新狀態為播放中
+      state = state.playing();
+    } else {
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,
-        message: '播放失敗：$e',
+        message: '播放失敗',
       );
     }
   }
@@ -270,18 +259,11 @@ class PlayerController extends StateNotifier<NarrationState> {
       return;
     }
 
-    try {
-      // 暫停 TTS
-      await _ttsService.pause();
+    // 暫停 TTS
+    await _ttsService.pause();
 
-      // 更新狀態為暫停
-      state = state.paused();
-    } catch (e) {
-      state = state.error(
-        NarrationStateErrorType.ttsPlaybackError,
-        message: '暫停失敗：$e',
-      );
-    }
+    // 更新狀態為暫停
+    state = state.paused();
   }
 
   /// 跳到指定段落並開始播放
@@ -297,47 +279,39 @@ class PlayerController extends StateNotifier<NarrationState> {
     // 記錄跳段前的狀態
     final wasPaused = state.isPaused;
 
-    try {
-      // 設定跳段標誌，防止 onComplete 事件誤觸
-      _isSkipping = true;
+    // 設定跳段標誌，防止 onComplete 事件誤觸
+    _isSkipping = true;
 
-      // 取得目標段落的起始位置
-      final targetSegment = segments[segmentIndex];
-      final startPosition = targetSegment.startPosition;
+    // 取得目標段落的起始位置
+    final targetSegment = segments[segmentIndex];
+    final startPosition = targetSegment.startPosition;
 
-      // 停止目前播放
-      await _ttsService.stop();
+    // 停止目前播放
+    await _ttsService.stop();
 
-      // 在 iOS 上，TTS 引擎需要一點時間來完全重置狀態
-      // 特別是從暫停狀態轉換時
-      if (wasPaused) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      }
+    // 在 iOS 上，TTS 引擎需要一點時間來完全重置狀態
+    // 特別是從暫停狀態轉換時
+    if (wasPaused) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
 
-      // 設定偏移量（用於 TTS 進度轉換）
-      _charPositionOffset = startPosition;
+    // 設定偏移量（用於 TTS 進度轉換）
+    _charPositionOffset = startPosition;
 
-      // 更新狀態為目標位置，保持播放狀態
-      state = state.updateCharPosition(startPosition).playing();
+    // 更新狀態為目標位置，保持播放狀態
+    state = state.updateCharPosition(startPosition).playing();
 
-      // 擷取從目標段落到結尾的文本
-      final textToPlay = state.content!.text.substring(startPosition);
+    // 擷取從目標段落到結尾的文本
+    final textToPlay = state.content!.text.substring(startPosition);
 
-      // 開始播放（onStart 會重置 _isSkipping）
-      final success = await _ttsService.speak(textToPlay);
-      if (!success) {
-        // 播放失敗時手動重置 flag
-        _isSkipping = false;
-        state = state.error(
-          NarrationStateErrorType.ttsPlaybackError,
-          message: '跳段播放失敗',
-        );
-      }
-    } catch (e) {
+    // 開始播放（onStart 會重置 _isSkipping）
+    final success = await _ttsService.speak(textToPlay);
+    if (!success) {
+      // 播放失敗時手動重置 flag
       _isSkipping = false;
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,
-        message: '跳段播放失敗：$e',
+        message: '跳段播放失敗',
       );
     }
   }

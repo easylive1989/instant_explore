@@ -1,3 +1,5 @@
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
@@ -43,7 +45,10 @@ class FakeNarrationService implements NarrationService {
     await Future<void>.delayed(Duration(milliseconds: delayMs));
 
     if (shouldThrowError) {
-      throw Exception('Fake error for testing');
+      throw const AppError(
+        type: NarrationError.unknown,
+        message: 'Fake error for testing',
+      );
     }
 
     return customNarrationText ?? defaultNarrationText;

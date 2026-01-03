@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/data/narration_prompt_builder.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart'
     as app_lang;
@@ -47,18 +47,34 @@ class GeminiService implements NarrationService {
       final generatedText = response.text ?? '';
 
       return generatedText;
-    } on FirebaseException catch (e) {
-      throw NarrationServiceException.server(
-        rawMessage: 'Firebase Error: ${e.message} (${e.code})',
+    } on FirebaseException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.serverError,
+        message: 'Firebase 伺服器錯誤',
+        originalException: e,
+        stackTrace: stackTrace,
+        context: {'firebase_code': e.code, 'firebase_message': e.message},
       );
-    } on SocketException catch (e) {
-      throw NarrationServiceException.network(rawMessage: e.toString());
-    } on TimeoutException catch (e) {
-      throw NarrationServiceException.network(rawMessage: e.toString());
-    } catch (e) {
-      throw NarrationServiceException(
-        type: NarrationServiceErrorType.unknown,
-        rawMessage: e.toString(),
+    } on SocketException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.networkError,
+        message: '網路連線失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.networkError,
+        message: '連線逾時',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.unknown,
+        message: '發生未預期的錯誤',
+        originalException: e,
+        stackTrace: stackTrace,
       );
     }
   }

@@ -1,3 +1,5 @@
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/explore/domain/errors/place_error.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
@@ -28,15 +30,28 @@ class PlacesRepositoryImpl implements PlacesRepository {
     required Language language,
     required double radius,
   }) async {
-    final dtos = await _apiService.searchNearby(
-      location,
-      includedTypes: _includedTypes,
-      languageCode: language.code,
-      radius: radius,
-    );
+    try {
+      final dtos = await _apiService.searchNearby(
+        location,
+        includedTypes: _includedTypes,
+        languageCode: language.code,
+        radius: radius,
+      );
 
-    // DTO -> Domain 轉換，同時產生照片 URL
-    return dtos.map((dto) => dto.toDomain(apiKey: _apiService.apiKey)).toList();
+      // DTO -> Domain 轉換，同時產生照片 URL
+      return dtos
+          .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
+          .toList();
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '獲取附近地點失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   @override
@@ -44,12 +59,25 @@ class PlacesRepositoryImpl implements PlacesRepository {
     String query, {
     required Language language,
   }) async {
-    final dtos = await _apiService.searchByText(
-      query,
-      languageCode: language.code,
-    );
+    try {
+      final dtos = await _apiService.searchByText(
+        query,
+        languageCode: language.code,
+      );
 
-    // DTO -> Domain 轉換，同時產生照片 URL
-    return dtos.map((dto) => dto.toDomain(apiKey: _apiService.apiKey)).toList();
+      // DTO -> Domain 轉換，同時產生照片 URL
+      return dtos
+          .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
+          .toList();
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '搜尋地點失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

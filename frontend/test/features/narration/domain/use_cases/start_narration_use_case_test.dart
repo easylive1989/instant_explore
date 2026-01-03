@@ -1,20 +1,19 @@
-import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_exception.dart';
-import 'package:context_app/features/narration/domain/services/narration_service_error_type.dart';
-import 'package:context_app/features/subscription/domain/exceptions/free_quota_exceeded_exception.dart';
-import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
-import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
-import 'package:context_app/features/subscription/domain/models/pass_type.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
+import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/subscription/domain/models/pass_type.dart';
+import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
+import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 // Mock classes
 class MockNarrationService extends Mock implements NarrationService {}
@@ -156,7 +155,7 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: Language.traditionalChinese,
         ),
-        throwsA(isA<NarrationContentException>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -177,39 +176,37 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: Language.traditionalChinese,
         ),
-        throwsA(isA<NarrationContentException>()),
+        throwsA(isA<AppError>()),
       );
     });
 
-    test(
-      'should rethrow NarrationServiceException with correct error type',
-      () async {
-        // Arrange
-        when(
-          () => mockNarrationService.generateNarration(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: any(named: 'language'),
-          ),
-        ).thenThrow(
-          NarrationServiceException.unsupportedLocation(
-            rawMessage: 'Location not supported',
-          ),
-        );
+    test('should rethrow AppError with correct error type', () async {
+      // Arrange
+      when(
+        () => mockNarrationService.generateNarration(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: any(named: 'language'),
+        ),
+      ).thenThrow(
+        const AppError(
+          type: NarrationError.unsupportedLocation,
+          message: 'Location not supported',
+        ),
+      );
 
-        // Act & Assert
-        try {
-          await useCase.execute(
-            place: testPlace,
-            aspect: NarrationAspect.historicalBackground,
-            language: Language.traditionalChinese,
-          );
-          fail('Should have thrown');
-        } on NarrationServiceException catch (e) {
-          expect(e.type, equals(NarrationServiceErrorType.unsupportedLocation));
-        }
-      },
-    );
+      // Act & Assert
+      try {
+        await useCase.execute(
+          place: testPlace,
+          aspect: NarrationAspect.historicalBackground,
+          language: Language.traditionalChinese,
+        );
+        fail('Should have thrown');
+      } on AppError catch (e) {
+        expect(e.type, equals(NarrationError.unsupportedLocation));
+      }
+    });
 
     test('should correctly split text into segments', () async {
       // Arrange
@@ -290,7 +287,7 @@ void main() {
       verify(() => mockEntitlementRepository.consumeFreeUsage()).called(1);
     });
 
-    test('免費用戶額度用完時，應拋出 FreeQuotaExceededException', () async {
+    test('免費用戶額度用完時，應拋出 AppError with freeQuotaExceeded', () async {
       // Arrange - 免費用戶額度已用完
       when(() => mockEntitlementRepository.getEntitlement()).thenAnswer(
         (_) async => const UserEntitlement(
@@ -307,7 +304,13 @@ void main() {
           aspect: NarrationAspect.historicalBackground,
           language: Language.traditionalChinese,
         ),
-        throwsA(isA<FreeQuotaExceededException>()),
+        throwsA(
+          isA<AppError>().having(
+            (e) => e.type,
+            'error type',
+            SubscriptionError.freeQuotaExceeded,
+          ),
+        ),
       );
 
       // 確認不會呼叫 generateNarration

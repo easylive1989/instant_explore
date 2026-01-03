@@ -1,5 +1,5 @@
+import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -69,7 +69,7 @@ void main() {
             '',
             language: Language.traditionalChinese,
           ),
-          throwsA(isA<NarrationContentException>()),
+          throwsA(isA<AppError>()),
         );
       });
 
@@ -79,7 +79,7 @@ void main() {
             '短文',
             language: Language.traditionalChinese,
           ),
-          throwsA(isA<NarrationContentException>()),
+          throwsA(isA<AppError>()),
         );
       });
 

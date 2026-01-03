@@ -109,7 +109,6 @@ class TtsService {
       _isInitialized = true;
     } catch (e) {
       _errorController.add('初始化 TTS 失敗: $e');
-      rethrow;
     }
   }
 

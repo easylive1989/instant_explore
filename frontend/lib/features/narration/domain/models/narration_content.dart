@@ -1,4 +1,5 @@
-import 'package:context_app/features/narration/domain/models/narration_content_exception.dart';
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
@@ -29,7 +30,7 @@ class NarrationContent {
   /// [text] 完整的導覽文本
   /// [language] 語言
   ///
-  /// 拋出 [NarrationContentException] 如果：
+  /// 拋出 [AppError] 如果：
   /// - 文本為空或只有空白字符
   /// - 文本長度少於 10 個字符
   /// - 無法分段（segments 為空）
@@ -37,16 +38,17 @@ class NarrationContent {
     // 驗證文本不為空
     final trimmedText = text.trim();
     if (trimmedText.isEmpty) {
-      throw NarrationContentException.contentFailed(
-        rawMessage: 'Narration text is empty',
+      throw const AppError(
+        type: NarrationError.contentGenerationFailed,
+        message: '導覽文本為空',
       );
     }
 
     // 驗證文本長度（最少需要 10 個字符）
     if (trimmedText.length < 10) {
-      throw NarrationContentException.contentFailed(
-        rawMessage:
-            'Narration is too short: ${trimmedText.length} chars (min: 10)',
+      throw const AppError(
+        type: NarrationError.contentGenerationFailed,
+        message: '導覽文本太短',
       );
     }
 
@@ -55,8 +57,9 @@ class NarrationContent {
 
     // 驗證分段結果
     if (segments.isEmpty) {
-      throw NarrationContentException.contentFailed(
-        rawMessage: 'Failed to segment narration',
+      throw const AppError(
+        type: NarrationError.contentGenerationFailed,
+        message: '導覽分段失敗',
       );
     }
 
