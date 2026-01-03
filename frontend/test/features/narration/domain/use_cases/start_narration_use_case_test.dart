@@ -181,29 +181,6 @@ void main() {
       );
     });
 
-    test('should rethrow NarrationServiceException from service', () async {
-      // Arrange
-      when(
-        () => mockNarrationService.generateNarration(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: any(named: 'language'),
-        ),
-      ).thenThrow(
-        NarrationServiceException.quotaExceeded(rawMessage: 'Quota exceeded'),
-      );
-
-      // Act & Assert
-      expect(
-        () => useCase.execute(
-          place: testPlace,
-          aspect: NarrationAspect.historicalBackground,
-          language: Language.traditionalChinese,
-        ),
-        throwsA(isA<NarrationServiceException>()),
-      );
-    });
-
     test(
       'should rethrow NarrationServiceException with correct error type',
       () async {

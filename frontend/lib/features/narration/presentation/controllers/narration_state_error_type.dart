@@ -3,9 +3,6 @@
 /// Presentation 層專用，用於 UI 顯示
 /// 統一來自 Service 和 UseCase 層的錯誤
 enum NarrationStateErrorType {
-  /// AI 配額已超過限制（API 服務層面）
-  aiQuotaExceeded,
-
   /// 免費使用額度已用完（用戶訂閱層面）
   freeQuotaExceeded,
 
@@ -36,8 +33,6 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
   /// 取得用戶友善的錯誤訊息（繁體中文）
   String get message {
     switch (this) {
-      case NarrationStateErrorType.aiQuotaExceeded:
-        return '您已達到每日 AI 使用額度上限。請稍後再試。';
       case NarrationStateErrorType.freeQuotaExceeded:
         return '您已達到今日免費使用上限，升級解鎖無限導覽。';
       case NarrationStateErrorType.networkError:
@@ -60,7 +55,6 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
   /// 是否為可重試的錯誤
   bool get isRetryable {
     switch (this) {
-      case NarrationStateErrorType.aiQuotaExceeded:
       case NarrationStateErrorType.networkError:
       case NarrationStateErrorType.serverError:
       case NarrationStateErrorType.contentGenerationFailed:
@@ -73,8 +67,6 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
   /// 建議的重試等待時間（秒）
   int? get suggestedRetryDelay {
     switch (this) {
-      case NarrationStateErrorType.aiQuotaExceeded:
-        return 900; // 15 分鐘
       case NarrationStateErrorType.networkError:
         return 5;
       case NarrationStateErrorType.serverError:
@@ -93,7 +85,6 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
 
   /// 是否需要顯示特殊對話框
   bool get requiresSpecialDialog {
-    return this == NarrationStateErrorType.aiQuotaExceeded ||
-        this == NarrationStateErrorType.freeQuotaExceeded;
+    return this == NarrationStateErrorType.freeQuotaExceeded;
   }
 }

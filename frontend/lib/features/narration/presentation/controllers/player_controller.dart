@@ -97,8 +97,6 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 將 NarrationServiceErrorType 轉換為 NarrationStateErrorType
   NarrationStateErrorType _mapServiceErrorType(NarrationServiceErrorType type) {
     switch (type) {
-      case NarrationServiceErrorType.aiQuotaExceeded:
-        return NarrationStateErrorType.aiQuotaExceeded;
       case NarrationServiceErrorType.networkError:
         return NarrationStateErrorType.networkError;
       case NarrationServiceErrorType.configurationError:

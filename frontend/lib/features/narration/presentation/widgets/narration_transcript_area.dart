@@ -82,8 +82,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
               ),
 
               // 顯示建議的重試時間
-              if (errorType?.suggestedRetryDelay != null &&
-                  errorType != NarrationStateErrorType.aiQuotaExceeded) ...[
+              if (errorType?.suggestedRetryDelay != null) ...[
                 const SizedBox(height: 8),
                 Text(
                   'player_screen.suggested_retry'.tr(
@@ -102,7 +101,6 @@ class NarrationTranscriptArea extends ConsumerWidget {
 
               // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示，且有 narrationAspect 時）
               if (errorType?.isRetryable == true &&
-                  errorType != NarrationStateErrorType.aiQuotaExceeded &&
                   narrationAspect != null) ...[
                 const SizedBox(height: 24),
                 ElevatedButton(

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -47,25 +46,8 @@ class GeminiService implements NarrationService {
       final response = await model.generateContent([Content.text(prompt)]);
       final generatedText = response.text ?? '';
 
-      debugPrint(
-        'Generated narration (${generatedText.length} chars): '
-        '${generatedText.substring(0, generatedText.length > 100 ? 100 : generatedText.length)}...',
-      );
-
       return generatedText;
-    } on NarrationServiceException {
-      // 已經是我們的異常，直接重新拋出
-      rethrow;
     } on FirebaseException catch (e) {
-      // 處理 Firebase 相關異常
-      final errorString = e.toString().toLowerCase();
-      if (errorString.contains('resource-exhausted') ||
-          errorString.contains('quota-exceeded')) {
-        throw NarrationServiceException.quotaExceeded(
-          rawMessage: e.message ?? e.toString(),
-          retryAfterSeconds: 900,
-        );
-      }
       throw NarrationServiceException.server(
         rawMessage: 'Firebase Error: ${e.message} (${e.code})',
       );
@@ -74,7 +56,6 @@ class GeminiService implements NarrationService {
     } on TimeoutException catch (e) {
       throw NarrationServiceException.network(rawMessage: e.toString());
     } catch (e) {
-      debugPrint('Error generating narration: $e');
       throw NarrationServiceException(
         type: NarrationServiceErrorType.unknown,
         rawMessage: e.toString(),

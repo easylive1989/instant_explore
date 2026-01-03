@@ -20,20 +20,6 @@ class NarrationServiceException implements Exception {
     this.context,
   });
 
-  /// 建立 AI 配額超限異常
-  factory NarrationServiceException.quotaExceeded({
-    String? rawMessage,
-    int? retryAfterSeconds,
-  }) {
-    return NarrationServiceException(
-      type: NarrationServiceErrorType.aiQuotaExceeded,
-      rawMessage: rawMessage,
-      context: retryAfterSeconds != null
-          ? {'retryAfterSeconds': retryAfterSeconds}
-          : null,
-    );
-  }
-
   /// 建立網路錯誤異常
   factory NarrationServiceException.network({String? rawMessage}) {
     return NarrationServiceException(

@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:context_app/features/narration/presentation/widgets/ai_over_limit_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
@@ -89,20 +88,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     );
   }
 
-  /// 顯示 AI 超限對話框
-  void _showAiOverLimitDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => const AiOverLimitDialog(),
-    ).then((_) {
-      // 對話框關閉後，導航回 config screen
-      if (mounted) {
-        context.pushReplacementNamed('config', extra: widget.place);
-      }
-    });
-  }
-
   /// 顯示付費牆對話框
   void _showPaywallDialog() {
     showPaywallDialog(
@@ -134,8 +119,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           // 根據錯誤類型顯示不同的對話框
           if (current.errorType!.requiresPaywall) {
             _showPaywallDialog();
-          } else {
-            _showAiOverLimitDialog();
           }
         });
       }

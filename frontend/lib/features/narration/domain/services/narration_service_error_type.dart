@@ -3,9 +3,6 @@
 /// 定義與 AI 服務呼叫相關的錯誤類型
 /// 這些錯誤不屬於 UseCase 的業務邏輯錯誤
 enum NarrationServiceErrorType {
-  /// AI 配額已超過限制
-  aiQuotaExceeded,
-
   /// 網路連線錯誤
   networkError,
 
