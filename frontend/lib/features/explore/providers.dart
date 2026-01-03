@@ -4,7 +4,6 @@ import 'package:context_app/features/explore/domain/use_cases/search_places_use_
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
 import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
-import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
@@ -30,7 +29,7 @@ final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
   return CachingPlacesRepository(apiRepository, cacheService);
 });
 
-final placesCacheServiceProvider = Provider<PlacesCacheService>((ref) {
+final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
   final apiKey = ref.watch(apiConfigProvider).googleMapsApiKey;
   return HivePlacesCacheService(apiKey);
 });

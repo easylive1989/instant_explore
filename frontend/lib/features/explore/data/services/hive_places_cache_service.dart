@@ -4,14 +4,13 @@ import 'dart:math';
 import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:hive/hive.dart';
 
 /// Hive 實作的地點快取服務
 ///
 /// 使用 Hive 儲存地點資料，支援 TTL 和距離判斷
 /// 內部使用 DTO 進行序列化，對外使用 Domain Model
-class HivePlacesCacheService implements PlacesCacheService {
+class HivePlacesCacheService {
   final String _apiKey;
 
   static const String _boxName = 'places_cache';
@@ -38,7 +37,6 @@ class HivePlacesCacheService implements PlacesCacheService {
     return _box!;
   }
 
-  @override
   Future<List<Place>?> getCachedPlaces() async {
     try {
       final box = await _getBox();
@@ -59,7 +57,6 @@ class HivePlacesCacheService implements PlacesCacheService {
     }
   }
 
-  @override
   Future<void> cachePlaces(List<Place> places) async {
     final box = await _getBox();
 
@@ -121,7 +118,6 @@ class HivePlacesCacheService implements PlacesCacheService {
     return path;
   }
 
-  @override
   Future<PlaceLocation?> getLastSearchLocation() async {
     try {
       final box = await _getBox();
@@ -136,14 +132,12 @@ class HivePlacesCacheService implements PlacesCacheService {
     }
   }
 
-  @override
   Future<void> saveLastSearchLocation(PlaceLocation location) async {
     final box = await _getBox();
     final locationJson = jsonEncode(location.toJson());
     await box.put(_locationKey, locationJson);
   }
 
-  @override
   Future<void> clearCache() async {
     final box = await _getBox();
     await box.delete(_placesKey);
@@ -151,7 +145,6 @@ class HivePlacesCacheService implements PlacesCacheService {
     await box.delete(_locationKey);
   }
 
-  @override
   Future<bool> shouldRefresh(PlaceLocation currentLocation) async {
     // 檢查快取是否過期
     if (await _isCacheExpired()) {

@@ -1,7 +1,7 @@
+import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
-import 'package:context_app/features/explore/domain/services/places_cache_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 使用 Decorator 模式包裝 PlacesRepository，添加快取功能
@@ -11,7 +11,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 /// - 否則呼叫底層 Repository 取得新資料並更新快取
 class CachingPlacesRepository implements PlacesRepository {
   final PlacesRepository _delegate;
-  final PlacesCacheService _cacheService;
+  final HivePlacesCacheService _cacheService;
 
   CachingPlacesRepository(this._delegate, this._cacheService);
 
