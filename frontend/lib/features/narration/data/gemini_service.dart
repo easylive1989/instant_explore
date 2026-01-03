@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -83,7 +82,3 @@ class GeminiService implements NarrationService {
     }
   }
 }
-
-final narrationServiceProvider = Provider<NarrationService>((ref) {
-  return GeminiService();
-});

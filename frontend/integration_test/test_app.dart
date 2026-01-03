@@ -1,9 +1,9 @@
+import 'package:context_app/features/narration/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/subscription/providers.dart';
 
 import 'fakes/fake_places_repository.dart';

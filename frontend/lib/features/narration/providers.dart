@@ -1,3 +1,4 @@
+import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
@@ -7,6 +8,10 @@ import 'package:context_app/features/narration/presentation/controllers/player_c
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
+
+final narrationServiceProvider = Provider<NarrationService>((ref) {
+  return GeminiService();
+});
 
 /// 導覽介紹面向選擇 Provider
 ///
