@@ -1,4 +1,6 @@
-class SavedPlace {
+import 'package:equatable/equatable.dart';
+
+class SavedPlace extends Equatable {
   final String id;
   final String name;
   final String address;
@@ -25,18 +27,5 @@ class SavedPlace {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is SavedPlace &&
-        other.id == id &&
-        other.name == name &&
-        other.address == address &&
-        other.imageUrl == imageUrl;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(id, name, address, imageUrl);
-  }
+  List<Object?> get props => [id, name, address, imageUrl];
 }

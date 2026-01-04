@@ -1,7 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 /// 導覽段落值對象
 ///
 /// 包含段落文本及其在完整文本中的位置範圍
-class NarrationSegment {
+class NarrationSegment extends Equatable {
   /// 段落文本
   final String text;
 
@@ -26,21 +28,11 @@ class NarrationSegment {
   int get length => text.length;
 
   @override
+  List<Object?> get props => [text, startPosition, endPosition];
+
+  @override
   String toString() {
     return 'NarrationSegment(text: "${text.substring(0, text.length > 20 ? 20 : text.length)}...", '
         'range: $startPosition-$endPosition)';
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is NarrationSegment &&
-        other.text == text &&
-        other.startPosition == startPosition &&
-        other.endPosition == endPosition;
-  }
-
-  @override
-  int get hashCode => Object.hash(text, startPosition, endPosition);
 }

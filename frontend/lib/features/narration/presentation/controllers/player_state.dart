@@ -1,10 +1,11 @@
 import 'package:context_app/features/narration/presentation/controllers/playback_state.dart';
+import 'package:equatable/equatable.dart';
 
 /// 播放器狀態
 ///
 /// 管理音訊播放的運行時狀態
 /// 與領域模型 Narration 分離，遵循關注點分離原則
-class PlayerState {
+class PlayerState extends Equatable {
   /// 播放狀態
   final PlaybackState state;
 
@@ -40,21 +41,10 @@ class PlayerState {
   }
 
   @override
+  List<Object?> get props => [state, currentCharPosition];
+
+  @override
   String toString() {
     return 'PlayerState(state: $state, charPosition: $currentCharPosition)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is PlayerState &&
-        other.state == state &&
-        other.currentCharPosition == currentCharPosition;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(state, currentCharPosition);
   }
 }

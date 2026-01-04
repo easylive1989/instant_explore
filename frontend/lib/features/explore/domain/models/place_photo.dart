@@ -1,7 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 /// 地點照片 Domain Model
 ///
 /// 純粹的業務模型，不包含 API 相關邏輯
-class PlacePhoto {
+class PlacePhoto extends Equatable {
   /// 照片 URL (已產生)
   final String url;
 
@@ -14,7 +16,7 @@ class PlacePhoto {
   /// 作者歸屬資訊
   final List<String> authorAttributions;
 
-  PlacePhoto({
+  const PlacePhoto({
     required this.url,
     required this.widthPx,
     required this.heightPx,
@@ -22,16 +24,10 @@ class PlacePhoto {
   });
 
   @override
+  List<Object?> get props => [url, widthPx, heightPx, authorAttributions];
+
+  @override
   String toString() {
     return 'PlacePhoto(url: $url, widthPx: $widthPx, heightPx: $heightPx)';
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is PlacePhoto && other.url == url;
-  }
-
-  @override
-  int get hashCode => url.hashCode;
 }

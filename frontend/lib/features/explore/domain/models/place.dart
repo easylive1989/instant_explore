@@ -1,11 +1,12 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/models/place_photo.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:equatable/equatable.dart';
 
 /// 地點 Domain Model
 ///
 /// 純粹的業務模型，不包含 API 相關邏輯
-class Place {
+class Place extends Equatable {
   final String id;
   final String name;
   final String formattedAddress;
@@ -15,7 +16,7 @@ class Place {
   final List<PlacePhoto> photos;
   final PlaceCategory category;
 
-  Place({
+  const Place({
     required this.id,
     required this.name,
     required this.formattedAddress,
@@ -32,11 +33,14 @@ class Place {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Place && other.id == id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
+  List<Object?> get props => [
+    id,
+    name,
+    formattedAddress,
+    location,
+    rating,
+    types,
+    photos,
+    category,
+  ];
 }

@@ -4,12 +4,13 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/narration/presentation/controllers/playback_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
+import 'package:equatable/equatable.dart';
 
 /// 導覽播放狀態
 ///
 /// 聚合導覽內容和播放狀態
 /// 封裝播放器 UI 所需的所有狀態資訊
-class NarrationState {
+class NarrationState extends Equatable {
   // Replace the aggregated Narration object with flattened fields or necessary components
   final Place? place;
   final NarrationAspect? aspect;
@@ -180,34 +181,19 @@ class NarrationState {
   }
 
   @override
+  List<Object?> get props => [
+    place,
+    aspect,
+    content,
+    playerState,
+    errorType,
+    errorMessage,
+  ];
+
+  @override
   String toString() {
     return 'NarrationState(playerState: $playerState, '
         'place: ${place?.name}, aspect: $aspect, '
         'hasError: $hasError)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is NarrationState &&
-        other.place == place &&
-        other.aspect == aspect &&
-        other.content == content &&
-        other.playerState == playerState &&
-        other.errorType == errorType &&
-        other.errorMessage == errorMessage;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      place,
-      aspect,
-      content,
-      playerState,
-      errorType,
-      errorMessage,
-    );
   }
 }

@@ -2,11 +2,12 @@ import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:equatable/equatable.dart';
 
 /// 導覽內容值對象
 ///
 /// 包含AI生成的導覽文本及其相關屬性
-class NarrationContent {
+class NarrationContent extends Equatable {
   /// 完整的導覽文本
   final String text;
 
@@ -217,16 +218,5 @@ class NarrationContent {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is NarrationContent &&
-        other.text == text &&
-        other.segments.length == segments.length;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(text, segments.length);
-  }
+  List<Object?> get props => [text, segments, language];
 }
