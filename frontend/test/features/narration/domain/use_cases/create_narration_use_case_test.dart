@@ -71,13 +71,9 @@ void main() {
 
   test('免費用戶有剩餘次數時，應成功生成導覽並消耗免費次數', () async {
     // Arrange - 免費用戶有剩餘次數
-    when(() => mockEntitlementRepository.getEntitlement()).thenAnswer(
-      (_) async => const UserEntitlement(
-        hasActivePass: false,
-        remainingFreeUsage: 2,
-        dailyFreeLimit: 3,
-      ),
-    );
+    when(
+      () => mockEntitlementRepository.getEntitlement(),
+    ).thenAnswer((_) async => UserEntitlement.free(dailyFreeLimit: 3));
     when(
       () => mockEntitlementRepository.consumeFreeUsage(),
     ).thenAnswer((_) async {});
