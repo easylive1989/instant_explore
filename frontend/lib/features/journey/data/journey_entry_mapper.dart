@@ -1,5 +1,6 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
+import 'package:context_app/features/narration/data/mappers/narration_aspect_mapper.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -31,7 +32,7 @@ class JourneyEntryMapper {
     // 解析 narration_style
     final narrationStyleStr = json['narration_style'] as String;
     final narrationAspect =
-        NarrationAspect.fromString(narrationStyleStr) ??
+        NarrationAspectMapper.fromString(narrationStyleStr) ??
         NarrationAspect.historicalBackground;
 
     return JourneyEntry(
@@ -55,7 +56,9 @@ class JourneyEntryMapper {
       'place_address': entry.place.address,
       'place_image_url': entry.place.imageUrl,
       'narration_text': entry.narrationContent.text,
-      'narration_style': entry.narrationAspect.toApiString(),
+      'narration_style': NarrationAspectMapper.toApiString(
+        entry.narrationAspect,
+      ),
       'created_at': entry.createdAt.toIso8601String(),
       'language': entry.language.toString(),
     };
