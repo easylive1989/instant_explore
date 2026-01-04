@@ -1,7 +1,7 @@
 import 'package:context_app/features/explore/data/dto/google_place_photo_dto.dart';
+import 'package:context_app/features/explore/data/mappers/place_category_mapper.dart';
 import 'package:context_app/features/explore/data/mappers/place_location_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_photo.dart';
 
 /// Google Places API Place DTO
@@ -60,7 +60,7 @@ class GooglePlaceDto {
   /// [maxPhotoWidth] 照片最大寬度
   Place toDomain({required String apiKey, int maxPhotoWidth = 400}) {
     final extractedTypes = _extractTypes(types);
-    final category = PlaceCategory.fromPlaceTypes(extractedTypes);
+    final category = PlaceCategoryMapper.fromPlaceTypes(extractedTypes);
 
     return Place(
       id: id,

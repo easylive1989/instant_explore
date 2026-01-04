@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/features/camera/domain/models/image_analysis_result.dart';
+import 'package:context_app/features/explore/data/mappers/place_category_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 
 /// 圖片分析服務
@@ -119,8 +120,7 @@ Only respond with JSON, no other text.
               .toList() ??
           [];
 
-      final category =
-          PlaceCategory.fromString(categoryStr) ?? PlaceCategory.modernUrban;
+      final category = PlaceCategoryMapper.fromString(categoryStr);
 
       return ImageAnalysisResult(
         name: name,

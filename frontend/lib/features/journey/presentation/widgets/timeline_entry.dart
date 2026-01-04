@@ -100,7 +100,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
       location: const PlaceLocation(latitude: 0, longitude: 0),
       types: const [],
       photos: const [],
-      category: PlaceCategory.fromPlaceTypes([]),
+      category: PlaceCategory.modernUrban,
     );
 
     context.pushNamed(
