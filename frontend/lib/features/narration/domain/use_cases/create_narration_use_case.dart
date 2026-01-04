@@ -3,7 +3,6 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
-import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
 import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
@@ -60,24 +59,13 @@ class CreateNarrationUseCase {
     );
 
     // 3. 使用 NarrationContent.create 組成並驗證內容
-    try {
-      final content = NarrationContent.create(text, language: language);
+    final content = NarrationContent.create(text, language: language);
 
-      // 4. 如果是免費用戶，消耗一次免費額度
-      if (!entitlement.isUnlimited) {
-        await _entitlementRepository.consumeFreeUsage();
-      }
-
-      return content;
-    } on AppError {
-      rethrow;
-    } catch (e, stackTrace) {
-      throw AppError(
-        type: NarrationError.contentGenerationFailed,
-        message: '內容生成失敗',
-        originalException: e,
-        stackTrace: stackTrace,
-      );
+    // 4. 如果是免費用戶，消耗一次免費額度
+    if (!entitlement.isUnlimited) {
+      await _entitlementRepository.consumeFreeUsage();
     }
+
+    return content;
   }
 }
