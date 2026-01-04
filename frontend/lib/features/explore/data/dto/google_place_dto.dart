@@ -1,7 +1,7 @@
 import 'package:context_app/features/explore/data/dto/google_place_photo_dto.dart';
+import 'package:context_app/features/explore/data/mappers/place_location_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
-import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/models/place_photo.dart';
 
 /// Google Places API Place DTO
@@ -66,7 +66,7 @@ class GooglePlaceDto {
       id: id,
       name: _extractDisplayName(displayName) ?? '',
       formattedAddress: formattedAddress ?? '',
-      location: PlaceLocation.fromJson(location ?? {}),
+      location: PlaceLocationMapper.fromJson(location ?? {}),
       rating: rating,
       types: extractedTypes,
       photos: photos

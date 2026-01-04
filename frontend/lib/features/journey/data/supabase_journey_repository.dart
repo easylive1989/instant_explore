@@ -2,6 +2,7 @@ import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/journey/domain/errors/journey_error.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
+import 'package:context_app/features/journey/data/journey_entry_mapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseJourneyRepository implements JourneyRepository {
@@ -19,7 +20,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
           .order('created_at', ascending: false);
 
       final data = response as List<dynamic>;
-      return data.map((json) => JourneyEntry.fromJson(json)).toList();
+      return data.map((json) => JourneyEntryMapper.fromJson(json)).toList();
     } on PostgrestException catch (e, stackTrace) {
       throw AppError(
         type: JourneyError.loadFailed,
@@ -41,7 +42,9 @@ class SupabaseJourneyRepository implements JourneyRepository {
   @override
   Future<void> addJourneyEntry(JourneyEntry entry) async {
     try {
-      await _client.from('passport_entries').insert(entry.toJson());
+      await _client
+          .from('passport_entries')
+          .insert(JourneyEntryMapper.toJson(entry));
     } on PostgrestException catch (e, stackTrace) {
       throw AppError(
         type: JourneyError.saveFailed,

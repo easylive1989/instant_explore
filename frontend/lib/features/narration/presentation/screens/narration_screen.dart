@@ -58,7 +58,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             .initialize(
               widget.place,
               widget.narrationAspect ?? NarrationAspect.historicalBackground,
-              language: Language.fromString(locale),
+              language: Language(locale),
             );
       }
     });

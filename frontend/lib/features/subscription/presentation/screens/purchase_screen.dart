@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:context_app/features/subscription/domain/models/pass_type.dart';
 import 'package:context_app/features/subscription/data/purchase_repository.dart';
+import 'package:context_app/features/subscription/data/pass_type_mapper.dart';
 import 'package:context_app/features/subscription/providers.dart';
 
 /// 購買頁面
@@ -304,8 +305,8 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
     // 根據 PassType 排序（Day Pass 在前）
     final sortedPackages = [...packages]
       ..sort((a, b) {
-        final aType = PassType.fromProductId(a.storeProduct.identifier);
-        final bType = PassType.fromProductId(b.storeProduct.identifier);
+        final aType = PassTypeMapper.fromProductId(a.storeProduct.identifier);
+        final bType = PassTypeMapper.fromProductId(b.storeProduct.identifier);
         if (aType == PassType.dayPass) return -1;
         if (bType == PassType.dayPass) return 1;
         return 0;
@@ -316,7 +317,7 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
       itemCount: sortedPackages.length,
       itemBuilder: (context, index) {
         final package = sortedPackages[index];
-        final passType = PassType.fromProductId(
+        final passType = PassTypeMapper.fromProductId(
           package.storeProduct.identifier,
         );
         final isRecommended = passType == PassType.tripPass;

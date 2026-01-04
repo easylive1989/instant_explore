@@ -7,6 +7,7 @@ import 'package:context_app/features/subscription/domain/models/pass_type.dart';
 import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
 import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
 import 'package:context_app/features/subscription/data/revenue_cat_service.dart';
+import 'package:context_app/features/subscription/data/pass_type_mapper.dart';
 
 /// 權益倉儲實作
 ///
@@ -41,7 +42,9 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
 
       if (customerInfo.entitlements.active.containsKey(_entitlementId)) {
         final entitlement = customerInfo.entitlements.active[_entitlementId]!;
-        final passType = PassType.fromProductId(entitlement.productIdentifier);
+        final passType = PassTypeMapper.fromProductId(
+          entitlement.productIdentifier,
+        );
         final expiresAt = entitlement.expirationDate != null
             ? DateTime.parse(entitlement.expirationDate!)
             : null;

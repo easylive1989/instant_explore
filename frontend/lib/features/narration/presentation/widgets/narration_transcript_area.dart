@@ -110,7 +110,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
                         .initialize(
                           place,
                           narrationAspect!,
-                          language: Language.fromString(locale),
+                          language: Language(locale),
                         );
                   },
                   child: const Text('重試'),

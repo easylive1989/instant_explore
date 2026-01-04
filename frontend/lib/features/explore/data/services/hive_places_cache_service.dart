@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
+import 'package:context_app/features/explore/data/mappers/place_location_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:hive/hive.dart';
@@ -126,7 +127,7 @@ class HivePlacesCacheService {
       if (locationJson == null) return null;
 
       final Map<String, dynamic> locationMap = jsonDecode(locationJson);
-      return PlaceLocation.fromJson(locationMap);
+      return PlaceLocationMapper.fromJson(locationMap);
     } catch (e) {
       return null;
     }
@@ -134,7 +135,7 @@ class HivePlacesCacheService {
 
   Future<void> saveLastSearchLocation(PlaceLocation location) async {
     final box = await _getBox();
-    final locationJson = jsonEncode(location.toJson());
+    final locationJson = jsonEncode(PlaceLocationMapper.toJson(location));
     await box.put(_locationKey, locationJson);
   }
 

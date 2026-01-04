@@ -11,10 +11,6 @@ class Language extends Equatable {
   /// 英文
   static const english = Language('en-US');
 
-  factory Language.fromString(String code) {
-    return Language(code);
-  }
-
   @override
   List<Object?> get props => [code];
 }

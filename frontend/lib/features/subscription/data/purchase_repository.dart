@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/subscription/domain/models/pass_type.dart';
+import 'package:context_app/features/subscription/data/pass_type_mapper.dart';
 
 /// RevenueCat 購買倉儲
 ///
@@ -50,7 +51,9 @@ class PurchaseRepository {
     // 檢查是否有 premium_access 權益
     if (info.entitlements.active.containsKey('premium_access')) {
       final entitlement = info.entitlements.active['premium_access']!;
-      final passType = PassType.fromProductId(entitlement.productIdentifier);
+      final passType = PassTypeMapper.fromProductId(
+        entitlement.productIdentifier,
+      );
       if (passType != null) {
         _purchaseController.add(PurchaseUpdate.success(passType));
       }
@@ -124,7 +127,9 @@ class PurchaseRepository {
       // 檢查購買是否成功
       if (customerInfo.entitlements.active.containsKey('premium_access')) {
         final entitlement = customerInfo.entitlements.active['premium_access']!;
-        final passType = PassType.fromProductId(entitlement.productIdentifier);
+        final passType = PassTypeMapper.fromProductId(
+          entitlement.productIdentifier,
+        );
         if (passType != null) {
           _purchaseController.add(PurchaseUpdate.success(passType));
           debugPrint('✅ 購買成功: ${package.storeProduct.identifier}');
@@ -158,7 +163,9 @@ class PurchaseRepository {
       // 檢查是否有權益
       if (customerInfo.entitlements.active.containsKey('premium_access')) {
         final entitlement = customerInfo.entitlements.active['premium_access']!;
-        final passType = PassType.fromProductId(entitlement.productIdentifier);
+        final passType = PassTypeMapper.fromProductId(
+          entitlement.productIdentifier,
+        );
         if (passType != null) {
           _purchaseController.add(PurchaseUpdate.success(passType));
         }

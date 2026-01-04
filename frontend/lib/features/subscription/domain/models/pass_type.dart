@@ -16,14 +16,4 @@ enum PassType {
 
   /// 有效期間
   final Duration duration;
-
-  /// 根據產品 ID 取得對應的 PassType
-  static PassType? fromProductId(String productId) {
-    for (final type in PassType.values) {
-      if (type.productId == productId) {
-        return type;
-      }
-    }
-    return null;
-  }
 }
