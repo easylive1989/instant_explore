@@ -42,9 +42,4 @@ class PlayerState extends Equatable {
 
   @override
   List<Object?> get props => [state, currentCharPosition];
-
-  @override
-  String toString() {
-    return 'PlayerState(state: $state, charPosition: $currentCharPosition)';
-  }
 }

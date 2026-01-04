@@ -17,7 +17,4 @@ class Language extends Equatable {
 
   @override
   List<Object?> get props => [code];
-
-  @override
-  String toString() => code;
 }

@@ -20,9 +20,4 @@ class PlaceLocation extends Equatable {
 
   @override
   List<Object?> get props => [latitude, longitude];
-
-  @override
-  String toString() {
-    return 'PlaceLocation(latitude: $latitude, longitude: $longitude)';
-  }
 }

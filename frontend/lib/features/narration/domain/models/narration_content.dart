@@ -71,30 +71,6 @@ class NarrationContent extends Equatable {
     );
   }
 
-  factory NarrationContent.fromJson(Map<String, dynamic> json) {
-    final text = json['text'] as String;
-    final segmentTexts = (json['segments'] as List).cast<String>();
-    final languageCode = json['language'] as String? ?? 'zh-TW';
-    final language = Language.fromString(languageCode);
-
-    // 從段落文本重建 NarrationSegment（包含位置資訊）
-    final segments = _buildSegmentsFromTexts(text, segmentTexts);
-
-    return NarrationContent._(
-      text: text,
-      segments: segments,
-      language: language,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'segments': segments.map((s) => s.text).toList(),
-      'language': language.code,
-    };
-  }
-
   /// 建立段落列表（包含文本和位置資訊）
   ///
   /// [fullText] 完整的導覽文本
@@ -209,12 +185,6 @@ class NarrationContent extends Equatable {
 
     // 預設返回第一個段落
     return 0;
-  }
-
-  @override
-  String toString() {
-    return 'NarrationContent(text: ${text.length} chars, '
-        'segments: ${segments.length})';
   }
 
   @override

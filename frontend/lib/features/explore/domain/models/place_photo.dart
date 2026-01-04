@@ -25,9 +25,4 @@ class PlacePhoto extends Equatable {
 
   @override
   List<Object?> get props => [url, widthPx, heightPx, authorAttributions];
-
-  @override
-  String toString() {
-    return 'PlacePhoto(url: $url, widthPx: $widthPx, heightPx: $heightPx)';
-  }
 }

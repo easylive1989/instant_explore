@@ -54,34 +54,4 @@ class UserEntitlement {
 
   /// 是否為無限使用（已付費）
   bool get isUnlimited => hasActivePass;
-
-  /// 是否已達免費上限
-  bool get hasReachedFreeLimit => !hasActivePass && remainingFreeUsage <= 0;
-
-  /// 複製並更新部分屬性
-  UserEntitlement copyWith({
-    bool? hasActivePass,
-    PassType? activePassType,
-    DateTime? expiresAt,
-    int? remainingFreeUsage,
-    int? dailyFreeLimit,
-  }) {
-    return UserEntitlement(
-      hasActivePass: hasActivePass ?? this.hasActivePass,
-      activePassType: activePassType ?? this.activePassType,
-      expiresAt: expiresAt ?? this.expiresAt,
-      remainingFreeUsage: remainingFreeUsage ?? this.remainingFreeUsage,
-      dailyFreeLimit: dailyFreeLimit ?? this.dailyFreeLimit,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'UserEntitlement('
-        'hasActivePass: $hasActivePass, '
-        'activePassType: $activePassType, '
-        'expiresAt: $expiresAt, '
-        'remainingFreeUsage: $remainingFreeUsage, '
-        'dailyFreeLimit: $dailyFreeLimit)';
-  }
 }

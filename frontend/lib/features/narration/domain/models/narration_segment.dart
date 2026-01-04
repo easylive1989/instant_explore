@@ -24,15 +24,6 @@ class NarrationSegment extends Equatable {
     return position >= startPosition && position < endPosition;
   }
 
-  /// 段落長度
-  int get length => text.length;
-
   @override
   List<Object?> get props => [text, startPosition, endPosition];
-
-  @override
-  String toString() {
-    return 'NarrationSegment(text: "${text.substring(0, text.length > 20 ? 20 : text.length)}...", '
-        'range: $startPosition-$endPosition)';
-  }
 }

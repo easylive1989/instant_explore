@@ -189,11 +189,4 @@ class NarrationState extends Equatable {
     errorType,
     errorMessage,
   ];
-
-  @override
-  String toString() {
-    return 'NarrationState(playerState: $playerState, '
-        'place: ${place?.name}, aspect: $aspect, '
-        'hasError: $hasError)';
-  }
 }
