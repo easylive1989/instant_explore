@@ -6,7 +6,7 @@ import 'package:context_app/features/explore/domain/services/location_service.da
 /// 回傳固定位置，避免需要 GPS 權限
 class FakeLocationService implements LocationService {
   /// 預設位置（台北 101 附近）
-  static final defaultLocation = PlaceLocation(
+  static const defaultLocation = PlaceLocation(
     latitude: 25.0330,
     longitude: 121.5654,
   );

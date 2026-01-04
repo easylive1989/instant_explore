@@ -56,13 +56,13 @@ void main() {
   });
 
   group('StartNarrationUseCase', () {
-    final testPlace = Place(
+    const testPlace = Place(
       id: 'test-place-id',
       name: 'Test Place',
       formattedAddress: '123 Test St, Test City',
       location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-      types: const ['tourist_attraction'],
-      photos: const [],
+      types: ['tourist_attraction'],
+      photos: [],
       category: PlaceCategory.historicalCultural,
     );
 
@@ -240,13 +240,13 @@ void main() {
   });
 
   group('CreateNarrationUseCase - 非付費用戶情境', () {
-    final testPlace = Place(
+    const testPlace = Place(
       id: 'test-place-id',
       name: 'Test Place',
       formattedAddress: '123 Test St, Test City',
       location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-      types: const ['tourist_attraction'],
-      photos: const [],
+      types: ['tourist_attraction'],
+      photos: [],
       category: PlaceCategory.historicalCultural,
     );
 

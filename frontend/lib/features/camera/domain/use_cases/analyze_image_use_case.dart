@@ -4,6 +4,7 @@ import 'package:context_app/features/camera/data/image_analysis_service.dart';
 import 'package:context_app/features/camera/domain/models/image_analysis_result.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/explore/domain/models/place_photo.dart';
 import 'package:uuid/uuid.dart';
 
 /// 分析圖片用例
@@ -43,9 +44,9 @@ class AnalyzeImageUseCase {
       id: id,
       name: result.name,
       formattedAddress: result.address ?? '由相機拍攝',
-      location: PlaceLocation(latitude: 0, longitude: 0),
+      location: const PlaceLocation(latitude: 0, longitude: 0),
       types: result.types,
-      photos: [],
+      photos: const <PlacePhoto>[],
       category: result.category,
     );
   }

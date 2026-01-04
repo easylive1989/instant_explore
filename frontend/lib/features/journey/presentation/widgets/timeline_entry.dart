@@ -97,9 +97,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
       id: widget.entry.place.id,
       name: widget.entry.place.name,
       formattedAddress: widget.entry.place.address,
-      location: PlaceLocation(latitude: 0, longitude: 0),
-      types: [],
-      photos: [],
+      location: const PlaceLocation(latitude: 0, longitude: 0),
+      types: const [],
+      photos: const [],
       category: PlaceCategory.fromPlaceTypes([]),
     );
 

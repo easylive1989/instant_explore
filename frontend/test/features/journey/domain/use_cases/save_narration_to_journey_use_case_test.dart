@@ -27,7 +27,7 @@ void main() {
     useCase = SaveNarrationToJourneyUseCase(mockRepository);
   });
 
-  final place = Place(
+  const place = Place(
     id: 'place-1',
     name: 'Test Place',
     formattedAddress: 'Address',

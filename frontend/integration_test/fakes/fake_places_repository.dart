@@ -9,7 +9,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 /// 回傳預設的地點列表，模擬 Google Places API
 class FakePlacesRepository implements PlacesRepository {
   /// 預設的測試地點 A (台北 101)
-  static final fakePlaceA = Place(
+  static const fakePlaceA = Place(
     id: 'fake_place_a',
     name: '台北 101',
     formattedAddress: '台北市信義區信義路五段7號',
@@ -21,7 +21,7 @@ class FakePlacesRepository implements PlacesRepository {
   );
 
   /// 預設的測試地點 B (國立故宮博物院)
-  static final fakePlaceB = Place(
+  static const fakePlaceB = Place(
     id: 'fake_place_b',
     name: '國立故宮博物院',
     formattedAddress: '台北市士林區至善路二段221號',
@@ -33,7 +33,7 @@ class FakePlacesRepository implements PlacesRepository {
   );
 
   /// 預設的測試地點 C (龍山寺)
-  static final fakePlaceC = Place(
+  static const fakePlaceC = Place(
     id: 'fake_place_c',
     name: '龍山寺',
     formattedAddress: '台北市萬華區廣州街211號',

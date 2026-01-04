@@ -22,7 +22,7 @@ void main() {
   late MockPlacesRepository mockPlacesRepository;
 
   // 使用者位置 (台北 101 附近)
-  final userLocation = PlaceLocation(latitude: 25.0330, longitude: 121.5654);
+  const userLocation = PlaceLocation(latitude: 25.0330, longitude: 121.5654);
   const testLanguage = Language.traditionalChinese;
   const testRadius = 1000.0;
 
@@ -56,8 +56,8 @@ void main() {
       name: name,
       formattedAddress: 'Test Address',
       location: location,
-      types: ['tourist_attraction'],
-      photos: [],
+      types: const ['tourist_attraction'],
+      photos: const [],
       category: PlaceCategory.modernUrban,
       rating: rating,
     );
@@ -69,7 +69,7 @@ void main() {
       final nearHighRating = createPlace(
         id: '1',
         name: 'High Rating Place',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0331, // 約 10m 遠
           longitude: 121.5654,
         ),
@@ -78,7 +78,7 @@ void main() {
       final nearLowRating = createPlace(
         id: '2',
         name: 'Low Rating Place',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0332, // 約 20m 遠
           longitude: 121.5654,
         ),
@@ -104,7 +104,7 @@ void main() {
       final veryNearLowRating = createPlace(
         id: '1',
         name: 'Very Near Low Rating',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0330, // 約 0m
           longitude: 121.5654,
         ),
@@ -113,7 +113,7 @@ void main() {
       final slightlyFarHighRating = createPlace(
         id: '2',
         name: 'Slightly Far High Rating',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0340, // 約 110m 遠
           longitude: 121.5654,
         ),
@@ -140,7 +140,7 @@ void main() {
       final nearMediumRating = createPlace(
         id: '1',
         name: 'Near Medium Rating',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0335, // 約 55m 遠
           longitude: 121.5654,
         ),
@@ -149,7 +149,7 @@ void main() {
       final farHighRating = createPlace(
         id: '2',
         name: 'Far High Rating',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0360, // 約 330m 遠 (超過 200m 容許範圍)
           longitude: 121.5654,
         ),
@@ -175,13 +175,13 @@ void main() {
       final noRating = createPlace(
         id: '1',
         name: 'No Rating Place',
-        location: PlaceLocation(latitude: 25.0331, longitude: 121.5654),
+        location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
         rating: null,
       );
       final hasRating = createPlace(
         id: '2',
         name: 'Has Rating Place',
-        location: PlaceLocation(latitude: 25.0332, longitude: 121.5654),
+        location: const PlaceLocation(latitude: 25.0332, longitude: 121.5654),
         rating: 4.0,
       );
 
@@ -205,7 +205,7 @@ void main() {
       final sameRatingNear = createPlace(
         id: '1',
         name: 'Near',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0335, // 約 55m
           longitude: 121.5654,
         ),
@@ -214,7 +214,7 @@ void main() {
       final sameRatingFar = createPlace(
         id: '2',
         name: 'Far',
-        location: PlaceLocation(
+        location: const PlaceLocation(
           latitude: 25.0360, // 約 330m (距離差 > 200m)
           longitude: 121.5654,
         ),
@@ -254,7 +254,7 @@ void main() {
       final singlePlace = createPlace(
         id: '1',
         name: 'Only Place',
-        location: PlaceLocation(latitude: 25.0331, longitude: 121.5654),
+        location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
         rating: 4.5,
       );
 
