@@ -133,32 +133,17 @@ class NarrationContent extends Equatable {
       // 在完整文本中搜尋段落的位置
       final startPos = fullText.indexOf(segmentText, currentPos);
 
-      if (startPos != -1) {
-        // 找到段落，記錄起始和結束位置
-        final endPos = startPos + segmentText.length;
-        segments.add(
-          NarrationSegment(
-            text: segmentText,
-            startPosition: startPos,
-            endPosition: endPos,
-          ),
-        );
-        // 更新搜尋起點，避免找到重複的段落
-        currentPos = endPos;
-      } else {
-        // 找不到段落（理論上不應發生），使用預估位置
-        // 這是一個安全後備方案
-        final estimatedStart = currentPos;
-        final estimatedEnd = estimatedStart + segmentText.length;
-        segments.add(
-          NarrationSegment(
-            text: segmentText,
-            startPosition: estimatedStart,
-            endPosition: estimatedEnd,
-          ),
-        );
-        currentPos = estimatedEnd;
-      }
+      // 找到段落，記錄起始和結束位置
+      final endPos = startPos + segmentText.length;
+      segments.add(
+        NarrationSegment(
+          text: segmentText,
+          startPosition: startPos,
+          endPosition: endPos,
+        ),
+      );
+      // 更新搜尋起點，避免找到重複的段落
+      currentPos = endPos;
     }
 
     return segments;
