@@ -69,6 +69,40 @@ void main() {
 許多遊客來到這裡參觀。這是一個著名的景點。
 ''';
 
+  test('成功生成導覽', () async {
+    // Arrange - 免費用戶有剩餘次數
+    when(
+      () => mockEntitlementRepository.getEntitlement(),
+    ).thenAnswer((_) async => UserEntitlement.free(dailyFreeLimit: 3));
+    when(
+      () => mockEntitlementRepository.consumeFreeUsage(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNarrationService.generateNarration(
+        place: testPlace,
+        aspect: NarrationAspect.historicalBackground,
+        language: any(named: 'language'),
+      ),
+    ).thenAnswer((_) async => testGeneratedText);
+
+    // Act
+    final narrationConent = await useCase.execute(
+      place: testPlace,
+      aspect: NarrationAspect.historicalBackground,
+      language: Language.traditionalChinese,
+    );
+
+    expect(
+      narrationConent,
+      equals(
+        NarrationContent.create(
+          testGeneratedText,
+          language: Language.traditionalChinese,
+        ),
+      ),
+    );
+  });
+
   test('免費用戶有剩餘次數時，應成功生成導覽並消耗免費次數', () async {
     // Arrange - 免費用戶有剩餘次數
     when(
@@ -86,14 +120,12 @@ void main() {
     ).thenAnswer((_) async => testGeneratedText);
 
     // Act
-    final result = await useCase.execute(
+    await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
-    // Assert
-    expect(result, isA<NarrationContent>());
     verify(() => mockEntitlementRepository.consumeFreeUsage()).called(1);
   });
 
@@ -150,14 +182,12 @@ void main() {
     ).thenAnswer((_) async => testGeneratedText);
 
     // Act
-    final result = await useCase.execute(
+    await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
-    // Assert
-    expect(result, isA<NarrationContent>());
     // 確認不會呼叫 consumeFreeUsage
     verifyNever(() => mockEntitlementRepository.consumeFreeUsage());
   });
@@ -183,14 +213,13 @@ void main() {
     ).thenAnswer((_) async => testGeneratedText);
 
     // Act
-    final result = await useCase.execute(
+    await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
     // Assert
-    expect(result, isA<NarrationContent>());
     verify(() => mockEntitlementRepository.consumeFreeUsage()).called(1);
   });
 }
