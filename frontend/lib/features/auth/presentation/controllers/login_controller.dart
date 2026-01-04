@@ -1,14 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:context_app/features/auth/domain/use_cases/login_with_email_use_case.dart';
-import 'package:context_app/features/auth/domain/use_cases/login_with_google_use_case.dart';
+import 'package:context_app/features/auth/data/auth_service.dart';
 
 class LoginController extends StateNotifier<AsyncValue<void>> {
-  final LoginWithEmailUseCase _loginWithEmailUseCase;
-  final LoginWithGoogleUseCase _loginWithGoogleUseCase;
+  final AuthService _authService;
 
-  LoginController(this._loginWithEmailUseCase, this._loginWithGoogleUseCase)
-    : super(const AsyncValue.data(null));
+  LoginController(this._authService) : super(const AsyncValue.data(null));
 
   Future<void> loginWithEmail({
     required String email,
@@ -16,14 +13,14 @@ class LoginController extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _loginWithEmailUseCase.execute(email: email, password: password);
+      await _authService.signInWithEmail(email: email, password: password);
     });
   }
 
   Future<void> loginWithGoogle() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final response = await _loginWithGoogleUseCase.execute();
+      final response = await _authService.signInWithGoogle();
       if (response == null) {
         throw const AuthException('Google Sign In Cancelled');
       }

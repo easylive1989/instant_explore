@@ -1,8 +1,5 @@
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/auth/data/auth_service.dart';
-import 'package:context_app/features/auth/domain/use_cases/login_with_email_use_case.dart';
-import 'package:context_app/features/auth/domain/use_cases/login_with_google_use_case.dart';
-import 'package:context_app/features/auth/domain/use_cases/register_with_email_use_case.dart';
 import 'package:context_app/features/auth/presentation/controllers/login_controller.dart';
 import 'package:context_app/features/auth/presentation/controllers/register_controller.dart';
 import 'package:flutter/foundation.dart';
@@ -52,53 +49,19 @@ final isSignedInProvider = Provider<bool>((ref) {
 });
 
 // ============================================================================
-// Use Case Providers
-// ============================================================================
-
-/// 電子郵件登入用例 Provider
-@protected
-final loginWithEmailUseCaseProvider = Provider<LoginWithEmailUseCase>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return LoginWithEmailUseCase(authService);
-});
-
-/// Google 登入用例 Provider
-@protected
-final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return LoginWithGoogleUseCase(authService);
-});
-
-/// 電子郵件註冊用例 Provider
-@protected
-final registerWithEmailUseCaseProvider = Provider<RegisterWithEmailUseCase>((
-  ref,
-) {
-  final authService = ref.watch(authServiceProvider);
-  return RegisterWithEmailUseCase(authService);
-});
-
-// ============================================================================
 // Controller Providers
 // ============================================================================
 
 /// 登入控制器 Provider
 final loginControllerProvider =
     StateNotifierProvider<LoginController, AsyncValue<void>>((ref) {
-      final loginWithEmailUseCase = ref.watch(loginWithEmailUseCaseProvider);
-      final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
-      return LoginController(loginWithEmailUseCase, loginWithGoogleUseCase);
+      final authService = ref.watch(authServiceProvider);
+      return LoginController(authService);
     });
 
 /// 註冊控制器 Provider
 final registerControllerProvider =
     StateNotifierProvider<RegisterController, AsyncValue<void>>((ref) {
-      final registerWithEmailUseCase = ref.watch(
-        registerWithEmailUseCaseProvider,
-      );
-      final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
-      return RegisterController(
-        registerWithEmailUseCase,
-        loginWithGoogleUseCase,
-      );
+      final authService = ref.watch(authServiceProvider);
+      return RegisterController(authService);
     });

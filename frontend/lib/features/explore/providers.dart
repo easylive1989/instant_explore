@@ -1,6 +1,5 @@
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
-import 'package:context_app/features/explore/domain/use_cases/search_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/places_api_service.dart';
 import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
@@ -43,11 +42,6 @@ final searchNearbyPlacesUseCaseProvider = Provider<SearchNearbyPlacesUseCase>((
   return SearchNearbyPlacesUseCase(locationService, repository);
 });
 
-final searchPlacesUseCaseProvider = Provider<SearchPlacesUseCase>((ref) {
-  final repository = ref.watch(placesRepositoryProvider);
-  return SearchPlacesUseCase(repository);
-});
-
 // UI-facing Providers
 final placesControllerProvider =
     AsyncNotifierProvider<PlacesController, List<Place>>(() {
@@ -82,8 +76,8 @@ class PlacesController extends AsyncNotifier<List<Place>> {
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final useCase = ref.read(searchPlacesUseCaseProvider);
-      return useCase.execute(query, language: language);
+      final repository = ref.read(placesRepositoryProvider);
+      return repository.searchPlaces(query, language: language);
     });
   }
 

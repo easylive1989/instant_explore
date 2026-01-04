@@ -68,8 +68,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
       try {
         await ref
-            .read(deleteJourneyEntryUseCaseProvider)
-            .execute(widget.entry.id);
+            .read(journeyRepositoryProvider)
+            .deleteJourneyEntry(widget.entry.id);
         // 刷新列表
         ref.invalidate(myJourneyProvider);
       } catch (e) {
