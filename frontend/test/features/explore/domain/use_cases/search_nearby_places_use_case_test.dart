@@ -1,4 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/explore/domain/models/place_photo.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -57,7 +58,14 @@ void main() {
       formattedAddress: 'Test Address',
       location: location,
       types: const ['tourist_attraction'],
-      photos: const [],
+      photos: const [
+        PlacePhoto(
+          url: 'https://example.com/photo.jpg',
+          widthPx: 200,
+          heightPx: 200,
+          authorAttributions: [],
+        ),
+      ],
       category: PlaceCategory.modernUrban,
       rating: rating,
     );
@@ -235,7 +243,9 @@ void main() {
       expect(result.first.name, 'Near');
       expect(result.last.name, 'Far');
     });
+  });
 
+  group('Get Nearby Places Correctly', () {
     test('空列表應該正確處理', () async {
       when(
         () => mockPlacesRepository.getNearbyPlaces(
@@ -268,8 +278,13 @@ void main() {
 
       final result = await useCase.execute(language: testLanguage);
 
-      expect(result.length, 1);
-      expect(result.first.name, 'Only Place');
+      final expected = createPlace(
+        id: '1',
+        name: 'Only Place',
+        location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
+        rating: 4.5,
+      );
+      expect(result.single, equals(expected));
     });
   });
 }
