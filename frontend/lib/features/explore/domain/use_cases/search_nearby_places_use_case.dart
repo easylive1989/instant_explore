@@ -38,20 +38,6 @@ class SearchNearbyPlacesUseCase {
     return _sortByWeightedScore(places, userLocation);
   }
 
-  /// 強制重新整理
-  /// 注意：可能會打中快取，視快取狀態而定
-  Future<List<Place>> forceRefresh({required Language language}) async {
-    final userLocation = await _locationService.getCurrentLocation();
-
-    final places = await _placesRepository.getNearbyPlaces(
-      userLocation,
-      language: language,
-      radius: _maxDistance,
-    );
-
-    return _sortByWeightedScore(places, userLocation);
-  }
-
   /// 使用權重計分法排序地點
   ///
   /// 排序邏輯：

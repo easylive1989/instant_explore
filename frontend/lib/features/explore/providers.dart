@@ -87,7 +87,7 @@ class PlacesController extends AsyncNotifier<List<Place>> {
     state = await AsyncValue.guard(() async {
       final language = ref.read(currentLanguageProvider);
       final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-      return useCase.forceRefresh(language: language);
+      return useCase.execute(language: language);
     });
   }
 }
