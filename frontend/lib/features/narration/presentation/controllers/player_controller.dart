@@ -11,7 +11,8 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
-import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
+import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
+import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 播放器控制器
@@ -21,7 +22,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 /// 注意：權益檢查由 CreateNarrationUseCase 處理
 class PlayerController extends StateNotifier<NarrationState> {
   final CreateNarrationUseCase _createNarrationUseCase;
-  final SaveNarrationToJourneyUseCase _saveNarrationToJourneyUseCase;
+  final JourneyRepository _journeyRepository;
   final TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;
@@ -40,7 +41,7 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   PlayerController(
     this._createNarrationUseCase,
-    this._saveNarrationToJourneyUseCase,
+    this._journeyRepository,
     this._ttsService,
   ) : super(NarrationState.initial()) {
     _setupTtsListeners();
@@ -143,14 +144,15 @@ class PlayerController extends StateNotifier<NarrationState> {
     }
 
     try {
-      // 直接傳遞個別參數給 use case
-      await _saveNarrationToJourneyUseCase.execute(
+      final entry = JourneyEntry.create(
         userId: userId,
         place: state.place!,
         aspect: state.aspect!,
         content: state.content!,
         language: language,
       );
+
+      await _journeyRepository.addJourneyEntry(entry);
     } catch (e) {
       // 這裡可以選擇透過 state 通知 UI 錯誤，或者拋出異常讓 UI 處理
       // 為了簡單起見，我們暫時不改變 state，但理想情況下應該有 toast 通知

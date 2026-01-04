@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/data/supabase_journey_repository.dart';
-import 'package:context_app/features/journey/domain/use_cases/save_narration_to_journey_use_case.dart';
 
 // ============================================================================
 // Data Layer Providers
@@ -13,17 +12,6 @@ import 'package:context_app/features/journey/domain/use_cases/save_narration_to_
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return SupabaseJourneyRepository(Supabase.instance.client);
 });
-
-// ============================================================================
-// Use Case Providers
-// ============================================================================
-
-/// 儲存導覽到旅程用例 Provider
-final saveNarrationToJourneyUseCaseProvider =
-    Provider<SaveNarrationToJourneyUseCase>((ref) {
-      final repository = ref.watch(journeyRepositoryProvider);
-      return SaveNarrationToJourneyUseCase(repository);
-    });
 
 // ============================================================================
 // UI Providers
