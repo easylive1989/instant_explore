@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/presentation/widgets/place_image_widget.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 
@@ -236,15 +237,11 @@ class PlaceCard extends StatelessWidget {
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-              // 使用 category icon 取代照片（完全免費）
-              ClipRRect(
+              PlaceImageWidget(
+                place: place,
+                width: 64,
+                height: 64,
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  place.category.imageAssetPath,
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
               ),
               const SizedBox(width: 16),
               Expanded(
