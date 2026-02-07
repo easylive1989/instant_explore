@@ -42,11 +42,6 @@ class FakePurchaseRepository implements PurchaseRepository {
   }
 
   @override
-  Future<CustomerInfo?> restorePurchases() async {
-    return null;
-  }
-
-  @override
   Future<CustomerInfo?> getCustomerInfo() async {
     return null;
   }

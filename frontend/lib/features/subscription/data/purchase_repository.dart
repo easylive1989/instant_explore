@@ -154,30 +154,6 @@ class PurchaseRepository {
     }
   }
 
-  /// 恢復購買
-  Future<CustomerInfo?> restorePurchases() async {
-    try {
-      final customerInfo = await Purchases.restorePurchases();
-      debugPrint('✅ 恢復購買完成');
-
-      // 檢查是否有權益
-      if (customerInfo.entitlements.active.containsKey('premium_access')) {
-        final entitlement = customerInfo.entitlements.active['premium_access']!;
-        final passType = PassTypeMapper.fromProductId(
-          entitlement.productIdentifier,
-        );
-        if (passType != null) {
-          _purchaseController.add(PurchaseUpdate.success(passType));
-        }
-      }
-
-      return customerInfo;
-    } catch (e) {
-      debugPrint('❌ 恢復購買失敗: $e');
-      return null;
-    }
-  }
-
   /// 取得客戶資訊
   Future<CustomerInfo?> getCustomerInfo() async {
     try {

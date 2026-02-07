@@ -11,9 +11,6 @@ enum SubscriptionError implements AppErrorType {
   /// 購買失敗
   purchaseFailed,
 
-  /// 恢復購買失敗
-  restoreFailed,
-
   /// 權益驗證失敗
   verificationFailed,
 

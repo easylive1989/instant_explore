@@ -45,11 +45,17 @@ class EntitlementRepositoryImpl implements EntitlementRepository {
         final passType = PassTypeMapper.fromProductId(
           entitlement.productIdentifier,
         );
-        final expiresAt = entitlement.expirationDate != null
-            ? DateTime.parse(entitlement.expirationDate!)
-            : null;
 
-        debugPrint('✅ 用戶有付費權益: ${passType?.name}, 到期: $expiresAt');
+        // 使用購買時間 + duration 計算到期時間
+        DateTime? expiresAt;
+        if (passType != null) {
+          final purchaseDate = DateTime.parse(entitlement.latestPurchaseDate);
+          expiresAt = purchaseDate.add(passType.duration);
+        }
+
+        debugPrint(
+          '✅ 用戶有付費權益: ${passType?.name}, 購買時間: ${entitlement.latestPurchaseDate}, 到期: $expiresAt',
+        );
 
         return UserEntitlement.premium(
           passType: passType ?? PassType.dayPass,

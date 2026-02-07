@@ -95,17 +95,6 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
     await repository.purchase(package);
   }
 
-  Future<void> _restorePurchases() async {
-    final repository = ref.read(purchaseRepositoryProvider);
-    await repository.restorePurchases();
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('subscription.restore_purchases'.tr())),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -165,15 +154,6 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
                 ),
               ),
             ),
-
-            // 恢復購買
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextButton(
-                onPressed: _restorePurchases,
-                child: Text('subscription.restore_purchases'.tr()),
-              ),
-            ),
           ],
         ),
       ),
@@ -186,9 +166,27 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
 
     if (entitlement.hasActivePass) {
       final formatter = DateFormat('yyyy/MM/dd HH:mm');
-      final expiresText = entitlement.expiresAt != null
-          ? formatter.format(entitlement.expiresAt!)
-          : '';
+      final expiresAt = entitlement.expiresAt;
+      final expiresText = expiresAt != null ? formatter.format(expiresAt) : '';
+
+      // 計算剩餘時間
+      String remainingText = '';
+      if (expiresAt != null) {
+        final remaining = expiresAt.difference(DateTime.now());
+        if (remaining.inDays > 0) {
+          remainingText = 'subscription.remaining_days'.tr(
+            namedArgs: {'days': remaining.inDays.toString()},
+          );
+        } else if (remaining.inHours > 0) {
+          remainingText = 'subscription.remaining_hours'.tr(
+            namedArgs: {'hours': remaining.inHours.toString()},
+          );
+        } else if (remaining.inMinutes > 0) {
+          remainingText = 'subscription.remaining_minutes'.tr(
+            namedArgs: {'minutes': remaining.inMinutes.toString()},
+          );
+        }
+      }
 
       return Container(
         margin: const EdgeInsets.all(16),
@@ -212,15 +210,29 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
                       color: colorScheme.primary,
                     ),
                   ),
-                  if (expiresText.isNotEmpty)
+                  if (remainingText.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      remainingText,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  if (expiresText.isNotEmpty) ...[
+                    const SizedBox(height: 2),
                     Text(
                       'subscription.expires_at'.tr(
                         namedArgs: {'date': expiresText},
                       ),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
+                        color: colorScheme.onPrimaryContainer.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -314,9 +326,15 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: sortedPackages.length,
+      itemCount: sortedPackages.length + (hasActivePass ? 1 : 0),
       itemBuilder: (context, index) {
-        final package = sortedPackages[index];
+        // 如果有有效通行證，第一個項目顯示提示訊息
+        if (hasActivePass && index == 0) {
+          return _buildActivePassNotice();
+        }
+
+        final packageIndex = hasActivePass ? index - 1 : index;
+        final package = sortedPackages[packageIndex];
         final passType = PassTypeMapper.fromProductId(
           package.storeProduct.identifier,
         );
@@ -329,6 +347,38 @@ class _PurchaseScreenState extends ConsumerState<PurchaseScreen> {
           isDisabled: hasActivePass,
         );
       },
+    );
+  }
+
+  Widget _buildActivePassNotice() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.secondary.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: colorScheme.secondary, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'subscription.active_pass_notice'.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSecondaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
