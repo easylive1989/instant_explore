@@ -8,12 +8,16 @@ import 'package:context_app/features/ads/domain/services/rewarded_ad_service.dar
 class GoogleRewardedAdService implements RewardedAdService {
   RewardedAd? _rewardedAd;
 
-  /// 測試用 Ad Unit ID
+  /// Ad Unit ID（debug 用測試 ID，release 用正式 ID）
   String get _adUnitId {
-    if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/1712485313';
+    if (kReleaseMode) {
+      return Platform.isIOS
+          ? 'ca-app-pub-9031377620197189/2546789476'
+          : 'ca-app-pub-9031377620197189/1018085386';
     }
-    return 'ca-app-pub-3940256099942544/5224354917';
+    return Platform.isIOS
+        ? 'ca-app-pub-3940256099942544/1712485313'
+        : 'ca-app-pub-3940256099942544/5224354917';
   }
 
   @override
