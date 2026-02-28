@@ -5,8 +5,6 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/settings/domain/use_cases/logout_use_case.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
-import 'package:context_app/features/subscription/providers.dart';
-
 // ============================================================================
 // Use Case Providers
 // ============================================================================
@@ -14,8 +12,7 @@ import 'package:context_app/features/subscription/providers.dart';
 /// 登出用例 Provider
 final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   final authService = ref.watch(authServiceProvider);
-  final purchaseRepository = ref.watch(purchaseRepositoryProvider);
-  return LogoutUseCase(authService, purchaseRepository);
+  return LogoutUseCase(authService);
 });
 
 // ============================================================================

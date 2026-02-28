@@ -1,4 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/auth/presentation/widgets/login_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -42,14 +43,12 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                 _isSaving)
             ? null
             : () async {
-                final userId = Supabase.instance.client.auth.currentUser?.id;
+                var userId = Supabase.instance.client.auth.currentUser?.id;
                 if (userId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(easy.tr('player_screen.please_login')),
-                    ),
-                  );
-                  return;
+                  final loggedIn = await showLoginDialog(context);
+                  if (loggedIn != true || !context.mounted) return;
+                  userId = Supabase.instance.client.auth.currentUser?.id;
+                  if (userId == null) return;
                 }
 
                 // 取得當前語言

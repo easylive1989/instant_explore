@@ -53,7 +53,8 @@
     "cancel": "取消",
     "today": "今天",
     "yesterday": "昨天",
-    "replay": "重播"
+    "replay": "重播",
+    "login_required": "登入後即可查看您的旅程記錄"
   },
   "explore": {
     "title": "探索",
@@ -98,7 +99,10 @@
     "resendEmail": "重新發送郵件",
     "resetPasswordFailed": "發送重設郵件失敗",
     "show_password": "顯示密碼",
-    "hide_password": "隱藏密碼"
+    "hide_password": "隱藏密碼",
+    "login_to_save": "登入以儲存",
+    "login_to_save_subtitle": "登入後即可將導覽儲存到護照",
+    "later": "稍後再說"
   },
   "validation": {
     "required": "此欄位為必填",
@@ -123,7 +127,9 @@
     "confirm": "確認",
     "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
     "app_version": "版本資訊無法取得",
-    "copyright": "© 2025 Contexture 讀景"
+    "copyright": "© 2025 Contexture 讀景",
+    "daily_usage": "每日使用量",
+    "remaining_today": "今日剩餘 {remaining} 次"
   },
   "place_category": {
     "historical_cultural": "人文古蹟",
@@ -211,5 +217,11 @@
     "view_plans": "查看方案",
     "continue_free": "繼續使用免費版",
     "already_has_pass": "您已有有效的通行證，無需重複購買"
+  },
+  "ads": {
+    "quota_exceeded_title": "今日免費次數已用完",
+    "watch_ad_subtitle": "觀看一段短影片即可獲得 1 次額外導覽",
+    "watch_video": "觀看影片",
+    "ad_reward_success": "獲得 1 次額外導覽！"
   }
 }

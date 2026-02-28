@@ -7,8 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/firebase_options.dart';
-import 'package:context_app/features/subscription/data/purchase_repository.dart';
-import 'package:context_app/features/subscription/providers.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 全域 ApiConfig 實例
 late final ApiConfig apiConfig;
@@ -35,19 +34,15 @@ Future<Widget> init() async {
   // Initialize Supabase
   await _initializeSupabase();
 
-  // Initialize PurchaseRepository (需要 async 初始化 RevenueCat)
-  final purchaseRepo = PurchaseRepository(apiConfig);
-  await purchaseRepo.initialize();
+  // Initialize Google Mobile Ads
+  await MobileAds.instance.initialize();
 
   return EasyLocalization(
     supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
     path: 'assets/translations',
     fallbackLocale: const Locale('zh', 'TW'),
     saveLocale: true,
-    child: ProviderScope(
-      overrides: [purchaseRepositoryProvider.overrideWithValue(purchaseRepo)],
-      child: const ContextureApp(),
-    ),
+    child: const ProviderScope(child: ContextureApp()),
   );
 }
 

@@ -1,5 +1,7 @@
 import 'package:context_app/core/errors/app_error.dart';
-import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
+import 'package:context_app/features/usage/domain/errors/usage_error.dart';
+import 'package:context_app/features/usage/domain/models/usage_status.dart';
+import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
@@ -8,30 +10,23 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/subscription/domain/models/pass_type.dart';
-import 'package:context_app/features/subscription/domain/models/user_entitlement.dart';
-import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mock classes
 class MockNarrationService extends Mock implements NarrationService {}
 
-class MockEntitlementRepository extends Mock implements EntitlementRepository {}
+class MockUsageRepository extends Mock implements UsageRepository {}
 
-// Fake class for Place (required for mocktail any() matcher)
 class FakePlace extends Fake implements Place {}
 
-// Fake class for Language
 class FakeLanguage extends Fake implements Language {}
 
 void main() {
   late CreateNarrationUseCase useCase;
   late MockNarrationService mockNarrationService;
-  late MockEntitlementRepository mockEntitlementRepository;
+  late MockUsageRepository mockUsageRepository;
 
   setUpAll(() {
-    // Register fallback values for mocktail
     registerFallbackValue(FakePlace());
     registerFallbackValue(NarrationAspect.historicalBackground);
     registerFallbackValue(FakeLanguage());
@@ -39,19 +34,19 @@ void main() {
 
   setUp(() {
     mockNarrationService = MockNarrationService();
-    mockEntitlementRepository = MockEntitlementRepository();
+    mockUsageRepository = MockUsageRepository();
     useCase = CreateNarrationUseCase(
       mockNarrationService,
-      mockEntitlementRepository,
+      mockUsageRepository,
     );
 
-    // 預設權益為免費用戶（有剩餘次數）
+    // 預設：有剩餘額度
     when(
-      () => mockEntitlementRepository.getEntitlement(),
-    ).thenAnswer((_) async => UserEntitlement.free(dailyFreeLimit: 3));
-    when(
-      () => mockEntitlementRepository.consumeFreeUsage(),
-    ).thenAnswer((_) async {});
+      () => mockUsageRepository.getUsageStatus(),
+    ).thenAnswer(
+      (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
+    );
+    when(() => mockUsageRepository.consumeUsage()).thenAnswer((_) async {});
   });
 
   const testPlace = Place(
@@ -70,13 +65,6 @@ void main() {
 ''';
 
   test('成功生成導覽', () async {
-    // Arrange - 免費用戶有剩餘次數
-    when(
-      () => mockEntitlementRepository.getEntitlement(),
-    ).thenAnswer((_) async => UserEntitlement.free(dailyFreeLimit: 3));
-    when(
-      () => mockEntitlementRepository.consumeFreeUsage(),
-    ).thenAnswer((_) async {});
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
@@ -85,15 +73,14 @@ void main() {
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
-    // Act
-    final narrationConent = await useCase.execute(
+    final narrationContent = await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
     expect(
-      narrationConent,
+      narrationContent,
       equals(
         NarrationContent.create(
           testGeneratedText,
@@ -103,14 +90,7 @@ void main() {
     );
   });
 
-  test('免費用戶有剩餘次數時，應成功生成導覽並消耗免費次數', () async {
-    // Arrange - 免費用戶有剩餘次數
-    when(
-      () => mockEntitlementRepository.getEntitlement(),
-    ).thenAnswer((_) async => UserEntitlement.free(dailyFreeLimit: 3));
-    when(
-      () => mockEntitlementRepository.consumeFreeUsage(),
-    ).thenAnswer((_) async {});
+  test('有剩餘次數時消耗額度', () async {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
@@ -119,27 +99,20 @@ void main() {
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
-    // Act
     await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
-    verify(() => mockEntitlementRepository.consumeFreeUsage()).called(1);
+    verify(() => mockUsageRepository.consumeUsage()).called(1);
   });
 
-  test('免費用戶額度用完時，應拋出 AppError with freeQuotaExceeded', () async {
-    // Arrange - 免費用戶額度已用完
-    when(() => mockEntitlementRepository.getEntitlement()).thenAnswer(
-      (_) async => const UserEntitlement(
-        hasActivePass: false,
-        remainingFreeUsage: 0,
-        dailyFreeLimit: 3,
-      ),
+  test('額度用完時拋出 UsageError.dailyQuotaExceeded', () async {
+    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
+      (_) async => const UsageStatus(usedToday: 1, dailyFreeLimit: 1),
     );
 
-    // Act & Assert
     expect(
       () => useCase.execute(
         place: testPlace,
@@ -150,12 +123,11 @@ void main() {
         isA<AppError>().having(
           (e) => e.type,
           'error type',
-          SubscriptionError.freeQuotaExceeded,
+          UsageError.dailyQuotaExceeded,
         ),
       ),
     );
 
-    // 確認不會呼叫 generateNarration
     verifyNever(
       () => mockNarrationService.generateNarration(
         place: any(named: 'place'),
@@ -165,12 +137,12 @@ void main() {
     );
   });
 
-  test('付費用戶應成功生成導覽且不消耗免費次數', () async {
-    // Arrange - 付費用戶
-    when(() => mockEntitlementRepository.getEntitlement()).thenAnswer(
-      (_) async => UserEntitlement.premium(
-        passType: PassType.dayPass,
-        expiresAt: DateTime.now().add(const Duration(hours: 24)),
+  test('看廣告後有 bonus 可用時成功生成', () async {
+    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
+      (_) async => const UsageStatus(
+        usedToday: 1,
+        dailyFreeLimit: 1,
+        bonusFromAds: 1,
       ),
     );
     when(
@@ -181,29 +153,20 @@ void main() {
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
-    // Act
-    await useCase.execute(
+    final narrationContent = await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
-    // 確認不會呼叫 consumeFreeUsage
-    verifyNever(() => mockEntitlementRepository.consumeFreeUsage());
+    expect(narrationContent, isNotNull);
+    verify(() => mockUsageRepository.consumeUsage()).called(1);
   });
 
-  test('免費用戶剩餘次數為 1 時，應成功生成並消耗最後一次', () async {
-    // Arrange - 免費用戶只剩最後一次
-    when(() => mockEntitlementRepository.getEntitlement()).thenAnswer(
-      (_) async => const UserEntitlement(
-        hasActivePass: false,
-        remainingFreeUsage: 1,
-        dailyFreeLimit: 3,
-      ),
+  test('剩餘次數為 1 時成功生成並消耗最後一次', () async {
+    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
+      (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
     );
-    when(
-      () => mockEntitlementRepository.consumeFreeUsage(),
-    ).thenAnswer((_) async {});
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
@@ -212,14 +175,12 @@ void main() {
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
-    // Act
     await useCase.execute(
       place: testPlace,
       aspect: NarrationAspect.historicalBackground,
       language: Language.traditionalChinese,
     );
 
-    // Assert
-    verify(() => mockEntitlementRepository.consumeFreeUsage()).called(1);
+    verify(() => mockUsageRepository.consumeUsage()).called(1);
   });
 }

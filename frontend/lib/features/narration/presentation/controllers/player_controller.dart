@@ -3,7 +3,7 @@ import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/core/errors/app_error_type.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
-import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
+import 'package:context_app/features/usage/domain/errors/usage_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -105,13 +105,11 @@ class PlayerController extends StateNotifier<NarrationState> {
       }
     }
 
-    // Subscription 相關錯誤
-    if (type is SubscriptionError) {
+    // Usage 相關錯誤
+    if (type is UsageError) {
       switch (type) {
-        case SubscriptionError.freeQuotaExceeded:
+        case UsageError.dailyQuotaExceeded:
           return NarrationStateErrorType.freeQuotaExceeded;
-        default:
-          return NarrationStateErrorType.unknown;
       }
     }
 

@@ -12,7 +12,6 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
-import 'package:context_app/features/subscription/presentation/widgets/paywall_dialog.dart';
 
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
@@ -88,16 +87,23 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
     );
   }
 
-  /// 顯示付費牆對話框
-  void _showPaywallDialog() {
-    showPaywallDialog(
-      context,
-      onPurchaseTap: () {
-        Navigator.of(context).pop();
-        context.push('/purchase');
-      },
+  /// 顯示額度用完對話框（防禦性檢查）
+  void _showQuotaExceededDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('額度已用完'),
+        content: const Text('今日免費次數已用完，觀看廣告即可繼續使用。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('確定'),
+          ),
+        ],
+      ),
     ).then((_) {
-      // 對話框關閉後，返回首頁
       if (mounted) {
         context.go('/');
       }
@@ -117,8 +123,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
           if (!mounted) return;
 
           // 根據錯誤類型顯示不同的對話框
-          if (current.errorType!.requiresPaywall) {
-            _showPaywallDialog();
+          if (current.errorType!.requiresAdDialog) {
+            _showQuotaExceededDialog();
           }
         });
       }

@@ -53,7 +53,8 @@
     "cancel": "Cancel",
     "today": "Today",
     "yesterday": "Yesterday",
-    "replay": "Replay"
+    "replay": "Replay",
+    "login_required": "Sign in to view your journey history"
   },
   "explore": {
     "title": "Explore",
@@ -98,7 +99,10 @@
     "resendEmail": "Resend email",
     "resetPasswordFailed": "Failed to send reset email",
     "show_password": "Show password",
-    "hide_password": "Hide password"
+    "hide_password": "Hide password",
+    "login_to_save": "Sign in to save",
+    "login_to_save_subtitle": "Sign in to save your narration to your passport",
+    "later": "Maybe later"
   },
   "validation": {
     "required": "This field is required",
@@ -123,7 +127,9 @@
     "confirm": "Confirm",
     "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
     "app_version": "Version information unavailable",
-    "copyright": "© 2025 Contexture"
+    "copyright": "© 2025 Contexture",
+    "daily_usage": "Daily Usage",
+    "remaining_today": "{remaining} remaining today"
   },
   "place_category": {
     "historical_cultural": "Historical & Cultural",
@@ -211,5 +217,11 @@
     "view_plans": "View Plans",
     "continue_free": "Continue with Free",
     "already_has_pass": "You already have an active pass, no need to purchase again"
+  },
+  "ads": {
+    "quota_exceeded_title": "Daily free limit reached",
+    "watch_ad_subtitle": "Watch a short video to get 1 extra narration",
+    "watch_video": "Watch Video",
+    "ad_reward_success": "Earned 1 extra narration!"
   }
 }

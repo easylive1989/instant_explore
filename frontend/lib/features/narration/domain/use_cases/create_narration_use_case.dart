@@ -4,8 +4,8 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/subscription/domain/repositories/entitlement_repository.dart';
-import 'package:context_app/features/subscription/domain/errors/subscription_error.dart';
+import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
+import 'package:context_app/features/usage/domain/errors/usage_error.dart';
 
 /// 建立導覽用例
 ///
@@ -13,20 +13,20 @@ import 'package:context_app/features/subscription/domain/errors/subscription_err
 /// 遵循 Clean Architecture Use Case 模式
 ///
 /// 職責：
-/// - 檢查用戶權益狀態
+/// - 檢查每日使用額度
 /// - 呼叫 NarrationService 取得導覽文本
 /// - 使用 NarrationContent.create 組成內容
-/// - 消耗免費額度（如果適用）
+/// - 消耗使用額度
 ///
 /// 錯誤處理：
-/// - AppError(SubscriptionError.freeQuotaExceeded): 免費額度已用完
+/// - AppError(UsageError.dailyQuotaExceeded): 每日額度已用完
 /// - AppError(NarrationError.*): AI 服務相關錯誤（透傳自 Service）
 /// - AppError(NarrationError.contentGenerationFailed): 內容驗證失敗
 class CreateNarrationUseCase {
   final NarrationService _narrationService;
-  final EntitlementRepository _entitlementRepository;
+  final UsageRepository _usageRepository;
 
-  CreateNarrationUseCase(this._narrationService, this._entitlementRepository);
+  CreateNarrationUseCase(this._narrationService, this._usageRepository);
 
   /// 執行用例：生成導覽內容
   ///
@@ -36,7 +36,7 @@ class CreateNarrationUseCase {
   /// 返回生成的 NarrationContent
   ///
   /// 可能拋出 AppError：
-  /// - SubscriptionError.freeQuotaExceeded: 免費額度已用完
+  /// - UsageError.dailyQuotaExceeded: 每日額度已用完
   /// - NarrationError.*: AI 服務相關錯誤（透傳）
   /// - NarrationError.contentGenerationFailed: 內容驗證失敗
   Future<NarrationContent> execute({
@@ -44,10 +44,10 @@ class CreateNarrationUseCase {
     required NarrationAspect aspect,
     required Language language,
   }) async {
-    // 1. 檢查用戶權益
-    final entitlement = await _entitlementRepository.getEntitlement();
-    if (!entitlement.canUseNarration) {
-      throw const AppError(type: SubscriptionError.freeQuotaExceeded);
+    // 1. 檢查每日使用額度
+    final usageStatus = await _usageRepository.getUsageStatus();
+    if (!usageStatus.canUseNarration) {
+      throw const AppError(type: UsageError.dailyQuotaExceeded);
     }
 
     // 2. 呼叫 NarrationService 取得導覽文本
@@ -61,10 +61,8 @@ class CreateNarrationUseCase {
     // 3. 使用 NarrationContent.create 組成並驗證內容
     final content = NarrationContent.create(text, language: language);
 
-    // 4. 如果是免費用戶，消耗一次免費額度
-    if (!entitlement.isUnlimited) {
-      await _entitlementRepository.consumeFreeUsage();
-    }
+    // 4. 消耗一次使用額度
+    await _usageRepository.consumeUsage();
 
     return content;
   }

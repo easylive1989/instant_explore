@@ -6,5 +6,3 @@ library;
 export 'fake_places_repository.dart';
 export 'fake_narration_service.dart';
 export 'fake_location_service.dart';
-export 'fake_purchase_repository.dart';
-export 'fake_revenue_cat_service.dart';

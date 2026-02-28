@@ -7,7 +7,7 @@ import 'package:context_app/features/narration/domain/use_cases/create_narration
 import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/subscription/providers.dart';
+import 'package:context_app/features/usage/providers.dart';
 
 final narrationServiceProvider = Provider<NarrationService>((ref) {
   return GeminiService();
@@ -39,11 +39,11 @@ final ttsServiceProvider = Provider<TtsService>((ref) {
 /// StartNarrationUseCase Provider
 ///
 /// 提供開始導覽的用例
-/// 注入 EntitlementRepository 以檢查權益
+/// 注入 UsageRepository 以檢查每日額度
 final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
   final narrationService = ref.watch(narrationServiceProvider);
-  final entitlementRepository = ref.watch(entitlementRepositoryProvider);
-  return CreateNarrationUseCase(narrationService, entitlementRepository);
+  final usageRepository = ref.watch(usageRepositoryProvider);
+  return CreateNarrationUseCase(narrationService, usageRepository);
 });
 
 /// PlayerController Provider

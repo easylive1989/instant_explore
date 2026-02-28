@@ -49,6 +49,8 @@
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>讀景需要存取您的相片庫，以分析地點提供導覽。</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/auth/presentation/widgets/login_dialog.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
-import 'package:context_app/features/subscription/providers.dart';
+import 'package:context_app/features/usage/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -14,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
     final state = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
     final appVersionAsync = ref.watch(appVersionStringProvider);
+    final isSignedIn = ref.watch(isSignedInProvider);
 
     // Listen for state changes (e.g., successful logout)
     ref.listen<AsyncValue<void>>(settingsControllerProvider, (previous, next) {
@@ -88,55 +90,73 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ]),
                 const SizedBox(height: 32),
-                _buildSectionHeader('subscription.purchase_title'.tr()),
+                _buildSectionHeader('settings.daily_usage'.tr()),
                 const SizedBox(height: 8),
-                _buildSubscriptionSection(context, ref),
+                _buildUsageSection(ref),
                 const SizedBox(height: 32),
                 _buildSectionHeader('settings.account'.tr()),
                 const SizedBox(height: 8),
-                _buildSectionContainer(AppColors.surfaceDark, [
-                  _buildSettingsTile(
-                    icon: Icons.logout,
-                    iconColor: AppColors.textPrimaryDark.withValues(alpha: 0.7),
-                    iconBgColor: AppColors.surfaceDarkPlayer,
-                    title: 'settings.logout'.tr(),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      color: AppColors.textSecondaryDark,
-                      size: 14,
+                if (isSignedIn)
+                  _buildSectionContainer(AppColors.surfaceDark, [
+                    _buildSettingsTile(
+                      icon: Icons.logout,
+                      iconColor: AppColors.textPrimaryDark.withValues(
+                        alpha: 0.7,
+                      ),
+                      iconBgColor: AppColors.surfaceDarkPlayer,
+                      title: 'settings.logout'.tr(),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.textSecondaryDark,
+                        size: 14,
+                      ),
+                      onTap: () async {
+                        final confirm = await _showConfirmationDialog(
+                          context,
+                          'settings.logout'.tr(),
+                          'settings.logout_confirm'.tr(),
+                        );
+                        if (confirm == true) {
+                          await controller.logout();
+                        }
+                      },
                     ),
-                    onTap: () async {
-                      final confirm = await _showConfirmationDialog(
-                        context,
-                        'settings.logout'.tr(),
-                        'settings.logout_confirm'.tr(),
-                      );
-                      if (confirm == true) {
-                        await controller.logout();
-                      }
-                    },
-                  ),
-                  const Divider(height: 1, color: AppColors.white10),
-                  _buildSettingsTile(
-                    icon: Icons.delete_forever,
-                    iconColor: AppColors.error,
-                    iconBgColor: AppColors.error.withValues(alpha: 0.2),
-                    title: 'settings.delete_account'.tr(),
-                    titleColor: AppColors.error,
-                    subtitleColor: AppColors.error.withValues(alpha: 0.6),
-                    onTap: () async {
-                      final confirm = await _showConfirmationDialog(
-                        context,
-                        'settings.delete_account'.tr(),
-                        'settings.delete_account_confirm'.tr(),
-                        isDestructive: true,
-                      );
-                      if (confirm == true) {
-                        await controller.deleteAccount();
-                      }
-                    },
-                  ),
-                ]),
+                    const Divider(height: 1, color: AppColors.white10),
+                    _buildSettingsTile(
+                      icon: Icons.delete_forever,
+                      iconColor: AppColors.error,
+                      iconBgColor: AppColors.error.withValues(alpha: 0.2),
+                      title: 'settings.delete_account'.tr(),
+                      titleColor: AppColors.error,
+                      subtitleColor: AppColors.error.withValues(alpha: 0.6),
+                      onTap: () async {
+                        final confirm = await _showConfirmationDialog(
+                          context,
+                          'settings.delete_account'.tr(),
+                          'settings.delete_account_confirm'.tr(),
+                          isDestructive: true,
+                        );
+                        if (confirm == true) {
+                          await controller.deleteAccount();
+                        }
+                      },
+                    ),
+                  ])
+                else
+                  _buildSectionContainer(AppColors.surfaceDark, [
+                    _buildSettingsTile(
+                      icon: Icons.login,
+                      iconColor: AppColors.primary,
+                      iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+                      title: 'auth.login'.tr(),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.textSecondaryDark,
+                        size: 14,
+                      ),
+                      onTap: () => showLoginDialog(context),
+                    ),
+                  ]),
                 const SizedBox(height: 48),
                 Center(
                   child: Column(
@@ -208,69 +228,26 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSubscriptionSection(BuildContext context, WidgetRef ref) {
-    final entitlementAsync = ref.watch(userEntitlementProvider);
+  Widget _buildUsageSection(WidgetRef ref) {
+    final usageAsync = ref.watch(usageStatusProvider);
 
     return _buildSectionContainer(AppColors.surfaceDark, [
-      entitlementAsync.when(
-        data: (entitlement) {
-          if (entitlement.hasActivePass) {
-            // 已付費用戶
-            final expiresText = entitlement.expiresAt != null
-                ? DateFormat('yyyy/MM/dd HH:mm').format(entitlement.expiresAt!)
-                : '';
-
-            return _buildSettingsTile(
-              icon: Icons.verified,
-              iconColor: AppColors.primary,
-              iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-              title: 'subscription.unlimited_access'.tr(),
-              trailing: Text(
-                expiresText.isNotEmpty
-                    ? 'subscription.expires_at'.tr(
-                        namedArgs: {'date': expiresText},
-                      )
-                    : '',
-                style: const TextStyle(
-                  color: AppColors.textSecondaryDark,
-                  fontSize: 12,
-                ),
-              ),
-              onTap: () => context.push('/purchase'),
-            );
-          } else {
-            // 免費用戶
-            return _buildSettingsTile(
-              icon: Icons.star_outline,
-              iconColor: Colors.amber,
-              iconBgColor: Colors.amber.withValues(alpha: 0.2),
-              title: 'subscription.view_plans'.tr(),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'subscription.remaining_usage'.tr(
-                      namedArgs: {
-                        'remaining': entitlement.remainingFreeUsage.toString(),
-                      },
-                    ),
-                    style: const TextStyle(
-                      color: AppColors.textSecondaryDark,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppColors.textSecondaryDark,
-                    size: 14,
-                  ),
-                ],
-              ),
-              onTap: () => context.push('/purchase'),
-            );
-          }
-        },
+      usageAsync.when(
+        data: (status) => _buildSettingsTile(
+          icon: Icons.bar_chart,
+          iconColor: AppColors.primary,
+          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          title: 'settings.daily_usage'.tr(),
+          trailing: Text(
+            'settings.remaining_today'.tr(
+              namedArgs: {'remaining': status.remaining.toString()},
+            ),
+            style: const TextStyle(
+              color: AppColors.textSecondaryDark,
+              fontSize: 12,
+            ),
+          ),
+        ),
         loading: () => const Padding(
           padding: EdgeInsets.all(16.0),
           child: Center(
@@ -282,16 +259,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         error: (_, __) => _buildSettingsTile(
-          icon: Icons.star_outline,
-          iconColor: Colors.amber,
-          iconBgColor: Colors.amber.withValues(alpha: 0.2),
-          title: 'subscription.view_plans'.tr(),
-          trailing: const Icon(
-            Icons.arrow_forward_ios,
-            color: AppColors.textSecondaryDark,
-            size: 14,
-          ),
-          onTap: () => context.push('/purchase'),
+          icon: Icons.bar_chart,
+          iconColor: AppColors.primary,
+          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          title: 'settings.daily_usage'.tr(),
         ),
       ),
     ]);

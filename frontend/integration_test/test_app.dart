@@ -4,13 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/subscription/providers.dart';
 
 import 'fakes/fake_places_repository.dart';
 import 'fakes/fake_narration_service.dart';
 import 'fakes/fake_location_service.dart';
-import 'fakes/fake_purchase_repository.dart';
-import 'fakes/fake_revenue_cat_service.dart';
 
 /// 建立用於 E2E 測試的 App Widget
 ///
@@ -34,10 +31,6 @@ Widget createTestApp({
     locationServiceProvider.overrideWithValue(
       locationService ?? FakeLocationService(),
     ),
-    // 覆蓋 PurchaseRepository
-    purchaseRepositoryProvider.overrideWithValue(FakePurchaseRepository()),
-    // 覆蓋 RevenueCatService (避免真實 SDK 呼叫)
-    revenueCatServiceProvider.overrideWithValue(FakeFreeRevenueCatService()),
     // 加入額外的 overrides
     ...?additionalOverrides,
   ];

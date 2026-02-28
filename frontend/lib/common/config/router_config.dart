@@ -15,7 +15,6 @@ import 'package:context_app/features/auth/presentation/screens/register_screen.d
 import 'package:context_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
-import 'package:context_app/features/subscription/presentation/screens/purchase_screen.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider
@@ -146,33 +145,17 @@ class RouterConfig {
           name: 'camera',
           builder: (context, state) => const CameraScreen(),
         ),
-        GoRoute(
-          path: '/purchase',
-          name: 'purchase',
-          builder: (context, state) => const PurchaseScreen(),
-        ),
       ],
       redirect: (context, state) {
-        // 直接從 authService 讀取最新的認證狀態，避免 provider 異步更新延遲
         final authService = ref.read(authServiceProvider);
         final isSignedIn = authService.isSignedIn;
         final location = state.matchedLocation;
 
-        // 公開頁面（不需要登入）
-        final publicPages = ['/login', '/register', '/forgot-password'];
-        final isPublicPage = publicPages.contains(location);
-
-        // If not signed in and not on a public page, redirect to login
-        if (!isSignedIn && !isPublicPage) {
-          return '/login';
-        }
-        // If signed in and on a login/register page, redirect to home
-        // (但不影響 forgot-password，已登入用戶也可以訪問)
+        // 已登入用戶不需看 login/register 頁面
         if (isSignedIn && (location == '/login' || location == '/register')) {
           return '/';
         }
 
-        // No redirect needed
         return null;
       },
       errorBuilder: (context, state) =>

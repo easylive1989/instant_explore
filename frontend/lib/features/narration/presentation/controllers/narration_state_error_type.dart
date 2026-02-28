@@ -34,7 +34,7 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
   String get message {
     switch (this) {
       case NarrationStateErrorType.freeQuotaExceeded:
-        return '您已達到今日免費使用上限，升級解鎖無限導覽。';
+        return '今日免費次數已用完，觀看廣告即可繼續使用。';
       case NarrationStateErrorType.networkError:
         return '網路連線失敗，請檢查您的網路連線後重試。';
       case NarrationStateErrorType.configurationError:
@@ -78,8 +78,8 @@ extension NarrationStateErrorTypeExtension on NarrationStateErrorType {
     }
   }
 
-  /// 是否需要顯示特殊對話框（付費牆）
-  bool get requiresPaywall {
+  /// 是否需要顯示廣告對話框
+  bool get requiresAdDialog {
     return this == NarrationStateErrorType.freeQuotaExceeded;
   }
 

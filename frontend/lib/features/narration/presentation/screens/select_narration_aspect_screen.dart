@@ -11,7 +11,9 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/extensions/narration_aspect_extension.dart';
+import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/narration/providers.dart';
+import 'package:context_app/features/usage/providers.dart';
 
 class SelectNarrationAspectScreen extends ConsumerWidget {
   final Place place;
@@ -173,7 +175,15 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
 
                   // Start Button
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      final usageRepo = ref.read(usageRepositoryProvider);
+                      final status = await usageRepo.getUsageStatus();
+                      if (!status.canUseNarration) {
+                        if (!context.mounted) return;
+                        final watched = await showWatchAdDialog(context, ref);
+                        if (watched != true || !context.mounted) return;
+                      }
+                      if (!context.mounted) return;
                       context.pushNamed(
                         'player',
                         extra: {
