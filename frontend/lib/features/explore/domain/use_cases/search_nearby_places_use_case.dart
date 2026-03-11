@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:context_app/core/utils/geo_utils.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -49,7 +48,7 @@ class SearchNearbyPlacesUseCase {
   ) {
     // 計算每個地點與使用者的距離
     final placesWithDistance = places.map((place) {
-      final distance = _calculateDistance(userLocation, place.location);
+      final distance = calculateHaversineDistance(userLocation, place.location);
       return _PlaceWithDistance(place: place, distance: distance);
     }).toList();
 
@@ -91,26 +90,6 @@ class SearchNearbyPlacesUseCase {
     );
 
     return (ratingScore * _ratingWeight) + (distanceScore * _distanceWeight);
-  }
-
-  /// 計算兩點之間的距離（Haversine 公式）
-  ///
-  /// 返回距離（公尺）
-  double _calculateDistance(PlaceLocation from, PlaceLocation to) {
-    const earthRadiusMeters = 6371000.0;
-
-    final lat1Rad = from.latitude * pi / 180;
-    final lat2Rad = to.latitude * pi / 180;
-    final deltaLat = (to.latitude - from.latitude) * pi / 180;
-    final deltaLon = (to.longitude - from.longitude) * pi / 180;
-
-    final a =
-        sin(deltaLat / 2) * sin(deltaLat / 2) +
-        cos(lat1Rad) * cos(lat2Rad) * sin(deltaLon / 2) * sin(deltaLon / 2);
-
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return earthRadiusMeters * c;
   }
 }
 

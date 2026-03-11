@@ -43,140 +43,122 @@ void main() {
   });
 
   group('getJourneyEntries', () {
-    test(
-      '拋出 AppError(networkError) 當 SocketException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(const SocketException('Network unreachable'));
+    test('拋出 AppError(networkError) 當 SocketException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(const SocketException('Network unreachable'));
 
-        await expectLater(
-          () => repository.getJourneyEntries('user-1'),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<SocketException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.getJourneyEntries('user-1'),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<SocketException>(),
+              ),
+        ),
+      );
+    });
 
-    test(
-      '拋出 AppError(networkError) 當 TimeoutException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(TimeoutException('Connection timed out'));
+    test('拋出 AppError(networkError) 當 TimeoutException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(TimeoutException('Connection timed out'));
 
-        await expectLater(
-          () => repository.getJourneyEntries('user-1'),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<TimeoutException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.getJourneyEntries('user-1'),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<TimeoutException>(),
+              ),
+        ),
+      );
+    });
   });
 
   group('addJourneyEntry', () {
-    test(
-      '拋出 AppError(networkError) 當 SocketException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(const SocketException('Network unreachable'));
+    test('拋出 AppError(networkError) 當 SocketException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(const SocketException('Network unreachable'));
 
-        await expectLater(
-          () => repository.addJourneyEntry(_buildEntry()),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<SocketException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.addJourneyEntry(_buildEntry()),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<SocketException>(),
+              ),
+        ),
+      );
+    });
 
-    test(
-      '拋出 AppError(networkError) 當 TimeoutException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(TimeoutException('Connection timed out'));
+    test('拋出 AppError(networkError) 當 TimeoutException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(TimeoutException('Connection timed out'));
 
-        await expectLater(
-          () => repository.addJourneyEntry(_buildEntry()),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<TimeoutException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.addJourneyEntry(_buildEntry()),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<TimeoutException>(),
+              ),
+        ),
+      );
+    });
   });
 
   group('deleteJourneyEntry', () {
-    test(
-      '拋出 AppError(networkError) 當 SocketException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(const SocketException('Network unreachable'));
+    test('拋出 AppError(networkError) 當 SocketException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(const SocketException('Network unreachable'));
 
-        await expectLater(
-          () => repository.deleteJourneyEntry('entry-1'),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<SocketException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.deleteJourneyEntry('entry-1'),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<SocketException>(),
+              ),
+        ),
+      );
+    });
 
-    test(
-      '拋出 AppError(networkError) 當 TimeoutException 發生時',
-      () async {
-        when(
-          () => mockClient.from('passport_entries'),
-        ).thenThrow(TimeoutException('Connection timed out'));
+    test('拋出 AppError(networkError) 當 TimeoutException 發生時', () async {
+      when(
+        () => mockClient.from('passport_entries'),
+      ).thenThrow(TimeoutException('Connection timed out'));
 
-        await expectLater(
-          () => repository.deleteJourneyEntry('entry-1'),
-          throwsA(
-            isA<AppError>()
-                .having((e) => e.type, 'type', JourneyError.networkError)
-                .having(
-                  (e) => e.originalException,
-                  'originalException',
-                  isA<TimeoutException>(),
-                ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        () => repository.deleteJourneyEntry('entry-1'),
+        throwsA(
+          isA<AppError>()
+              .having((e) => e.type, 'type', JourneyError.networkError)
+              .having(
+                (e) => e.originalException,
+                'originalException',
+                isA<TimeoutException>(),
+              ),
+        ),
+      );
+    });
   });
 }

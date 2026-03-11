@@ -15,6 +15,9 @@ import 'package:context_app/features/auth/presentation/screens/register_screen.d
 import 'package:context_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
+import 'package:context_app/features/route/presentation/screens/route_planning_screen.dart';
+import 'package:context_app/features/route/presentation/screens/route_preview_screen.dart';
+import 'package:context_app/features/route/presentation/screens/route_navigation_screen.dart';
 import 'package:context_app/common/config/go_router_refresh_stream.dart';
 
 /// Router refresh provider
@@ -138,6 +141,33 @@ class RouterConfig {
                 context.pop();
               },
             );
+          },
+        ),
+        GoRoute(
+          path: '/route/planning',
+          name: 'route_planning',
+          redirect: (context, state) {
+            if (state.extra is! List<Place>) return '/';
+            return null;
+          },
+          builder: (context, state) {
+            return RoutePlanningScreen(
+              candidatePlaces: state.extra as List<Place>,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/route/preview',
+          name: 'route_preview',
+          builder: (context, state) {
+            return const RoutePreviewScreen();
+          },
+        ),
+        GoRoute(
+          path: '/route/navigate',
+          name: 'route_navigate',
+          builder: (context, state) {
+            return const RouteNavigationScreen();
           },
         ),
         GoRoute(

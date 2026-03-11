@@ -62,21 +62,24 @@ void main() {
         expect(result[1].id, 'entry-2');
       });
 
-      test('returns entries with correct field values after roundtrip', () async {
-        final entry = _createTestEntry('entry-1', 'user-1');
+      test(
+        'returns entries with correct field values after roundtrip',
+        () async {
+          final entry = _createTestEntry('entry-1', 'user-1');
 
-        await cacheService.saveEntries('user-1', [entry]);
-        final result = await cacheService.getEntries('user-1');
+          await cacheService.saveEntries('user-1', [entry]);
+          final result = await cacheService.getEntries('user-1');
 
-        expect(result, isNotNull);
-        final retrieved = result!.first;
-        expect(retrieved.id, entry.id);
-        expect(retrieved.userId, entry.userId);
-        expect(retrieved.place.name, entry.place.name);
-        expect(retrieved.narrationContent.text, entry.narrationContent.text);
-        expect(retrieved.narrationAspect, entry.narrationAspect);
-        expect(retrieved.createdAt, entry.createdAt);
-      });
+          expect(result, isNotNull);
+          final retrieved = result!.first;
+          expect(retrieved.id, entry.id);
+          expect(retrieved.userId, entry.userId);
+          expect(retrieved.place.name, entry.place.name);
+          expect(retrieved.narrationContent.text, entry.narrationContent.text);
+          expect(retrieved.narrationAspect, entry.narrationAspect);
+          expect(retrieved.createdAt, entry.createdAt);
+        },
+      );
     });
 
     group('user isolation', () {

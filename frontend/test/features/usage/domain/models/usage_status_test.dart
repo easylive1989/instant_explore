@@ -4,10 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('UsageStatus', () {
     test('未使用時 canUseNarration 為 true', () {
-      const status = UsageStatus(
-        usedToday: 0,
-        dailyFreeLimit: 1,
-      );
+      const status = UsageStatus(usedToday: 0, dailyFreeLimit: 1);
 
       expect(status.canUseNarration, isTrue);
       expect(status.remaining, 1);
@@ -15,10 +12,7 @@ void main() {
     });
 
     test('已用完免費額度時 canUseNarration 為 false', () {
-      const status = UsageStatus(
-        usedToday: 1,
-        dailyFreeLimit: 1,
-      );
+      const status = UsageStatus(usedToday: 1, dailyFreeLimit: 1);
 
       expect(status.canUseNarration, isFalse);
       expect(status.remaining, 0);

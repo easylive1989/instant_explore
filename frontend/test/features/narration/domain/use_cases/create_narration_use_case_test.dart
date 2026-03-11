@@ -35,15 +35,10 @@ void main() {
   setUp(() {
     mockNarrationService = MockNarrationService();
     mockUsageRepository = MockUsageRepository();
-    useCase = CreateNarrationUseCase(
-      mockNarrationService,
-      mockUsageRepository,
-    );
+    useCase = CreateNarrationUseCase(mockNarrationService, mockUsageRepository);
 
     // 預設：有剩餘額度
-    when(
-      () => mockUsageRepository.getUsageStatus(),
-    ).thenAnswer(
+    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
       (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
     );
     when(() => mockUsageRepository.consumeUsage()).thenAnswer((_) async {});
@@ -139,11 +134,8 @@ void main() {
 
   test('看廣告後有 bonus 可用時成功生成', () async {
     when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async => const UsageStatus(
-        usedToday: 1,
-        dailyFreeLimit: 1,
-        bonusFromAds: 1,
-      ),
+      (_) async =>
+          const UsageStatus(usedToday: 1, dailyFreeLimit: 1, bonusFromAds: 1),
     );
     when(
       () => mockNarrationService.generateNarration(
