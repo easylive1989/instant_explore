@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/journey/domain/errors/journey_error.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
@@ -29,6 +32,22 @@ class SupabaseJourneyRepository implements JourneyRepository {
         stackTrace: stackTrace,
         context: {'user_id': userId},
       );
+    } on SocketException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線失敗，請檢查網路狀態',
+        originalException: e,
+        stackTrace: stackTrace,
+        context: {'user_id': userId},
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線逾時，請稍後再試',
+        originalException: e,
+        stackTrace: stackTrace,
+        context: {'user_id': userId},
+      );
     } catch (e, stackTrace) {
       throw AppError(
         type: JourneyError.unknown,
@@ -52,6 +71,20 @@ class SupabaseJourneyRepository implements JourneyRepository {
         originalException: e,
         stackTrace: stackTrace,
       );
+    } on SocketException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線失敗，請檢查網路狀態',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線逾時，請稍後再試',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
     } catch (e, stackTrace) {
       throw AppError(
         type: JourneyError.unknown,
@@ -70,6 +103,22 @@ class SupabaseJourneyRepository implements JourneyRepository {
       throw AppError(
         type: JourneyError.deleteFailed,
         message: '刪除旅程記錄失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+        context: {'entry_id': id},
+      );
+    } on SocketException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線失敗，請檢查網路狀態',
+        originalException: e,
+        stackTrace: stackTrace,
+        context: {'entry_id': id},
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw AppError(
+        type: JourneyError.networkError,
+        message: '網路連線逾時，請稍後再試',
         originalException: e,
         stackTrace: stackTrace,
         context: {'entry_id': id},
