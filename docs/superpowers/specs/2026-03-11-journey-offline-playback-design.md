@@ -40,7 +40,7 @@ SupabaseJourneyRepository (現有)
 
 **刪除 (deleteJourneyEntry)**：
 1. 從 Supabase 刪除
-2. 成功 → 從 Hive 移除
+2. 成功 → 不主動更新快取（`JourneyRepository.deleteJourneyEntry` 介面只接收 `id`，無法取得 `userId` 來操作快取。下次 `getJourneyEntries` 時會從 Supabase 全量覆寫快取）
 3. 失敗 → 拋出錯誤
 
 ## 快取實作
