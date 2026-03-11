@@ -62,7 +62,7 @@ SupabaseJourneyRepository (現有)
 - `removeEntry(userId, entryId)` → 從列表移除
 - `clear()` → 清除所有快取
 
-序列化複用 `JourneyEntryMapper` 的轉換邏輯。
+序列化複用 `JourneyEntryMapper` 現有的 `fromJson`/`toJson` 方法，不需要新增方法。
 
 ## Provider 整合
 
@@ -89,11 +89,13 @@ final cachingJourneyRepositoryProvider = Provider<JourneyRepository>(
 | Supabase 非網路錯誤 | 不 fallback，直接拋出 |
 | 快取讀寫失敗 | 靜默忽略，不影響主流程 |
 
-**網路錯誤判定**：攔截 `SocketException`、`TimeoutException`。其他錯誤不觸發 fallback。
+**網路錯誤判定**：`CachingJourneyRepository` 攔截 `AppError` 並檢查 `type == JourneyError.networkError`。為此需修改 `SupabaseJourneyRepository`，在 catch-all 之前明確攔截 `SocketException` 和 `TimeoutException`，將其包裝為 `AppError(type: JourneyError.networkError)`。此改法與 `PlacesApiService`、`GeminiService` 的錯誤處理模式一致。
+
+**快取一致性備註**：`addEntry` 將新項目插入列表頭部，在跨裝置使用的情況下，快取排序可能不完全與 Supabase 一致。這是可接受的 trade-off，因為下次有網路時 `getJourneyEntries` 會全量覆寫快取。
 
 ## 初始化
 
-在 `main.dart` 啟動流程中開啟 `journey_cache` Hive box，與現有 `places_cache` 放在一起。
+採用與 `HivePlacesCacheService` 相同的 lazy open 模式：`HiveJourneyCacheService` 內部自行管理 box 的開啟，不需要在 `main.dart` 預先初始化。
 
 ## TTS 離線
 
@@ -115,20 +117,20 @@ final cachingJourneyRepositoryProvider = Provider<JourneyRepository>(
 - 保存/刪除成功 → 快取同步
 - 快取讀寫失敗 → 靜默忽略
 
-### JourneyEntryMapper 補充測試
-- JSON 雙向轉換正確性（如需新增 `fromMap`）
+### SupabaseJourneyRepository 補充測試
+- `SocketException` → 拋出 `AppError(type: JourneyError.networkError)`
+- `TimeoutException` → 拋出 `AppError(type: JourneyError.networkError)`
 
-Mock 策略：使用 `mocktail`。
+Mock 策略：使用 `mocktail`。落 fallback 到快取時加入 log 記錄（使用 `logging` 套件）。
 
 ## 影響的檔案
 
 ### 新增
-- `features/journey/data/hive_journey_cache_service.dart`
+- `features/journey/data/services/hive_journey_cache_service.dart`
 - `features/journey/data/caching_journey_repository.dart`
-- `test/unit/journey/hive_journey_cache_service_test.dart`
-- `test/unit/journey/caching_journey_repository_test.dart`
+- `test/features/journey/data/services/hive_journey_cache_service_test.dart`
+- `test/features/journey/data/caching_journey_repository_test.dart`
 
 ### 修改
-- `main.dart` — Hive box 初始化
-- Journey provider 定義 — 切換到 CachingJourneyRepository
-- `JourneyEntryMapper` — 可能補充 `fromMap` 方法
+- `features/journey/data/supabase_journey_repository.dart` — 新增 `SocketException`/`TimeoutException` 攔截，拋出 `JourneyError.networkError`
+- `features/journey/providers.dart` — 新增 provider，切換到 CachingJourneyRepository
