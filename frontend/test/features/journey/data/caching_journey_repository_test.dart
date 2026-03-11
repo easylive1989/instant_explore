@@ -27,11 +27,11 @@ JourneyEntry _createTestEntry(String id, String userId) {
     ),
     narrationContent: NarrationContent.create(
       '這是一段測試導覽文字。用於驗證快取功能。',
-      language: Language('zh-TW'),
+      language: const Language('zh-TW'),
     ),
     narrationAspect: NarrationAspect.historicalBackground,
     createdAt: DateTime(2026, 1, 1),
-    language: Language('zh-TW'),
+    language: const Language('zh-TW'),
   );
 }
 
@@ -107,7 +107,7 @@ void main() {
       '遠端網路錯誤且無快取時，重新拋出錯誤',
       () async {
         // Arrange
-        final networkError = const AppError(
+        const networkError = AppError(
           type: JourneyError.networkError,
           message: 'Network error',
         );

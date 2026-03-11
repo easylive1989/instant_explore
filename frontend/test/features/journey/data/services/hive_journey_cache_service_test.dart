@@ -20,11 +20,11 @@ JourneyEntry _createTestEntry(String id, String userId) {
     ),
     narrationContent: NarrationContent.create(
       '這是一段測試導覽文字。用於驗證快取功能。',
-      language: Language('zh-TW'),
+      language: const Language('zh-TW'),
     ),
     narrationAspect: NarrationAspect.historicalBackground,
     createdAt: DateTime(2026, 1, 1),
-    language: Language('zh-TW'),
+    language: const Language('zh-TW'),
   );
 }
 
