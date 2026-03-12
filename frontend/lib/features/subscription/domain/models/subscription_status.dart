@@ -8,10 +8,7 @@ class SubscriptionStatus {
   final bool isPremium;
   final DateTime? expirationDate;
 
-  const SubscriptionStatus({
-    this.isPremium = false,
-    this.expirationDate,
-  });
+  const SubscriptionStatus({this.isPremium = false, this.expirationDate});
 
   /// 免費使用者的預設狀態
   static const free = SubscriptionStatus();
