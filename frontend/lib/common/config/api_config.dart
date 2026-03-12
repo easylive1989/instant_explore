@@ -14,6 +14,8 @@ class ApiConfig {
   final String googleWebClientId;
   final String googleIosClientId;
   final String geminiApiKey;
+  final String revenueCatApiKeyIos;
+  final String revenueCatApiKeyAndroid;
 
   const ApiConfig({
     required this.googleMapsApiKey,
@@ -24,6 +26,8 @@ class ApiConfig {
     required this.googleWebClientId,
     required this.googleIosClientId,
     required this.geminiApiKey,
+    required this.revenueCatApiKeyIos,
+    required this.revenueCatApiKeyAndroid,
   });
 
   /// 從環境變數建立配置
@@ -55,6 +59,14 @@ class ApiConfig {
         defaultValue: '',
       ),
       geminiApiKey: String.fromEnvironment('GEMINI_API_KEY', defaultValue: ''),
+      revenueCatApiKeyIos: String.fromEnvironment(
+        'REVENUECAT_API_KEY_IOS',
+        defaultValue: '',
+      ),
+      revenueCatApiKeyAndroid: String.fromEnvironment(
+        'REVENUECAT_API_KEY_ANDROID',
+        defaultValue: '',
+      ),
     );
   }
 
