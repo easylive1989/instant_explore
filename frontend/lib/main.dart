@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/firebase_options.dart';
+import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 全域 ApiConfig 實例
@@ -36,6 +38,14 @@ Future<Widget> init() async {
 
   // Initialize Google Mobile Ads
   await MobileAds.instance.initialize();
+
+  // Initialize RevenueCat SDK (global, one-time)
+  final revenueCatApiKey = Platform.isIOS
+      ? apiConfig.revenueCatApiKeyIos
+      : apiConfig.revenueCatApiKeyAndroid;
+  if (revenueCatApiKey.isNotEmpty) {
+    await RevenueCatSubscriptionService.configureSDK(apiKey: revenueCatApiKey);
+  }
 
   return EasyLocalization(
     supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
