@@ -216,7 +216,20 @@
     "purchase_failed": "購買失敗，請稍後再試",
     "view_plans": "查看方案",
     "continue_free": "繼續使用免費版",
-    "already_has_pass": "您已有有效的通行證，無需重複購買"
+    "already_has_pass": "您已有有效的通行證，無需重複購買",
+    "title": "升級 Premium",
+    "benefit_no_ads": "無廣告體驗",
+    "benefit_unlimited": "無限次數使用導覽",
+    "benefit_route": "路線規劃功能",
+    "subscribe": "立即訂閱",
+    "restore": "恢復購買",
+    "terms": "服務條款",
+    "privacy": "隱私權政策",
+    "upgrade_cta": "升級 Premium",
+    "premium_active": "Premium 會員",
+    "expires": "到期日：{date}",
+    "no_purchases_found": "找不到先前的購買紀錄",
+    "login_required": "請先登入以訂閱"
   },
   "route": {
     "plan_route": "規劃路線",
