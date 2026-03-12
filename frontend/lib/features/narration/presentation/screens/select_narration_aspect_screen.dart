@@ -180,8 +180,12 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
                       final status = await usageRepo.getUsageStatus();
                       if (!status.canUseNarration) {
                         if (!context.mounted) return;
-                        final watched = await showWatchAdDialog(context, ref);
-                        if (watched != true || !context.mounted) return;
+                        final result = await showWatchAdDialog(context, ref);
+                        if (result == 'subscribe' && context.mounted) {
+                          context.pushNamed('subscription');
+                          return;
+                        }
+                        if (result != true || !context.mounted) return;
                       }
                       if (!context.mounted) return;
                       context.pushNamed(

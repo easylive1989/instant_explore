@@ -7,9 +7,10 @@ import 'package:context_app/features/usage/providers.dart';
 
 /// 顯示觀看廣告對話框
 ///
-/// 回傳 true 表示已觀看並獲得獎勵，false/null 表示取消
-Future<bool?> showWatchAdDialog(BuildContext context, WidgetRef ref) {
-  return showModalBottomSheet<bool>(
+/// 回傳 true 表示已觀看並獲得獎勵，false/null 表示取消，
+/// 回傳 'subscribe' 表示使用者選擇訂閱
+Future<dynamic> showWatchAdDialog(BuildContext context, WidgetRef ref) {
+  return showModalBottomSheet<dynamic>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -161,6 +162,39 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
                 disabledBackgroundColor: AppColors.primary.withValues(
                   alpha: 0.5,
                 ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Subscribe Button
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      // 回傳 'subscribe' 讓呼叫端導航
+                      Navigator.of(context).pop('subscribe');
+                    },
+              icon: const Icon(
+                Icons.workspace_premium,
+                color: AppColors.primary,
+              ),
+              label: Text(
+                'subscription.upgrade_cta'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

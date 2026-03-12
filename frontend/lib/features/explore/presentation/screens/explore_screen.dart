@@ -8,6 +8,7 @@ import 'package:context_app/features/explore/presentation/extensions/place_categ
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/common/config/feature_flags.dart';
+import 'package:context_app/features/subscription/providers.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -225,10 +226,17 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                       ),
                                       child: ElevatedButton.icon(
                                         onPressed: () {
-                                          context.pushNamed(
-                                            'route_planning',
-                                            extra: places,
+                                          final isPremium = ref.read(
+                                            isPremiumProvider,
                                           );
+                                          if (isPremium) {
+                                            context.pushNamed(
+                                              'route_planning',
+                                              extra: places,
+                                            );
+                                          } else {
+                                            context.pushNamed('subscription');
+                                          }
                                         },
                                         icon: const Text(
                                           '\u{1F5FA}\u{FE0F}',
