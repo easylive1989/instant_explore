@@ -15,6 +15,7 @@ import 'package:context_app/features/auth/presentation/screens/register_screen.d
 import 'package:context_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
+import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_planning_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_preview_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_navigation_screen.dart';
@@ -174,6 +175,11 @@ class RouterConfig {
           path: '/camera',
           name: 'camera',
           builder: (context, state) => const CameraScreen(),
+        ),
+        GoRoute(
+          path: '/subscription',
+          name: 'subscription',
+          builder: (context, state) => const SubscriptionScreen(),
         ),
       ],
       redirect: (context, state) {
