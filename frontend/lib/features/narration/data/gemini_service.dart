@@ -28,8 +28,7 @@ class GeminiService implements NarrationService {
     required app_lang.Language language,
   }) async {
     try {
-      // 使用 Google AI (Gemini Developer API)
-      final ai = FirebaseAI.googleAI();
+      final ai = FirebaseAI.vertexAI();
       final model = ai.generativeModel(
         model: 'gemini-2.5-flash',
         tools: [Tool.googleSearch()],

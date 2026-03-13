@@ -39,7 +39,7 @@ class GeminiRouteAiService implements RouteAiService {
       );
       final prompt = promptBuilder.build();
 
-      final ai = FirebaseAI.googleAI();
+      final ai = FirebaseAI.vertexAI();
       final model = ai.generativeModel(model: 'gemini-2.5-flash');
 
       final response = await model.generateContent([Content.text(prompt)]);

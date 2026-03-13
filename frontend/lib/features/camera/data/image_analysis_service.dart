@@ -25,7 +25,7 @@ class ImageAnalysisService {
     String language = 'zh-TW',
   }) async {
     try {
-      final ai = FirebaseAI.googleAI();
+      final ai = FirebaseAI.vertexAI();
       final model = ai.generativeModel(
         model: 'gemini-2.5-flash',
         tools: [Tool.googleSearch()],
