@@ -163,6 +163,24 @@ void main() {
     });
   });
 
+  group('setRoute', () {
+    test('sets route and resets navigation state', () {
+      final route = createRouteWith3Stops();
+      controller.state = RouteState(
+        currentStopIndex: 2,
+        candidatePlaces: [place1],
+      );
+
+      controller.setRoute(route);
+
+      expect(controller.state.route, route);
+      expect(controller.state.currentStopIndex, 0);
+      expect(controller.state.candidatePlaces, isEmpty);
+      expect(controller.state.isLoading, false);
+      expect(controller.state.error, isNull);
+    });
+  });
+
   group('reset', () {
     test('重置所有狀態', () {
       final route = createRouteWith3Stops();

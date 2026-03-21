@@ -120,6 +120,13 @@ class RouteController extends StateNotifier<RouteState> {
     }
   }
 
+  /// 從已儲存 Plan 還原路線，供 Plan Tab 開啟預覽使用。
+  ///
+  /// candidatePlaces 設為空列表（已儲存 Plan 無候選景點）。
+  void setRoute(TourRoute route) {
+    state = RouteState(route: route, currentStopIndex: 0);
+  }
+
   /// 重置所有狀態
   void reset() {
     state = const RouteState();

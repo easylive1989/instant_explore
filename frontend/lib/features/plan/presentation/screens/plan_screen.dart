@@ -2,7 +2,6 @@ import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/presentation/widgets/plan_card.dart';
 import 'package:context_app/features/plan/providers.dart';
-// ignore: unused_import — routeControllerProvider used in Task 6 (setRoute)
 import 'package:context_app/features/route/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -56,8 +55,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   }
 
   void _openPlan(Plan plan) {
-    // TODO(Task 6): Add setRoute() to RouteController, then uncomment:
-    // ref.read(routeControllerProvider.notifier).setRoute(plan.toTourRoute());
+    ref.read(routeControllerProvider.notifier).setRoute(plan.toTourRoute());
     context.push('/route/preview');
   }
 
