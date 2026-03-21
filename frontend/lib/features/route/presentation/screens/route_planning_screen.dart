@@ -1,5 +1,7 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/plan/domain/models/plan.dart';
+import 'package:context_app/features/plan/providers.dart';
 import 'package:context_app/features/route/presentation/controllers/route_controller.dart';
 import 'package:context_app/features/route/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -56,9 +58,23 @@ class _RoutePlanningScreenState extends ConsumerState<RoutePlanningScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(routeControllerProvider);
 
-    // 路線生成成功，跳轉至預覽畫面
+    // 路線生成成功：儲存 Plan 後跳轉至預覽畫面
     ref.listen<RouteState>(routeControllerProvider, (previous, current) {
-      if (current.route != null && !current.isLoading) {
+      if (previous?.route == null &&
+          current.route != null &&
+          !current.isLoading) {
+        // 儲存 Plan 並重新整理 PlanListController
+        final plan = Plan.fromTourRoute(current.route!);
+        ref
+            .read(planRepositoryProvider)
+            .save(plan)
+            .then((_) {
+              ref.read(planListControllerProvider.notifier).reload();
+            })
+            .catchError((_) {
+              // 儲存失敗不影響導覽流程
+            });
+
         context.go(
           '/route/preview',
           extra: {
