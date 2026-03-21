@@ -5,5 +5,5 @@ class FeatureFlags {
   FeatureFlags._();
 
   /// 路線規劃功能開關
-  static const bool enableRoutePlanning = false;
+  static const bool enableRoutePlanning = true;
 }
