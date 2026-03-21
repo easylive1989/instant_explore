@@ -44,6 +44,9 @@ void main() {
 
       expect(planStop.placeId, 'X');
       expect(planStop.placeName, 'Place X');
+      expect(planStop.placeAddress, 'Addr X');
+      expect(planStop.latitude, 25.0);
+      expect(planStop.longitude, 121.5);
       expect(planStop.placeRating, 4.5);
       expect(planStop.placeCategory, 'historicalCultural');
       expect(planStop.overview, 'desc');
@@ -94,6 +97,26 @@ void main() {
       expect(restored.walkingTimeToNext, isNull);
       expect(restored.placeRating, 4.5);
     });
+
+    test('null placeRating round-trips through JSON', () {
+      final placeWithoutRating = Place(
+        id: 'NR',
+        name: 'Place NR',
+        formattedAddress: 'Addr NR',
+        location: PlaceLocation(latitude: 25.0, longitude: 121.5),
+        rating: null,
+        category: PlaceCategory.historicalCultural,
+        types: const [],
+        photos: const [],
+      );
+      final stop = PlanStop.fromRouteStop(
+        RouteStop(place: placeWithoutRating),
+      );
+      final restored = PlanStop.fromJson(stop.toJson());
+
+      expect(stop.placeRating, isNull);
+      expect(restored.placeRating, isNull);
+    });
   });
 
   group('Plan', () {
@@ -106,6 +129,8 @@ void main() {
       expect(plan.stops[0].placeId, 'A');
       expect(plan.id, isNotEmpty);
       expect(plan.createdAt, isNotNull);
+      expect(plan.totalDistance, 300.0);
+      expect(plan.estimatedDuration, 4.0);
     });
 
     test('toTourRoute restores route with correct stops', () {
