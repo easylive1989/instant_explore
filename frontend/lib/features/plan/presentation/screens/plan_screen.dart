@@ -1,3 +1,4 @@
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/presentation/widgets/plan_card.dart';
@@ -64,41 +65,76 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
     final state = ref.watch(planListControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('plan.title'.tr()),
-        actions: [
-          IconButton(
-            icon: _isGenerating
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.add),
-            onPressed: _isGenerating ? null : _generatePlan,
-          ),
-        ],
-      ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.plans.isEmpty
-          ? const _EmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: state.plans.length,
-              itemBuilder: (context, index) {
-                final plan = state.plans[index];
-                return PlanCard(
-                  plan: plan,
-                  onTap: () => _openPlan(plan),
-                  onDelete: () {
-                    ref
-                        .read(planListControllerProvider.notifier)
-                        .deletePlan(plan.id);
-                  },
-                );
-              },
+      backgroundColor: AppColors.backgroundDark,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'plan.title'.tr(),
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryDark,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _isGenerating ? null : _generatePlan,
+                    icon: _isGenerating
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.add),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            Expanded(
+              child: state.isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : state.plans.isEmpty
+                  ? const _EmptyState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: state.plans.length,
+                      itemBuilder: (context, index) {
+                        final plan = state.plans[index];
+                        return PlanCard(
+                          plan: plan,
+                          onTap: () => _openPlan(plan),
+                          onDelete: () {
+                            ref
+                                .read(planListControllerProvider.notifier)
+                                .deletePlan(plan.id);
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
