@@ -11,7 +11,7 @@ Place _place(String id) => Place(
   id: id,
   name: 'Place $id',
   formattedAddress: 'Addr $id',
-  location: PlaceLocation(latitude: 25.0, longitude: 121.5),
+  location: const PlaceLocation(latitude: 25.0, longitude: 121.5),
   rating: 4.5,
   category: PlaceCategory.historicalCultural,
   types: const ['tourist_attraction'],
@@ -99,18 +99,18 @@ void main() {
     });
 
     test('null placeRating round-trips through JSON', () {
-      final placeWithoutRating = Place(
+      const placeWithoutRating = Place(
         id: 'NR',
         name: 'Place NR',
         formattedAddress: 'Addr NR',
         location: PlaceLocation(latitude: 25.0, longitude: 121.5),
         rating: null,
         category: PlaceCategory.historicalCultural,
-        types: const [],
-        photos: const [],
+        types: [],
+        photos: [],
       );
       final stop = PlanStop.fromRouteStop(
-        RouteStop(place: placeWithoutRating),
+        const RouteStop(place: placeWithoutRating),
       );
       final restored = PlanStop.fromJson(stop.toJson());
 

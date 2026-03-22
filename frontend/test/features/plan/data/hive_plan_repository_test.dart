@@ -12,7 +12,7 @@ import 'package:hive/hive.dart';
 
 TourRoute _makeRoute(String title) => TourRoute(
   title: title,
-  stops: [
+  stops: const [
     RouteStop(
       place: Place(
         id: 'p1',
@@ -20,8 +20,8 @@ TourRoute _makeRoute(String title) => TourRoute(
         formattedAddress: 'Addr 1',
         location: PlaceLocation(latitude: 25.0, longitude: 121.5),
         category: PlaceCategory.modernUrban,
-        types: const [],
-        photos: const [],
+        types: [],
+        photos: [],
       ),
     ),
     RouteStop(
@@ -31,8 +31,8 @@ TourRoute _makeRoute(String title) => TourRoute(
         formattedAddress: 'Addr 2',
         location: PlaceLocation(latitude: 25.01, longitude: 121.51),
         category: PlaceCategory.naturalLandscape,
-        types: const [],
-        photos: const [],
+        types: [],
+        photos: [],
       ),
     ),
   ],
