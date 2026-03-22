@@ -49,14 +49,16 @@ class PlanCard extends StatelessWidget {
                   _InfoChip(
                     icon: Icons.place_outlined,
                     label: 'plan.stops'.tr(
-                      args: [plan.stops.length.toString()],
+                      namedArgs: {'count': plan.stops.length.toString()},
                     ),
                   ),
                   const SizedBox(width: 12),
                   _InfoChip(
                     icon: Icons.schedule_outlined,
                     label: 'plan.duration'.tr(
-                      args: [plan.estimatedDuration.round().toString()],
+                      namedArgs: {
+                        'minutes': plan.estimatedDuration.round().toString(),
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),

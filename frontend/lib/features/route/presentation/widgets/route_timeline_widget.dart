@@ -125,7 +125,7 @@ class _TimelineConnector extends StatelessWidget {
                 if (walkingTime != null)
                   Text(
                     'route.walking_time_value'.tr(
-                      args: [walkingTime.round().toString()],
+                      namedArgs: {'minutes': walkingTime.round().toString()},
                     ),
                     style: const TextStyle(
                       color: AppColors.textSecondaryDark,

@@ -177,13 +177,15 @@ class _RouteHeader extends StatelessWidget {
             children: [
               _StatChip(
                 icon: Icons.place,
-                label: 'route.stops_count'.tr(args: [totalStops.toString()]),
+                label: 'route.stops_count'.tr(
+                  namedArgs: {'count': totalStops.toString()},
+                ),
               ),
               const SizedBox(width: 12),
               _StatChip(
                 icon: Icons.schedule,
                 label: 'route.duration_value'.tr(
-                  args: [estimatedDuration.round().toString()],
+                  namedArgs: {'minutes': estimatedDuration.round().toString()},
                 ),
               ),
               const SizedBox(width: 12),

@@ -121,10 +121,10 @@ class RouteNavigationScreen extends ConsumerWidget {
                         ),
                         child: Text(
                           'route.stop_label'.tr(
-                            args: [
-                              (currentIndex + 1).toString(),
-                              route.stops.length.toString(),
-                            ],
+                            namedArgs: {
+                              'current': (currentIndex + 1).toString(),
+                              'total': route.stops.length.toString(),
+                            },
                           ),
                           style: const TextStyle(
                             color: AppColors.primary,
@@ -232,15 +232,16 @@ class RouteNavigationScreen extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Text(
                                 'route.next_stop_info'.tr(
-                                  args: [
-                                    currentStop.walkingTimeToNext
+                                  namedArgs: {
+                                    'minutes':
+                                        currentStop.walkingTimeToNext
                                             ?.round()
                                             .toString() ??
                                         '-',
-                                    _formatDistance(
+                                    'distance': _formatDistance(
                                       currentStop.distanceToNext!,
                                     ),
-                                  ],
+                                  },
                                 ),
                                 style: const TextStyle(
                                   color: AppColors.textSecondaryDark,
