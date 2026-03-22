@@ -143,7 +143,6 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     try {
       final entry = JourneyEntry.create(
-        userId: userId,
         place: state.place!,
         aspect: state.aspect!,
         content: state.content!,

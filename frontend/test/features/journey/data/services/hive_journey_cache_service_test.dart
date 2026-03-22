@@ -9,10 +9,9 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-JourneyEntry _createTestEntry(String id, String userId) {
+JourneyEntry _createTestEntry(String id, [String? userId]) {
   return JourneyEntry(
     id: id,
-    userId: userId,
     place: const SavedPlace(
       id: 'place-1',
       name: 'Test Place',
@@ -73,7 +72,6 @@ void main() {
           expect(result, isNotNull);
           final retrieved = result!.first;
           expect(retrieved.id, entry.id);
-          expect(retrieved.userId, entry.userId);
           expect(retrieved.place.name, entry.place.name);
           expect(retrieved.narrationContent.text, entry.narrationContent.text);
           expect(retrieved.narrationAspect, entry.narrationAspect);

@@ -37,7 +37,6 @@ class JourneyEntryMapper {
 
     return JourneyEntry(
       id: json['id'] as String,
-      userId: json['user_id'] as String,
       place: place,
       narrationContent: narrationContent,
       narrationAspect: narrationAspect,
@@ -50,7 +49,6 @@ class JourneyEntryMapper {
   static Map<String, dynamic> toJson(JourneyEntry entry) {
     return {
       'id': entry.id,
-      'user_id': entry.userId,
       'place_id': entry.place.id,
       'place_name': entry.place.name,
       'place_address': entry.place.address,
@@ -60,7 +58,7 @@ class JourneyEntryMapper {
         entry.narrationAspect,
       ),
       'created_at': entry.createdAt.toIso8601String(),
-      'language': entry.language.toString(),
+      'language': entry.language.code,
     };
   }
 }

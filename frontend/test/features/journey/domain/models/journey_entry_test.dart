@@ -29,14 +29,12 @@ void main() {
       );
 
       final entry = JourneyEntry.create(
-        userId: 'user-1',
         place: place,
         aspect: aspect,
         content: content,
         language: Language.traditionalChinese,
       );
 
-      expect(entry.userId, equals('user-1'));
       expect(
         entry.place,
         equals(
@@ -80,14 +78,12 @@ void main() {
         );
 
         final entry = JourneyEntry.create(
-          userId: 'user-2',
           place: place,
           aspect: aspect,
           content: content,
           language: Language.traditionalChinese,
         );
 
-        expect(entry.userId, equals('user-2'));
         expect(
           entry.place,
           equals(
@@ -123,7 +119,6 @@ void main() {
       );
 
       final entry1 = JourneyEntry.create(
-        userId: 'user-1',
         place: place,
         aspect: aspect,
         content: content,
@@ -131,7 +126,6 @@ void main() {
       );
 
       final entry2 = JourneyEntry.create(
-        userId: 'user-1',
         place: place,
         aspect: aspect,
         content: content,
@@ -139,6 +133,68 @@ void main() {
       );
 
       expect(entry1.id, isNot(equals(entry2.id)));
+    });
+  });
+
+  group('JourneyEntry JSON round-trip', () {
+    test('toJson/fromJson preserves all fields', () {
+      const place = Place(
+        id: 'place-rt',
+        name: 'Round Trip Place',
+        formattedAddress: 'RT Address',
+        location: PlaceLocation(latitude: 25.0, longitude: 121.0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.historicalCultural,
+      );
+
+      const aspect = NarrationAspect.historicalBackground;
+      final content = NarrationContent.create(
+        'Round trip text',
+        language: Language.traditionalChinese,
+      );
+
+      final original = JourneyEntry.create(
+        place: place,
+        aspect: aspect,
+        content: content,
+        language: Language.traditionalChinese,
+      );
+
+      final restored = JourneyEntry.fromJson(original.toJson());
+
+      expect(restored.id, original.id);
+      expect(restored.place.id, original.place.id);
+      expect(restored.place.name, original.place.name);
+      expect(restored.place.address, original.place.address);
+      expect(restored.narrationContent.text, original.narrationContent.text);
+      expect(restored.narrationAspect, original.narrationAspect);
+      expect(restored.language, original.language);
+    });
+
+    test('fromJson uses language.code (not toString)', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        formattedAddress: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.english,
+      );
+      final entry = JourneyEntry.create(
+        place: place,
+        aspect: NarrationAspect.historicalBackground,
+        content: content,
+        language: Language.english,
+      );
+      final json = entry.toJson();
+      // language.code returns 'en-US', not 'Instance of Language'
+      expect(json['language'], equals(Language.english.code));
     });
   });
 }

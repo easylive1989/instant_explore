@@ -16,10 +16,9 @@ class MockJourneyRepository extends Mock implements JourneyRepository {}
 class MockHiveJourneyCacheService extends Mock
     implements HiveJourneyCacheService {}
 
-JourneyEntry _createTestEntry(String id, String userId) {
+JourneyEntry _createTestEntry(String id, [String? userId]) {
   return JourneyEntry(
     id: id,
-    userId: userId,
     place: const SavedPlace(
       id: 'place-1',
       name: 'Test Place',
@@ -46,7 +45,7 @@ void main() {
     mockRemote = MockJourneyRepository();
     mockCache = MockHiveJourneyCacheService();
     sut = CachingJourneyRepository(remote: mockRemote, cache: mockCache);
-    registerFallbackValue(_createTestEntry('fallback', 'fallback'));
+    registerFallbackValue(_createTestEntry('fallback'));
   });
 
   group('getJourneyEntries', () {
@@ -142,20 +141,19 @@ void main() {
   });
 
   group('addJourneyEntry', () {
-    test('遠端成功後，呼叫 cache.addEntry', () async {
+    test('遠端成功後，完成新增', () async {
       // Arrange
       final entry = _createTestEntry('1', userId);
       when(() => mockRemote.addJourneyEntry(entry)).thenAnswer((_) async {});
-      when(() => mockCache.addEntry(userId, entry)).thenAnswer((_) async {});
 
       // Act
       await sut.addJourneyEntry(entry);
 
       // Assert
-      verify(() => mockCache.addEntry(userId, entry)).called(1);
+      verify(() => mockRemote.addJourneyEntry(entry)).called(1);
     });
 
-    test('遠端失敗時拋出例外，且不呼叫 cache.addEntry', () async {
+    test('遠端失敗時拋出例外', () async {
       // Arrange
       final entry = _createTestEntry('1', userId);
       when(() => mockRemote.addJourneyEntry(entry)).thenThrow(
@@ -167,7 +165,6 @@ void main() {
         () => sut.addJourneyEntry(entry),
         throwsA(isA<AppError>()),
       );
-      verifyNever(() => mockCache.addEntry(any(), any()));
     });
   });
 

@@ -52,15 +52,6 @@ class CachingJourneyRepository implements JourneyRepository {
   @override
   Future<void> addJourneyEntry(JourneyEntry entry) async {
     await _remote.addJourneyEntry(entry);
-    try {
-      await _cache.addEntry(entry.userId, entry);
-    } catch (e) {
-      log(
-        'Failed to update cache after add',
-        error: e,
-        name: 'CachingJourneyRepository',
-      );
-    }
   }
 
   @override

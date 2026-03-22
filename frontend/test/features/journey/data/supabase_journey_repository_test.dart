@@ -21,7 +21,6 @@ class MockSupabaseClient extends Mock implements SupabaseClient {}
 JourneyEntry _buildEntry() {
   return JourneyEntry(
     id: 'entry-1',
-    userId: 'user-1',
     place: const SavedPlace(id: 'p1', name: 'Test Place', address: 'Addr'),
     narrationContent: NarrationContent.create(
       '這是一段測試導覽文本，描述測試地點的歷史背景。',
