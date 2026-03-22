@@ -7,7 +7,6 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
-import 'package:context_app/features/subscription/providers.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -202,62 +201,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                   },
                                 ),
                               ),
-                              if (places.length >= 3)
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    8,
-                                    20,
-                                    12,
-                                  ),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFF6366F1),
-                                            Color(0xFF8B5CF6),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          final isPremium = ref.read(
-                                            isPremiumProvider,
-                                          );
-                                          if (isPremium) {
-                                            context.pushNamed(
-                                              'route_planning',
-                                              extra: places,
-                                            );
-                                          } else {
-                                            context.pushNamed('subscription');
-                                          }
-                                        },
-                                        icon: const Text(
-                                          '\u{1F5FA}\u{FE0F}',
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                        label: Text('route.plan_route'.tr()),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                             ],
                           ),
                     loading: () =>
