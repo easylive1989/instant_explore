@@ -1,7 +1,7 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 
 abstract class JourneyRepository {
-  Future<List<JourneyEntry>> getJourneyEntries(String userId);
-  Future<void> addJourneyEntry(JourneyEntry entry);
-  Future<void> deleteJourneyEntry(String id);
+  Future<List<JourneyEntry>> getAll();
+  Future<void> save(JourneyEntry entry);
+  Future<void> delete(String id);
 }
