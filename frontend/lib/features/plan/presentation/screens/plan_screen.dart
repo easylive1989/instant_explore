@@ -1,10 +1,12 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/presentation/widgets/plan_card.dart';
 import 'package:context_app/features/plan/providers.dart';
 import 'package:context_app/features/route/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/usage/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,8 +31,21 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   }
 
   Future<void> _generatePlan() async {
+    // Disable button immediately to prevent re-entrant taps
     setState(() => _isGenerating = true);
     try {
+      // Pre-flight quota check
+      final status = await ref.read(usageStatusProvider.future);
+      if (!status.canUse) {
+        if (!mounted) return;
+        final result = await showWatchAdDialog(context, ref);
+        if (result == 'subscribe') {
+          if (!mounted) return;
+          context.pushNamed('subscription');
+        }
+        return;
+      }
+
       final places = await ref
           .read(searchNearbyPlacesUseCaseProvider)
           .execute(language: _currentLanguage());
