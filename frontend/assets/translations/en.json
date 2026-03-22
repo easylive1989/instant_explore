@@ -40,7 +40,7 @@
     "settings": "Settings"
   },
   "passport": {
-    "title": "Journey of Exploration",
+    "title": "Journey",
     "title_uppercase": "JOURNEY OF EXPLORATION",
     "no_entries": "No saved tours yet",
     "load_error": "Failed to load",
