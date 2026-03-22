@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/auth/presentation/widgets/login_dialog.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
+import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -93,6 +95,10 @@ class SettingsScreen extends ConsumerWidget {
                 _buildSectionHeader('settings.daily_usage'.tr()),
                 const SizedBox(height: 8),
                 _buildUsageSection(ref),
+                const SizedBox(height: 32),
+                _buildSectionHeader('subscription.title'.tr()),
+                const SizedBox(height: 8),
+                _buildSubscriptionSection(context, ref),
                 const SizedBox(height: 32),
                 _buildSectionHeader('settings.account'.tr()),
                 const SizedBox(height: 8),
@@ -198,6 +204,50 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
     );
+  }
+
+  Widget _buildSubscriptionSection(BuildContext context, WidgetRef ref) {
+    final isPremium = ref.watch(isPremiumProvider);
+    final statusAsync = ref.watch(subscriptionStatusProvider);
+
+    if (isPremium) {
+      final expirationDate = statusAsync.valueOrNull?.expirationDate;
+      final formattedDate = expirationDate != null
+          ? DateFormat.yMMMd().format(expirationDate)
+          : '';
+      return _buildSectionContainer(AppColors.surfaceDark, [
+        _buildSettingsTile(
+          icon: Icons.workspace_premium,
+          iconColor: AppColors.amber,
+          iconBgColor: AppColors.amber.withValues(alpha: 0.2),
+          title: 'subscription.premium_active'.tr(),
+          trailing: formattedDate.isNotEmpty
+              ? Text(
+                  'subscription.expires'.tr(namedArgs: {'date': formattedDate}),
+                  style: const TextStyle(
+                    color: AppColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
+        ),
+      ]);
+    }
+
+    return _buildSectionContainer(AppColors.surfaceDark, [
+      _buildSettingsTile(
+        icon: Icons.workspace_premium,
+        iconColor: AppColors.primary,
+        iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+        title: 'subscription.upgrade_cta'.tr(),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          color: AppColors.textSecondaryDark,
+          size: 14,
+        ),
+        onTap: () => context.pushNamed('subscription'),
+      ),
+    ]);
   }
 
   Widget _buildSectionHeader(String title) {
