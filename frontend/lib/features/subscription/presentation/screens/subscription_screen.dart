@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
@@ -181,30 +180,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _LinkText(
-                    text: 'subscription.terms'.tr(),
-                    url: 'https://paulchwu.com/terms',
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      '|',
-                      style: TextStyle(
-                        color: AppColors.textSecondaryDark,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  _LinkText(
-                    text: 'subscription.privacy'.tr(),
-                    url: 'https://paulchwu.com/privacy',
-                  ),
-                ],
-              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -244,28 +219,6 @@ class _BenefitRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _LinkText extends StatelessWidget {
-  final String text;
-  final String url;
-
-  const _LinkText({required this.text, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => launchUrl(Uri.parse(url)),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: AppColors.textSecondaryDark,
-          decoration: TextDecoration.underline,
-        ),
-      ),
     );
   }
 }
