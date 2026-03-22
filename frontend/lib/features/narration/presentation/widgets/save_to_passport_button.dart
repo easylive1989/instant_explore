@@ -1,5 +1,4 @@
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/auth/presentation/widgets/login_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -7,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// 儲存到護照的按鈕
 class SaveToPassportButton extends ConsumerStatefulWidget {
@@ -43,15 +41,6 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                 _isSaving)
             ? null
             : () async {
-                var userId = Supabase.instance.client.auth.currentUser?.id;
-                if (userId == null) {
-                  final loggedIn = await showLoginDialog(context);
-                  if (loggedIn != true || !context.mounted) return;
-                  userId = Supabase.instance.client.auth.currentUser?.id;
-                  if (userId == null) return;
-                }
-
-                // 取得當前語言
                 final locale =
                     easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
                     'zh-TW';
@@ -61,7 +50,6 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                 });
 
                 try {
-                  // 儲存時傳入語言（必填）
                   await playerController.saveToJourney(
                     language: Language(locale),
                   );
