@@ -1,10 +1,16 @@
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/domain/repositories/plan_repository.dart';
 import 'package:context_app/features/plan/presentation/controllers/plan_list_controller.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockPlanRepository extends Mock implements PlanRepository {}
+
+class MockSearchNearbyPlacesUseCase extends Mock
+    implements SearchNearbyPlacesUseCase {}
 
 Plan _makePlan(String id, {DateTime? createdAt}) => Plan(
   id: id,
@@ -18,18 +24,20 @@ Plan _makePlan(String id, {DateTime? createdAt}) => Plan(
 void main() {
   late PlanListController controller;
   late MockPlanRepository mockRepo;
+  late MockSearchNearbyPlacesUseCase mockSearchUseCase;
 
   setUp(() {
     mockRepo = MockPlanRepository();
+    mockSearchUseCase = MockSearchNearbyPlacesUseCase();
     when(() => mockRepo.getAll()).thenAnswer((_) async => []);
-    controller = PlanListController(mockRepo);
+    controller = PlanListController(mockRepo, mockSearchUseCase);
   });
 
   test('initial state is loading then loads plans', () async {
     final plan = _makePlan('1');
     when(() => mockRepo.getAll()).thenAnswer((_) async => [plan]);
 
-    controller = PlanListController(mockRepo);
+    controller = PlanListController(mockRepo, mockSearchUseCase);
     await Future.delayed(Duration.zero); // let async init complete
 
     expect(controller.state.isLoading, false);
@@ -62,6 +70,20 @@ void main() {
     expect(controller.state.plans.length, 1);
     expect(controller.state.plans.first.id, 'keep');
     verify(() => mockRepo.delete('remove')).called(1);
+  });
+
+  test('findNearbyPlaces delegates to use case', () async {
+    final places = <Place>[];
+    when(
+      () => mockSearchUseCase.execute(language: Language.english),
+    ).thenAnswer((_) async => places);
+
+    final result = await controller.findNearbyPlaces(Language.english);
+
+    expect(result, places);
+    verify(
+      () => mockSearchUseCase.execute(language: Language.english),
+    ).called(1);
   });
 
   test('deletePlan rolls back state when repository throws', () async {

@@ -1,6 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
-import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/presentation/widgets/plan_card.dart';
 import 'package:context_app/features/plan/providers.dart';
@@ -47,8 +46,8 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
       }
 
       final places = await ref
-          .read(searchNearbyPlacesUseCaseProvider)
-          .execute(language: _currentLanguage());
+          .read(planListControllerProvider.notifier)
+          .findNearbyPlaces(_currentLanguage());
 
       if (!mounted) return;
 

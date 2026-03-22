@@ -1,5 +1,8 @@
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/plan/domain/models/plan.dart';
 import 'package:context_app/features/plan/domain/repositories/plan_repository.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Immutable state for the plan list screen.
@@ -18,8 +21,10 @@ class PlanListState {
 /// Plan 列表狀態管理
 class PlanListController extends StateNotifier<PlanListState> {
   final PlanRepository _repository;
+  final SearchNearbyPlacesUseCase _searchNearbyPlacesUseCase;
 
-  PlanListController(this._repository) : super(const PlanListState()) {
+  PlanListController(this._repository, this._searchNearbyPlacesUseCase)
+    : super(const PlanListState()) {
     _load();
   }
 
@@ -31,6 +36,10 @@ class PlanListController extends StateNotifier<PlanListState> {
 
   /// 重新從 Hive 載入列表（例如新增 Plan 後呼叫）
   Future<void> reload() => _load();
+
+  /// 搜尋附近景點以供路線規劃使用。
+  Future<List<Place>> findNearbyPlaces(Language language) =>
+      _searchNearbyPlacesUseCase.execute(language: language);
 
   /// 刪除 Plan 並更新列表。失敗時還原狀態。
   Future<void> deletePlan(String id) async {
