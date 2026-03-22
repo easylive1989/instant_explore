@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/auth/presentation/widgets/login_dialog.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
@@ -99,10 +98,10 @@ class SettingsScreen extends ConsumerWidget {
                 _buildSectionHeader('subscription.title'.tr()),
                 const SizedBox(height: 8),
                 _buildSubscriptionSection(context, ref),
-                const SizedBox(height: 32),
-                _buildSectionHeader('settings.account'.tr()),
-                const SizedBox(height: 8),
-                if (isSignedIn)
+                if (isSignedIn) ...[
+                  const SizedBox(height: 32),
+                  _buildSectionHeader('settings.account'.tr()),
+                  const SizedBox(height: 8),
                   _buildSectionContainer(AppColors.surfaceDark, [
                     _buildSettingsTile(
                       icon: Icons.logout,
@@ -147,22 +146,8 @@ class SettingsScreen extends ConsumerWidget {
                         }
                       },
                     ),
-                  ])
-                else
-                  _buildSectionContainer(AppColors.surfaceDark, [
-                    _buildSettingsTile(
-                      icon: Icons.login,
-                      iconColor: AppColors.primary,
-                      iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-                      title: 'auth.login'.tr(),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios,
-                        color: AppColors.textSecondaryDark,
-                        size: 14,
-                      ),
-                      onTap: () => showLoginDialog(context),
-                    ),
                   ]),
+                ],
                 const SizedBox(height: 48),
                 Center(
                   child: Column(
