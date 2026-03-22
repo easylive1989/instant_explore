@@ -20,4 +20,7 @@ class UsageStatus {
 
   /// 是否還可以使用導覽
   bool get canUseNarration => remaining > 0;
+
+  /// 是否還可以使用（與 canUseNarration 相同，語意更通用）
+  bool get canUse => remaining > 0;
 }
