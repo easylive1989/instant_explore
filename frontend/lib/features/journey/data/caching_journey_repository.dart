@@ -22,11 +22,11 @@ class CachingJourneyRepository implements JourneyRepository {
        _cache = cache;
 
   @override
-  Future<List<JourneyEntry>> getJourneyEntries(String userId) async {
+  Future<List<JourneyEntry>> getAll() async {
     try {
-      final entries = await _remote.getJourneyEntries(userId);
+      final entries = await _remote.getAll();
       try {
-        await _cache.saveEntries(userId, entries);
+        await _cache.saveEntries('default', entries);
       } catch (e) {
         log(
           'Failed to update cache after remote fetch',
@@ -42,7 +42,7 @@ class CachingJourneyRepository implements JourneyRepository {
           error: e,
           name: 'CachingJourneyRepository',
         );
-        final cached = await _cache.getEntries(userId);
+        final cached = await _cache.getEntries('default');
         if (cached != null) return cached;
       }
       rethrow;
@@ -50,14 +50,13 @@ class CachingJourneyRepository implements JourneyRepository {
   }
 
   @override
-  Future<void> addJourneyEntry(JourneyEntry entry) async {
-    await _remote.addJourneyEntry(entry);
+  Future<void> save(JourneyEntry entry) async {
+    await _remote.save(entry);
   }
 
   @override
-  Future<void> deleteJourneyEntry(String id) async {
-    await _remote.deleteJourneyEntry(id);
-    // 刪除操作無法從 id 推斷 userId，
-    // 下次 getJourneyEntries 時快取會全量覆寫
+  Future<void> delete(String id) async {
+    await _remote.delete(id);
+    // 刪除操作會在下次 getAll 時快取會全量覆寫
   }
 }

@@ -14,12 +14,11 @@ class SupabaseJourneyRepository implements JourneyRepository {
   SupabaseJourneyRepository(this._client);
 
   @override
-  Future<List<JourneyEntry>> getJourneyEntries(String userId) async {
+  Future<List<JourneyEntry>> getAll() async {
     try {
       final response = await _client
           .from('passport_entries')
           .select()
-          .eq('user_id', userId)
           .order('created_at', ascending: false);
 
       final data = response as List<dynamic>;
@@ -30,7 +29,6 @@ class SupabaseJourneyRepository implements JourneyRepository {
         message: '載入旅程記錄失敗',
         originalException: e,
         stackTrace: stackTrace,
-        context: {'user_id': userId},
       );
     } on SocketException catch (e, stackTrace) {
       throw AppError(
@@ -38,7 +36,6 @@ class SupabaseJourneyRepository implements JourneyRepository {
         message: '網路連線失敗，請檢查網路狀態',
         originalException: e,
         stackTrace: stackTrace,
-        context: {'user_id': userId},
       );
     } on TimeoutException catch (e, stackTrace) {
       throw AppError(
@@ -46,7 +43,6 @@ class SupabaseJourneyRepository implements JourneyRepository {
         message: '網路連線逾時，請稍後再試',
         originalException: e,
         stackTrace: stackTrace,
-        context: {'user_id': userId},
       );
     } catch (e, stackTrace) {
       throw AppError(
@@ -59,7 +55,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
   }
 
   @override
-  Future<void> addJourneyEntry(JourneyEntry entry) async {
+  Future<void> save(JourneyEntry entry) async {
     try {
       await _client
           .from('passport_entries')
@@ -96,7 +92,7 @@ class SupabaseJourneyRepository implements JourneyRepository {
   }
 
   @override
-  Future<void> deleteJourneyEntry(String id) async {
+  Future<void> delete(String id) async {
     try {
       await _client.from('passport_entries').delete().eq('id', id);
     } on PostgrestException catch (e, stackTrace) {

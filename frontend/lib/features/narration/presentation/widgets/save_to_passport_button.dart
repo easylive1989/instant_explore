@@ -63,7 +63,6 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                 try {
                   // 儲存時傳入語言（必填）
                   await playerController.saveToJourney(
-                    userId,
                     language: Language(locale),
                   );
                   if (context.mounted) {

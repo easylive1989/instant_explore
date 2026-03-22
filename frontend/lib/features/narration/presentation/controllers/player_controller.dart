@@ -133,10 +133,7 @@ class PlayerController extends StateNotifier<NarrationState> {
   }
 
   /// 儲存導覽到歷程
-  Future<void> saveToJourney(
-    String userId, {
-    required Language language,
-  }) async {
+  Future<void> saveToJourney({required Language language}) async {
     if (state.content == null || state.place == null || state.aspect == null) {
       return;
     }
@@ -149,7 +146,7 @@ class PlayerController extends StateNotifier<NarrationState> {
         language: language,
       );
 
-      await _journeyRepository.addJourneyEntry(entry);
+      await _journeyRepository.save(entry);
     } catch (e) {
       // 這裡可以選擇透過 state 通知 UI 錯誤，或者拋出異常讓 UI 處理
       // 為了簡單起見，我們暫時不改變 state，但理想情況下應該有 toast 通知

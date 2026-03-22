@@ -39,11 +39,5 @@ final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((
   ref,
 ) async {
   final repository = ref.watch(journeyRepositoryProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id;
-
-  if (userId == null) {
-    return [];
-  }
-
-  return repository.getJourneyEntries(userId);
+  return repository.getAll();
 });
