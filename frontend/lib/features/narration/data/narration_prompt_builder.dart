@@ -56,15 +56,15 @@ Please generate the narration now:''';
   String _getCategoryDescription(PlaceCategory category) {
     switch (category) {
       case PlaceCategory.historicalCultural:
-        return 'Historical & Cultural Site (人文古蹟)';
+        return 'Historical & Cultural Site';
       case PlaceCategory.naturalLandscape:
-        return 'Natural Landscape (自然景觀)';
+        return 'Natural Landscape';
       case PlaceCategory.modernUrban:
-        return 'Modern Landmark & Urban (現代地標與城市)';
+        return 'Modern Landmark & Urban';
       case PlaceCategory.museumArt:
-        return 'Museum & Art (博物館與藝術)';
+        return 'Museum & Art';
       case PlaceCategory.foodMarket:
-        return 'Local Food & Night Market (在地美食與夜市)';
+        return 'Local Food & Night Market';
     }
   }
 
@@ -72,15 +72,15 @@ Please generate the narration now:''';
   String _getAspectDescription(NarrationAspect aspect) {
     switch (aspect) {
       case NarrationAspect.historicalBackground:
-        return 'Historical Background (歷史背景)';
+        return 'Historical Background';
       case NarrationAspect.architecture:
-        return 'Architecture (建築細節)';
+        return 'Architecture';
       case NarrationAspect.customs:
-        return 'Customs (文化禁忌與習俗)';
+        return 'Customs';
       case NarrationAspect.geology:
-        return 'Geology (地理成因)';
+        return 'Geology';
       case NarrationAspect.myths:
-        return 'Myths (傳說故事)';
+        return 'Myths';
     }
   }
 
