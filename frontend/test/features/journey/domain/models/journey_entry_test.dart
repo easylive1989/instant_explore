@@ -112,7 +112,7 @@ void main() {
         category: PlaceCategory.modernUrban,
       );
 
-      const aspect = NarrationAspect.designConcept;
+      const aspect = NarrationAspect.historicalBackground;
       final content = NarrationContent.create(
         'Test narration',
         language: Language.traditionalChinese,

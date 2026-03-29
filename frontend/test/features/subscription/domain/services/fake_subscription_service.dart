@@ -8,7 +8,7 @@ class FakeSubscriptionService implements SubscriptionService {
   final _controller = StreamController<SubscriptionStatus>.broadcast();
 
   FakeSubscriptionService({SubscriptionStatus? initialStatus})
-      : _status = initialStatus ?? SubscriptionStatus.free;
+    : _status = initialStatus ?? SubscriptionStatus.free;
 
   /// 模擬狀態變更（測試用）
   void emitStatus(SubscriptionStatus status) {

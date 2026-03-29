@@ -74,12 +74,14 @@ void main() {
     });
 
     test('fromJson(toJson()) round-trips correctly', () {
-      final stop = PlanStop.fromRouteStop(RouteStop(
-        place: _place('Z'),
-        overview: 'ov2',
-        distanceToNext: 100,
-        walkingTimeToNext: 2,
-      ));
+      final stop = PlanStop.fromRouteStop(
+        RouteStop(
+          place: _place('Z'),
+          overview: 'ov2',
+          distanceToNext: 100,
+          walkingTimeToNext: 2,
+        ),
+      );
       final restored = PlanStop.fromJson(stop.toJson());
 
       expect(restored.placeId, stop.placeId);

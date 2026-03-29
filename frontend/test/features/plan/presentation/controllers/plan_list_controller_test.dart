@@ -46,10 +46,9 @@ void main() {
   });
 
   test('reload refreshes plan list from repository', () async {
-    when(() => mockRepo.getAll()).thenAnswer((_) async => [
-      _makePlan('A'),
-      _makePlan('B'),
-    ]);
+    when(
+      () => mockRepo.getAll(),
+    ).thenAnswer((_) async => [_makePlan('A'), _makePlan('B')]);
 
     await controller.reload();
 
@@ -58,10 +57,9 @@ void main() {
   });
 
   test('deletePlan removes plan from state and calls repository', () async {
-    when(() => mockRepo.getAll()).thenAnswer((_) async => [
-      _makePlan('keep'),
-      _makePlan('remove'),
-    ]);
+    when(
+      () => mockRepo.getAll(),
+    ).thenAnswer((_) async => [_makePlan('keep'), _makePlan('remove')]);
     when(() => mockRepo.delete(any())).thenAnswer((_) async {});
     await controller.reload();
 
@@ -87,10 +85,9 @@ void main() {
   });
 
   test('deletePlan rolls back state when repository throws', () async {
-    when(() => mockRepo.getAll()).thenAnswer((_) async => [
-      _makePlan('keep'),
-      _makePlan('fail'),
-    ]);
+    when(
+      () => mockRepo.getAll(),
+    ).thenAnswer((_) async => [_makePlan('keep'), _makePlan('fail')]);
     when(() => mockRepo.delete('fail')).thenThrow(Exception('Hive error'));
     await controller.reload();
 

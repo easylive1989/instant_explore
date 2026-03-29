@@ -9,10 +9,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-JourneyEntry _makeEntry({
-  String id = 'e1',
-  DateTime? createdAt,
-}) {
+JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
   const place = SavedPlace(
     id: 'p1',
     name: 'Test Place',
