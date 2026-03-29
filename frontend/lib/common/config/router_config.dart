@@ -10,34 +10,18 @@ import 'package:context_app/features/narration/presentation/screens/narration_sc
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
-import 'package:context_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:context_app/features/auth/presentation/screens/register_screen.dart';
-import 'package:context_app/features/auth/presentation/screens/forgot_password_screen.dart';
-import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_planning_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_preview_screen.dart';
 import 'package:context_app/features/route/presentation/screens/route_navigation_screen.dart';
-import 'package:context_app/common/config/go_router_refresh_stream.dart';
-
-/// Router refresh provider
-/// 監聽認證狀態變化並通知 GoRouter 重新評估路由
-final routerRefreshProvider = Provider<GoRouterRefreshStream>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return GoRouterRefreshStream(authService.authStateChanges);
-});
 
 class RouterConfig {
   RouterConfig._();
 
   static GoRouter createRouter(Ref ref) {
-    // 使用 provider 管理的 refresh stream
-    final refreshListenable = ref.watch(routerRefreshProvider);
-
     return GoRouter(
       initialLocation: '/',
-      refreshListenable: refreshListenable,
       routes: [
         GoRoute(
           path: '/',
@@ -47,21 +31,6 @@ class RouterConfig {
             final index = tab == 'passport' ? 1 : 0;
             return MainScreen(initialIndex: index);
           },
-        ),
-        GoRoute(
-          path: '/login',
-          name: 'login',
-          builder: (context, state) => const LoginScreen(),
-        ),
-        GoRoute(
-          path: '/register',
-          name: 'register',
-          builder: (context, state) => const RegisterScreen(),
-        ),
-        GoRoute(
-          path: '/forgot-password',
-          name: 'forgot-password',
-          builder: (context, state) => const ForgotPasswordScreen(),
         ),
         GoRoute(
           path: '/config',
@@ -182,18 +151,6 @@ class RouterConfig {
           builder: (context, state) => const SubscriptionScreen(),
         ),
       ],
-      redirect: (context, state) {
-        final authService = ref.read(authServiceProvider);
-        final isSignedIn = authService.isSignedIn;
-        final location = state.matchedLocation;
-
-        // 已登入用戶不需看 login/register 頁面
-        if (isSignedIn && (location == '/login' || location == '/register')) {
-          return '/';
-        }
-
-        return null;
-      },
       errorBuilder: (context, state) =>
           Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
     );

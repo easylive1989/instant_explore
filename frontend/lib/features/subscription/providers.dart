@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/domain/services/subscription_service.dart';
@@ -31,17 +30,4 @@ final subscriptionStatusProvider = StreamProvider<SubscriptionStatus>((ref) {
 final isPremiumProvider = Provider<bool>((ref) {
   final status = ref.watch(subscriptionStatusProvider);
   return status.valueOrNull?.isPremium ?? false;
-});
-
-/// 監聽認證狀態，自動同步 RevenueCat 使用者身份
-///
-/// 使用 FutureProvider 確保 async logIn 被正確 awaited
-final subscriptionAuthSyncProvider = FutureProvider<void>((ref) async {
-  final authService = ref.watch(authServiceProvider);
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
-  final user = authService.currentUser;
-
-  if (user != null) {
-    await subscriptionService.logIn(user.id);
-  }
 });

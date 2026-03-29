@@ -1,21 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:context_app/features/auth/providers.dart';
-import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/settings/domain/use_cases/logout_use_case.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
-// ============================================================================
-// Use Case Providers
-// ============================================================================
-
-/// 登出用例 Provider
-final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
-  return LogoutUseCase(authService, subscriptionService);
-});
 
 // ============================================================================
 // App Info Providers
@@ -47,13 +34,6 @@ final currentLanguageProvider = NotifierProvider<LanguageNotifier, Language>(
 
 /// 設定控制器 Provider
 final settingsControllerProvider =
-    StateNotifierProvider<SettingsController, AsyncValue<void>>((ref) {
-      final logoutUseCase = ref.watch(logoutUseCaseProvider);
-      final authService = ref.watch(authServiceProvider);
-      final subscriptionService = ref.watch(subscriptionServiceProvider);
-      return SettingsController(
-        logoutUseCase,
-        authService,
-        subscriptionService,
-      );
-    });
+    StateNotifierProvider<SettingsController, AsyncValue<void>>(
+      (ref) => SettingsController(),
+    );

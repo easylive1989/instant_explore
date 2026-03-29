@@ -1,9 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 
 /// 訂閱付費牆畫面
@@ -18,18 +16,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   bool _isLoading = false;
 
   Future<void> _purchase() async {
-    // 檢查是否已登入
-    final authService = ref.read(authServiceProvider);
-    if (!authService.isSignedIn) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('subscription.login_required'.tr())),
-        );
-        context.pushNamed('login');
-      }
-      return;
-    }
-
     setState(() => _isLoading = true);
     try {
       final service = ref.read(subscriptionServiceProvider);

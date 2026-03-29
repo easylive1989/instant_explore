@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
@@ -13,22 +12,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
     final appVersionAsync = ref.watch(appVersionStringProvider);
-    final isSignedIn = ref.watch(isSignedInProvider);
-
-    // Listen for state changes (e.g., successful logout)
-    ref.listen<AsyncValue<void>>(settingsControllerProvider, (previous, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${'common.error_prefix'.tr()}: ${next.error}'),
-          ),
-        );
-      }
-      // Assuming auth state change listener in main app will handle navigation upon logout
-    });
 
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
@@ -53,141 +38,85 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                _buildSectionHeader('settings.preferences'.tr()),
-                const SizedBox(height: 8),
-                _buildSectionContainer(AppColors.surfaceDark, [
-                  _buildSettingsTile(
-                    icon: Icons.language,
-                    iconColor: AppColors.primary,
-                    iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-                    title: 'settings.change_language'.tr(),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.locale.languageCode == 'en'
-                              ? 'English'
-                              : '繁體中文',
-                          style: const TextStyle(
-                            color: AppColors.textSecondaryDark,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          color: AppColors.textSecondaryDark,
-                          size: 14,
-                        ),
-                      ],
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          _buildSectionHeader('settings.preferences'.tr()),
+          const SizedBox(height: 8),
+          _buildSectionContainer(AppColors.surfaceDark, [
+            _buildSettingsTile(
+              icon: Icons.language,
+              iconColor: AppColors.primary,
+              iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+              title: 'settings.change_language'.tr(),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.locale.languageCode == 'en' ? 'English' : '繁體中文',
+                    style: const TextStyle(
+                      color: AppColors.textSecondaryDark,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                    onTap: () => controller.changeLanguage(context),
                   ),
-                ]),
-                const SizedBox(height: 32),
-                _buildSectionHeader('settings.daily_usage'.tr()),
-                const SizedBox(height: 8),
-                _buildUsageSection(ref),
-                const SizedBox(height: 32),
-                _buildSectionHeader('subscription.title'.tr()),
-                const SizedBox(height: 8),
-                _buildSubscriptionSection(context, ref),
-                if (isSignedIn) ...[
-                  const SizedBox(height: 32),
-                  _buildSectionHeader('settings.account'.tr()),
-                  const SizedBox(height: 8),
-                  _buildSectionContainer(AppColors.surfaceDark, [
-                    _buildSettingsTile(
-                      icon: Icons.logout,
-                      iconColor: AppColors.textPrimaryDark.withValues(
-                        alpha: 0.7,
-                      ),
-                      iconBgColor: AppColors.surfaceDarkPlayer,
-                      title: 'settings.logout'.tr(),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios,
-                        color: AppColors.textSecondaryDark,
-                        size: 14,
-                      ),
-                      onTap: () async {
-                        final confirm = await _showConfirmationDialog(
-                          context,
-                          'settings.logout'.tr(),
-                          'settings.logout_confirm'.tr(),
-                        );
-                        if (confirm == true) {
-                          await controller.logout();
-                        }
-                      },
-                    ),
-                    const Divider(height: 1, color: AppColors.white10),
-                    _buildSettingsTile(
-                      icon: Icons.delete_forever,
-                      iconColor: AppColors.error,
-                      iconBgColor: AppColors.error.withValues(alpha: 0.2),
-                      title: 'settings.delete_account'.tr(),
-                      titleColor: AppColors.error,
-                      subtitleColor: AppColors.error.withValues(alpha: 0.6),
-                      onTap: () async {
-                        final confirm = await _showConfirmationDialog(
-                          context,
-                          'settings.delete_account'.tr(),
-                          'settings.delete_account_confirm'.tr(),
-                          isDestructive: true,
-                        );
-                        if (confirm == true) {
-                          await controller.deleteAccount();
-                        }
-                      },
-                    ),
-                  ]),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColors.textSecondaryDark,
+                    size: 14,
+                  ),
                 ],
-                const SizedBox(height: 48),
-                Center(
-                  child: Column(
-                    children: [
-                      appVersionAsync.when(
-                        data: (version) => Text(
-                          version,
-                          style: const TextStyle(
-                            color: AppColors.textSecondaryDark,
-                            fontSize: 12,
-                          ),
-                        ),
-                        loading: () => const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(strokeWidth: 1),
-                        ),
-                        error: (_, __) => Text(
-                          'settings.app_version'.tr(),
-                          style: const TextStyle(
-                            color: AppColors.textSecondaryDark,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'settings.copyright'.tr(),
-                        style: TextStyle(
-                          color: AppColors.textSecondaryDark.withValues(
-                            alpha: 0.7,
-                          ),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+              ),
+              onTap: () => controller.changeLanguage(context),
+            ),
+          ]),
+          const SizedBox(height: 32),
+          _buildSectionHeader('settings.daily_usage'.tr()),
+          const SizedBox(height: 8),
+          _buildUsageSection(ref),
+          const SizedBox(height: 32),
+          _buildSectionHeader('subscription.title'.tr()),
+          const SizedBox(height: 8),
+          _buildSubscriptionSection(context, ref),
+          const SizedBox(height: 48),
+          Center(
+            child: Column(
+              children: [
+                appVersionAsync.when(
+                  data: (version) => Text(
+                    version,
+                    style: const TextStyle(
+                      color: AppColors.textSecondaryDark,
+                      fontSize: 12,
+                    ),
+                  ),
+                  loading: () => const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 1),
+                  ),
+                  error: (_, __) => Text(
+                    'settings.app_version'.tr(),
+                    style: const TextStyle(
+                      color: AppColors.textSecondaryDark,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'settings.copyright'.tr(),
+                  style: TextStyle(
+                    color: AppColors.textSecondaryDark.withValues(alpha: 0.7),
+                    fontSize: 10,
                   ),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -310,7 +239,6 @@ class SettingsScreen extends ConsumerWidget {
     required String title,
     Widget? trailing,
     Color? titleColor,
-    Color? subtitleColor,
     VoidCallback? onTap,
   }) {
     return InkWell(
@@ -343,48 +271,6 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Future<bool?> _showConfirmationDialog(
-    BuildContext context,
-    String title,
-    String content, {
-    bool isDestructive = false,
-  }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.surfaceDark,
-          title: Text(
-            title,
-            style: const TextStyle(color: AppColors.textPrimaryDark),
-          ),
-          content: Text(
-            content,
-            style: const TextStyle(color: AppColors.textSecondaryDark),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                'settings.cancel'.tr(),
-                style: const TextStyle(color: AppColors.textSecondaryDark),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(
-                'settings.confirm'.tr(),
-                style: TextStyle(
-                  color: isDestructive ? AppColors.error : AppColors.primary,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
