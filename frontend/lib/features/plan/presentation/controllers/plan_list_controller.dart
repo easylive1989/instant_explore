@@ -18,7 +18,6 @@ class PlanListState {
   );
 }
 
-/// Plan 列表狀態管理
 class PlanListController extends StateNotifier<PlanListState> {
   final PlanRepository _repository;
   final SearchNearbyPlacesUseCase _searchNearbyPlacesUseCase;
