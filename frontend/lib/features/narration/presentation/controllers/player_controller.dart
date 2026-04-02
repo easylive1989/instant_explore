@@ -75,6 +75,9 @@ class PlayerController extends StateNotifier<NarrationState> {
 
       // 更新狀態為就緒
       state = state.ready(place, aspect, content);
+
+      // 自動儲存到歷程
+      await _autoSaveToJourney(place, aspect, content, language);
     } on AppError catch (e) {
       final stateErrorType = _mapAppErrorToStateError(e.type);
       state = state.error(stateErrorType, message: e.message);
@@ -132,25 +135,23 @@ class PlayerController extends StateNotifier<NarrationState> {
     state = state.ready(place, null, content);
   }
 
-  /// 儲存導覽到歷程
-  Future<void> saveToJourney({required Language language}) async {
-    if (state.content == null || state.place == null || state.aspect == null) {
-      return;
-    }
-
+  /// 自動儲存導覽到歷程（生成完成後靜默儲存）
+  Future<void> _autoSaveToJourney(
+    Place place,
+    NarrationAspect aspect,
+    NarrationContent content,
+    Language language,
+  ) async {
     try {
       final entry = JourneyEntry.create(
-        place: state.place!,
-        aspect: state.aspect!,
-        content: state.content!,
+        place: place,
+        aspect: aspect,
+        content: content,
         language: language,
       );
-
       await _journeyRepository.save(entry);
-    } catch (e) {
-      // 這裡可以選擇透過 state 通知 UI 錯誤，或者拋出異常讓 UI 處理
-      // 為了簡單起見，我們暫時不改變 state，但理想情況下應該有 toast 通知
-      rethrow;
+    } catch (_) {
+      // 靜默失敗，不影響播放體驗
     }
   }
 
