@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:context_app/features/narration/presentation/widgets/save_to_passport_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +11,6 @@ class NarrationControlPanel extends ConsumerWidget {
   final Color primaryColorShadow;
   final Color surfaceColor;
   final Color backgroundColor;
-  final bool enableSave;
 
   const NarrationControlPanel({
     super.key,
@@ -21,7 +19,6 @@ class NarrationControlPanel extends ConsumerWidget {
     required this.primaryColorShadow,
     required this.surfaceColor,
     required this.backgroundColor,
-    this.enableSave = true,
   });
 
   @override
@@ -173,13 +170,6 @@ class NarrationControlPanel extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Save Button
-                if (enableSave)
-                  SaveToPassportButton(
-                    place: place,
-                    surfaceColor: surfaceColor,
-                  ),
               ],
             ),
           ),

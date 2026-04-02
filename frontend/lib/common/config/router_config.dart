@@ -88,12 +88,10 @@ class RouterConfig {
                 params['narrationAspect'] as NarrationAspect?;
             final narrationContent =
                 params['narrationContent'] as NarrationContent?;
-            final enableSave = params['enableSave'] as bool? ?? true;
             return NarrationScreen(
               place: place,
               narrationAspect: narrationAspect,
               narrationContent: narrationContent,
-              enableSave: enableSave,
             );
           },
         ),

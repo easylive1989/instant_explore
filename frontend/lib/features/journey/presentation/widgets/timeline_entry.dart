@@ -106,7 +106,6 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
       extra: {
         'place': place,
         'narrationContent': widget.entry.narrationContent,
-        'enableSave': false,
       },
     );
   }

@@ -17,14 +17,12 @@ class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationAspect? narrationAspect;
   final NarrationContent? narrationContent;
-  final bool enableSave;
 
   const NarrationScreen({
     super.key,
     required this.place,
     this.narrationAspect,
     this.narrationContent,
-    this.enableSave = true,
   });
 
   @override
@@ -207,7 +205,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             primaryColorShadow: primaryColorShadow,
             surfaceColor: surfaceColor,
             backgroundColor: backgroundColor,
-            enableSave: widget.enableSave,
           ),
         ],
       ),
