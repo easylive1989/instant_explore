@@ -146,15 +146,15 @@
   },
   "narration_aspect": {
     "historical_background": "歷史背景",
-    "historical_background_description": "講述「人」的故事",
+    "historical_background_description": "人物、事件、時代背景",
     "architecture": "建築細節",
-    "architecture_description": "解讀肉眼看不到的象徵意義",
+    "architecture_description": "建材、工法、建築風格",
     "customs": "文化禁忌與習俗",
-    "customs_description": "告訴遊客該怎麼做、為什麼這麼做",
+    "customs_description": "禁忌、儀式、日常習俗",
     "geology": "地理成因",
-    "geology_description": "用簡單的比喻解釋地貌形成",
+    "geology_description": "地層、地貌、自然成因",
     "myths": "傳說故事",
-    "myths_description": "賦予山水靈性"
+    "myths_description": "民間傳說與神話"
   },
   "camera": {
     "title": "拍照辨識",

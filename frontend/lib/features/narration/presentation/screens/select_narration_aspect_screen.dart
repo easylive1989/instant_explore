@@ -62,119 +62,134 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20.0),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    AppColors.backgroundDark,
-                    Color(0xCC101922),
-                    Colors.transparent,
-                  ],
-                ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Place Name
-                  Text(
-                    place.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: Container(
+                padding: const EdgeInsets.all(20.0),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      AppColors.backgroundDark,
+                      Color(0xCC101922),
+                      Colors.transparent,
+                    ],
                   ),
-                  const SizedBox(height: 8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Place Name
+                    Text(
+                      place.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
 
-                  // Place Category Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: place.category.color.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: place.category.color, width: 1),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          place.category.icon,
-                          size: 16,
-                          color: Colors.white,
+                    // Place Category Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: place.category.color.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: place.category.color,
+                          width: 1,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          place.category.translationKey.tr(),
-                          style: const TextStyle(
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            place.category.icon,
+                            size: 16,
                             color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            place.category.translationKey.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Place Address
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: Colors.white70,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            place.formattedAddress,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 24),
 
-                  // Place Address
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        color: Colors.white70,
-                        size: 16,
+                    // Title
+                    Text(
+                      'config_screen.select_aspect_title'.tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          place.formattedAddress,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Aspect Options (scrollable)
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: availableAspects.map((aspect) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: AspectOption(
+                                aspect: aspect,
+                                isSelected: selectedAspect == aspect,
+                                onTap: () {
+                                  ref
+                                      .read(narrationAspectProvider.notifier)
+                                      .state = aspect;
+                                },
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Title
-                  Text(
-                    'config_screen.select_aspect_title'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 24),
 
-                  // Aspect Options
-                  ...availableAspects.map((aspect) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AspectOption(
-                        aspect: aspect,
-                        isSelected: selectedAspect == aspect,
-                        onTap: () {
-                          ref.read(narrationAspectProvider.notifier).state =
-                              aspect;
-                        },
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 24),
-
-                  // Start Button
-                  ElevatedButton(
+                    // Start Button
+                    ElevatedButton(
                     onPressed: () async {
                       final usageRepo = ref.read(usageRepositoryProvider);
                       final status = await usageRepo.getUsageStatus();
@@ -226,6 +241,7 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
               ),
             ),
           ),
+        ),
         ],
       ),
     );
