@@ -155,6 +155,22 @@ class PlayerController extends StateNotifier<NarrationState> {
     }
   }
 
+  /// 手動儲存導覽到歷程
+  Future<void> saveToJourney({required Language language}) async {
+    final place = state.place;
+    final aspect = state.aspect;
+    final content = state.content;
+    if (place == null || aspect == null || content == null) return;
+
+    final entry = JourneyEntry.create(
+      place: place,
+      aspect: aspect,
+      content: content,
+      language: language,
+    );
+    await _journeyRepository.save(entry);
+  }
+
   /// 設定 TTS 事件監聽器
   void _setupTtsListeners() {
     // 監聽播放完成事件
