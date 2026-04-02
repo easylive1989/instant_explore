@@ -146,15 +146,15 @@
   },
   "narration_aspect": {
     "historical_background": "Historical Background",
-    "historical_background_description": "Stories about the people",
+    "historical_background_description": "People, events, and historical context",
     "architecture": "Architectural Details",
-    "architecture_description": "Symbolic meanings beyond what meets the eye",
+    "architecture_description": "Materials, techniques, and style",
     "customs": "Cultural Customs",
-    "customs_description": "What to do and why",
+    "customs_description": "Taboos, rituals, and daily practices",
     "geology": "Geological Formation",
-    "geology_description": "How the landscape was formed",
+    "geology_description": "Strata, landforms, and natural formation",
     "myths": "Legends & Stories",
-    "myths_description": "Mythical tales of the landscape"
+    "myths_description": "Folk tales and myths"
   },
   "camera": {
     "title": "Photo Recognition",
