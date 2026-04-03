@@ -194,6 +194,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildUsageSection(WidgetRef ref) {
     final usageAsync = ref.watch(usageStatusProvider);
+    final isPremium = ref.watch(isPremiumProvider);
 
     return _buildSectionContainer(AppColors.surfaceDark, [
       usageAsync.when(
@@ -203,9 +204,11 @@ class SettingsScreen extends ConsumerWidget {
           iconBgColor: AppColors.primary.withValues(alpha: 0.2),
           title: 'settings.daily_usage'.tr(),
           trailing: Text(
-            'settings.remaining_today'.tr(
-              namedArgs: {'remaining': status.remaining.toString()},
-            ),
+            isPremium
+                ? 'subscription.unlimited_access'.tr()
+                : 'settings.remaining_today'.tr(
+                    namedArgs: {'remaining': status.remaining.toString()},
+                  ),
             style: const TextStyle(
               color: AppColors.textSecondaryDark,
               fontSize: 12,
