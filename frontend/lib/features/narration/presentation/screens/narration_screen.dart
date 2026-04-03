@@ -168,7 +168,13 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                             color: Colors.white,
                             size: 20,
                           ),
-                          onPressed: () => context.go('/'),
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('/');
+                            }
+                          },
                         ),
                         Expanded(
                           child: Text(
