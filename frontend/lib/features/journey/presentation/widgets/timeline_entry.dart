@@ -318,39 +318,37 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                       const SizedBox(height: 16),
 
                       // Action Bar
-                      Container(
-                        padding: const EdgeInsets.only(top: 12),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          padding: const EdgeInsets.only(top: 12),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.08),
+                              ),
                             ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            _ActionButton(
-                              icon: Icons.mic_outlined,
-                              label: 'passport.replay'.tr(),
-                              onTap: _navigateToPlayer,
-                            ),
-                            const Spacer(),
-                            if (_isDeleting)
-                              const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (_isDeleting)
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              else
+                                _ActionButton(
+                                  icon: Icons.delete_outline,
+                                  label: 'passport.delete_confirm'.tr(),
+                                  onTap: _showDeleteConfirmDialog,
                                 ),
-                              )
-                            else
-                              _ActionButton(
-                                icon: Icons.delete_outline,
-                                label: 'passport.delete_confirm'.tr(),
-                                onTap: _showDeleteConfirmDialog,
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
