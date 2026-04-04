@@ -6,6 +6,9 @@ import 'package:context_app/features/narration/presentation/controllers/playback
 import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
 import 'package:equatable/equatable.dart';
 
+/// 哨兵物件，用於區分「未傳入」與「明確傳入 null」。
+const Object _unset = Object();
+
 /// 導覽播放狀態
 ///
 /// 聚合導覽內容和播放狀態
@@ -41,7 +44,11 @@ class NarrationState extends Equatable {
 
   /// 建立載入中狀態
   NarrationState loading() {
-    return copyWith(playerState: PlayerState.loading(), errorMessage: null);
+    return copyWith(
+      playerState: PlayerState.loading(),
+      errorType: null,
+      errorMessage: null,
+    );
   }
 
   /// 建立就緒狀態
@@ -55,6 +62,7 @@ class NarrationState extends Equatable {
       aspect: aspect,
       content: content,
       playerState: PlayerState.ready(),
+      errorType: null,
       errorMessage: null,
     );
   }
@@ -107,21 +115,26 @@ class NarrationState extends Equatable {
   }
 
   /// 建立副本並更新指定屬性
+  ///
+  /// 使用哨兵物件 [_unset] 區分「明確傳入 null」和「未傳入」，
+  /// 讓可為 null 的欄位（如 aspect、errorType）可以被明確清除。
   NarrationState copyWith({
     Place? place,
-    NarrationAspect? aspect,
+    Object? aspect = _unset,
     NarrationContent? content,
     PlayerState? playerState,
-    NarrationStateErrorType? errorType,
-    String? errorMessage,
+    Object? errorType = _unset,
+    Object? errorMessage = _unset,
   }) {
     return NarrationState(
       place: place ?? this.place,
-      aspect: aspect ?? this.aspect,
+      aspect: aspect == _unset ? this.aspect : aspect as NarrationAspect?,
       content: content ?? this.content,
       playerState: playerState ?? this.playerState,
-      errorType: errorType ?? this.errorType,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorType:
+          errorType == _unset ? this.errorType : errorType as NarrationStateErrorType?,
+      errorMessage:
+          errorMessage == _unset ? this.errorMessage : errorMessage as String?,
     );
   }
 
