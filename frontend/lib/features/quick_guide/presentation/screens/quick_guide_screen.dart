@@ -3,7 +3,6 @@ import 'package:context_app/features/quick_guide/presentation/controllers/quick_
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,6 +30,8 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    final locale =
+        EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
@@ -42,8 +43,6 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
 
       final bytes = await image.readAsBytes();
       final mimeType = _mimeType(image.path);
-      final locale =
-          EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
 
       await ref
           .read(quickGuideControllerProvider.notifier)

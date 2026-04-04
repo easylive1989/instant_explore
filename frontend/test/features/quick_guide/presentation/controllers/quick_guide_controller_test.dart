@@ -74,7 +74,7 @@ void main() {
 
     test('sets status to error when AI service throws', () async {
       final aiService = _FakeAiService(
-        exceptionToThrow: QuickGuideAiException(
+        exceptionToThrow: const QuickGuideAiException(
           type: QuickGuideAiErrorType.network,
           message: 'no connection',
         ),
