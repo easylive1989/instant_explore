@@ -1,9 +1,11 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/journey/domain/models/journey_item.dart';
+import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
+import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
+import 'package:context_app/features/journey/providers.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 
 class JourneyScreen extends ConsumerWidget {
   const JourneyScreen({super.key});
@@ -35,11 +37,11 @@ class JourneyScreen extends ConsumerWidget {
   }
 
   Widget _buildJourneyList(WidgetRef ref) {
-    final journeyAsyncValue = ref.watch(myJourneyProvider);
+    final asyncItems = ref.watch(allJourneyItemsProvider);
 
-    return journeyAsyncValue.when(
-      data: (entries) {
-        if (entries.isEmpty) {
+    return asyncItems.when(
+      data: (items) {
+        if (items.isEmpty) {
           return Center(
             child: Text(
               'passport.no_entries'.tr(),
@@ -48,16 +50,24 @@ class JourneyScreen extends ConsumerWidget {
           );
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: entries.length,
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
           itemBuilder: (context, index) {
-            final entry = entries[index];
-            final isLast = index == entries.length - 1;
-            return TimelineEntry(
-              key: ValueKey(entry.id),
-              entry: entry,
-              isLast: isLast,
-            );
+            final item = items[index];
+            final isLast = index == items.length - 1;
+
+            return switch (item) {
+              NarrationJourneyItem(:final entry) => TimelineEntry(
+                key: ValueKey(item.id),
+                entry: entry,
+                isLast: isLast,
+              ),
+              QuickGuideJourneyItem(:final entry) => QuickGuideTimelineEntry(
+                key: ValueKey(item.id),
+                entry: entry,
+                isLast: isLast,
+              ),
+            };
           },
         );
       },

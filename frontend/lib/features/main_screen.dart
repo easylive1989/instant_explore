@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
-import 'package:context_app/features/plan/presentation/screens/plan_screen.dart';
+import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 
@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     ExploreScreen(),
-    PlanScreen(),
+    QuickGuideScreen(),
     JourneyScreen(),
     SettingsScreen(),
   ];
@@ -34,11 +34,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Check if locale has changed
     final locale = context.locale;
     if (_currentLocale != locale) {
       _currentLocale = locale;
-      // Trigger rebuild when locale changes
       if (mounted) {
         setState(() {});
       }
@@ -62,8 +60,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'bottom_nav.home'.tr(),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.map_outlined),
-            label: 'bottom_nav.plan'.tr(),
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: 'bottom_nav.quick_guide'.tr(),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.book),
