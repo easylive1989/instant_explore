@@ -12,9 +12,6 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
-import 'package:context_app/features/route/presentation/screens/route_planning_screen.dart';
-import 'package:context_app/features/route/presentation/screens/route_preview_screen.dart';
-import 'package:context_app/features/route/presentation/screens/route_navigation_screen.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -28,7 +25,7 @@ class RouterConfig {
           name: 'home',
           builder: (context, state) {
             final tab = state.uri.queryParameters['tab'];
-            final index = tab == 'passport' ? 1 : 0;
+            final index = tab == 'passport' ? 2 : 0;
             return MainScreen(initialIndex: index);
           },
         ),
@@ -36,22 +33,15 @@ class RouterConfig {
           path: '/config',
           name: 'config',
           redirect: (context, state) {
-            // 如果沒有傳入 extra 或類型不正確，導回首頁
             final extra = state.extra;
-            if (extra == null) {
-              return '/';
-            }
-            if (extra is! Place && extra is! Map<String, dynamic>) {
-              return '/';
-            }
-            // 如果是 Map，確保包含必要的 'place' 欄位
+            if (extra == null) return '/';
+            if (extra is! Place && extra is! Map<String, dynamic>) return '/';
             if (extra is Map<String, dynamic> && extra['place'] is! Place) {
               return '/';
             }
             return null;
           },
           builder: (context, state) {
-            // 支援兩種傳入方式：直接傳 Place 或傳 Map（包含 capturedImageBytes）
             final extra = state.extra;
             if (extra is Place) {
               return SelectNarrationAspectScreen(place: extra);
@@ -70,15 +60,9 @@ class RouterConfig {
           path: '/player',
           name: 'player',
           redirect: (context, state) {
-            // 如果沒有傳入 extra 或類型不正確，導回首頁
             final extra = state.extra;
-            if (extra == null || extra is! Map<String, dynamic>) {
-              return '/';
-            }
-            // 確保包含必要的 'place' 欄位
-            if (extra['place'] is! Place) {
-              return '/';
-            }
+            if (extra == null || extra is! Map<String, dynamic>) return '/';
+            if (extra['place'] is! Place) return '/';
             return null;
           },
           builder: (context, state) {
@@ -109,33 +93,6 @@ class RouterConfig {
                 context.pop();
               },
             );
-          },
-        ),
-        GoRoute(
-          path: '/route/planning',
-          name: 'route_planning',
-          redirect: (context, state) {
-            if (state.extra is! List<Place>) return '/';
-            return null;
-          },
-          builder: (context, state) {
-            return RoutePlanningScreen(
-              candidatePlaces: state.extra as List<Place>,
-            );
-          },
-        ),
-        GoRoute(
-          path: '/route/preview',
-          name: 'route_preview',
-          builder: (context, state) {
-            return const RoutePreviewScreen();
-          },
-        ),
-        GoRoute(
-          path: '/route/navigate',
-          name: 'route_navigate',
-          builder: (context, state) {
-            return const RouteNavigationScreen();
           },
         ),
         GoRoute(
