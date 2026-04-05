@@ -72,10 +72,12 @@ class RouterConfig {
                 params['narrationAspect'] as NarrationAspect?;
             final narrationContent =
                 params['narrationContent'] as NarrationContent?;
+            final autoPlay = params['autoPlay'] as bool? ?? false;
             return NarrationScreen(
               place: place,
               narrationAspect: narrationAspect,
               narrationContent: narrationContent,
+              autoPlay: autoPlay,
             );
           },
         ),

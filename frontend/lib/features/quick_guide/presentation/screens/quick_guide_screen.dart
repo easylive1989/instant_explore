@@ -1,10 +1,15 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Quick Guide tab screen.
@@ -27,6 +32,40 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
       ref.read(quickGuideControllerProvider.notifier).reset();
     });
     super.dispose();
+  }
+
+  Future<void> _navigateToPlayer(
+    BuildContext context,
+    String description,
+  ) async {
+    final language = _currentLanguage();
+
+    NarrationContent content;
+    try {
+      content = NarrationContent.create(description, language: language);
+    } catch (_) {
+      return;
+    }
+
+    final place = Place(
+      id: 'quick-guide-${DateTime.now().millisecondsSinceEpoch}',
+      name: 'quick_guide.title'.tr(),
+      formattedAddress: '',
+      location: const PlaceLocation(latitude: 0, longitude: 0),
+      types: const [],
+      photos: const [],
+      category: PlaceCategory.modernUrban,
+    );
+
+    await context.push<void>('/player', extra: {
+      'place': place,
+      'narrationContent': content,
+      'autoPlay': true,
+    });
+
+    if (mounted) {
+      ref.read(quickGuideControllerProvider.notifier).reset();
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -60,15 +99,6 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
         : Language.english;
   }
 
-  Future<void> _saveToJourney() async {
-    await ref
-        .read(quickGuideControllerProvider.notifier)
-        .saveToJourney(_currentLanguage());
-
-    // Invalidate journey providers so the list refreshes.
-    ref.invalidate(quickGuideEntriesProvider);
-  }
-
   String _mimeType(String path) {
     switch (path.split('.').last.toLowerCase()) {
       case 'jpg':
@@ -87,6 +117,14 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<QuickGuideState>(quickGuideControllerProvider, (previous, current) {
+      if (previous?.isSuccess != true &&
+          current.isSuccess &&
+          current.aiDescription != null) {
+        _navigateToPlayer(context, current.aiDescription!);
+      }
+    });
+
     final guideState = ref.watch(quickGuideControllerProvider);
 
     return Scaffold(
@@ -115,7 +153,6 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
                           ref
                               .read(quickGuideControllerProvider.notifier)
                               .reset(),
-                      onSave: _saveToJourney,
                     ),
             ),
           ],
@@ -220,12 +257,10 @@ class _ImageSourceSelector extends StatelessWidget {
 class _CaptureResultView extends StatelessWidget {
   final QuickGuideState guideState;
   final VoidCallback onRetake;
-  final VoidCallback onSave;
 
   const _CaptureResultView({
     required this.guideState,
     required this.onRetake,
-    required this.onSave,
   });
 
   @override
@@ -282,7 +317,7 @@ class _CaptureResultView extends StatelessWidget {
         ),
 
         // Description area
-        Expanded(flex: 3, child: _DescriptionArea(state: guideState, onSave: onSave)),
+        Expanded(flex: 3, child: _DescriptionArea(state: guideState)),
       ],
     );
   }
@@ -290,13 +325,12 @@ class _CaptureResultView extends StatelessWidget {
 
 class _DescriptionArea extends StatelessWidget {
   final QuickGuideState state;
-  final VoidCallback onSave;
 
-  const _DescriptionArea({required this.state, required this.onSave});
+  const _DescriptionArea({required this.state});
 
   @override
   Widget build(BuildContext context) {
-    if (state.isLoading) {
+    if (state.isLoading || state.isSuccess) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -342,101 +376,7 @@ class _DescriptionArea extends StatelessWidget {
       );
     }
 
-    if (state.isSaved) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 56),
-            const SizedBox(height: 16),
-            Text(
-              'quick_guide.saved'.tr(),
-              style: const TextStyle(
-                color: AppColors.textPrimaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (state.isSuccess && state.aiDescription != null) {
-      return _DescriptionCard(description: state.aiDescription!, onSave: onSave);
-    }
-
     return const SizedBox.shrink();
   }
 }
 
-class _DescriptionCard extends StatelessWidget {
-  final String description;
-  final VoidCallback onSave;
-
-  const _DescriptionCard({required this.description, required this.onSave});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceDark,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontSize: 15,
-                    height: 1.7,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: onSave,
-            icon: const Icon(Icons.bookmark_add_outlined, size: 20),
-            label: Text(
-              'quick_guide.save_to_journey'.tr(),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 8,
-              shadowColor: AppColors.primary.withValues(alpha: 0.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
