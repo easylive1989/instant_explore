@@ -125,7 +125,12 @@ class PlayerController extends StateNotifier<NarrationState> {
     Place place,
     NarrationContent content,
   ) async {
-    state = state.loading();
+    // 立即顯示內容讓使用者知道這是回放，TTS 初始化期間播放鈕暫時停用
+    state = NarrationState(
+      place: place,
+      content: content,
+      playerState: PlayerState.loading(),
+    );
 
     // 初始化 TtsService
     await _ttsService.initialize();

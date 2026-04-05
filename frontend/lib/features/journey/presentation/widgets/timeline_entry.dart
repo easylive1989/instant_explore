@@ -68,8 +68,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
       try {
         await ref.read(journeyRepositoryProvider).delete(widget.entry.id);
-        // 刷新列表
         ref.invalidate(myJourneyProvider);
+        ref.invalidate(allJourneyItemsProvider);
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
