@@ -10,6 +10,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
+import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
