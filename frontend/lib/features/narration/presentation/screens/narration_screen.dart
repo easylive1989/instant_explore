@@ -18,11 +18,15 @@ class NarrationScreen extends ConsumerStatefulWidget {
   final NarrationAspect? narrationAspect;
   final NarrationContent? narrationContent;
 
+  /// Whether to start playback automatically after initialisation.
+  final bool autoPlay;
+
   const NarrationScreen({
     super.key,
     required this.place,
     this.narrationAspect,
     this.narrationContent,
+    this.autoPlay = false,
   });
 
   @override
@@ -44,7 +48,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
         // 使用已有的 NarrationContent 初始化（例如從 JourneyEntry 回放）
         ref
             .read(playerControllerProvider.notifier)
-            .initializeWithContent(widget.place, widget.narrationContent!);
+            .initializeWithContent(widget.place, widget.narrationContent!)
+            .then((_) {
+              if (!mounted || !widget.autoPlay) return;
+              ref.read(playerControllerProvider.notifier).play();
+            });
       } else if (widget.narrationAspect != null) {
         // 生成新的導覽內容（需要明確的 narrationAspect）
         final locale =
