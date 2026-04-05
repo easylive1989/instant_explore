@@ -40,8 +40,9 @@ class NarrationTranscriptArea extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
 
-    // 載入中狀態
-    if (playerState.isLoading) {
+    // 載入中且尚無內容（生成模式）才顯示 spinner；
+    // 回放模式下 content 已立即設定，直接顯示轉錄文字
+    if (playerState.isLoading && playerState.content == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

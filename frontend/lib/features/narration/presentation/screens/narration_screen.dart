@@ -45,8 +45,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
         ref
             .read(playerControllerProvider.notifier)
             .initializeWithContent(widget.place, widget.narrationContent!);
-      } else {
-        // 生成新的導覽內容
+      } else if (widget.narrationAspect != null) {
+        // 生成新的導覽內容（需要明確的 narrationAspect）
         final locale =
             easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
             'zh-TW';
@@ -54,7 +54,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             .read(playerControllerProvider.notifier)
             .initialize(
               widget.place,
-              widget.narrationAspect ?? NarrationAspect.historicalBackground,
+              widget.narrationAspect!,
               language: Language(locale),
             );
       }
