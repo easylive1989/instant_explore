@@ -5,11 +5,9 @@ import 'package:context_app/features/explore/domain/services/location_service.da
 class GeolocatorService implements LocationService {
   @override
   Future<PlaceLocation> getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
     // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    LocationPermission permission;
     if (!serviceEnabled) {
       // Location services are not enabled don't continue
       // accessing the position and request users of the

@@ -40,7 +40,7 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
   ) async {
     final language = _currentLanguage();
 
-    NarrationContent content;
+    final NarrationContent content;
     try {
       content = NarrationContent.create(description, language: language);
     } catch (_) {

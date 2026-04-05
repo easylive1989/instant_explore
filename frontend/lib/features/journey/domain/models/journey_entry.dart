@@ -32,10 +32,7 @@ class JourneyEntry {
   }) {
     const uuid = Uuid();
 
-    String? imageUrl;
-    if (place.primaryPhoto != null) {
-      imageUrl = place.primaryPhoto!.url;
-    }
+    final String? imageUrl = place.primaryPhoto?.url;
 
     final savedPlace = SavedPlace(
       id: place.id,

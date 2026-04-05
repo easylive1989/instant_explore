@@ -246,7 +246,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       await _ttsService.stop();
     }
 
-    String textToPlay;
+    final String textToPlay;
     if (isResuming) {
       // 從暫停位置恢復播放：截取當前位置到結尾的文本
       _charPositionOffset = currentPos;
