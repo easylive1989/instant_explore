@@ -1,9 +1,14 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Timeline entry widget for a [QuickGuideEntry].
 class QuickGuideTimelineEntry extends ConsumerStatefulWidget {
@@ -24,6 +29,35 @@ class QuickGuideTimelineEntry extends ConsumerStatefulWidget {
 class _QuickGuideTimelineEntryState
     extends ConsumerState<QuickGuideTimelineEntry> {
   bool _isDeleting = false;
+
+  void _navigateToPlayer() {
+    if (_isDeleting) return;
+
+    final NarrationContent content;
+    try {
+      content = NarrationContent.create(
+        widget.entry.aiDescription,
+        language: widget.entry.language,
+      );
+    } catch (_) {
+      return;
+    }
+
+    final place = Place(
+      id: 'quick-guide-${widget.entry.id}',
+      name: 'quick_guide.title'.tr(),
+      formattedAddress: '',
+      location: const PlaceLocation(latitude: 0, longitude: 0),
+      types: const [],
+      photos: const [],
+      category: PlaceCategory.modernUrban,
+    );
+
+    context.push<void>(
+      '/player',
+      extra: {'place': place, 'narrationContent': content, 'autoPlay': true},
+    );
+  }
 
   Future<void> _showDeleteConfirmDialog() async {
     if (_isDeleting) return;
@@ -64,9 +98,7 @@ class _QuickGuideTimelineEntryState
       setState(() => _isDeleting = true);
 
       try {
-        await ref
-            .read(quickGuideRepositoryProvider)
-            .delete(widget.entry.id);
+        await ref.read(quickGuideRepositoryProvider).delete(widget.entry.id);
         ref.invalidate(quickGuideEntriesProvider);
         ref.invalidate(allJourneyItemsProvider);
       } catch (e) {
@@ -98,187 +130,190 @@ class _QuickGuideTimelineEntryState
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
 
-    return Container(
-      padding: const EdgeInsets.only(left: 32, bottom: 40),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          if (!widget.isLast)
+    return GestureDetector(
+      onTap: _navigateToPlayer,
+      child: Container(
+        padding: const EdgeInsets.only(left: 32, bottom: 40),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            if (!widget.isLast)
+              Positioned(
+                left: -21,
+                top: 32,
+                bottom: -40,
+                child: Container(
+                  width: 2,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+              ),
+
+            // Timeline node (camera icon instead of plain dot)
             Positioned(
-              left: -21,
-              top: 32,
-              bottom: -40,
+              left: -32,
+              top: 4,
               child: Container(
-                width: 2,
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-
-          // Timeline node (camera icon instead of plain dot)
-          Positioned(
-            left: -32,
-            top: 4,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2A7AE4),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.backgroundDark, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.camera_alt, color: Colors.white, size: 11),
-              ),
-            ),
-          ),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              _formatDateLabel(
-                                widget.entry.createdAt,
-                              ).toUpperCase(),
-                              style: const TextStyle(
-                                color: Color(0xFF2A7AE4),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              timeFormat.format(widget.entry.createdAt),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'quick_guide.title'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Thumbnail from captured image
-                  Container(
-                    width: 48,
-                    height: 48,
-                    margin: const EdgeInsets.only(left: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Colors.grey,
-                        BlendMode.saturation,
-                      ),
-                      child: Opacity(
-                        opacity: 0.8,
-                        child: Image.memory(
-                          widget.entry.imageBytes,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Description card
-              Container(
-                padding: const EdgeInsets.all(20),
+                width: 24,
+                height: 24,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDark,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
+                  color: const Color(0xFF2A7AE4),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.backgroundDark, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 4,
                     ),
                   ],
                 ),
-                child: Column(
+                child: const Center(
+                  child: Icon(Icons.camera_alt, color: Colors.white, size: 11),
+                ),
+              ),
+            ),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.entry.aiDescription,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 15,
-                        height: 1.6,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.only(top: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.08),
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_isDeleting)
-                            const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primary,
+                          Row(
+                            children: [
+                              Text(
+                                _formatDateLabel(
+                                  widget.entry.createdAt,
+                                ).toUpperCase(),
+                                style: const TextStyle(
+                                  color: Color(0xFF2A7AE4),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
-                            )
-                          else
-                            _DeleteButton(onTap: _showDeleteConfirmDialog),
+                              const SizedBox(width: 8),
+                              Text(
+                                timeFormat.format(widget.entry.createdAt),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'quick_guide.title'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
+                            ),
+                          ),
                         ],
                       ),
                     ),
+
+                    // Thumbnail from captured image
+                    Container(
+                      width: 48,
+                      height: 48,
+                      margin: const EdgeInsets.only(left: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                          Colors.grey,
+                          BlendMode.saturation,
+                        ),
+                        child: Opacity(
+                          opacity: 0.8,
+                          child: Image.memory(
+                            widget.entry.imageBytes,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ],
+
+                const SizedBox(height: 16),
+
+                // Description card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceDark,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.entry.aiDescription,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 15,
+                          height: 1.6,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.only(top: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.08),
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (_isDeleting)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            else
+                              _DeleteButton(onTap: _showDeleteConfirmDialog),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
