@@ -4,6 +4,7 @@ import 'package:context_app/features/quick_guide/data/quick_guide_ai_service.dar
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The lifecycle of a quick-guide session.
@@ -16,6 +17,9 @@ enum QuickGuideStatus {
 
   /// Description is ready and entry has been saved to the journey.
   success,
+
+  /// Daily usage quota has been exceeded.
+  quotaExceeded,
 
   /// An error occurred.
   error,
@@ -39,6 +43,7 @@ class QuickGuideState {
 
   bool get hasError => status == QuickGuideStatus.error;
   bool get isSuccess => status == QuickGuideStatus.success;
+  bool get isQuotaExceeded => status == QuickGuideStatus.quotaExceeded;
 
   QuickGuideState copyWith({
     QuickGuideStatus? status,
@@ -57,17 +62,34 @@ class QuickGuideState {
 class QuickGuideController extends StateNotifier<QuickGuideState> {
   final QuickGuideAiService _aiService;
   final QuickGuideRepository _repository;
+  final UsageRepository _usageRepository;
 
-  QuickGuideController(this._aiService, this._repository)
+  QuickGuideController(this._aiService, this._repository, this._usageRepository)
     : super(const QuickGuideState());
 
   /// Sends [imageBytes] to the AI service, then automatically saves the
-  /// result to the journey.
+  /// result to the journey and consumes one usage quota.
+  ///
+  /// Sets [QuickGuideStatus.quotaExceeded] when the daily limit is reached.
   Future<void> analyzeImage({
     required Uint8List imageBytes,
     required String mimeType,
     required String language,
   }) async {
+    try {
+      final usageStatus = await _usageRepository.getUsageStatus();
+      if (!usageStatus.canUseNarration) {
+        state = const QuickGuideState(status: QuickGuideStatus.quotaExceeded);
+        return;
+      }
+    } catch (e) {
+      state = QuickGuideState(
+        status: QuickGuideStatus.error,
+        errorMessage: e.toString(),
+      );
+      return;
+    }
+
     state = QuickGuideState(
       status: QuickGuideStatus.analyzing,
       imageBytes: imageBytes,
@@ -86,6 +108,7 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
         language: Language(language),
       );
       await _repository.save(entry);
+      await _usageRepository.consumeUsage();
 
       state = state.copyWith(
         status: QuickGuideStatus.success,

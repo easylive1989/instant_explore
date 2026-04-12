@@ -4,6 +4,7 @@ import 'package:context_app/features/quick_guide/data/quick_guide_ai_service.dar
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
+import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final quickGuideAiServiceProvider = Provider<QuickGuideAiService>((ref) {
@@ -19,6 +20,7 @@ final quickGuideControllerProvider =
       return QuickGuideController(
         ref.watch(quickGuideAiServiceProvider),
         ref.watch(quickGuideRepositoryProvider),
+        ref.watch(usageRepositoryProvider),
       );
     });
 

@@ -1,4 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
@@ -61,6 +62,14 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
       '/player',
       extra: {'place': place, 'narrationContent': content, 'autoPlay': true},
     );
+  }
+
+  Future<void> _handleQuotaExceeded(BuildContext context) async {
+    ref.read(quickGuideControllerProvider.notifier).reset();
+    final result = await showWatchAdDialog(context, ref);
+    if (result == 'subscribe' && mounted) {
+      context.pushNamed('subscription');
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -126,6 +135,9 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
         final description = current.aiDescription!;
         ref.read(quickGuideControllerProvider.notifier).reset();
         _navigateToPlayer(context, description);
+      }
+      if (previous?.isQuotaExceeded != true && current.isQuotaExceeded) {
+        _handleQuotaExceeded(context);
       }
     });
 

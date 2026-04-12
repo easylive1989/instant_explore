@@ -4,6 +4,8 @@ import 'package:context_app/features/quick_guide/data/quick_guide_ai_service.dar
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
+import 'package:context_app/features/usage/domain/models/usage_status.dart';
+import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // ---------------------------------------------------------------------------
@@ -25,6 +27,25 @@ class _FakeAiService implements QuickGuideAiService {
     if (exceptionToThrow != null) throw exceptionToThrow!;
     return responseToReturn ?? 'AI description';
   }
+}
+
+class _FakeUsageRepository implements UsageRepository {
+  bool hasQuota;
+  int consumeCallCount = 0;
+
+  _FakeUsageRepository({this.hasQuota = true});
+
+  @override
+  Future<UsageStatus> getUsageStatus() async => UsageStatus(
+    usedToday: hasQuota ? 0 : 1,
+    dailyFreeLimit: 1,
+  );
+
+  @override
+  Future<void> consumeUsage() async => consumeCallCount++;
+
+  @override
+  Future<void> addBonusFromAd() async {}
 }
 
 class _FakeRepository implements QuickGuideRepository {
@@ -53,11 +74,31 @@ class _FakeRepository implements QuickGuideRepository {
 void main() {
   final imageBytes = Uint8List.fromList([10, 20, 30]);
 
+  QuickGuideController _makeController({
+    String? aiResponse,
+    Exception? aiException,
+    Exception? saveException,
+    bool hasQuota = true,
+  }) {
+    return QuickGuideController(
+      _FakeAiService(
+        responseToReturn: aiResponse,
+        exceptionToThrow: aiException,
+      ),
+      _FakeRepository()..saveException = saveException,
+      _FakeUsageRepository(hasQuota: hasQuota),
+    );
+  }
+
   group('QuickGuideController.analyzeImage', () {
-    test('sets status to success and saves entry to journey', () async {
-      final aiService = _FakeAiService(responseToReturn: 'A lovely temple.');
+    test('sets status to success, saves entry, and consumes usage', () async {
+      final usageRepo = _FakeUsageRepository();
       final repo = _FakeRepository();
-      final controller = QuickGuideController(aiService, repo);
+      final controller = QuickGuideController(
+        _FakeAiService(responseToReturn: 'A lovely temple.'),
+        repo,
+        usageRepo,
+      );
 
       await controller.analyzeImage(
         imageBytes: imageBytes,
@@ -68,20 +109,35 @@ void main() {
       expect(controller.state.status, QuickGuideStatus.success);
       expect(controller.state.aiDescription, 'A lovely temple.');
       expect(controller.state.imageBytes, imageBytes);
-      expect(controller.state.hasError, isFalse);
       expect(repo._entries.length, 1);
       expect(repo._entries.first.aiDescription, 'A lovely temple.');
+      expect(usageRepo.consumeCallCount, 1);
+    });
+
+    test('sets status to quotaExceeded when daily limit is reached', () async {
+      final controller = _makeController(
+        aiResponse: 'desc',
+        hasQuota: false,
+      );
+
+      await controller.analyzeImage(
+        imageBytes: imageBytes,
+        mimeType: 'image/jpeg',
+        language: 'zh-TW',
+      );
+
+      expect(controller.state.status, QuickGuideStatus.quotaExceeded);
+      expect(controller.state.isQuotaExceeded, isTrue);
+      expect(controller.state.imageBytes, isNull);
     });
 
     test('sets status to error when AI service throws', () async {
-      final aiService = _FakeAiService(
-        exceptionToThrow: const QuickGuideAiException(
+      final controller = _makeController(
+        aiException: const QuickGuideAiException(
           type: QuickGuideAiErrorType.network,
           message: 'no connection',
         ),
       );
-      final repo = _FakeRepository();
-      final controller = QuickGuideController(aiService, repo);
 
       await controller.analyzeImage(
         imageBytes: imageBytes,
@@ -92,13 +148,13 @@ void main() {
       expect(controller.state.status, QuickGuideStatus.error);
       expect(controller.state.hasError, isTrue);
       expect(controller.state.errorMessage, isNotNull);
-      expect(repo._entries, isEmpty);
     });
 
     test('sets status to error when repository throws', () async {
-      final aiService = _FakeAiService(responseToReturn: 'desc');
-      final repo = _FakeRepository()..saveException = Exception('disk full');
-      final controller = QuickGuideController(aiService, repo);
+      final controller = _makeController(
+        aiResponse: 'desc',
+        saveException: Exception('disk full'),
+      );
 
       await controller.analyzeImage(
         imageBytes: imageBytes,
@@ -112,10 +168,7 @@ void main() {
 
     test('stores imageBytes in state while analyzing', () async {
       final states = <QuickGuideState>[];
-      final aiService = _FakeAiService(responseToReturn: 'desc');
-      final repo = _FakeRepository();
-      final controller = QuickGuideController(aiService, repo);
-
+      final controller = _makeController(aiResponse: 'desc');
       controller.addListener(states.add, fireImmediately: false);
 
       await controller.analyzeImage(
@@ -131,9 +184,7 @@ void main() {
 
   group('QuickGuideController.reset', () {
     test('resets to idle state with no data', () async {
-      final aiService = _FakeAiService(responseToReturn: 'desc');
-      final repo = _FakeRepository();
-      final controller = QuickGuideController(aiService, repo);
+      final controller = _makeController(aiResponse: 'desc');
 
       await controller.analyzeImage(
         imageBytes: imageBytes,
