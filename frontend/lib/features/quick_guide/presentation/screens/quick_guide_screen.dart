@@ -7,6 +7,7 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/usage/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,7 +163,23 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
             ),
             Expanded(
               child: guideState.imageBytes == null
-                  ? _ImageSourceSelector(onPickImage: _pickImage)
+                  ? _ImageSourceSelector(
+                      onPickImage: (source) async {
+                        final usageStatus = await ref
+                            .read(usageRepositoryProvider)
+                            .getUsageStatus();
+                        if (!context.mounted) return;
+                        if (!usageStatus.canUseNarration) {
+                          final result = await showWatchAdDialog(context, ref);
+                          if (result == 'subscribe') {
+                            if (!context.mounted) return;
+                            context.pushNamed('subscription');
+                          }
+                          return;
+                        }
+                        _pickImage(source);
+                      },
+                    )
                   : _CaptureResultView(
                       guideState: guideState,
                       onRetake: () => ref
