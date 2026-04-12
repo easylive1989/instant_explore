@@ -57,15 +57,10 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
       category: PlaceCategory.modernUrban,
     );
 
-    await context.push<void>('/player', extra: {
-      'place': place,
-      'narrationContent': content,
-      'autoPlay': true,
-    });
-
-    if (mounted) {
-      ref.read(quickGuideControllerProvider.notifier).reset();
-    }
+    await context.push<void>(
+      '/player',
+      extra: {'place': place, 'narrationContent': content, 'autoPlay': true},
+    );
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -85,7 +80,11 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
 
       await ref
           .read(quickGuideControllerProvider.notifier)
-          .analyzeImage(imageBytes: bytes, mimeType: mimeType, language: locale);
+          .analyzeImage(
+            imageBytes: bytes,
+            mimeType: mimeType,
+            language: locale,
+          );
     } catch (e) {
       debugPrint('Error picking image: $e');
       ref.read(quickGuideControllerProvider.notifier).reset();
@@ -117,11 +116,16 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<QuickGuideState>(quickGuideControllerProvider, (previous, current) {
+    ref.listen<QuickGuideState>(quickGuideControllerProvider, (
+      previous,
+      current,
+    ) {
       if (previous?.isSuccess != true &&
           current.isSuccess &&
           current.aiDescription != null) {
-        _navigateToPlayer(context, current.aiDescription!);
+        final description = current.aiDescription!;
+        ref.read(quickGuideControllerProvider.notifier).reset();
+        _navigateToPlayer(context, description);
       }
     });
 
@@ -149,10 +153,9 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
                   ? _ImageSourceSelector(onPickImage: _pickImage)
                   : _CaptureResultView(
                       guideState: guideState,
-                      onRetake: () =>
-                          ref
-                              .read(quickGuideControllerProvider.notifier)
-                              .reset(),
+                      onRetake: () => ref
+                          .read(quickGuideControllerProvider.notifier)
+                          .reset(),
                     ),
             ),
           ],
@@ -258,10 +261,7 @@ class _CaptureResultView extends StatelessWidget {
   final QuickGuideState guideState;
   final VoidCallback onRetake;
 
-  const _CaptureResultView({
-    required this.guideState,
-    required this.onRetake,
-  });
+  const _CaptureResultView({required this.guideState, required this.onRetake});
 
   @override
   Widget build(BuildContext context) {
@@ -379,4 +379,3 @@ class _DescriptionArea extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-

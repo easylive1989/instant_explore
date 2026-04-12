@@ -11,17 +11,11 @@ enum QuickGuideStatus {
   /// Waiting for the user to take a photo.
   idle,
 
-  /// AI is analysing the image.
+  /// AI is analysing the image and saving to journey.
   analyzing,
 
-  /// AI description is ready; user can save.
+  /// Description is ready and entry has been saved to the journey.
   success,
-
-  /// Persisting the entry.
-  saving,
-
-  /// Entry has been saved to the journey.
-  saved,
 
   /// An error occurred.
   error,
@@ -41,26 +35,22 @@ class QuickGuideState {
     this.errorMessage,
   });
 
-  bool get isLoading =>
-      status == QuickGuideStatus.analyzing ||
-      status == QuickGuideStatus.saving;
+  bool get isLoading => status == QuickGuideStatus.analyzing;
 
   bool get hasError => status == QuickGuideStatus.error;
   bool get isSuccess => status == QuickGuideStatus.success;
-  bool get isSaved => status == QuickGuideStatus.saved;
 
   QuickGuideState copyWith({
     QuickGuideStatus? status,
     Uint8List? imageBytes,
     String? aiDescription,
     String? errorMessage,
-  }) =>
-      QuickGuideState(
-        status: status ?? this.status,
-        imageBytes: imageBytes ?? this.imageBytes,
-        aiDescription: aiDescription ?? this.aiDescription,
-        errorMessage: errorMessage ?? this.errorMessage,
-      );
+  }) => QuickGuideState(
+    status: status ?? this.status,
+    imageBytes: imageBytes ?? this.imageBytes,
+    aiDescription: aiDescription ?? this.aiDescription,
+    errorMessage: errorMessage ?? this.errorMessage,
+  );
 }
 
 /// Manages the quick-guide capture → describe → save flow.
@@ -71,7 +61,8 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
   QuickGuideController(this._aiService, this._repository)
     : super(const QuickGuideState());
 
-  /// Sends [imageBytes] to the AI service and stores the description.
+  /// Sends [imageBytes] to the AI service, then automatically saves the
+  /// result to the journey.
   Future<void> analyzeImage({
     required Uint8List imageBytes,
     required String mimeType,
@@ -89,36 +80,17 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
         language: language,
       );
 
+      final entry = QuickGuideEntry.create(
+        imageBytes: imageBytes,
+        aiDescription: description,
+        language: Language(language),
+      );
+      await _repository.save(entry);
+
       state = state.copyWith(
         status: QuickGuideStatus.success,
         aiDescription: description,
       );
-    } catch (e) {
-      state = state.copyWith(
-        status: QuickGuideStatus.error,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-  /// Persists the current image and description as a [QuickGuideEntry].
-  ///
-  /// Does nothing when no image or description is available.
-  Future<void> saveToJourney(Language language) async {
-    final imageBytes = state.imageBytes;
-    final description = state.aiDescription;
-    if (imageBytes == null || description == null) return;
-
-    state = state.copyWith(status: QuickGuideStatus.saving);
-
-    try {
-      final entry = QuickGuideEntry.create(
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: language,
-      );
-      await _repository.save(entry);
-      state = state.copyWith(status: QuickGuideStatus.saved);
     } catch (e) {
       state = state.copyWith(
         status: QuickGuideStatus.error,
