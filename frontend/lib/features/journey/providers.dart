@@ -18,17 +18,18 @@ final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((ref) {
 
 /// Combined provider returning all journey items (narration + quick guide)
 /// sorted newest first.
-final allJourneyItemsProvider =
-    FutureProvider.autoDispose<List<JourneyItem>>((ref) async {
-      final narrationEntries =
-          await ref.watch(journeyRepositoryProvider).getAll();
-      final quickGuideEntries =
-          await ref.watch(quickGuideRepositoryProvider).getAll();
+final allJourneyItemsProvider = FutureProvider.autoDispose<List<JourneyItem>>((
+  ref,
+) async {
+  final narrationEntries = await ref.watch(journeyRepositoryProvider).getAll();
+  final quickGuideEntries = await ref
+      .watch(quickGuideRepositoryProvider)
+      .getAll();
 
-      final items = <JourneyItem>[
-        ...narrationEntries.map(NarrationJourneyItem.new),
-        ...quickGuideEntries.map(QuickGuideJourneyItem.new),
-      ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  final items = <JourneyItem>[
+    ...narrationEntries.map(NarrationJourneyItem.new),
+    ...quickGuideEntries.map(QuickGuideJourneyItem.new),
+  ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      return items;
-    });
+  return items;
+});

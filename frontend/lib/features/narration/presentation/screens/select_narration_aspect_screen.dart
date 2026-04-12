@@ -177,8 +177,11 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
                                 isSelected: selectedAspect == aspect,
                                 onTap: () {
                                   ref
-                                      .read(narrationAspectProvider.notifier)
-                                      .state = aspect;
+                                          .read(
+                                            narrationAspectProvider.notifier,
+                                          )
+                                          .state =
+                                      aspect;
                                 },
                               ),
                             );
@@ -190,58 +193,58 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
 
                     // Start Button
                     ElevatedButton(
-                    onPressed: () async {
-                      final usageRepo = ref.read(usageRepositoryProvider);
-                      final status = await usageRepo.getUsageStatus();
-                      if (!status.canUseNarration) {
-                        if (!context.mounted) return;
-                        final result = await showWatchAdDialog(context, ref);
-                        if (result == 'subscribe') {
+                      onPressed: () async {
+                        final usageRepo = ref.read(usageRepositoryProvider);
+                        final status = await usageRepo.getUsageStatus();
+                        if (!status.canUseNarration) {
                           if (!context.mounted) return;
-                          context.pushNamed('subscription');
-                          return;
+                          final result = await showWatchAdDialog(context, ref);
+                          if (result == 'subscribe') {
+                            if (!context.mounted) return;
+                            context.pushNamed('subscription');
+                            return;
+                          }
+                          if (result != true || !context.mounted) return;
                         }
-                        if (result != true || !context.mounted) return;
-                      }
-                      if (!context.mounted) return;
-                      context.pushNamed(
-                        'player',
-                        extra: {
-                          'place': place,
-                          'narrationAspect': selectedAspect,
-                        },
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.play_arrow, color: Colors.white),
-                        const SizedBox(width: 8),
-                        Text(
-                          'config_screen.start_button'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        if (!context.mounted) return;
+                        context.pushNamed(
+                          'player',
+                          extra: {
+                            'place': place,
+                            'narrationAspect': selectedAspect,
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.play_arrow, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text(
+                            'config_screen.start_button'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
         ],
       ),
     );

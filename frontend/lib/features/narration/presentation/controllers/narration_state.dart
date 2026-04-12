@@ -131,10 +131,12 @@ class NarrationState extends Equatable {
       aspect: aspect == _unset ? this.aspect : aspect as NarrationAspect?,
       content: content ?? this.content,
       playerState: playerState ?? this.playerState,
-      errorType:
-          errorType == _unset ? this.errorType : errorType as NarrationStateErrorType?,
-      errorMessage:
-          errorMessage == _unset ? this.errorMessage : errorMessage as String?,
+      errorType: errorType == _unset
+          ? this.errorType
+          : errorType as NarrationStateErrorType?,
+      errorMessage: errorMessage == _unset
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
 
