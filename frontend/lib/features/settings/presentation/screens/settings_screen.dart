@@ -14,71 +14,40 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(settingsControllerProvider.notifier);
     final appVersionAsync = ref.watch(appVersionStringProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundDark.withValues(alpha: 0.95),
-        elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.1),
+            color: colorScheme.onSurface.withValues(alpha: 0.1),
             height: 1.0,
           ),
         ),
-        title: Text(
-          'settings.title'.tr(),
-          style: const TextStyle(
-            color: AppColors.textPrimaryDark,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text('settings.title'.tr(), style: textTheme.titleLarge),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildSectionHeader('settings.preferences'.tr()),
+          _SectionHeader(title: 'settings.preferences'.tr()),
           const SizedBox(height: 8),
-          _buildSectionContainer(AppColors.surfaceDark, [
-            _buildSettingsTile(
-              icon: Icons.language,
-              iconColor: AppColors.primary,
-              iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-              title: 'settings.change_language'.tr(),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.locale.languageCode == 'en' ? 'English' : '繁體中文',
-                    style: const TextStyle(
-                      color: AppColors.textSecondaryDark,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppColors.textSecondaryDark,
-                    size: 14,
-                  ),
-                ],
-              ),
-              onTap: () => controller.changeLanguage(context),
-            ),
-          ]),
+          _SectionContainer(
+            children: [
+              _LanguageTile(controller: controller),
+              _Divider(),
+              const _ThemeModeTile(),
+            ],
+          ),
           const SizedBox(height: 32),
-          _buildSectionHeader('settings.daily_usage'.tr()),
+          _SectionHeader(title: 'settings.daily_usage'.tr()),
           const SizedBox(height: 8),
-          _buildUsageSection(ref),
+          _UsageSection(ref: ref),
           const SizedBox(height: 32),
-          _buildSectionHeader('subscription.title'.tr()),
+          _SectionHeader(title: 'subscription.title'.tr()),
           const SizedBox(height: 8),
-          _buildSubscriptionSection(context, ref),
+          _SubscriptionSection(context: context, ref: ref),
           const SizedBox(height: 48),
           Center(
             child: Column(
@@ -86,9 +55,8 @@ class SettingsScreen extends ConsumerWidget {
                 appVersionAsync.when(
                   data: (version) => Text(
                     version,
-                    style: const TextStyle(
-                      color: AppColors.textSecondaryDark,
-                      fontSize: 12,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   loading: () => const SizedBox(
@@ -98,17 +66,16 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   error: (_, __) => Text(
                     'settings.app_version'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.textSecondaryDark,
-                      fontSize: 12,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'settings.copyright'.tr(),
-                  style: TextStyle(
-                    color: AppColors.textSecondaryDark.withValues(alpha: 0.7),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     fontSize: 10,
                   ),
                 ),
@@ -119,58 +86,26 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildSubscriptionSection(BuildContext context, WidgetRef ref) {
-    final isPremium = ref.watch(isPremiumProvider);
-    final statusAsync = ref.watch(subscriptionStatusProvider);
+// ============================================================================
+// Section widgets
+// ============================================================================
 
-    if (isPremium) {
-      final expirationDate = statusAsync.valueOrNull?.expirationDate;
-      final formattedDate = expirationDate != null
-          ? DateFormat.yMMMd().format(expirationDate)
-          : '';
-      return _buildSectionContainer(AppColors.surfaceDark, [
-        _buildSettingsTile(
-          icon: Icons.workspace_premium,
-          iconColor: AppColors.amber,
-          iconBgColor: AppColors.amber.withValues(alpha: 0.2),
-          title: 'subscription.premium_active'.tr(),
-          trailing: formattedDate.isNotEmpty
-              ? Text(
-                  'subscription.expires'.tr(namedArgs: {'date': formattedDate}),
-                  style: const TextStyle(
-                    color: AppColors.textSecondaryDark,
-                    fontSize: 12,
-                  ),
-                )
-              : null,
-        ),
-      ]);
-    }
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
 
-    return _buildSectionContainer(AppColors.surfaceDark, [
-      _buildSettingsTile(
-        icon: Icons.workspace_premium,
-        iconColor: AppColors.primary,
-        iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-        title: 'subscription.upgrade_cta'.tr(),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          color: AppColors.textSecondaryDark,
-          size: 14,
-        ),
-        onTap: () => context.pushNamed('subscription'),
-      ),
-    ]);
-  }
+  final String title;
 
-  Widget _buildSectionHeader(String title) {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: 4.0),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
-          color: AppColors.textSecondaryDark,
+        style: TextStyle(
+          color: colorScheme.onSurfaceVariant,
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.0,
@@ -178,73 +113,268 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildSectionContainer(Color color, List<Widget> children) {
+class _SectionContainer extends StatelessWidget {
+  const _SectionContainer({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: color,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: const Border.fromBorderSide(
-          BorderSide(color: AppColors.white10),
+        border: Border.fromBorderSide(
+          BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
       child: Column(children: children),
     );
   }
+}
 
-  Widget _buildUsageSection(WidgetRef ref) {
-    final usageAsync = ref.watch(usageStatusProvider);
-    final isPremium = ref.watch(isPremiumProvider);
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      indent: 60,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
+}
 
-    return _buildSectionContainer(AppColors.surfaceDark, [
-      usageAsync.when(
-        data: (status) => _buildSettingsTile(
-          icon: Icons.bar_chart,
-          iconColor: AppColors.primary,
-          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-          title: 'settings.daily_usage'.tr(),
-          trailing: Text(
-            isPremium
-                ? 'subscription.unlimited_access'.tr()
-                : 'settings.remaining_today'.tr(
-                    namedArgs: {'remaining': status.remaining.toString()},
-                  ),
-            style: const TextStyle(
-              color: AppColors.textSecondaryDark,
-              fontSize: 12,
+// ============================================================================
+// Tile widgets
+// ============================================================================
+
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile({required this.controller});
+
+  final dynamic controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingsTile(
+      icon: Icons.language,
+      iconColor: AppColors.primary,
+      iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+      title: 'settings.change_language'.tr(),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.locale.languageCode == 'en' ? 'English' : '繁體中文',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ),
-        loading: () => const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.arrow_forward_ios,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: 14,
           ),
-        ),
-        error: (_, __) => _buildSettingsTile(
-          icon: Icons.bar_chart,
-          iconColor: AppColors.primary,
-          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
-          title: 'settings.daily_usage'.tr(),
-        ),
+        ],
       ),
-    ]);
+      onTap: () => controller.changeLanguage(context),
+    );
+  }
+}
+
+class _ThemeModeTile extends ConsumerWidget {
+  const _ThemeModeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final notifier = ref.read(themeModeProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark =
+        themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
+    return _SettingsTile(
+      icon: isDark ? Icons.dark_mode : Icons.light_mode,
+      iconColor: isDark ? AppColors.amber : AppColors.primary,
+      iconBgColor: isDark
+          ? AppColors.amber.withValues(alpha: 0.2)
+          : AppColors.primary.withValues(alpha: 0.2),
+      title: 'settings.theme'.tr(),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _label(themeMode),
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch(
+            value: themeMode == ThemeMode.dark,
+            activeThumbColor: AppColors.primary,
+            onChanged: (value) =>
+                notifier.setThemeMode(value ? ThemeMode.dark : ThemeMode.light),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-    required String title,
-    Widget? trailing,
-    Color? titleColor,
-    VoidCallback? onTap,
-  }) {
+  String _label(ThemeMode mode) => switch (mode) {
+    ThemeMode.dark => 'settings.theme_dark'.tr(),
+    ThemeMode.light => 'settings.theme_light'.tr(),
+    ThemeMode.system => 'settings.theme_system'.tr(),
+  };
+}
+
+class _SubscriptionSection extends StatelessWidget {
+  const _SubscriptionSection({required this.context, required this.ref});
+
+  final BuildContext context;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext outerContext) {
+    final isPremium = ref.watch(isPremiumProvider);
+    final statusAsync = ref.watch(subscriptionStatusProvider);
+    final colorScheme = Theme.of(outerContext).colorScheme;
+
+    if (isPremium) {
+      final expirationDate = statusAsync.valueOrNull?.expirationDate;
+      final formattedDate = expirationDate != null
+          ? DateFormat.yMMMd().format(expirationDate)
+          : '';
+      return _SectionContainer(
+        children: [
+          _SettingsTile(
+            icon: Icons.workspace_premium,
+            iconColor: AppColors.amber,
+            iconBgColor: AppColors.amber.withValues(alpha: 0.2),
+            title: 'subscription.premium_active'.tr(),
+            trailing: formattedDate.isNotEmpty
+                ? Text(
+                    'subscription.expires'.tr(
+                      namedArgs: {'date': formattedDate},
+                    ),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  )
+                : null,
+          ),
+        ],
+      );
+    }
+
+    return _SectionContainer(
+      children: [
+        _SettingsTile(
+          icon: Icons.workspace_premium,
+          iconColor: AppColors.primary,
+          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          title: 'subscription.upgrade_cta'.tr(),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: colorScheme.onSurfaceVariant,
+            size: 14,
+          ),
+          onTap: () => outerContext.pushNamed('subscription'),
+        ),
+      ],
+    );
+  }
+}
+
+class _UsageSection extends StatelessWidget {
+  const _UsageSection({required this.ref});
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final usageAsync = ref.watch(usageStatusProvider);
+    final isPremium = ref.watch(isPremiumProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return _SectionContainer(
+      children: [
+        usageAsync.when(
+          data: (status) => _SettingsTile(
+            icon: Icons.bar_chart,
+            iconColor: AppColors.primary,
+            iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+            title: 'settings.daily_usage'.tr(),
+            trailing: Text(
+              isPremium
+                  ? 'subscription.unlimited_access'.tr()
+                  : 'settings.remaining_today'.tr(
+                      namedArgs: {'remaining': status.remaining.toString()},
+                    ),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+          error: (_, __) => _SettingsTile(
+            icon: Icons.bar_chart,
+            iconColor: AppColors.primary,
+            iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+            title: 'settings.daily_usage'.tr(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================================
+// Base tile
+// ============================================================================
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBgColor,
+    required this.title,
+    this.trailing,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBgColor;
+  final String title;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
+      borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -264,13 +394,13 @@ class SettingsScreen extends ConsumerWidget {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: titleColor ?? AppColors.textPrimaryDark,
+                  color: colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            if (trailing != null) trailing,
+            if (trailing != null) trailing!,
           ],
         ),
       ),

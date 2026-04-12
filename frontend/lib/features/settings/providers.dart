@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
+import 'package:context_app/features/settings/presentation/controllers/theme_mode_notifier.dart';
 
 // ============================================================================
 // App Info Providers
@@ -37,3 +39,12 @@ final settingsControllerProvider =
     StateNotifierProvider<SettingsController, AsyncValue<void>>(
       (ref) => SettingsController(),
     );
+
+// ============================================================================
+// Theme Providers
+// ============================================================================
+
+/// 應用的 ThemeMode Provider（持久化到 SharedPreferences）
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);

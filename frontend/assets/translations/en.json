@@ -130,7 +130,11 @@
     "app_version": "Version information unavailable",
     "copyright": "© 2025 Contexture",
     "daily_usage": "Daily Usage",
-    "remaining_today": "{remaining} remaining today"
+    "remaining_today": "{remaining} remaining today",
+    "theme": "Appearance",
+    "theme_dark": "Dark",
+    "theme_light": "Light",
+    "theme_system": "System"
   },
   "place_category": {
     "historical_cultural": "Historical & Cultural",

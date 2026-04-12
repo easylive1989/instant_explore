@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/common/config/theme_config.dart';
 import 'package:context_app/common/config/router_config.dart';
+import 'package:context_app/features/settings/providers.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -13,16 +14,17 @@ class ContextureApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => 'name'.tr(),
       debugShowCheckedModeBanner: false,
       theme: ThemeConfig.lightTheme,
+      darkTheme: ThemeConfig.darkTheme,
+      themeMode: themeMode,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-      darkTheme: ThemeConfig.darkTheme,
-      themeMode: ThemeMode.dark, // Force dark mode to match design
       routerConfig: router,
     );
   }

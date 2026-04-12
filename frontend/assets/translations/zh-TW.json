@@ -130,7 +130,11 @@
     "app_version": "版本資訊無法取得",
     "copyright": "© 2025 Contexture 讀景",
     "daily_usage": "每日使用量",
-    "remaining_today": "今日剩餘 {remaining} 次"
+    "remaining_today": "今日剩餘 {remaining} 次",
+    "theme": "外觀",
+    "theme_dark": "深色",
+    "theme_light": "淺色",
+    "theme_system": "跟隨系統"
   },
   "place_category": {
     "historical_cultural": "人文古蹟",
