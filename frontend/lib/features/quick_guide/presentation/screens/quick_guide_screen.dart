@@ -67,7 +67,7 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
   Future<void> _handleQuotaExceeded(BuildContext context) async {
     ref.read(quickGuideControllerProvider.notifier).reset();
     final result = await showWatchAdDialog(context, ref);
-    if (result == 'subscribe' && mounted) {
+    if (result == 'subscribe' && context.mounted) {
       context.pushNamed('subscription');
     }
   }

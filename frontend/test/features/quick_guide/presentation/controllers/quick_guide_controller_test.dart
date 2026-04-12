@@ -74,7 +74,7 @@ class _FakeRepository implements QuickGuideRepository {
 void main() {
   final imageBytes = Uint8List.fromList([10, 20, 30]);
 
-  QuickGuideController _makeController({
+  QuickGuideController makeController({
     String? aiResponse,
     Exception? aiException,
     Exception? saveException,
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('sets status to quotaExceeded when daily limit is reached', () async {
-      final controller = _makeController(
+      final controller = makeController(
         aiResponse: 'desc',
         hasQuota: false,
       );
@@ -132,7 +132,7 @@ void main() {
     });
 
     test('sets status to error when AI service throws', () async {
-      final controller = _makeController(
+      final controller = makeController(
         aiException: const QuickGuideAiException(
           type: QuickGuideAiErrorType.network,
           message: 'no connection',
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('sets status to error when repository throws', () async {
-      final controller = _makeController(
+      final controller = makeController(
         aiResponse: 'desc',
         saveException: Exception('disk full'),
       );
@@ -168,7 +168,7 @@ void main() {
 
     test('stores imageBytes in state while analyzing', () async {
       final states = <QuickGuideState>[];
-      final controller = _makeController(aiResponse: 'desc');
+      final controller = makeController(aiResponse: 'desc');
       controller.addListener(states.add, fireImmediately: false);
 
       await controller.analyzeImage(
@@ -184,7 +184,7 @@ void main() {
 
   group('QuickGuideController.reset', () {
     test('resets to idle state with no data', () async {
-      final controller = _makeController(aiResponse: 'desc');
+      final controller = makeController(aiResponse: 'desc');
 
       await controller.analyzeImage(
         imageBytes: imageBytes,
