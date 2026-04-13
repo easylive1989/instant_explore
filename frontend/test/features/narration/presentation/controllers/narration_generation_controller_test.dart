@@ -6,7 +6,6 @@ import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
