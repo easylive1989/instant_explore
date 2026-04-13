@@ -28,7 +28,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakePlace());
-    registerFallbackValue(NarrationAspect.historicalBackground);
+    registerFallbackValue(<NarrationAspect>{NarrationAspect.historicalBackground});
     registerFallbackValue(FakeLanguage());
   });
 
@@ -63,14 +63,14 @@ void main() {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
     final narrationContent = await useCase.execute(
       place: testPlace,
-      aspect: NarrationAspect.historicalBackground,
+      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
     );
 
@@ -89,14 +89,14 @@ void main() {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
     await useCase.execute(
       place: testPlace,
-      aspect: NarrationAspect.historicalBackground,
+      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
     );
 
@@ -111,7 +111,7 @@ void main() {
     expect(
       () => useCase.execute(
         place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       ),
       throwsA(
@@ -126,7 +126,7 @@ void main() {
     verifyNever(
       () => mockNarrationService.generateNarration(
         place: any(named: 'place'),
-        aspect: any(named: 'aspect'),
+        aspects: any(named: 'aspects'),
         language: any(named: 'language'),
       ),
     );
@@ -140,14 +140,14 @@ void main() {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
     final narrationContent = await useCase.execute(
       place: testPlace,
-      aspect: NarrationAspect.historicalBackground,
+      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
     );
 
@@ -162,14 +162,14 @@ void main() {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => testGeneratedText);
 
     await useCase.execute(
       place: testPlace,
-      aspect: NarrationAspect.historicalBackground,
+      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
     );
 

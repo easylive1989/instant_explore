@@ -8,7 +8,7 @@ class JourneyEntry {
   final String id;
   final SavedPlace place;
   final NarrationContent narrationContent;
-  final NarrationAspect narrationAspect;
+  final Set<NarrationAspect> narrationAspects;
   final DateTime createdAt;
   final Language language;
 
@@ -16,7 +16,7 @@ class JourneyEntry {
     required this.id,
     required this.place,
     required this.narrationContent,
-    required this.narrationAspect,
+    required this.narrationAspects,
     required this.createdAt,
     required this.language,
   });
@@ -27,7 +27,7 @@ class JourneyEntry {
   factory JourneyEntry.create({
     required String id,
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required NarrationContent content,
     required Language language,
   }) {
@@ -44,7 +44,7 @@ class JourneyEntry {
       id: id,
       place: savedPlace,
       narrationContent: content,
-      narrationAspect: aspect,
+      narrationAspects: aspects,
       createdAt: DateTime.now(),
       language: language,
     );
@@ -57,7 +57,9 @@ class JourneyEntry {
     'place_address': place.address,
     'place_image_url': place.imageUrl,
     'narration_text': narrationContent.text,
-    'narration_style': narrationAspect.key,
+    'narration_styles': narrationAspects
+        .map((a) => a.key)
+        .toList(),
     'created_at': createdAt.toIso8601String(),
     'language': language.code,
   };
@@ -78,15 +80,32 @@ class JourneyEntry {
       language: language,
     );
 
-    final narrationAspect =
-        NarrationAspect.fromKey(json['narration_style'] as String) ??
-        NarrationAspect.historicalBackground;
+    // 向下相容：支援舊的 narration_style（單一字串）
+    // 和新的 narration_styles（字串陣列）
+    Set<NarrationAspect> narrationAspects;
+    if (json.containsKey('narration_styles')) {
+      final styles = (json['narration_styles'] as List<dynamic>)
+          .cast<String>();
+      narrationAspects = styles
+          .map((key) => NarrationAspect.fromKey(key))
+          .whereType<NarrationAspect>()
+          .toSet();
+      if (narrationAspects.isEmpty) {
+        narrationAspects = {NarrationAspect.historicalBackground};
+      }
+    } else {
+      final aspect = NarrationAspect.fromKey(
+            json['narration_style'] as String,
+          ) ??
+          NarrationAspect.historicalBackground;
+      narrationAspects = {aspect};
+    }
 
     return JourneyEntry(
       id: json['id'] as String,
       place: place,
       narrationContent: narrationContent,
-      narrationAspect: narrationAspect,
+      narrationAspects: narrationAspects,
       createdAt: DateTime.parse(json['created_at'] as String),
       language: language,
     );
