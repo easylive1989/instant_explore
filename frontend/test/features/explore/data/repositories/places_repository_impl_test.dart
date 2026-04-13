@@ -54,12 +54,12 @@ void main() {
     );
   }
 
-  group('getNearbyPlaces - 評論數過濾', () {
-    test('應過濾掉評論數低於 10 的地點', () async {
+  group('getNearbyPlaces - 回傳所有地點（不過濾）', () {
+    test('應回傳所有地點，包括評論數少的', () async {
       final dtos = [
         createDto(id: '1', name: 'Popular', userRatingCount: 500),
-        createDto(id: '2', name: 'Too Few', userRatingCount: 5),
-        createDto(id: '3', name: 'Enough', userRatingCount: 10),
+        createDto(id: '2', name: 'Few Reviews', userRatingCount: 5),
+        createDto(id: '3', name: 'No Reviews', userRatingCount: null),
       ];
 
       when(
@@ -77,14 +77,12 @@ void main() {
         radius: testRadius,
       );
 
-      expect(result.length, 2);
-      expect(result.map((p) => p.name), ['Popular', 'Enough']);
+      expect(result.length, 3);
     });
 
-    test('應過濾掉 userRatingCount 為 null 的地點', () async {
+    test('應正確傳遞 userRatingCount 到 Domain Model', () async {
       final dtos = [
-        createDto(id: '1', name: 'Has Reviews', userRatingCount: 50),
-        createDto(id: '2', name: 'No Data', userRatingCount: null),
+        createDto(id: '1', name: 'Place', userRatingCount: 42),
       ];
 
       when(
@@ -102,92 +100,15 @@ void main() {
         radius: testRadius,
       );
 
-      expect(result.length, 1);
-      expect(result.first.name, 'Has Reviews');
-    });
-
-    test('剛好 10 則評論的地點應保留', () async {
-      final dtos = [
-        createDto(
-          id: '1',
-          name: 'Exactly 10',
-          userRatingCount: 10,
-        ),
-      ];
-
-      when(
-        () => mockApiService.searchNearby(
-          any(),
-          includedTypes: any(named: 'includedTypes'),
-          languageCode: any(named: 'languageCode'),
-          radius: any(named: 'radius'),
-        ),
-      ).thenAnswer((_) async => dtos);
-
-      final result = await repository.getNearbyPlaces(
-        testLocation,
-        language: testLanguage,
-        radius: testRadius,
-      );
-
-      expect(result.length, 1);
-      expect(result.first.name, 'Exactly 10');
-    });
-
-    test('9 則評論的地點應被過濾', () async {
-      final dtos = [
-        createDto(id: '1', name: 'Almost', userRatingCount: 9),
-      ];
-
-      when(
-        () => mockApiService.searchNearby(
-          any(),
-          includedTypes: any(named: 'includedTypes'),
-          languageCode: any(named: 'languageCode'),
-          radius: any(named: 'radius'),
-        ),
-      ).thenAnswer((_) async => dtos);
-
-      final result = await repository.getNearbyPlaces(
-        testLocation,
-        language: testLanguage,
-        radius: testRadius,
-      );
-
-      expect(result, isEmpty);
-    });
-
-    test('所有地點都被過濾時應回傳空列表', () async {
-      final dtos = [
-        createDto(id: '1', name: 'Low 1', userRatingCount: 3),
-        createDto(id: '2', name: 'Low 2', userRatingCount: 0),
-        createDto(id: '3', name: 'No Data', userRatingCount: null),
-      ];
-
-      when(
-        () => mockApiService.searchNearby(
-          any(),
-          includedTypes: any(named: 'includedTypes'),
-          languageCode: any(named: 'languageCode'),
-          radius: any(named: 'radius'),
-        ),
-      ).thenAnswer((_) async => dtos);
-
-      final result = await repository.getNearbyPlaces(
-        testLocation,
-        language: testLanguage,
-        radius: testRadius,
-      );
-
-      expect(result, isEmpty);
+      expect(result.first.userRatingCount, 42);
     });
   });
 
-  group('searchPlaces - 評論數過濾', () {
-    test('文字搜尋也應過濾掉評論數不足的地點', () async {
+  group('searchPlaces - 回傳所有地點（不過濾）', () {
+    test('應回傳所有搜尋結果', () async {
       final dtos = [
         createDto(id: '1', name: 'Popular', userRatingCount: 200),
-        createDto(id: '2', name: 'Too Few', userRatingCount: 3),
+        createDto(id: '2', name: 'Tiny', userRatingCount: 3),
       ];
 
       when(
@@ -202,8 +123,7 @@ void main() {
         language: testLanguage,
       );
 
-      expect(result.length, 1);
-      expect(result.first.name, 'Popular');
+      expect(result.length, 2);
     });
   });
 }

@@ -63,7 +63,13 @@
   },
   "explore": {
     "title": "探索",
-    "refresh": "重新整理"
+    "refresh": "重新整理",
+    "filter": {
+      "title": "篩選條件",
+      "min_reviews": "最低評論數",
+      "description": "過濾評論數不足的地點，避免顯示非真正的景點。",
+      "reset": "重設為預設值"
+    }
   },
   "common": {
     "language_english": "English",

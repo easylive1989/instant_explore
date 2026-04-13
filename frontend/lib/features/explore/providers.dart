@@ -33,6 +33,26 @@ final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
   return HivePlacesCacheService(apiKey);
 });
 
+// Filter Providers
+
+/// 使用者設定的最低評論數門檻，預設 100
+final minReviewCountProvider = StateProvider<int>((ref) => 100);
+
+/// 根據評論數過濾後的地點列表
+///
+/// 監聽 [placesControllerProvider] 和 [minReviewCountProvider]，
+/// 當任一改變時自動重新過濾，不會重新呼叫 API。
+final filteredPlacesProvider = Provider<AsyncValue<List<Place>>>((ref) {
+  final placesAsync = ref.watch(placesControllerProvider);
+  final minCount = ref.watch(minReviewCountProvider);
+
+  return placesAsync.whenData((places) {
+    return places
+        .where((p) => (p.userRatingCount ?? 0) >= minCount)
+        .toList();
+  });
+});
+
 // Use Case Providers
 final searchNearbyPlacesUseCaseProvider = Provider<SearchNearbyPlacesUseCase>((
   ref,
