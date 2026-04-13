@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/shared/extensions/place_category_extension.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 

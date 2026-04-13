@@ -29,6 +29,7 @@ void main() {
       );
 
       final entry = JourneyEntry.create(
+        id: 'test-id',
         place: place,
         aspect: aspect,
         content: content,
@@ -78,6 +79,7 @@ void main() {
         );
 
         final entry = JourneyEntry.create(
+          id: 'test-id-2',
           place: place,
           aspect: aspect,
           content: content,
@@ -101,7 +103,7 @@ void main() {
       },
     );
 
-    test('generates unique IDs for different entries', () {
+    test('preserves distinct IDs passed by caller', () {
       const place = Place(
         id: 'place-1',
         name: 'Place With Photo',
@@ -119,6 +121,7 @@ void main() {
       );
 
       final entry1 = JourneyEntry.create(
+        id: 'id-1',
         place: place,
         aspect: aspect,
         content: content,
@@ -126,12 +129,15 @@ void main() {
       );
 
       final entry2 = JourneyEntry.create(
+        id: 'id-2',
         place: place,
         aspect: aspect,
         content: content,
         language: Language.traditionalChinese,
       );
 
+      expect(entry1.id, equals('id-1'));
+      expect(entry2.id, equals('id-2'));
       expect(entry1.id, isNot(equals(entry2.id)));
     });
   });
@@ -155,6 +161,7 @@ void main() {
       );
 
       final original = JourneyEntry.create(
+        id: 'round-trip-id',
         place: place,
         aspect: aspect,
         content: content,
@@ -187,6 +194,7 @@ void main() {
         language: Language.english,
       );
       final entry = JourneyEntry.create(
+        id: 'lang-test-id',
         place: place,
         aspect: NarrationAspect.historicalBackground,
         content: content,

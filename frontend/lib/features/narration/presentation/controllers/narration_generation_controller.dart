@@ -10,6 +10,7 @@ import 'package:context_app/features/narration/domain/use_cases/create_narration
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/domain/errors/usage_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 /// The lifecycle of a narration generation session.
 enum NarrationGenerationStatus {
@@ -142,6 +143,7 @@ class NarrationGenerationController
   ) async {
     try {
       final entry = JourneyEntry.create(
+        id: const Uuid().v4(),
         place: place,
         aspect: aspect,
         content: content,

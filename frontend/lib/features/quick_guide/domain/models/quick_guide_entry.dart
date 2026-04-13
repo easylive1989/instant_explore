@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:uuid/uuid.dart';
 
 /// A journey entry created from a quick photo guide session.
 ///
@@ -22,15 +21,17 @@ class QuickGuideEntry {
     required this.language,
   });
 
-  /// Creates a new entry with a generated UUID and current timestamp.
+  /// Creates a new entry with the given [id] and current timestamp.
+  ///
+  /// [id] 由呼叫端產生，domain 層不負責 ID 生成策略。
   factory QuickGuideEntry.create({
+    required String id,
     required Uint8List imageBytes,
     required String aiDescription,
     required Language language,
   }) {
-    const uuid = Uuid();
     return QuickGuideEntry(
-      id: uuid.v4(),
+      id: id,
       imageBytes: imageBytes,
       aiDescription: aiDescription,
       createdAt: DateTime.now(),

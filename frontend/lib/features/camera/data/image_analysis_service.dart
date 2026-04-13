@@ -5,14 +5,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/features/camera/domain/models/image_analysis_result.dart';
+import 'package:context_app/features/camera/domain/services/image_analysis_service.dart';
 import 'package:context_app/features/explore/data/mappers/place_category_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 
-/// 圖片分析服務
-///
-/// 使用 Firebase AI (Gemini) 分析圖片內容，識別景點或食物
-class ImageAnalysisService {
-  ImageAnalysisService();
+/// Firebase AI (Gemini) 實作的圖片分析服務
+class FirebaseImageAnalysisService implements ImageAnalysisService {
+  FirebaseImageAnalysisService();
 
   /// 分析圖片並返回識別結果
   ///
@@ -142,16 +141,3 @@ Only respond with JSON, no other text.
   }
 }
 
-/// 圖片分析錯誤類型
-enum ImageAnalysisErrorType { network, quotaExceeded, unknown }
-
-/// 圖片分析異常
-class ImageAnalysisException implements Exception {
-  final ImageAnalysisErrorType type;
-  final String message;
-
-  const ImageAnalysisException({required this.type, required this.message});
-
-  @override
-  String toString() => 'ImageAnalysisException: $type - $message';
-}

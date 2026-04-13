@@ -1,10 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:context_app/features/quick_guide/data/quick_guide_ai_service.dart';
-import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
-import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
-import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
+import 'package:context_app/features/quick_guide/domain/use_cases/generate_quick_guide_use_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The lifecycle of a quick-guide session.
@@ -59,16 +55,14 @@ class QuickGuideState {
 }
 
 /// Manages the quick-guide capture → describe → save flow.
+///
+/// 僅負責 UI 狀態管理，業務邏輯委派給 [GenerateQuickGuideUseCase]。
 class QuickGuideController extends StateNotifier<QuickGuideState> {
-  final QuickGuideAiService _aiService;
-  final QuickGuideRepository _repository;
-  final UsageRepository _usageRepository;
+  final GenerateQuickGuideUseCase _useCase;
 
-  QuickGuideController(this._aiService, this._repository, this._usageRepository)
-    : super(const QuickGuideState());
+  QuickGuideController(this._useCase) : super(const QuickGuideState());
 
-  /// Sends [imageBytes] to the AI service, then automatically saves the
-  /// result to the journey and consumes one usage quota.
+  /// Sends [imageBytes] to the AI service via use case.
   ///
   /// Sets [QuickGuideStatus.quotaExceeded] when the daily limit is reached.
   Future<void> analyzeImage({
@@ -76,44 +70,29 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
     required String mimeType,
     required String language,
   }) async {
-    try {
-      final usageStatus = await _usageRepository.getUsageStatus();
-      if (!usageStatus.canUseNarration) {
-        state = const QuickGuideState(status: QuickGuideStatus.quotaExceeded);
-        return;
-      }
-    } catch (e) {
-      state = QuickGuideState(
-        status: QuickGuideStatus.error,
-        errorMessage: e.toString(),
-      );
-      return;
-    }
-
     state = QuickGuideState(
       status: QuickGuideStatus.analyzing,
       imageBytes: imageBytes,
     );
 
     try {
-      final description = await _aiService.describeImage(
+      final result = await _useCase.execute(
         imageBytes: imageBytes,
         mimeType: mimeType,
         language: language,
       );
 
-      final entry = QuickGuideEntry.create(
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: Language(language),
-      );
-      await _repository.save(entry);
-      await _usageRepository.consumeUsage();
-
-      state = state.copyWith(
-        status: QuickGuideStatus.success,
-        aiDescription: description,
-      );
+      switch (result) {
+        case GenerateQuickGuideQuotaExceeded():
+          state = const QuickGuideState(
+            status: QuickGuideStatus.quotaExceeded,
+          );
+        case GenerateQuickGuideSuccess(:final entry):
+          state = state.copyWith(
+            status: QuickGuideStatus.success,
+            aiDescription: entry.aiDescription,
+          );
+      }
     } catch (e) {
       state = state.copyWith(
         status: QuickGuideStatus.error,

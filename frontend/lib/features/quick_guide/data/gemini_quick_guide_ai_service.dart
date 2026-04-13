@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:context_app/features/quick_guide/data/quick_guide_ai_service.dart';
+import 'package:context_app/features/quick_guide/domain/services/quick_guide_ai_service.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 

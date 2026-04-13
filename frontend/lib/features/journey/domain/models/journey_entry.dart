@@ -1,10 +1,8 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/data/mappers/narration_aspect_mapper.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:uuid/uuid.dart';
 
 class JourneyEntry {
   final String id;
@@ -24,14 +22,15 @@ class JourneyEntry {
   });
 
   /// 建立新的旅程記錄
+  ///
+  /// [id] 由呼叫端產生（例如 UUID），domain 層不負責 ID 生成策略。
   factory JourneyEntry.create({
+    required String id,
     required Place place,
     required NarrationAspect aspect,
     required NarrationContent content,
     required Language language,
   }) {
-    const uuid = Uuid();
-
     final String? imageUrl = place.primaryPhoto?.url;
 
     final savedPlace = SavedPlace(
@@ -42,7 +41,7 @@ class JourneyEntry {
     );
 
     return JourneyEntry(
-      id: uuid.v4(),
+      id: id,
       place: savedPlace,
       narrationContent: content,
       narrationAspect: aspect,
@@ -58,7 +57,7 @@ class JourneyEntry {
     'place_address': place.address,
     'place_image_url': place.imageUrl,
     'narration_text': narrationContent.text,
-    'narration_style': NarrationAspectMapper.toApiString(narrationAspect),
+    'narration_style': narrationAspect.key,
     'created_at': createdAt.toIso8601String(),
     'language': language.code,
   };
@@ -80,7 +79,7 @@ class JourneyEntry {
     );
 
     final narrationAspect =
-        NarrationAspectMapper.fromString(json['narration_style'] as String) ??
+        NarrationAspect.fromKey(json['narration_style'] as String) ??
         NarrationAspect.historicalBackground;
 
     return JourneyEntry(

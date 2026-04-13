@@ -1,7 +1,9 @@
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
+import 'package:context_app/features/narration/domain/services/tts_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/gemini_service.dart';
-import 'package:context_app/features/narration/data/tts_service.dart';
+import 'package:context_app/features/narration/data/tts_service.dart'
+    as tts_impl;
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
@@ -30,7 +32,7 @@ final narrationAspectProvider = StateProvider.autoDispose<NarrationAspect>((
 /// 提供 TTS 語音合成服務
 /// 單例模式，整個應用共用
 final ttsServiceProvider = Provider<TtsService>((ref) {
-  final service = TtsService();
+  final service = tts_impl.FlutterTtsService();
   ref.onDispose(() {
     service.dispose();
   });

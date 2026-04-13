@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:context_app/features/narration/domain/services/tts_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
-/// TTS 語音合成服務
-///
-/// 封裝 flutter_tts 套件，提供統一的文字轉語音介面
-class TtsService {
+/// 基於 flutter_tts 的 TTS 語音合成服務實作
+class FlutterTtsService implements TtsService {
   final FlutterTts _tts = FlutterTts();
 
   /// 播放進度回調（當前播放到的字符位置和文本長度）
@@ -256,37 +255,3 @@ class TtsService {
   }
 }
 
-/// TTS 播放進度資訊
-class TtsProgress {
-  /// 完整文本
-  final String text;
-
-  /// 當前播放到的字符位置
-  final int currentPosition;
-
-  /// 文本總長度
-  final int totalLength;
-
-  /// 當前播放的詞組
-  final String currentWord;
-
-  const TtsProgress({
-    required this.text,
-    required this.currentPosition,
-    required this.totalLength,
-    required this.currentWord,
-  });
-
-  /// 播放進度百分比 (0.0 - 1.0)
-  double get progress {
-    if (totalLength == 0) return 0.0;
-    return currentPosition / totalLength;
-  }
-
-  @override
-  String toString() {
-    return 'TtsProgress(position: $currentPosition/$totalLength, '
-        'progress: ${(progress * 100).toStringAsFixed(1)}%, '
-        'word: $currentWord)';
-  }
-}

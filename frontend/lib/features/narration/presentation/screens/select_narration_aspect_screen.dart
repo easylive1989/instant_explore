@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/shared/extensions/place_category_extension.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/extensions/narration_aspect_extension.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';

@@ -1,5 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/shared/extensions/place_category_extension.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 

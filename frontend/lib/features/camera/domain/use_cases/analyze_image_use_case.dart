@@ -1,19 +1,20 @@
 import 'dart:typed_data';
 
-import 'package:context_app/features/camera/data/image_analysis_service.dart';
 import 'package:context_app/features/camera/domain/models/image_analysis_result.dart';
+import 'package:context_app/features/camera/domain/services/image_analysis_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/models/place_photo.dart';
-import 'package:uuid/uuid.dart';
 
 /// 分析圖片用例
 ///
-/// 負責執行圖片分析並將結果轉換為 Place 物件
+/// 負責執行圖片分析並將結果轉換為 Place 物件。
+/// [idGenerator] 由呼叫端注入，domain 層不負責 ID 生成策略。
 class AnalyzeImageUseCase {
   final ImageAnalysisService _analysisService;
+  final String Function() _idGenerator;
 
-  AnalyzeImageUseCase(this._analysisService);
+  AnalyzeImageUseCase(this._analysisService, this._idGenerator);
 
   /// 執行用例：分析圖片並建立 Place 物件
   ///
@@ -36,9 +37,7 @@ class AnalyzeImageUseCase {
   }
 
   Place _createPlaceFromResult(ImageAnalysisResult result) {
-    // 產生唯一 ID（以 camera_ 前綴標識為相機拍攝的景點）
-    const uuid = Uuid();
-    final id = 'camera_${uuid.v4()}';
+    final id = 'camera_${_idGenerator()}';
 
     return Place(
       id: id,
