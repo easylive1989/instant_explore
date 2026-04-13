@@ -217,18 +217,9 @@ class _QuickGuideTimelineEntryState
                         color: colorScheme.surfaceContainerHigh,
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                          Colors.grey,
-                          BlendMode.saturation,
-                        ),
-                        child: Opacity(
-                          opacity: 0.8,
-                          child: Image.memory(
-                            widget.entry.imageBytes,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                      child: Image.memory(
+                        widget.entry.imageBytes,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ],

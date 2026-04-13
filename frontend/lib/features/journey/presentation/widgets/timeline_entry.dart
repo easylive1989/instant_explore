@@ -233,26 +233,17 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                           color: colorScheme.surfaceContainerHigh,
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.mode(
-                            Colors.grey,
-                            BlendMode.saturation,
+                        child: CachedNetworkImage(
+                          imageUrl: widget.entry.place.imageUrl!,
+                          fit: BoxFit.cover,
+                          cacheManager: PlaceImageCacheManager.instance,
+                          placeholder: (context, url) => Container(
+                            color: colorScheme.surfaceContainerHigh,
                           ),
-                          child: Opacity(
-                            opacity: 0.8,
-                            child: CachedNetworkImage(
-                              imageUrl: widget.entry.place.imageUrl!,
-                              fit: BoxFit.cover,
-                              cacheManager: PlaceImageCacheManager.instance,
-                              placeholder: (context, url) => Container(
-                                color: colorScheme.surfaceContainerHigh,
-                              ),
-                              errorWidget: (context, url, error) => Icon(
-                                Icons.image_not_supported,
-                                color: colorScheme.onSurfaceVariant,
-                                size: 20,
-                              ),
-                            ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.image_not_supported,
+                            color: colorScheme.onSurfaceVariant,
+                            size: 20,
                           ),
                         ),
                       ),
