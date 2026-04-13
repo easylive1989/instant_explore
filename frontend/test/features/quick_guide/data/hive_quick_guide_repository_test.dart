@@ -9,6 +9,7 @@ import 'package:hive/hive.dart';
 
 QuickGuideEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
   final entry = QuickGuideEntry.create(
+    id: id,
     imageBytes: Uint8List.fromList([1, 2, 3]),
     aiDescription: 'Test description',
     language: const Language('zh-TW'),

@@ -18,6 +18,7 @@ class FirebaseImageAnalysisService implements ImageAnalysisService {
   /// [imageBytes] 圖片的二進位資料
   /// [mimeType] 圖片的 MIME 類型（如 'image/jpeg'）
   /// [language] 語言代碼（'zh-TW' 或 'en-US'）
+  @override
   Future<ImageAnalysisResult> analyzeImage({
     required Uint8List imageBytes,
     required String mimeType,

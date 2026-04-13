@@ -31,22 +31,22 @@ class FlutterTtsService implements TtsService {
   bool _isPaused = false;
   String _currentText = '';
 
-  /// 播放進度事件流
+  @override
   Stream<TtsProgress> get onProgress => _progressController.stream;
 
-  /// 播放完成事件流
+  @override
   Stream<void> get onComplete => _completeController.stream;
 
-  /// 播放開始事件流
+  @override
   Stream<void> get onStart => _startController.stream;
 
-  /// 播放暫停事件流
+  @override
   Stream<void> get onPause => _pauseController.stream;
 
-  /// 播放錯誤事件流
+  @override
   Stream<String> get onError => _errorController.stream;
 
-  /// 初始化 TTS 服務
+  @override
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -111,10 +111,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 播放文本
-  ///
-  /// [text] 要播放的文本
-  /// 返回播放是否成功開始
+  @override
   Future<bool> speak(String text) async {
     if (!_isInitialized) {
       await initialize();
@@ -141,7 +138,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 暫停播放
+  @override
   Future<void> pause() async {
     try {
       await _tts.pause();
@@ -150,7 +147,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 停止播放
+  @override
   Future<void> stop() async {
     try {
       await _tts.stop();
@@ -161,9 +158,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 設定語言
-  ///
-  /// [language] 語言
+  @override
   Future<void> setLanguage(Language language) async {
     try {
       await _tts.setLanguage(language.code);
@@ -172,10 +167,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 設定語速
-  ///
-  /// [rate] 語速 (0.0 - 1.0)
-  /// 推薦值：0.5 (適合導覽)
+  @override
   Future<void> setRate(double rate) async {
     try {
       final clampedRate = rate.clamp(0.0, 1.0);
@@ -185,9 +177,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 設定音量
-  ///
-  /// [volume] 音量 (0.0 - 1.0)
+  @override
   Future<void> setVolume(double volume) async {
     try {
       final clampedVolume = volume.clamp(0.0, 1.0);
@@ -197,10 +187,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 設定音調
-  ///
-  /// [pitch] 音調 (0.5 - 2.0)
-  /// 1.0 為正常音調
+  @override
   Future<void> setPitch(double pitch) async {
     try {
       final clampedPitch = pitch.clamp(0.5, 2.0);
@@ -239,7 +226,7 @@ class FlutterTtsService implements TtsService {
     }
   }
 
-  /// 釋放資源
+  @override
   Future<void> dispose() async {
     try {
       await stop();

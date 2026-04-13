@@ -1,4 +1,2 @@
-/// 已搬移至 shared 層。
-///
-/// 請改用 `package:context_app/shared/extensions/place_category_extension.dart`。
+// Re-export from shared layer.
 export 'package:context_app/shared/extensions/place_category_extension.dart';
