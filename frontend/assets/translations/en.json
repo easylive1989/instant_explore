@@ -63,7 +63,13 @@
   },
   "explore": {
     "title": "Explore",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "filter": {
+      "title": "Filters",
+      "min_reviews": "Minimum reviews",
+      "description": "Filter out places with too few reviews to avoid showing non-genuine attractions.",
+      "reset": "Reset to default"
+    }
   },
   "common": {
     "language_english": "English",

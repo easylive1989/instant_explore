@@ -42,10 +42,22 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     super.dispose();
   }
 
+  void _showFilterPanel() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const _FilterPanel(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final placesState = ref.watch(placesControllerProvider);
+    final placesState = ref.watch(filteredPlacesProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final minReviewCount = ref.watch(minReviewCountProvider);
+    final isFilterActive = minReviewCount != 100;
 
     return Scaffold(
       body: SafeArea(
@@ -66,19 +78,30 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          ref.read(placesControllerProvider.notifier).refresh();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                      Row(
+                        children: [
+                          _FilterButton(
+                            isActive: isFilterActive,
+                            onPressed: _showFilterPanel,
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: () {
+                              _searchController.clear();
+                              ref
+                                  .read(placesControllerProvider.notifier)
+                                  .refresh();
+                            },
+                            icon: const Icon(Icons.refresh),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -130,7 +153,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           return PlaceCard(place: places[index]);
                         },
                       ),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),
@@ -138,6 +162,198 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final bool isActive;
+  final VoidCallback onPressed;
+
+  const _FilterButton({
+    required this.isActive,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Badge(
+        isLabelVisible: isActive,
+        smallSize: 8,
+        child: const Icon(Icons.tune),
+      ),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor:
+            isActive ? AppColors.amber : AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterPanel extends ConsumerStatefulWidget {
+  const _FilterPanel();
+
+  @override
+  ConsumerState<_FilterPanel> createState() => _FilterPanelState();
+}
+
+class _FilterPanelState extends ConsumerState<_FilterPanel> {
+  late double _sliderValue;
+
+  /// 滑桿的刻度值：0, 10, 50, 100, 200, 500, 1000
+  static const List<int> _steps = [0, 10, 50, 100, 200, 500, 1000];
+
+  @override
+  void initState() {
+    super.initState();
+    final current = ref.read(minReviewCountProvider);
+    _sliderValue = _valueToSlider(current);
+  }
+
+  /// 將評論數對應到滑桿位置（0.0 ~ 1.0）
+  double _valueToSlider(int value) {
+    for (int i = 0; i < _steps.length; i++) {
+      if (value <= _steps[i]) {
+        if (i == 0) return 0.0;
+        final prev = _steps[i - 1];
+        final curr = _steps[i];
+        final fraction = (value - prev) / (curr - prev);
+        return (i - 1 + fraction) / (_steps.length - 1);
+      }
+    }
+    return 1.0;
+  }
+
+  /// 將滑桿位置轉換為評論數
+  int _sliderToValue(double slider) {
+    final pos = slider * (_steps.length - 1);
+    final lower = pos.floor().clamp(0, _steps.length - 2);
+    final fraction = pos - lower;
+    final value =
+        _steps[lower] + ((_steps[lower + 1] - _steps[lower]) * fraction);
+    return value.round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final currentValue = _sliderToValue(_sliderValue);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'explore.filter.title'.tr(),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'explore.filter.min_reviews'.tr(),
+            style: TextStyle(
+              fontSize: 14,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  value: _sliderValue,
+                  onChanged: (value) {
+                    setState(() {
+                      _sliderValue = value;
+                    });
+                  },
+                  onChangeEnd: (value) {
+                    ref.read(minReviewCountProvider.notifier).state =
+                        _sliderToValue(value);
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 60,
+                child: Text(
+                  '$currentValue',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '0',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '1000',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'explore.filter.description'.tr(),
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                ref.read(minReviewCountProvider.notifier).state = 100;
+                setState(() {
+                  _sliderValue = _valueToSlider(100);
+                });
+              },
+              child: Text('explore.filter.reset'.tr()),
+            ),
+          ),
+        ],
       ),
     );
   }
