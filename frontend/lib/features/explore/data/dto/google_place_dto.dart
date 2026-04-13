@@ -13,6 +13,7 @@ class GooglePlaceDto {
   final String? formattedAddress;
   final Map<String, dynamic>? location;
   final double? rating;
+  final int? userRatingCount;
   final List<dynamic>? types;
   final List<GooglePlacePhotoDto> photos;
 
@@ -22,6 +23,7 @@ class GooglePlaceDto {
     this.formattedAddress,
     this.location,
     this.rating,
+    this.userRatingCount,
     this.types,
     required this.photos,
   });
@@ -33,6 +35,7 @@ class GooglePlaceDto {
       formattedAddress: json['formattedAddress'],
       location: json['location'],
       rating: json['rating']?.toDouble(),
+      userRatingCount: (json['userRatingCount'] as num?)?.toInt(),
       types: json['types'],
       photos:
           (json['photos'] as List?)
@@ -49,6 +52,7 @@ class GooglePlaceDto {
       'formattedAddress': formattedAddress,
       'location': location,
       'rating': rating,
+      'userRatingCount': userRatingCount,
       'types': types,
       'photos': photos.map((p) => p.toJson()).toList(),
     };
@@ -68,6 +72,7 @@ class GooglePlaceDto {
       formattedAddress: formattedAddress ?? '',
       location: PlaceLocationMapper.fromJson(location ?? {}),
       rating: rating,
+      userRatingCount: userRatingCount,
       types: extractedTypes,
       photos: photos
           .map(

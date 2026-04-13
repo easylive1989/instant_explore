@@ -12,6 +12,7 @@ class Place extends Equatable {
   final String formattedAddress;
   final PlaceLocation location;
   final double? rating;
+  final int? userRatingCount;
   final List<String> types;
   final List<PlacePhoto> photos;
   final PlaceCategory category;
@@ -22,6 +23,7 @@ class Place extends Equatable {
     required this.formattedAddress,
     required this.location,
     this.rating,
+    this.userRatingCount,
     required this.types,
     required this.photos,
     required this.category,
@@ -39,6 +41,7 @@ class Place extends Equatable {
     formattedAddress,
     location,
     rating,
+    userRatingCount,
     types,
     photos,
     category,

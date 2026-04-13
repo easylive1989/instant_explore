@@ -11,6 +11,13 @@ class PlacesRepositoryImpl implements PlacesRepository {
 
   PlacesRepositoryImpl(this._apiService);
 
+  /// 最低評論數門檻
+  ///
+  /// 評論數低於此值的地點會被過濾，避免顯示非真正景點。
+  /// 根據研究，真正的觀光景點通常至少會有 10 則以上的 Google 評論，
+  /// 低於此數量的地點很可能是被錯誤標記的商家或臨時性地點。
+  static const int _minUserRatingCount = 10;
+
   static const List<String> _includedTypes = [
     'tourist_attraction',
     'historical_landmark',
@@ -39,8 +46,10 @@ class PlacesRepositoryImpl implements PlacesRepository {
       );
 
       // DTO -> Domain 轉換，同時產生照片 URL
+      // 過濾掉評論數不足的地點，避免顯示非真正景點
       return dtos
           .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
+          .where(_hasEnoughReviews)
           .toList();
     } on AppError {
       rethrow;
@@ -66,8 +75,10 @@ class PlacesRepositoryImpl implements PlacesRepository {
       );
 
       // DTO -> Domain 轉換，同時產生照片 URL
+      // 過濾掉評論數不足的地點，避免顯示非真正景點
       return dtos
           .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
+          .where(_hasEnoughReviews)
           .toList();
     } on AppError {
       rethrow;
@@ -79,5 +90,13 @@ class PlacesRepositoryImpl implements PlacesRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  /// 檢查地點是否有足夠的評論數
+  ///
+  /// 若 API 未回傳 userRatingCount（為 null），視為評論數不足並過濾。
+  bool _hasEnoughReviews(Place place) {
+    final count = place.userRatingCount;
+    return count != null && count >= _minUserRatingCount;
   }
 }
