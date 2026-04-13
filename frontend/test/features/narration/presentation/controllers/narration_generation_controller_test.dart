@@ -144,9 +144,13 @@ void main() {
       );
 
       final states = <NarrationGenerationStatus>[];
-      controller.addListener((state) {
-        states.add(state.status);
-      });
+      // fireImmediately: false 避免收到初始狀態 idle
+      controller.addListener(
+        (state) {
+          states.add(state.status);
+        },
+        fireImmediately: false,
+      );
 
       await controller.generate(
         place: _testPlace,
