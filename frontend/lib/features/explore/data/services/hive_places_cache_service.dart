@@ -80,6 +80,7 @@ class HivePlacesCacheService {
         'longitude': place.location.longitude,
       },
       'rating': place.rating,
+      'userRatingCount': place.userRatingCount,
       'types': place.types,
       'photos': place.photos
           .map(

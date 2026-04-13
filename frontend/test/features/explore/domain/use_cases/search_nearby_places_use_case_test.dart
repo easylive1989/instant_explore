@@ -51,6 +51,7 @@ void main() {
     required String name,
     required PlaceLocation location,
     double? rating,
+    int? userRatingCount = 100,
   }) {
     return Place(
       id: id,
@@ -68,6 +69,7 @@ void main() {
       ],
       category: PlaceCategory.modernUrban,
       rating: rating,
+      userRatingCount: userRatingCount,
     );
   }
 

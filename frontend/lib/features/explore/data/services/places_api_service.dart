@@ -14,9 +14,9 @@ class PlacesApiService {
   static const String _textSearchUrl =
       'https://places.googleapis.com/v1/places:searchText';
 
-  /// Basic FieldMask - 不含 rating 和 priceLevel (Pro 等級，較便宜)
-  static const String _basicFieldMask =
-      'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.photos';
+  /// Advanced FieldMask - 包含 rating 和 userRatingCount 以支援評論數過濾
+  static const String _fieldMask =
+      'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.types,places.photos';
 
   PlacesApiService(this._apiKey);
 
@@ -37,7 +37,7 @@ class PlacesApiService {
       final headers = {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': _apiKey,
-        'X-Goog-FieldMask': _basicFieldMask,
+        'X-Goog-FieldMask': _fieldMask,
       };
 
       final Map<String, dynamic> requestBody = {'textQuery': query};
@@ -116,7 +116,7 @@ class PlacesApiService {
       final headers = {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': _apiKey,
-        'X-Goog-FieldMask': _basicFieldMask,
+        'X-Goog-FieldMask': _fieldMask,
       };
 
       final Map<String, dynamic> requestBody = {
