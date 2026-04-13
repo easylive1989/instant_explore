@@ -12,33 +12,38 @@ void main() {
   group('QuickGuideEntry.create', () {
     test('creates entry with correct data', () {
       final entry = QuickGuideEntry.create(
+        id: 'test-id',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
       );
 
+      expect(entry.id, 'test-id');
       expect(entry.imageBytes, imageBytes);
       expect(entry.aiDescription, description);
       expect(entry.language, language);
-      expect(entry.id, isNotEmpty);
       expect(
         entry.createdAt.difference(DateTime.now()).abs(),
         lessThan(const Duration(seconds: 5)),
       );
     });
 
-    test('generates unique IDs for different entries', () {
+    test('preserves distinct IDs passed by caller', () {
       final entry1 = QuickGuideEntry.create(
+        id: 'id-1',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
       );
       final entry2 = QuickGuideEntry.create(
+        id: 'id-2',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
       );
 
+      expect(entry1.id, equals('id-1'));
+      expect(entry2.id, equals('id-2'));
       expect(entry1.id, isNot(equals(entry2.id)));
     });
   });
@@ -46,6 +51,7 @@ void main() {
   group('QuickGuideEntry JSON round-trip', () {
     test('toJson/fromJson preserves all fields', () {
       final original = QuickGuideEntry.create(
+        id: 'round-trip-id',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
@@ -65,6 +71,7 @@ void main() {
 
     test('fromJson defaults language to zh-TW when absent', () {
       final original = QuickGuideEntry.create(
+        id: 'lang-test-id',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
@@ -78,6 +85,7 @@ void main() {
 
     test('toJson stores imageBytes as base64 string', () {
       final entry = QuickGuideEntry.create(
+        id: 'base64-test-id',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,

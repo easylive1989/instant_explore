@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/data/tts_service.dart';
+import 'package:context_app/features/narration/domain/services/tts_service.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -60,15 +60,6 @@ class _FakeTtsService implements TtsService {
 
   @override
   Future<void> setPitch(double pitch) async {}
-
-  @override
-  Future<List<dynamic>> getLanguages() async => [];
-
-  @override
-  Future<List<dynamic>> getVoices() async => [];
-
-  @override
-  Future<bool> isPlaying() async => false;
 
   @override
   Stream<void> get onComplete => _completeController.stream;
