@@ -41,6 +41,9 @@ yarn-error.log*
 .fvm/
 .fvm
 
+# Firebase
+.firebase/
+
 # Supabase
 supabase/.branches
 supabase/.temp
