@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,11 +13,12 @@ class AnalysisResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: place.category.color.withValues(alpha: 0.5),
@@ -56,8 +56,8 @@ class AnalysisResultCard extends StatelessWidget {
                   children: [
                     Text(
                       place.name,
-                      style: const TextStyle(
-                        color: AppColors.textPrimaryDark,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -108,17 +108,17 @@ class AnalysisResultCard extends StatelessWidget {
           if (place.formattedAddress.isNotEmpty)
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on_outlined,
-                  color: AppColors.textSecondaryDark,
+                  color: colorScheme.onSurfaceVariant,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     place.formattedAddress,
-                    style: const TextStyle(
-                      color: AppColors.textSecondaryDark,
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 14,
                     ),
                     maxLines: 2,

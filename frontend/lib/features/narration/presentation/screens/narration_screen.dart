@@ -146,22 +146,18 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
       }
     });
 
-    // Colors from design
     const primaryColor = AppColors.primary;
-    const backgroundColor = AppColors.backgroundDark;
-    const surfaceColor = AppColors.surfaceDarkPlayer;
     const primaryColorShadow = Color(0x4D137FEC);
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: Column(
         children: [
-          // Main Content
           Expanded(
             child: SafeArea(
               child: Column(
                 children: [
-                  // Header
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
@@ -171,9 +167,9 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_back_ios_new,
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                             size: 20,
                           ),
                           onPressed: () => context.go('/'),
@@ -181,8 +177,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                         Expanded(
                           child: Text(
                             widget.place.name,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -191,7 +187,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                       ],
                     ),
                   ),
-                  // Transcript Area
                   Expanded(
                     child: NarrationTranscriptArea(
                       scrollController: _scrollController,
@@ -206,12 +201,10 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             ),
           ),
 
-          // Bottom Control Panel
           NarrationControlPanel(
             place: widget.place,
             primaryColor: primaryColor,
             primaryColorShadow: primaryColorShadow,
-            surfaceColor: surfaceColor,
             backgroundColor: backgroundColor,
           ),
         ],

@@ -51,7 +51,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'player_screen.loading'.tr(),
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 16,
+              ),
             ),
           ],
         ),
@@ -78,7 +81,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 errorMessage,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                ),
                 textAlign: TextAlign.center,
               ),
 
@@ -94,7 +100,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
                     },
                   ),
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                 ),

@@ -65,22 +65,12 @@ class _QuickGuideTimelineEntryState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surfaceDark,
-        title: Text(
-          'passport.delete_title'.tr(),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'passport.delete_message'.tr(),
-          style: const TextStyle(color: Colors.white70),
-        ),
+        title: Text('passport.delete_title'.tr()),
+        content: Text('passport.delete_message'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'passport.cancel'.tr(),
-              style: const TextStyle(color: Colors.white60),
-            ),
+            child: Text('passport.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -129,6 +119,9 @@ class _QuickGuideTimelineEntryState
   @override
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
+    final colorScheme = Theme.of(context).colorScheme;
+    // Quick Guide uses a distinct blue accent for its timeline node.
+    const nodeColor = Color(0xFF2A7AE4);
 
     return GestureDetector(
       onTap: _navigateToPlayer,
@@ -142,13 +135,9 @@ class _QuickGuideTimelineEntryState
                 left: -21,
                 top: 32,
                 bottom: -40,
-                child: Container(
-                  width: 2,
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
+                child: Container(width: 2, color: colorScheme.outlineVariant),
               ),
 
-            // Timeline node (camera icon instead of plain dot)
             Positioned(
               left: -32,
               top: 4,
@@ -156,9 +145,9 @@ class _QuickGuideTimelineEntryState
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2A7AE4),
+                  color: nodeColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.backgroundDark, width: 3),
+                  border: Border.all(color: colorScheme.surface, width: 3),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.2),
@@ -175,7 +164,6 @@ class _QuickGuideTimelineEntryState
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -190,7 +178,7 @@ class _QuickGuideTimelineEntryState
                                   widget.entry.createdAt,
                                 ).toUpperCase(),
                                 style: const TextStyle(
-                                  color: Color(0xFF2A7AE4),
+                                  color: nodeColor,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.5,
@@ -200,7 +188,7 @@ class _QuickGuideTimelineEntryState
                               Text(
                                 timeFormat.format(widget.entry.createdAt),
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),
@@ -209,8 +197,8 @@ class _QuickGuideTimelineEntryState
                           const SizedBox(height: 4),
                           Text(
                             'quick_guide.title'.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
@@ -220,14 +208,13 @@ class _QuickGuideTimelineEntryState
                       ),
                     ),
 
-                    // Thumbnail from captured image
                     Container(
                       width: 48,
                       height: 48,
                       margin: const EdgeInsets.only(left: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: colorScheme.surfaceContainerHigh,
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: ColorFiltered(
@@ -249,18 +236,15 @@ class _QuickGuideTimelineEntryState
 
                 const SizedBox(height: 16),
 
-                // Description card
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceDark,
+                    color: colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
-                    ),
+                    border: Border.all(color: colorScheme.outlineVariant),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -274,7 +258,7 @@ class _QuickGuideTimelineEntryState
                         maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 15,
                           height: 1.6,
                           letterSpacing: 0.2,
@@ -285,9 +269,7 @@ class _QuickGuideTimelineEntryState
                         padding: const EdgeInsets.only(top: 12),
                         decoration: BoxDecoration(
                           border: Border(
-                            top: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
-                            ),
+                            top: BorderSide(color: colorScheme.outlineVariant),
                           ),
                         ),
                         child: Row(
@@ -325,21 +307,18 @@ class _DeleteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurfaceVariant;
     return GestureDetector(
       onTap: onTap,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.delete_outline,
-            size: 16,
-            color: Colors.white.withValues(alpha: 0.4),
-          ),
+          Icon(Icons.delete_outline, size: 16, color: color),
           const SizedBox(width: 6),
           Text(
             'passport.delete_confirm'.tr(),
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: color,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

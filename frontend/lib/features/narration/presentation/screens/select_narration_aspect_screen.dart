@@ -277,11 +277,11 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
         colorBlendMode: BlendMode.darken,
         cacheManager: PlaceImageCacheManager.instance,
         placeholder: (context, url) => Container(
-          color: AppColors.backgroundDark,
+          color: Colors.black,
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
-          color: AppColors.backgroundDark,
+          color: Colors.black,
           child: const Icon(
             Icons.image_not_supported,
             size: 48,
@@ -292,7 +292,7 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
     }
 
     // 沒有圖片時顯示深色背景
-    return Container(color: AppColors.backgroundDark);
+    return Container(color: Colors.black);
   }
 }
 

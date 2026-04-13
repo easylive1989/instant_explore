@@ -121,27 +121,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     final cameraState = ref.watch(cameraControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.pop(),
         ),
         title: Text(
           'camera.title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (_displayImage != null)
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              onPressed: _retake,
-            ),
+            IconButton(icon: const Icon(Icons.refresh), onPressed: _retake),
         ],
       ),
       body: _buildBody(cameraState),
@@ -205,8 +196,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 24),
             Text(
               'camera.instruction'.tr(),
-              style: const TextStyle(
-                color: AppColors.textPrimaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -215,8 +206,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 8),
             Text(
               'camera.instruction_subtitle'.tr(),
-              style: const TextStyle(
-                color: AppColors.textSecondaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -264,8 +255,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white, width: 2),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -289,8 +278,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 16),
             Text(
               'camera.analyzing'.tr(),
-              style: const TextStyle(
-                color: AppColors.textSecondaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 16,
               ),
             ),
@@ -312,8 +301,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             const SizedBox(height: 16),
             Text(
               state.errorMessage ?? 'camera.analysis_error'.tr(),
-              style: const TextStyle(
-                color: AppColors.textPrimaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
               ),
               textAlign: TextAlign.center,

@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart';
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SaveSuccessScreen extends StatelessWidget {
   final Place place;
@@ -17,25 +18,17 @@ class SaveSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Colors from design
-    const backgroundColor = Color(0xFF101922);
-    const successColor = Color(0xFF10b981);
-    const primaryColor = Color(0xFF137fec);
-    const cardColor = Color(0xFF1E293B); // Dark slate for card
-    const textColor = Colors.white;
-    const textSecondaryColor = Color(0xFF94A3B8); // slate-400
+    const successColor = AppColors.success;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: backgroundColor.withValues(alpha: 0.9),
-        elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
           'passport.title_uppercase'.tr(),
-          style: const TextStyle(
-            color: textSecondaryColor,
+          style: TextStyle(
+            color: colorScheme.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.0,
@@ -44,7 +37,11 @@ class SaveSuccessScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () => context.pop(),
-            icon: const Icon(Icons.close, color: textSecondaryColor, size: 24),
+            icon: Icon(
+              Icons.close,
+              color: colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -57,7 +54,6 @@ class SaveSuccessScreen extends StatelessWidget {
             children: [
               const Spacer(flex: 2),
 
-              // Pulse Animation / Icon
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -85,7 +81,7 @@ class SaveSuccessScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Color(0x4D10b981), // success/30
+                          color: Color(0x4D10b981),
                           blurRadius: 20,
                           offset: Offset(0, 10),
                         ),
@@ -104,8 +100,8 @@ class SaveSuccessScreen extends StatelessWidget {
 
               Text(
                 'passport.item_saved'.tr(),
-                style: const TextStyle(
-                  color: textColor,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -116,8 +112,8 @@ class SaveSuccessScreen extends StatelessWidget {
               Text(
                 '"${place.name}" ${'passport.added_to_passport'.tr()}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: textSecondaryColor,
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16,
                   height: 1.5,
                 ),
@@ -125,24 +121,20 @@ class SaveSuccessScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Place Card
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: cardColor, // slate-800
+                  color: colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
                 child: Row(
                   children: [
-                    // Image Placeholder
                     Container(
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF334155), // slate-700
+                        color: colorScheme.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -150,17 +142,17 @@ class SaveSuccessScreen extends StatelessWidget {
                           ? Image.network(
                               place.photos.first.url,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Center(
+                              errorBuilder: (_, __, ___) => Center(
                                 child: Icon(
                                   Icons.stadium,
-                                  color: textSecondaryColor,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             )
-                          : const Center(
+                          : Center(
                               child: Icon(
                                 Icons.stadium,
-                                color: textSecondaryColor,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                     ),
@@ -171,8 +163,8 @@ class SaveSuccessScreen extends StatelessWidget {
                         children: [
                           Text(
                             place.name,
-                            style: const TextStyle(
-                              color: textColor,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -182,8 +174,8 @@ class SaveSuccessScreen extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             place.formattedAddress,
-                            style: const TextStyle(
-                              color: textSecondaryColor,
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                             maxLines: 2,
@@ -198,13 +190,12 @@ class SaveSuccessScreen extends StatelessWidget {
 
               const Spacer(flex: 3),
 
-              // Buttons
               Column(
                 children: [
                   ElevatedButton(
                     onPressed: onViewPassport,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(
@@ -231,8 +222,8 @@ class SaveSuccessScreen extends StatelessWidget {
                   TextButton(
                     onPressed: onContinueTour ?? () => context.pop(),
                     style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E293B), // slate-800
-                      foregroundColor: const Color(0xFFE2E8F0), // slate-200
+                      backgroundColor: colorScheme.surfaceContainerHigh,
+                      foregroundColor: colorScheme.onSurface,
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

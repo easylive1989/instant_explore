@@ -145,7 +145,6 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
     final guideState = ref.watch(quickGuideControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,10 +153,10 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
               child: Text(
                 'quick_guide.title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryDark,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -215,8 +214,8 @@ class _ImageSourceSelector extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'quick_guide.instruction'.tr(),
-              style: const TextStyle(
-                color: AppColors.textPrimaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -225,8 +224,8 @@ class _ImageSourceSelector extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'quick_guide.instruction_subtitle'.tr(),
-              style: const TextStyle(
-                color: AppColors.textSecondaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -270,8 +269,6 @@ class _ImageSourceSelector extends StatelessWidget {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white, width: 2),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -368,8 +365,8 @@ class _DescriptionArea extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'quick_guide.analyzing'.tr(),
-              style: const TextStyle(
-                color: AppColors.textSecondaryDark,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 16,
               ),
             ),
@@ -393,8 +390,8 @@ class _DescriptionArea extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'quick_guide.analysis_error'.tr(),
-                style: const TextStyle(
-                  color: AppColors.textPrimaryDark,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                 ),
                 textAlign: TextAlign.center,

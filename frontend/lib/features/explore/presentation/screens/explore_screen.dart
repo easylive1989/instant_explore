@@ -45,162 +45,99 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final placesState = ref.watch(placesControllerProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              color: AppColors.backgroundDark,
-              child: Stack(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              child: Column(
                 children: [
-                  Positioned.fill(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xE6101922),
-                            Color(0x33101922),
-                            Color(0xE6101922),
-                          ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'explore.title'.tr(),
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
                         ),
                       ),
+                      IconButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          ref.read(placesControllerProvider.notifier).refresh();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search for places...',
+                      prefixIcon: const Icon(Icons.search),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                ref
+                                    .read(placesControllerProvider.notifier)
+                                    .search('');
+                              },
+                            )
+                          : null,
                     ),
+                    onSubmitted: (value) {
+                      ref.read(placesControllerProvider.notifier).search(value);
+                    },
                   ),
                 ],
               ),
             ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'explore.title'.tr(),
-                            style: const TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryDark,
-                            ),
+            Expanded(
+              child: placesState.when(
+                data: (places) => places.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No places found',
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 16,
                           ),
-                          IconButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              ref
-                                  .read(placesControllerProvider.notifier)
-                                  .refresh();
-                            },
-                            icon: const Icon(Icons.refresh),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _searchController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Search for places...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.white,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withValues(alpha: 0.1),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.clear,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    ref
-                                        .read(placesControllerProvider.notifier)
-                                        .search('');
-                                  },
-                                )
-                              : null,
                         ),
-                        onSubmitted: (value) {
-                          ref
-                              .read(placesControllerProvider.notifier)
-                              .search(value);
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: places.length,
+                        itemBuilder: (context, index) {
+                          return PlaceCard(place: places[index]);
                         },
                       ),
-                    ],
-                  ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),
-                Expanded(
-                  child: placesState.when(
-                    data: (places) => places.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No places found',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 16,
-                              ),
-                            ),
-                          )
-                        : Column(
-                            children: [
-                              Expanded(
-                                child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  itemCount: places.length,
-                                  itemBuilder: (context, index) {
-                                    final place = places[index];
-                                    return PlaceCard(place: place);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(
-                      child: Text(
-                        '${'common.error_prefix'.tr()}: $error',
-                        style: const TextStyle(
-                          color: AppColors.textPrimaryDark,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -213,20 +150,16 @@ class PlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
-      color: Colors.white.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
-        onTap: () {
-          context.pushNamed('config', extra: place);
-        },
+        onTap: () => context.pushNamed('config', extra: place),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-              // 使用 category icon 取代照片（完全免費）
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
@@ -241,21 +174,14 @@ class PlaceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            place.name,
-                            style: const TextStyle(
-                              color: AppColors.textPrimaryDark,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      place.name,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -301,7 +227,7 @@ class PlaceCard extends StatelessWidget {
                     Text(
                       place.formattedAddress,
                       style: TextStyle(
-                        color: AppColors.textPrimaryDark.withValues(alpha: 0.8),
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 12,
                       ),
                       maxLines: 2,

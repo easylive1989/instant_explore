@@ -70,10 +70,11 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -84,18 +85,16 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle bar
           Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.textSecondaryDark.withValues(alpha: 0.3),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 24),
 
-          // Icon
           Container(
             width: 56,
             height: 56,
@@ -111,25 +110,20 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
           ),
           const SizedBox(height: 16),
 
-          // Title
           Text(
             'ads.quota_exceeded_title'.tr(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryDark,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
 
-          // Subtitle
           Text(
             'ads.watch_ad_subtitle'.tr(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textTertiaryDark,
-            ),
+            style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
 

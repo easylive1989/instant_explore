@@ -1,3 +1,4 @@
+import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
@@ -73,10 +74,8 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF137fec),
+        selectedItemColor: AppColors.primary,
         onTap: _onItemTapped,
-        backgroundColor: const Color(0xFF101922),
-        unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
       ),
     );

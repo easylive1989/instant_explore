@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -46,8 +45,8 @@ class TranscriptSegmentItem extends StatelessWidget {
                   ),
                   Text(
                     segment.text,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
                       height: 1.4,
@@ -57,8 +56,8 @@ class TranscriptSegmentItem extends StatelessWidget {
               )
             : Text(
                 segment.text,
-                style: const TextStyle(
-                  color: AppColors.textSecondaryDark,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 20,
                   height: 1.6,
                 ),

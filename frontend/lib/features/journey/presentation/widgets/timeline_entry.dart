@@ -29,35 +29,23 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.surfaceDark,
-          title: Text(
-            'passport.delete_title'.tr(),
-            style: const TextStyle(color: Colors.white),
+      builder: (context) => AlertDialog(
+        title: Text('passport.delete_title'.tr()),
+        content: Text('passport.delete_message'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('passport.cancel'.tr()),
           ),
-          content: Text(
-            'passport.delete_message'.tr(),
-            style: const TextStyle(color: Colors.white70),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'passport.delete_confirm'.tr(),
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                'passport.cancel'.tr(),
-                style: const TextStyle(color: Colors.white60),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(
-                'passport.delete_confirm'.tr(),
-                style: const TextStyle(color: AppColors.error),
-              ),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
 
     if (confirmed == true) {
@@ -128,6 +116,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   @override
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: _navigateToPlayer,
@@ -142,10 +131,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                 left: -21,
                 top: 32,
                 bottom: -40,
-                child: Container(
-                  width: 2,
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
+                child: Container(width: 2, color: colorScheme.outlineVariant),
               ),
 
             // Timeline Node
@@ -158,7 +144,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.backgroundDark, width: 3),
+                  border: Border.all(color: colorScheme.surface, width: 3),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.2),
@@ -183,16 +169,13 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Location Header with Thumbnail
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Left: Date, Time, Name, Address
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Date & Time
                           Row(
                             children: [
                               Text(
@@ -210,31 +193,27 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               Text(
                                 timeFormat.format(widget.entry.createdAt),
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-
-                          // Place Name
                           Text(
                             widget.entry.place.name,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                             ),
                           ),
                           const SizedBox(height: 2),
-
-                          // Address
                           Text(
                             widget.entry.place.address,
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                           ),
@@ -242,7 +221,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                       ),
                     ),
 
-                    // Right: Thumbnail (grayscale, desaturated)
+                    // Thumbnail
                     if (widget.entry.place.imageUrl != null &&
                         widget.entry.place.imageUrl!.isNotEmpty)
                       Container(
@@ -251,7 +230,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                         margin: const EdgeInsets.only(left: 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: colorScheme.surfaceContainerHigh,
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: ColorFiltered(
@@ -266,11 +245,11 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               fit: BoxFit.cover,
                               cacheManager: PlaceImageCacheManager.instance,
                               placeholder: (context, url) => Container(
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: colorScheme.surfaceContainerHigh,
                               ),
                               errorWidget: (context, url, error) => Icon(
                                 Icons.image_not_supported,
-                                color: Colors.white.withValues(alpha: 0.3),
+                                color: colorScheme.onSurfaceVariant,
                                 size: 20,
                               ),
                             ),
@@ -282,18 +261,16 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
                 const SizedBox(height: 16),
 
-                // Q&A Card
+                // Content Card
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceDark,
+                    color: colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
-                    ),
+                    border: Border.all(color: colorScheme.outlineVariant),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -302,22 +279,18 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Content text
                       Text(
                         widget.entry.narrationContent.text,
                         maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 15,
                           height: 1.6,
                           letterSpacing: 0.2,
                         ),
                       ),
-
                       const SizedBox(height: 16),
-
-                      // Action Bar
                       GestureDetector(
                         onTap: () {},
                         child: Container(
@@ -325,7 +298,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                           decoration: BoxDecoration(
                             border: Border(
                               top: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.08),
+                                color: colorScheme.outlineVariant,
                               ),
                             ),
                           ),
@@ -376,17 +349,18 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurfaceVariant;
     return GestureDetector(
       onTap: onTap,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.4)),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: color,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

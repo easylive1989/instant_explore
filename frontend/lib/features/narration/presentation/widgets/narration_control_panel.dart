@@ -9,7 +9,6 @@ class NarrationControlPanel extends ConsumerWidget {
   final Place place;
   final Color primaryColor;
   final Color primaryColorShadow;
-  final Color surfaceColor;
   final Color backgroundColor;
 
   const NarrationControlPanel({
@@ -17,7 +16,6 @@ class NarrationControlPanel extends ConsumerWidget {
     required this.place,
     required this.primaryColor,
     required this.primaryColorShadow,
-    required this.surfaceColor,
     required this.backgroundColor,
   });
 
@@ -25,6 +23,7 @@ class NarrationControlPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
     final playerController = ref.read(playerControllerProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return ClipRRect(
       borderRadius: const BorderRadius.only(
@@ -56,7 +55,7 @@ class NarrationControlPanel extends ConsumerWidget {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF334155),
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -89,14 +88,14 @@ class NarrationControlPanel extends ConsumerWidget {
                                 width: 48,
                                 margin: const EdgeInsets.only(right: 24),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.1),
+                                  color: colorScheme.surfaceContainerHigh,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.skip_previous,
                                     size: 24,
-                                    color: Colors.white,
+                                    color: colorScheme.onSurface,
                                   ),
                                   onPressed: playerState.canSkipPrevious
                                       ? () => playerController
@@ -148,14 +147,14 @@ class NarrationControlPanel extends ConsumerWidget {
                                 width: 48,
                                 margin: const EdgeInsets.only(left: 24),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.1),
+                                  color: colorScheme.surfaceContainerHigh,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.skip_next,
                                     size: 24,
-                                    color: Colors.white,
+                                    color: colorScheme.onSurface,
                                   ),
                                   onPressed: playerState.canSkipNext
                                       ? () =>
