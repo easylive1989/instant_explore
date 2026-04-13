@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Historical Tour Guide | Experience History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #101922;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-neon {
+            text-shadow: 0 0 15px rgba(19, 127, 236, 0.4);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#93000a",
+                      "on-primary-container": "#a8c8ff",
+                      "on-secondary-fixed-variant": "#2c4770",
+                      "on-secondary": "#123158",
+                      "tertiary-fixed": "#ffdbc9",
+                      "on-surface": "#ffffff",
+                      "on-secondary-fixed": "#001b3c",
+                      "on-surface-variant": "#c1c6d5",
+                      "surface-container-highest": "#323c48",
+                      "on-background": "#ffffff",
+                      "surface-container-lowest": "#0b1117",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#adc8f7",
+                      "outline": "#8b919f",
+                      "primary": "#137fec",
+                      "surface": "#101922",
+                      "surface-container": "#1c2630",
+                      "on-secondary-container": "#9bb6e5",
+                      "tertiary-fixed-dim": "#ffb68c",
+                      "tertiary": "#ffb68c",
+                      "on-primary-fixed-variant": "#004689",
+                      "inverse-primary": "#005eb4",
+                      "surface-dim": "#0d141b",
+                      "on-tertiary-fixed-variant": "#753400",
+                      "on-error": "#690005",
+                      "on-tertiary": "#532200",
+                      "outline-variant": "rgba(255, 255, 255, 0.1)",
+                      "on-tertiary-container": "#481d00",
+                      "primary-fixed-dim": "#a8c8ff",
+                      "secondary-fixed": "#d5e3ff",
+                      "secondary": "#adc8f7",
+                      "on-primary-fixed": "#001b3c",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#137fec",
+                      "surface-container-low": "#151e27",
+                      "inverse-on-surface": "#2d3038",
+                      "surface-container-high": "#27313c",
+                      "tertiary-container": "#e47019",
+                      "secondary-container": "#2c4770",
+                      "primary-fixed": "#d5e3ff",
+                      "on-tertiary-fixed": "#321200",
+                      "surface-variant": "rgba(255, 255, 255, 0.08)",
+                      "inverse-surface": "#e0e2ec",
+                      "surface-bright": "#222d39",
+                      "background": "#101922",
+                      "primary-container": "rgba(19, 127, 236, 0.2)",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Inter"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          }
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<nav class="bg-slate-950/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-lg shadow-black/20">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-black text-white tracking-tighter">AI Historical Tour Guide</div>
+<div class="hidden md:flex gap-10 items-center">
+<a class="text-blue-500 font-bold border-b-2 border-blue-500 pb-1 font-['Inter'] tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95 transition-transform" href="#">Discovery</a>
+<a class="text-white/60 font-medium font-['Inter'] tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95 transition-transform" href="#">AI Narration</a>
+<a class="text-white/60 font-medium font-['Inter'] tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95 transition-transform" href="#">Passport</a>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold transition-all active:scale-95 shadow-lg shadow-primary/20">
+                Download
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-40 grayscale-[20%] mix-blend-overlay" data-alt="Cinematic night shot of Yasaka Shrine in Kyoto with glowing lanterns, deep indigo shadows, and electric blue light highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASZPOsAqZkeedzkl5TVcCVOMx02JHUb6-oRed7dtwtvjDU9hbi31R42p58aB5WMHz06XU2FlQ5NE6Hm_gufct1Zs5JqCXpYlXrME1TJWaSLZaW9hszIjsBf1rR66XAJr2bsLIbeG3FagWfr1sYq8xHHaXkXHpUlsiryd8Pim0hwj78oYs8-dn0TktgxB7jSlcLwPWDjTxmTrvZ-BoWZxkKsHnQRlh2tyjZFB8M_cKZH8Xr9xH3ZkSynmyb9ILlE_fn9-3VhKeq"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-5xl mx-auto px-8 text-center">
+<div class="inline-block mb-6 px-4 py-1.5 glass-card rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-primary">
+                The Future of Exploration
+            </div>
+<h1 class="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
+                Experience History, <br/>
+<span class="text-primary text-neon">Not Just Sights.</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 font-medium">
+                Your personal AI historian for immersive, eyes-up exploration. Hear the stories behind the stones.
+            </p>
+<div class="flex flex-wrap justify-center gap-4">
+<button class="bg-primary text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-primary-fixed-dim hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">ios</span>
+                    App Store
+                </button>
+<button class="glass-card text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-white/20 hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_store_installed</span>
+                    Play Store
+                </button>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+<span class="material-symbols-outlined text-4xl">keyboard_double_arrow_down</span>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="max-w-7xl mx-auto px-8 py-24 space-y-32">
+<!-- Feature: Eyes-Up Discovery (Bento Style) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+<div class="lg:col-span-7 glass-card rounded-xl overflow-hidden relative group min-h-[400px]">
+<img class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700" data-alt="Close up of ancient weathered Japanese wooden gate with soft bokeh of temple gardens behind, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO4r_NLgHUKf4EF5ZOG1iWVyAin20jq4VaJTwwQFJyrW5IQEFjcW3eWOVHif7dQXndVHl-KRoYkkdfP9eFqWU9QY44lIwikdutTLg_k89KfNSoDOSxRdhOErLNnVKUn-Kf4jvTNDz4hS98gxEV4hlrLbpx0W2ywYExF4is2cOO9gI3Py_N0m-aNe_ivoxzL_QQZ8Zv5mtVqTrQeVFtG7ZEwnOOLP1HlDCcKW0B6GOO8hZHavW24LFl0dug_0JKxFVft9PXr37z"/>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/60 to-transparent p-12 flex flex-col justify-end">
+<div class="mb-4 text-primary font-black tracking-widest text-xs uppercase">Feature 01</div>
+<h2 class="text-4xl font-black mb-4 tracking-tighter leading-none">Eyes-Up Discovery</h2>
+<p class="text-on-surface-variant max-w-md">Our 'Free Roam' mode uses spatial audio to narrate history as you walk. Put your phone away and let the city speak to you.</p>
+</div>
+</div>
+<div class="lg:col-span-5 flex flex-col gap-8">
+<div class="glass-card p-10 rounded-xl flex-1 flex flex-col justify-center">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">spatial_audio_off</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 tracking-tight">Immersive Spatial Flow</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Audio cues adapt to your walking speed and orientation, creating a seamless narrative that feels part of the environment.</p>
+</div>
+<div class="glass-card p-10 rounded-xl flex-1 flex flex-col justify-center border-primary/20">
+<div class="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white text-3xl">visibility_off</span>
+</div>
+<h3 class="text-2xl font-bold mb-3 tracking-tight">Zero-Screen Interaction</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Stop looking at maps. Our AI directs you using historical landmarks as waypoints.</p>
+</div>
+</div>
+</section>
+<!-- Feature: AI Narration (Asymmetric) -->
+<section class="relative">
+<div class="flex flex-col md:flex-row items-center gap-16">
+<div class="md:w-1/2 order-2 md:order-1">
+<div class="inline-block mb-6 px-4 py-1 bg-primary/20 border border-primary/30 rounded-full text-[10px] uppercase tracking-widest font-bold text-primary">
+                        Dynamic Intelligence
+                    </div>
+<h2 class="text-5xl font-black mb-8 tracking-tighter leading-none">AI Narration: <br/>Choose Your Depth</h2>
+<div class="space-y-8">
+<div class="flex gap-6">
+<div class="flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-primary text-3xl">shutter_speed</span>
+</div>
+<div>
+<h4 class="text-xl font-bold tracking-tight mb-2">Brief Mode</h4>
+<p class="text-on-surface-variant text-sm">Perfect for high-level highlights. Get the 60-second essential history of any monument you pass.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-primary text-3xl">auto_stories</span>
+</div>
+<div>
+<h4 class="text-xl font-bold tracking-tight mb-2">Deep Dive</h4>
+<p class="text-on-surface-variant text-sm">For the true scholar. 15-minute immersive sagas detailing political intrigue, architectural secrets, and lost legends.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="md:w-1/2 order-1 md:order-2 flex justify-center">
+<div class="relative w-full max-w-sm aspect-[9/19] rounded-[3rem] border-[12px] border-surface-container-high bg-surface-container shadow-2xl overflow-hidden">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover" data-alt="Smartphone screen showing a dark minimalist music player style interface with a photo of a temple and a pulsing blue play button" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGVXWLX-f5lm_zJHqAweICRip3l6PyiGID5DyWce6oVMbJRbUOftNjP5EdhTMa1ddNWKiRcKGMEue-ohhla7UyB946I7okB6z_nv_oMwkr2DSaolTMxIWP7C66Eb4R4eQFikq3gesjd2C8QhUiM6dNdD_WJPn-gZpB4uW63snZ12w-V8AF5Zrb9XY_XLoE6uyxhxr754xO-9WUSYBW-Y2knOFnsDFkcWyxj3tQUrT-1c8-Zywozweqsxky0CeGQEZMgCF0KQFK"/>
+<div class="absolute inset-0 bg-black/60 backdrop-blur-sm p-8 flex flex-col justify-between">
+<div class="flex justify-between items-center pt-4">
+<span class="material-symbols-outlined">expand_more</span>
+<span class="text-[10px] uppercase tracking-widest font-bold">Now Playing</span>
+<span class="material-symbols-outlined">more_vert</span>
+</div>
+<div class="text-center">
+<div class="text-xs text-primary font-bold uppercase tracking-widest mb-2">Yasaka Shrine</div>
+<h3 class="text-2xl font-black tracking-tight leading-tight">The Fire of Gion</h3>
+<div class="mt-8 flex justify-center items-center gap-8">
+<span class="material-symbols-outlined text-3xl">replay_10</span>
+<div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+<span class="material-symbols-outlined text-3xl">forward_30</span>
+</div>
+</div>
+<div class="pb-4">
+<div class="h-1 bg-white/10 w-full rounded-full overflow-hidden mb-2">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold opacity-40">
+<span>04:12</span>
+<span>12:45</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature: Photo Identify (Full Width Card) -->
+<section class="glass-card rounded-[2rem] overflow-hidden">
+<div class="flex flex-col lg:flex-row">
+<div class="lg:w-1/2 h-[400px] lg:h-auto relative">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="User holding a smartphone to take a photo of a red torii gate, neon blue scanning line overlaying the screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9iuv8dlDX3a5CWH02xBuJE5T-mhchfuYwKT_wnIA5Y-16JX4eNZr6TcgdBZ2n_U68rkzArJv9lgfJa60Z6cU65PrHaw1XIm0_MWATZja7fvP55AGRvnUQExv9wZ3ho66x8qKSzuq2F6bIFRBaNymRJpw5nLzPf8CpUjSMgjXdws84bQLMkXwuBna8sZdokwnhqL_DJ5mrTAO1SJNhTbGCEDZsya1FkBWIeibtR4LoTxKyFRUoepayAVr5wrhiDrch6ezRkzdo"/>
+<div class="absolute inset-0 bg-primary/20 mix-blend-overlay"></div>
+</div>
+<div class="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
+<h2 class="text-4xl font-black mb-6 tracking-tighter leading-none">Photo Identify</h2>
+<p class="text-lg text-on-surface-variant mb-10 leading-relaxed">
+                        Encountered something mysterious? Snap a photo. Our advanced computer vision identifies the era, architect, and historical significance instantly, launching a tailored tour for you.
+                    </p>
+<ul class="space-y-4">
+<li class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-bold">Artifact Recognition</span>
+</li>
+<li class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-bold">Real-time Translation of Scripts</span>
+</li>
+<li class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-bold">Style &amp; Era Estimation</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Feature: Knowledge Passport (Stats/Grid) -->
+<section class="text-center">
+<h2 class="text-4xl font-black mb-16 tracking-tighter">Your Knowledge Passport</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="glass-card p-12 rounded-xl text-center group hover:bg-primary/5 transition-colors">
+<div class="text-5xl font-black text-primary mb-4">120+</div>
+<div class="text-xs uppercase tracking-[0.3em] font-bold text-on-surface-variant mb-6">Historical Logs</div>
+<p class="text-sm opacity-60">Automatically curate a diary of every site you've visited across the globe.</p>
+</div>
+<div class="glass-card p-12 rounded-xl text-center group hover:bg-primary/5 transition-colors">
+<div class="text-5xl font-black text-primary mb-4">500+</div>
+<div class="text-xs uppercase tracking-[0.3em] font-bold text-on-surface-variant mb-6">Stories Unlocked</div>
+<p class="text-sm opacity-60">Review deep-dive scripts and rare historical photos even after you return home.</p>
+</div>
+<div class="glass-card p-12 rounded-xl text-center group hover:bg-primary/5 transition-colors">
+<div class="text-5xl font-black text-primary mb-4">84</div>
+<div class="text-xs uppercase tracking-[0.3em] font-bold text-on-surface-variant mb-6">Cultural Badges</div>
+<p class="text-sm opacity-60">Gamify your exploration. Earn recognition for mastering specific dynasties or regions.</p>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="relative py-32 rounded-[3rem] overflow-hidden text-center">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="Blurred glowing city lights of Kyoto at night, creating a dreamy bokeh effect with deep blue and gold tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd0OfVbR5Q4h-VHrLhNFmPqxGvIuoch1oauAgFaDoITm0JLNVhdWv5Xnd0zrYfQtViPIUqHjrwq8FhH_3u3_LykrXyIJ5BXtL-PzlaVO-FU7ojhSMmCCkeWVcFQIQrYNnPvlbl-FEHFX2WwEsNosDgaMvd-nuj6VdLf1H9G0RlX2_m-m7oqtWLGs7WEfmvae819YqCp5y5a3azNHzkzdHpiPNycQEytwWxHhV41jTv7QRKOxbmhThLap0aIU9VzSPKU42cy4nk"/>
+<div class="absolute inset-0 bg-surface/80 backdrop-blur-md"></div>
+</div>
+<div class="relative z-10 max-w-2xl mx-auto px-8">
+<h2 class="text-5xl font-black mb-8 tracking-tighter leading-[0.9]">The city is a book. <br/>Start reading.</h2>
+<p class="text-on-surface-variant mb-12 font-medium">Join 50,000+ explorers uncovering the hidden narratives of our world.</p>
+<button class="bg-primary hover:bg-primary-fixed-dim text-white text-lg px-12 py-5 rounded-full font-black transition-all shadow-2xl shadow-primary/40 active:scale-95">
+                    Download for iOS / Android
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-950 w-full py-12 border-t border-white/10">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
+<div class="text-lg font-black text-white">AI Historical Tour Guide</div>
+<div class="flex flex-wrap justify-center gap-8 text-[10px] uppercase tracking-widest font-['Inter'] text-white/40">
+<a class="hover:text-blue-400 transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-blue-400 transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-blue-400 transition-colors" href="#">Support</a>
+<a class="hover:text-blue-400 transition-colors" href="#">Instagram</a>
+<a class="hover:text-blue-400 transition-colors" href="#">App Store</a>
+<a class="hover:text-blue-400 transition-colors" href="#">Play Store</a>
+</div>
+<div class="text-[10px] uppercase tracking-widest text-white/40">
+                © 2024 AI Historical Tour Guide. Neon Nocturne Aesthetics.
+            </div>
+</div>
+</footer>
+</body></html>
