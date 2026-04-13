@@ -31,7 +31,7 @@ class CreateNarrationUseCase {
   /// 執行用例：生成導覽內容
   ///
   /// [place] 地點資訊
-  /// [aspect] 導覽介紹面向
+  /// [aspects] 導覽介紹面向（支援多選）
   /// [language] 語言
   /// 返回生成的 NarrationContent
   ///
@@ -41,7 +41,7 @@ class CreateNarrationUseCase {
   /// - NarrationError.contentGenerationFailed: 內容驗證失敗
   Future<NarrationContent> execute({
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required Language language,
   }) async {
     // 1. 檢查每日使用額度
@@ -54,7 +54,7 @@ class CreateNarrationUseCase {
     // AppError 會直接透傳給上層
     final text = await _narrationService.generateNarration(
       place: place,
-      aspect: aspect,
+      aspects: aspects,
       language: language,
     );
 

@@ -5,21 +5,26 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 /// 導覽 Prompt 建構器
 ///
 /// 負責根據景點類型和介紹面向生成對應的 AI prompt
+/// 支援多個面向同時選擇，將各面向的指引合併為單一 prompt
 class NarrationPromptBuilder {
   final Place place;
-  final NarrationAspect aspect;
+  final Set<NarrationAspect> aspects;
   final String language;
 
   NarrationPromptBuilder({
     required this.place,
-    required this.aspect,
+    required this.aspects,
     required this.language,
   });
 
   /// 建構完整的 prompt
   String build() {
     final languageName = language.startsWith('zh') ? '繁體中文' : 'English';
-    final aspectGuideline = _getAspectGuideline(aspect);
+    final aspectDescriptions =
+        aspects.map(_getAspectDescription).join(', ');
+    final aspectGuidelines = aspects
+        .map(_getAspectGuideline)
+        .join('\n');
 
     return '''
 You are a professional tour guide creating an engaging audio narration for a location.
@@ -33,14 +38,14 @@ ${place.rating != null ? '- Rating: ${place.rating}/5.0' : ''}
 
 Requirements:
 - Language: $languageName
-- Narration Aspect: ${_getAspectDescription(aspect)}
+- Narration Aspects: $aspectDescriptions
 - Target Length: approximately 800-1200 characters
 - Estimated Duration: 3-5 minutes when read aloud
 - Tone: Engaging, vivid, and informative - as if you're speaking to a tourist standing at the location
 - Do NOT include any opening greetings, introductions, or welcome phrases (e.g., "Hello everyone", "Welcome to..."). Start directly with the content.
 
 Content Guidelines:
-$aspectGuideline
+$aspectGuidelines
 
 Format:
 - Write in a conversational tone suitable for audio playback
@@ -48,6 +53,7 @@ Format:
 - Avoid bullet points or lists
 - Write in flowing paragraphs with clear sentence endings (。！？or . ! ?)
 - Make it engaging and memorable
+- Weave all selected aspects naturally into a cohesive narrative
 
 Please generate the narration now:''';
   }

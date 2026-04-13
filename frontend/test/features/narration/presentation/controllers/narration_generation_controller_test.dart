@@ -39,7 +39,7 @@ class _SpyNarrationService implements NarrationService {
   @override
   Future<String> generateNarration({
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required Language language,
   }) async {
     called = true;
@@ -112,7 +112,7 @@ void main() {
 
       await controller.generate(
         place: _testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       );
 
@@ -128,7 +128,7 @@ void main() {
 
       await controller.generate(
         place: _testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       );
 
@@ -154,7 +154,7 @@ void main() {
 
       await controller.generate(
         place: _testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       );
 
@@ -172,7 +172,7 @@ void main() {
 
       await controller.generate(
         place: _testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       );
 
@@ -190,7 +190,7 @@ void main() {
 
       await controller.generate(
         place: _testPlace,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
       );
       expect(controller.state.isSuccess, isTrue);

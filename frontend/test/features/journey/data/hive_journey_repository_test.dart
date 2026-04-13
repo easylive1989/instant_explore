@@ -16,7 +16,7 @@ JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     address: 'Test Address',
   );
 
-  const aspect = NarrationAspect.historicalBackground;
+  const aspects = {NarrationAspect.historicalBackground};
   final content = NarrationContent.create(
     'Narration text',
     language: const Language('zh-TW'),
@@ -26,7 +26,7 @@ JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     id: id,
     place: place,
     narrationContent: content,
-    narrationAspect: aspect,
+    narrationAspects: aspects,
     createdAt: createdAt ?? DateTime.now(),
     language: const Language('zh-TW'),
   );
@@ -101,7 +101,7 @@ void main() {
     expect(restored.place.name, original.place.name);
     expect(restored.place.address, original.place.address);
     expect(restored.narrationContent.text, original.narrationContent.text);
-    expect(restored.narrationAspect, original.narrationAspect);
+    expect(restored.narrationAspects, original.narrationAspects);
     expect(restored.language.code, original.language.code);
   });
 }

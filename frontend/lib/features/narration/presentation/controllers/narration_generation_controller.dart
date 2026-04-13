@@ -75,13 +75,13 @@ class NarrationGenerationController
     this._journeyRepository,
   ) : super(const NarrationGenerationState());
 
-  /// Generates narration content for the given place and aspect.
+  /// Generates narration content for the given place and aspects.
   ///
   /// On success, auto-saves to journey and sets state to [success].
   /// On error, sets state to [error] with the appropriate error type.
   Future<void> generate({
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required Language language,
   }) async {
     state = const NarrationGenerationState(
@@ -91,11 +91,11 @@ class NarrationGenerationController
     try {
       final content = await _createNarrationUseCase.execute(
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         language: language,
       );
 
-      await _autoSaveToJourney(place, aspect, content, language);
+      await _autoSaveToJourney(place, aspects, content, language);
 
       state = NarrationGenerationState(
         status: NarrationGenerationStatus.success,
@@ -137,7 +137,7 @@ class NarrationGenerationController
 
   Future<void> _autoSaveToJourney(
     Place place,
-    NarrationAspect aspect,
+    Set<NarrationAspect> aspects,
     NarrationContent content,
     Language language,
   ) async {
@@ -145,7 +145,7 @@ class NarrationGenerationController
       final entry = JourneyEntry.create(
         id: const Uuid().v4(),
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         content: content,
         language: language,
       );

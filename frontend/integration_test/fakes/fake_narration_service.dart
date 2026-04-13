@@ -38,7 +38,7 @@ class FakeNarrationService implements NarrationService {
   @override
   Future<String> generateNarration({
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required Language language,
   }) async {
     // 模擬網路延遲

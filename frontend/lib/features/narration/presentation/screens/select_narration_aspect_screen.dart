@@ -40,7 +40,8 @@ class _SelectNarrationAspectScreenState
   }
 
   Future<void> _onStartPressed() async {
-    final selectedAspect = ref.read(narrationAspectProvider);
+    final selectedAspects = ref.read(narrationAspectsProvider);
+    if (selectedAspects.isEmpty) return;
 
     // Quota check before generation
     final usageRepo = ref.read(usageRepositoryProvider);
@@ -63,7 +64,7 @@ class _SelectNarrationAspectScreenState
         .read(narrationGenerationControllerProvider.notifier)
         .generate(
           place: widget.place,
-          aspect: selectedAspect,
+          aspects: selectedAspects,
           language: _currentLanguage(),
         );
   }
@@ -102,7 +103,7 @@ class _SelectNarrationAspectScreenState
 
   @override
   Widget build(BuildContext context) {
-    final selectedAspect = ref.watch(narrationAspectProvider);
+    final selectedAspects = ref.watch(narrationAspectsProvider);
     final generationState = ref.watch(
       narrationGenerationControllerProvider,
     );
@@ -227,14 +228,21 @@ class _SelectNarrationAspectScreenState
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: AspectOption(
                                   aspect: aspect,
-                                  isSelected: selectedAspect == aspect,
+                                  isSelected:
+                                      selectedAspects.contains(aspect),
                                   onTap: () {
-                                    ref
-                                            .read(
-                                              narrationAspectProvider.notifier,
-                                            )
-                                            .state =
-                                        aspect;
+                                    final notifier = ref.read(
+                                      narrationAspectsProvider.notifier,
+                                    );
+                                    final current = ref.read(
+                                      narrationAspectsProvider,
+                                    );
+                                    if (current.contains(aspect)) {
+                                      notifier.state =
+                                          {...current}..remove(aspect);
+                                    } else {
+                                      notifier.state = {...current, aspect};
+                                    }
                                   },
                                 ),
                               );
@@ -246,7 +254,9 @@ class _SelectNarrationAspectScreenState
 
                       // Start Button
                       ElevatedButton(
-                        onPressed: _onStartPressed,
+                        onPressed: selectedAspects.isEmpty
+                            ? null
+                            : _onStartPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
@@ -481,9 +491,12 @@ class AspectOption extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: AppColors.primary)
+              const Icon(Icons.check_box, color: AppColors.primary)
             else
-              const Icon(Icons.radio_button_unchecked, color: Colors.white54),
+              const Icon(
+                Icons.check_box_outline_blank,
+                color: Colors.white54,
+              ),
           ],
         ),
       ),

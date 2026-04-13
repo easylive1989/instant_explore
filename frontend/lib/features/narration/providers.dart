@@ -18,13 +18,12 @@ final narrationServiceProvider = Provider<NarrationService>((ref) {
 
 /// 導覽介紹面向選擇 Provider
 ///
-/// 管理用戶選擇的導覽介紹面向
+/// 管理用戶選擇的導覽介紹面向（支援多選）
 /// 預設為歷史背景（historicalBackground）
 /// 使用 autoDispose 確保離開頁面時自動重置
-final narrationAspectProvider = StateProvider.autoDispose<NarrationAspect>((
-  ref,
-) {
-  return NarrationAspect.historicalBackground;
+final narrationAspectsProvider =
+    StateProvider.autoDispose<Set<NarrationAspect>>((ref) {
+  return {NarrationAspect.historicalBackground};
 });
 
 /// TtsService Provider

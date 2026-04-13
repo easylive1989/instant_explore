@@ -18,13 +18,13 @@ class GeminiService implements NarrationService {
   /// 生成地點導覽內容
   ///
   /// [place] 地點資訊
-  /// [aspect] 導覽介紹面向
+  /// [aspects] 導覽介紹面向（支援多選）
   /// [language] 語言代碼（'zh-TW' 或 'en-US'）
   /// 返回適合語音播放的導覽文本
   @override
   Future<String> generateNarration({
     required Place place,
-    required NarrationAspect aspect,
+    required Set<NarrationAspect> aspects,
     required app_lang.Language language,
   }) async {
     try {
@@ -37,7 +37,7 @@ class GeminiService implements NarrationService {
       // 使用 NarrationPromptBuilder 建立提示詞
       final promptBuilder = NarrationPromptBuilder(
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         language: language.code,
       );
       final prompt = promptBuilder.build();

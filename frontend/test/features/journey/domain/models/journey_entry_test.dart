@@ -22,7 +22,7 @@ void main() {
         category: PlaceCategory.historicalCultural,
       );
 
-      const aspect = NarrationAspect.historicalBackground;
+      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Test narration',
         language: Language.traditionalChinese,
@@ -31,7 +31,7 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'test-id',
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -47,7 +47,7 @@ void main() {
         ),
       );
       expect(entry.narrationContent, equals(content));
-      expect(entry.narrationAspect, equals(aspect));
+      expect(entry.narrationAspects, equals(aspects));
       expect(entry.language, equals(Language.traditionalChinese));
       expect(entry.id, isNotEmpty);
     });
@@ -72,7 +72,7 @@ void main() {
           category: PlaceCategory.naturalLandscape,
         );
 
-        const aspect = NarrationAspect.geology;
+        const aspects = {NarrationAspect.geology};
         final content = NarrationContent.create(
           'Geology narration',
           language: Language.traditionalChinese,
@@ -81,7 +81,7 @@ void main() {
         final entry = JourneyEntry.create(
           id: 'test-id-2',
           place: place,
-          aspect: aspect,
+          aspects: aspects,
           content: content,
           language: Language.traditionalChinese,
         );
@@ -98,7 +98,7 @@ void main() {
           ),
         );
         expect(entry.narrationContent, equals(content));
-        expect(entry.narrationAspect, equals(aspect));
+        expect(entry.narrationAspects, equals(aspects));
         expect(entry.language, equals(Language.traditionalChinese));
       },
     );
@@ -114,7 +114,7 @@ void main() {
         category: PlaceCategory.modernUrban,
       );
 
-      const aspect = NarrationAspect.historicalBackground;
+      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Test narration',
         language: Language.traditionalChinese,
@@ -123,7 +123,7 @@ void main() {
       final entry1 = JourneyEntry.create(
         id: 'id-1',
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -131,7 +131,7 @@ void main() {
       final entry2 = JourneyEntry.create(
         id: 'id-2',
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -154,7 +154,7 @@ void main() {
         category: PlaceCategory.historicalCultural,
       );
 
-      const aspect = NarrationAspect.historicalBackground;
+      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Round trip text',
         language: Language.traditionalChinese,
@@ -163,7 +163,7 @@ void main() {
       final original = JourneyEntry.create(
         id: 'round-trip-id',
         place: place,
-        aspect: aspect,
+        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -175,7 +175,7 @@ void main() {
       expect(restored.place.name, original.place.name);
       expect(restored.place.address, original.place.address);
       expect(restored.narrationContent.text, original.narrationContent.text);
-      expect(restored.narrationAspect, original.narrationAspect);
+      expect(restored.narrationAspects, original.narrationAspects);
       expect(restored.language, original.language);
     });
 
@@ -196,7 +196,7 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'lang-test-id',
         place: place,
-        aspect: NarrationAspect.historicalBackground,
+        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.english,
       );
