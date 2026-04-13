@@ -1,29 +1,17 @@
 import 'dart:async';
-import 'package:context_app/core/errors/app_error.dart';
-import 'package:context_app/core/errors/app_error_type.dart';
-import 'package:context_app/features/narration/domain/errors/narration_error.dart';
-import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
-import 'package:context_app/features/usage/domain/errors/usage_error.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
-import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
-import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
-import 'package:context_app/features/journey/domain/models/journey_entry.dart';
-import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 播放器控制器
 ///
 /// 使用 StateNotifier 管理播放器狀態
-/// 負責協調 Use Cases 和 TTS Service
-/// 注意：權益檢查由 CreateNarrationUseCase 處理
+/// 僅負責播放控制，不負責生成導覽內容
 class PlayerController extends StateNotifier<NarrationState> {
-  final CreateNarrationUseCase _createNarrationUseCase;
-  final JourneyRepository _journeyRepository;
   final TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;
@@ -40,93 +28,16 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 用於防止 onComplete 事件在跳段時誤觸
   bool _isSkipping = false;
 
-  PlayerController(
-    this._createNarrationUseCase,
-    this._journeyRepository,
-    this._ttsService,
-  ) : super(NarrationState.initial()) {
+  PlayerController(this._ttsService) : super(NarrationState.initial()) {
     _setupTtsListeners();
   }
 
-  /// 初始化並開始生成導覽
-  ///
-  /// [place] 地點資訊
-  /// [aspect] 導覽介紹面向
-  /// [language] 語言（預設為繁體中文）
-  Future<void> initialize(
-    Place place,
-    NarrationAspect aspect, {
-    required Language language,
-  }) async {
-    // 設定為載入中狀態
-    state = state.loading();
-
-    try {
-      // 使用 CreateNarrationUseCase 生成導覽內容
-      // Use Case 會處理權益檢查和消耗免費額度
-      final content = await _createNarrationUseCase.execute(
-        place: place,
-        aspect: aspect,
-        language: language,
-      );
-
-      // 初始化 TtsService
-      await _ttsService.initialize();
-      await _ttsService.setLanguage(language);
-
-      // 更新狀態為就緒
-      state = state.ready(place, aspect, content);
-
-      // 自動儲存到歷程
-      await _autoSaveToJourney(place, aspect, content, language);
-    } on AppError catch (e) {
-      final stateErrorType = _mapAppErrorToStateError(e.type);
-      state = state.error(stateErrorType, message: e.message);
-    }
-  }
-
-  /// 將 AppErrorType 轉換為 NarrationStateErrorType
-  NarrationStateErrorType _mapAppErrorToStateError(AppErrorType type) {
-    // Narration 相關錯誤
-    if (type is NarrationError) {
-      switch (type) {
-        case NarrationError.freeQuotaExceeded:
-          return NarrationStateErrorType.freeQuotaExceeded;
-        case NarrationError.networkError:
-          return NarrationStateErrorType.networkError;
-        case NarrationError.configurationError:
-          return NarrationStateErrorType.configurationError;
-        case NarrationError.serverError:
-          return NarrationStateErrorType.serverError;
-        case NarrationError.unsupportedLocation:
-          return NarrationStateErrorType.unsupportedLocation;
-        case NarrationError.contentGenerationFailed:
-          return NarrationStateErrorType.contentGenerationFailed;
-        case NarrationError.ttsPlaybackError:
-          return NarrationStateErrorType.ttsPlaybackError;
-        case NarrationError.unknown:
-          return NarrationStateErrorType.unknown;
-      }
-    }
-
-    // Usage 相關錯誤
-    if (type is UsageError) {
-      switch (type) {
-        case UsageError.dailyQuotaExceeded:
-          return NarrationStateErrorType.freeQuotaExceeded;
-      }
-    }
-
-    // 其他類型一律返回 unknown
-    return NarrationStateErrorType.unknown;
-  }
-
-  /// 使用現有內容初始化（用於回放已儲存的導覽）
+  /// 使用現有內容初始化（用於播放已生成的導覽）
   Future<void> initializeWithContent(
     Place place,
     NarrationContent content,
   ) async {
-    // 立即顯示內容讓使用者知道這是回放，TTS 初始化期間播放鈕暫時停用
+    // 立即顯示內容，TTS 初始化期間播放鈕暫時停用
     state = NarrationState(
       place: place,
       content: content,
@@ -137,44 +48,8 @@ class PlayerController extends StateNotifier<NarrationState> {
     await _ttsService.initialize();
     await _ttsService.setLanguage(content.language);
 
-    // 更新狀態為就緒（aspect 為 null 因為是回放模式）
+    // 更新狀態為就緒
     state = state.ready(place, null, content);
-  }
-
-  /// 自動儲存導覽到歷程（生成完成後靜默儲存）
-  Future<void> _autoSaveToJourney(
-    Place place,
-    NarrationAspect aspect,
-    NarrationContent content,
-    Language language,
-  ) async {
-    try {
-      final entry = JourneyEntry.create(
-        place: place,
-        aspect: aspect,
-        content: content,
-        language: language,
-      );
-      await _journeyRepository.save(entry);
-    } catch (_) {
-      // 靜默失敗，不影響播放體驗
-    }
-  }
-
-  /// 手動儲存導覽到歷程
-  Future<void> saveToJourney({required Language language}) async {
-    final place = state.place;
-    final aspect = state.aspect;
-    final content = state.content;
-    if (place == null || aspect == null || content == null) return;
-
-    final entry = JourneyEntry.create(
-      place: place,
-      aspect: aspect,
-      content: content,
-      language: language,
-    );
-    await _journeyRepository.save(entry);
   }
 
   /// 設定 TTS 事件監聽器
@@ -194,13 +69,12 @@ class PlayerController extends StateNotifier<NarrationState> {
     // 監聽播放開始事件
     _ttsStartSubscription = _ttsService.onStart.listen((_) {
       // 新播放真正開始後，重置跳段標誌
-      // 這樣可以確保 stop() 觸發的非同步 onComplete 不會影響狀態
       _isSkipping = false;
       // 根據偏移量設定字符位置（跳段播放時偏移量不為 0）
       state = state.updateCharPosition(_charPositionOffset);
     });
 
-    // 監聯錯誤事件
+    // 監聽錯誤事件
     _ttsErrorSubscription = _ttsService.onError.listen((error) {
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,
@@ -210,8 +84,6 @@ class PlayerController extends StateNotifier<NarrationState> {
 
     // 監聽進度事件（字符級別的精確追蹤）
     _ttsProgressSubscription = _ttsService.onProgress.listen((progress) {
-      // 使用 TTS 提供的字符級別進度更新段落索引和進度
-      // 加入偏移量以對應原始文本的實際位置（跳段播放時需要）
       if (state.content != null && state.isPlaying) {
         state = state.updateCharPosition(
           progress.currentPosition + _charPositionOffset,
@@ -262,7 +134,6 @@ class PlayerController extends StateNotifier<NarrationState> {
     final success = await _ttsService.speak(textToPlay);
 
     if (success) {
-      // 更新狀態為播放中
       state = state.playing();
     } else {
       state = state.error(
@@ -278,10 +149,7 @@ class PlayerController extends StateNotifier<NarrationState> {
       return;
     }
 
-    // 暫停 TTS
     await _ttsService.pause();
-
-    // 更新狀態為暫停
     state = state.paused();
   }
 
@@ -309,7 +177,6 @@ class PlayerController extends StateNotifier<NarrationState> {
     await _ttsService.stop();
 
     // 在 iOS 上，TTS 引擎需要一點時間來完全重置狀態
-    // 特別是從暫停狀態轉換時
     if (wasPaused) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
@@ -326,7 +193,6 @@ class PlayerController extends StateNotifier<NarrationState> {
     // 開始播放（onStart 會重置 _isSkipping）
     final success = await _ttsService.speak(textToPlay);
     if (!success) {
-      // 播放失敗時手動重置 flag
       _isSkipping = false;
       state = state.error(
         NarrationStateErrorType.ttsPlaybackError,
@@ -336,8 +202,6 @@ class PlayerController extends StateNotifier<NarrationState> {
   }
 
   /// 跳到下一段
-  ///
-  /// 如果已是最後一段則不執行
   Future<void> skipToNextSegment() async {
     if (state.content == null) return;
 
@@ -350,8 +214,6 @@ class PlayerController extends StateNotifier<NarrationState> {
   }
 
   /// 跳到上一段
-  ///
-  /// 如果已是第一段則不執行
   Future<void> skipToPreviousSegment() async {
     if (state.content == null) return;
 
@@ -365,10 +227,8 @@ class PlayerController extends StateNotifier<NarrationState> {
 
   @override
   void dispose() {
-    // 停止播放
     _ttsService.stop();
 
-    // 取消訂閱
     _ttsCompleteSubscription?.cancel();
     _ttsStartSubscription?.cancel();
     _ttsErrorSubscription?.cancel();

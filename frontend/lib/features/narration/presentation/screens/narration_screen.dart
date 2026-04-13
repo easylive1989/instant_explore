@@ -1,22 +1,20 @@
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
-import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 
+/// 導覽播放頁面
+///
+/// 僅負責播放已生成的導覽內容，不負責生成。
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
-  final NarrationAspect? narrationAspect;
-  final NarrationContent? narrationContent;
+  final NarrationContent narrationContent;
 
   /// Whether to start playback automatically after initialisation.
   final bool autoPlay;
@@ -24,8 +22,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
   const NarrationScreen({
     super.key,
     required this.place,
-    this.narrationAspect,
-    this.narrationContent,
+    required this.narrationContent,
     this.autoPlay = false,
   });
 
@@ -40,32 +37,16 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
   @override
   void initState() {
     super.initState();
-    // 初始化播放器
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      if (widget.narrationContent != null) {
-        // 使用已有的 NarrationContent 初始化（例如從 JourneyEntry 回放）
-        ref
-            .read(playerControllerProvider.notifier)
-            .initializeWithContent(widget.place, widget.narrationContent!)
-            .then((_) {
-              if (!mounted || !widget.autoPlay) return;
-              ref.read(playerControllerProvider.notifier).play();
-            });
-      } else if (widget.narrationAspect != null) {
-        // 生成新的導覽內容（需要明確的 narrationAspect）
-        final locale =
-            easy.EasyLocalization.of(context)?.locale.toLanguageTag() ??
-            'zh-TW';
-        ref
-            .read(playerControllerProvider.notifier)
-            .initialize(
-              widget.place,
-              widget.narrationAspect!,
-              language: Language(locale),
-            );
-      }
+      ref
+          .read(playerControllerProvider.notifier)
+          .initializeWithContent(widget.place, widget.narrationContent)
+          .then((_) {
+            if (!mounted || !widget.autoPlay) return;
+            ref.read(playerControllerProvider.notifier).play();
+          });
     });
   }
 
@@ -85,57 +66,17 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     _lastSegmentIndex = segmentIndex;
 
-    // 使用 scrollToIndex 滑動到指定段落（定位到螢幕頂部）
     _scrollController.scrollToIndex(
-      segmentIndex + 1, // +1 因為 index 0 是頂部空白項
-      preferPosition: AutoScrollPosition.middle, // 定位到螢幕頂部
+      segmentIndex + 1,
+      preferPosition: AutoScrollPosition.middle,
       duration: const Duration(milliseconds: 300),
     );
   }
 
-  /// 顯示額度用完對話框（防禦性檢查）
-  void _showQuotaExceededDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('額度已用完'),
-        content: const Text('今日免費次數已用完，觀看廣告即可繼續使用。'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('確定'),
-          ),
-        ],
-      ),
-    ).then((_) {
-      if (mounted) {
-        context.go('/');
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    // 監聽錯誤狀態並顯示對應的對話框
+    // 監聽當前段落索引變化並自動滾動
     ref.listen(playerControllerProvider, (previous, current) {
-      // 當狀態從非錯誤變為錯誤時，且需要特殊對話框
-      if ((previous == null || !previous.hasError) &&
-          current.hasError &&
-          current.errorType != null &&
-          current.errorType!.requiresSpecialDialog) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-
-          // 根據錯誤類型顯示不同的對話框
-          if (current.errorType!.requiresAdDialog) {
-            _showQuotaExceededDialog();
-          }
-        });
-      }
-
-      // 監聽當前段落索引變化並自動滾動
       final previousIndex = previous?.currentSegmentIndex;
       final currentIndex = current.currentSegmentIndex;
       if (previousIndex != currentIndex && currentIndex != null) {
@@ -192,8 +133,6 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                       scrollController: _scrollController,
                       backgroundColor: backgroundColor,
                       primaryColor: primaryColor,
-                      place: widget.place,
-                      narrationAspect: widget.narrationAspect,
                     ),
                   ),
                 ],

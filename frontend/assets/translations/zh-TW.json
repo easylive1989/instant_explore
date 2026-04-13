@@ -13,7 +13,11 @@
   "config_screen": {
     "title": "選擇解說深度",
     "select_aspect_title": "選擇導覽面向",
-    "start_button": "開始導覽"
+    "start_button": "開始導覽",
+    "generating": "正在生成導覽內容...",
+    "generation_error_title": "生成失敗",
+    "generation_error_message": "導覽內容生成失敗，請稍後再試。",
+    "generation_error_ok": "確定"
   },
   "narration_style": {
     "brief": "摘要版",

@@ -1,10 +1,6 @@
 import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/presentation/widgets/transcript_segment_item.dart';
-import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,33 +11,19 @@ class NarrationTranscriptArea extends ConsumerWidget {
   final AutoScrollController scrollController;
   final Color backgroundColor;
   final Color primaryColor;
-  final Place place;
-  final NarrationAspect? narrationAspect;
 
   const NarrationTranscriptArea({
     super.key,
     required this.scrollController,
     required this.backgroundColor,
     required this.primaryColor,
-    required this.place,
-    this.narrationAspect,
   });
-
-  /// 格式化重試延遲時間
-  String _formatRetryDelay(int seconds) {
-    if (seconds < 60) {
-      return '$seconds 秒';
-    } else {
-      return '${seconds ~/ 60} 分鐘';
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
 
-    // 載入中且尚無內容（生成模式）才顯示 spinner；
-    // 回放模式下 content 已立即設定，直接顯示轉錄文字
+    // 載入中且尚無內容時顯示 spinner（TTS 初始化中）
     if (playerState.isLoading && playerState.content == null) {
       return Center(
         child: Column(
@@ -63,11 +45,6 @@ class NarrationTranscriptArea extends ConsumerWidget {
 
     // 錯誤狀態
     if (playerState.hasError) {
-      final locale =
-          easy.EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
-      final errorType = playerState.errorType;
-
-      // 取得錯誤訊息
       final errorMessage =
           playerState.errorMessage ?? 'player_screen.error'.tr();
 
@@ -87,42 +64,6 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-
-              // 顯示建議的重試時間
-              if (errorType?.suggestedRetryDelay != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'player_screen.suggested_retry'.tr(
-                    namedArgs: {
-                      'delay': _formatRetryDelay(
-                        errorType!.suggestedRetryDelay!,
-                      ),
-                    },
-                  ),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-
-              // 重試按鈕（僅在可重試且非 AI quota 錯誤時顯示，且有 narrationAspect 時）
-              if (errorType?.isRetryable == true &&
-                  narrationAspect != null) ...[
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    ref
-                        .read(playerControllerProvider.notifier)
-                        .initialize(
-                          place,
-                          narrationAspect!,
-                          language: Language(locale),
-                        );
-                  },
-                  child: const Text('重試'),
-                ),
-              ],
             ],
           ),
         ),
@@ -144,19 +85,18 @@ class NarrationTranscriptArea extends ConsumerWidget {
           controller: scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           itemCount: content.segments.length + 2,
-          // +2 for top/bottom spacing
           itemBuilder: (context, index) {
-            // 頂部空白 - 不需要 AutoScrollTag
+            // 頂部空白
             if (index == 0) {
               return const SizedBox(height: 60);
             }
 
-            // 底部空白 - 不需要 AutoScrollTag
+            // 底部空白
             if (index == content.segments.length + 1) {
               return const SizedBox(height: 200);
             }
 
-            // 文本段落 - 使用 AutoScrollTag 包裝
+            // 文本段落
             final segmentIndex = index - 1;
             final segment = content.segments[segmentIndex];
             final isActive = currentSegmentIndex == segmentIndex;
