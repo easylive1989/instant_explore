@@ -7,7 +7,6 @@ import 'package:context_app/features/main_screen.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/presentation/screens/select_narration_aspect_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
@@ -63,19 +62,17 @@ class RouterConfig {
             final extra = state.extra;
             if (extra == null || extra is! Map<String, dynamic>) return '/';
             if (extra['place'] is! Place) return '/';
+            if (extra['narrationContent'] is! NarrationContent) return '/';
             return null;
           },
           builder: (context, state) {
             final params = state.extra as Map<String, dynamic>;
             final place = params['place'] as Place;
-            final narrationAspect =
-                params['narrationAspect'] as NarrationAspect?;
             final narrationContent =
-                params['narrationContent'] as NarrationContent?;
+                params['narrationContent'] as NarrationContent;
             final autoPlay = params['autoPlay'] as bool? ?? false;
             return NarrationScreen(
               place: place,
-              narrationAspect: narrationAspect,
               narrationContent: narrationContent,
               autoPlay: autoPlay,
             );

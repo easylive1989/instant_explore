@@ -13,7 +13,11 @@
   "config_screen": {
     "title": "Select Narration Depth",
     "select_aspect_title": "Select Narration Aspect",
-    "start_button": "Start Guide"
+    "start_button": "Start Guide",
+    "generating": "Generating narration...",
+    "generation_error_title": "Generation Failed",
+    "generation_error_message": "Failed to generate narration. Please try again later.",
+    "generation_error_ok": "OK"
   },
   "narration_style": {
     "brief": "Brief",

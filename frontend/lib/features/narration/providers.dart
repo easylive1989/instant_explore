@@ -4,6 +4,7 @@ import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/narration/data/tts_service.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/journey/providers.dart';
@@ -46,19 +47,26 @@ final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
   return CreateNarrationUseCase(narrationService, usageRepository);
 });
 
+/// NarrationGenerationController Provider
+///
+/// 管理導覽生成的狀態（在選擇面向頁面使用）
+/// 使用 autoDispose 確保離開頁面時自動清理資源
+final narrationGenerationControllerProvider = StateNotifierProvider
+    .autoDispose<NarrationGenerationController, NarrationGenerationState>((
+      ref,
+    ) {
+      final useCase = ref.watch(startNarrationUseCaseProvider);
+      final journeyRepository = ref.watch(journeyRepositoryProvider);
+      return NarrationGenerationController(useCase, journeyRepository);
+    });
+
 /// PlayerController Provider
 ///
 /// 管理播放器狀態和控制播放行為
 /// 使用 autoDispose 確保離開頁面時自動清理資源
-/// 注意：權益檢查由 CreateNarrationUseCase 處理
+/// 僅負責播放，不負責生成導覽內容
 final playerControllerProvider =
     StateNotifierProvider.autoDispose<PlayerController, NarrationState>((ref) {
-      final startNarrationUseCase = ref.watch(startNarrationUseCaseProvider);
-      final journeyRepository = ref.watch(journeyRepositoryProvider);
       final ttsService = ref.watch(ttsServiceProvider);
-      return PlayerController(
-        startNarrationUseCase,
-        journeyRepository,
-        ttsService,
-      );
+      return PlayerController(ttsService);
     });

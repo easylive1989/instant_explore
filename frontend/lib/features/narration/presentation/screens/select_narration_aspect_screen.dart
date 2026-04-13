@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
+import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
+import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +17,7 @@ import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.da
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 
-class SelectNarrationAspectScreen extends ConsumerWidget {
+class SelectNarrationAspectScreen extends ConsumerStatefulWidget {
   final Place place;
   final Uint8List? capturedImageBytes;
 
@@ -26,21 +28,115 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedAspect = ref.watch(narrationAspectProvider);
+  ConsumerState<SelectNarrationAspectScreen> createState() =>
+      _SelectNarrationAspectScreenState();
+}
 
-    // 根據景點類型取得可用的介紹面向
-    final availableAspects = NarrationAspect.getAspectsForCategory(
-      place.category,
+class _SelectNarrationAspectScreenState
+    extends ConsumerState<SelectNarrationAspectScreen> {
+  Language _currentLanguage() {
+    final locale = EasyLocalization.of(context)?.locale.toLanguageTag();
+    return Language(locale ?? 'zh-TW');
+  }
+
+  Future<void> _onStartPressed() async {
+    final selectedAspect = ref.read(narrationAspectProvider);
+
+    // Quota check before generation
+    final usageRepo = ref.read(usageRepositoryProvider);
+    final status = await usageRepo.getUsageStatus();
+    if (!status.canUseNarration) {
+      if (!mounted) return;
+      final result = await showWatchAdDialog(context, ref);
+      if (result == 'subscribe') {
+        if (!mounted) return;
+        context.pushNamed('subscription');
+        return;
+      }
+      if (result != true || !mounted) return;
+    }
+
+    if (!mounted) return;
+
+    // Start generation on this page
+    ref
+        .read(narrationGenerationControllerProvider.notifier)
+        .generate(
+          place: widget.place,
+          aspect: selectedAspect,
+          language: _currentLanguage(),
+        );
+  }
+
+  void _navigateToPlayer(NarrationGenerationState genState) {
+    ref.read(narrationGenerationControllerProvider.notifier).reset();
+    context.pushNamed(
+      'player',
+      extra: {
+        'place': widget.place,
+        'narrationContent': genState.content,
+        'autoPlay': true,
+      },
+    );
+  }
+
+  void _showErrorDialog(NarrationGenerationState genState) {
+    ref.read(narrationGenerationControllerProvider.notifier).reset();
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('config_screen.generation_error_title'.tr()),
+        content: Text(
+          genState.errorMessage ??
+              'config_screen.generation_error_message'.tr(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text('config_screen.generation_error_ok'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedAspect = ref.watch(narrationAspectProvider);
+    final generationState = ref.watch(
+      narrationGenerationControllerProvider,
     );
 
-    final photoUrl = place.primaryPhoto?.url;
+    // Listen for generation success / error
+    ref.listen<NarrationGenerationState>(
+      narrationGenerationControllerProvider,
+      (previous, current) {
+        if (previous?.isSuccess != true && current.isSuccess) {
+          _navigateToPlayer(current);
+        }
+        if (previous?.hasError != true && current.hasError) {
+          _showErrorDialog(current);
+        }
+      },
+    );
+
+    final availableAspects = NarrationAspect.getAspectsForCategory(
+      widget.place.category,
+    );
+
+    final photoUrl = widget.place.primaryPhoto?.url;
+    final isGenerating = generationState.isGenerating;
 
     return Scaffold(
       body: Stack(
         children: [
           // Background Image
-          Positioned.fill(child: _buildBackgroundImage(photoUrl)),
+          Positioned.fill(
+            child: _BackgroundImage(
+              photoUrl: photoUrl,
+              capturedImageBytes: widget.capturedImageBytes,
+            ),
+          ),
 
           // Top Navigation
           Positioned(
@@ -50,10 +146,15 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
             child: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-                onPressed: () => context.pop(),
-              ),
+              leading: isGenerating
+                  ? null
+                  : IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => context.pop(),
+                    ),
             ),
           ),
 
@@ -85,7 +186,7 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
                   children: [
                     // Place Name
                     Text(
-                      place.name,
+                      widget.place.name,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 32,
@@ -95,151 +196,83 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
 
                     // Place Category Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: place.category.color.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: place.category.color,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            place.category.icon,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            place.category.translationKey.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _CategoryBadge(place: widget.place),
                     const SizedBox(height: 12),
 
                     // Place Address
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          color: Colors.white70,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            place.formattedAddress,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    _AddressRow(place: widget.place),
                     const SizedBox(height: 24),
 
-                    // Title
-                    Text(
-                      'config_screen.select_aspect_title'.tr(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    // Content area: loading spinner or aspect options
+                    if (isGenerating)
+                      _GeneratingIndicator()
+                    else ...[
+                      // Title
+                      Text(
+                        'config_screen.select_aspect_title'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Aspect Options (scrollable)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: availableAspects.map((aspect) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: AspectOption(
-                                aspect: aspect,
-                                isSelected: selectedAspect == aspect,
-                                onTap: () {
-                                  ref
-                                          .read(
-                                            narrationAspectProvider.notifier,
-                                          )
-                                          .state =
-                                      aspect;
-                                },
+                      // Aspect Options (scrollable)
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: availableAspects.map((aspect) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: AspectOption(
+                                  aspect: aspect,
+                                  isSelected: selectedAspect == aspect,
+                                  onTap: () {
+                                    ref
+                                            .read(
+                                              narrationAspectProvider.notifier,
+                                            )
+                                            .state =
+                                        aspect;
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Start Button
+                      ElevatedButton(
+                        onPressed: _onStartPressed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.play_arrow, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'config_screen.start_button'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Start Button
-                    ElevatedButton(
-                      onPressed: () async {
-                        final usageRepo = ref.read(usageRepositoryProvider);
-                        final status = await usageRepo.getUsageStatus();
-                        if (!status.canUseNarration) {
-                          if (!context.mounted) return;
-                          final result = await showWatchAdDialog(context, ref);
-                          if (result == 'subscribe') {
-                            if (!context.mounted) return;
-                            context.pushNamed('subscription');
-                            return;
-                          }
-                          if (result != true || !context.mounted) return;
-                        }
-                        if (!context.mounted) return;
-                        context.pushNamed(
-                          'player',
-                          extra: {
-                            'place': place,
-                            'narrationAspect': selectedAspect,
-                          },
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.play_arrow, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Text(
-                            'config_screen.start_button'.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
+                    ],
                   ],
                 ),
               ),
@@ -249,10 +282,40 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  /// 建立背景圖片
-  Widget _buildBackgroundImage(String? photoUrl) {
-    // 優先使用相機拍攝的圖片
+class _GeneratingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: AppColors.primary),
+            const SizedBox(height: 16),
+            Text(
+              'config_screen.generating'.tr(),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BackgroundImage extends StatelessWidget {
+  final String? photoUrl;
+  final Uint8List? capturedImageBytes;
+
+  const _BackgroundImage({this.photoUrl, this.capturedImageBytes});
+
+  @override
+  Widget build(BuildContext context) {
     if (capturedImageBytes != null) {
       return ColorFiltered(
         colorFilter: const ColorFilter.mode(
@@ -268,10 +331,9 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
       );
     }
 
-    // 使用網路圖片
     if (photoUrl != null) {
       return CachedNetworkImage(
-        imageUrl: photoUrl,
+        imageUrl: photoUrl!,
         fit: BoxFit.cover,
         color: const Color(0x66000000),
         colorBlendMode: BlendMode.darken,
@@ -291,8 +353,64 @@ class SelectNarrationAspectScreen extends ConsumerWidget {
       );
     }
 
-    // 沒有圖片時顯示深色背景
     return Container(color: Colors.black);
+  }
+}
+
+class _CategoryBadge extends StatelessWidget {
+  final Place place;
+
+  const _CategoryBadge({required this.place});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: place.category.color.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: place.category.color, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(place.category.icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            place.category.translationKey.tr(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddressRow extends StatelessWidget {
+  final Place place;
+
+  const _AddressRow({required this.place});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.location_on, color: Colors.white70, size: 16),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            place.formattedAddress,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }
 
