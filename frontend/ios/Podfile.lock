@@ -146,7 +146,11 @@ PODS:
   - quill_native_bridge_ios (0.0.1):
     - Flutter
   - RecaptchaInterop (101.0.0)
+  - receive_sharing_intent (1.8.1):
+    - Flutter
   - RevenueCat (5.61.0)
+  - share_plus (0.0.1):
+    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -181,6 +185,8 @@ DEPENDENCIES:
   - patrol (from `.symlinks/plugins/patrol/darwin`)
   - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - quill_native_bridge_ios (from `.symlinks/plugins/quill_native_bridge_ios/ios`)
+  - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -252,6 +258,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/purchases_flutter/ios"
   quill_native_bridge_ios:
     :path: ".symlinks/plugins/quill_native_bridge_ios/ios"
+  receive_sharing_intent:
+    :path: ".symlinks/plugins/receive_sharing_intent/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
@@ -305,13 +315,15 @@ SPEC CHECKSUMS:
   PurchasesHybridCommon: afaf46e9650f9399984196a6966c6d697d6122a2
   quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   RevenueCat: 9acbd29a62000b57d59efa16166290c4a119847b
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
 
-PODFILE CHECKSUM: fa50df0ef06c5e6da62de6a1fb77daa777394a51
+PODFILE CHECKSUM: c6cc965b87334b452b69d6af185352e421b0aed0
 
 COCOAPODS: 1.16.2
