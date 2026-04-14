@@ -4,8 +4,8 @@ import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Floating action button that opens the saved locations dialog
-/// with a hero-style expand animation from the FAB position.
+/// Floating action button that morphs into the saved locations dialog
+/// with a container-transform style animation from the FAB position.
 class SavedLocationsFab extends ConsumerWidget {
   const SavedLocationsFab({super.key});
 
@@ -16,12 +16,11 @@ class SavedLocationsFab extends ConsumerWidget {
 
     return FloatingActionButton(
       heroTag: 'saved_locations_fab',
+      shape: const CircleBorder(),
       onPressed: () {
         final box = context.findRenderObject() as RenderBox?;
         final fabRect = _computeFabRect(context, box);
-        Navigator.of(context).push(
-          _SavedLocationsRoute(fabRect: fabRect),
-        );
+        Navigator.of(context).push(_SavedLocationsRoute(fabRect: fabRect));
       },
       backgroundColor: AppColors.primary,
       child: Badge(
@@ -42,73 +41,120 @@ class SavedLocationsFab extends ConsumerWidget {
   }
 }
 
-/// Custom page route: expands a rounded rect from [fabRect] to
-/// a centered dialog, with content fading in.
+/// Custom page route: morphs the circular FAB into a rounded dialog.
+///
+/// The container expands from [fabRect] to a centered dialog rect while
+/// its corner radius morphs from 28 (circle) to 20, and its color fades
+/// from the FAB's primary tint to the dialog's surface color. The FAB
+/// icon is shown early in the transition and fades out as the real
+/// dialog content fades in. On pop, the whole animation plays in reverse.
 class _SavedLocationsRoute extends PageRouteBuilder<void> {
   _SavedLocationsRoute({required Rect fabRect})
-      : super(
-          opaque: false,
-          barrierDismissible: true,
-          barrierColor: Colors.black54,
-          transitionDuration: const Duration(milliseconds: 350),
-          reverseTransitionDuration: const Duration(milliseconds: 250),
-          pageBuilder: (_, __, ___) => const SavedLocationsDialog(),
-          transitionsBuilder: (context, animation, _, child) {
-            final size = MediaQuery.of(context).size;
-            final dialogRect = Rect.fromLTRB(
-              20,
-              size.height * 0.15,
-              size.width - 20,
-              size.height * 0.85,
-            );
+    : super(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 400),
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (_, __, ___) => const SavedLocationsDialog(),
+        transitionsBuilder: (context, animation, _, child) {
+          final mediaSize = MediaQuery.of(context).size;
+          final dialogRect = Rect.fromLTRB(
+            20,
+            mediaSize.height * 0.15,
+            mediaSize.width - 20,
+            mediaSize.height * 0.85,
+          );
 
-            final curved = CurvedAnimation(
+          final colorScheme = Theme.of(context).colorScheme;
+
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+
+          final rectTween = RectTween(begin: fabRect, end: dialogRect);
+          final radiusTween = Tween<double>(begin: 28, end: 20);
+          final colorTween = ColorTween(
+            begin: AppColors.primary,
+            end: colorScheme.surface,
+          );
+
+          // FAB icon is visible at the start and fades out early.
+          final iconOpacity = Tween<double>(begin: 1, end: 0).animate(
+            CurvedAnimation(
               parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            );
-
-            final rectTween = RectTween(
-              begin: fabRect,
-              end: dialogRect,
-            );
-
-            final radiusTween = Tween<double>(begin: 28, end: 20);
-            final fadeTween = Tween<double>(begin: 0, end: 1);
-            final fadeCurved = CurvedAnimation(
+              curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+            ),
+          );
+          // Dialog content fades in after the morph is mostly done.
+          final contentOpacity = Tween<double>(begin: 0, end: 1).animate(
+            CurvedAnimation(
               parent: animation,
-              curve: const Interval(0.2, 0.6),
-            );
+              curve: const Interval(0.45, 1.0, curve: Curves.easeIn),
+            ),
+          );
 
-            return ListenableBuilder(
-              listenable: animation,
-              builder: (context, _) {
-                final rect = rectTween.evaluate(curved);
-                if (rect == null) return const SizedBox.shrink();
-                final radius = radiusTween.evaluate(curved);
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, _) {
+              final rect = rectTween.evaluate(curved) ?? fabRect;
+              final radius = radiusTween.evaluate(curved);
+              final bgColor =
+                  colorTween.evaluate(curved) ?? colorScheme.surface;
 
-                return Stack(
-                  children: [
-                    Positioned(
-                      left: rect.left,
-                      top: rect.top,
-                      width: rect.width,
-                      height: rect.height,
-                      child: Material(
-                        color: Theme.of(context).colorScheme.surface,
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(radius),
-                        clipBehavior: Clip.antiAlias,
-                        child: Opacity(
-                          opacity: fadeTween.evaluate(fadeCurved),
-                          child: child,
-                        ),
+              return Stack(
+                children: [
+                  Positioned.fromRect(
+                    rect: rect,
+                    child: Material(
+                      color: bgColor,
+                      elevation: 8,
+                      borderRadius: BorderRadius.circular(radius),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Dialog content laid out at final dialog size,
+                          // clipped to the current morph rect. Ignores
+                          // pointer events until nearly fully visible.
+                          IgnorePointer(
+                            ignoring: contentOpacity.value < 0.95,
+                            child: Opacity(
+                              opacity: contentOpacity.value,
+                              child: OverflowBox(
+                                alignment: Alignment.topLeft,
+                                minWidth: dialogRect.width,
+                                maxWidth: dialogRect.width,
+                                minHeight: dialogRect.height,
+                                maxHeight: dialogRect.height,
+                                child: child,
+                              ),
+                            ),
+                          ),
+                          // FAB's bookmark icon, visible during the
+                          // circular phase of the morph.
+                          IgnorePointer(
+                            child: Center(
+                              child: Opacity(
+                                opacity: iconOpacity.value,
+                                child: const Icon(
+                                  Icons.bookmark,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                );
-              },
-            );
-          },
-        );
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
 }
