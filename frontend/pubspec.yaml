@@ -85,6 +85,9 @@ dependencies:
   logging: ^1.3.0
   purchases_flutter: ^9.13.2
 
+  # Receive shared content from other apps (e.g. Google Maps)
+  receive_sharing_intent: ^1.8.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

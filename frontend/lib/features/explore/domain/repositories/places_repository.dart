@@ -10,4 +10,9 @@ abstract class PlacesRepository {
   });
 
   Future<List<Place>> searchPlaces(String query, {required Language language});
+
+  /// Fetches a single place by its Google Place ID.
+  ///
+  /// Returns `null` if the place is not found.
+  Future<Place?> getPlaceById(String placeId, {required Language language});
 }

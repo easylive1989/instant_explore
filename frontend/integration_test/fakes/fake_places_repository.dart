@@ -56,6 +56,19 @@ class FakePlacesRepository implements PlacesRepository {
   }
 
   @override
+  Future<Place?> getPlaceById(
+    String placeId, {
+    required Language language,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    final allPlaces = [fakePlaceA, fakePlaceB, fakePlaceC];
+    return allPlaces.cast<Place?>().firstWhere(
+          (place) => place!.id == placeId,
+          orElse: () => null,
+        );
+  }
+
+  @override
   Future<List<Place>> searchPlaces(
     String query, {
     required Language language,

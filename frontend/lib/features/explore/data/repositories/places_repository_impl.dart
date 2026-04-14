@@ -80,4 +80,27 @@ class PlacesRepositoryImpl implements PlacesRepository {
       );
     }
   }
+
+  @override
+  Future<Place?> getPlaceById(
+    String placeId, {
+    required Language language,
+  }) async {
+    try {
+      final dto = await _apiService.getPlaceById(
+        placeId,
+        languageCode: language.code,
+      );
+      return dto?.toDomain(apiKey: _apiService.apiKey);
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '取得地點詳情失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
 }
