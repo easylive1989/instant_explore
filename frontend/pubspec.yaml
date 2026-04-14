@@ -88,6 +88,9 @@ dependencies:
   # Receive shared content from other apps (e.g. Google Maps)
   receive_sharing_intent: ^1.8.1
 
+  # Share content to other apps (social media, messaging, etc.)
+  share_plus: ^10.1.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -247,5 +247,11 @@
     "delete_message": "Are you sure you want to remove this saved location?",
     "delete_confirm": "Remove",
     "cancel": "Cancel"
+  },
+  "share_card": {
+    "share": "Share",
+    "visited": "Visited",
+    "explore_more": "Explore More",
+    "share_text": "I explored this place with Contexture"
   }
 }

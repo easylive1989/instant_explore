@@ -2,6 +2,7 @@ import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
@@ -29,6 +30,27 @@ class QuickGuideTimelineEntry extends ConsumerStatefulWidget {
 class _QuickGuideTimelineEntryState
     extends ConsumerState<QuickGuideTimelineEntry> {
   bool _isDeleting = false;
+  bool _isSharing = false;
+
+  Future<void> _shareAsCard() async {
+    if (_isSharing || _isDeleting) return;
+    setState(() => _isSharing = true);
+
+    try {
+      await JourneySharingService.shareJourneyCard(
+        context: context,
+        placeName: 'quick_guide.title'.tr(),
+        placeAddress: '',
+        narrationExcerpt: widget.entry.aiDescription,
+        visitedAt: widget.entry.createdAt,
+        imageBytes: widget.entry.imageBytes,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
 
   void _navigateToPlayer() {
     if (_isDeleting) return;
@@ -266,6 +288,22 @@ class _QuickGuideTimelineEntryState
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            if (_isSharing)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            else
+                              _ActionButton(
+                                icon: Icons.share_outlined,
+                                label: 'share_card.share'.tr(),
+                                onTap: _shareAsCard,
+                              ),
+                            const SizedBox(width: 16),
                             if (_isDeleting)
                               const SizedBox(
                                 width: 18,
@@ -276,7 +314,11 @@ class _QuickGuideTimelineEntryState
                                 ),
                               )
                             else
-                              _DeleteButton(onTap: _showDeleteConfirmDialog),
+                              _ActionButton(
+                                icon: Icons.delete_outline,
+                                label: 'passport.delete_confirm'.tr(),
+                                onTap: _showDeleteConfirmDialog,
+                              ),
                           ],
                         ),
                       ),
@@ -292,9 +334,16 @@ class _QuickGuideTimelineEntryState
   }
 }
 
-class _DeleteButton extends StatelessWidget {
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
   final VoidCallback onTap;
-  const _DeleteButton({required this.onTap});
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -304,10 +353,10 @@ class _DeleteButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.delete_outline, size: 16, color: color),
+          Icon(icon, size: 16, color: color),
           const SizedBox(width: 6),
           Text(
-            'passport.delete_confirm'.tr(),
+            label,
             style: TextStyle(
               color: color,
               fontSize: 12,
