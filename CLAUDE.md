@@ -80,6 +80,10 @@ mobile platforms.
   `platform` packages, if appropriate, so you can inject in-memory and fake
   versions of the objects.
 * **Logging:** Use the `logging` package instead of `print`.
+* **Static Analysis:** After every code modification, run
+  `fvm flutter analyze --fatal-infos` to ensure there are no errors, warnings,
+  or info-level issues. All issues must be resolved before considering the task
+  complete.
 
 ## Dart Best Practices
 * **Effective Dart:** Follow the official Effective Dart guidelines
