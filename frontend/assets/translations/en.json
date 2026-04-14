@@ -59,7 +59,12 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "replay": "Replay",
-    "login_required": "Sign in to view your journey history"
+    "login_required": "Sign in to view your journey history",
+    "search_hint": "Search places or content...",
+    "filter_all": "All",
+    "filter_narration": "Narration",
+    "filter_quick_guide": "Quick Guide",
+    "no_results": "No matching entries found"
   },
   "explore": {
     "title": "Explore",

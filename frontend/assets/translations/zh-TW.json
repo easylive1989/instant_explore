@@ -59,7 +59,12 @@
     "today": "今天",
     "yesterday": "昨天",
     "replay": "重播",
-    "login_required": "登入後即可查看您的旅程記錄"
+    "login_required": "登入後即可查看您的旅程記錄",
+    "search_hint": "搜尋地點或內容...",
+    "filter_all": "全部",
+    "filter_narration": "語音導覽",
+    "filter_quick_guide": "快速導覽",
+    "no_results": "找不到符合的紀錄"
   },
   "explore": {
     "title": "探索",
