@@ -1,4 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -23,6 +24,27 @@ class TimelineEntry extends ConsumerStatefulWidget {
 
 class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   bool _isDeleting = false;
+  bool _isSharing = false;
+
+  Future<void> _shareAsCard() async {
+    if (_isSharing || _isDeleting) return;
+    setState(() => _isSharing = true);
+
+    try {
+      await JourneySharingService.shareJourneyCard(
+        context: context,
+        placeName: widget.entry.place.name,
+        placeAddress: widget.entry.place.address,
+        narrationExcerpt: widget.entry.narrationContent.text,
+        visitedAt: widget.entry.createdAt,
+        imageUrl: widget.entry.place.imageUrl,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
 
   Future<void> _showDeleteConfirmDialog() async {
     if (_isDeleting) return; // Prevent multiple clicks
@@ -296,6 +318,22 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
+                              if (_isSharing)
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              else
+                                _ActionButton(
+                                  icon: Icons.share_outlined,
+                                  label: 'share_card.share'.tr(),
+                                  onTap: _shareAsCard,
+                                ),
+                              const SizedBox(width: 16),
                               if (_isDeleting)
                                 const SizedBox(
                                   width: 18,

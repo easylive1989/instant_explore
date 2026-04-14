@@ -247,5 +247,11 @@
     "delete_message": "確定要移除此儲存的地點嗎？",
     "delete_confirm": "移除",
     "cancel": "取消"
+  },
+  "share_card": {
+    "share": "分享",
+    "visited": "已探訪",
+    "explore_more": "探索更多",
+    "share_text": "我用讀景探索了這個地方"
   }
 }
