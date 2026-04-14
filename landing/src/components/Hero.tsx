@@ -25,7 +25,12 @@ export default function Hero() {
           the stories behind the stones.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <button className="bg-primary text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-primary-fixed-dim hover:scale-105 active:scale-95">
+          <a
+            href="https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-primary text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-primary-fixed-dim hover:scale-105 active:scale-95"
+          >
             <span
               className="material-symbols-outlined"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -33,16 +38,21 @@ export default function Hero() {
               ios
             </span>
             App Store
-          </button>
-          <button className="glass-card text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-white/20 hover:scale-105 active:scale-95">
+          </a>
+          <a
+            href="https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="glass-card text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+          >
             <span
               className="material-symbols-outlined"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
-              play_store_installed
+              android
             </span>
             Play Store
-          </button>
+          </a>
         </div>
       </div>
 

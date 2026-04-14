@@ -1,10 +1,16 @@
 const links = [
-  "Privacy Policy",
-  "Terms of Service",
-  "Support",
-  "Instagram",
-  "App Store",
-  "Play Store",
+  { label: "Privacy Policy", href: "#" },
+  { label: "Terms of Service", href: "#" },
+  { label: "Support", href: "#" },
+  { label: "Instagram", href: "#" },
+  {
+    label: "App Store",
+    href: "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060",
+  },
+  {
+    label: "Play Store",
+    href: "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW",
+  },
 ];
 
 export default function Footer() {
@@ -15,11 +21,13 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center gap-8 text-[10px] uppercase tracking-widest text-white/40">
           {links.map((link) => (
             <a
-              key={link}
+              key={link.label}
               className="hover:text-blue-400 transition-colors"
-              href="#"
+              href={link.href}
+              target={link.href !== "#" ? "_blank" : undefined}
+              rel={link.href !== "#" ? "noopener noreferrer" : undefined}
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </div>
