@@ -57,9 +57,7 @@ class JourneyEntry {
     'place_address': place.address,
     'place_image_url': place.imageUrl,
     'narration_text': narrationContent.text,
-    'narration_styles': narrationAspects
-        .map((a) => a.key)
-        .toList(),
+    'narration_styles': narrationAspects.map((a) => a.key).toList(),
     'created_at': createdAt.toIso8601String(),
     'language': language.code,
   };
@@ -84,8 +82,7 @@ class JourneyEntry {
     // 和新的 narration_styles（字串陣列）
     Set<NarrationAspect> narrationAspects;
     if (json.containsKey('narration_styles')) {
-      final styles = (json['narration_styles'] as List<dynamic>)
-          .cast<String>();
+      final styles = (json['narration_styles'] as List<dynamic>).cast<String>();
       narrationAspects = styles
           .map((key) => NarrationAspect.fromKey(key))
           .whereType<NarrationAspect>()
@@ -94,9 +91,8 @@ class JourneyEntry {
         narrationAspects = {NarrationAspect.historicalBackground};
       }
     } else {
-      final aspect = NarrationAspect.fromKey(
-            json['narration_style'] as String,
-          ) ??
+      final aspect =
+          NarrationAspect.fromKey(json['narration_style'] as String) ??
           NarrationAspect.historicalBackground;
       narrationAspects = {aspect};
     }

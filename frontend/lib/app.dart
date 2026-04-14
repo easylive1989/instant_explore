@@ -38,9 +38,7 @@ class ContextureApp extends ConsumerWidget {
             router,
             context,
             SnackBar(
-              content: Text(
-                'shared_place.saved'.tr(args: [place.name]),
-              ),
+              content: Text('shared_place.saved'.tr(args: [place.name])),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -89,8 +87,7 @@ class ContextureApp extends ConsumerWidget {
     BuildContext fallback,
     SnackBar snackBar,
   ) {
-    final ctx =
-        router.routerDelegate.navigatorKey.currentContext ?? fallback;
+    final ctx = router.routerDelegate.navigatorKey.currentContext ?? fallback;
     ScaffoldMessenger.of(ctx).showSnackBar(snackBar);
   }
 }
@@ -112,23 +109,15 @@ class _ShareLoadingOverlay extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 24,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(
-                  color: colorScheme.primary,
-                ),
+                CircularProgressIndicator(color: colorScheme.primary),
                 const SizedBox(height: 16),
                 Text(
                   'shared_place.loading'.tr(),
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
                 ),
               ],
             ),

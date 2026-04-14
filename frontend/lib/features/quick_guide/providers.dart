@@ -17,21 +17,20 @@ final quickGuideRepositoryProvider = Provider<QuickGuideRepository>((ref) {
   return HiveQuickGuideRepository();
 });
 
-final generateQuickGuideUseCaseProvider =
-    Provider<GenerateQuickGuideUseCase>((ref) {
-      return GenerateQuickGuideUseCase(
-        ref.watch(quickGuideAiServiceProvider),
-        ref.watch(quickGuideRepositoryProvider),
-        ref.watch(usageRepositoryProvider),
-        () => const Uuid().v4(),
-      );
-    });
+final generateQuickGuideUseCaseProvider = Provider<GenerateQuickGuideUseCase>((
+  ref,
+) {
+  return GenerateQuickGuideUseCase(
+    ref.watch(quickGuideAiServiceProvider),
+    ref.watch(quickGuideRepositoryProvider),
+    ref.watch(usageRepositoryProvider),
+    () => const Uuid().v4(),
+  );
+});
 
 final quickGuideControllerProvider =
     StateNotifierProvider<QuickGuideController, QuickGuideState>((ref) {
-      return QuickGuideController(
-        ref.watch(generateQuickGuideUseCaseProvider),
-      );
+      return QuickGuideController(ref.watch(generateQuickGuideUseCaseProvider));
     });
 
 final quickGuideEntriesProvider =

@@ -20,11 +20,8 @@ class NarrationPromptBuilder {
   /// 建構完整的 prompt
   String build() {
     final languageName = language.startsWith('zh') ? '繁體中文' : 'English';
-    final aspectDescriptions =
-        aspects.map(_getAspectDescription).join(', ');
-    final aspectGuidelines = aspects
-        .map(_getAspectGuideline)
-        .join('\n');
+    final aspectDescriptions = aspects.map(_getAspectDescription).join(', ');
+    final aspectGuidelines = aspects.map(_getAspectGuideline).join('\n');
 
     return '''
 You are a professional tour guide creating an engaging audio narration for a location.

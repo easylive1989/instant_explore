@@ -75,23 +75,17 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
               curve: Curves.easeInOut,
               child: _showSearch
                   ? Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        20, 12, 20, 0,
-                      ),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                       child: TextField(
                         controller: _searchController,
                         autofocus: true,
                         onChanged: (value) {
                           setState(() {});
-                          ref
-                              .read(
-                                journeySearchQueryProvider.notifier,
-                              )
-                              .state = value;
+                          ref.read(journeySearchQueryProvider.notifier).state =
+                              value;
                         },
                         decoration: InputDecoration(
-                          hintText:
-                              'passport.search_hint'.tr(),
+                          hintText: 'passport.search_hint'.tr(),
                           prefixIcon: Icon(
                             Icons.search,
                             color: colorScheme.onSurfaceVariant,
@@ -99,27 +93,23 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                           ),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(
-                                    Icons.clear,
-                                    size: 18,
-                                  ),
+                                  icon: const Icon(Icons.clear, size: 18),
                                   onPressed: () {
                                     _searchController.clear();
                                     setState(() {});
                                     ref
-                                        .read(
-                                          journeySearchQueryProvider
-                                              .notifier,
-                                        )
-                                        .state = '';
+                                            .read(
+                                              journeySearchQueryProvider
+                                                  .notifier,
+                                            )
+                                            .state =
+                                        '';
                                   },
                                 )
                               : null,
                           filled: true,
-                          fillColor:
-                              colorScheme.surfaceContainerHighest,
-                          contentPadding:
-                              const EdgeInsets.symmetric(
+                          fillColor: colorScheme.surfaceContainerHighest,
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 10,
                           ),
@@ -164,9 +154,8 @@ class _FilterChips extends ConsumerWidget {
             label: 'passport.filter_all'.tr(),
             selected: currentFilter == JourneyFilter.all,
             colorScheme: colorScheme,
-            onTap: () => ref
-                .read(journeyFilterProvider.notifier)
-                .state = JourneyFilter.all,
+            onTap: () => ref.read(journeyFilterProvider.notifier).state =
+                JourneyFilter.all,
           ),
           const SizedBox(width: 8),
           _buildChip(
@@ -174,9 +163,8 @@ class _FilterChips extends ConsumerWidget {
             label: 'passport.filter_narration'.tr(),
             selected: currentFilter == JourneyFilter.narration,
             colorScheme: colorScheme,
-            onTap: () => ref
-                .read(journeyFilterProvider.notifier)
-                .state = JourneyFilter.narration,
+            onTap: () => ref.read(journeyFilterProvider.notifier).state =
+                JourneyFilter.narration,
           ),
           const SizedBox(width: 8),
           _buildChip(
@@ -184,9 +172,8 @@ class _FilterChips extends ConsumerWidget {
             label: 'passport.filter_quick_guide'.tr(),
             selected: currentFilter == JourneyFilter.quickGuide,
             colorScheme: colorScheme,
-            onTap: () => ref
-                .read(journeyFilterProvider.notifier)
-                .state = JourneyFilter.quickGuide,
+            onTap: () => ref.read(journeyFilterProvider.notifier).state =
+                JourneyFilter.quickGuide,
           ),
         ],
       ),
@@ -204,10 +191,7 @@ class _FilterChips extends ConsumerWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 7,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary
@@ -217,12 +201,9 @@ class _FilterChips extends ConsumerWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: selected
-                ? Colors.white
-                : colorScheme.onSurfaceVariant,
+            color: selected ? Colors.white : colorScheme.onSurfaceVariant,
             fontSize: 13,
-            fontWeight:
-                selected ? FontWeight.w600 : FontWeight.normal,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
       ),
@@ -236,8 +217,7 @@ class _JourneyList extends ConsumerWidget {
     final asyncItems = ref.watch(filteredJourneyItemsProvider);
     final query = ref.watch(journeySearchQueryProvider).trim();
     final filter = ref.watch(journeyFilterProvider);
-    final hasActiveFilter =
-        query.isNotEmpty || filter != JourneyFilter.all;
+    final hasActiveFilter = query.isNotEmpty || filter != JourneyFilter.all;
 
     return asyncItems.when(
       data: (items) {
@@ -249,14 +229,11 @@ class _JourneyList extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    hasActiveFilter
-                        ? Icons.search_off
-                        : Icons.explore_outlined,
+                    hasActiveFilter ? Icons.search_off : Icons.explore_outlined,
                     size: 48,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -264,9 +241,7 @@ class _JourneyList extends ConsumerWidget {
                         ? 'passport.no_results'.tr()
                         : 'passport.no_entries'.tr(),
                     style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 15,
                     ),
                     textAlign: TextAlign.center,
@@ -284,24 +259,21 @@ class _JourneyList extends ConsumerWidget {
             final isLast = index == items.length - 1;
 
             return switch (item) {
-              NarrationJourneyItem(:final entry) =>
-                TimelineEntry(
-                  key: ValueKey(item.id),
-                  entry: entry,
-                  isLast: isLast,
-                ),
-              QuickGuideJourneyItem(:final entry) =>
-                QuickGuideTimelineEntry(
-                  key: ValueKey(item.id),
-                  entry: entry,
-                  isLast: isLast,
-                ),
+              NarrationJourneyItem(:final entry) => TimelineEntry(
+                key: ValueKey(item.id),
+                entry: entry,
+                isLast: isLast,
+              ),
+              QuickGuideJourneyItem(:final entry) => QuickGuideTimelineEntry(
+                key: ValueKey(item.id),
+                entry: entry,
+                isLast: isLast,
+              ),
             };
           },
         );
       },
-      loading: () =>
-          const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
         child: Text(
           '${'passport.load_error'.tr()}: $error',

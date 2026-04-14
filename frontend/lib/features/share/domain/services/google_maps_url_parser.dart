@@ -50,9 +50,7 @@ class GoogleMapsUrlParser {
   );
 
   /// Pattern for coordinates in Google Maps URLs: @lat,lng
-  static final _coordPattern = RegExp(
-    r'@(-?\d+\.?\d*),(-?\d+\.?\d*)',
-  );
+  static final _coordPattern = RegExp(r'@(-?\d+\.?\d*),(-?\d+\.?\d*)');
 
   /// Pattern for query parameters: ?q=lat,lng or &q=lat,lng
   static final _queryCoordPattern = RegExp(
@@ -60,9 +58,7 @@ class GoogleMapsUrlParser {
   );
 
   /// Pattern for place name in URL path: /place/PlaceName/
-  static final _placeNamePattern = RegExp(
-    r'/place/([^/@]+)',
-  );
+  static final _placeNamePattern = RegExp(r'/place/([^/@]+)');
 
   GoogleMapsUrlParser._();
 

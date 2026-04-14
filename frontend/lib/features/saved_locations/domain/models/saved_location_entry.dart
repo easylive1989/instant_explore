@@ -47,12 +47,14 @@ class SavedLocationEntry extends Equatable {
       userRatingCount: place.userRatingCount,
       types: place.types,
       photosJson: place.photos
-          .map((p) => {
-                'url': p.url,
-                'width_px': p.widthPx,
-                'height_px': p.heightPx,
-                'author_attributions': p.authorAttributions,
-              })
+          .map(
+            (p) => {
+              'url': p.url,
+              'width_px': p.widthPx,
+              'height_px': p.heightPx,
+              'author_attributions': p.authorAttributions,
+            },
+          )
           .toList(),
       categoryKey: place.category.name,
       savedAt: DateTime.now(),
@@ -62,23 +64,22 @@ class SavedLocationEntry extends Equatable {
   /// Reconstructs the [Place] domain model.
   Place toPlace() {
     final photos = photosJson
-        .map((p) => PlacePhoto(
-              url: p['url'] as String,
-              widthPx: p['width_px'] as int,
-              heightPx: p['height_px'] as int,
-              authorAttributions:
-                  (p['author_attributions'] as List<dynamic>).cast<String>(),
-            ))
+        .map(
+          (p) => PlacePhoto(
+            url: p['url'] as String,
+            widthPx: p['width_px'] as int,
+            heightPx: p['height_px'] as int,
+            authorAttributions: (p['author_attributions'] as List<dynamic>)
+                .cast<String>(),
+          ),
+        )
         .toList();
 
     return Place(
       id: placeId,
       name: name,
       formattedAddress: formattedAddress,
-      location: PlaceLocation(
-        latitude: latitude,
-        longitude: longitude,
-      ),
+      location: PlaceLocation(latitude: latitude, longitude: longitude),
       rating: rating,
       userRatingCount: userRatingCount,
       types: types,
@@ -91,18 +92,18 @@ class SavedLocationEntry extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'place_id': placeId,
-        'name': name,
-        'formatted_address': formattedAddress,
-        'latitude': latitude,
-        'longitude': longitude,
-        'rating': rating,
-        'user_rating_count': userRatingCount,
-        'types': types,
-        'photos': photosJson,
-        'category_key': categoryKey,
-        'saved_at': savedAt.toIso8601String(),
-      };
+    'place_id': placeId,
+    'name': name,
+    'formatted_address': formattedAddress,
+    'latitude': latitude,
+    'longitude': longitude,
+    'rating': rating,
+    'user_rating_count': userRatingCount,
+    'types': types,
+    'photos': photosJson,
+    'category_key': categoryKey,
+    'saved_at': savedAt.toIso8601String(),
+  };
 
   factory SavedLocationEntry.fromJson(Map<String, dynamic> json) {
     return SavedLocationEntry(

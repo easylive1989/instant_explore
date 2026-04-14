@@ -26,8 +26,7 @@ class SavedLocationsDialog extends ConsumerWidget {
             data: (entries) => entries.isEmpty
                 ? _EmptyState(colorScheme: colorScheme)
                 : _SavedLocationsList(entries: entries),
-            loading: () =>
-                const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => Center(
               child: Text(
                 'common.error_prefix'.tr(),
@@ -52,11 +51,7 @@ class _DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 12),
       child: Row(
         children: [
-          const Icon(
-            Icons.bookmark,
-            color: AppColors.primary,
-            size: 24,
-          ),
+          const Icon(Icons.bookmark, color: AppColors.primary, size: 24),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -70,10 +65,7 @@ class _DialogHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.close,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -97,9 +89,7 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.bookmark_border,
               size: 64,
-              color: colorScheme.onSurfaceVariant.withValues(
-                alpha: 0.4,
-              ),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
@@ -116,9 +106,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.7,
-                ),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -138,11 +126,8 @@ class _SavedLocationsList extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: entries.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 16,
-        endIndent: 16,
-      ),
+      separatorBuilder: (_, __) =>
+          const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
         return _SavedLocationTile(entry: entries[index]);
       },
@@ -167,20 +152,14 @@ class _SavedLocationTile extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: colorScheme.error,
-        child: Icon(
-          Icons.delete_outline,
-          color: colorScheme.onError,
-        ),
+        child: Icon(Icons.delete_outline, color: colorScheme.onError),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) {
-        ref
-            .read(savedLocationsProvider.notifier)
-            .removePlace(entry.placeId);
+        ref.read(savedLocationsProvider.notifier).removePlace(entry.placeId);
       },
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Image.asset(
@@ -201,10 +180,7 @@ class _SavedLocationTile extends ConsumerWidget {
         ),
         subtitle: Text(
           entry.formattedAddress,
-          style: TextStyle(
-            fontSize: 12,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

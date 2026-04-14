@@ -51,13 +51,11 @@ class JourneySharingService {
       final file = File('${tempDir.path}/journey_card_$timestamp.png');
       await file.writeAsBytes(pngBytes);
 
-      final shareText =
-          '${'share_card.share_text'.tr()} — $placeName';
+      final shareText = '${'share_card.share_text'.tr()} — $placeName';
 
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'image/png')],
-        text: shareText,
-      );
+      await Share.shareXFiles([
+        XFile(file.path, mimeType: 'image/png'),
+      ], text: shareText);
     } catch (e, stack) {
       _log.severe('Error sharing journey card', e, stack);
     }
@@ -101,11 +99,7 @@ class JourneySharingService {
 
     // Build the widget in an overlay so it renders off-screen.
     final overlay = OverlayEntry(
-      builder: (_) => Positioned(
-        left: -1000,
-        top: -1000,
-        child: widget,
-      ),
+      builder: (_) => Positioned(left: -1000, top: -1000, child: widget),
     );
 
     final overlayState = Overlay.of(context);
@@ -120,8 +114,7 @@ class JourneySharingService {
       if (boundary == null) return null;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } finally {
       overlay.remove();

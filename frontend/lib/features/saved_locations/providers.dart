@@ -5,19 +5,19 @@ import 'package:context_app/features/saved_locations/domain/repositories/saved_l
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Singleton repository provider.
-final savedLocationsRepositoryProvider =
-    Provider<SavedLocationsRepository>((ref) {
+final savedLocationsRepositoryProvider = Provider<SavedLocationsRepository>((
+  ref,
+) {
   return HiveSavedLocationsRepository();
 });
 
 /// Notifier that manages the saved locations list.
-final savedLocationsProvider = AsyncNotifierProvider<
-    SavedLocationsNotifier, List<SavedLocationEntry>>(() {
-  return SavedLocationsNotifier();
-});
+final savedLocationsProvider =
+    AsyncNotifierProvider<SavedLocationsNotifier, List<SavedLocationEntry>>(() {
+      return SavedLocationsNotifier();
+    });
 
-class SavedLocationsNotifier
-    extends AsyncNotifier<List<SavedLocationEntry>> {
+class SavedLocationsNotifier extends AsyncNotifier<List<SavedLocationEntry>> {
   @override
   Future<List<SavedLocationEntry>> build() async {
     final repo = ref.read(savedLocationsRepositoryProvider);
@@ -32,9 +32,7 @@ class SavedLocationsNotifier
 
     final entry = SavedLocationEntry.fromPlace(place);
     await repo.save(entry);
-    state = AsyncValue.data(
-      [entry, ...state.valueOrNull ?? []],
-    );
+    state = AsyncValue.data([entry, ...state.valueOrNull ?? []]);
   }
 
   /// Removes a saved location by place ID.
@@ -42,9 +40,7 @@ class SavedLocationsNotifier
     final repo = ref.read(savedLocationsRepositoryProvider);
     await repo.delete(placeId);
     state = AsyncValue.data(
-      (state.valueOrNull ?? [])
-          .where((e) => e.placeId != placeId)
-          .toList(),
+      (state.valueOrNull ?? []).where((e) => e.placeId != placeId).toList(),
     );
   }
 

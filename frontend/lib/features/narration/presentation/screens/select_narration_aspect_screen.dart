@@ -104,9 +104,7 @@ class _SelectNarrationAspectScreenState
   @override
   Widget build(BuildContext context) {
     final selectedAspects = ref.watch(narrationAspectsProvider);
-    final generationState = ref.watch(
-      narrationGenerationControllerProvider,
-    );
+    final generationState = ref.watch(narrationGenerationControllerProvider);
 
     // Listen for generation success / error
     ref.listen<NarrationGenerationState>(
@@ -228,8 +226,7 @@ class _SelectNarrationAspectScreenState
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: AspectOption(
                                   aspect: aspect,
-                                  isSelected:
-                                      selectedAspects.contains(aspect),
+                                  isSelected: selectedAspects.contains(aspect),
                                   onTap: () {
                                     final notifier = ref.read(
                                       narrationAspectsProvider.notifier,
@@ -238,8 +235,8 @@ class _SelectNarrationAspectScreenState
                                       narrationAspectsProvider,
                                     );
                                     if (current.contains(aspect)) {
-                                      notifier.state =
-                                          {...current}..remove(aspect);
+                                      notifier.state = {...current}
+                                        ..remove(aspect);
                                     } else {
                                       notifier.state = {...current, aspect};
                                     }
@@ -306,10 +303,7 @@ class _GeneratingIndicator extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'config_screen.generating'.tr(),
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],
         ),
@@ -493,10 +487,7 @@ class AspectOption extends StatelessWidget {
             if (isSelected)
               const Icon(Icons.check_box, color: AppColors.primary)
             else
-              const Icon(
-                Icons.check_box_outline_blank,
-                color: Colors.white54,
-              ),
+              const Icon(Icons.check_box_outline_blank, color: Colors.white54),
           ],
         ),
       ),

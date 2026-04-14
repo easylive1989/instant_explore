@@ -26,10 +26,7 @@ class ImageAnalysisException implements Exception {
   final ImageAnalysisErrorType type;
   final String message;
 
-  const ImageAnalysisException({
-    required this.type,
-    required this.message,
-  });
+  const ImageAnalysisException({required this.type, required this.message});
 
   @override
   String toString() => 'ImageAnalysisException: $type - $message';

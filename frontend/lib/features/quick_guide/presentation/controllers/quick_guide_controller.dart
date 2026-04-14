@@ -84,9 +84,7 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
 
       switch (result) {
         case GenerateQuickGuideQuotaExceeded():
-          state = const QuickGuideState(
-            status: QuickGuideStatus.quotaExceeded,
-          );
+          state = const QuickGuideState(status: QuickGuideStatus.quotaExceeded);
         case GenerateQuickGuideSuccess(:final entry):
           state = state.copyWith(
             status: QuickGuideStatus.success,

@@ -110,11 +110,7 @@ class _CardHeader extends StatelessWidget {
               ),
             ),
             // Stamp badge
-            const Positioned(
-              top: 16,
-              right: 16,
-              child: _StampBadge(),
-            ),
+            const Positioned(top: 16, right: 16, child: _StampBadge()),
           ],
         ),
       ),
@@ -355,9 +351,7 @@ class _CardFooter extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.06),
-          ),
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
         ),
       ),
       child: Row(
@@ -397,14 +391,9 @@ class _CardFooter extends StatelessWidget {
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

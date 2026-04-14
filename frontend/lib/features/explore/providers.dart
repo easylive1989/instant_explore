@@ -47,9 +47,7 @@ final filteredPlacesProvider = Provider<AsyncValue<List<Place>>>((ref) {
   final minCount = ref.watch(minReviewCountProvider);
 
   return placesAsync.whenData((places) {
-    return places
-        .where((p) => (p.userRatingCount ?? 0) >= minCount)
-        .toList();
+    return places.where((p) => (p.userRatingCount ?? 0) >= minCount).toList();
   });
 });
 

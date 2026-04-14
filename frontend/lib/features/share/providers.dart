@@ -21,8 +21,9 @@ final shareIntentHandlerProvider = Provider<ShareIntentHandler>((ref) {
 /// `null` means no share is pending.
 /// Consumers should read this, navigate to the config screen,
 /// then clear it.
-final pendingSharedPlaceProvider =
-    StateProvider<AsyncValue<Place>?>((ref) => null);
+final pendingSharedPlaceProvider = StateProvider<AsyncValue<Place>?>(
+  (ref) => null,
+);
 
 /// Provider that initialises share intent listeners.
 ///
@@ -31,16 +32,14 @@ final pendingSharedPlaceProvider =
 /// share intents.
 final shareIntentInitProvider = Provider<void>((ref) {
   // Handle the initial shared content (app was closed).
-  ReceiveSharingIntent.instance
-      .getInitialMedia()
-      .then((files) {
+  ReceiveSharingIntent.instance.getInitialMedia().then((files) {
     _handleSharedMedia(ref, files);
   });
 
   // Handle shares while the app is running.
-  final subscription = ReceiveSharingIntent.instance
-      .getMediaStream()
-      .listen((files) {
+  final subscription = ReceiveSharingIntent.instance.getMediaStream().listen((
+    files,
+  ) {
     _handleSharedMedia(ref, files);
   });
 
@@ -54,9 +53,7 @@ void _handleSharedMedia(Ref ref, List<SharedMediaFile> files) {
   // The shared text may be in `path` or `message` depending on the
   // platform and package version.
   for (final file in files) {
-    final text = file.message?.isNotEmpty == true
-        ? file.message!
-        : file.path;
+    final text = file.message?.isNotEmpty == true ? file.message! : file.path;
     if (text.isEmpty) continue;
 
     _log.info('Received shared text: $text');

@@ -14,10 +14,7 @@ class NarrationAspectMapper {
 
   /// 從字串列表解析多個面向
   static Set<NarrationAspect> fromStringList(List<String> values) =>
-      values
-          .map(NarrationAspect.fromKey)
-          .whereType<NarrationAspect>()
-          .toSet();
+      values.map(NarrationAspect.fromKey).whereType<NarrationAspect>().toSet();
 
   /// 轉換多個面向為 API 字串列表
   static List<String> toApiStringList(Set<NarrationAspect> aspects) =>

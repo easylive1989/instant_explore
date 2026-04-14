@@ -53,10 +53,7 @@ class CachingPlacesRepository implements PlacesRepository {
   }
 
   @override
-  Future<Place?> getPlaceById(
-    String placeId, {
-    required Language language,
-  }) {
+  Future<Place?> getPlaceById(String placeId, {required Language language}) {
     // 單一地點查詢不使用快取
     return _delegate.getPlaceById(placeId, language: language);
   }

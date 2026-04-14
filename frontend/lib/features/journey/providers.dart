@@ -15,19 +15,19 @@ final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return HiveJourneyRepository();
 });
 
-final myJourneyProvider =
-    FutureProvider.autoDispose<List<JourneyEntry>>((ref) {
+final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((ref) {
   return ref.watch(journeyRepositoryProvider).getAll();
 });
 
 /// Combined provider returning all journey items (narration + quick guide)
 /// sorted newest first.
-final allJourneyItemsProvider =
-    FutureProvider.autoDispose<List<JourneyItem>>((ref) async {
-  final narrationEntries =
-      await ref.watch(journeyRepositoryProvider).getAll();
-  final quickGuideEntries =
-      await ref.watch(quickGuideRepositoryProvider).getAll();
+final allJourneyItemsProvider = FutureProvider.autoDispose<List<JourneyItem>>((
+  ref,
+) async {
+  final narrationEntries = await ref.watch(journeyRepositoryProvider).getAll();
+  final quickGuideEntries = await ref
+      .watch(quickGuideRepositoryProvider)
+      .getAll();
 
   final items = <JourneyItem>[
     ...narrationEntries.map(NarrationJourneyItem.new),
@@ -38,43 +38,43 @@ final allJourneyItemsProvider =
 });
 
 /// Current search query entered by the user.
-final journeySearchQueryProvider =
-    StateProvider.autoDispose<String>((ref) => '');
+final journeySearchQueryProvider = StateProvider.autoDispose<String>(
+  (ref) => '',
+);
 
 /// Current type filter selected by the user.
-final journeyFilterProvider =
-    StateProvider.autoDispose<JourneyFilter>((ref) => JourneyFilter.all);
+final journeyFilterProvider = StateProvider.autoDispose<JourneyFilter>(
+  (ref) => JourneyFilter.all,
+);
 
 /// Items after applying search query and type filter.
 final filteredJourneyItemsProvider =
     Provider.autoDispose<AsyncValue<List<JourneyItem>>>((ref) {
-  final asyncItems = ref.watch(allJourneyItemsProvider);
-  final query =
-      ref.watch(journeySearchQueryProvider).trim().toLowerCase();
-  final filter = ref.watch(journeyFilterProvider);
+      final asyncItems = ref.watch(allJourneyItemsProvider);
+      final query = ref.watch(journeySearchQueryProvider).trim().toLowerCase();
+      final filter = ref.watch(journeyFilterProvider);
 
-  return asyncItems.whenData((items) {
-    var result = items;
+      return asyncItems.whenData((items) {
+        var result = items;
 
-    if (filter != JourneyFilter.all) {
-      result = result.where((item) {
-        return switch (filter) {
-          JourneyFilter.narration => item is NarrationJourneyItem,
-          JourneyFilter.quickGuide => item is QuickGuideJourneyItem,
-          JourneyFilter.all => true,
-        };
-      }).toList();
-    }
+        if (filter != JourneyFilter.all) {
+          result = result.where((item) {
+            return switch (filter) {
+              JourneyFilter.narration => item is NarrationJourneyItem,
+              JourneyFilter.quickGuide => item is QuickGuideJourneyItem,
+              JourneyFilter.all => true,
+            };
+          }).toList();
+        }
 
-    if (query.isNotEmpty) {
-      result = result
-          .where(
-            (item) =>
-                item.searchableText.toLowerCase().contains(query),
-          )
-          .toList();
-    }
+        if (query.isNotEmpty) {
+          result = result
+              .where(
+                (item) => item.searchableText.toLowerCase().contains(query),
+              )
+              .toList();
+        }
 
-    return result;
-  });
-});
+        return result;
+      });
+    });

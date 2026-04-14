@@ -23,7 +23,8 @@ class SaveToPassportButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
-    final isDisabled = playerState.isLoading ||
+    final isDisabled =
+        playerState.isLoading ||
         playerState.hasError ||
         playerState.content == null;
 

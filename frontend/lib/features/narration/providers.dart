@@ -23,8 +23,8 @@ final narrationServiceProvider = Provider<NarrationService>((ref) {
 /// 使用 autoDispose 確保離開頁面時自動重置
 final narrationAspectsProvider =
     StateProvider.autoDispose<Set<NarrationAspect>>((ref) {
-  return {NarrationAspect.historicalBackground};
-});
+      return {NarrationAspect.historicalBackground};
+    });
 
 /// TtsService Provider
 ///
@@ -52,10 +52,11 @@ final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
 ///
 /// 管理導覽生成的狀態（在選擇面向頁面使用）
 /// 使用 autoDispose 確保離開頁面時自動清理資源
-final narrationGenerationControllerProvider = StateNotifierProvider
-    .autoDispose<NarrationGenerationController, NarrationGenerationState>((
-      ref,
-    ) {
+final narrationGenerationControllerProvider =
+    StateNotifierProvider.autoDispose<
+      NarrationGenerationController,
+      NarrationGenerationState
+    >((ref) {
       final useCase = ref.watch(startNarrationUseCaseProvider);
       final journeyRepository = ref.watch(journeyRepositoryProvider);
       return NarrationGenerationController(useCase, journeyRepository);

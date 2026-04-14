@@ -156,8 +156,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           return PlaceCard(place: places[index]);
                         },
                       ),
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),
@@ -174,10 +173,7 @@ class _FilterButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPressed;
 
-  const _FilterButton({
-    required this.isActive,
-    required this.onPressed,
-  });
+  const _FilterButton({required this.isActive, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -190,11 +186,8 @@ class _FilterButton extends StatelessWidget {
       ),
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor:
-            isActive ? AppColors.amber : AppColors.primary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        backgroundColor: isActive ? AppColors.amber : AppColors.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }
@@ -277,10 +270,7 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
           const SizedBox(height: 24),
           Text(
             'explore.filter.min_reviews'.tr(),
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Row(
@@ -338,10 +328,7 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
           const SizedBox(height: 8),
           Text(
             'explore.filter.description'.tr(),
-            style: TextStyle(
-              fontSize: 12,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 20),
           SizedBox(
@@ -371,9 +358,8 @@ class PlaceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final savedLocations = ref.watch(savedLocationsProvider);
-    final isSaved = savedLocations.valueOrNull
-            ?.any((e) => e.placeId == place.id) ??
-        false;
+    final isSaved =
+        savedLocations.valueOrNull?.any((e) => e.placeId == place.id) ?? false;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -416,12 +402,12 @@ class PlaceCard extends ConsumerWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: place.category.color
-                                .withValues(alpha: 0.2),
+                            color: place.category.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: place.category.color
-                                  .withValues(alpha: 0.5),
+                              color: place.category.color.withValues(
+                                alpha: 0.5,
+                              ),
                               width: 1,
                             ),
                           ),
@@ -463,9 +449,7 @@ class PlaceCard extends ConsumerWidget {
               _BookmarkButton(
                 isSaved: isSaved,
                 onTap: () {
-                  ref
-                      .read(savedLocationsProvider.notifier)
-                      .togglePlace(place);
+                  ref.read(savedLocationsProvider.notifier).togglePlace(place);
                 },
               ),
             ],
@@ -480,10 +464,7 @@ class _BookmarkButton extends StatelessWidget {
   final bool isSaved;
   final VoidCallback onTap;
 
-  const _BookmarkButton({
-    required this.isSaved,
-    required this.onTap,
-  });
+  const _BookmarkButton({required this.isSaved, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -499,9 +480,7 @@ class _BookmarkButton extends StatelessWidget {
           key: ValueKey(isSaved),
           color: isSaved
               ? AppColors.primary
-              : Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant,
+              : Theme.of(context).colorScheme.onSurfaceVariant,
           size: 28,
         ),
       ),

@@ -23,10 +23,7 @@ class QuickGuideAiException implements Exception {
   final QuickGuideAiErrorType type;
   final String message;
 
-  const QuickGuideAiException({
-    required this.type,
-    required this.message,
-  });
+  const QuickGuideAiException({required this.type, required this.message});
 
   @override
   String toString() => 'QuickGuideAiException($type): $message';
