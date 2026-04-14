@@ -25,9 +25,14 @@ export default function Navbar() {
             Passport
           </a>
         </div>
-        <button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold transition-all active:scale-95 shadow-lg shadow-primary/20">
+        <a
+          href="https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold transition-all active:scale-95 shadow-lg shadow-primary/20"
+        >
           Download
-        </button>
+        </a>
       </div>
     </nav>
   );
