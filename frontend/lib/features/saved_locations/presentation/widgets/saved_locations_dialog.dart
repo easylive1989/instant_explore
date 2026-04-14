@@ -52,7 +52,7 @@ class _DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 12),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.bookmark,
             color: AppColors.primary,
             size: 24,

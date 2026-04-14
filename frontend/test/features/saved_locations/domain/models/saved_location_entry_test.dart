@@ -16,7 +16,7 @@ Place _makePlace({
     location: const PlaceLocation(latitude: 25.0, longitude: 121.5),
     rating: 4.5,
     userRatingCount: 200,
-    types: ['tourist_attraction', 'point_of_interest'],
+    types: const ['tourist_attraction', 'point_of_interest'],
     photos: photos,
     category: PlaceCategory.historicalCultural,
   );
