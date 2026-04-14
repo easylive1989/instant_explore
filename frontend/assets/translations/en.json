@@ -232,5 +232,14 @@
     "watch_ad_subtitle": "Watch a short video to get 1 extra narration",
     "watch_video": "Watch Video",
     "ad_reward_success": "Earned 1 extra narration!"
+  },
+  "saved_locations": {
+    "title": "Saved Locations",
+    "empty": "No saved locations yet",
+    "empty_hint": "Tap the bookmark icon on a place card to save it",
+    "delete_title": "Remove Location",
+    "delete_message": "Are you sure you want to remove this saved location?",
+    "delete_confirm": "Remove",
+    "cancel": "Cancel"
   }
 }

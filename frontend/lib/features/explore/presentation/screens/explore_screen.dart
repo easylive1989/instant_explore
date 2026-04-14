@@ -7,6 +7,8 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/shared/extensions/place_category_extension.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
+import 'package:context_app/features/saved_locations/providers.dart';
+import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -60,6 +62,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final isFilterActive = minReviewCount != 100;
 
     return Scaffold(
+      floatingActionButton: const SavedLocationsFab(),
       body: SafeArea(
         child: Column(
           children: [
@@ -359,14 +362,19 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
   }
 }
 
-class PlaceCard extends StatelessWidget {
+class PlaceCard extends ConsumerWidget {
   final Place place;
 
   const PlaceCard({super.key, required this.place});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final savedLocations = ref.watch(savedLocationsProvider);
+    final isSaved = savedLocations.valueOrNull
+            ?.any((e) => e.placeId == place.id) ??
+        false;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
@@ -408,12 +416,12 @@ class PlaceCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: place.category.color.withValues(alpha: 0.2),
+                            color: place.category.color
+                                .withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: place.category.color.withValues(
-                                alpha: 0.5,
-                              ),
+                              color: place.category.color
+                                  .withValues(alpha: 0.5),
                               width: 1,
                             ),
                           ),
@@ -452,8 +460,49 @@ class PlaceCard extends StatelessWidget {
                   ],
                 ),
               ),
+              _BookmarkButton(
+                isSaved: isSaved,
+                onTap: () {
+                  ref
+                      .read(savedLocationsProvider.notifier)
+                      .togglePlace(place);
+                },
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BookmarkButton extends StatelessWidget {
+  final bool isSaved;
+  final VoidCallback onTap;
+
+  const _BookmarkButton({
+    required this.isSaved,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: Icon(
+          isSaved ? Icons.bookmark : Icons.bookmark_border,
+          key: ValueKey(isSaved),
+          color: isSaved
+              ? AppColors.primary
+              : Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant,
+          size: 28,
         ),
       ),
     );

@@ -232,5 +232,14 @@
     "watch_ad_subtitle": "觀看一段短影片即可獲得 1 次額外導覽",
     "watch_video": "觀看影片",
     "ad_reward_success": "獲得 1 次額外導覽！"
+  },
+  "saved_locations": {
+    "title": "儲存的地點",
+    "empty": "尚未儲存任何地點",
+    "empty_hint": "點擊地點卡片上的書籤圖示即可儲存",
+    "delete_title": "移除地點",
+    "delete_message": "確定要移除此儲存的地點嗎？",
+    "delete_confirm": "移除",
+    "cancel": "取消"
   }
 }
