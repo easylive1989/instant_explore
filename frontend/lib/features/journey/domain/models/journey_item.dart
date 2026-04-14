@@ -6,6 +6,9 @@ import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry
 sealed class JourneyItem {
   String get id;
   DateTime get createdAt;
+
+  /// Text used for keyword search across all item types.
+  String get searchableText;
 }
 
 /// Wraps a [JourneyEntry] (narration-based) for display in the timeline.
@@ -19,6 +22,11 @@ class NarrationJourneyItem extends JourneyItem {
 
   @override
   DateTime get createdAt => entry.createdAt;
+
+  @override
+  String get searchableText =>
+      '${entry.place.name} ${entry.place.address} '
+      '${entry.narrationContent.text}';
 }
 
 /// Wraps a [QuickGuideEntry] (photo-based) for display in the timeline.
@@ -32,4 +40,7 @@ class QuickGuideJourneyItem extends JourneyItem {
 
   @override
   DateTime get createdAt => entry.createdAt;
+
+  @override
+  String get searchableText => entry.aiDescription;
 }
