@@ -33,7 +33,7 @@ final shareIntentInitProvider = Provider<void>((ref) {
   // Handle the initial shared content (app was closed).
   ReceiveSharingIntent.instance
       .getInitialMedia()
-      .then((List<SharedMediaFile> files) {
+      .then((files) {
     _handleSharedMedia(ref, files);
   });
 
