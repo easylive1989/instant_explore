@@ -233,6 +233,11 @@
     "watch_video": "觀看影片",
     "ad_reward_success": "獲得 1 次額外導覽！"
   },
+  "shared_place": {
+    "loading": "正在載入分享的地點...",
+    "error": "無法載入分享的地點，請稍後再試",
+    "not_found": "找不到分享的地點"
+  },
   "saved_locations": {
     "title": "儲存的地點",
     "empty": "尚未儲存任何地點",

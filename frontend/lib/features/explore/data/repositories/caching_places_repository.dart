@@ -51,4 +51,13 @@ class CachingPlacesRepository implements PlacesRepository {
     // 關鍵字搜尋不使用快取，直接委派給底層 Repository
     return _delegate.searchPlaces(query, language: language);
   }
+
+  @override
+  Future<Place?> getPlaceById(
+    String placeId, {
+    required Language language,
+  }) {
+    // 單一地點查詢不使用快取
+    return _delegate.getPlaceById(placeId, language: language);
+  }
 }

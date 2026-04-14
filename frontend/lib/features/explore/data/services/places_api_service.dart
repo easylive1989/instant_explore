@@ -13,10 +13,16 @@ class PlacesApiService {
       'https://places.googleapis.com/v1/places:searchNearby';
   static const String _textSearchUrl =
       'https://places.googleapis.com/v1/places:searchText';
+  static const String _placeDetailsBaseUrl =
+      'https://places.googleapis.com/v1/places/';
 
   /// Advanced FieldMask - 包含 rating 和 userRatingCount 以支援評論數過濾
   static const String _fieldMask =
       'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.types,places.photos';
+
+  /// FieldMask for single place detail requests.
+  static const String _detailFieldMask =
+      'id,displayName,formattedAddress,location,rating,userRatingCount,types,photos';
 
   PlacesApiService(this._apiKey);
 
@@ -186,6 +192,50 @@ class PlacesApiService {
       throw AppError(
         type: PlaceError.unknown,
         message: '發生未預期的錯誤',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Fetches a single place by its Google Place ID.
+  Future<GooglePlaceDto?> getPlaceById(
+    String placeId, {
+    String? languageCode,
+  }) async {
+    try {
+      if (_apiKey.isEmpty) {
+        throw const AppError(
+          type: PlaceError.configurationError,
+          message: 'Google Maps API Key 未配置',
+        );
+      }
+
+      final uri = Uri.parse('$_placeDetailsBaseUrl$placeId');
+      final headers = {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': _apiKey,
+        'X-Goog-FieldMask': _detailFieldMask,
+      };
+
+      if (languageCode != null) {
+        headers['X-Goog-User-Project'] = languageCode;
+      }
+
+      final response = await http.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return GooglePlaceDto.fromJson(data);
+      }
+
+      return null;
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '取得地點詳情失敗',
         originalException: e,
         stackTrace: stackTrace,
       );

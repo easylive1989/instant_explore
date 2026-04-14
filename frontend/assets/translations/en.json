@@ -233,6 +233,11 @@
     "watch_video": "Watch Video",
     "ad_reward_success": "Earned 1 extra narration!"
   },
+  "shared_place": {
+    "loading": "Loading shared place...",
+    "error": "Could not load the shared place. Please try again.",
+    "not_found": "Shared place not found"
+  },
   "saved_locations": {
     "title": "Saved Locations",
     "empty": "No saved locations yet",
