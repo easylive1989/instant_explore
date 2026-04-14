@@ -32,7 +32,7 @@ final pendingSharedPlaceProvider =
 final shareIntentInitProvider = Provider<void>((ref) {
   // Handle the initial shared content (app was closed).
   ReceiveSharingIntent.instance
-      .getInitialSharing()
+      .getInitialMedia()
       .then((List<SharedMediaFile> files) {
     _handleSharedMedia(ref, files);
   });
@@ -40,7 +40,7 @@ final shareIntentInitProvider = Provider<void>((ref) {
   // Handle shares while the app is running.
   final subscription = ReceiveSharingIntent.instance
       .getMediaStream()
-      .listen((List<SharedMediaFile> files) {
+      .listen((files) {
     _handleSharedMedia(ref, files);
   });
 

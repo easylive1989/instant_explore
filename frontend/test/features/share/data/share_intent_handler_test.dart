@@ -13,13 +13,13 @@ void main() {
   late MockPlacesRepository mockRepository;
   late ShareIntentHandler handler;
 
-  final testPlace = Place(
+  const testPlace = Place(
     id: 'ChIJ_1',
     name: '台北101',
     formattedAddress: '台北市信義區信義路五段7號',
-    location: const PlaceLocation(latitude: 25.03, longitude: 121.56),
-    types: const ['tourist_attraction'],
-    photos: const [],
+    location: PlaceLocation(latitude: 25.03, longitude: 121.56),
+    types: ['tourist_attraction'],
+    photos: [],
     category: PlaceCategory.modernUrban,
   );
 
