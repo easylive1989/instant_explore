@@ -54,11 +54,9 @@ class JourneySharingService {
       final shareText =
           '${'share_card.share_text'.tr()} — $placeName';
 
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path, mimeType: 'image/png')],
-          text: shareText,
-        ),
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'image/png')],
+        text: shareText,
       );
     } catch (e, stack) {
       _log.severe('Error sharing journey card', e, stack);
@@ -82,7 +80,7 @@ class JourneySharingService {
       child: MediaQuery(
         data: MediaQuery.of(context),
         child: Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
           child: Localizations.override(
             context: context,
             child: Material(
