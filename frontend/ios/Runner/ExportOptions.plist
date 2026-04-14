@@ -18,6 +18,8 @@
     <dict>
         <key>com.paulchwu.instantexplore</key>
         <string>Instant Explore</string>
+        <key>com.paulchwu.instantexplore.ShareExtension</key>
+        <string>Instant Explore ShareExtension AppStore</string>
     </dict>
 </dict>
 </plist>

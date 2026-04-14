@@ -221,21 +221,24 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Install the Apple certificate and provisioning profile
+      - name: Install the Apple certificate and provisioning profiles
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          SHARE_EXTENSION_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_SHARE_EXTENSION_PROVISIONING_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/Instant_Explore.mobileprovision
+          SHARE_PP_PATH=$RUNNER_TEMP/Instant_Explore_ShareExtension.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # import certificate and provisioning profile from secrets
+          # import certificate and provisioning profiles from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
           echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+          echo -n "$SHARE_EXTENSION_PROVISION_PROFILE_BASE64" | base64 --decode --output $SHARE_PP_PATH
 
           # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -246,9 +249,10 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # apply provisioning profile
+          # apply provisioning profiles
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $SHARE_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
       - name: Generate version numbers
         run: |
@@ -304,11 +308,12 @@ jobs:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
 
-      - name: Clean up keychain and provisioning profile
+      - name: Clean up keychain and provisioning profiles
         if: ${{ always() }}
         run: |
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore.mobileprovision
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore_ShareExtension.mobileprovision
 
   # 建置狀態報告
   build-status:
