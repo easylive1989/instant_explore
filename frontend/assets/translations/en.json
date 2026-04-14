@@ -235,6 +235,7 @@
   },
   "shared_place": {
     "loading": "Loading shared place...",
+    "saved": "\"{}\" saved to your locations",
     "error": "Could not load the shared place. Please try again.",
     "not_found": "Shared place not found"
   },
