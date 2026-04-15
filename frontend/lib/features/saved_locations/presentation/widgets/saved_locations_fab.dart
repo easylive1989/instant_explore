@@ -4,6 +4,13 @@ import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Tracks whether the saved-locations morph route is currently on screen,
+/// so the underlying FAB can hide itself to avoid appearing alongside the
+/// morphing dialog.
+final ValueNotifier<bool> _savedLocationsRouteActive = ValueNotifier<bool>(
+  false,
+);
+
 /// Floating action button that morphs into the saved locations dialog
 /// with a container-transform style animation from the FAB position.
 class SavedLocationsFab extends ConsumerWidget {
@@ -14,20 +21,36 @@ class SavedLocationsFab extends ConsumerWidget {
     final savedLocations = ref.watch(savedLocationsProvider);
     final count = savedLocations.valueOrNull?.length ?? 0;
 
-    return FloatingActionButton(
-      heroTag: 'saved_locations_fab',
-      shape: const CircleBorder(),
-      onPressed: () {
-        final box = context.findRenderObject() as RenderBox?;
-        final fabRect = _computeFabRect(context, box);
-        Navigator.of(context).push(_SavedLocationsRoute(fabRect: fabRect));
+    return ValueListenableBuilder<bool>(
+      valueListenable: _savedLocationsRouteActive,
+      builder: (context, isRouteActive, _) {
+        // Hide the FAB (including hit-testing) as soon as the morph route
+        // is pushed, so the dialog truly appears to *become* the FAB rather
+        // than co-exist with it.
+        return Visibility(
+          visible: !isRouteActive,
+          maintainState: true,
+          maintainSize: true,
+          maintainAnimation: true,
+          child: FloatingActionButton(
+            heroTag: 'saved_locations_fab',
+            shape: const CircleBorder(),
+            onPressed: () {
+              final box = context.findRenderObject() as RenderBox?;
+              final fabRect = _computeFabRect(context, box);
+              Navigator.of(
+                context,
+              ).push(_SavedLocationsRoute(fabRect: fabRect));
+            },
+            backgroundColor: AppColors.primary,
+            child: Badge(
+              isLabelVisible: count > 0,
+              label: Text('$count', style: const TextStyle(fontSize: 10)),
+              child: const Icon(Icons.bookmark, color: Colors.white),
+            ),
+          ),
+        );
       },
-      backgroundColor: AppColors.primary,
-      child: Badge(
-        isLabelVisible: count > 0,
-        label: Text('$count', style: const TextStyle(fontSize: 10)),
-        child: const Icon(Icons.bookmark, color: Colors.white),
-      ),
     );
   }
 
@@ -157,4 +180,18 @@ class _SavedLocationsRoute extends PageRouteBuilder<void> {
           );
         },
       );
+
+  @override
+  TickerFuture didPush() {
+    _savedLocationsRouteActive.value = true;
+    return super.didPush();
+  }
+
+  @override
+  void dispose() {
+    // Reset only after the reverse morph fully finishes (route disposal),
+    // so the underlying FAB stays hidden through the entire transition.
+    _savedLocationsRouteActive.value = false;
+    super.dispose();
+  }
 }
