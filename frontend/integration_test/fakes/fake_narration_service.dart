@@ -36,7 +36,7 @@ class FakeNarrationService implements NarrationService {
   });
 
   @override
-  Future<String> generateNarration({
+  Future<NarrationGenerationResult> generateNarration({
     required Place place,
     required Set<NarrationAspect> aspects,
     required Language language,
@@ -51,6 +51,9 @@ class FakeNarrationService implements NarrationService {
       );
     }
 
-    return customNarrationText ?? defaultNarrationText;
+    return (
+      text: customNarrationText ?? defaultNarrationText,
+      grounding: null,
+    );
   }
 }

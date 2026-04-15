@@ -8,6 +8,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/data/narration_prompt_builder.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
+import 'package:context_app/features/narration/domain/models/grounding_info.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart'
     as app_lang;
@@ -22,7 +23,7 @@ class GeminiService implements NarrationService {
   /// [language] 語言代碼（'zh-TW' 或 'en-US'）
   /// 返回適合語音播放的導覽文本
   @override
-  Future<String> generateNarration({
+  Future<NarrationGenerationResult> generateNarration({
     required Place place,
     required Set<NarrationAspect> aspects,
     required app_lang.Language language,
@@ -44,8 +45,11 @@ class GeminiService implements NarrationService {
 
       final response = await model.generateContent([Content.text(prompt)]);
       final generatedText = response.text ?? '';
+      final grounding = GroundingInfo.fromCandidate(
+        response.candidates.isNotEmpty ? response.candidates.first : null,
+      );
 
-      return generatedText;
+      return (text: generatedText, grounding: grounding);
     } on FirebaseException catch (e, stackTrace) {
       throw AppError(
         type: NarrationError.serverError,

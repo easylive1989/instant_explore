@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/models/grounding_info.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/providers.dart';
+import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 
@@ -129,10 +131,22 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                     ),
                   ),
                   Expanded(
-                    child: NarrationTranscriptArea(
-                      scrollController: _scrollController,
-                      backgroundColor: backgroundColor,
-                      primaryColor: primaryColor,
+                    child: Stack(
+                      children: [
+                        NarrationTranscriptArea(
+                          scrollController: _scrollController,
+                          backgroundColor: backgroundColor,
+                          primaryColor: primaryColor,
+                        ),
+                        if (widget.narrationContent.grounding != null)
+                          Positioned(
+                            right: 12,
+                            bottom: 12,
+                            child: _GroundingInfoButton(
+                              grounding: widget.narrationContent.grounding!,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -147,6 +161,27 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
             backgroundColor: backgroundColor,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GroundingInfoButton extends StatelessWidget {
+  final GroundingInfo grounding;
+
+  const _GroundingInfoButton({required this.grounding});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.surface,
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: IconButton(
+        tooltip: 'Google 搜尋結果',
+        icon: Icon(Icons.info_outline, color: colorScheme.onSurface),
+        onPressed: () => showGroundingInfoSheet(context, grounding: grounding),
       ),
     );
   }

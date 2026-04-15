@@ -1,5 +1,6 @@
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
+import 'package:context_app/features/narration/domain/models/grounding_info.dart';
 import 'package:context_app/features/narration/domain/models/narration_segment.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:equatable/equatable.dart';
@@ -18,11 +19,15 @@ class NarrationContent extends Equatable {
   /// 語言
   final Language language;
 
+  /// Google Search grounding 資訊（若模型有使用搜尋 grounding）
+  final GroundingInfo? grounding;
+
   /// 私有建構子，確保只能通過 factory 方法創建實例
   const NarrationContent._({
     required this.text,
     required this.segments,
     required this.language,
+    required this.grounding,
   });
 
   /// 從完整文本創建 NarrationContent
@@ -35,7 +40,11 @@ class NarrationContent extends Equatable {
   /// - 文本為空或只有空白字符
   /// - 文本長度少於 10 個字符
   /// - 無法分段（segments 為空）
-  factory NarrationContent.create(String text, {required Language language}) {
+  factory NarrationContent.create(
+    String text, {
+    required Language language,
+    GroundingInfo? grounding,
+  }) {
     // 驗證文本不為空
     final trimmedText = text.trim();
     if (trimmedText.isEmpty) {
@@ -68,6 +77,7 @@ class NarrationContent extends Equatable {
       text: text,
       segments: segments,
       language: language,
+      grounding: grounding,
     );
   }
 
@@ -173,5 +183,5 @@ class NarrationContent extends Equatable {
   }
 
   @override
-  List<Object?> get props => [text, segments, language];
+  List<Object?> get props => [text, segments, language, grounding];
 }

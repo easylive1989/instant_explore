@@ -37,7 +37,7 @@ class _SpyNarrationService implements NarrationService {
   _SpyNarrationService({this.textToReturn});
 
   @override
-  Future<String> generateNarration({
+  Future<NarrationGenerationResult> generateNarration({
     required Place place,
     required Set<NarrationAspect> aspects,
     required Language language,
@@ -49,7 +49,7 @@ class _SpyNarrationService implements NarrationService {
         message: 'spy: no text configured',
       );
     }
-    return textToReturn!;
+    return (text: textToReturn!, grounding: null);
   }
 }
 

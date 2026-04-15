@@ -52,14 +52,18 @@ class CreateNarrationUseCase {
 
     // 2. 呼叫 NarrationService 取得導覽文本
     // AppError 會直接透傳給上層
-    final text = await _narrationService.generateNarration(
+    final result = await _narrationService.generateNarration(
       place: place,
       aspects: aspects,
       language: language,
     );
 
     // 3. 使用 NarrationContent.create 組成並驗證內容
-    final content = NarrationContent.create(text, language: language);
+    final content = NarrationContent.create(
+      result.text,
+      language: language,
+      grounding: result.grounding,
+    );
 
     // 4. 消耗一次使用額度
     await _usageRepository.consumeUsage();

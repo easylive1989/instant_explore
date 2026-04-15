@@ -66,7 +66,7 @@ void main() {
         aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
-    ).thenAnswer((_) async => testGeneratedText);
+    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     final narrationContent = await useCase.execute(
       place: testPlace,
@@ -92,7 +92,7 @@ void main() {
         aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
-    ).thenAnswer((_) async => testGeneratedText);
+    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     await useCase.execute(
       place: testPlace,
@@ -143,7 +143,7 @@ void main() {
         aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
-    ).thenAnswer((_) async => testGeneratedText);
+    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     final narrationContent = await useCase.execute(
       place: testPlace,
@@ -165,7 +165,7 @@ void main() {
         aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
       ),
-    ).thenAnswer((_) async => testGeneratedText);
+    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     await useCase.execute(
       place: testPlace,
