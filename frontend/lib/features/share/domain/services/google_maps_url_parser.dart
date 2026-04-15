@@ -60,6 +60,11 @@ class GoogleMapsUrlParser {
   /// Pattern for place name in URL path: /place/PlaceName/
   static final _placeNamePattern = RegExp(r'/place/([^/@]+)');
 
+  /// Pattern for a free-text `q` query parameter (anything not a
+  /// `lat,lng` pair). Used to handle expansions like
+  /// `https://maps.google.com?q=NAME&ftid=...`.
+  static final _queryTextPattern = RegExp(r'[?&]q=([^&]+)');
+
   GoogleMapsUrlParser._();
 
   /// Returns `true` if the [text] looks like a Google Maps share.
@@ -89,6 +94,14 @@ class GoogleMapsUrlParser {
     // Try to extract place name from URL path if not in text.
     if (placeName == null || placeName.isEmpty) {
       placeName = _extractPlaceNameFromUrl(url);
+    }
+
+    // Fallback: many short-link expansions land on
+    // `https://maps.google.com?q=NAME&ftid=...` (iOS Google Maps
+    // "send to other app" flow). Use the `q` text as the search
+    // query when it's not a coordinate pair.
+    if (placeName == null || placeName.isEmpty) {
+      placeName = _extractTextQueryFromUrl(url);
     }
 
     // Try to extract coordinates.
@@ -133,6 +146,31 @@ class GoogleMapsUrlParser {
     } catch (_) {
       return encoded.replaceAll('+', ' ');
     }
+  }
+
+  /// Extracts a free-text `q` query parameter as a place name.
+  ///
+  /// Skips coordinate-style values (e.g. `?q=25.03,121.56`) since
+  /// those are handled separately as `latitude`/`longitude`.
+  static String? _extractTextQueryFromUrl(String url) {
+    final match = _queryTextPattern.firstMatch(url);
+    if (match == null) return null;
+
+    final raw = match.group(1)!;
+    String decoded;
+    try {
+      decoded = Uri.decodeComponent(raw).replaceAll('+', ' ');
+    } catch (_) {
+      decoded = raw.replaceAll('+', ' ');
+    }
+
+    // Looks like a coordinate pair → not a name.
+    if (RegExp(r'^-?\d+\.?\d*,-?\d+\.?\d*$').hasMatch(decoded)) {
+      return null;
+    }
+
+    final cleaned = decoded.trim();
+    return cleaned.isEmpty ? null : cleaned;
   }
 
   /// Cleans up a potential place name string.

@@ -122,16 +122,31 @@ class ShareIntentHandler {
 
   /// Extracts a fallback query from a full Google Maps URL.
   ///
-  /// Tries to pull the place name from the `/place/NAME/` segment.
+  /// Tries `/place/NAME/` first, then falls back to a free-text
+  /// `?q=NAME` parameter.
   String? _extractFallbackQuery(String url) {
-    final placeNamePattern = RegExp(r'/place/([^/@]+)');
-    final match = placeNamePattern.firstMatch(url);
-    if (match == null) return null;
+    final placeMatch = RegExp(r'/place/([^/@]+)').firstMatch(url);
+    if (placeMatch != null) {
+      return _decodeQueryComponent(placeMatch.group(1)!);
+    }
 
+    final qMatch = RegExp(r'[?&]q=([^&]+)').firstMatch(url);
+    if (qMatch != null) {
+      final decoded = _decodeQueryComponent(qMatch.group(1)!);
+      // Skip pure coordinate pairs.
+      if (!RegExp(r'^-?\d+\.?\d*,-?\d+\.?\d*$').hasMatch(decoded)) {
+        return decoded;
+      }
+    }
+
+    return null;
+  }
+
+  String _decodeQueryComponent(String raw) {
     try {
-      return Uri.decodeComponent(match.group(1)!).replaceAll('+', ' ');
+      return Uri.decodeComponent(raw).replaceAll('+', ' ');
     } catch (_) {
-      return match.group(1)!.replaceAll('+', ' ');
+      return raw.replaceAll('+', ' ');
     }
   }
 }

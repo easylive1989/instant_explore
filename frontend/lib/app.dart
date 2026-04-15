@@ -46,11 +46,18 @@ class ContextureApp extends ConsumerWidget {
         loading: () {},
         error: (error, _) {
           ref.read(pendingSharedPlaceProvider.notifier).state = null;
+          // `_resolveAndSetPlace` emits the literal key
+          // `'shared_place.not_found'` when the share was parsed
+          // but no matching place was found — show a more specific
+          // message in that case.
+          final messageKey = error == 'shared_place.not_found'
+              ? 'shared_place.not_found'
+              : 'shared_place.error';
           _showSnackBar(
             router,
             context,
             SnackBar(
-              content: Text('shared_place.error'.tr()),
+              content: Text(messageKey.tr()),
               behavior: SnackBarBehavior.floating,
             ),
           );

@@ -82,6 +82,27 @@ void main() {
       expect(result!.name, '台北101');
     });
 
+    test('extracts place name from ?q= query parameter', () async {
+      // Reproduces iOS Google Maps "send to other app" flow:
+      // the short link expands to `https://maps.google.com?q=NAME&ftid=...`.
+      when(() => mockRepository.searchPlaces(
+            '尋嚐人家',
+            language: any(named: 'language'),
+          )).thenAnswer((_) async => [testPlace]);
+
+      final result = await handler.resolveSharedText(
+        'https://maps.google.com?q=%E5%B0%8B%E5%9A%90%E4%BA%BA%E5%AE%B6'
+        '&ftid=0x3469192045a2ac15:0xcab7b7a0e029a0c8',
+        language: const Language('zh-TW'),
+      );
+
+      expect(result, isNotNull);
+      verify(() => mockRepository.searchPlaces(
+            '尋嚐人家',
+            language: any(named: 'language'),
+          )).called(1);
+    });
+
     test('returns null when place not found', () async {
       when(() => mockRepository.searchPlaces(
             any(),
