@@ -46,30 +46,26 @@ class ShareIntentHandler {
 
     final shareData = GoogleMapsUrlParser.parse(expandedText);
 
-    // Use the place name from the shared text as search query.
+    // Candidate search queries, tried in order until one hits.
+    final candidates = <String>{};
     if (shareData.hasSearchQuery) {
-      _log.fine('Searching for place: ${shareData.placeName}');
+      _addQueryCandidates(candidates, shareData.placeName!);
+    }
+    if (shareData.url != null) {
+      final nameFromUrl = _extractFallbackQuery(shareData.url!);
+      if (nameFromUrl != null) {
+        _addQueryCandidates(candidates, nameFromUrl);
+      }
+    }
+
+    for (final query in candidates) {
+      _log.fine('Searching for place: $query');
       final results = await _placesRepository.searchPlaces(
-        shareData.placeName!,
+        query,
         language: language,
       );
       if (results.isNotEmpty) {
         return results.first;
-      }
-    }
-
-    // Fallback: try the URL as a text query (may contain place name).
-    if (shareData.url != null) {
-      final nameFromUrl = _extractFallbackQuery(shareData.url!);
-      if (nameFromUrl != null) {
-        _log.fine('Fallback search with URL-derived name: $nameFromUrl');
-        final results = await _placesRepository.searchPlaces(
-          nameFromUrl,
-          language: language,
-        );
-        if (results.isNotEmpty) {
-          return results.first;
-        }
       }
     }
 
@@ -140,6 +136,36 @@ class ShareIntentHandler {
     }
 
     return null;
+  }
+
+  /// Adds [raw] and useful variants to [candidates] in the order
+  /// they should be tried.
+  ///
+  /// Google Maps' `?q=` often arrives as `ZIP + full address + name`
+  /// (e.g. `406臺中市北屯區太順路77號尋嚐人家`), which Places Text
+  /// Search fails to match. We fall back to stripping a leading
+  /// digit block (Taiwan ZIP), and to the trailing non-numeric
+  /// segment (typically the store name) when present.
+  void _addQueryCandidates(Set<String> candidates, String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return;
+    candidates.add(trimmed);
+
+    // Strip a leading 3- or 5-digit ZIP-like prefix.
+    final zipStripped = trimmed.replaceFirst(RegExp(r'^\d{3,6}(?=\D)'), '');
+    if (zipStripped.isNotEmpty && zipStripped != trimmed) {
+      candidates.add(zipStripped);
+    }
+
+    // Trailing non-digit block: works when the store name sits
+    // after the last number (e.g. `...77號尋嚐人家` → `尋嚐人家`).
+    final tailMatch = RegExp(r'[^\d\s號巷弄樓號之-]+$').firstMatch(trimmed);
+    if (tailMatch != null) {
+      final tail = tailMatch.group(0)!.trim();
+      if (tail.isNotEmpty && tail.length >= 2 && tail != trimmed) {
+        candidates.add(tail);
+      }
+    }
   }
 
   String _decodeQueryComponent(String raw) {

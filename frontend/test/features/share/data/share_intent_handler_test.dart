@@ -103,6 +103,39 @@ void main() {
           )).called(1);
     });
 
+    test(
+      'retries with trailing store name when full address fails',
+      () async {
+        // Real example: iOS Google Maps expands a short link into
+        // `?q=406臺中市北屯區太順路77號尋嚐人家` which Places Text
+        // Search doesn't match. The handler should retry with the
+        // trailing non-numeric segment.
+        const fullQuery = '406臺中市北屯區太順路77號尋嚐人家';
+        when(() => mockRepository.searchPlaces(
+              fullQuery,
+              language: any(named: 'language'),
+            )).thenAnswer((_) async => []);
+        when(() => mockRepository.searchPlaces(
+              '臺中市北屯區太順路77號尋嚐人家',
+              language: any(named: 'language'),
+            )).thenAnswer((_) async => []);
+        when(() => mockRepository.searchPlaces(
+              '尋嚐人家',
+              language: any(named: 'language'),
+            )).thenAnswer((_) async => [testPlace]);
+
+        final result = await handler.resolveSharedText(
+          'https://maps.google.com?q=406%E8%87%BA%E4%B8%AD%E5%B8%82'
+          '%E5%8C%97%E5%B1%AF%E5%8D%80%E5%A4%AA%E9%A0%86%E8%B7%AF77'
+          '%E8%99%9F%E5%B0%8B%E5%9A%90%E4%BA%BA%E5%AE%B6'
+          '&ftid=0x3469192045a2ac15:0xcab7b7a0e029a0c8',
+          language: const Language('zh-TW'),
+        );
+
+        expect(result, isNotNull);
+      },
+    );
+
     test('returns null when place not found', () async {
       when(() => mockRepository.searchPlaces(
             any(),
