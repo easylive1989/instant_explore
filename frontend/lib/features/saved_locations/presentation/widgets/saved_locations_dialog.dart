@@ -163,7 +163,7 @@ class _SavedLocationTile extends ConsumerWidget {
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Image.asset(
-            place.category.imageAssetPath,
+            place.category.getImageAssetPath(context),
             width: 48,
             height: 48,
             fit: BoxFit.cover,

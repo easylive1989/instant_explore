@@ -67,18 +67,20 @@ extension PlaceCategoryUIExtension on PlaceCategory {
   }
 
   /// 取得類別圖片路徑
-  String get imageAssetPath {
+  String getImageAssetPath(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final suffix = isDark ? '_dark' : '_light';
     switch (this) {
       case PlaceCategory.historicalCultural:
-        return 'assets/images/categories/historical_cultural_icon.png';
+        return 'assets/images/categories/historical_cultural${suffix}_icon.png';
       case PlaceCategory.naturalLandscape:
-        return 'assets/images/categories/natural_landscape_icon.png';
+        return 'assets/images/categories/natural_landscape${suffix}_icon.png';
       case PlaceCategory.modernUrban:
-        return 'assets/images/categories/modern_urban_icon.png';
+        return 'assets/images/categories/modern_urban${suffix}_icon.png';
       case PlaceCategory.museumArt:
-        return 'assets/images/categories/museum_art_icon.png';
+        return 'assets/images/categories/museum_art${suffix}_icon.png';
       case PlaceCategory.foodMarket:
-        return 'assets/images/categories/food_market_icon.png';
+        return 'assets/images/categories/food_market${suffix}_icon.png';
     }
   }
 }

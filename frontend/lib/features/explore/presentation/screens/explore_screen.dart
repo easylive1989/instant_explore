@@ -373,7 +373,7 @@ class PlaceCard extends ConsumerWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
-                  place.category.imageAssetPath,
+                  place.category.getImageAssetPath(context),
                   width: 64,
                   height: 64,
                   fit: BoxFit.cover,
