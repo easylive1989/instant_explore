@@ -122,7 +122,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [backgroundColor, Colors.transparent],
+                  colors: [
+                    backgroundColor,
+                    backgroundColor.withValues(alpha: 0),
+                  ],
                 ),
               ),
             ),
@@ -140,7 +143,10 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [backgroundColor, Colors.transparent],
+                  colors: [
+                    backgroundColor,
+                    backgroundColor.withValues(alpha: 0),
+                  ],
                 ),
               ),
             ),
