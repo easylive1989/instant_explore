@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
@@ -36,20 +38,21 @@ class _QuickGuideTimelineEntryState
     if (_isSharing || _isDeleting) return;
     setState(() => _isSharing = true);
 
-    try {
-      await JourneySharingService.shareJourneyCard(
+    unawaited(
+      JourneySharingService.shareJourneyCard(
         context: context,
         placeName: 'quick_guide.title'.tr(),
         placeAddress: '',
         narrationExcerpt: widget.entry.aiDescription,
         visitedAt: widget.entry.createdAt,
         imageBytes: widget.entry.imageBytes,
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSharing = false);
-      }
-    }
+        onSheetPresented: () {
+          if (mounted) {
+            setState(() => _isSharing = false);
+          }
+        },
+      ),
+    );
   }
 
   void _navigateToPlayer() {
