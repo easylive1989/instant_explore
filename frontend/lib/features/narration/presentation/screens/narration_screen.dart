@@ -91,10 +91,11 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     const primaryColor = AppColors.primary;
     const primaryColorShadow = Color(0x4D137FEC);
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = colorScheme.surface;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
           Expanded(
