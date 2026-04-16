@@ -72,7 +72,9 @@ class NarrationControlPanel extends ConsumerWidget {
                             width: 48,
                             margin: const EdgeInsets.only(right: 24),
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHigh,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.1,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
@@ -129,7 +131,9 @@ class NarrationControlPanel extends ConsumerWidget {
                             width: 48,
                             margin: const EdgeInsets.only(left: 24),
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHigh,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.1,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
