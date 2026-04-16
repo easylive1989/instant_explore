@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
 import 'package:flutter/material.dart';
@@ -30,20 +32,21 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
     if (_isSharing || _isDeleting) return;
     setState(() => _isSharing = true);
 
-    try {
-      await JourneySharingService.shareJourneyCard(
+    unawaited(
+      JourneySharingService.shareJourneyCard(
         context: context,
         placeName: widget.entry.place.name,
         placeAddress: widget.entry.place.address,
         narrationExcerpt: widget.entry.narrationContent.text,
         visitedAt: widget.entry.createdAt,
         imageUrl: widget.entry.place.imageUrl,
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSharing = false);
-      }
-    }
+        onSheetPresented: () {
+          if (mounted) {
+            setState(() => _isSharing = false);
+          }
+        },
+      ),
+    );
   }
 
   Future<void> _showDeleteConfirmDialog() async {

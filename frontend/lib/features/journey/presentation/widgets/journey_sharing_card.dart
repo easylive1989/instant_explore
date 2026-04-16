@@ -33,14 +33,13 @@ class JourneySharingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 380,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF0F1923), Color(0xFF1A2B3D)],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x40000000),
             blurRadius: 24,
@@ -90,29 +89,26 @@ class _CardHeader extends StatelessWidget {
       return _PlaceholderHeader(placeName: placeName);
     }
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      child: SizedBox(
-        height: 200,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildImage(),
-            // Gradient overlay for text readability
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Color(0xCC0F1923)],
-                  stops: [0.4, 1.0],
-                ),
+    return SizedBox(
+      height: 200,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildImage(),
+          // Gradient overlay for text readability
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xCC0F1923)],
+                stops: [0.4, 1.0],
               ),
             ),
-            // Stamp badge
-            const Positioned(top: 16, right: 16, child: _StampBadge()),
-          ],
-        ),
+          ),
+          // Stamp badge
+          const Positioned(top: 16, right: 16, child: _StampBadge()),
+        ],
       ),
     );
   }
@@ -146,7 +142,6 @@ class _PlaceholderHeader extends StatelessWidget {
     return Container(
       height: 120,
       decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
