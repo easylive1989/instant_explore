@@ -10,6 +10,7 @@ import 'package:context_app/features/narration/presentation/controllers/narratio
 import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 
 final narrationServiceProvider = Provider<NarrationService>((ref) {
@@ -59,7 +60,11 @@ final narrationGenerationControllerProvider =
     >((ref) {
       final useCase = ref.watch(startNarrationUseCaseProvider);
       final journeyRepository = ref.watch(journeyRepositoryProvider);
-      return NarrationGenerationController(useCase, journeyRepository);
+      return NarrationGenerationController(
+        useCase,
+        journeyRepository,
+        () => ref.read(currentTripIdProvider),
+      );
     });
 
 /// PlayerController Provider

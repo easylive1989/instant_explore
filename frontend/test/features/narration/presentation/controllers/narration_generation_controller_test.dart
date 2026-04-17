@@ -88,12 +88,14 @@ const _testNarrationText =
 NarrationGenerationController _makeController({
   _SpyNarrationService? narrationService,
   _FakeJourneyRepository? journeyRepository,
+  String? Function()? currentTripIdGetter,
 }) {
   final service = narrationService ?? _SpyNarrationService();
   final useCase = CreateNarrationUseCase(service, _FakeUsageRepository());
   return NarrationGenerationController(
     useCase,
     journeyRepository ?? _FakeJourneyRepository(),
+    currentTripIdGetter ?? () => null,
   );
 }
 

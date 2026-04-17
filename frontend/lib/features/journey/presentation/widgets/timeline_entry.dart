@@ -13,12 +13,20 @@ import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 
 class TimelineEntry extends ConsumerStatefulWidget {
   final JourneyEntry entry;
   final bool isLast;
 
   const TimelineEntry({super.key, required this.entry, this.isLast = false});
+
+  /// Shared outer padding used by timeline entries so overlays
+  /// (e.g. selection mode) can align without duplicating magic numbers.
+  static const EdgeInsets contentPadding = EdgeInsets.only(
+    left: 32,
+    bottom: 40,
+  );
 
   @override
   ConsumerState<TimelineEntry> createState() => _TimelineEntryState();
@@ -47,6 +55,31 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
         },
       ),
     );
+  }
+
+  Future<void> _showMoveToTripSheet() async {
+    if (_isDeleting) return;
+    final selection = await showMoveToTripSheet(
+      context: context,
+      currentTripId: widget.entry.tripId,
+    );
+    if (selection == null) return;
+    if (selection.tripId == widget.entry.tripId) return;
+    try {
+      await ref
+          .read(journeyRepositoryProvider)
+          .save(widget.entry.copyWithTripId(selection.tripId));
+      ref.invalidate(allJourneyItemsProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'common.error_prefix'.tr()}: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _showDeleteConfirmDialog() async {
@@ -81,7 +114,6 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
       try {
         await ref.read(journeyRepositoryProvider).delete(widget.entry.id);
-        ref.invalidate(myJourneyProvider);
         ref.invalidate(allJourneyItemsProvider);
       } catch (e) {
         if (mounted) {
@@ -145,8 +177,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
     return GestureDetector(
       onTap: _navigateToPlayer,
+      onLongPress: _showMoveToTripSheet,
       child: Container(
-        padding: const EdgeInsets.only(left: 32, bottom: 40),
+        padding: TimelineEntry.contentPadding,
         child: Stack(
           clipBehavior: Clip.none,
           children: [

@@ -96,6 +96,7 @@ QuickGuideController _makeController({
     repository,
     usageRepository,
     _testIdGenerator,
+    () => null,
   );
 
   return QuickGuideController(useCase);

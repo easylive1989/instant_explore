@@ -11,6 +11,9 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
+import 'package:context_app/features/trip/presentation/screens/trip_detail_screen.dart';
+import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.dart';
+import 'package:context_app/features/trip/presentation/screens/trip_list_screen.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -103,6 +106,37 @@ class RouterConfig {
           path: '/subscription',
           name: 'subscription',
           builder: (context, state) => const SubscriptionScreen(),
+        ),
+        GoRoute(
+          path: '/trips',
+          name: 'trips',
+          builder: (context, state) => const TripListScreen(),
+        ),
+        GoRoute(
+          path: '/trip/edit',
+          name: 'trip_create',
+          builder: (context, state) => const TripEditScreen(),
+        ),
+        GoRoute(
+          path: '/trip/edit/:id',
+          name: 'trip_edit',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return TripEditScreen(tripId: id);
+          },
+        ),
+        GoRoute(
+          path: '/trip/uncategorized',
+          name: 'trip_uncategorized',
+          builder: (context, state) => const TripDetailScreen(),
+        ),
+        GoRoute(
+          path: '/trip/:id',
+          name: 'trip_detail',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return TripDetailScreen(tripId: id);
+          },
         ),
       ],
       errorBuilder: (context, state) =>

@@ -69,10 +69,12 @@ class NarrationGenerationController
     extends StateNotifier<NarrationGenerationState> {
   final CreateNarrationUseCase _createNarrationUseCase;
   final JourneyRepository _journeyRepository;
+  final String? Function() _currentTripIdGetter;
 
   NarrationGenerationController(
     this._createNarrationUseCase,
     this._journeyRepository,
+    this._currentTripIdGetter,
   ) : super(const NarrationGenerationState());
 
   /// Generates narration content for the given place and aspects.
@@ -148,6 +150,7 @@ class NarrationGenerationController
         aspects: aspects,
         content: content,
         language: language,
+        tripId: _currentTripIdGetter(),
       );
       await _journeyRepository.save(entry);
     } catch (_) {

@@ -179,6 +179,119 @@ void main() {
       expect(restored.language, original.language);
     });
 
+    test('create defaults tripId to null when omitted', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        formattedAddress: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.traditionalChinese,
+      );
+
+      final entry = JourneyEntry.create(
+        id: 'no-trip-id',
+        place: place,
+        aspects: {NarrationAspect.historicalBackground},
+        content: content,
+        language: Language.traditionalChinese,
+      );
+
+      expect(entry.tripId, isNull);
+    });
+
+    test('create attaches tripId when provided', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        formattedAddress: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.traditionalChinese,
+      );
+
+      final entry = JourneyEntry.create(
+        id: 'with-trip-id',
+        place: place,
+        aspects: {NarrationAspect.historicalBackground},
+        content: content,
+        language: Language.traditionalChinese,
+        tripId: 'trip-123',
+      );
+
+      expect(entry.tripId, 'trip-123');
+    });
+
+    test('copyWithTripId returns a copy with updated tripId', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        formattedAddress: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.traditionalChinese,
+      );
+      final original = JourneyEntry.create(
+        id: 'copy-id',
+        place: place,
+        aspects: {NarrationAspect.historicalBackground},
+        content: content,
+        language: Language.traditionalChinese,
+        tripId: 'trip-a',
+      );
+
+      final moved = original.copyWithTripId('trip-b');
+      final cleared = original.copyWithTripId(null);
+
+      expect(moved.tripId, 'trip-b');
+      expect(moved.id, original.id);
+      expect(cleared.tripId, isNull);
+    });
+
+    test('fromJson treats missing trip_id as null (backward compat)', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        formattedAddress: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        types: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.traditionalChinese,
+      );
+      final entry = JourneyEntry.create(
+        id: 'legacy-id',
+        place: place,
+        aspects: {NarrationAspect.historicalBackground},
+        content: content,
+        language: Language.traditionalChinese,
+        tripId: 'will-be-removed',
+      );
+      final legacyJson = entry.toJson()..remove('trip_id');
+
+      final restored = JourneyEntry.fromJson(legacyJson);
+
+      expect(restored.tripId, isNull);
+    });
+
     test('fromJson uses language.code (not toString)', () {
       const place = Place(
         id: 'p1',

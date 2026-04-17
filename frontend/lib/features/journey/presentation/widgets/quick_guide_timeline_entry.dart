@@ -5,9 +5,11 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
+import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
+import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,6 +86,31 @@ class _QuickGuideTimelineEntryState
     );
   }
 
+  Future<void> _showMoveToTripSheet() async {
+    if (_isDeleting) return;
+    final selection = await showMoveToTripSheet(
+      context: context,
+      currentTripId: widget.entry.tripId,
+    );
+    if (selection == null) return;
+    if (selection.tripId == widget.entry.tripId) return;
+    try {
+      await ref
+          .read(quickGuideRepositoryProvider)
+          .save(widget.entry.copyWithTripId(selection.tripId));
+      ref.invalidate(allJourneyItemsProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'common.error_prefix'.tr()}: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _showDeleteConfirmDialog() async {
     if (_isDeleting) return;
 
@@ -114,7 +141,6 @@ class _QuickGuideTimelineEntryState
 
       try {
         await ref.read(quickGuideRepositoryProvider).delete(widget.entry.id);
-        ref.invalidate(quickGuideEntriesProvider);
         ref.invalidate(allJourneyItemsProvider);
       } catch (e) {
         if (mounted) {
@@ -150,8 +176,9 @@ class _QuickGuideTimelineEntryState
 
     return GestureDetector(
       onTap: _navigateToPlayer,
+      onLongPress: _showMoveToTripSheet,
       child: Container(
-        padding: const EdgeInsets.only(left: 32, bottom: 40),
+        padding: TimelineEntry.contentPadding,
         child: Stack(
           clipBehavior: Clip.none,
           children: [

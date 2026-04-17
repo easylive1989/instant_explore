@@ -5,6 +5,7 @@ import 'package:context_app/features/quick_guide/domain/repositories/quick_guide
 import 'package:context_app/features/quick_guide/domain/services/quick_guide_ai_service.dart';
 import 'package:context_app/features/quick_guide/domain/use_cases/generate_quick_guide_use_case.dart';
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
+import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -25,6 +26,7 @@ final generateQuickGuideUseCaseProvider = Provider<GenerateQuickGuideUseCase>((
     ref.watch(quickGuideRepositoryProvider),
     ref.watch(usageRepositoryProvider),
     () => const Uuid().v4(),
+    () => ref.read(currentTripIdProvider),
   );
 });
 

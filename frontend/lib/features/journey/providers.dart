@@ -11,6 +11,9 @@ export 'package:context_app/features/quick_guide/providers.dart'
 /// Filter type for the journey list.
 enum JourneyFilter { all, narration, quickGuide }
 
+/// Journey 頁的檢視模式：完整時間軸 或 依旅程分群。
+enum JourneyViewMode { timeline, byTrip }
+
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return HiveJourneyRepository();
 });
@@ -45,6 +48,11 @@ final journeySearchQueryProvider = StateProvider.autoDispose<String>(
 /// Current type filter selected by the user.
 final journeyFilterProvider = StateProvider.autoDispose<JourneyFilter>(
   (ref) => JourneyFilter.all,
+);
+
+/// Journey 頁當前的檢視模式。
+final journeyViewModeProvider = StateProvider.autoDispose<JourneyViewMode>(
+  (ref) => JourneyViewMode.timeline,
 );
 
 /// Items after applying search query and type filter.

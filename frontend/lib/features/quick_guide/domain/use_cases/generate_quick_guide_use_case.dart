@@ -30,12 +30,14 @@ class GenerateQuickGuideUseCase {
   final QuickGuideRepository _repository;
   final UsageRepository _usageRepository;
   final String Function() _idGenerator;
+  final String? Function() _currentTripIdGetter;
 
   GenerateQuickGuideUseCase(
     this._aiService,
     this._repository,
     this._usageRepository,
     this._idGenerator,
+    this._currentTripIdGetter,
   );
 
   /// 執行用例
@@ -62,6 +64,7 @@ class GenerateQuickGuideUseCase {
       imageBytes: imageBytes,
       aiDescription: description,
       language: Language(language),
+      tripId: _currentTripIdGetter(),
     );
     await _repository.save(entry);
     await _usageRepository.consumeUsage();
