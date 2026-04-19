@@ -1,8 +1,13 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/export/data/default_pdf_export_pipeline.dart';
+import 'package:context_app/features/export/domain/models/pdf_export_result.dart';
+import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
+import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
@@ -266,6 +271,10 @@ class _TripMenuButton extends ConsumerWidget {
           child: Text('trip.edit_action'.tr()),
         ),
         PopupMenuItem(
+          value: _TripMenuAction.exportPdf,
+          child: Text('export.menu_item'.tr()),
+        ),
+        PopupMenuItem(
           value: _TripMenuAction.delete,
           child: Text(
             'trip.delete_action'.tr(),
@@ -289,6 +298,8 @@ class _TripMenuButton extends ConsumerWidget {
             .setCurrentTripId(isCurrent ? null : tripId);
       case _TripMenuAction.edit:
         if (context.mounted) context.push('/trip/edit/$tripId');
+      case _TripMenuAction.exportPdf:
+        await _exportPdf(context, ref, tripId);
       case _TripMenuAction.delete:
         final confirmed = await _confirmDelete(context);
         if (!confirmed) return;
@@ -323,10 +334,7 @@ class _TripMenuButton extends ConsumerWidget {
       title: 'trip.delete_title'.tr(),
       content: 'trip.delete_message'.tr(),
       actions: [
-        AdaptiveDialogAction<bool>(
-          label: 'trip.cancel'.tr(),
-          result: false,
-        ),
+        AdaptiveDialogAction<bool>(label: 'trip.cancel'.tr(), result: false),
         AdaptiveDialogAction<bool>(
           label: 'trip.delete_confirm'.tr(),
           isDestructive: true,
@@ -338,7 +346,89 @@ class _TripMenuButton extends ConsumerWidget {
   }
 }
 
-enum _TripMenuAction { setCurrent, edit, delete }
+enum _TripMenuAction { setCurrent, edit, exportPdf, delete }
+
+Future<void> _exportPdf(
+  BuildContext context,
+  WidgetRef ref,
+  String tripId,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(width: 16),
+          Expanded(child: Text('export.generating'.tr())),
+        ],
+      ),
+    ),
+  );
+
+  try {
+    final result = await exportTripAsPdf(
+      ref: ref,
+      context: context,
+      tripId: tripId,
+      strings: _buildExportStrings(),
+    );
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    _showResultSnackBar(messenger, result);
+  } on EmptyTripExportException {
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    messenger.showSnackBar(SnackBar(content: Text('export.empty_trip'.tr())));
+  } catch (e) {
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('export.failed'.tr(namedArgs: {'error': e.toString()})),
+      ),
+    );
+  }
+}
+
+void _showResultSnackBar(
+  ScaffoldMessengerState messenger,
+  PdfExportResult result,
+) {
+  if (result.hasMissingImages) {
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'export.some_images_missing'.tr(
+            namedArgs: {'count': '${result.missingImagePlaceNames.length}'},
+          ),
+        ),
+      ),
+    );
+    return;
+  }
+  messenger.showSnackBar(SnackBar(content: Text('export.success'.tr())));
+}
+
+TripPdfExportStrings _buildExportStrings() {
+  return TripPdfExportStrings(
+    stampLabel: 'export.stamp_label'.tr(),
+    appName: 'app.name'.tr(),
+    tagline: 'app.tagline'.tr(),
+    entryCountLabel: 'export.entry_count_label'.tr(),
+    pdfLabels: PdfLabels(
+      aspectsHeading: 'export.aspects_heading'.tr(),
+      pageOfTotal: 'export.page_of_total'.tr(),
+    ),
+    aspectLabels: {
+      for (final aspect in NarrationAspect.values)
+        aspect: 'export.aspect.${aspect.key}'.tr(),
+    },
+  );
+}
 
 class _ItemsList extends StatelessWidget {
   final AsyncValue<List<JourneyItem>> itemsAsync;

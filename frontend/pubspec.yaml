@@ -91,6 +91,8 @@ dependencies:
   # Share content to other apps (social media, messaging, etc.)
   share_plus: ^10.1.4
   webview_flutter: ^4.13.1
+  pdf: ^3.12.0
+  printing: ^5.14.3
 
 dev_dependencies:
   flutter_test:
