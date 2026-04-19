@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart' as easy;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 導覽轉錄文本顯示區域
 class NarrationTranscriptArea extends ConsumerWidget {
@@ -29,7 +30,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: primaryColor),
+            AdaptiveProgressIndicator(color: primaryColor),
             const SizedBox(height: 16),
             Text(
               'player_screen.loading'.tr(),

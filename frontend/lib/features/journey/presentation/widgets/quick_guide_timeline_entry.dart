@@ -14,6 +14,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// Timeline entry widget for a [QuickGuideEntry].
 class QuickGuideTimelineEntry extends ConsumerStatefulWidget {
@@ -114,25 +115,21 @@ class _QuickGuideTimelineEntryState
   Future<void> _showDeleteConfirmDialog() async {
     if (_isDeleting) return;
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAdaptiveAlertDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('passport.delete_title'.tr()),
-        content: Text('passport.delete_message'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('passport.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'passport.delete_confirm'.tr(),
-              style: const TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+      title: 'passport.delete_title'.tr(),
+      content: 'passport.delete_message'.tr(),
+      actions: [
+        AdaptiveDialogAction<bool>(
+          label: 'passport.cancel'.tr(),
+          result: false,
+        ),
+        AdaptiveDialogAction<bool>(
+          label: 'passport.delete_confirm'.tr(),
+          isDestructive: true,
+          result: true,
+        ),
+      ],
     );
 
     if (confirmed == true) {
@@ -322,7 +319,7 @@ class _QuickGuideTimelineEntryState
                               const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
+                                child: AdaptiveProgressIndicator(
                                   strokeWidth: 2,
                                   color: AppColors.primary,
                                 ),
@@ -338,7 +335,7 @@ class _QuickGuideTimelineEntryState
                               const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
+                                child: AdaptiveProgressIndicator(
                                   strokeWidth: 2,
                                   color: AppColors.primary,
                                 ),

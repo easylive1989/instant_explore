@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 建立或編輯 Trip 的表單頁。
 ///
@@ -124,7 +125,7 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
         ),
       ),
       body: _loadingInitial
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: AdaptiveProgressIndicator())
           : _buildForm(),
     );
   }
@@ -173,13 +174,14 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
                   : () => setState(() => _endDate = null),
             ),
             const SizedBox(height: 32),
-            FilledButton(
+            AdaptiveButton(
+              expanded: true,
               onPressed: _saving ? null : _save,
               child: _saving
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: AdaptiveProgressIndicator(strokeWidth: 2),
                     )
                   : Text(
                       _isEditMode
@@ -220,7 +222,10 @@ class _DatePickerTile extends StatelessWidget {
           border: const OutlineInputBorder(),
           suffixIcon: onClear == null
               ? const Icon(Icons.calendar_today)
-              : IconButton(icon: const Icon(Icons.clear), onPressed: onClear),
+              : AdaptiveIconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: onClear,
+                ),
         ),
         child: Text(
           value == null ? 'trip.date_not_set'.tr() : formatter.format(value!),

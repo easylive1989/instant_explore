@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// Content of the saved locations dialog, displayed inside
 /// the expanding animation from [SavedLocationsFab].
@@ -26,7 +27,7 @@ class SavedLocationsDialog extends ConsumerWidget {
             data: (entries) => entries.isEmpty
                 ? _EmptyState(colorScheme: colorScheme)
                 : _SavedLocationsList(entries: entries),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: AdaptiveProgressIndicator()),
             error: (_, __) => Center(
               child: Text(
                 'common.error_prefix'.tr(),
@@ -63,7 +64,7 @@ class _DialogHeader extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
+          AdaptiveIconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
           ),
@@ -198,31 +199,21 @@ class _SavedLocationTile extends ConsumerWidget {
   }
 
   Future<bool?> _confirmDelete(BuildContext context) {
-    return showDialog<bool>(
+    return showAdaptiveAlertDialog<bool>(
       context: context,
-      builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return AlertDialog(
-          title: Text('saved_locations.delete_title'.tr()),
-          content: Text('saved_locations.delete_message'.tr()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                'saved_locations.cancel'.tr(),
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(
-                'saved_locations.delete_confirm'.tr(),
-                style: TextStyle(color: colorScheme.error),
-              ),
-            ),
-          ],
-        );
-      },
+      title: 'saved_locations.delete_title'.tr(),
+      content: 'saved_locations.delete_message'.tr(),
+      actions: [
+        AdaptiveDialogAction<bool>(
+          label: 'saved_locations.cancel'.tr(),
+          result: false,
+        ),
+        AdaptiveDialogAction<bool>(
+          label: 'saved_locations.delete_confirm'.tr(),
+          isDestructive: true,
+          result: true,
+        ),
+      ],
     );
   }
 }

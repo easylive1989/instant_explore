@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class JourneyScreen extends ConsumerStatefulWidget {
   const JourneyScreen({super.key});
@@ -64,7 +65,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                     ),
                   ),
                   if (isTimeline)
-                    IconButton(
+                    AdaptiveIconButton(
                       onPressed: _toggleSearch,
                       icon: Icon(
                         _showSearch ? Icons.close : Icons.search,
@@ -72,9 +73,8 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                       ),
                     )
                   else
-                    IconButton(
+                    AdaptiveIconButton(
                       onPressed: () => context.push('/trip/edit'),
-                      tooltip: 'trip.create_action'.tr(),
                       icon: Icon(
                         Icons.add,
                         color: colorScheme.onSurfaceVariant,
@@ -119,7 +119,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                               size: 20,
                             ),
                             suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
+                                ? AdaptiveIconButton(
                                     icon: const Icon(Icons.clear, size: 18),
                                     onPressed: () {
                                       _searchController.clear();
@@ -322,15 +322,12 @@ class _CurrentTripBanner extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      TextButton(
+                      AdaptiveButton(
+                        style: AdaptiveButtonStyle.text,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         onPressed: () =>
                             ref.read(currentTripIdProvider.notifier).clear(),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          minimumSize: const Size(0, 32),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
                         child: Text(
                           'trip.end_current'.tr(),
                           style: const TextStyle(
@@ -370,7 +367,7 @@ class _TripGridView extends ConsumerWidget {
           currentTripId: currentTripId,
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: AdaptiveProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
           '${'trip.load_error'.tr()}: $error',
@@ -515,7 +512,7 @@ class _JourneyList extends ConsumerWidget {
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: AdaptiveProgressIndicator()),
       error: (error, stack) => Center(
         child: Text(
           '${'passport.load_error'.tr()}: $error',

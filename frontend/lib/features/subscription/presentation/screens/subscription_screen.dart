@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/subscription/providers.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 訂閱付費牆畫面
 class SubscriptionScreen extends ConsumerStatefulWidget {
@@ -72,7 +73,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
+        leading: AdaptiveIconButton(
           icon: Icon(Icons.close, color: colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -125,22 +126,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               SizedBox(
                 width: double.infinity,
                 height: 54,
-                child: ElevatedButton(
+                child: AdaptiveButton(
+                  expanded: true,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
                   onPressed: _isLoading ? null : _purchase,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.primary.withValues(
-                      alpha: 0.5,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
                   child: _isLoading
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(
+                          child: AdaptiveProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
@@ -156,7 +151,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              TextButton(
+              AdaptiveButton(
+                style: AdaptiveButtonStyle.text,
+                foregroundColor: colorScheme.onSurfaceVariant,
                 onPressed: _isLoading ? null : _restore,
                 child: Text(
                   'subscription.restore'.tr(),

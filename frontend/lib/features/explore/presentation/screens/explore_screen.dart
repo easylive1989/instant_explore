@@ -9,6 +9,7 @@ import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -45,11 +46,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   void _showFilterPanel() {
-    showModalBottomSheet(
+    showAdaptiveModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) => const _FilterPanel(),
     );
   }
@@ -109,27 +107,21 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  TextField(
+                  AdaptiveTextField(
                     controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search for places...',
-                      prefixIcon: const Icon(Icons.search),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                ref
-                                    .read(placesControllerProvider.notifier)
-                                    .search('');
-                              },
-                            )
-                          : null,
-                    ),
+                    hintText: 'Search for places...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffix: _searchController.text.isNotEmpty
+                        ? AdaptiveIconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref
+                                  .read(placesControllerProvider.notifier)
+                                  .search('');
+                            },
+                          )
+                        : null,
                     onSubmitted: (value) {
                       ref.read(placesControllerProvider.notifier).search(value);
                     },
@@ -156,7 +148,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           return PlaceCard(place: places[index]);
                         },
                       ),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () =>
+                    const Center(child: AdaptiveProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),
@@ -276,7 +269,7 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
           Row(
             children: [
               Expanded(
-                child: Slider(
+                child: AdaptiveSlider(
                   value: _sliderValue,
                   onChanged: (value) {
                     setState(() {
@@ -331,17 +324,15 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () {
-                ref.read(minReviewCountProvider.notifier).state = 100;
-                setState(() {
-                  _sliderValue = _valueToSlider(100);
-                });
-              },
-              child: Text('explore.filter.reset'.tr()),
-            ),
+          AdaptiveButton(
+            expanded: true,
+            onPressed: () {
+              ref.read(minReviewCountProvider.notifier).state = 100;
+              setState(() {
+                _sliderValue = _valueToSlider(100);
+              });
+            },
+            child: Text('explore.filter.reset'.tr()),
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 顯示所有旅程 + 「未分類」群組的列表頁。
 class TripListScreen extends ConsumerWidget {
@@ -20,9 +21,8 @@ class TripListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('trip.list_title'.tr()),
         actions: [
-          IconButton(
+          AdaptiveIconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'trip.create_action'.tr(),
             onPressed: () => context.push('/trip/edit'),
           ),
         ],
@@ -36,7 +36,7 @@ class TripListScreen extends ConsumerWidget {
             currentTripId: currentTripId,
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: AdaptiveProgressIndicator()),
         error: (error, _) => Center(
           child: Text(
             '${'trip.load_error'.tr()}: $error',

@@ -14,6 +14,7 @@ import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class TimelineEntry extends ConsumerStatefulWidget {
   final JourneyEntry entry;
@@ -85,25 +86,21 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   Future<void> _showDeleteConfirmDialog() async {
     if (_isDeleting) return; // Prevent multiple clicks
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAdaptiveAlertDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('passport.delete_title'.tr()),
-        content: Text('passport.delete_message'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('passport.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'passport.delete_confirm'.tr(),
-              style: const TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+      title: 'passport.delete_title'.tr(),
+      content: 'passport.delete_message'.tr(),
+      actions: [
+        AdaptiveDialogAction<bool>(
+          label: 'passport.cancel'.tr(),
+          result: false,
+        ),
+        AdaptiveDialogAction<bool>(
+          label: 'passport.delete_confirm'.tr(),
+          isDestructive: true,
+          result: true,
+        ),
+      ],
     );
 
     if (confirmed == true) {
@@ -358,7 +355,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                                 const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(
+                                  child: AdaptiveProgressIndicator(
                                     strokeWidth: 2,
                                     color: AppColors.primary,
                                   ),
@@ -374,7 +371,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                                 const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(
+                                  child: AdaptiveProgressIndicator(
                                     strokeWidth: 2,
                                     color: AppColors.primary,
                                   ),

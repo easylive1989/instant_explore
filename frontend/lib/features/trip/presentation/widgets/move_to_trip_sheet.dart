@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 顯示旅程選擇底部表單，讓使用者把條目移到指定旅程或未分類。
 ///
@@ -17,10 +18,9 @@ Future<TripSelection?> showMoveToTripSheet({
   String? currentTripId,
   int itemCount = 1,
 }) {
-  return showModalBottomSheet<TripSelection>(
+  return showAdaptiveModalBottomSheet<TripSelection>(
     context: context,
     isScrollControlled: true,
-    showDragHandle: true,
     builder: (ctx) =>
         _MoveToTripSheet(currentTripId: currentTripId, itemCount: itemCount),
   );
@@ -73,7 +73,7 @@ class _MoveToTripSheet extends ConsumerWidget {
                 data: (trips) => _buildList(context, trips, colorScheme),
                 loading: () => const Padding(
                   padding: EdgeInsets.all(40),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: AdaptiveProgressIndicator()),
                 ),
                 error: (e, _) => Padding(
                   padding: const EdgeInsets.all(20),

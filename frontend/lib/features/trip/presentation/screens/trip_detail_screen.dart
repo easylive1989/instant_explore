@@ -10,6 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 顯示單一 Trip 的條目時間軸。
 ///
@@ -143,13 +144,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   AppBar _buildAppBar(AsyncValue<Trip?> tripAsync, List<JourneyItem> items) {
     if (_selectionMode) {
       return AppBar(
-        leading: IconButton(
+        leading: AdaptiveIconButton(
           icon: const Icon(Icons.close),
           onPressed: _exitSelectionMode,
         ),
         title: Text('trip.selected_count'.tr(args: ['${_selectedIds.length}'])),
         actions: [
-          TextButton(
+          AdaptiveButton(
+            style: AdaptiveButtonStyle.text,
             onPressed: items.isEmpty ? null : () => _selectAll(items),
             child: Text('trip.select_all'.tr()),
           ),
@@ -169,9 +171,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       ),
       actions: [
         if (_isUncategorized && items.isNotEmpty)
-          IconButton(
+          AdaptiveIconButton(
             icon: const Icon(Icons.checklist),
-            tooltip: 'trip.select_action'.tr(),
             onPressed: _enterSelectionMode,
           )
         else if (!_isUncategorized)
@@ -184,22 +185,23 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        child: FilledButton.icon(
-          onPressed: _selectedIds.isEmpty || _moving
-              ? null
-              : () => _moveSelected(items),
+        child: AdaptiveButton(
+          expanded: true,
+          padding: const EdgeInsets.symmetric(vertical: 14),
           icon: _moving
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(
+                  child: AdaptiveProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,
                   ),
                 )
               : const Icon(Icons.drive_file_move_outlined),
-          label: Text('trip.move_selected'.tr()),
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+          onPressed: _selectedIds.isEmpty || _moving
+              ? null
+              : () => _moveSelected(items),
+          child: Text('trip.move_selected'.tr()),
         ),
       ),
     );
@@ -316,25 +318,21 @@ class _TripMenuButton extends ConsumerWidget {
   }
 
   Future<bool> _confirmDelete(BuildContext context) async {
-    final result = await showDialog<bool>(
+    final result = await showAdaptiveAlertDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('trip.delete_title'.tr()),
-        content: Text('trip.delete_message'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('trip.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              'trip.delete_confirm'.tr(),
-              style: const TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
+      title: 'trip.delete_title'.tr(),
+      content: 'trip.delete_message'.tr(),
+      actions: [
+        AdaptiveDialogAction<bool>(
+          label: 'trip.cancel'.tr(),
+          result: false,
+        ),
+        AdaptiveDialogAction<bool>(
+          label: 'trip.delete_confirm'.tr(),
+          isDestructive: true,
+          result: true,
+        ),
+      ],
     );
     return result ?? false;
   }
@@ -403,7 +401,7 @@ class _ItemsList extends StatelessWidget {
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: AdaptiveProgressIndicator()),
       error: (e, _) => Center(
         child: Text(
           '${'trip.load_error'.tr()}: $e',

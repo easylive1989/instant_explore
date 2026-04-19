@@ -1,5 +1,6 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +36,7 @@ class SaveSuccessScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
+          AdaptiveIconButton(
             onPressed: () => context.pop(),
             icon: Icon(
               Icons.close,
@@ -192,19 +193,15 @@ class SaveSuccessScreen extends StatelessWidget {
 
               Column(
                 children: [
-                  ElevatedButton(
+                  AdaptiveButton(
+                    expanded: true,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     onPressed: onViewPassport,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'passport.view_button'.tr(),
@@ -219,16 +216,13 @@ class SaveSuccessScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
+                  AdaptiveButton(
+                    expanded: true,
+                    style: AdaptiveButtonStyle.text,
+                    backgroundColor: colorScheme.surfaceContainerHigh,
+                    foregroundColor: colorScheme.onSurface,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     onPressed: onContinueTour ?? () => context.pop(),
-                    style: TextButton.styleFrom(
-                      backgroundColor: colorScheme.surfaceContainerHigh,
-                      foregroundColor: colorScheme.onSurface,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     child: Text(
                       'passport.continue_tour'.tr(),
                       style: const TextStyle(

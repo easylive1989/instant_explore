@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// Quick Guide tab screen.
 ///
@@ -231,48 +232,33 @@ class _ImageSourceSelector extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 48),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => onPickImage(ImageSource.camera),
-                icon: const Icon(Icons.camera_alt, size: 24),
-                label: Text(
-                  'quick_guide.take_photo'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.5),
+            AdaptiveButton(
+              expanded: true,
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              icon: const Icon(Icons.camera_alt, size: 24),
+              onPressed: () => onPickImage(ImageSource.camera),
+              child: Text(
+                'quick_guide.take_photo'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => onPickImage(ImageSource.gallery),
-                icon: const Icon(Icons.photo_library, size: 24),
-                label: Text(
-                  'quick_guide.from_gallery'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+            AdaptiveButton(
+              expanded: true,
+              style: AdaptiveButtonStyle.outlined,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              icon: const Icon(Icons.photo_library, size: 24),
+              onPressed: () => onPickImage(ImageSource.gallery),
+              child: Text(
+                'quick_guide.from_gallery'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -361,7 +347,7 @@ class _DescriptionArea extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: AppColors.primary),
+            const AdaptiveProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
               'quick_guide.analyzing'.tr(),
