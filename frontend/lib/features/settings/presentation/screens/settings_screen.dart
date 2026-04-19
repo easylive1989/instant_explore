@@ -6,6 +6,7 @@ import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -62,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                   loading: () => const SizedBox(
                     width: 12,
                     height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 1),
+                    child: AdaptiveProgressIndicator(strokeWidth: 1),
                   ),
                   error: (_, __) => Text(
                     'settings.app_version'.tr(),
@@ -219,9 +220,9 @@ class _ThemeModeTile extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Switch(
+          AdaptiveSwitch(
             value: themeMode == ThemeMode.dark,
-            activeThumbColor: AppColors.primary,
+            activeColor: AppColors.primary,
             onChanged: (value) =>
                 notifier.setThemeMode(value ? ThemeMode.dark : ThemeMode.light),
           ),
@@ -333,7 +334,7 @@ class _UsageSection extends StatelessWidget {
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: AdaptiveProgressIndicator(strokeWidth: 2),
               ),
             ),
           ),

@@ -4,16 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/ads/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 顯示觀看廣告對話框
 ///
 /// 回傳 true 表示已觀看並獲得獎勵，false/null 表示取消，
 /// 回傳 'subscribe' 表示使用者選擇訂閱
 Future<dynamic> showWatchAdDialog(BuildContext context, WidgetRef ref) {
-  return showModalBottomSheet<dynamic>(
+  return showAdaptiveModalBottomSheet<dynamic>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (context) => _WatchAdDialog(ref: ref),
   );
 }
@@ -128,77 +128,63 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
           const SizedBox(height: 32),
 
           // Watch Ad Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _watchAd,
-              icon: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.play_arrow, color: Colors.white),
-              label: Text(
-                'ads.watch_video'.tr(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.primary.withValues(
-                  alpha: 0.5,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          AdaptiveButton(
+            expanded: true,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: AdaptiveProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.play_arrow, color: Colors.white),
+            onPressed: _isLoading ? null : _watchAd,
+            child: Text(
+              'ads.watch_video'.tr(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),
           const SizedBox(height: 12),
 
           // Subscribe Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: OutlinedButton.icon(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      // 回傳 'subscribe' 讓呼叫端導航
-                      Navigator.of(context).pop('subscribe');
-                    },
-              icon: const Icon(
-                Icons.workspace_premium,
+          AdaptiveButton(
+            expanded: true,
+            style: AdaptiveButtonStyle.outlined,
+            foregroundColor: AppColors.primary,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            icon: const Icon(
+              Icons.workspace_premium,
+              color: AppColors.primary,
+            ),
+            onPressed: _isLoading
+                ? null
+                : () {
+                    // 回傳 'subscribe' 讓呼叫端導航
+                    Navigator.of(context).pop('subscribe');
+                  },
+            child: Text(
+              'subscription.upgrade_cta'.tr(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
                 color: AppColors.primary,
-              ),
-              label: Text(
-                'subscription.upgrade_cta'.tr(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
             ),
           ),
           const SizedBox(height: 12),
 
           // Cancel
-          TextButton(
+          AdaptiveButton(
+            style: AdaptiveButtonStyle.text,
             onPressed: _isLoading
                 ? null
                 : () => Navigator.of(context).pop(false),

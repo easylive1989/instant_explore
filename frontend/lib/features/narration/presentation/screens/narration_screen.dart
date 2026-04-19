@@ -10,6 +10,7 @@ import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 導覽播放頁面
 ///
@@ -110,7 +111,7 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
+                        AdaptiveIconButton(
                           icon: Icon(
                             Icons.arrow_back_ios_new,
                             color: colorScheme.onSurface,
@@ -179,8 +180,7 @@ class _GroundingInfoButton extends StatelessWidget {
       color: colorScheme.surface,
       shape: const CircleBorder(),
       elevation: 2,
-      child: IconButton(
-        tooltip: 'Google 搜尋結果',
+      child: AdaptiveIconButton(
         icon: Icon(Icons.info_outline, color: colorScheme.onSurface),
         onPressed: () => showGroundingInfoSheet(context, grounding: grounding),
       ),

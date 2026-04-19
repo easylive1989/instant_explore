@@ -8,6 +8,7 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -120,7 +121,7 @@ class _ShareLoadingOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(color: colorScheme.primary),
+                AdaptiveProgressIndicator(color: colorScheme.primary),
                 const SizedBox(height: 16),
                 Text(
                   'shared_place.loading'.tr(),

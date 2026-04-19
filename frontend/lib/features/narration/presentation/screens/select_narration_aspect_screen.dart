@@ -16,6 +16,7 @@ import 'package:context_app/features/narration/presentation/controllers/extensio
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class SelectNarrationAspectScreen extends ConsumerStatefulWidget {
   final Place place;
@@ -83,21 +84,18 @@ class _SelectNarrationAspectScreenState
 
   void _showErrorDialog(NarrationGenerationState genState) {
     ref.read(narrationGenerationControllerProvider.notifier).reset();
-    showDialog<void>(
+    showAdaptiveAlertDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('config_screen.generation_error_title'.tr()),
-        content: Text(
+      title: 'config_screen.generation_error_title'.tr(),
+      content:
           genState.errorMessage ??
-              'config_screen.generation_error_message'.tr(),
+          'config_screen.generation_error_message'.tr(),
+      actions: [
+        AdaptiveDialogAction<void>(
+          label: 'config_screen.generation_error_ok'.tr(),
+          isDefault: true,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text('config_screen.generation_error_ok'.tr()),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -147,7 +145,7 @@ class _SelectNarrationAspectScreenState
               elevation: 0,
               leading: isGenerating
                   ? null
-                  : IconButton(
+                  : AdaptiveIconButton(
                       icon: const Icon(
                         Icons.arrow_back_ios_new,
                         color: Colors.white,
@@ -250,32 +248,22 @@ class _SelectNarrationAspectScreenState
                       const SizedBox(height: 24),
 
                       // Start Button
-                      ElevatedButton(
+                      AdaptiveButton(
+                        expanded: true,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        icon: const Icon(Icons.play_arrow, color: Colors.white),
                         onPressed: selectedAspects.isEmpty
                             ? null
                             : _onStartPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        child: Text(
+                          'config_screen.start_button'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.play_arrow, color: Colors.white),
-                            const SizedBox(width: 8),
-                            Text(
-                              'config_screen.start_button'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -299,7 +287,7 @@ class _GeneratingIndicator extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: AppColors.primary),
+            const AdaptiveProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
               'config_screen.generating'.tr(),
@@ -344,7 +332,7 @@ class _BackgroundImage extends StatelessWidget {
         cacheManager: PlaceImageCacheManager.instance,
         placeholder: (context, url) => Container(
           color: Colors.black,
-          child: const Center(child: CircularProgressIndicator()),
+          child: const Center(child: AdaptiveProgressIndicator()),
         ),
         errorWidget: (context, url, error) => Container(
           color: Colors.black,

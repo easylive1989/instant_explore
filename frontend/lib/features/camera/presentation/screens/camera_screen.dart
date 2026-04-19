@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// 相機畫面
 ///
@@ -122,7 +123,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
+        leading: AdaptiveIconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.pop(),
         ),
@@ -132,7 +133,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         ),
         actions: [
           if (_displayImage != null)
-            IconButton(icon: const Icon(Icons.refresh), onPressed: _retake),
+            AdaptiveIconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _retake,
+            ),
         ],
       ),
       body: _buildBody(cameraState),
@@ -214,51 +218,33 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             ),
             const SizedBox(height: 48),
 
-            // 拍照按鈕
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _pickImage(ImageSource.camera),
-                icon: const Icon(Icons.camera_alt, size: 24),
-                label: Text(
-                  'camera.take_photo'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.5),
+            AdaptiveButton(
+              expanded: true,
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              icon: const Icon(Icons.camera_alt, size: 24),
+              onPressed: () => _pickImage(ImageSource.camera),
+              child: Text(
+                'camera.take_photo'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
-            // 從相簿選擇
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _pickImage(ImageSource.gallery),
-                icon: const Icon(Icons.photo_library, size: 24),
-                label: Text(
-                  'camera.from_gallery'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+            AdaptiveButton(
+              expanded: true,
+              style: AdaptiveButtonStyle.outlined,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              icon: const Icon(Icons.photo_library, size: 24),
+              onPressed: () => _pickImage(ImageSource.gallery),
+              child: Text(
+                'camera.from_gallery'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -274,7 +260,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: AppColors.primary),
+            const AdaptiveProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
               'camera.analyzing'.tr(),
@@ -308,12 +294,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            AdaptiveButton(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
               onPressed: _retake,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
               child: Text('camera.retry'.tr()),
             ),
           ],
@@ -330,33 +314,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           // 開始導覽按鈕（放在卡片外面）
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _navigateToNarration,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.5),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.play_arrow_rounded, size: 24),
-                    const SizedBox(width: 8),
-                    Text(
-                      'camera.start_narration'.tr(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+            child: AdaptiveButton(
+              expanded: true,
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              icon: const Icon(Icons.play_arrow_rounded, size: 24),
+              onPressed: _navigateToNarration,
+              child: Text(
+                'camera.start_narration'.tr(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

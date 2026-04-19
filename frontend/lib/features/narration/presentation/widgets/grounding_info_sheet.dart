@@ -2,6 +2,7 @@ import 'package:context_app/features/narration/domain/models/grounding_info.dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 /// Opens the Google Search grounding info as a modal bottom sheet.
 ///
@@ -12,11 +13,9 @@ Future<void> showGroundingInfoSheet(
   BuildContext context, {
   required GroundingInfo grounding,
 }) {
-  return showModalBottomSheet<void>(
+  return showAdaptiveModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    showDragHandle: true,
-    useSafeArea: true,
     builder: (context) => GroundingInfoSheet(grounding: grounding),
   );
 }
