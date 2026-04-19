@@ -161,10 +161,7 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
             style: AdaptiveButtonStyle.outlined,
             foregroundColor: AppColors.primary,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            icon: const Icon(
-              Icons.workspace_premium,
-              color: AppColors.primary,
-            ),
+            icon: const Icon(Icons.workspace_premium, color: AppColors.primary),
             onPressed: _isLoading
                 ? null
                 : () {

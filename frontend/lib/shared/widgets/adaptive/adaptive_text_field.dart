@@ -32,8 +32,7 @@ class AdaptiveTextField extends StatelessWidget {
 
   bool _isCupertino(BuildContext context) {
     final platform = Theme.of(context).platform;
-    return platform == TargetPlatform.iOS ||
-        platform == TargetPlatform.macOS;
+    return platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
   }
 
   @override
@@ -57,10 +56,7 @@ class AdaptiveTextField extends StatelessWidget {
               ),
         suffix: suffix == null
             ? null
-            : Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: suffix,
-              ),
+            : Padding(padding: const EdgeInsets.only(right: 8), child: suffix),
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         keyboardType: keyboardType,

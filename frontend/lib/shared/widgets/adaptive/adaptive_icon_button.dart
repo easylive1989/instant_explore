@@ -24,8 +24,7 @@ class AdaptiveIconButton extends StatelessWidget {
 
   bool _isCupertino(BuildContext context) {
     final platform = Theme.of(context).platform;
-    return platform == TargetPlatform.iOS ||
-        platform == TargetPlatform.macOS;
+    return platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
   }
 
   @override

@@ -47,8 +47,7 @@ class AdaptiveButton extends StatelessWidget {
 
   bool _isCupertino(BuildContext context) {
     final platform = Theme.of(context).platform;
-    return platform == TargetPlatform.iOS ||
-        platform == TargetPlatform.macOS;
+    return platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
   }
 
   @override
@@ -118,9 +117,7 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           minimumSize: minSize,
           child: DefaultTextStyle.merge(
-            style: TextStyle(
-              color: foregroundColor ?? CupertinoColors.white,
-            ),
+            style: TextStyle(color: foregroundColor ?? CupertinoColors.white),
             child: IconTheme.merge(
               data: IconThemeData(
                 color: foregroundColor ?? CupertinoColors.white,
@@ -133,7 +130,8 @@ class AdaptiveButton extends StatelessWidget {
         final outlineColor = foregroundColor ?? primary;
         return CupertinoButton(
           onPressed: onPressed,
-          padding: padding ??
+          padding:
+              padding ??
               const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           minimumSize: minSize,
           color: backgroundColor,

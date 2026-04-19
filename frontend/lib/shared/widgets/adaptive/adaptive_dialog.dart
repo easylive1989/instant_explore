@@ -51,7 +51,7 @@ Future<T?> showAdaptiveAlertDialog<T>({
           return CupertinoDialogAction(
             onPressed: handleTap,
             isDefaultAction: action.isDefault,
-            isDestructiveRole: action.isDestructive,
+            isDestructiveAction: action.isDestructive,
             child: Text(action.label),
           );
         }

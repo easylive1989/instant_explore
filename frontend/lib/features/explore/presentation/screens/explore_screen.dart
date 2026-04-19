@@ -148,8 +148,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           return PlaceCard(place: places[index]);
                         },
                       ),
-                loading: () =>
-                    const Center(child: AdaptiveProgressIndicator()),
+                loading: () => const Center(child: AdaptiveProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),

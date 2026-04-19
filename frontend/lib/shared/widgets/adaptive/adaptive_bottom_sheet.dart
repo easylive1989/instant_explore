@@ -29,10 +29,7 @@ Future<T?> showAdaptiveModalBottomSheet<T>({
                 top: Radius.circular(20),
               ),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: builder(ctx),
-            ),
+            child: Material(color: Colors.transparent, child: builder(ctx)),
           ),
         );
       },
