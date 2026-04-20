@@ -1,4 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/core/services/image_picker_service.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
@@ -27,8 +28,6 @@ class QuickGuideScreen extends ConsumerStatefulWidget {
 }
 
 class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
-  final ImagePicker _picker = ImagePicker();
-
   @override
   void dispose() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -78,22 +77,16 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
     final locale =
         EasyLocalization.of(context)?.locale.toLanguageTag() ?? 'zh-TW';
     try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-      if (image == null) return;
-
-      final bytes = await image.readAsBytes();
-      final mimeType = _mimeType(image.path);
+      final picked = await ref
+          .read(imagePickerServiceProvider)
+          .pickImage(source);
+      if (picked == null) return;
 
       await ref
           .read(quickGuideControllerProvider.notifier)
           .analyzeImage(
-            imageBytes: bytes,
-            mimeType: mimeType,
+            imageBytes: picked.bytes,
+            mimeType: picked.mimeType,
             language: locale,
           );
     } catch (e) {
@@ -107,22 +100,6 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
     return locale?.languageCode == 'zh'
         ? Language.traditionalChinese
         : Language.english;
-  }
-
-  String _mimeType(String path) {
-    switch (path.split('.').last.toLowerCase()) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
-    }
   }
 
   @override
