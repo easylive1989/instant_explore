@@ -5,9 +5,12 @@ import 'package:context_app/features/journey/presentation/widgets/timeline_entry
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
+import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/in_memory_journey_repository.dart';
 import '../../../../fakes/in_memory_quick_guide_repository.dart';
@@ -88,6 +91,151 @@ void main() {
         _thenOnlyNarrationEntriesRemain();
       },
     );
+
+    testWidgets(
+      'given mixed entries, when the user switches to the quick-guide filter, '
+      'then only quick-guide entries remain',
+      (tester) async {
+        final narration = buildJourneyEntry(id: 'n1');
+        final quick = buildQuickGuideEntry(id: 'q1');
+
+        await _givenJourneyScreen(
+          tester,
+          seededJourneys: [narration],
+          seededQuickGuides: [quick],
+        );
+
+        final chipFinder = find.text('passport.filter_quick_guide');
+        await tester.ensureVisible(chipFinder);
+        await tester.tap(chipFinder);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(QuickGuideTimelineEntry), findsOneWidget);
+        expect(find.byType(TimelineEntry), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given a non-matching filter is active, when the list has no results, '
+      'then the search-off icon and no-results copy are shown',
+      (tester) async {
+        final quick = buildQuickGuideEntry(id: 'q1');
+
+        await _givenJourneyScreen(tester, seededQuickGuides: [quick]);
+        await _whenUserTapsNarrationFilterChip(tester);
+
+        expect(find.byIcon(Icons.search_off), findsOneWidget);
+        expect(find.text('passport.no_results'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given the search field is open, when the user types a query, '
+      'then a clear-search suffix icon is revealed',
+      (tester) async {
+        await _givenJourneyScreen(tester);
+        await _whenUserTapsSearchToggle(tester);
+
+        await tester.enterText(find.byType(TextField), 'tokyo');
+        await tester.pump();
+
+        expect(find.byIcon(Icons.clear), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a typed search query, when the user taps the clear suffix, '
+      'then the search field empties and the suffix disappears',
+      (tester) async {
+        await _givenJourneyScreen(tester);
+        await _whenUserTapsSearchToggle(tester);
+
+        await tester.enterText(find.byType(TextField), 'tokyo');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.clear));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller?.text, isEmpty);
+        expect(find.byIcon(Icons.clear), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given search is open with text, when the user taps the close toggle, '
+      'then the search bar collapses and the query is cleared',
+      (tester) async {
+        final e1 = buildJourneyEntry(id: 'e1');
+
+        await _givenJourneyScreen(tester, seededJourneys: [e1]);
+        await _whenUserTapsSearchToggle(tester);
+        await tester.enterText(find.byType(TextField), 'xyz');
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(TextField), findsNothing);
+        // Entry re-appears because query was cleared on toggle-close.
+        expect(find.byType(TimelineEntry), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a currentTripId is set, when the screen renders, '
+      'then the current-trip banner shows the trip name',
+      (tester) async {
+        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
+
+        await _givenJourneyScreen(
+          tester,
+          seededTrips: [trip],
+          currentTripIdInitial: 't1',
+        );
+
+        expect(find.text('trip.current_badge'), findsOneWidget);
+        expect(find.text('Kyoto Trip'), findsOneWidget);
+        expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given the current-trip banner is visible, when the user taps End, '
+      'then the banner disappears',
+      (tester) async {
+        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
+
+        await _givenJourneyScreen(
+          tester,
+          seededTrips: [trip],
+          currentTripIdInitial: 't1',
+        );
+
+        await tester.tap(find.text('trip.end_current'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('trip.current_badge'), findsNothing);
+        expect(find.byIcon(Icons.flag_outlined), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given the by-trip view is active under a router, '
+      'when the user taps the add icon, '
+      'then the trip-edit route is pushed',
+      (tester) async {
+        await _givenJourneyScreenWithRouter(tester);
+
+        await tester.tap(find.text('passport.view_by_trip'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.add));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const ValueKey('edit-screen')), findsOneWidget);
+      },
+    );
   });
 }
 
@@ -96,6 +244,59 @@ Future<void> _givenJourneyScreen(
   List<JourneyEntry> seededJourneys = const [],
   List<Trip> seededTrips = const [],
   List<QuickGuideEntry> seededQuickGuides = const [],
+  String? currentTripIdInitial,
+}) async {
+  final overrides = await _buildJourneyOverrides(
+    seededJourneys: seededJourneys,
+    seededTrips: seededTrips,
+    seededQuickGuides: seededQuickGuides,
+    currentTripIdInitial: currentTripIdInitial,
+  );
+
+  await pumpScreen(
+    tester,
+    child: const JourneyScreen(),
+    overrides: overrides,
+  );
+  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump(const Duration(milliseconds: 20));
+}
+
+Future<void> _givenJourneyScreenWithRouter(
+  WidgetTester tester, {
+  List<JourneyEntry> seededJourneys = const [],
+  List<Trip> seededTrips = const [],
+  List<QuickGuideEntry> seededQuickGuides = const [],
+}) async {
+  final overrides = await _buildJourneyOverrides(
+    seededJourneys: seededJourneys,
+    seededTrips: seededTrips,
+    seededQuickGuides: seededQuickGuides,
+  );
+
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const JourneyScreen()),
+      GoRoute(
+        path: '/trip/edit',
+        builder: (_, __) => const Scaffold(
+          key: ValueKey('edit-screen'),
+          body: Text('edit'),
+        ),
+      ),
+    ],
+    overrides: overrides,
+  );
+  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump(const Duration(milliseconds: 20));
+}
+
+Future<List<Override>> _buildJourneyOverrides({
+  List<JourneyEntry> seededJourneys = const [],
+  List<Trip> seededTrips = const [],
+  List<QuickGuideEntry> seededQuickGuides = const [],
+  String? currentTripIdInitial,
 }) async {
   final journeyRepo = InMemoryJourneyRepository();
   for (final entry in seededJourneys) {
@@ -110,17 +311,24 @@ Future<void> _givenJourneyScreen(
     await tripRepo.save(trip);
   }
 
-  await pumpScreen(
-    tester,
-    child: const JourneyScreen(),
-    overrides: [
-      journeyRepositoryProvider.overrideWithValue(journeyRepo),
-      quickGuideRepositoryProvider.overrideWithValue(quickGuideRepo),
-      tripRepositoryProvider.overrideWithValue(tripRepo),
-    ],
-  );
-  await tester.pump(const Duration(milliseconds: 20));
-  await tester.pump(const Duration(milliseconds: 20));
+  return [
+    journeyRepositoryProvider.overrideWithValue(journeyRepo),
+    quickGuideRepositoryProvider.overrideWithValue(quickGuideRepo),
+    tripRepositoryProvider.overrideWithValue(tripRepo),
+    if (currentTripIdInitial != null)
+      currentTripIdProvider.overrideWith(
+        () => _StaticCurrentTripIdNotifier(currentTripIdInitial),
+      ),
+  ];
+}
+
+class _StaticCurrentTripIdNotifier extends CurrentTripIdNotifier {
+  _StaticCurrentTripIdNotifier(this._initial);
+
+  final String? _initial;
+
+  @override
+  String? build() => _initial;
 }
 
 Future<void> _whenUserTapsSearchToggle(WidgetTester tester) async {
