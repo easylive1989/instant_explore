@@ -5,7 +5,10 @@ import 'package:context_app/features/quick_guide/presentation/screens/quick_guid
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:context_app/features/usage/providers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../fakes/fake_image_picker_service.dart';
@@ -92,6 +95,88 @@ void main() {
         _thenPickerWasNotCalled(picker);
       },
     );
+
+    testWidgets(
+      'given the daily quota is exhausted, when the user taps take photo, '
+      'then the watch-ad dialog is shown',
+      (tester) async {
+        await _givenQuickGuideScreen(
+          tester,
+          usage: InMemoryUsageRepository(usedToday: 1, dailyFreeLimit: 1),
+        );
+
+        await _whenUserTapsTakePhoto(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('ads.quota_exceeded_title'), findsOneWidget);
+        expect(find.text('ads.watch_video'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given the AI service throws, when the user picks a gallery image, '
+      'then the error state replaces the selector',
+      (tester) async {
+        await _givenQuickGuideScreen(
+          tester,
+          ai: FakeQuickGuideAiService(error: Exception('boom')),
+        );
+
+        await _whenUserTapsFromGallery(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.error_outline), findsOneWidget);
+        expect(find.text('quick_guide.analysis_error'), findsOneWidget);
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given an error state is shown, when the controller resets, '
+      'then the source selector is restored',
+      (tester) async {
+        await _givenQuickGuideScreen(
+          tester,
+          ai: FakeQuickGuideAiService(error: Exception('boom')),
+        );
+
+        await _whenUserTapsFromGallery(tester);
+        await tester.pumpAndSettle();
+
+        // Invoke the retake callback through the provider notifier: the
+        // refresh GestureDetector is stacked over the image preview and
+        // can't be tapped reliably via the test surface's hit-testing.
+        final element = tester.element(find.byType(QuickGuideScreen));
+        final scope = ProviderScope.containerOf(element, listen: false);
+        scope.read(quickGuideControllerProvider.notifier).reset();
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.error_outline), findsNothing);
+        expect(find.text('quick_guide.instruction'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given AI succeeds under a router, when the user picks a gallery image, '
+      'then the player route is pushed with narration content',
+      (tester) async {
+        final extras = <Object?>[];
+
+        await _givenQuickGuideScreenWithRouter(
+          tester,
+          ai: FakeQuickGuideAiService(response: 'This is a friendly place.'),
+          onPlayerPush: extras.add,
+        );
+
+        await _whenUserTapsFromGallery(tester);
+        await tester.pumpAndSettle();
+
+        expect(extras, hasLength(1));
+        final extra = extras.single as Map<String, dynamic>;
+        expect(extra['narrationContent'], isNotNull);
+        expect(extra['autoPlay'], isTrue);
+      },
+    );
   });
 }
 
@@ -100,6 +185,7 @@ Future<void> _givenQuickGuideScreen(
   InMemoryUsageRepository? usage,
   RewardedAdService? rewardedAdService,
   FakeImagePickerService? picker,
+  FakeQuickGuideAiService? ai,
 }) async {
   // The screen pushes `/player` on successful analysis, so a fake AI service
   // that throws keeps the test focused on the picker interaction without
@@ -107,25 +193,71 @@ Future<void> _givenQuickGuideScreen(
   await pumpScreen(
     tester,
     child: const QuickGuideScreen(),
-    overrides: [
-      quickGuideRepositoryProvider.overrideWithValue(
-        InMemoryQuickGuideRepository(),
-      ),
-      quickGuideAiServiceProvider.overrideWithValue(
-        FakeQuickGuideAiService(error: Exception('stubbed ai failure')),
-      ),
-      tripRepositoryProvider.overrideWithValue(InMemoryTripRepository()),
-      usageRepositoryProvider.overrideWithValue(
-        usage ?? InMemoryUsageRepository(),
-      ),
-      rewardedAdServiceProvider.overrideWithValue(
-        rewardedAdService ?? FakeRewardedAdService(),
-      ),
-      imagePickerServiceProvider.overrideWithValue(
-        picker ?? FakeImagePickerService.withImage(),
+    overrides: _buildOverrides(
+      usage: usage,
+      rewardedAdService: rewardedAdService,
+      picker: picker,
+      ai: ai,
+    ),
+  );
+}
+
+Future<void> _givenQuickGuideScreenWithRouter(
+  WidgetTester tester, {
+  InMemoryUsageRepository? usage,
+  RewardedAdService? rewardedAdService,
+  FakeImagePickerService? picker,
+  FakeQuickGuideAiService? ai,
+  required void Function(Object? extra) onPlayerPush,
+}) async {
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const QuickGuideScreen()),
+      GoRoute(
+        path: '/player',
+        builder: (_, state) {
+          onPlayerPush(state.extra);
+          return const Scaffold(
+            key: Key('player-screen'),
+            body: SizedBox.shrink(),
+          );
+        },
       ),
     ],
+    overrides: _buildOverrides(
+      usage: usage,
+      rewardedAdService: rewardedAdService,
+      picker: picker,
+      ai: ai,
+    ),
   );
+}
+
+List<Override> _buildOverrides({
+  InMemoryUsageRepository? usage,
+  RewardedAdService? rewardedAdService,
+  FakeImagePickerService? picker,
+  FakeQuickGuideAiService? ai,
+}) {
+  return [
+    quickGuideRepositoryProvider.overrideWithValue(
+      InMemoryQuickGuideRepository(),
+    ),
+    quickGuideAiServiceProvider.overrideWithValue(
+      ai ?? FakeQuickGuideAiService(error: Exception('stubbed ai failure')),
+    ),
+    tripRepositoryProvider.overrideWithValue(InMemoryTripRepository()),
+    usageRepositoryProvider.overrideWithValue(
+      usage ?? InMemoryUsageRepository(),
+    ),
+    rewardedAdServiceProvider.overrideWithValue(
+      rewardedAdService ?? FakeRewardedAdService(),
+    ),
+    imagePickerServiceProvider.overrideWithValue(
+      picker ?? FakeImagePickerService.withImage(),
+    ),
+  ];
 }
 
 Future<void> _whenUserTapsTakePhoto(WidgetTester tester) async {
