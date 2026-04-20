@@ -1,4 +1,5 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/core/services/image_picker_service.dart';
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/camera/presentation/controllers/camera_controller.dart';
 import 'package:context_app/features/camera/presentation/widgets/analysis_result_card.dart';
@@ -21,7 +22,6 @@ class CameraScreen extends ConsumerStatefulWidget {
 }
 
 class _CameraScreenState extends ConsumerState<CameraScreen> {
-  final ImagePicker _picker = ImagePicker();
   Uint8List? _displayImage;
 
   @override
@@ -35,25 +35,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
+      final picked = await ref
+          .read(imagePickerServiceProvider)
+          .pickImage(source);
 
-      if (image == null) return;
-
-      final bytes = await image.readAsBytes();
-      final mimeType = _getMimeType(image.path);
+      if (picked == null) return;
 
       setState(() {
-        _displayImage = bytes;
+        _displayImage = picked.bytes;
       });
 
       // 設定圖片並開始分析
-      ref.read(cameraControllerProvider.notifier).setImage(bytes);
-      await _analyzeImage(bytes, mimeType);
+      ref.read(cameraControllerProvider.notifier).setImage(picked.bytes);
+      await _analyzeImage(picked.bytes, picked.mimeType);
     } catch (e) {
       debugPrint('Error picking image: $e');
       ref.read(cameraControllerProvider.notifier).setError(e.toString());
@@ -80,23 +74,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     } catch (e) {
       debugPrint('Error analyzing image: $e');
       controller.setError('camera.analysis_error'.tr());
-    }
-  }
-
-  String _getMimeType(String path) {
-    final extension = path.split('.').last.toLowerCase();
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
     }
   }
 
