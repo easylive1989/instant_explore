@@ -16,6 +16,20 @@ Future<void> initTestEnvironment() async {
   await EasyLocalization.ensureInitialized();
 }
 
+/// AssetLoader that returns no translations so `tr()` always returns the key.
+///
+/// Keeping translations out of the tests lets assertions match the raw
+/// i18n key, which is both deterministic and locale-independent.
+class _EmptyAssetLoader extends AssetLoader {
+  const _EmptyAssetLoader();
+
+  @override
+  Future<Map<String, dynamic>?> load(String path, Locale locale) async =>
+      <String, dynamic>{};
+}
+
+const _kEmptyAssetLoader = _EmptyAssetLoader();
+
 /// Pumps [child] inside a minimal app host with [EasyLocalization],
 /// [ProviderScope] and a [MaterialApp] wrapper.
 ///
@@ -24,12 +38,15 @@ Future<void> pumpScreen(
   WidgetTester tester, {
   required Widget child,
   List<Override> overrides = const [],
+  Locale locale = const Locale('zh', 'TW'),
 }) async {
   await tester.pumpWidget(
     EasyLocalization(
       supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
       path: 'assets/translations',
-      fallbackLocale: const Locale('zh', 'TW'),
+      fallbackLocale: locale,
+      startLocale: locale,
+      assetLoader: _kEmptyAssetLoader,
       useOnlyLangCode: false,
       child: ProviderScope(
         overrides: overrides,
@@ -44,8 +61,7 @@ Future<void> pumpScreen(
       ),
     ),
   );
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  await _settleBoot(tester);
 }
 
 /// Pumps a GoRouter-driven app for screens that rely on routing.
@@ -58,6 +74,7 @@ Future<void> pumpRouterApp(
   String initialLocation = '/',
   Object? initialExtra,
   List<Override> overrides = const [],
+  Locale locale = const Locale('zh', 'TW'),
 }) async {
   final router = GoRouter(
     initialLocation: initialLocation,
@@ -69,7 +86,9 @@ Future<void> pumpRouterApp(
     EasyLocalization(
       supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
       path: 'assets/translations',
-      fallbackLocale: const Locale('zh', 'TW'),
+      fallbackLocale: locale,
+      startLocale: locale,
+      assetLoader: _kEmptyAssetLoader,
       useOnlyLangCode: false,
       child: ProviderScope(
         overrides: overrides,
@@ -84,6 +103,13 @@ Future<void> pumpRouterApp(
       ),
     ),
   );
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  await _settleBoot(tester);
+}
+
+/// Pumps enough frames for [EasyLocalization] to finish its async
+/// bootstrap and for first-frame post-callbacks to run.
+Future<void> _settleBoot(WidgetTester tester) async {
+  for (var i = 0; i < 3; i += 1) {
+    await tester.pump(const Duration(milliseconds: 10));
+  }
 }
