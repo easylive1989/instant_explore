@@ -4,7 +4,6 @@ import 'package:context_app/features/narration/presentation/screens/narration_sc
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fakes/fake_tts_service.dart';

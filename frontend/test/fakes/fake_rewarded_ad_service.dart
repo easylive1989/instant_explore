@@ -3,7 +3,7 @@ import 'package:context_app/features/ads/domain/services/rewarded_ad_service.dar
 /// Fake [RewardedAdService] that records interactions without touching ads.
 class FakeRewardedAdService implements RewardedAdService {
   bool _isReady;
-  bool _watchOutcome;
+  final bool _watchOutcome;
   int loadCount = 0;
   int showCount = 0;
 
