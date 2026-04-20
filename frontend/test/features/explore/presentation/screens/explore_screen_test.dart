@@ -2,7 +2,9 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/fake_location_service.dart';
 import '../../../../fakes/fake_places_repository.dart';
@@ -60,12 +62,162 @@ void main() {
         _thenPlaceNamesAreHidden(['Obscure']);
       },
     );
+
+    testWidgets(
+      'given the user types in the search box and submits, '
+      'when the repository returns search results, '
+      'then the result list replaces the nearby places',
+      (tester) async {
+        final repo = FakePlacesRepository(
+          nearbyPlaces: [buildPlace(id: 'p1', name: 'Nearby Place')],
+          searchResults: [buildPlace(id: 's1', name: 'Searched Place')],
+        );
+
+        await _givenExploreScreen(tester, repo: repo);
+
+        await tester.enterText(find.byType(TextField), 'searched');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump(const Duration(milliseconds: 20));
+        await tester.pump(const Duration(milliseconds: 20));
+
+        expect(find.text('Searched Place'), findsOneWidget);
+        expect(find.text('Nearby Place'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given a submitted search term, when the user taps the clear icon, '
+      'then the controller is cleared and nearby places are restored',
+      (tester) async {
+        final repo = FakePlacesRepository(
+          nearbyPlaces: [buildPlace(id: 'p1', name: 'Nearby Place')],
+          searchResults: [buildPlace(id: 's1', name: 'Searched Place')],
+        );
+
+        await _givenExploreScreen(tester, repo: repo);
+
+        // The clear icon only appears after the search field is actually
+        // used — submit once so the suffix rebuilds into a clear button.
+        await tester.enterText(find.byType(TextField), 'xyz');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump(const Duration(milliseconds: 20));
+        await tester.pump(const Duration(milliseconds: 20));
+
+        await tester.tap(find.byIcon(Icons.clear));
+        await tester.pump(const Duration(milliseconds: 20));
+        await tester.pump(const Duration(milliseconds: 20));
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller?.text, isEmpty);
+        expect(find.text('Nearby Place'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given places are on screen, when the user taps refresh, '
+      'then the nearby-places use case is invoked again',
+      (tester) async {
+        final repo = FakePlacesRepository(
+          nearbyPlaces: [buildPlace(id: 'p1', name: 'Nearby')],
+        );
+
+        await _givenExploreScreen(tester, repo: repo);
+        final before = repo.nearbyCallCount;
+
+        await tester.tap(find.byIcon(Icons.refresh));
+        await tester.pump(const Duration(milliseconds: 20));
+        await tester.pump(const Duration(milliseconds: 20));
+
+        expect(repo.nearbyCallCount, greaterThan(before));
+      },
+    );
+
+    testWidgets(
+      'given the filter is at its default value, when the screen renders, '
+      'then the filter badge is hidden',
+      (tester) async {
+        await _givenExploreScreen(tester, minReviewCount: 100);
+
+        final badge = tester.widget<Badge>(find.byType(Badge).first);
+        expect(badge.isLabelVisible, isFalse);
+      },
+    );
+
+    testWidgets(
+      'given a non-default minReviewCount, when the screen renders, '
+      'then the filter badge is visible',
+      (tester) async {
+        await _givenExploreScreen(tester, minReviewCount: 500);
+
+        final badge = tester.widget<Badge>(find.byType(Badge).first);
+        expect(badge.isLabelVisible, isTrue);
+      },
+    );
+
+    testWidgets(
+      'given the filter button is present, when the user taps it, '
+      'then the filter panel bottom sheet is shown',
+      (tester) async {
+        await _givenExploreScreen(tester);
+
+        await tester.tap(find.byIcon(Icons.tune));
+        await tester.pumpAndSettle();
+
+        expect(find.text('explore.filter.title'), findsOneWidget);
+        expect(find.text('explore.filter.min_reviews'), findsOneWidget);
+        expect(find.text('explore.filter.reset'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given an unsaved place card, when the user taps the bookmark icon, '
+      'then the card shows the filled bookmark and the repo records the save',
+      (tester) async {
+        final savedRepo = InMemorySavedLocationsRepository();
+
+        await _givenExploreScreen(
+          tester,
+          places: [buildPlace(id: 'p1', name: 'Senso-ji')],
+          savedRepo: savedRepo,
+        );
+
+        expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.bookmark_border));
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.bookmark), findsAtLeastNWidgets(1));
+        expect(await savedRepo.isSaved('p1'), isTrue);
+      },
+    );
+
+    testWidgets(
+      'given a place card under a router, when the card is tapped, '
+      'then the config route is pushed with the place as extra',
+      (tester) async {
+        final extras = <Object?>[];
+
+        await _givenExploreScreenWithRouter(
+          tester,
+          places: [buildPlace(id: 'p1', name: 'Senso-ji')],
+          onConfigPush: extras.add,
+        );
+
+        await tester.tap(find.text('Senso-ji'));
+        await tester.pumpAndSettle();
+
+        expect(extras.single, isA<Place>());
+        expect((extras.single as Place).id, equals('p1'));
+      },
+    );
   });
 }
 
 Future<void> _givenExploreScreen(
   WidgetTester tester, {
   List<Place> places = const [],
+  FakePlacesRepository? repo,
+  InMemorySavedLocationsRepository? savedRepo,
   int minReviewCount = 0,
 }) async {
   await pumpScreen(
@@ -74,15 +226,52 @@ Future<void> _givenExploreScreen(
     overrides: [
       locationServiceProvider.overrideWithValue(FakeLocationService()),
       placesRepositoryProvider.overrideWithValue(
-        FakePlacesRepository(nearbyPlaces: places),
+        repo ?? FakePlacesRepository(nearbyPlaces: places),
       ),
       savedLocationsRepositoryProvider.overrideWithValue(
-        InMemorySavedLocationsRepository(),
+        savedRepo ?? InMemorySavedLocationsRepository(),
       ),
       minReviewCountProvider.overrideWith((ref) => minReviewCount),
     ],
   );
   // Let async searchNearby + filtered places provider resolve.
+  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump(const Duration(milliseconds: 20));
+}
+
+Future<void> _givenExploreScreenWithRouter(
+  WidgetTester tester, {
+  List<Place> places = const [],
+  required void Function(Object? extra) onConfigPush,
+}) async {
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const ExploreScreen()),
+      GoRoute(
+        name: 'config',
+        path: '/config',
+        builder: (_, state) {
+          onConfigPush(state.extra);
+          return const Scaffold(
+            key: Key('config-screen'),
+            body: SizedBox.shrink(),
+          );
+        },
+      ),
+    ],
+    overrides: [
+      locationServiceProvider.overrideWithValue(FakeLocationService()),
+      placesRepositoryProvider.overrideWithValue(
+        FakePlacesRepository(nearbyPlaces: places),
+      ),
+      savedLocationsRepositoryProvider.overrideWithValue(
+        InMemorySavedLocationsRepository(),
+      ),
+      minReviewCountProvider.overrideWith((ref) => 0),
+    ],
+  );
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));

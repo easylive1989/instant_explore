@@ -8,6 +8,13 @@ class FakePlacesRepository implements PlacesRepository {
   List<Place> nearbyPlaces;
   List<Place> searchResults;
 
+  /// Number of [getNearbyPlaces] invocations — useful for asserting refresh.
+  int nearbyCallCount = 0;
+
+  /// Number of [searchPlaces] invocations and the last query received.
+  int searchCallCount = 0;
+  String? lastSearchQuery;
+
   FakePlacesRepository({
     this.nearbyPlaces = const [],
     this.searchResults = const [],
@@ -19,6 +26,7 @@ class FakePlacesRepository implements PlacesRepository {
     required Language language,
     required double radius,
   }) async {
+    nearbyCallCount += 1;
     return nearbyPlaces;
   }
 
@@ -27,6 +35,8 @@ class FakePlacesRepository implements PlacesRepository {
     String query, {
     required Language language,
   }) async {
+    searchCallCount += 1;
+    lastSearchQuery = query;
     return searchResults;
   }
 
