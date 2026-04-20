@@ -6,6 +6,7 @@ import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../fakes/fake_image_analysis_service.dart';
@@ -90,6 +91,96 @@ void main() {
         _thenImageSourceButtonsAreVisible();
       },
     );
+
+    testWidgets(
+      'given analysis has succeeded, when the screen rebuilds, '
+      'then the retake icon is exposed in the app bar',
+      (tester) async {
+        await _givenCameraScreen(tester);
+        await _whenUserTapsFromGallery(tester);
+        await _whenAnalysisCompletes(tester);
+
+        expect(find.byIcon(Icons.refresh), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given analysis has succeeded, when the user taps retake, '
+      'then the source selector is shown again and the result card is gone',
+      (tester) async {
+        await _givenCameraScreen(tester);
+        await _whenUserTapsFromGallery(tester);
+        await _whenAnalysisCompletes(tester);
+
+        await _whenUserTapsRetake(tester);
+
+        _thenImageSourceButtonsAreVisible();
+        expect(find.byType(AnalysisResultCard), findsNothing);
+        expect(find.byIcon(Icons.refresh), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given the analyzer throws, when the user picks from gallery, '
+      'then the error icon, message and retry button are shown',
+      (tester) async {
+        final analyzer = FakeImageAnalysisService(
+          error: Exception('network down'),
+        );
+
+        await _givenCameraScreen(tester, analyzer: analyzer);
+        await _whenUserTapsFromGallery(tester);
+        await _whenAnalysisCompletes(tester);
+
+        expect(find.byIcon(Icons.error_outline), findsOneWidget);
+        expect(find.text('camera.analysis_error'), findsOneWidget);
+        expect(find.text('camera.retry'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given an analysis error is on screen, when the user taps retry, '
+      'then the image source selector is restored',
+      (tester) async {
+        final analyzer = FakeImageAnalysisService(
+          error: Exception('network down'),
+        );
+
+        await _givenCameraScreen(tester, analyzer: analyzer);
+        await _whenUserTapsFromGallery(tester);
+        await _whenAnalysisCompletes(tester);
+
+        await tester.tap(find.text('camera.retry'));
+        await tester.pumpAndSettle();
+
+        _thenImageSourceButtonsAreVisible();
+        expect(find.byIcon(Icons.error_outline), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given analysis has succeeded under a router, '
+      'when the user taps start narration, '
+      'then the config route is pushed with the place and image bytes',
+      (tester) async {
+        final navigatedExtras = <Object?>[];
+
+        await _givenCameraScreenWithRouter(
+          tester,
+          onConfigPush: navigatedExtras.add,
+        );
+        await _whenUserTapsFromGallery(tester);
+        await _whenAnalysisCompletes(tester);
+
+        await tester.tap(find.text('camera.start_narration'));
+        await tester.pumpAndSettle();
+
+        expect(navigatedExtras, hasLength(1));
+        final extra = navigatedExtras.single as Map<String, dynamic>;
+        expect(extra['place'], isNotNull);
+        expect(extra['capturedImageBytes'], isNotNull);
+      },
+    );
   });
 }
 
@@ -127,6 +218,44 @@ Future<void> _whenUserTapsFromGallery(WidgetTester tester) async {
 Future<void> _whenAnalysisCompletes(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 50));
+}
+
+Future<void> _whenUserTapsRetake(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.refresh));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _givenCameraScreenWithRouter(
+  WidgetTester tester, {
+  required void Function(Object? extra) onConfigPush,
+  FakeImagePickerService? picker,
+  FakeImageAnalysisService? analyzer,
+}) async {
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const CameraScreen()),
+      GoRoute(
+        name: 'config',
+        path: '/config',
+        builder: (_, state) {
+          onConfigPush(state.extra);
+          return const Scaffold(
+            key: Key('config-screen'),
+            body: SizedBox.shrink(),
+          );
+        },
+      ),
+    ],
+    overrides: [
+      imageAnalysisServiceProvider.overrideWithValue(
+        analyzer ?? FakeImageAnalysisService(),
+      ),
+      imagePickerServiceProvider.overrideWithValue(
+        picker ?? FakeImagePickerService.withImage(),
+      ),
+    ],
+  );
 }
 
 void _thenInstructionCopyIsVisible() {
