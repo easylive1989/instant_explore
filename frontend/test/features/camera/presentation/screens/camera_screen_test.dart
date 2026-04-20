@@ -20,31 +20,13 @@ void main() {
   group('CameraScreen', () {
     testWidgets(
       'given no captured image, when the screen loads, '
-      'then the instruction text and source buttons are rendered',
+      'then the initial layout and app bar are rendered correctly',
       (tester) async {
         await _givenCameraScreen(tester);
 
         _thenInstructionCopyIsVisible();
         _thenImageSourceButtonsAreVisible();
-      },
-    );
-
-    testWidgets(
-      'given no captured image, when the screen loads, '
-      'then the retake icon is hidden from the app bar',
-      (tester) async {
-        await _givenCameraScreen(tester);
-
         _thenRetakeIconIsHidden();
-      },
-    );
-
-    testWidgets(
-      'given no captured image, when the screen loads, '
-      'then the app bar back button is visible',
-      (tester) async {
-        await _givenCameraScreen(tester);
-
         _thenBackNavigationIsAvailable();
       },
     );

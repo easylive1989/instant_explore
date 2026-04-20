@@ -24,20 +24,11 @@ void main() {
   group('QuickGuideScreen', () {
     testWidgets(
       'given no picked image, when the screen loads, '
-      'then the large title and instruction copy are visible',
+      'then the title, instructions, and source buttons are visible',
       (tester) async {
         await _givenQuickGuideScreen(tester);
 
         _thenTitleAndInstructionsAreVisible();
-      },
-    );
-
-    testWidgets(
-      'given no picked image, when the screen loads, '
-      'then the take-photo and gallery buttons are visible',
-      (tester) async {
-        await _givenQuickGuideScreen(tester);
-
         _thenImageSourceButtonsAreVisible();
       },
     );

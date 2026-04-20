@@ -104,7 +104,7 @@ PlayerController _makeController({_FakeTtsService? ttsService}) {
 
 void main() {
   group('PlayerController.initializeWithContent', () {
-    test('初始化後狀態為 ready', () async {
+    test('初始化後狀態為 ready，包含正確的內容、地點且 aspect 為 null', () async {
       final controller = _makeController();
 
       final content = NarrationContent.create(
@@ -115,32 +115,8 @@ void main() {
       await controller.initializeWithContent(_testPlace, content);
 
       expect(controller.state.isReady, isTrue);
-    });
-
-    test('狀態包含正確的內容和地點', () async {
-      final controller = _makeController();
-
-      final content = NarrationContent.create(
-        _testNarrationText,
-        language: Language.traditionalChinese,
-      );
-
-      await controller.initializeWithContent(_testPlace, content);
-
       expect(controller.state.content, equals(content));
       expect(controller.state.place, equals(_testPlace));
-    });
-
-    test('aspect 為 null（播放模式不帶面向）', () async {
-      final controller = _makeController();
-
-      final content = NarrationContent.create(
-        _testNarrationText,
-        language: Language.traditionalChinese,
-      );
-
-      await controller.initializeWithContent(_testPlace, content);
-
       expect(controller.state.aspect, isNull);
     });
 
