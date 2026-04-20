@@ -184,6 +184,55 @@ void main() {
 
     testWidgets(
       'given a router, when generation succeeds, '
+      'then the journey repository receives an auto-saved entry',
+      (tester) async {
+        final journeyRepo = InMemoryJourneyRepository();
+
+        await pumpRouterApp(
+          tester,
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, __) =>
+                  SelectNarrationAspectScreen(place: buildPlace()),
+            ),
+            GoRoute(
+              name: 'player',
+              path: '/player',
+              builder: (_, __) => const Scaffold(
+                key: Key('player-screen'),
+                body: SizedBox.shrink(),
+              ),
+            ),
+          ],
+          overrides: [
+            narrationServiceProvider.overrideWithValue(FakeNarrationService()),
+            journeyRepositoryProvider.overrideWithValue(journeyRepo),
+            usageRepositoryProvider.overrideWithValue(InMemoryUsageRepository()),
+            rewardedAdServiceProvider.overrideWithValue(
+              FakeRewardedAdService(),
+            ),
+            narrationAspectsProvider.overrideWith(
+              (ref) => const {NarrationAspect.historicalBackground},
+            ),
+          ],
+        );
+        await tester.pump(const Duration(milliseconds: 20));
+
+        await tester.tap(find.text('config_screen.start_button'));
+        await tester.pumpAndSettle();
+
+        final saved = await journeyRepo.getAll();
+        expect(saved, hasLength(1));
+        expect(
+          saved.single.narrationAspects,
+          contains(NarrationAspect.historicalBackground),
+        );
+      },
+    );
+
+    testWidgets(
+      'given a router, when generation succeeds, '
       'then the player route is pushed with place and narration content',
       (tester) async {
         final extras = <Object?>[];

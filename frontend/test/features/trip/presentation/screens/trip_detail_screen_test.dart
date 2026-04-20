@@ -311,6 +311,31 @@ void main() {
     );
 
     testWidgets(
+      'given the trip is not current, when the user taps set-as-current, '
+      'then the menu label flips to end-current on next open',
+      (tester) async {
+        final trip = buildTrip(id: 'kyoto', name: 'Kyoto');
+
+        await _givenTripDetailScreen(
+          tester,
+          tripId: 'kyoto',
+          seededTrips: [trip],
+        );
+
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('trip.set_as_current'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+
+        expect(find.text('trip.end_current'), findsOneWidget);
+        expect(find.text('trip.set_as_current'), findsNothing);
+      },
+    );
+
+    testWidgets(
       'given selection mode is active, when the user taps move selected, '
       'then the move-to-trip sheet is shown',
       (tester) async {

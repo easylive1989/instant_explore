@@ -1,5 +1,6 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
@@ -217,6 +218,24 @@ void main() {
 
         expect(find.text('trip.current_badge'), findsNothing);
         expect(find.byIcon(Icons.flag_outlined), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given SharedPreferences has a saved current trip id, '
+      'when the screen loads without an override, '
+      'then the current-trip banner is hydrated from storage',
+      (tester) async {
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'current_trip_id': 't1',
+        });
+        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
+
+        await _givenJourneyScreen(tester, seededTrips: [trip]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('trip.current_badge'), findsOneWidget);
+        expect(find.text('Kyoto Trip'), findsOneWidget);
       },
     );
 
