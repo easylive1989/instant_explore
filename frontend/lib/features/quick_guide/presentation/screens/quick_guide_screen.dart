@@ -28,10 +28,21 @@ class QuickGuideScreen extends ConsumerStatefulWidget {
 }
 
 class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
+  late final QuickGuideController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(quickGuideControllerProvider.notifier);
+  }
+
   @override
   void dispose() {
+    final controller = _controller;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(quickGuideControllerProvider.notifier).reset();
+      if (controller.mounted) {
+        controller.reset();
+      }
     });
     super.dispose();
   }
@@ -279,6 +290,7 @@ class _CaptureResultView extends StatelessWidget {
                     guideState.imageBytes!,
                     fit: BoxFit.cover,
                     width: double.infinity,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),

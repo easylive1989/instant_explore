@@ -23,12 +23,21 @@ class CameraScreen extends ConsumerStatefulWidget {
 
 class _CameraScreenState extends ConsumerState<CameraScreen> {
   Uint8List? _displayImage;
+  late final CameraController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(cameraControllerProvider.notifier);
+  }
 
   @override
   void dispose() {
-    // 離開畫面時重置狀態
+    final controller = _controller;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(cameraControllerProvider.notifier).reset();
+      if (controller.mounted) {
+        controller.reset();
+      }
     });
     super.dispose();
   }
@@ -150,6 +159,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                 _displayImage!,
                 fit: BoxFit.cover,
                 width: double.infinity,
+                errorBuilder: (_, __, ___) =>
+                    const SizedBox.shrink(key: Key('camera.image_error')),
               ),
             ),
           ),

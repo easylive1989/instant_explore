@@ -384,7 +384,8 @@ class _FilterChips extends ConsumerWidget {
     final currentFilter = ref.watch(journeyFilterProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
       child: Row(
         children: [

@@ -5,7 +5,6 @@ import 'package:context_app/features/quick_guide/presentation/screens/quick_guid
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:context_app/features/usage/providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -111,6 +110,9 @@ Future<void> _givenQuickGuideScreen(
   RewardedAdService? rewardedAdService,
   FakeImagePickerService? picker,
 }) async {
+  // The screen pushes `/player` on successful analysis, so a fake AI service
+  // that throws keeps the test focused on the picker interaction without
+  // requiring a full router scaffold.
   await pumpScreen(
     tester,
     child: const QuickGuideScreen(),
@@ -118,7 +120,9 @@ Future<void> _givenQuickGuideScreen(
       quickGuideRepositoryProvider.overrideWithValue(
         InMemoryQuickGuideRepository(),
       ),
-      quickGuideAiServiceProvider.overrideWithValue(FakeQuickGuideAiService()),
+      quickGuideAiServiceProvider.overrideWithValue(
+        FakeQuickGuideAiService(error: Exception('stubbed ai failure')),
+      ),
       tripRepositoryProvider.overrideWithValue(InMemoryTripRepository()),
       usageRepositoryProvider.overrideWithValue(
         usage ?? InMemoryUsageRepository(),

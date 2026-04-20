@@ -6,7 +6,6 @@ import 'package:context_app/features/narration/presentation/screens/select_narra
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fakes/fake_narration_service.dart';
@@ -65,12 +64,12 @@ void main() {
 
 Future<void> _givenSelectNarrationAspectScreen(
   WidgetTester tester, {
-  required Place place,
+  Place? place,
   Set<NarrationAspect>? aspects,
 }) async {
   await pumpScreen(
     tester,
-    child: SelectNarrationAspectScreen(place: place),
+    child: SelectNarrationAspectScreen(place: place ?? buildPlace()),
     overrides: [
       narrationServiceProvider.overrideWithValue(FakeNarrationService()),
       journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),

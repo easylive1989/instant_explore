@@ -5,7 +5,6 @@ import 'package:context_app/features/camera/presentation/widgets/analysis_result
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 

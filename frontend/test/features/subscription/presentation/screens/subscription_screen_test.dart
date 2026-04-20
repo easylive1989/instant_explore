@@ -110,14 +110,12 @@ Future<void> _givenSubscriptionScreenOnRoute(
 
 Future<void> _whenUserTapsSubscribe(WidgetTester tester) async {
   await tester.tap(find.text('subscription.subscribe'));
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _whenUserTapsRestore(WidgetTester tester) async {
   await tester.tap(find.text('subscription.restore'));
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
 }
 
 void _thenBenefitsAreVisible() {

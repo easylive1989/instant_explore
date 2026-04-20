@@ -1,4 +1,3 @@
-import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:flutter/material.dart';
@@ -128,8 +127,7 @@ Future<void> _whenUserEntersTripName(
 
 Future<void> _whenUserTapsSave(WidgetTester tester) async {
   await tester.tap(find.text('trip.create_action'));
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
 }
 
 void _thenCreateTitleIsVisible() {
@@ -149,7 +147,7 @@ Future<void> _thenTripIsPersistedWithName(
   String expectedName,
 ) async {
   final trips = await repo.getAll();
-  final names = trips.map((Trip t) => t.name).toList();
+  final names = trips.map((t) => t.name).toList();
   expect(names, contains(expectedName));
 }
 

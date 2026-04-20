@@ -4,6 +4,7 @@ import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/main_screen.dart';
 import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
+import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:context_app/features/subscription/providers.dart';

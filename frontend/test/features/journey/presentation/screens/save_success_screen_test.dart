@@ -126,8 +126,7 @@ Future<void> _whenUserTapsViewPassport(WidgetTester tester) async {
 
 Future<void> _whenUserTapsContinueTour(WidgetTester tester) async {
   await tester.tap(find.text('passport.continue_tour'));
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _whenHostLaunchesSuccessScreen(

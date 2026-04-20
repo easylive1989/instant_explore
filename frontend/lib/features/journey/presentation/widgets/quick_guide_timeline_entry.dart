@@ -269,6 +269,7 @@ class _QuickGuideTimelineEntryState
                       child: Image.memory(
                         widget.entry.imageBytes,
                         fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                       ),
                     ),
                   ],
