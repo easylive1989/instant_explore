@@ -120,12 +120,14 @@ void _thenPrimaryActionsAreVisible() {
 
 Future<void> _whenUserTapsViewPassport(WidgetTester tester) async {
   await tester.tap(find.text('passport.view_button'));
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _whenUserTapsContinueTour(WidgetTester tester) async {
   await tester.tap(find.text('passport.continue_tour'));
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _whenHostLaunchesSuccessScreen(
@@ -134,7 +136,8 @@ Future<void> _whenHostLaunchesSuccessScreen(
 ) async {
   final BuildContext context = tester.element(find.byType(_HostLauncher));
   GoRouter.of(context).push('/success', extra: place);
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 class _HostLauncher extends StatelessWidget {

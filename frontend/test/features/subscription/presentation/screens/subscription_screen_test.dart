@@ -104,22 +104,20 @@ Future<void> _givenSubscriptionScreenOnRoute(
   );
   final context = tester.element(find.byType(_Host));
   GoRouter.of(context).push('/subscription');
-  await tester.pump(const Duration(milliseconds: 20));
-  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _whenUserTapsSubscribe(WidgetTester tester) async {
   await tester.tap(find.text('subscription.subscribe'));
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 50));
-  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _whenUserTapsRestore(WidgetTester tester) async {
   await tester.tap(find.text('subscription.restore'));
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 50));
-  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 void _thenBenefitsAreVisible() {

@@ -131,8 +131,9 @@ Future<void> _givenTripListScreenWithRouter(WidgetTester tester) async {
 
 Future<void> _whenUserTapsAddTripButton(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.add));
-  await tester.pump(const Duration(milliseconds: 50));
-  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump();
+  // Allow the push transition to complete.
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 void _thenTripNamesAreVisible(List<String> names) {

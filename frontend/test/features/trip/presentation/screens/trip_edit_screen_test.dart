@@ -113,8 +113,9 @@ Future<void> _givenCreateScreenWithRouter(
   await tester.pump(const Duration(milliseconds: 10));
   final context = tester.element(find.byType(_Host));
   GoRouter.of(context).push('/trip/edit');
-  await tester.pump(const Duration(milliseconds: 20));
-  await tester.pump(const Duration(milliseconds: 20));
+  // Allow the push transition to complete.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _whenUserEntersTripName(
@@ -127,8 +128,8 @@ Future<void> _whenUserEntersTripName(
 
 Future<void> _whenUserTapsSave(WidgetTester tester) async {
   await tester.tap(find.text('trip.create_action'));
-  await tester.pump(const Duration(milliseconds: 20));
-  await tester.pump(const Duration(milliseconds: 20));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 void _thenCreateTitleIsVisible() {
