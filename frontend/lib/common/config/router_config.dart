@@ -10,6 +10,8 @@ import 'package:context_app/features/narration/presentation/screens/narration_sc
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
+import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
+import 'package:context_app/features/onboarding/presentation/screens/onboarding_welcome_screen.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.dart';
@@ -21,6 +23,26 @@ class RouterConfig {
   static GoRouter createRouter(Ref ref) {
     return GoRouter(
       initialLocation: '/',
+      refreshListenable: _OnboardingListenable(ref),
+      redirect: (context, state) {
+        // Send first-run users through the welcome carousel. Other flows
+        // (deep links via `/player`, `/camera`, etc.) are left untouched
+        // so that an authenticated returning user is never interrupted.
+        final onboarding = ref.read(onboardingControllerProvider);
+        // While SharedPreferences is still loading, skip the redirect so
+        // returning users don't see `/onboarding` flash on cold start.
+        if (!onboarding.hasLoaded) return null;
+        final atOnboarding = state.matchedLocation == '/onboarding';
+        if (!onboarding.welcomeDone &&
+            !atOnboarding &&
+            state.matchedLocation == '/') {
+          return '/onboarding';
+        }
+        if (onboarding.welcomeDone && atOnboarding) {
+          return '/';
+        }
+        return null;
+      },
       routes: [
         GoRoute(
           path: '/',
@@ -30,6 +52,11 @@ class RouterConfig {
             final index = tab == 'passport' ? 2 : 0;
             return MainScreen(initialIndex: index);
           },
+        ),
+        GoRoute(
+          path: '/onboarding',
+          name: 'onboarding',
+          builder: (context, state) => const OnboardingWelcomeScreen(),
         ),
         GoRoute(
           path: '/config',
@@ -148,3 +175,28 @@ class RouterConfig {
 final routerProvider = Provider<GoRouter>((ref) {
   return RouterConfig.createRouter(ref);
 });
+
+/// Notifies [GoRouter] to re-evaluate redirects whenever onboarding
+/// completes or is reset.
+///
+/// A ChangeNotifier is the contract GoRouter expects for
+/// `refreshListenable`; we forward Riverpod state changes into it.
+class _OnboardingListenable extends ChangeNotifier {
+  _OnboardingListenable(Ref ref) {
+    // Listen to the full state so the router also refreshes when
+    // `hasLoaded` flips from false to true on cold start.
+    _sub = ref.listen(
+      onboardingControllerProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: false,
+    );
+  }
+
+  late final ProviderSubscription _sub;
+
+  @override
+  void dispose() {
+    _sub.close();
+    super.dispose();
+  }
+}

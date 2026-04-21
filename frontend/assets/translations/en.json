@@ -313,5 +313,44 @@
     "visited": "Visited",
     "explore_more": "Explore More",
     "share_text": "I explored this place with Contexture"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "get_started": "Get Started",
+    "try_sample": "Try a sample guide",
+    "try_sample_hint": "A full voice tour of Fushimi Inari Taisha — works offline.",
+    "welcome": {
+      "title": "Welcome to Contexture",
+      "body": "Your AI pocket historian — giving every stop along the way real meaning."
+    },
+    "quick_guide": {
+      "title": "Snap it. Understand it.",
+      "body": "Spot something interesting? Take a photo and let the AI tell you its story."
+    },
+    "explore": {
+      "title": "Find hidden history nearby",
+      "body": "Open the map, discover historical places around you, and start a voice tour with a single tap."
+    },
+    "journey": {
+      "title": "A cultural passport, written for you",
+      "body": "Every tour and question becomes part of your own personal knowledge passport."
+    },
+    "tips": {
+      "home_title": "Start here",
+      "home_body": "Tap anywhere on the map to start an AI-guided tour.",
+      "quick_guide_title": "Photo-to-story",
+      "quick_guide_body": "Point your camera at a landmark or sign — the AI takes it from there.",
+      "journey_title": "Your passport",
+      "journey_body": "Every guide you listen to is collected here automatically."
+    }
+  },
+  "settings_onboarding": {
+    "section": "Onboarding",
+    "replay": "Replay welcome tour",
+    "reset_tips": "Reset in-app tips",
+    "reset_tips_done": "Tips reset — they will reappear when you switch tabs",
+    "confirm_replay_title": "Replay the welcome tour?",
+    "confirm_replay_body": "The welcome screens and in-app tips will show again the next time you open the app.",
+    "confirm_replay_action": "OK"
   }
 }

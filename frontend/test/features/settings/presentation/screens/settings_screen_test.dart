@@ -1,3 +1,4 @@
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
@@ -6,6 +7,7 @@ import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../../fakes/in_memory_onboarding_repository.dart';
 import '../../../../fakes/in_memory_usage_repository.dart';
 import '../../../../helpers/pump_app.dart';
 
@@ -88,6 +90,9 @@ Future<void> _givenSettingsScreen(
         (ref) => Stream<SubscriptionStatus>.value(status),
       ),
       appVersionStringProvider.overrideWith((ref) async => _fakeVersionLabel),
+      onboardingRepositoryProvider.overrideWithValue(
+        InMemoryOnboardingRepository(welcomeDone: true),
+      ),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));
