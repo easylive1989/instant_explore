@@ -6,28 +6,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Exposes the persisted onboarding state to the UI and mediates writes
 /// back to [OnboardingRepository].
 ///
-/// Reads are optimistic: the controller starts from [OnboardingState.initial]
-/// and asynchronously replaces it once storage resolves. Callers that
-/// redirect based on `welcomeDone` must therefore tolerate a single frame
-/// of the initial value.
+/// The controller starts at [OnboardingState.initial] and only reaches out
+/// to storage when a caller invokes [ensureLoaded]. This avoids racing the
+/// Notifier lifecycle during `build()` and makes tests deterministic.
 class OnboardingController extends Notifier<OnboardingState> {
   late final OnboardingRepository _repository;
+  Future<void>? _loadFuture;
 
   @override
   OnboardingState build() {
     _repository = ref.read(onboardingRepositoryProvider);
-    // Defer the load until after build() returns. Otherwise the first
-    // `state` read inside _loadFromRepository would fire before the
-    // Notifier has installed its initial state.
-    Future.microtask(_loadFromRepository);
     return const OnboardingState.initial();
   }
 
+  /// Loads persisted state, guaranteeing `state.hasLoaded == true` when the
+  /// returned future resolves. Safe to call many times; the same future is
+  /// reused after the first invocation.
+  Future<void> ensureLoaded() {
+    return _loadFuture ??= _loadFromRepository();
+  }
+
   Future<void> _loadFromRepository() async {
-    if (state.hasLoaded) return;
     final loaded = await _repository.load();
-    // Re-check: a user-initiated write (e.g. completeWelcome) could
-    // have landed between our initial check and the async load.
+    // Guard against a user-initiated write (e.g. completeWelcome) that
+    // may have landed while the async load was in flight.
     if (state.hasLoaded) return;
     state = loaded.copyWith(hasLoaded: true);
   }

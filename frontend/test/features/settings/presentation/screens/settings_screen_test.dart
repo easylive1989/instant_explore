@@ -78,6 +78,12 @@ Future<void> _givenSettingsScreen(
 }) async {
   final usageRepo = usage ?? InMemoryUsageRepository(usedToday: 0);
 
+  // The settings screen is taller than the default 800x600 test surface
+  // after the onboarding section was added. Enlarging the surface lets
+  // `find.text` locate tiles below the fold without having to scroll.
+  await tester.binding.setSurfaceSize(const Size(800, 1600));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
   await pumpScreen(
     tester,
     child: const SettingsScreen(),

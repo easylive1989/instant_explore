@@ -29,9 +29,14 @@ class RouterConfig {
         // (deep links via `/player`, `/camera`, etc.) are left untouched
         // so that an authenticated returning user is never interrupted.
         final onboarding = ref.read(onboardingControllerProvider);
-        // While SharedPreferences is still loading, skip the redirect so
-        // returning users don't see `/onboarding` flash on cold start.
-        if (!onboarding.hasLoaded) return null;
+        if (!onboarding.hasLoaded) {
+          // Trigger the async load (idempotent). `refreshListenable`
+          // will re-run this redirect once state is available, so we
+          // don't redirect prematurely and flash `/onboarding` at
+          // returning users.
+          ref.read(onboardingControllerProvider.notifier).ensureLoaded();
+          return null;
+        }
         final atOnboarding = state.matchedLocation == '/onboarding';
         if (!onboarding.welcomeDone &&
             !atOnboarding &&

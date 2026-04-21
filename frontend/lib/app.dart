@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/theme_config.dart';
 import 'package:context_app/common/config/router_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
@@ -25,6 +26,11 @@ class ContextureApp extends ConsumerWidget {
 
     // Initialise share intent listeners (idempotent).
     ref.watch(shareIntentInitProvider);
+
+    // Kick off the onboarding state load on app start. The controller
+    // itself stays in `initial` until this completes, so the router
+    // redirect knows to wait instead of flashing `/onboarding`.
+    ref.read(onboardingControllerProvider.notifier).ensureLoaded();
 
     // Listen for resolved shared places and save directly.
     ref.listen<AsyncValue<Place>?>(pendingSharedPlaceProvider, (prev, next) {

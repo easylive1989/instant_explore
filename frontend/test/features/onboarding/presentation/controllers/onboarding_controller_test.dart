@@ -14,7 +14,7 @@ void main() {
         final repo = InMemoryOnboardingRepository();
         final container = _containerWith(repo);
 
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
 
         final state = container.read(onboardingControllerProvider);
         expect(state.hasLoaded, isTrue);
@@ -30,7 +30,7 @@ void main() {
       () async {
         final repo = InMemoryOnboardingRepository();
         final container = _containerWith(repo);
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
 
         await container
             .read(onboardingControllerProvider.notifier)
@@ -50,7 +50,7 @@ void main() {
       () async {
         final repo = InMemoryOnboardingRepository();
         final container = _containerWith(repo);
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
 
         await container
             .read(onboardingControllerProvider.notifier)
@@ -72,7 +72,7 @@ void main() {
       () async {
         final repo = InMemoryOnboardingRepository();
         final container = _containerWith(repo);
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
         final notifier = container.read(onboardingControllerProvider.notifier);
 
         await notifier.markTipSeen(OnboardingTip.quickGuide);
@@ -91,7 +91,7 @@ void main() {
           seenTips: {OnboardingTip.quickGuide},
         );
         final container = _containerWith(repo);
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
 
         await container
             .read(onboardingControllerProvider.notifier)
@@ -114,7 +114,7 @@ void main() {
           seenTips: {OnboardingTip.quickGuide, OnboardingTip.journey},
         );
         final container = _containerWith(repo);
-        await _waitForLoad(container);
+        await _ensureLoaded(container);
 
         await container
             .read(onboardingControllerProvider.notifier)
@@ -136,11 +136,8 @@ ProviderContainer _containerWith(InMemoryOnboardingRepository repo) {
   return container;
 }
 
-Future<void> _waitForLoad(ProviderContainer container) async {
-  // Force the notifier to build, then let the async load complete.
-  container.read(onboardingControllerProvider);
-  for (var i = 0; i < 5; i += 1) {
-    await Future<void>.delayed(Duration.zero);
-    if (container.read(onboardingControllerProvider).hasLoaded) return;
-  }
+Future<void> _ensureLoaded(ProviderContainer container) async {
+  await container
+      .read(onboardingControllerProvider.notifier)
+      .ensureLoaded();
 }
