@@ -20,7 +20,11 @@ class SharedPreferencesOnboardingRepository implements OnboardingRepository {
         seen.add(tip);
       }
     }
-    return OnboardingState(welcomeDone: welcomeDone, seenTips: seen);
+    return OnboardingState(
+      hasLoaded: true,
+      welcomeDone: welcomeDone,
+      seenTips: seen,
+    );
   }
 
   @override
