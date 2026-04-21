@@ -1,11 +1,14 @@
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../../fakes/in_memory_onboarding_repository.dart';
 import '../../../../fakes/in_memory_usage_repository.dart';
 import '../../../../helpers/pump_app.dart';
 
@@ -76,6 +79,12 @@ Future<void> _givenSettingsScreen(
 }) async {
   final usageRepo = usage ?? InMemoryUsageRepository(usedToday: 0);
 
+  // The settings screen is taller than the default 800x600 test surface
+  // after the onboarding section was added. Enlarging the surface lets
+  // `find.text` locate tiles below the fold without having to scroll.
+  await tester.binding.setSurfaceSize(const Size(800, 1600));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
   await pumpScreen(
     tester,
     child: const SettingsScreen(),
@@ -88,6 +97,9 @@ Future<void> _givenSettingsScreen(
         (ref) => Stream<SubscriptionStatus>.value(status),
       ),
       appVersionStringProvider.overrideWith((ref) async => _fakeVersionLabel),
+      onboardingRepositoryProvider.overrideWithValue(
+        InMemoryOnboardingRepository(welcomeDone: true),
+      ),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));

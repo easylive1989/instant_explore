@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/common/config/api_config.dart';
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/firebase_options.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -52,7 +53,10 @@ Future<Widget> init() async {
     path: 'assets/translations',
     fallbackLocale: const Locale('zh', 'TW'),
     saveLocale: true,
-    child: const ProviderScope(child: ContextureApp()),
+    child: ProviderScope(
+      overrides: [defaultOnboardingRepositoryOverride],
+      child: const ContextureApp(),
+    ),
   );
 }
 

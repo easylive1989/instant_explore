@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
@@ -45,6 +46,10 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: 'settings.daily_usage'.tr()),
           const SizedBox(height: 8),
           _UsageSection(ref: ref),
+          const SizedBox(height: 32),
+          _SectionHeader(title: 'settings_onboarding.section'.tr()),
+          const SizedBox(height: 8),
+          const _OnboardingSection(),
           const SizedBox(height: 32),
           _SectionHeader(title: 'subscription.title'.tr()),
           const SizedBox(height: 8),
@@ -236,6 +241,86 @@ class _ThemeModeTile extends ConsumerWidget {
     ThemeMode.light => 'settings.theme_light'.tr(),
     ThemeMode.system => 'settings.theme_system'.tr(),
   };
+}
+
+class _OnboardingSection extends ConsumerWidget {
+  const _OnboardingSection();
+
+  Future<void> _confirmReplay(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('settings_onboarding.confirm_replay_title'.tr()),
+        content: Text('settings_onboarding.confirm_replay_body'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('passport.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('settings_onboarding.confirm_replay_action'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(onboardingControllerProvider.notifier).resetAll();
+    if (!context.mounted) return;
+    context.go('/onboarding');
+  }
+
+  Future<void> _resetTips(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    await ref.read(onboardingControllerProvider.notifier).resetTips();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('settings_onboarding.reset_tips_done'.tr()),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return _SectionContainer(
+      children: [
+        _SettingsTile(
+          icon: Icons.school_outlined,
+          iconColor: AppColors.primary,
+          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          title: 'settings_onboarding.replay'.tr(),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: colorScheme.onSurfaceVariant,
+            size: 14,
+          ),
+          onTap: () => _confirmReplay(context, ref),
+        ),
+        _Divider(),
+        _SettingsTile(
+          icon: Icons.refresh,
+          iconColor: AppColors.amber,
+          iconBgColor: AppColors.amber.withValues(alpha: 0.2),
+          title: 'settings_onboarding.reset_tips'.tr(),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: colorScheme.onSurfaceVariant,
+            size: 14,
+          ),
+          onTap: () => _resetTips(context, ref),
+        ),
+      ],
+    );
+  }
 }
 
 class _SubscriptionSection extends StatelessWidget {

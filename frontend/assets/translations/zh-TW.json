@@ -313,5 +313,44 @@
     "visited": "已探訪",
     "explore_more": "探索更多",
     "share_text": "我用讀景探索了這個地方"
+  },
+  "onboarding": {
+    "skip": "略過",
+    "get_started": "開始使用",
+    "try_sample": "試聽範例導覽",
+    "try_sample_hint": "以「伏見稻荷大社」示範完整語音導覽，免網路也能試用",
+    "welcome": {
+      "title": "歡迎來到讀景",
+      "body": "您的 AI 口袋歷史學家，讓每一次的駐足都充滿意義。"
+    },
+    "quick_guide": {
+      "title": "拍照即刻解讀",
+      "body": "遇到感興趣的景點或招牌？拍一張照片，AI 立刻告訴你它背後的故事。"
+    },
+    "explore": {
+      "title": "自由探索身邊的寶藏",
+      "body": "打開地圖，發現附近隱藏的歷史景點，點一下就開始語音導覽。"
+    },
+    "journey": {
+      "title": "自動累積文化足跡",
+      "body": "聽過的故事、問過的問題，都會變成你專屬的知識護照。"
+    },
+    "tips": {
+      "home_title": "從這裡探索",
+      "home_body": "地圖上點選任何地點，AI 就會開始為你導覽。",
+      "quick_guide_title": "拍一張就懂",
+      "quick_guide_body": "對著景點、招牌或文物拍照，讓 AI 為你解讀。",
+      "journey_title": "你的知識護照",
+      "journey_body": "所有聽過的導覽都會自動收藏在這裡。"
+    }
+  },
+  "settings_onboarding": {
+    "section": "新手導覽",
+    "replay": "重看新手導覽",
+    "reset_tips": "重置畫面教學提示",
+    "reset_tips_done": "教學提示已重置，切換 Tab 就會再次顯示",
+    "confirm_replay_title": "重新進行新手導覽？",
+    "confirm_replay_body": "下次開啟 App 會再次顯示歡迎畫面與教學提示。",
+    "confirm_replay_action": "確定"
   }
 }

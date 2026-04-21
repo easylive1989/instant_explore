@@ -3,6 +3,7 @@ import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/main_screen.dart';
+import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
@@ -19,6 +20,7 @@ import '../fakes/fake_places_repository.dart';
 import '../fakes/fake_quick_guide_ai_service.dart';
 import '../fakes/fake_subscription_service.dart';
 import '../fakes/in_memory_journey_repository.dart';
+import '../fakes/in_memory_onboarding_repository.dart';
 import '../fakes/in_memory_quick_guide_repository.dart';
 import '../fakes/in_memory_saved_locations_repository.dart';
 import '../fakes/in_memory_trip_repository.dart';
@@ -104,6 +106,9 @@ List<Override> _mainScreenOverrides() {
     subscriptionServiceProvider.overrideWithValue(FakeSubscriptionService()),
     quickGuideAiServiceProvider.overrideWithValue(FakeQuickGuideAiService()),
     imageAnalysisServiceProvider.overrideWithValue(FakeImageAnalysisService()),
+    onboardingRepositoryProvider.overrideWithValue(
+      InMemoryOnboardingRepository(welcomeDone: true),
+    ),
   ];
 }
 
