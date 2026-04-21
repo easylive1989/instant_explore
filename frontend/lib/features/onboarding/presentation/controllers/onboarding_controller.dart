@@ -16,16 +16,18 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() {
     _repository = ref.read(onboardingRepositoryProvider);
-    _loadFromRepository();
+    // Defer the load until after build() returns. Otherwise the first
+    // `state` read inside _loadFromRepository would fire before the
+    // Notifier has installed its initial state.
+    Future.microtask(_loadFromRepository);
     return const OnboardingState.initial();
   }
 
   Future<void> _loadFromRepository() async {
-    // Skip if a user-initiated write already set state. Otherwise the
-    // async load would clobber `welcomeDone=true` with the pre-write
-    // storage snapshot.
     if (state.hasLoaded) return;
     final loaded = await _repository.load();
+    // Re-check: a user-initiated write (e.g. completeWelcome) could
+    // have landed between our initial check and the async load.
     if (state.hasLoaded) return;
     state = loaded.copyWith(hasLoaded: true);
   }
