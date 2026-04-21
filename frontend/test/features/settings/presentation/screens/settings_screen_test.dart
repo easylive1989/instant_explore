@@ -5,6 +5,7 @@ import 'package:context_app/features/subscription/domain/models/subscription_sta
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fakes/in_memory_onboarding_repository.dart';
