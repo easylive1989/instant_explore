@@ -18,6 +18,10 @@ import 'package:introduction_screen/introduction_screen.dart';
 /// narration so the user can experience the audio-guide flow without
 /// hitting the AI backend. Finishing or skipping the carousel persists
 /// the `welcomeDone` flag and returns the user to `/`.
+///
+/// The visuals are locked to the Midnight Kyoto dark palette regardless
+/// of the system theme — the brand's signature atmosphere has to land
+/// the first time every user opens the app.
 class OnboardingWelcomeScreen extends ConsumerStatefulWidget {
   const OnboardingWelcomeScreen({super.key});
 
@@ -68,132 +72,212 @@ class _OnboardingWelcomeScreenState
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final titleStyle = TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      color: colorScheme.onSurface,
-    );
-    final bodyStyle = TextStyle(
-      fontSize: 15,
-      height: 1.5,
-      color: colorScheme.onSurfaceVariant,
-    );
-
-    final pageDecoration = PageDecoration(
-      titleTextStyle: titleStyle,
-      bodyTextStyle: bodyStyle,
-      bodyPadding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      imagePadding: const EdgeInsets.only(top: 48, bottom: 24),
-      pageColor: colorScheme.surface,
-    );
-
-    return IntroductionScreen(
-      globalBackgroundColor: colorScheme.surface,
-      allowImplicitScrolling: true,
-      showSkipButton: true,
-      showBackButton: false,
-      showNextButton: true,
-      skip: Text('onboarding.skip'.tr()),
-      next: const Icon(Icons.arrow_forward),
-      done: Text(
-        'onboarding.get_started'.tr(),
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      onSkip: _finish,
-      onDone: _finish,
-      dotsDecorator: DotsDecorator(
-        activeColor: AppColors.primary,
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-        size: const Size(8, 8),
-        activeSize: const Size(22, 8),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
-      ),
-      pages: [
-        PageViewModel(
-          titleWidget: Text(
-            'onboarding.welcome.title'.tr(),
-            style: titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          bodyWidget: Text(
-            'onboarding.welcome.body'.tr(),
-            style: bodyStyle,
-            textAlign: TextAlign.center,
-          ),
-          image: const OnboardingPageArt(icon: Icons.auto_stories),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          titleWidget: Text(
-            'onboarding.quick_guide.title'.tr(),
-            style: titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          bodyWidget: Text(
-            'onboarding.quick_guide.body'.tr(),
-            style: bodyStyle,
-            textAlign: TextAlign.center,
-          ),
-          image: const OnboardingPageArt(icon: Icons.camera_alt_rounded),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          titleWidget: Text(
-            'onboarding.explore.title'.tr(),
-            style: titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          bodyWidget: Text(
-            'onboarding.explore.body'.tr(),
-            style: bodyStyle,
-            textAlign: TextAlign.center,
-          ),
-          image: const OnboardingPageArt(icon: Icons.explore),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          titleWidget: Text(
-            'onboarding.journey.title'.tr(),
-            style: titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'onboarding.journey.body'.tr(),
-                style: bodyStyle,
-                textAlign: TextAlign.center,
+    return Theme(
+      data: _midnightKyotoTheme(),
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundDark,
+        body: _MidnightKyotoBackdrop(
+          child: IntroductionScreen(
+            globalBackgroundColor: Colors.transparent,
+            allowImplicitScrolling: true,
+            showSkipButton: true,
+            showBackButton: false,
+            showNextButton: true,
+            skip: Text(
+              'onboarding.skip'.tr(),
+              style: const TextStyle(
+                color: AppColors.textSecondaryDark,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _playSample,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: Text('onboarding.try_sample'.tr()),
+            ),
+            next: const Icon(Icons.arrow_forward, color: AppColors.primary),
+            done: Text(
+              'onboarding.get_started'.tr(),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'onboarding.try_sample_hint'.tr(),
-                style: bodyStyle.copyWith(fontSize: 12),
-                textAlign: TextAlign.center,
+            ),
+            onSkip: _finish,
+            onDone: _finish,
+            dotsDecorator: DotsDecorator(
+              activeColor: AppColors.primary,
+              color: AppColors.white20,
+              size: const Size(6, 6),
+              activeSize: const Size(24, 6),
+              activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            pages: [
+              _page(
+                serialLabel: '01',
+                chipKey: 'onboarding.chip.discovery',
+                titleKey: 'onboarding.welcome.title',
+                bodyKey: 'onboarding.welcome.body',
+                icon: Icons.auto_stories,
+                accent: AppColors.primary,
+              ),
+              _page(
+                serialLabel: '02',
+                chipKey: 'onboarding.chip.ai_guide',
+                titleKey: 'onboarding.quick_guide.title',
+                bodyKey: 'onboarding.quick_guide.body',
+                icon: Icons.camera_alt_rounded,
+                accent: AppColors.primary,
+              ),
+              _page(
+                serialLabel: '03',
+                chipKey: 'onboarding.chip.explore',
+                titleKey: 'onboarding.explore.title',
+                bodyKey: 'onboarding.explore.body',
+                icon: Icons.explore_rounded,
+                accent: AppColors.primary,
+              ),
+              _page(
+                serialLabel: '04',
+                chipKey: 'onboarding.chip.passport',
+                titleKey: 'onboarding.journey.title',
+                bodyKey: 'onboarding.journey.body',
+                icon: Icons.headphones_rounded,
+                accent: AppColors.amber,
+                footer: _SampleCtaFooter(onTap: _playSample),
               ),
             ],
           ),
-          image: const OnboardingPageArt(
-            icon: Icons.headphones_rounded,
-            tint: AppColors.amber,
+        ),
+      ),
+    );
+  }
+
+  PageViewModel _page({
+    required String serialLabel,
+    required String chipKey,
+    required String titleKey,
+    required String bodyKey,
+    required IconData icon,
+    required Color accent,
+    Widget? footer,
+  }) {
+    const titleStyle = TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
+      color: AppColors.textPrimaryDark,
+    );
+    const bodyStyle = TextStyle(
+      fontSize: 15,
+      height: 1.55,
+      color: AppColors.textSecondaryDark,
+    );
+
+    return PageViewModel(
+      titleWidget: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 8, 28, 0),
+        child: Text(
+          titleKey.tr(),
+          style: titleStyle,
+          textAlign: TextAlign.center,
+        ),
+      ),
+      bodyWidget: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(bodyKey.tr(), style: bodyStyle, textAlign: TextAlign.center),
+            if (footer != null) ...[const SizedBox(height: 28), footer],
+          ],
+        ),
+      ),
+      image: OnboardingPageArt(
+        icon: icon,
+        serialLabel: serialLabel,
+        chipLabel: chipKey.tr(),
+        accent: accent,
+      ),
+      decoration: const PageDecoration(
+        pageColor: Colors.transparent,
+        imagePadding: EdgeInsets.only(top: 24),
+        contentMargin: EdgeInsets.zero,
+        bodyPadding: EdgeInsets.zero,
+        titlePadding: EdgeInsets.zero,
+      ),
+    );
+  }
+}
+
+/// Atmospheric backdrop layer: a deep radial wash of electric blue at
+/// the top so the canvas reads as "night sky over Kyoto" rather than
+/// a flat dark rectangle.
+class _MidnightKyotoBackdrop extends StatelessWidget {
+  const _MidnightKyotoBackdrop({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(0, -0.85),
+          radius: 1.1,
+          colors: [Color(0x33137FEC), AppColors.backgroundDark],
+          stops: [0.0, 0.7],
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SampleCtaFooter extends StatelessWidget {
+  const _SampleCtaFooter({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton.icon(
+          onPressed: onTap,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: const StadiumBorder(),
+            textStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          decoration: pageDecoration,
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text('onboarding.try_sample'.tr()),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'onboarding.try_sample_hint'.tr(),
+          style: const TextStyle(
+            fontSize: 12,
+            height: 1.5,
+            color: AppColors.textTertiaryDark,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
+}
+
+ThemeData _midnightKyotoTheme() {
+  final base = ThemeData.dark(useMaterial3: true);
+  return base.copyWith(
+    scaffoldBackgroundColor: AppColors.backgroundDark,
+    colorScheme: base.colorScheme.copyWith(
+      primary: AppColors.primary,
+      surface: AppColors.backgroundDark,
+    ),
+  );
 }

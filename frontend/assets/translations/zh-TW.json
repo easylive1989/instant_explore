@@ -334,6 +334,12 @@
     "journey": {
       "title": "自動累積文化足跡",
       "body": "聽過的故事、問過的問題，都會變成你專屬的知識護照。"
+    },
+    "chip": {
+      "discovery": "DISCOVERY",
+      "ai_guide": "AI GUIDE",
+      "explore": "NEARBY",
+      "passport": "PASSPORT"
     }
   },
   "settings_onboarding": {

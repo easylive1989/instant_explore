@@ -334,6 +334,12 @@
     "journey": {
       "title": "A cultural passport, written for you",
       "body": "Every tour and question becomes part of your own personal knowledge passport."
+    },
+    "chip": {
+      "discovery": "DISCOVERY",
+      "ai_guide": "AI GUIDE",
+      "explore": "NEARBY",
+      "passport": "PASSPORT"
     }
   },
   "settings_onboarding": {
