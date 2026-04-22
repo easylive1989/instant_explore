@@ -7,7 +7,5 @@ export 'package:context_app/features/onboarding/presentation/controllers/onboard
 /// Default override installed at the app root so the production build wires
 /// the SharedPreferences-backed repository. Widget tests swap this for an
 /// in-memory fake.
-final defaultOnboardingRepositoryOverride =
-    onboardingRepositoryProvider.overrideWith(
-  (ref) => SharedPreferencesOnboardingRepository(),
-);
+final defaultOnboardingRepositoryOverride = onboardingRepositoryProvider
+    .overrideWith((ref) => SharedPreferencesOnboardingRepository());

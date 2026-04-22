@@ -2,7 +2,6 @@ import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
-import 'package:context_app/features/onboarding/presentation/widgets/onboarding_tips_host.dart';
 import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
@@ -53,49 +52,31 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return OnboardingTipsHost(
-      currentTabIndex: _selectedIndex,
-      child: Scaffold(
-        body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-        bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: OnboardingShowcase(
-                showcaseKey: OnboardingShowcaseKeys.home,
-                title: 'onboarding.tips.home_title'.tr(),
-                description: 'onboarding.tips.home_body'.tr(),
-                child: const Icon(Icons.home),
-              ),
-              label: 'bottom_nav.home'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: OnboardingShowcase(
-                showcaseKey: OnboardingShowcaseKeys.quickGuide,
-                title: 'onboarding.tips.quick_guide_title'.tr(),
-                description: 'onboarding.tips.quick_guide_body'.tr(),
-                child: const Icon(Icons.camera_alt_outlined),
-              ),
-              label: 'bottom_nav.quick_guide'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: OnboardingShowcase(
-                showcaseKey: OnboardingShowcaseKeys.journey,
-                title: 'onboarding.tips.journey_title'.tr(),
-                description: 'onboarding.tips.journey_body'.tr(),
-                child: const Icon(Icons.book),
-              ),
-              label: 'bottom_nav.passport'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.settings),
-              label: 'bottom_nav.settings'.tr(),
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: AppColors.primary,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-        ),
+    return Scaffold(
+      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: 'bottom_nav.home'.tr(),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: 'bottom_nav.quick_guide'.tr(),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.book),
+            label: 'bottom_nav.passport'.tr(),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: 'bottom_nav.settings'.tr(),
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColors.primary,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }

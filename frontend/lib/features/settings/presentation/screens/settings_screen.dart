@@ -246,10 +246,7 @@ class _ThemeModeTile extends ConsumerWidget {
 class _OnboardingSection extends ConsumerWidget {
   const _OnboardingSection();
 
-  Future<void> _confirmReplay(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _confirmReplay(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -274,20 +271,6 @@ class _OnboardingSection extends ConsumerWidget {
     context.go('/onboarding');
   }
 
-  Future<void> _resetTips(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    await ref.read(onboardingControllerProvider.notifier).resetTips();
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('settings_onboarding.reset_tips_done'.tr()),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -304,19 +287,6 @@ class _OnboardingSection extends ConsumerWidget {
             size: 14,
           ),
           onTap: () => _confirmReplay(context, ref),
-        ),
-        _Divider(),
-        _SettingsTile(
-          icon: Icons.refresh,
-          iconColor: AppColors.amber,
-          iconBgColor: AppColors.amber.withValues(alpha: 0.2),
-          title: 'settings_onboarding.reset_tips'.tr(),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            color: colorScheme.onSurfaceVariant,
-            size: 14,
-          ),
-          onTap: () => _resetTips(context, ref),
         ),
       ],
     );

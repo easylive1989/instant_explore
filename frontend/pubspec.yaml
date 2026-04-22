@@ -96,7 +96,6 @@ dependencies:
 
   # Onboarding
   introduction_screen: ^3.1.14
-  showcaseview: ^3.0.0
 
 dev_dependencies:
   flutter_test:

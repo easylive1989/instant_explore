@@ -334,23 +334,13 @@
     "journey": {
       "title": "自動累積文化足跡",
       "body": "聽過的故事、問過的問題，都會變成你專屬的知識護照。"
-    },
-    "tips": {
-      "home_title": "從這裡探索",
-      "home_body": "地圖上點選任何地點，AI 就會開始為你導覽。",
-      "quick_guide_title": "拍一張就懂",
-      "quick_guide_body": "對著景點、招牌或文物拍照，讓 AI 為你解讀。",
-      "journey_title": "你的知識護照",
-      "journey_body": "所有聽過的導覽都會自動收藏在這裡。"
     }
   },
   "settings_onboarding": {
     "section": "新手導覽",
     "replay": "重看新手導覽",
-    "reset_tips": "重置畫面教學提示",
-    "reset_tips_done": "教學提示已重置，切換 Tab 就會再次顯示",
     "confirm_replay_title": "重新進行新手導覽？",
-    "confirm_replay_body": "下次開啟 App 會再次顯示歡迎畫面與教學提示。",
+    "confirm_replay_body": "下次開啟 App 會再次顯示歡迎畫面。",
     "confirm_replay_action": "確定"
   }
 }

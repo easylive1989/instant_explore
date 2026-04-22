@@ -51,11 +51,7 @@ class _OnboardingWelcomeScreenState
     // mid-navigation and race with the push.
     await context.push<void>(
       '/player',
-      extra: {
-        'place': place,
-        'narrationContent': content,
-        'autoPlay': true,
-      },
+      extra: {'place': place, 'narrationContent': content, 'autoPlay': true},
     );
     if (!mounted) return;
     // When the player pops, flipping welcomeDone lets the router

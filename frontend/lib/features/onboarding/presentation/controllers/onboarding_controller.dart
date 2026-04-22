@@ -1,5 +1,4 @@
 import 'package:context_app/features/onboarding/domain/models/onboarding_state.dart';
-import 'package:context_app/features/onboarding/domain/models/onboarding_tip.dart';
 import 'package:context_app/features/onboarding/domain/onboarding_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,33 +38,13 @@ class OnboardingController extends Notifier<OnboardingState> {
     await _repository.markWelcomeDone();
   }
 
-  Future<void> markTipSeen(OnboardingTip tip) async {
-    if (state.hasSeen(tip)) return;
-    state = state.copyWith(seenTips: {...state.seenTips, tip});
-    await _repository.markTipSeen(tip);
-  }
-
-  /// Resets every flag so the user sees the welcome carousel and tips
-  /// again. Used by "replay onboarding" in Settings.
+  /// Resets every flag so the user sees the welcome carousel again.
+  /// Used by "replay onboarding" in Settings.
   Future<void> resetAll() async {
     await _repository.reset();
     // Preserve `hasLoaded=true` so the router doesn't treat the reset as
     // "still booting" and block navigation.
-    state = const OnboardingState(
-      hasLoaded: true,
-      welcomeDone: false,
-      seenTips: <OnboardingTip>{},
-    );
-  }
-
-  /// Resets only the contextual tips, leaving the welcome flag intact.
-  Future<void> resetTips() async {
-    final wasWelcomeDone = state.welcomeDone;
-    await _repository.reset();
-    if (wasWelcomeDone) {
-      await _repository.markWelcomeDone();
-    }
-    state = state.copyWith(seenTips: <OnboardingTip>{});
+    state = const OnboardingState(hasLoaded: true, welcomeDone: false);
   }
 }
 
