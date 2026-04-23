@@ -189,7 +189,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: _midnightKyotoTheme(),
+      data: midnightKyotoTheme(),
       child: Scaffold(
         backgroundColor: AppColors.backgroundDark,
         body: MidnightKyotoBackdrop(
@@ -412,15 +412,4 @@ class _LegalFooter extends StatelessWidget {
       ],
     );
   }
-}
-
-ThemeData _midnightKyotoTheme() {
-  final base = ThemeData.dark(useMaterial3: true);
-  return base.copyWith(
-    scaffoldBackgroundColor: AppColors.backgroundDark,
-    colorScheme: base.colorScheme.copyWith(
-      primary: AppColors.primary,
-      surface: AppColors.backgroundDark,
-    ),
-  );
 }
