@@ -285,6 +285,7 @@
     "plan_label": "月訂閱",
     "plan_period": "／月",
     "auto_renew_notice": "每月自動續訂，可隨時取消",
+    "plan_load_failed": "無法載入訂閱方案，請稍後再試。",
     "terms": "服務條款",
     "privacy": "隱私權政策",
     "upgrade_cta": "升級 Premium",

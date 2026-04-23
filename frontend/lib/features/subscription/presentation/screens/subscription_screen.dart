@@ -94,7 +94,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _planError = e.toString();
+        _planError = 'subscription.plan_load_failed'.tr();
         _isLoadingPlan = false;
       });
     }
@@ -170,7 +170,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     final plan = _plan;
     if (plan == null) {
       return SubscriptionPlanCardState.error(
-        message: 'common.error_prefix'.tr(),
+        message: 'subscription.plan_load_failed'.tr(),
       );
     }
     return SubscriptionPlanCardState.ready(
