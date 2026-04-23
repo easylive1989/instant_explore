@@ -5,6 +5,7 @@ import 'package:context_app/features/onboarding/domain/demo_narration_factory.da
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/widgets/onboarding_page_art.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/shared/widgets/midnight_kyoto_backdrop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +77,7 @@ class _OnboardingWelcomeScreenState
       data: _midnightKyotoTheme(),
       child: Scaffold(
         backgroundColor: AppColors.backgroundDark,
-        body: _MidnightKyotoBackdrop(
+        body: MidnightKyotoBackdrop(
           child: IntroductionScreen(
             globalBackgroundColor: Colors.transparent,
             allowImplicitScrolling: true,
@@ -203,30 +204,6 @@ class _OnboardingWelcomeScreenState
         bodyPadding: EdgeInsets.zero,
         titlePadding: EdgeInsets.zero,
       ),
-    );
-  }
-}
-
-/// Atmospheric backdrop layer: a deep radial wash of electric blue at
-/// the top so the canvas reads as "night sky over Kyoto" rather than
-/// a flat dark rectangle.
-class _MidnightKyotoBackdrop extends StatelessWidget {
-  const _MidnightKyotoBackdrop({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.85),
-          radius: 1.1,
-          colors: [Color(0x33137FEC), AppColors.backgroundDark],
-          stops: [0.0, 0.7],
-        ),
-      ),
-      child: child,
     );
   }
 }
