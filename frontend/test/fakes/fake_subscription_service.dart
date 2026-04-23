@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/domain/services/subscription_service.dart';
 
@@ -13,6 +14,8 @@ class FakeSubscriptionService implements SubscriptionService {
   SubscriptionStatus? _restoreResult;
   Exception? _purchaseError;
   Exception? _restoreError;
+  SubscriptionPlan? _currentPlan;
+  Exception? _currentPlanError;
 
   final StreamController<SubscriptionStatus> _controller =
       StreamController<SubscriptionStatus>.broadcast();
@@ -33,6 +36,15 @@ class FakeSubscriptionService implements SubscriptionService {
   void stubRestore({SubscriptionStatus? status, Exception? error}) {
     _restoreResult = status;
     _restoreError = error;
+  }
+
+  /// Sets the value returned by [getCurrentPlan].
+  ///
+  /// When [plan] is `null`, [getCurrentPlan] simulates "no offerings".
+  /// When [error] is non-null, [getCurrentPlan] throws it.
+  void stubGetCurrentPlan({SubscriptionPlan? plan, Exception? error}) {
+    _currentPlan = plan;
+    _currentPlanError = error;
   }
 
   /// Emits [status] on [statusStream] and updates current status.
@@ -73,6 +85,12 @@ class FakeSubscriptionService implements SubscriptionService {
     final result = _restoreResult ?? _current;
     emit(result);
     return result;
+  }
+
+  @override
+  Future<SubscriptionPlan?> getCurrentPlan() async {
+    if (_currentPlanError != null) throw _currentPlanError!;
+    return _currentPlan;
   }
 
   Future<void> dispose() async {

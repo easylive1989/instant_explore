@@ -1,3 +1,4 @@
+import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 
 /// 訂閱服務介面
@@ -27,4 +28,9 @@ abstract class SubscriptionService {
 
   /// 恢復購買
   Future<SubscriptionStatus> restorePurchases();
+
+  /// 取得目前可購買的方案資訊（含已本地化的價格字串）
+  ///
+  /// 若沒有任何可用 offerings 則回傳 null。
+  Future<SubscriptionPlan?> getCurrentPlan();
 }
