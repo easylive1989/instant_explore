@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/domain/services/subscription_service.dart';
 
@@ -74,6 +75,36 @@ class RevenueCatSubscriptionService implements SubscriptionService {
   Future<SubscriptionStatus> restorePurchases() async {
     final info = await Purchases.restorePurchases();
     return _mapToStatus(info);
+  }
+
+  @override
+  Future<SubscriptionPlan?> getCurrentPlan() async {
+    final offerings = await Purchases.getOfferings();
+    final current = offerings.current;
+    if (current == null || current.availablePackages.isEmpty) {
+      return null;
+    }
+    final package = current.availablePackages.first;
+    return SubscriptionPlan(
+      priceString: package.storeProduct.priceString,
+      period: _mapPeriod(package.packageType),
+    );
+  }
+
+  SubscriptionPeriod _mapPeriod(PackageType type) {
+    switch (type) {
+      case PackageType.annual:
+        return SubscriptionPeriod.yearly;
+      case PackageType.monthly:
+      case PackageType.twoMonth:
+      case PackageType.threeMonth:
+      case PackageType.sixMonth:
+      case PackageType.weekly:
+      case PackageType.lifetime:
+      case PackageType.custom:
+      case PackageType.unknown:
+        return SubscriptionPeriod.monthly;
+    }
   }
 
   SubscriptionStatus _mapToStatus(CustomerInfo info) {

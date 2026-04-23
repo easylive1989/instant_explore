@@ -5,6 +5,7 @@ import 'package:context_app/features/onboarding/domain/demo_narration_factory.da
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/widgets/onboarding_page_art.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/shared/widgets/midnight_kyoto_backdrop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,10 +74,10 @@ class _OnboardingWelcomeScreenState
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: _midnightKyotoTheme(),
+      data: midnightKyotoTheme(),
       child: Scaffold(
         backgroundColor: AppColors.backgroundDark,
-        body: _MidnightKyotoBackdrop(
+        body: MidnightKyotoBackdrop(
           child: IntroductionScreen(
             globalBackgroundColor: Colors.transparent,
             allowImplicitScrolling: true,
@@ -207,30 +208,6 @@ class _OnboardingWelcomeScreenState
   }
 }
 
-/// Atmospheric backdrop layer: a deep radial wash of electric blue at
-/// the top so the canvas reads as "night sky over Kyoto" rather than
-/// a flat dark rectangle.
-class _MidnightKyotoBackdrop extends StatelessWidget {
-  const _MidnightKyotoBackdrop({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.85),
-          radius: 1.1,
-          colors: [Color(0x33137FEC), AppColors.backgroundDark],
-          stops: [0.0, 0.7],
-        ),
-      ),
-      child: child,
-    );
-  }
-}
-
 class _SampleCtaFooter extends StatelessWidget {
   const _SampleCtaFooter({required this.onTap});
 
@@ -269,15 +246,4 @@ class _SampleCtaFooter extends StatelessWidget {
       ],
     );
   }
-}
-
-ThemeData _midnightKyotoTheme() {
-  final base = ThemeData.dark(useMaterial3: true);
-  return base.copyWith(
-    scaffoldBackgroundColor: AppColors.backgroundDark,
-    colorScheme: base.colorScheme.copyWith(
-      primary: AppColors.primary,
-      surface: AppColors.backgroundDark,
-    ),
-  );
 }
