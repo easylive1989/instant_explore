@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/domain/services/subscription_service.dart';
 
@@ -39,6 +40,9 @@ class FakeSubscriptionService implements SubscriptionService {
 
   @override
   Future<SubscriptionStatus> restorePurchases() async => _status;
+
+  @override
+  Future<SubscriptionPlan?> getCurrentPlan() async => null;
 
   void dispose() {
     _controller.close();

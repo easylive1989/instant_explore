@@ -1,3 +1,5 @@
+import 'package:context_app/common/config/legal_urls.dart';
+import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:context_app/features/subscription/providers.dart';
@@ -15,13 +17,30 @@ void main() {
 
   group('SubscriptionScreen', () {
     testWidgets(
-      'given the paywall is displayed, when the screen loads, '
+      'given a ready plan, when the screen loads, '
+      'then the localized price string is rendered',
+      (tester) async {
+        final service = _serviceWithPlan();
+
+        await _givenSubscriptionScreen(tester, service: service);
+
+        expect(find.text('NT\$90'), findsOneWidget);
+        expect(find.text('subscription.plan_period'), findsOneWidget);
+        expect(find.text('subscription.plan_label'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given the screen is shown, when it loads, '
       'then the benefits and primary actions are visible',
       (tester) async {
-        await _givenSubscriptionScreen(tester);
+        await _givenSubscriptionScreen(tester, service: _serviceWithPlan());
 
-        _thenBenefitsAreVisible();
-        _thenPrimaryActionsAreVisible();
+        expect(find.text('subscription.benefit_no_ads'), findsOneWidget);
+        expect(find.text('subscription.benefit_unlimited'), findsOneWidget);
+        expect(find.text('subscription.benefit_route'), findsOneWidget);
+        expect(find.text('subscription.subscribe'), findsOneWidget);
+        expect(find.text('subscription.restore'), findsOneWidget);
       },
     );
 
@@ -29,7 +48,7 @@ void main() {
       'given a successful purchase, when the user subscribes, '
       'then the screen dismisses with a positive result',
       (tester) async {
-        final service = FakeSubscriptionService()
+        final service = _serviceWithPlan()
           ..stubPurchase(
             status: const SubscriptionStatus(isPremium: true),
           );
@@ -37,7 +56,7 @@ void main() {
         await _givenSubscriptionScreenOnRoute(tester, service);
         await _whenUserTapsSubscribe(tester);
 
-        _thenSubscriptionScreenIsDismissed();
+        expect(find.byType(SubscriptionScreen), findsNothing);
       },
     );
 
@@ -45,46 +64,113 @@ void main() {
       'given no prior purchase, when the user taps restore, '
       'then the no-purchases snackbar is shown',
       (tester) async {
-        final service = FakeSubscriptionService()
+        final service = _serviceWithPlan()
           ..stubRestore(status: SubscriptionStatus.free);
 
         await _givenSubscriptionScreen(tester, service: service);
         await _whenUserTapsRestore(tester);
 
-        _thenNoPurchasesSnackbarIsShown();
+        expect(find.text('subscription.no_purchases_found'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'given a premium restore result, when the user taps restore, '
-      'then the screen dismisses with a positive result',
+      'given the terms link is tapped, when the user interacts, '
+      'then the injected launcher is called with the terms URL',
+      (tester) async {
+        final launched = <Uri>[];
+        await _givenSubscriptionScreen(
+          tester,
+          service: _serviceWithPlan(),
+          launcher: (uri) async {
+            launched.add(uri);
+            return true;
+          },
+        );
+
+        await tester.scrollUntilVisible(
+          find.text('subscription.terms'),
+          100,
+        );
+        await tester.tap(find.text('subscription.terms'));
+        await tester.pumpAndSettle();
+
+        expect(launched, [Uri.parse(LegalUrls.termsOfUse)]);
+      },
+    );
+
+    testWidgets(
+      'given the privacy link is tapped, when the user interacts, '
+      'then the injected launcher is called with the privacy URL',
+      (tester) async {
+        final launched = <Uri>[];
+        await _givenSubscriptionScreen(
+          tester,
+          service: _serviceWithPlan(),
+          launcher: (uri) async {
+            launched.add(uri);
+            return true;
+          },
+        );
+
+        await tester.scrollUntilVisible(
+          find.text('subscription.privacy'),
+          100,
+        );
+        await tester.tap(find.text('subscription.privacy'));
+        await tester.pumpAndSettle();
+
+        expect(launched, [Uri.parse(LegalUrls.privacyPolicy)]);
+      },
+    );
+
+    testWidgets(
+      'given the plan fails to load, when retry is tapped, '
+      'then getCurrentPlan is called again',
       (tester) async {
         final service = FakeSubscriptionService()
-          ..stubRestore(
-            status: const SubscriptionStatus(isPremium: true),
-          );
+          ..stubGetCurrentPlan(error: Exception('network'));
 
-        await _givenSubscriptionScreenOnRoute(tester, service);
-        await _whenUserTapsRestore(tester);
+        await _givenSubscriptionScreen(tester, service: service);
 
-        _thenSubscriptionScreenIsDismissed();
+        expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
+
+        service.stubGetCurrentPlan(
+          plan: const SubscriptionPlan(
+            priceString: 'NT\$90',
+            period: SubscriptionPeriod.monthly,
+          ),
+        );
+        await tester.tap(find.byKey(const ValueKey('planCard.retry')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('NT\$90'), findsOneWidget);
       },
     );
   });
 }
 
+FakeSubscriptionService _serviceWithPlan() {
+  return FakeSubscriptionService()
+    ..stubGetCurrentPlan(
+      plan: const SubscriptionPlan(
+        priceString: 'NT\$90',
+        period: SubscriptionPeriod.monthly,
+      ),
+    );
+}
+
 Future<void> _givenSubscriptionScreen(
   WidgetTester tester, {
-  FakeSubscriptionService? service,
+  required FakeSubscriptionService service,
+  Future<bool> Function(Uri)? launcher,
 }) async {
-  final resolved = service ?? FakeSubscriptionService();
   await pumpScreen(
     tester,
-    child: const SubscriptionScreen(),
-    overrides: [
-      subscriptionServiceProvider.overrideWithValue(resolved),
-    ],
+    child: SubscriptionScreen(launchUrl: launcher),
+    overrides: [subscriptionServiceProvider.overrideWithValue(service)],
   );
+  await tester.pumpAndSettle();
 }
 
 Future<void> _givenSubscriptionScreenOnRoute(
@@ -104,37 +190,25 @@ Future<void> _givenSubscriptionScreenOnRoute(
   );
   final context = tester.element(find.byType(_Host));
   GoRouter.of(context).push('/subscription');
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _whenUserTapsSubscribe(WidgetTester tester) async {
+  await tester.scrollUntilVisible(
+    find.text('subscription.subscribe'),
+    100,
+  );
   await tester.tap(find.text('subscription.subscribe'));
   await tester.pumpAndSettle();
 }
 
 Future<void> _whenUserTapsRestore(WidgetTester tester) async {
+  await tester.scrollUntilVisible(
+    find.text('subscription.restore'),
+    100,
+  );
   await tester.tap(find.text('subscription.restore'));
   await tester.pumpAndSettle();
-}
-
-void _thenBenefitsAreVisible() {
-  expect(find.text('subscription.benefit_no_ads'), findsOneWidget);
-  expect(find.text('subscription.benefit_unlimited'), findsOneWidget);
-  expect(find.text('subscription.benefit_route'), findsOneWidget);
-}
-
-void _thenPrimaryActionsAreVisible() {
-  expect(find.text('subscription.subscribe'), findsOneWidget);
-  expect(find.text('subscription.restore'), findsOneWidget);
-}
-
-void _thenSubscriptionScreenIsDismissed() {
-  expect(find.byType(SubscriptionScreen), findsNothing);
-}
-
-void _thenNoPurchasesSnackbarIsShown() {
-  expect(find.text('subscription.no_purchases_found'), findsOneWidget);
 }
 
 class _Host extends StatelessWidget {
