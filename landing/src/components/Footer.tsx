@@ -1,5 +1,6 @@
 const links = [
   { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Use", href: "/terms" },
   { label: "Support", href: "/support" },
   { label: "Instagram", href: "#" },
   {
