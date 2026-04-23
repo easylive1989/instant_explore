@@ -33,6 +33,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   bool _isLoadingPlan = true;
   SubscriptionPlan? _plan;
   String? _planError;
+  bool _showHeadline = false;
+  bool _showSubheadline = false;
+  bool _showPlanCard = false;
 
   static Future<bool> _defaultLaunchUrl(Uri uri) {
     return url_launcher.launchUrl(
@@ -47,6 +50,33 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   void initState() {
     super.initState();
     _loadPlan();
+    _scheduleEntryAnimation();
+  }
+
+  Future<void> _scheduleEntryAnimation() async {
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+    setState(() => _showHeadline = true);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
+    setState(() => _showSubheadline = true);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
+    setState(() => _showPlanCard = true);
+  }
+
+  Widget _entry({required bool visible, required Widget child}) {
+    return AnimatedSlide(
+      offset: visible ? Offset.zero : const Offset(0, 0.04),
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      child: AnimatedOpacity(
+        opacity: visible ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+        child: child,
+      ),
+    );
   }
 
   Future<void> _loadPlan() async {
@@ -196,31 +226,40 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'subscription.headline'.tr(),
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: AppColors.textPrimaryDark,
-                            height: 1.2,
+                        _entry(
+                          visible: _showHeadline,
+                          child: Text(
+                            'subscription.headline'.tr(),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              color: AppColors.textPrimaryDark,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          'subscription.subheadline'.tr(),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            height: 1.55,
-                            color: AppColors.textSecondaryDark,
+                        _entry(
+                          visible: _showSubheadline,
+                          child: Text(
+                            'subscription.subheadline'.tr(),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              height: 1.55,
+                              color: AppColors.textSecondaryDark,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 28),
-                        SubscriptionPlanCard(
-                          state: _cardState(),
-                          onRetry: _loadPlan,
+                        _entry(
+                          visible: _showPlanCard,
+                          child: SubscriptionPlanCard(
+                            state: _cardState(),
+                            onRetry: _loadPlan,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         _SubscribeButton(
