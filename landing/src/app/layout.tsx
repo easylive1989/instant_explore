@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Conexture — Experience History, Not Just Sights",
+  title: "Lorescape — Experience History, Not Just Sights",
   description:
     "Your personal AI historian for immersive, eyes-up exploration. Hear the stories behind the stones with spatial audio narration.",
   keywords: [
@@ -19,19 +19,19 @@ export const metadata: Metadata = {
     "spatial audio",
     "photo identify",
     "cultural exploration",
-    "Conexture",
+    "Lorescape",
   ],
   openGraph: {
-    title: "Conexture — Experience History, Not Just Sights",
+    title: "Lorescape — Experience History, Not Just Sights",
     description:
       "Your personal AI historian for immersive, eyes-up exploration.",
     type: "website",
     locale: "en_US",
-    siteName: "Conexture",
+    siteName: "Lorescape",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Conexture — Experience History, Not Just Sights",
+    title: "Lorescape — Experience History, Not Just Sights",
     description:
       "Your personal AI historian for immersive, eyes-up exploration.",
   },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Conexture",
+  name: "Lorescape",
   applicationCategory: "TravelApplication",
   operatingSystem: "iOS, Android",
   description:

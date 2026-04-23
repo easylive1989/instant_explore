@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://conexture.app/sitemap.xml",
+    sitemap: "https://lorescape.app/sitemap.xml",
   };
 }
