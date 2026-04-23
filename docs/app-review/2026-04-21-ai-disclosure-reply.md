@@ -23,7 +23,7 @@ Per narration request, the app sends:
   name, formatted address, category, place types, and rating (when
   available).
 - A localized prompt template (English or Traditional Chinese)
-  describing the desired narration style, length, and audience.
+  describing the desired narration style and length.
 
 The app does **not** transmit:
 
