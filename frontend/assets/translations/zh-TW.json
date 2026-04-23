@@ -7,7 +7,7 @@
   "gion_district": "祇園地區",
   "sites_nearby_hook": "附近有 12 個歷史景點。您知道嗎？祇園是為了滿足前往八坂神社的旅客需求而建造的。",
   "app": {
-    "name": "讀景",
+    "name": "Lorescape",
     "tagline": "您的 AI 口袋歷史學家"
   },
   "config_screen": {
@@ -198,7 +198,7 @@
     "confirm": "確認",
     "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
     "app_version": "版本資訊無法取得",
-    "copyright": "© 2025 Contexture 讀景",
+    "copyright": "© 2025 Lorescape",
     "daily_usage": "每日使用量",
     "remaining_today": "今日剩餘 {remaining} 次",
     "theme": "外觀",
@@ -312,7 +312,7 @@
     "share": "分享",
     "visited": "已探訪",
     "explore_more": "探索更多",
-    "share_text": "我用讀景探索了這個地方"
+    "share_text": "我用 Lorescape 探索了這個地方"
   },
   "onboarding": {
     "skip": "略過",
@@ -320,7 +320,7 @@
     "try_sample": "試聽範例導覽",
     "try_sample_hint": "以「伏見稻荷大社」示範完整語音導覽，免網路也能試用",
     "welcome": {
-      "title": "歡迎來到讀景",
+      "title": "歡迎來到 Lorescape",
       "body": "您的 AI 口袋歷史學家，讓每一次的駐足都充滿意義。"
     },
     "quick_guide": {

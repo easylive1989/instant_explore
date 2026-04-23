@@ -41,6 +41,6 @@ Widget createTestApp({
     fallbackLocale: const Locale('zh', 'TW'),
     startLocale: const Locale('en'), // Force English for testing
     saveLocale: false, // 測試時不儲存語言設定
-    child: ProviderScope(overrides: overrides, child: const ContextureApp()),
+    child: ProviderScope(overrides: overrides, child: const LorescapeApp()),
   );
 }

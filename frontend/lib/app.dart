@@ -16,8 +16,8 @@ import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 /// This widget sets up the app theme, routing, and global configuration.
 /// Also initialises share intent listeners so the app can receive
 /// places shared from Google Maps and save them directly.
-class ContextureApp extends ConsumerWidget {
-  const ContextureApp({super.key});
+class LorescapeApp extends ConsumerWidget {
+  const LorescapeApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

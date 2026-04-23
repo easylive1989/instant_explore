@@ -2,7 +2,7 @@ import React from "react";
 import { useCurrentFrame, interpolate } from "remotion";
 import { easeOutExpo } from "../../utils/animations";
 
-// Mock of the Contexture Home screen:
+// Mock of the Lorescape Home screen:
 // dark map background with glowing points + glassmorphism place cards.
 export const HomeMockup: React.FC = () => {
   const frame = useCurrentFrame();

@@ -1,6 +1,6 @@
-# 旅食日記 - 設定指南
+# Lorescape - 設定指南
 
-本指南將協助你完成「旅食日記」App 的初始設定，讓應用程式能夠正常運作。
+本指南將協助你完成 Lorescape App 的初始設定，讓應用程式能夠正常運作。
 
 ## 目錄
 
@@ -41,7 +41,7 @@ fvm flutter doctor
 1. 登入 [Supabase Dashboard](https://app.supabase.com)
 2. 點擊「New Project」建立新專案
 3. 填寫專案資訊：
-   - **Name**: Travel Diary (或你喜歡的名稱)
+   - **Name**: Lorescape (或你喜歡的名稱)
    - **Database Password**: 設定強密碼並記下來
    - **Region**: 選擇最接近你的區域
 4. 等待專案建立完成 (約 2-3 分鐘)

@@ -24,7 +24,7 @@ export const Wordmark: React.FC<Props> = ({
         lineHeight: 1,
       }}
     >
-      Contexture
+      Lorescape
     </div>
   );
 };

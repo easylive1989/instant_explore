@@ -6,7 +6,7 @@ export default function VideoShowcase() {
           Watch the 30-second intro
         </div>
         <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.95]">
-          See Contexture <br />
+          See Lorescape <br />
           <span className="text-primary text-neon">in motion.</span>
         </h2>
       </div>
@@ -20,8 +20,8 @@ export default function VideoShowcase() {
         <div className="relative rounded-2xl overflow-hidden glass-card shadow-2xl shadow-primary/10">
           <video
             className="block w-full h-auto aspect-video bg-surface"
-            src="/videos/contexture-intro.mp4"
-            poster="/videos/contexture-intro-poster.jpg"
+            src="/videos/lorescape-intro.mp4"
+            poster="/videos/lorescape-intro-poster.jpg"
             autoPlay
             muted
             loop

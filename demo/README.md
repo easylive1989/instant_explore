@@ -1,10 +1,10 @@
-# Contexture — App Intro Video
+# Lorescape — App Intro Video
 
-30 秒、1920×1080、電影感的 Contexture 讀景 App 介紹影片，以 Remotion 製作。全部 UI 皆為純 code mockup (TypeScript + TailwindCSS)。
+30 秒、1920×1080、電影感的 Lorescape App 介紹影片，以 Remotion 製作。全部 UI 皆為純 code mockup (TypeScript + TailwindCSS)。
 
 ## 影片規格
 
-- **Composition id**：`ContextureIntro`
+- **Composition id**：`LorescapeIntro`
 - **解析度**：1920 × 1080 (16:9)
 - **FPS**：30
 - **長度**：900 frames (30s)
@@ -14,7 +14,7 @@
 | Scene        | 時間     | 內容                                                             |
 | ------------ | -------- | ---------------------------------------------------------------- |
 | Hook         | 0–5s     | 石紋 + 裂縫金光，"Stones don't speak—until now."                  |
-| Intro        | 5–10s    | iPhone + Home 畫面，Contexture wordmark + tagline                 |
+| Intro        | 5–10s    | iPhone + Home 畫面，Lorescape wordmark + tagline                  |
 | Narration    | 10–18s   | iPhone + Immersive Player，"Real-time AI narration"               |
 | Passport     | 18–25s   | iPhone + Knowledge Passport，"Every journey, remembered."         |
 | CTA          | 25–30s   | Wordmark + "Read the world." + App Store / Google Play 徽章      |
@@ -30,10 +30,10 @@ npm run dev
 # → http://localhost:3000
 
 # 輸出 MP4
-npx remotion render ContextureIntro out/contexture-intro.mp4
+npx remotion render LorescapeIntro out/lorescape-intro.mp4
 
 # 單幀 PNG（用來快速驗證某一幀）
-npx remotion still ContextureIntro out/frame.png --frame=90 --scale=0.5
+npx remotion still LorescapeIntro out/frame.png --frame=90 --scale=0.5
 ```
 
 ## 加入 BGM
@@ -62,7 +62,7 @@ src/
 │   └── CtaScene.tsx
 ├── components/
 │   ├── PhoneFrame.tsx        # iPhone 外框
-│   ├── Wordmark.tsx          # "Contexture" 標準字
+│   ├── Wordmark.tsx          # "Lorescape" 標準字
 │   ├── StoneTexture.tsx      # Hook 用石紋 + 金光 SVG
 │   ├── Waveform.tsx          # 聲紋動畫
 │   ├── StoreBadges.tsx       # App Store / Google Play 徽章
@@ -95,4 +95,4 @@ src/
 
 ## 授權
 
-本資料夾作為 Contexture 專案的行銷素材工作區，授權隨主專案。Remotion 本身對 3 人以上團隊需要 [company license](https://www.remotion.pro/license)。
+本資料夾作為 Lorescape 專案的行銷素材工作區，授權隨主專案。Remotion 本身對 3 人以上團隊需要 [company license](https://www.remotion.pro/license)。

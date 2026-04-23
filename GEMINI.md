@@ -140,7 +140,7 @@ When building reusable APIs, such as a library, follow these principles.
 
 ### Overall Architecture
 
-Travel Diary (旅食日記) adopts a **Feature-First** architecture design, organizing code around feature modules with each module following Clean Architecture principles internally.
+Lorescape adopts a **Feature-First** architecture design, organizing code around feature modules with each module following Clean Architecture principles internally.
 
 #### Architecture Principles
 

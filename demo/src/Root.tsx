@@ -5,7 +5,7 @@ import { Main } from "./Main";
 export const RemotionRoot: React.FC = () => {
   return (
     <Composition
-      id="ContextureIntro"
+      id="LorescapeIntro"
       component={Main}
       durationInFrames={900}
       fps={30}

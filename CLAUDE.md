@@ -144,7 +144,7 @@ When building reusable APIs, such as a library, follow these principles.
 
 ### Overall Architecture
 
-Travel Diary (旅食日記) adopts a **Feature-First** architecture design, organizing code around feature modules with each module following Clean Architecture principles internally.
+Lorescape (an AI-powered voice tour guide app) adopts a **Feature-First** architecture design, organizing code around feature modules with each module following Clean Architecture principles internally.
 
 #### Architecture Principles
 
@@ -155,56 +155,52 @@ Travel Diary (旅食日記) adopts a **Feature-First** architecture design, orga
 5. **Security** - Sensitive information is managed via environment variables, never committed to version control
 6. **Domain-Driven Design (DDD)** - Emphasize a rich understanding of the domain, using domain models to guide development
 7. **Mobile-First** - Focus on mobile use cases to ensure optimal experience
-8. **Privacy-First** - User diaries are private by default, with secure data storage
+8. **Privacy-First** - User journey data and cultural footprint logs are private by default, with secure data storage
 
 ### Project Structure
 
 ```
 instant_explore/
-├── frontend/                 # Flutter application
+├── frontend/                    # Flutter application
 │   ├── lib/
-│   │   ├── main.dart         # Application entry point
-│   │   ├── core/             # Core shared functionality
-│   │   │   ├── config/       # Application configuration
-│   │   │   │   ├── api_keys.dart      # Secure API key management
-│   │   │   │   ├── app_config.dart
-│   │   │   │   └── theme_config.dart
-│   │   │   ├── constants/    # Constant definitions
-│   │   │   │   ├── app_constants.dart
-│   │   │   │   ├── api_constants.dart
-│   │   │   │   └── ui_constants.dart
-│   │   │   ├── utils/        # Utility functions
-│   │   │   │   ├── date_utils.dart
-│   │   │   │   ├── validation_utils.dart
-│   │   │   │   └── format_utils.dart
-│   │   │   ├── models/       # Infrastructure data models
-│   │   │   │   └── api_response.dart
-│   │   │   └── services/     # Core services
-│   │   │       ├── http_service.dart
-│   │   │       ├── storage_service.dart
-│   │   │       └── analytics_service.dart
-│   │   ├── shared/           # Shared components
-│   │   │   ├── widgets/      # Shared UI components
-│   │   │   │   ├── custom_button.dart
-│   │   │   │   ├── loading_widget.dart
-│   │   │   │   └── error_widget.dart
-│   │   │   └── models/       # Cross-feature business models
-│   │   │       └── user_preferences.dart
-│   │   └── features/         # Feature modules
-│   │       ├── diary/        # Diary management features
-│   │       ├── images/       # Image upload and management
-│   │       └── places/       # Place selection and search
-│   ├── test/                 # Test files
-│   ├── assets/               # Static resources
-│   ├── ios/                  # iOS platform files
-│   ├── android/              # Android platform files
-│   └── pubspec.yaml          # Flutter project configuration
-├── scripts/                  # Execution scripts (optional)
-│   ├── dev.sh               # Unix/Linux/macOS development script
-│   ├── dev.bat              # Windows development script
-│   └── setup.sh             # Environment setup script
-├── docs/                     # Project documentation
-└── README.md                 # Project readme
+│   │   ├── main.dart            # Application entry point
+│   │   ├── app.dart             # App-level setup (router, theme)
+│   │   ├── firebase_options.dart
+│   │   ├── common/              # Shared configuration & utilities
+│   │   │   ├── config/          # App config, API keys, theme
+│   │   │   ├── constants/       # Global constants
+│   │   │   └── utils/           # Utility functions
+│   │   ├── core/                # Core infrastructure
+│   │   │   ├── errors/          # Shared error types
+│   │   │   ├── services/        # HTTP, storage, analytics, etc.
+│   │   │   └── utils/           # Core-level helpers
+│   │   ├── shared/              # Reusable presentation helpers
+│   │   │   ├── extensions/      # Dart/Flutter extensions
+│   │   │   └── widgets/         # Shared UI components
+│   │   └── features/            # Feature modules
+│   │       ├── ads/             # Ad integration
+│   │       ├── camera/          # Camera capture
+│   │       ├── explore/         # Nearby place exploration
+│   │       ├── export/          # Export journey data
+│   │       ├── journey/         # Cultural footprint log
+│   │       ├── narration/       # AI voice guide (Gemini + TTS)
+│   │       ├── onboarding/      # First-run onboarding flow
+│   │       ├── quick_guide/     # Quick guide entry
+│   │       ├── saved_locations/ # Saved places
+│   │       ├── settings/        # Settings screen
+│   │       ├── share/           # Share functionality
+│   │       ├── subscription/    # RevenueCat subscriptions
+│   │       ├── trip/            # Trip management
+│   │       └── usage/           # Usage tracking / limits
+│   ├── test/                    # Test files
+│   ├── assets/                  # Static resources
+│   ├── ios/                     # iOS platform files
+│   ├── android/                 # Android platform files
+│   └── pubspec.yaml             # Flutter project configuration
+├── supabase/                    # Supabase schema & config
+├── docs/                        # Project documentation
+├── landing/                     # Landing page assets
+└── README.md                    # Project readme
 ```
 
 ### Feature Module Structure
@@ -213,36 +209,43 @@ Each Feature module follows Clean Architecture layering internally:
 
 ```
 features/[feature_name]/
-├── models/                   # Data model layer
-│   ├── [feature]_model.dart      # Data entities
-│   └── [feature]_repository.dart # Repository interface
-├── services/                 # Business logic layer
-│   ├── [feature]_service.dart     # Business logic implementation
-│   └── [feature]_repository_impl.dart # Repository implementation
-├── widgets/                  # UI component layer
-│   ├── [feature]_card.dart        # Feature-related components
-│   └── [feature]_list.dart        # List components
-└── screens/                  # Screen layer
-    ├── [feature]_screen.dart      # Main screen
-    └── [feature]_detail_screen.dart # Detail screen
+├── data/                      # Data sources & external service wrappers
+│   ├── [feature]_service.dart      # API / SDK integration
+│   └── mappers/                    # DTO ↔ domain mappers
+├── domain/                    # Business logic (framework-agnostic)
+│   ├── models/                     # Domain entities & value objects
+│   ├── services/                   # Domain services
+│   ├── use_cases/                  # Application use cases
+│   └── errors/                     # Domain-specific exceptions
+├── presentation/              # Flutter-facing layer
+│   ├── controllers/                # Riverpod notifiers / controllers
+│   ├── screens/                    # Screen widgets
+│   └── widgets/                    # Feature-scoped widgets
+└── providers.dart             # Riverpod providers for this feature
 ```
 
-### Core Modules
+### Common Module (`lib/common/`)
 
-The Core module is responsible for the application's core infrastructure:
+Shared configuration and utilities used across features:
 
-- **config/** - Application configuration, themes, secure API key management
+- **config/** - App configuration, theme, secure API key management
 - **constants/** - Global constant definitions
 - **utils/** - Common utility functions
-- **models/** - Infrastructure data models (API response formats, etc.)
+
+### Core Module (`lib/core/`)
+
+Core infrastructure that supports feature modules:
+
+- **errors/** - Shared error types
 - **services/** - Core services (HTTP, storage, analytics, etc.)
+- **utils/** - Core-level helpers
 
-### Shared Module
+### Shared Module (`lib/shared/`)
 
-Provides cross-feature shared components:
+Cross-feature presentation helpers:
 
 - **widgets/** - Reusable UI components
-- **models/** - Cross-feature business domain models (user preferences, etc.)
+- **extensions/** - Dart/Flutter extensions
 
 ### Data Flow Architecture
 
@@ -261,7 +264,7 @@ External Services (Supabase, Google APIs)
 1. **UI Layer** - Handles user interaction and screen rendering
 2. **Business Logic Layer** - Handles business logic and state management
 3. **Data Layer** - Handles data access and API calls
-4. **External Services** - Supabase (Database, Storage, Auth), Google Places API, Google Maps API
+4. **External Services** - Supabase (Database, Storage, Auth), Google Maps API, Firebase AI (Gemini), RevenueCat (subscriptions)
 
 ## Lint Rules
 

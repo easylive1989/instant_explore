@@ -1,6 +1,6 @@
 # iOS Share Extension 設定指南
 
-本文件說明如何在 Xcode 中為 Contexture 讀景 App 設定 iOS Share Extension，讓使用者可以從 Google Maps 分享地點到 App。
+本文件說明如何在 Xcode 中為 Lorescape App 設定 iOS Share Extension，讓使用者可以從 Google Maps 分享地點到 App。
 
 > **前置條件**：已完成 `receive_sharing_intent` 套件的 Flutter 端整合（`pubspec.yaml`、`providers.dart`、`app.dart`）。
 
@@ -291,14 +291,14 @@ ios/
 
 1. 用 Xcode 編譯並安裝 App 到裝置
 2. 開啟 Safari，瀏覽任意 Google Maps 地點頁面
-3. 點擊分享按鈕 → 在分享清單中找到 **Contexture**
+3. 點擊分享按鈕 → 在分享清單中找到 **Lorescape**
 4. 點擊 → 確認 App 開啟後顯示「已儲存至地點清單」的 SnackBar
 
 ### 8.3 常見問題
 
 | 問題 | 解法 |
 |------|------|
-| 分享清單中看不到 Contexture | 確認 Info.plist 的 `NSExtensionActivationRule` 設定正確，且 Extension 有正確簽署 |
+| 分享清單中看不到 Lorescape | 確認 Info.plist 的 `NSExtensionActivationRule` 設定正確，且 Extension 有正確簽署 |
 | App 開啟但沒有接收到資料 | 確認主 App 和 Extension 使用相同的 App Group ID |
 | 編譯錯誤：找不到 module | 執行 `cd ios && pod install`，確認 Podfile 包含 ShareExtension target |
 | Extension 閃退 | 檢查 `ShareViewController.swift` 的 `appGroupId` 是否與 entitlements 中一致 |

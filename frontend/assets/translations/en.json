@@ -7,7 +7,7 @@
   "gion_district": "Gion District",
   "sites_nearby_hook": "12 historical sites nearby. Did you know Gion was built to accommodate the needs of travelers to the Yasaka Shrine?",
   "app": {
-    "name": "Contexture",
+    "name": "Lorescape",
     "tagline": "Your AI Pocket Historian"
   },
   "config_screen": {
@@ -198,7 +198,7 @@
     "confirm": "Confirm",
     "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
     "app_version": "Version information unavailable",
-    "copyright": "© 2025 Contexture",
+    "copyright": "© 2025 Lorescape",
     "daily_usage": "Daily Usage",
     "remaining_today": "{remaining} remaining today",
     "theme": "Appearance",
@@ -312,7 +312,7 @@
     "share": "Share",
     "visited": "Visited",
     "explore_more": "Explore More",
-    "share_text": "I explored this place with Contexture"
+    "share_text": "I explored this place with Lorescape"
   },
   "onboarding": {
     "skip": "Skip",
@@ -320,7 +320,7 @@
     "try_sample": "Try a sample guide",
     "try_sample_hint": "A full voice tour of Fushimi Inari Taisha — works offline.",
     "welcome": {
-      "title": "Welcome to Contexture",
+      "title": "Welcome to Lorescape",
       "body": "Your AI pocket historian — giving every stop along the way real meaning."
     },
     "quick_guide": {

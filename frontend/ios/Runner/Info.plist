@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Contexture</string>
+	<string>Lorescape</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Contexture</string>
+	<string>Lorescape</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -54,13 +54,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>讀景需要使用相機拍攝照片，以分析地點提供導覽。</string>
+	<string>Lorescape 需要使用相機拍攝照片，以分析地點提供導覽。</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>讀景需要存取您的相片庫，以分析地點提供導覽。</string>
+	<string>Lorescape 需要存取您的相片庫，以分析地點提供導覽。</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-9031377620197189~3040449773</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

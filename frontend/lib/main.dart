@@ -55,7 +55,7 @@ Future<Widget> init() async {
     saveLocale: true,
     child: ProviderScope(
       overrides: [defaultOnboardingRepositoryOverride],
-      child: const ContextureApp(),
+      child: const LorescapeApp(),
     ),
   );
 }

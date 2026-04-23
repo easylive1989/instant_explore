@@ -6,7 +6,7 @@ class AppConfig {
   AppConfig._();
 
   /// App name displayed in UI
-  static const String appName = '旅食日記';
+  static const String appName = 'Lorescape';
 
   /// App version (should match pubspec.yaml)
   static const String appVersion = '1.0.0';
