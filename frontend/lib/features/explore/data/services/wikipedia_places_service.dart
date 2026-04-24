@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/data/dto/wiki_geo_search_result_dto.dart';
+import 'package:context_app/features/explore/data/dto/wikidata_entity_dto.dart';
 import 'package:context_app/features/explore/domain/errors/place_error.dart';
 import 'package:http/http.dart' as http;
 
@@ -69,5 +70,62 @@ class WikipediaPlacesService {
       if (dto != null) results.add(dto);
     }
     return results;
+  }
+
+  static const int _batchSize = 50;
+
+  /// Batch-fetches Wikidata entities by id.
+  ///
+  /// Chunks requests of more than [_batchSize] ids into multiple calls.
+  Future<Map<String, WikidataEntityDto>> fetchEntities(List<String> ids) async {
+    if (ids.isEmpty) return const {};
+
+    final result = <String, WikidataEntityDto>{};
+    for (var i = 0; i < ids.length; i += _batchSize) {
+      final chunk = ids.sublist(
+        i,
+        i + _batchSize > ids.length ? ids.length : i + _batchSize,
+      );
+      result.addAll(await _fetchEntityChunk(chunk));
+    }
+    return result;
+  }
+
+  Future<Map<String, WikidataEntityDto>> _fetchEntityChunk(
+    List<String> ids,
+  ) async {
+    final uri = Uri.https('www.wikidata.org', '/w/api.php', {
+      'action': 'wbgetentities',
+      'ids': ids.join('|'),
+      'props': 'claims',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+
+    if (response.statusCode != 200) {
+      throw AppError(
+        type: PlaceError.searchFailed,
+        message: 'Wikidata wbgetentities failed',
+        context: {'status_code': response.statusCode},
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final entities = data['entities'];
+    if (entities is! Map) return const {};
+
+    final result = <String, WikidataEntityDto>{};
+    for (final entry in entities.entries) {
+      final value = entry.value;
+      if (value is! Map) continue;
+      result[entry.key] = WikidataEntityDto.fromEntity(
+        Map<String, dynamic>.from(value),
+      );
+    }
+    return result;
   }
 }

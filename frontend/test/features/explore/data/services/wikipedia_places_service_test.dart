@@ -91,4 +91,66 @@ void main() {
       );
     });
   });
+
+  group('WikipediaPlacesService.fetchEntities', () {
+    test('joins ids with | and parses claims', () async {
+      late Uri capturedUri;
+      final mockClient = MockClient((req) async {
+        capturedUri = req.url;
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'entities': {
+              'Q221716': {
+                'id': 'Q221716',
+                'claims': {
+                  'P31': [
+                    {'mainsnak': {'datavalue': {'value': {'id': 'Q5393308'}}}},
+                  ],
+                },
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final entities = await service.fetchEntities(['Q221716']);
+
+      expect(capturedUri.host, 'www.wikidata.org');
+      expect(capturedUri.queryParameters['action'], 'wbgetentities');
+      expect(capturedUri.queryParameters['ids'], 'Q221716');
+      expect(capturedUri.queryParameters['props'], 'claims');
+      expect(entities['Q221716']?.p31ClassIds, ['Q5393308']);
+    });
+
+    test('returns empty map when given empty id list', () async {
+      final mockClient = MockClient((_) async {
+        fail('HTTP should not be called for empty list');
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+      expect(await service.fetchEntities([]), isEmpty);
+    });
+
+    test('chunks requests of more than 50 ids', () async {
+      final calls = <String>[];
+      final mockClient = MockClient((req) async {
+        calls.add(req.url.queryParameters['ids']!);
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({'entities': {}})),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final ids = List.generate(75, (i) => 'Q$i');
+      await service.fetchEntities(ids);
+
+      expect(calls, hasLength(2));
+      expect(calls[0].split('|'), hasLength(50));
+      expect(calls[1].split('|'), hasLength(25));
+    });
+  });
 }
