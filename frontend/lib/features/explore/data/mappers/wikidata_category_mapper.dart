@@ -20,6 +20,10 @@ class WikidataCategoryMapper {
     'Q123314524': PlaceCategory.historicalCultural, // yamajiro
     'Q667783': PlaceCategory.historicalCultural, // sandō
     'Q162633': PlaceCategory.historicalCultural, // academy (書院)
+    'Q44539': PlaceCategory.historicalCultural, // temple (generic)
+    'Q1200957': PlaceCategory.historicalCultural, // pilgrimage site
+    'Q15243209': PlaceCategory.historicalCultural, // historic district
+    'Q1785071': PlaceCategory.historicalCultural, // national historic site (US)
     // --- museum / art ---
     'Q33506': PlaceCategory.museumArt, // museum
     'Q207694': PlaceCategory.museumArt, // art museum
