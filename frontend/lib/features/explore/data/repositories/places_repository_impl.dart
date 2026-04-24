@@ -1,28 +1,20 @@
 import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/explore/data/dto/wiki_geo_search_result_dto.dart';
+import 'package:context_app/features/explore/data/dto/wikidata_entity_dto.dart';
+import 'package:context_app/features/explore/data/mappers/wikidata_category_mapper.dart';
+import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
 import 'package:context_app/features/explore/domain/errors/place_error.dart';
-import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
-import 'package:context_app/features/explore/data/services/places_api_service.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
+import 'package:context_app/features/explore/domain/models/place_photo.dart';
+import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
 class PlacesRepositoryImpl implements PlacesRepository {
-  final PlacesApiService _apiService;
+  final WikipediaPlacesService _service;
 
-  PlacesRepositoryImpl(this._apiService);
-
-  static const List<String> _includedTypes = [
-    'tourist_attraction',
-    'historical_landmark',
-    'art_gallery',
-    'museum',
-    'park',
-    'national_park',
-    'city_hall',
-    'library',
-    'aquarium',
-    'zoo',
-  ];
+  PlacesRepositoryImpl(this._service);
 
   @override
   Future<List<Place>> getNearbyPlaces(
@@ -31,17 +23,14 @@ class PlacesRepositoryImpl implements PlacesRepository {
     required double radius,
   }) async {
     try {
-      final dtos = await _apiService.searchNearby(
-        location,
-        includedTypes: _includedTypes,
-        languageCode: language.code,
-        radius: radius,
+      final wikiLang = _wikiLang(language);
+      final dtos = await _service.geoSearch(
+        lat: location.latitude,
+        lon: location.longitude,
+        radiusMeters: radius,
+        wikiLang: wikiLang,
       );
-
-      // DTO -> Domain 轉換，同時產生照片 URL
-      return dtos
-          .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
-          .toList();
+      return _buildPlaces(dtos);
     } on AppError {
       rethrow;
     } catch (e, stackTrace) {
@@ -59,26 +48,8 @@ class PlacesRepositoryImpl implements PlacesRepository {
     String query, {
     required Language language,
   }) async {
-    try {
-      final dtos = await _apiService.searchByText(
-        query,
-        languageCode: language.code,
-      );
-
-      // DTO -> Domain 轉換，同時產生照片 URL
-      return dtos
-          .map((dto) => dto.toDomain(apiKey: _apiService.apiKey))
-          .toList();
-    } on AppError {
-      rethrow;
-    } catch (e, stackTrace) {
-      throw AppError(
-        type: PlaceError.unknown,
-        message: '搜尋地點失敗',
-        originalException: e,
-        stackTrace: stackTrace,
-      );
-    }
+    // Implemented in Task 11.
+    throw UnimplementedError();
   }
 
   @override
@@ -86,21 +57,56 @@ class PlacesRepositoryImpl implements PlacesRepository {
     String placeId, {
     required Language language,
   }) async {
-    try {
-      final dto = await _apiService.getPlaceById(
-        placeId,
-        languageCode: language.code,
-      );
-      return dto?.toDomain(apiKey: _apiService.apiKey);
-    } on AppError {
-      rethrow;
-    } catch (e, stackTrace) {
-      throw AppError(
-        type: PlaceError.unknown,
-        message: '取得地點詳情失敗',
-        originalException: e,
-        stackTrace: stackTrace,
-      );
-    }
+    // Implemented in Task 12.
+    throw UnimplementedError();
   }
+
+  Future<List<Place>> _buildPlaces(List<WikiGeoSearchResultDto> dtos) async {
+    final withIds = dtos.where((dto) => dto.wikidataId != null).toList();
+    if (withIds.isEmpty) return const [];
+
+    final entities = await _service.fetchEntities(
+      withIds.map((dto) => dto.wikidataId!).toList(),
+    );
+
+    final places = <Place>[];
+    for (final dto in withIds) {
+      final entity = entities[dto.wikidataId!];
+      if (entity == null) continue;
+      final category = WikidataCategoryMapper.categorize(entity.p31ClassIds);
+      if (category == null) continue;
+      places.add(_placeFromDto(dto, entity, category));
+    }
+    return places;
+  }
+
+  Place _placeFromDto(
+    WikiGeoSearchResultDto dto,
+    WikidataEntityDto entity,
+    PlaceCategory category,
+  ) {
+    return Place(
+      id: 'wikidata:${entity.id}',
+      name: dto.title,
+      formattedAddress: '',
+      location: PlaceLocation(latitude: dto.lat, longitude: dto.lon),
+      rating: null,
+      userRatingCount: null,
+      types: entity.p31ClassIds,
+      photos: dto.thumbnailUrl == null
+          ? const []
+          : [
+              PlacePhoto(
+                url: dto.thumbnailUrl!,
+                widthPx: dto.thumbnailWidth ?? 0,
+                heightPx: dto.thumbnailHeight ?? 0,
+                authorAttributions: const [],
+              ),
+            ],
+      category: category,
+    );
+  }
+
+  String _wikiLang(Language language) =>
+      language.code.split('-').first.toLowerCase();
 }

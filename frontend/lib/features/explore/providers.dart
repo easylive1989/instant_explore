@@ -1,7 +1,7 @@
 import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
-import 'package:context_app/features/explore/data/services/places_api_service.dart';
+import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
 import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
@@ -16,15 +16,14 @@ final locationServiceProvider = Provider<LocationService>((ref) {
   return GeolocatorService();
 });
 
-final placesApiServiceProvider = Provider<PlacesApiService>((ref) {
-  final apiKey = ref.watch(apiConfigProvider).googleMapsApiKey;
-  return PlacesApiService(apiKey);
+final wikipediaPlacesServiceProvider = Provider<WikipediaPlacesService>((ref) {
+  return WikipediaPlacesService();
 });
 
 final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
-  final placesApiService = ref.watch(placesApiServiceProvider);
+  final service = ref.watch(wikipediaPlacesServiceProvider);
   final cacheService = ref.watch(placesCacheServiceProvider);
-  final apiRepository = PlacesRepositoryImpl(placesApiService);
+  final apiRepository = PlacesRepositoryImpl(service);
   return CachingPlacesRepository(apiRepository, cacheService);
 });
 

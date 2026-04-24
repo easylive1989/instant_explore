@@ -1,98 +1,69 @@
-import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
+import 'package:context_app/features/explore/data/dto/wiki_geo_search_result_dto.dart';
+import 'package:context_app/features/explore/data/dto/wikidata_entity_dto.dart';
 import 'package:context_app/features/explore/data/repositories/places_repository_impl.dart';
-import 'package:context_app/features/explore/data/services/places_api_service.dart';
+import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockPlacesApiService extends Mock implements PlacesApiService {}
-
-class FakePlaceLocation extends Fake implements PlaceLocation {}
+class MockWikipediaPlacesService extends Mock
+    implements WikipediaPlacesService {}
 
 void main() {
   late PlacesRepositoryImpl repository;
-  late MockPlacesApiService mockApiService;
+  late MockWikipediaPlacesService mockService;
 
-  const testLocation = PlaceLocation(
-    latitude: 25.0330,
-    longitude: 121.5654,
-  );
+  const testLocation = PlaceLocation(latitude: 25.0336, longitude: 121.5644);
   const testLanguage = Language.traditionalChinese;
   const testRadius = 1000.0;
 
-  setUpAll(() {
-    registerFallbackValue(FakePlaceLocation());
-  });
-
   setUp(() {
-    mockApiService = MockPlacesApiService();
-    repository = PlacesRepositoryImpl(mockApiService);
-
-    when(() => mockApiService.apiKey).thenReturn('test-api-key');
+    mockService = MockWikipediaPlacesService();
+    repository = PlacesRepositoryImpl(mockService);
   });
 
-  /// 建立測試用 GooglePlaceDto
-  GooglePlaceDto createDto({
-    required String id,
-    required String name,
-    int? userRatingCount,
-    double? rating,
+  WikiGeoSearchResultDto geoDto({
+    required String title,
+    required String wikidataId,
+    String? thumb = 'https://img/x.jpg',
   }) {
-    return GooglePlaceDto(
-      id: id,
-      displayName: {'text': name},
-      formattedAddress: 'Test Address',
-      location: {
-        'latitude': 25.0330,
-        'longitude': 121.5654,
-      },
-      rating: rating,
-      userRatingCount: userRatingCount,
-      types: ['tourist_attraction'],
-      photos: [],
+    return WikiGeoSearchResultDto(
+      pageId: title.hashCode,
+      title: title,
+      lat: 25.0,
+      lon: 121.0,
+      thumbnailUrl: thumb,
+      thumbnailWidth: thumb == null ? null : 400,
+      thumbnailHeight: thumb == null ? null : 300,
+      wikidataId: wikidataId,
     );
   }
 
-  group('getNearbyPlaces - 回傳所有地點（不過濾）', () {
-    test('應回傳所有地點，包括評論數少的', () async {
-      final dtos = [
-        createDto(id: '1', name: 'Popular', userRatingCount: 500),
-        createDto(id: '2', name: 'Few Reviews', userRatingCount: 5),
-        createDto(id: '3', name: 'No Reviews', userRatingCount: null),
-      ];
+  group('getNearbyPlaces', () {
+    test('calls geoSearch with zh, then wbgetentities, builds Place list',
+        () async {
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => [
+            geoDto(title: '清水寺', wikidataId: 'Q221716'),
+            geoDto(title: '小学校', wikidataId: 'Q17219693'),
+          ]);
 
-      when(
-        () => mockApiService.searchNearby(
-          any(),
-          includedTypes: any(named: 'includedTypes'),
-          languageCode: any(named: 'languageCode'),
-          radius: any(named: 'radius'),
-        ),
-      ).thenAnswer((_) async => dtos);
-
-      final result = await repository.getNearbyPlaces(
-        testLocation,
-        language: testLanguage,
-        radius: testRadius,
-      );
-
-      expect(result.length, 3);
-    });
-
-    test('應正確傳遞 userRatingCount 到 Domain Model', () async {
-      final dtos = [
-        createDto(id: '1', name: 'Place', userRatingCount: 42),
-      ];
-
-      when(
-        () => mockApiService.searchNearby(
-          any(),
-          includedTypes: any(named: 'includedTypes'),
-          languageCode: any(named: 'languageCode'),
-          radius: any(named: 'radius'),
-        ),
-      ).thenAnswer((_) async => dtos);
+      when(() => mockService.fetchEntities(any())).thenAnswer((_) async => {
+            'Q221716': const WikidataEntityDto(
+              id: 'Q221716',
+              p31ClassIds: ['Q5393308'], // temple → kept
+            ),
+            'Q17219693': const WikidataEntityDto(
+              id: 'Q17219693',
+              p31ClassIds: ['Q5358913'], // elementary school → dropped
+            ),
+          });
 
       final result = await repository.getNearbyPlaces(
         testLocation,
@@ -100,30 +71,64 @@ void main() {
         radius: testRadius,
       );
 
-      expect(result.first.userRatingCount, 42);
+      expect(result, hasLength(1));
+      expect(result.first.name, '清水寺');
+      expect(result.first.id, 'wikidata:Q221716');
+      expect(result.first.category, PlaceCategory.historicalCultural);
+      expect(result.first.photos.first.url, 'https://img/x.jpg');
+
+      verify(() => mockService.geoSearch(
+            lat: 25.0336,
+            lon: 121.5644,
+            radiusMeters: 1000.0,
+            wikiLang: 'zh',
+          )).called(1);
     });
-  });
 
-  group('searchPlaces - 回傳所有地點（不過濾）', () {
-    test('應回傳所有搜尋結果', () async {
-      final dtos = [
-        createDto(id: '1', name: 'Popular', userRatingCount: 200),
-        createDto(id: '2', name: 'Tiny', userRatingCount: 3),
-      ];
+    test('skips results with no wikidata id', () async {
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => [
+            const WikiGeoSearchResultDto(
+              pageId: 1,
+              title: 'orphan',
+              lat: 0,
+              lon: 0,
+              // no wikidataId
+            ),
+          ]);
+      when(() => mockService.fetchEntities(any()))
+          .thenAnswer((_) async => {});
 
-      when(
-        () => mockApiService.searchByText(
-          any(),
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).thenAnswer((_) async => dtos);
-
-      final result = await repository.searchPlaces(
-        '台北景點',
+      final result = await repository.getNearbyPlaces(
+        testLocation,
         language: testLanguage,
+        radius: testRadius,
       );
 
-      expect(result.length, 2);
+      expect(result, isEmpty);
+    });
+
+    test('Place.photos is empty when no thumbnail', () async {
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => [
+            geoDto(title: 't', wikidataId: 'Q1', thumb: null),
+          ]);
+      when(() => mockService.fetchEntities(any())).thenAnswer((_) async => {
+            'Q1': const WikidataEntityDto(id: 'Q1', p31ClassIds: ['Q33506']),
+          });
+
+      final result = await repository.getNearbyPlaces(
+          testLocation, language: testLanguage, radius: testRadius);
+
+      expect(result.first.photos, isEmpty);
     });
   });
 }
