@@ -16,6 +16,9 @@ class PlacesRepositoryImpl implements PlacesRepository {
 
   PlacesRepositoryImpl(this._service);
 
+  static const int _minResultsBeforeRetry = 3;
+  static const double _retryRadiusFactor = 5.0;
+
   @override
   Future<List<Place>> getNearbyPlaces(
     PlaceLocation location, {
@@ -24,13 +27,16 @@ class PlacesRepositoryImpl implements PlacesRepository {
   }) async {
     try {
       final wikiLang = _wikiLang(language);
-      final dtos = await _service.geoSearch(
-        lat: location.latitude,
-        lon: location.longitude,
-        radiusMeters: radius,
-        wikiLang: wikiLang,
+      final places = await _searchAtRadius(location, wikiLang, radius);
+      if (places.length >= _minResultsBeforeRetry) return places;
+
+      final retried = await _searchAtRadius(
+        location,
+        wikiLang,
+        radius * _retryRadiusFactor,
       );
-      return _buildPlaces(dtos);
+      // Prefer the larger list.
+      return retried.length > places.length ? retried : places;
     } on AppError {
       rethrow;
     } catch (e, stackTrace) {
@@ -41,6 +47,20 @@ class PlacesRepositoryImpl implements PlacesRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  Future<List<Place>> _searchAtRadius(
+    PlaceLocation location,
+    String wikiLang,
+    double radius,
+  ) async {
+    final dtos = await _service.geoSearch(
+      lat: location.latitude,
+      lon: location.longitude,
+      radiusMeters: radius,
+      wikiLang: wikiLang,
+    );
+    return _buildPlaces(dtos);
   }
 
   @override

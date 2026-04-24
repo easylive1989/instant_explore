@@ -131,4 +131,70 @@ void main() {
       expect(result.first.photos, isEmpty);
     });
   });
+
+  group('getNearbyPlaces dynamic radius', () {
+    test('retries once with radius*5 when <3 kept places', () async {
+      final calls = <double>[];
+
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((inv) async {
+        calls.add(inv.namedArguments[#radiusMeters] as double);
+        if (calls.length == 1) {
+          return [geoDto(title: 'a', wikidataId: 'Q1')];
+        }
+        return [
+          geoDto(title: 'a', wikidataId: 'Q1'),
+          geoDto(title: 'b', wikidataId: 'Q2'),
+          geoDto(title: 'c', wikidataId: 'Q3'),
+        ];
+      });
+
+      when(() => mockService.fetchEntities(any())).thenAnswer((inv) async {
+        final ids = inv.positionalArguments.first as List<String>;
+        return {
+          for (final id in ids)
+            id: WikidataEntityDto(id: id, p31ClassIds: const ['Q33506']),
+        };
+      });
+
+      final result = await repository.getNearbyPlaces(
+          testLocation, language: testLanguage, radius: 1000);
+
+      expect(calls, [1000.0, 5000.0]);
+      expect(result, hasLength(3));
+    });
+
+    test('does not retry when >=3 kept places', () async {
+      final calls = <double>[];
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((inv) async {
+        calls.add(inv.namedArguments[#radiusMeters] as double);
+        return [
+          geoDto(title: 'a', wikidataId: 'Q1'),
+          geoDto(title: 'b', wikidataId: 'Q2'),
+          geoDto(title: 'c', wikidataId: 'Q3'),
+        ];
+      });
+      when(() => mockService.fetchEntities(any())).thenAnswer((inv) async {
+        final ids = inv.positionalArguments.first as List<String>;
+        return {
+          for (final id in ids)
+            id: WikidataEntityDto(id: id, p31ClassIds: const ['Q33506']),
+        };
+      });
+
+      await repository.getNearbyPlaces(
+          testLocation, language: testLanguage, radius: 1000);
+
+      expect(calls, [1000.0]);
+    });
+  });
 }
