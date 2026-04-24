@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/api_config.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
@@ -28,8 +27,7 @@ final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
 });
 
 final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
-  final apiKey = ref.watch(apiConfigProvider).googleMapsApiKey;
-  return HivePlacesCacheService(apiKey);
+  return HivePlacesCacheService();
 });
 
 // Filter Providers

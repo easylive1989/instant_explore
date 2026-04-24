@@ -1,143 +1,89 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:context_app/features/explore/data/dto/google_place_dto.dart';
+import 'package:context_app/features/explore/data/mappers/place_json_mapper.dart';
 import 'package:context_app/features/explore/data/mappers/place_location_mapper.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:hive/hive.dart';
 
-/// Hive 實作的地點快取服務
+/// Hive-backed cache for nearby places.
 ///
-/// 使用 Hive 儲存地點資料，支援 TTL 和距離判斷
-/// 內部使用 DTO 進行序列化，對外使用 Domain Model
+/// Stores [Place] objects directly as JSON. A [_cacheSchemaVersion] key
+/// is bumped when the on-disk format changes; a mismatch clears the box
+/// so callers transparently re-fetch fresh data.
 class HivePlacesCacheService {
-  final String _apiKey;
-
   static const String _boxName = 'places_cache';
   static const String _placesKey = 'cached_places';
   static const String _timestampKey = 'cache_timestamp';
   static const String _locationKey = 'last_search_location';
+  static const String _versionKey = 'cache_schema_version';
 
-  /// 快取有效期限（24 小時）
+  /// Bump whenever the on-disk format changes.
+  static const int _cacheSchemaVersion = 2;
+
   static const Duration _cacheTtl = Duration(hours: 24);
-
-  /// 重新搜尋的距離門檻（500 公尺）
   static const double _refreshDistanceThreshold = 500.0;
 
   Box? _box;
 
-  HivePlacesCacheService(this._apiKey);
-
-  /// 取得或開啟 Hive Box
   Future<Box> _getBox() async {
-    if (_box != null && _box!.isOpen) {
-      return _box!;
-    }
+    if (_box != null && _box!.isOpen) return _box!;
     _box = await Hive.openBox(_boxName);
+    await _migrateIfNeeded(_box!);
     return _box!;
+  }
+
+  Future<void> _migrateIfNeeded(Box box) async {
+    final stored = box.get(_versionKey);
+    if (stored != _cacheSchemaVersion) {
+      await box.clear();
+      await box.put(_versionKey, _cacheSchemaVersion);
+    }
   }
 
   Future<List<Place>?> getCachedPlaces() async {
     try {
       final box = await _getBox();
       final placesJson = box.get(_placesKey) as String?;
-
       if (placesJson == null) return null;
 
-      final List<dynamic> placesList = jsonDecode(placesJson);
-      // 使用 DTO 反序列化，然後轉換為 Domain Model
-      // apiKey 從建構函式注入，不需要快取
-      return placesList
-          .map((json) => GooglePlaceDto.fromJson(json as Map<String, dynamic>))
-          .map((dto) => dto.toDomain(apiKey: _apiKey))
+      final list = jsonDecode(placesJson) as List;
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(PlaceJsonMapper.fromJson)
           .toList();
-    } catch (e) {
-      // 解析失敗時返回 null，讓呼叫端重新取得資料
+    } catch (_) {
       return null;
     }
   }
 
   Future<void> cachePlaces(List<Place> places) async {
     final box = await _getBox();
-
-    // 將 Domain Model 轉換為可序列化的格式
-    final placesData = places.map((p) => _placeToJson(p)).toList();
-    final placesJson = jsonEncode(placesData);
-
-    await box.put(_placesKey, placesJson);
+    final data = places.map(PlaceJsonMapper.toJson).toList();
+    await box.put(_placesKey, jsonEncode(data));
     await box.put(_timestampKey, DateTime.now().millisecondsSinceEpoch);
-  }
-
-  /// 將 Place 轉換為可序列化的 JSON 格式
-  Map<String, dynamic> _placeToJson(Place place) {
-    return {
-      'id': place.id,
-      'displayName': {'text': place.name},
-      'formattedAddress': place.formattedAddress,
-      'location': {
-        'latitude': place.location.latitude,
-        'longitude': place.location.longitude,
-      },
-      'rating': place.rating,
-      'userRatingCount': place.userRatingCount,
-      'types': place.types,
-      'photos': place.photos
-          .map(
-            (photo) => {
-              'name': _extractPhotoNameFromUrl(photo.url),
-              'widthPx': photo.widthPx,
-              'heightPx': photo.heightPx,
-              'authorAttributions': photo.authorAttributions,
-            },
-          )
-          .toList(),
-    };
-  }
-
-  /// 從照片 URL 中提取 photo name
-  String _extractPhotoNameFromUrl(String url) {
-    // URL 格式: https://places.googleapis.com/v1/{name}/media?...
-    // name 格式應為: places/{place_id}/photos/{photo_reference}
-    final uri = Uri.parse(url);
-    var path = uri.path;
-
-    // 移除開頭的 /
-    if (path.startsWith('/')) {
-      path = path.substring(1);
-    }
-
-    // 移除 v1/ 前綴（如果存在）
-    if (path.startsWith('v1/')) {
-      path = path.substring(3);
-    }
-
-    // 移除 /media 後綴
-    if (path.endsWith('/media')) {
-      path = path.substring(0, path.length - 6);
-    }
-
-    return path;
   }
 
   Future<PlaceLocation?> getLastSearchLocation() async {
     try {
       final box = await _getBox();
-      final locationJson = box.get(_locationKey) as String?;
-
-      if (locationJson == null) return null;
-
-      final Map<String, dynamic> locationMap = jsonDecode(locationJson);
-      return PlaceLocationMapper.fromJson(locationMap);
-    } catch (e) {
+      final raw = box.get(_locationKey) as String?;
+      if (raw == null) return null;
+      return PlaceLocationMapper.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+    } catch (_) {
       return null;
     }
   }
 
   Future<void> saveLastSearchLocation(PlaceLocation location) async {
     final box = await _getBox();
-    final locationJson = jsonEncode(PlaceLocationMapper.toJson(location));
-    await box.put(_locationKey, locationJson);
+    await box.put(
+      _locationKey,
+      jsonEncode(PlaceLocationMapper.toJson(location)),
+    );
   }
 
   Future<void> clearCache() async {
@@ -148,49 +94,29 @@ class HivePlacesCacheService {
   }
 
   Future<bool> shouldRefresh(PlaceLocation currentLocation) async {
-    // 檢查快取是否過期
-    if (await _isCacheExpired()) {
-      return true;
-    }
-
-    // 檢查距離是否超過門檻
-    final lastLocation = await getLastSearchLocation();
-    if (lastLocation == null) {
-      return true;
-    }
-
-    final distance = _calculateDistance(lastLocation, currentLocation);
-    return distance > _refreshDistanceThreshold;
+    if (await _isCacheExpired()) return true;
+    final last = await getLastSearchLocation();
+    if (last == null) return true;
+    return _distanceMeters(last, currentLocation) > _refreshDistanceThreshold;
   }
 
-  /// 檢查快取是否已過期
   Future<bool> _isCacheExpired() async {
     final box = await _getBox();
-    final timestamp = box.get(_timestampKey) as int?;
-
-    if (timestamp == null) return true;
-
-    final cachedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final now = DateTime.now();
-    return now.difference(cachedTime) > _cacheTtl;
+    final ts = box.get(_timestampKey) as int?;
+    if (ts == null) return true;
+    final cached = DateTime.fromMillisecondsSinceEpoch(ts);
+    return DateTime.now().difference(cached) > _cacheTtl;
   }
 
-  /// 計算兩點之間的距離（Haversine 公式）
-  /// 返回距離（公尺）
-  double _calculateDistance(PlaceLocation from, PlaceLocation to) {
-    const earthRadiusMeters = 6371000.0;
-
-    final lat1Rad = from.latitude * pi / 180;
-    final lat2Rad = to.latitude * pi / 180;
-    final deltaLat = (to.latitude - from.latitude) * pi / 180;
-    final deltaLon = (to.longitude - from.longitude) * pi / 180;
-
-    final a =
-        sin(deltaLat / 2) * sin(deltaLat / 2) +
-        cos(lat1Rad) * cos(lat2Rad) * sin(deltaLon / 2) * sin(deltaLon / 2);
-
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return earthRadiusMeters * c;
+  double _distanceMeters(PlaceLocation a, PlaceLocation b) {
+    const earthRadius = 6371000.0;
+    final lat1 = a.latitude * pi / 180;
+    final lat2 = b.latitude * pi / 180;
+    final dLat = (b.latitude - a.latitude) * pi / 180;
+    final dLon = (b.longitude - a.longitude) * pi / 180;
+    final h =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
+    return earthRadius * 2 * atan2(sqrt(h), sqrt(1 - h));
   }
 }
