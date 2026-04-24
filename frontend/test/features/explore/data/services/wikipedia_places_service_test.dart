@@ -188,4 +188,92 @@ void main() {
       expect(results.first.wikidataId, 'Q221716');
     });
   });
+
+  group('WikipediaPlacesService.fetchEntityById', () {
+    test('fetches entity + page info and returns merged DTO', () async {
+      final mockClient = MockClient((req) async {
+        if (req.url.host == 'www.wikidata.org') {
+          return http.Response.bytes(
+            utf8.encode(jsonEncode({
+              'entities': {
+                'Q221716': {
+                  'id': 'Q221716',
+                  'claims': {
+                    'P31': [
+                      {'mainsnak': {'datavalue': {'value': {'id': 'Q5393308'}}}},
+                    ],
+                  },
+                  'sitelinks': {
+                    'jawiki': {'site': 'jawiki', 'title': '清水寺'},
+                  },
+                },
+              },
+            })),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        // ja.wikipedia.org page lookup
+        expect(req.url.host, 'ja.wikipedia.org');
+        expect(req.url.queryParameters['titles'], '清水寺');
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'query': {
+              'pages': {
+                '1758861': {
+                  'pageid': 1758861,
+                  'title': '清水寺',
+                  'coordinates': [{'lat': 34.9948, 'lon': 135.785}],
+                  'thumbnail': {
+                    'source': 'https://upload.wikimedia.org/k.jpg',
+                    'width': 400,
+                    'height': 300,
+                  },
+                  'pageprops': {'wikibase_item': 'Q221716'},
+                },
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final result = await service.fetchEntityById(
+        'Q221716',
+        wikiLang: 'ja',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.dto.title, '清水寺');
+      expect(result.dto.wikidataId, 'Q221716');
+      expect(result.entity.p31ClassIds, ['Q5393308']);
+    });
+
+    test('returns null when entity has no matching sitelink', () async {
+      final mockClient = MockClient((req) async {
+        expect(req.url.host, 'www.wikidata.org');
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'entities': {
+              'Q999': {
+                'id': 'Q999',
+                'claims': {},
+                'sitelinks': {},
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      expect(
+        await service.fetchEntityById('Q999', wikiLang: 'en'),
+        isNull,
+      );
+    });
+  });
 }

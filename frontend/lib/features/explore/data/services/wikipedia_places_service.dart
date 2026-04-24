@@ -177,4 +177,97 @@ class WikipediaPlacesService {
     }
     return result;
   }
+
+  /// Fetches a Wikidata entity by id plus the associated wiki page info
+  /// (title, coordinates, thumbnail) via the matching sitelink.
+  ///
+  /// Returns null if the entity has no sitelink on the requested wiki and
+  /// no fallback sitelink was found.
+  Future<WikiEntityWithPage?> fetchEntityById(
+    String wikidataId, {
+    required String wikiLang,
+  }) async {
+    final uri = Uri.https('www.wikidata.org', '/w/api.php', {
+      'action': 'wbgetentities',
+      'ids': wikidataId,
+      'props': 'claims|sitelinks',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+    if (response.statusCode != 200) {
+      throw AppError(
+        type: PlaceError.searchFailed,
+        message: 'Wikidata wbgetentities failed',
+        context: {'status_code': response.statusCode},
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final entityRaw = (data['entities'] as Map?)?[wikidataId];
+    if (entityRaw is! Map) return null;
+
+    final entity = WikidataEntityDto.fromEntity(
+      Map<String, dynamic>.from(entityRaw),
+    );
+    final sitelinks = entityRaw['sitelinks'];
+    if (sitelinks is! Map) return null;
+
+    // Prefer the user's language, fall back to enwiki.
+    final langKey = '${wikiLang}wiki';
+    final Map? link = (sitelinks[langKey] ?? sitelinks['enwiki']) as Map?;
+    if (link == null) return null;
+    final title = link['title'];
+    if (title is! String) return null;
+
+    final effectiveLang = link['site'] == 'enwiki' ? 'en' : wikiLang;
+
+    final dto = await _fetchPageByTitle(title, wikiLang: effectiveLang);
+    if (dto == null) return null;
+
+    return WikiEntityWithPage(dto: dto, entity: entity);
+  }
+
+  Future<WikiGeoSearchResultDto?> _fetchPageByTitle(
+    String title, {
+    required String wikiLang,
+  }) async {
+    final uri = Uri.https('$wikiLang.wikipedia.org', '/w/api.php', {
+      'action': 'query',
+      'titles': title,
+      'prop': 'pageimages|coordinates|pageprops',
+      'pithumbsize': '$_thumbSize',
+      'ppprop': 'wikibase_item',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+    if (response.statusCode != 200) return null;
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final pages = (data['query'] as Map?)?['pages'];
+    if (pages is! Map) return null;
+    for (final page in pages.values) {
+      if (page is! Map) continue;
+      final dto = WikiGeoSearchResultDto.fromPage(
+        Map<String, dynamic>.from(page),
+      );
+      if (dto != null) return dto;
+    }
+    return null;
+  }
+}
+
+/// Combined result of [WikipediaPlacesService.fetchEntityById].
+class WikiEntityWithPage {
+  final WikiGeoSearchResultDto dto;
+  final WikidataEntityDto entity;
+
+  const WikiEntityWithPage({required this.dto, required this.entity});
 }
