@@ -7,15 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('PlaceJsonMapper', () {
-    final place = Place(
+    const place = Place(
       id: 'wikidata:Q221716',
       name: '清水寺',
       formattedAddress: '',
-      location: const PlaceLocation(latitude: 34.9948, longitude: 135.785),
+      location: PlaceLocation(latitude: 34.9948, longitude: 135.785),
       rating: null,
       userRatingCount: null,
-      types: const ['Q5393308'],
-      photos: const [
+      types: ['Q5393308'],
+      photos: [
         PlacePhoto(
           url: 'https://img/x.jpg',
           widthPx: 400,
