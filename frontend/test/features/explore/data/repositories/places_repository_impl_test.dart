@@ -197,4 +197,52 @@ void main() {
       expect(calls, [1000.0]);
     });
   });
+
+  group('getNearbyPlaces language fallback', () {
+    test('falls back to en.wiki on zero results', () async {
+      final langs = <String>[];
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((inv) async {
+        final lang = inv.namedArguments[#wikiLang] as String;
+        langs.add(lang);
+        if (lang == 'zh') return [];
+        return [geoDto(title: 'en place', wikidataId: 'Q1')];
+      });
+      when(() => mockService.fetchEntities(any())).thenAnswer((_) async => {
+            'Q1': const WikidataEntityDto(
+              id: 'Q1', p31ClassIds: ['Q33506']),
+          });
+
+      final result = await repository.getNearbyPlaces(
+        testLocation, language: testLanguage, radius: 1000);
+
+      expect(langs, contains('zh'));
+      expect(langs, contains('en'));
+      expect(result.first.name, 'en place');
+    });
+
+    test('does not fall back when language is already en', () async {
+      final langs = <String>[];
+      when(() => mockService.geoSearch(
+            lat: any(named: 'lat'),
+            lon: any(named: 'lon'),
+            radiusMeters: any(named: 'radiusMeters'),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((inv) async {
+        langs.add(inv.namedArguments[#wikiLang] as String);
+        return [];
+      });
+      when(() => mockService.fetchEntities(any()))
+          .thenAnswer((_) async => {});
+
+      await repository.getNearbyPlaces(
+        testLocation, language: Language.english, radius: 1000);
+
+      expect(langs.every((l) => l == 'en'), isTrue);
+    });
+  });
 }

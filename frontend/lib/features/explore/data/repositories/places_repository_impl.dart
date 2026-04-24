@@ -27,16 +27,10 @@ class PlacesRepositoryImpl implements PlacesRepository {
   }) async {
     try {
       final wikiLang = _wikiLang(language);
-      final places = await _searchAtRadius(location, wikiLang, radius);
-      if (places.length >= _minResultsBeforeRetry) return places;
+      final initial = await _searchWithRetry(location, wikiLang, radius);
+      if (initial.isNotEmpty || wikiLang == 'en') return initial;
 
-      final retried = await _searchAtRadius(
-        location,
-        wikiLang,
-        radius * _retryRadiusFactor,
-      );
-      // Prefer the larger list.
-      return retried.length > places.length ? retried : places;
+      return _searchWithRetry(location, 'en', radius);
     } on AppError {
       rethrow;
     } catch (e, stackTrace) {
@@ -47,6 +41,21 @@ class PlacesRepositoryImpl implements PlacesRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  Future<List<Place>> _searchWithRetry(
+    PlaceLocation location,
+    String wikiLang,
+    double radius,
+  ) async {
+    final places = await _searchAtRadius(location, wikiLang, radius);
+    if (places.length >= _minResultsBeforeRetry) return places;
+    final retried = await _searchAtRadius(
+      location,
+      wikiLang,
+      radius * _retryRadiusFactor,
+    );
+    return retried.length > places.length ? retried : places;
   }
 
   Future<List<Place>> _searchAtRadius(
