@@ -77,8 +77,20 @@ class PlacesRepositoryImpl implements PlacesRepository {
     String query, {
     required Language language,
   }) async {
-    // Implemented in Task 11.
-    throw UnimplementedError();
+    try {
+      final wikiLang = _wikiLang(language);
+      final dtos = await _service.searchByText(query, wikiLang: wikiLang);
+      return _buildPlaces(dtos);
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '搜尋地點失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   @override

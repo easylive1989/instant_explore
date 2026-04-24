@@ -245,4 +245,28 @@ void main() {
       expect(langs.every((l) => l == 'en'), isTrue);
     });
   });
+
+  group('searchPlaces', () {
+    test('calls searchByText and applies P31 filter', () async {
+      when(() => mockService.searchByText(
+            any(),
+            wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => [
+            geoDto(title: '清水寺', wikidataId: 'Q221716'),
+            geoDto(title: '小学校', wikidataId: 'Q17219693'),
+          ]);
+      when(() => mockService.fetchEntities(any())).thenAnswer((_) async => {
+            'Q221716': const WikidataEntityDto(
+              id: 'Q221716', p31ClassIds: ['Q5393308']),
+            'Q17219693': const WikidataEntityDto(
+              id: 'Q17219693', p31ClassIds: ['Q5358913']),
+          });
+
+      final result = await repository.searchPlaces(
+        '清水寺', language: testLanguage);
+
+      expect(result, hasLength(1));
+      expect(result.first.name, '清水寺');
+    });
+  });
 }
