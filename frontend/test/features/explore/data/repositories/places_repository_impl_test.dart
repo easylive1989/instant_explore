@@ -269,4 +269,59 @@ void main() {
       expect(result.first.name, '清水寺');
     });
   });
+
+  group('getPlaceById', () {
+    test('returns Place for valid wikidata:Q id', () async {
+      when(() => mockService.fetchEntityById(
+            any(), wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => WikiEntityWithPage(
+            dto: geoDto(title: '清水寺', wikidataId: 'Q221716'),
+            entity: const WikidataEntityDto(
+              id: 'Q221716', p31ClassIds: ['Q5393308']),
+          ));
+
+      final place = await repository.getPlaceById(
+        'wikidata:Q221716', language: testLanguage);
+
+      expect(place, isNotNull);
+      expect(place!.id, 'wikidata:Q221716');
+      expect(place.category, PlaceCategory.historicalCultural);
+    });
+
+    test('returns null when service returns null', () async {
+      when(() => mockService.fetchEntityById(
+            any(), wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => null);
+
+      expect(
+        await repository.getPlaceById(
+          'wikidata:Q999', language: testLanguage),
+        isNull,
+      );
+    });
+
+    test('returns null when P31 not in whitelist', () async {
+      when(() => mockService.fetchEntityById(
+            any(), wikiLang: any(named: 'wikiLang'),
+          )).thenAnswer((_) async => WikiEntityWithPage(
+            dto: geoDto(title: 'school', wikidataId: 'Q17219693'),
+            entity: const WikidataEntityDto(
+              id: 'Q17219693', p31ClassIds: ['Q5358913']),
+          ));
+
+      expect(
+        await repository.getPlaceById(
+          'wikidata:Q17219693', language: testLanguage),
+        isNull,
+      );
+    });
+
+    test('returns null when id lacks wikidata: prefix', () async {
+      expect(
+        await repository.getPlaceById(
+          'ChIJN1t_xxxx', language: testLanguage),
+        isNull,
+      );
+    });
+  });
 }

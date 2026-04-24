@@ -93,13 +93,40 @@ class PlacesRepositoryImpl implements PlacesRepository {
     }
   }
 
+  static const String _wikidataPrefix = 'wikidata:';
+
   @override
   Future<Place?> getPlaceById(
     String placeId, {
     required Language language,
   }) async {
-    // Implemented in Task 12.
-    throw UnimplementedError();
+    if (!placeId.startsWith(_wikidataPrefix)) return null;
+    final wikidataId = placeId.substring(_wikidataPrefix.length);
+
+    try {
+      final wikiLang = _wikiLang(language);
+      final combined = await _service.fetchEntityById(
+        wikidataId,
+        wikiLang: wikiLang,
+      );
+      if (combined == null) return null;
+
+      final category = WikidataCategoryMapper.categorize(
+        combined.entity.p31ClassIds,
+      );
+      if (category == null) return null;
+
+      return _placeFromDto(combined.dto, combined.entity, category);
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: PlaceError.unknown,
+        message: '取得地點詳情失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Future<List<Place>> _buildPlaces(List<WikiGeoSearchResultDto> dtos) async {
