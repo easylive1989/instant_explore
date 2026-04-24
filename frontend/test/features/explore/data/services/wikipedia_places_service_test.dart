@@ -153,4 +153,39 @@ void main() {
       expect(calls[1].split('|'), hasLength(25));
     });
   });
+
+  group('WikipediaPlacesService.searchByText', () {
+    test('issues generator=search and returns DTOs', () async {
+      late Uri capturedUri;
+      final mockClient = MockClient((req) async {
+        capturedUri = req.url;
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'query': {
+              'pages': {
+                '1': {
+                  'pageid': 1,
+                  'title': '清水寺',
+                  'coordinates': [
+                    {'lat': 34.9948, 'lon': 135.7850}
+                  ],
+                  'pageprops': {'wikibase_item': 'Q221716'},
+                },
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final results = await service.searchByText('清水寺', wikiLang: 'zh');
+
+      expect(capturedUri.host, 'zh.wikipedia.org');
+      expect(capturedUri.queryParameters['generator'], 'search');
+      expect(capturedUri.queryParameters['gsrsearch'], '清水寺');
+      expect(results.first.wikidataId, 'Q221716');
+    });
+  });
 }

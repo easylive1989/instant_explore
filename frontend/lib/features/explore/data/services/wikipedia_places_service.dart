@@ -72,6 +72,55 @@ class WikipediaPlacesService {
     return results;
   }
 
+  /// Searches Wikipedia articles by [query] text using generator=search.
+  ///
+  /// [wikiLang] selects the language edition (e.g. `'en'`, `'zh'`).
+  /// Returns an empty list when no pages are found.
+  /// Throws [AppError] with [PlaceError.searchFailed] on a non-200 response.
+  Future<List<WikiGeoSearchResultDto>> searchByText(
+    String query, {
+    required String wikiLang,
+    int limit = 10,
+  }) async {
+    final uri = Uri.https('$wikiLang.wikipedia.org', '/w/api.php', {
+      'action': 'query',
+      'generator': 'search',
+      'gsrsearch': query,
+      'gsrlimit': limit.toString(),
+      'prop': 'pageimages|coordinates|pageprops',
+      'pithumbsize': '$_thumbSize',
+      'ppprop': 'wikibase_item',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+
+    if (response.statusCode != 200) {
+      throw AppError(
+        type: PlaceError.searchFailed,
+        message: 'Wikipedia text search failed',
+        context: {'status_code': response.statusCode},
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final pages = (data['query'] as Map?)?['pages'];
+    if (pages is! Map) return const [];
+
+    final results = <WikiGeoSearchResultDto>[];
+    for (final page in pages.values) {
+      if (page is! Map) continue;
+      final dto = WikiGeoSearchResultDto.fromPage(
+        Map<String, dynamic>.from(page),
+      );
+      if (dto != null) results.add(dto);
+    }
+    return results;
+  }
+
   static const int _batchSize = 50;
 
   /// Batch-fetches Wikidata entities by id.
