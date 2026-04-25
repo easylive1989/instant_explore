@@ -34,6 +34,7 @@ class OnboardingPageArt extends StatelessWidget {
     return SizedBox(
       height: 320,
       child: Stack(
+        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
           _GhostSerial(label: serialLabel),
@@ -60,7 +61,7 @@ class _GhostSerial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: -28,
+      top: 0,
       left: -12,
       child: Text(
         label,

@@ -196,7 +196,7 @@ class _OnboardingWelcomeScreenState
       ),
       decoration: const PageDecoration(
         pageColor: Colors.transparent,
-        imagePadding: EdgeInsets.only(top: 24),
+        imagePadding: EdgeInsets.only(top: 48),
         contentMargin: EdgeInsets.zero,
         bodyPadding: EdgeInsets.zero,
         titlePadding: EdgeInsets.zero,

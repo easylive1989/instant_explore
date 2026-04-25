@@ -196,10 +196,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           child: Column(
             children: [
               Align(
-                alignment: Alignment.centerLeft,
-                child: AdaptiveIconButton(
-                  icon: Icon(Icons.close, color: cs.onSurface),
-                  onPressed: () => Navigator.of(context).pop(),
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: AdaptiveIconButton(
+                    icon: Icon(Icons.close, color: cs.onSurface),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
               ),
               Expanded(
