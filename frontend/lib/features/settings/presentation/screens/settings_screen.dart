@@ -134,11 +134,11 @@ class _LanguageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return _SettingsTile(
       icon: Icons.language,
-      iconColor: cs.primary,
-      iconBgColor: cs.primary.withValues(alpha: 0.2),
+      iconColor: colorScheme.primary,
+      iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
       title: 'settings.change_language'.tr(),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
