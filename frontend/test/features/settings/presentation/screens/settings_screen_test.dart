@@ -4,7 +4,6 @@ import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
-import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -43,18 +42,6 @@ void main() {
 
         _thenPremiumTileIsVisible();
         _thenUpgradeCtaIsHidden();
-      },
-    );
-
-    testWidgets(
-      'given the current theme is dark, when the user toggles theme off, '
-      'then the theme switch value flips to light',
-      (tester) async {
-        await _givenSettingsScreen(tester);
-
-        await _whenUserTogglesThemeSwitch(tester);
-
-        _thenThemeSwitchIsOff(tester);
       },
     );
 
@@ -105,11 +92,6 @@ Future<void> _givenSettingsScreen(
   await tester.pump(const Duration(milliseconds: 20));
 }
 
-Future<void> _whenUserTogglesThemeSwitch(WidgetTester tester) async {
-  await tester.tap(find.byType(AdaptiveSwitch));
-  await tester.pump(const Duration(milliseconds: 20));
-}
-
 Future<void> _whenVersionFutureResolves(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
@@ -118,7 +100,6 @@ Future<void> _whenVersionFutureResolves(WidgetTester tester) async {
 void _thenPreferencesSectionIsVisible() {
   expect(find.text('SETTINGS.PREFERENCES'), findsOneWidget);
   expect(find.text('settings.change_language'), findsOneWidget);
-  expect(find.text('settings.theme'), findsOneWidget);
 }
 
 void _thenUsageSectionIsVisible() {
@@ -136,13 +117,6 @@ void _thenPremiumTileIsVisible() {
 
 void _thenUpgradeCtaIsHidden() {
   expect(find.text('subscription.upgrade_cta'), findsNothing);
-}
-
-void _thenThemeSwitchIsOff(WidgetTester tester) {
-  final switchWidget = tester.widget<AdaptiveSwitch>(
-    find.byType(AdaptiveSwitch),
-  );
-  expect(switchWidget.value, isFalse);
 }
 
 void _thenVersionLabelIsVisible() {

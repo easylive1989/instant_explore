@@ -35,13 +35,7 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _SectionHeader(title: 'settings.preferences'.tr()),
           const SizedBox(height: 8),
-          _SectionContainer(
-            children: [
-              _LanguageTile(controller: controller),
-              _Divider(),
-              const _ThemeModeTile(),
-            ],
-          ),
+          _SectionContainer(children: [_LanguageTile(controller: controller)]),
           const SizedBox(height: 32),
           _SectionHeader(title: 'settings.daily_usage'.tr()),
           const SizedBox(height: 8),
@@ -142,17 +136,6 @@ class _SectionContainer extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      indent: 60,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    );
-  }
-}
-
 // ============================================================================
 // Tile widgets
 // ============================================================================
@@ -191,56 +174,6 @@ class _LanguageTile extends StatelessWidget {
       onTap: () => controller.changeLanguage(context),
     );
   }
-}
-
-class _ThemeModeTile extends ConsumerWidget {
-  const _ThemeModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-    final notifier = ref.read(themeModeProvider.notifier);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark =
-        themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system &&
-            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-
-    return _SettingsTile(
-      icon: isDark ? Icons.dark_mode : Icons.light_mode,
-      iconColor: isDark ? AppColors.amber : AppColors.primary,
-      iconBgColor: isDark
-          ? AppColors.amber.withValues(alpha: 0.2)
-          : AppColors.primary.withValues(alpha: 0.2),
-      title: 'settings.theme'.tr(),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            _label(themeMode),
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 8),
-          AdaptiveSwitch(
-            value: themeMode == ThemeMode.dark,
-            activeColor: AppColors.primary,
-            onChanged: (value) =>
-                notifier.setThemeMode(value ? ThemeMode.dark : ThemeMode.light),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _label(ThemeMode mode) => switch (mode) {
-    ThemeMode.dark => 'settings.theme_dark'.tr(),
-    ThemeMode.light => 'settings.theme_light'.tr(),
-    ThemeMode.system => 'settings.theme_system'.tr(),
-  };
 }
 
 class _OnboardingSection extends ConsumerWidget {

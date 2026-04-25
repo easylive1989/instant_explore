@@ -7,7 +7,6 @@ import 'package:context_app/common/config/router_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
-import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
@@ -22,7 +21,6 @@ class LorescapeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-    final themeMode = ref.watch(themeModeProvider);
 
     // Initialise share intent listeners (idempotent).
     ref.watch(shareIntentInitProvider);
@@ -77,9 +75,9 @@ class LorescapeApp extends ConsumerWidget {
     return MaterialApp.router(
       onGenerateTitle: (context) => 'name'.tr(),
       debugShowCheckedModeBanner: false,
-      theme: ThemeConfig.lightTheme,
+      theme: ThemeConfig.darkTheme,
       darkTheme: ThemeConfig.darkTheme,
-      themeMode: themeMode,
+      themeMode: ThemeMode.dark,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
