@@ -1,4 +1,4 @@
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/shared/widgets/pulsing_glow.dart';
 import 'package:flutter/material.dart';
 

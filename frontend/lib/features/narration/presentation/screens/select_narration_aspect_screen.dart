@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';

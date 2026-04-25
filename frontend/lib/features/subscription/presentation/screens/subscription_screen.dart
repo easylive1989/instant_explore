@@ -1,5 +1,5 @@
-import 'package:context_app/common/config/app_colors.dart';
-import 'package:context_app/common/config/legal_urls.dart';
+import 'package:context_app/app/config/app_colors.dart';
+import 'package:context_app/app/config/legal_urls.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/presentation/widgets/subscription_plan_card.dart';
 import 'package:context_app/features/subscription/providers.dart';

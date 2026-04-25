@@ -1,4 +1,4 @@
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/onboarding/domain/demo_narration_factory.dart';

@@ -1,4 +1,4 @@
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/core/services/image_picker_service.dart';
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/camera/presentation/controllers/camera_controller.dart';

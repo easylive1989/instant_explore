@@ -1,4 +1,4 @@
-import 'package:context_app/common/config/legal_urls.dart';
+import 'package:context_app/app/config/legal_urls.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';

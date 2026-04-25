@@ -1,4 +1,4 @@
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/providers.dart';

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/ads/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';

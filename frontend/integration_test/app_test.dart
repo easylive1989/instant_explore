@@ -5,7 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:patrol/patrol.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:context_app/common/config/api_config.dart';
+import 'package:context_app/app/config/api_config.dart';
 import 'package:context_app/firebase_options.dart';
 
 import 'test_app.dart';
