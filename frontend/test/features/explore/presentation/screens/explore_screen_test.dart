@@ -134,23 +134,23 @@ void main() {
 
     testWidgets(
       'given the filter is at its default value, when the screen renders, '
-      'then the filter badge is hidden',
+      'then no active dot is shown',
       (tester) async {
         await _givenExploreScreen(tester, minReviewCount: 100);
 
-        final badge = tester.widget<Badge>(find.byType(Badge).first);
-        expect(badge.isLabelVisible, isFalse);
+        // The active dot is an 8x8 BoxDecoration in the filter-button stack.
+        // When inactive, it is not present.
+        expect(_activeDotFinder(), findsNothing);
       },
     );
 
     testWidgets(
       'given a non-default minReviewCount, when the screen renders, '
-      'then the filter badge is visible',
+      'then the active dot is shown',
       (tester) async {
         await _givenExploreScreen(tester, minReviewCount: 500);
 
-        final badge = tester.widget<Badge>(find.byType(Badge).first);
-        expect(badge.isLabelVisible, isTrue);
+        expect(_activeDotFinder(), findsOneWidget);
       },
     );
 
@@ -291,4 +291,15 @@ void _thenPlaceNamesAreHidden(List<String> names) {
   for (final name in names) {
     expect(find.text(name), findsNothing);
   }
+}
+
+Finder _activeDotFinder() {
+  return find.byWidgetPredicate(
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration! as BoxDecoration).shape == BoxShape.circle &&
+        (widget.decoration! as BoxDecoration).color != null,
+    description: 'filter active dot',
+  );
 }

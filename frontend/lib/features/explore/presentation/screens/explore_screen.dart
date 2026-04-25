@@ -1,15 +1,18 @@
 import 'package:context_app/common/config/app_colors.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/providers.dart';
+import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
+import 'package:context_app/features/saved_locations/providers.dart';
+import 'package:context_app/features/settings/providers.dart';
+import 'package:context_app/shared/extensions/place_category_extension.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/shared/extensions/place_category_extension.dart';
-import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/settings/providers.dart';
-import 'package:context_app/features/saved_locations/providers.dart';
-import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
-import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -71,12 +74,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'explore.title'.tr(),
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                      Flexible(
+                        child: Text(
+                          'explore.title'.tr(),
+                          style: Theme.of(context).textTheme.displayLarge,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Row(
@@ -86,21 +88,15 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             onPressed: _showFilterPanel,
                           ),
                           const SizedBox(width: 8),
-                          IconButton(
+                          PillIconButton(
+                            icon: Icons.refresh,
+                            size: 40,
                             onPressed: () {
                               _searchController.clear();
                               ref
                                   .read(placesControllerProvider.notifier)
                                   .refresh();
                             },
-                            icon: const Icon(Icons.refresh),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -169,17 +165,34 @@ class _FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Badge(
-        isLabelVisible: isActive,
-        smallSize: 8,
-        child: const Icon(Icons.tune),
-      ),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: isActive ? AppColors.amber : AppColors.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        PillIconButton(
+          icon: Icons.tune,
+          size: 40,
+          variant: isActive
+              ? PillIconButtonVariant.filled
+              : PillIconButtonVariant.ghost,
+          onPressed: onPressed,
+        ),
+        if (isActive) const Positioned(top: 2, right: 2, child: _ActiveDot()),
+      ],
+    );
+  }
+}
+
+class _ActiveDot extends StatelessWidget {
+  const _ActiveDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -253,16 +266,14 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
           const SizedBox(height: 20),
           Text(
             'explore.filter.title'.tr(),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 24),
           Text(
             'explore.filter.min_reviews'.tr(),
-            style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -286,11 +297,9 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
                 child: Text(
                   '$currentValue',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: colorScheme.primary),
                 ),
               ),
             ],
@@ -300,38 +309,27 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '0',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  '1000',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                Text('0', style: Theme.of(context).textTheme.labelSmall),
+                Text('1000', style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'explore.filter.description'.tr(),
-            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 20),
-          AdaptiveButton(
-            expanded: true,
+          PillButton(
+            label: 'explore.filter.reset'.tr(),
+            variant: PillButtonVariant.ghost,
+            fullWidth: true,
             onPressed: () {
               ref.read(minReviewCountProvider.notifier).state = 100;
               setState(() {
                 _sliderValue = _valueToSlider(100);
               });
             },
-            child: Text('explore.filter.reset'.tr()),
           ),
         ],
       ),
@@ -351,99 +349,89 @@ class PlaceCard extends ConsumerWidget {
     final isSaved =
         savedLocations.valueOrNull?.any((e) => e.placeId == place.id) ?? false;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GlassCard(
         onTap: () => context.pushNamed('config', extra: place),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  place.category.getImageAssetPath(context),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                place.category.getImageAssetPath(context),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      place.name,
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.name,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  _CategoryChip(category: place.category),
+                  const SizedBox(height: 8),
+                  Text(
+                    place.formattedAddress,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: place.category.color.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: place.category.color.withValues(
-                                alpha: 0.5,
-                              ),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                place.category.icon,
-                                size: 14,
-                                color: place.category.color,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                place.category.translationKey.tr(),
-                                style: TextStyle(
-                                  color: place.category.color,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      place.formattedAddress,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              _BookmarkButton(
-                isSaved: isSaved,
-                onTap: () {
-                  ref.read(savedLocationsProvider.notifier).togglePlace(place);
-                },
+            ),
+            _BookmarkButton(
+              isSaved: isSaved,
+              onTap: () {
+                ref.read(savedLocationsProvider.notifier).togglePlace(place);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.category});
+
+  final PlaceCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = category.color;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(category.icon, size: 12, color: color),
+            const SizedBox(width: 4),
+            Text(
+              category.translationKey.tr().toUpperCase(),
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -458,19 +446,17 @@ class _BookmarkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final colorScheme = Theme.of(context).colorScheme;
+    return PressScale(
       onTap: onTap,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, animation) {
-          return ScaleTransition(scale: animation, child: child);
-        },
+        transitionBuilder: (child, animation) =>
+            ScaleTransition(scale: animation, child: child),
         child: Icon(
           isSaved ? Icons.bookmark : Icons.bookmark_border,
           key: ValueKey(isSaved),
-          color: isSaved
-              ? AppColors.primary
-              : Theme.of(context).colorScheme.onSurfaceVariant,
+          color: isSaved ? AppColors.primary : colorScheme.onSurfaceVariant,
           size: 28,
         ),
       ),
