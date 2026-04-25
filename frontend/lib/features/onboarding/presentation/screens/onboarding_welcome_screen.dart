@@ -5,6 +5,7 @@ import 'package:context_app/features/onboarding/domain/demo_narration_factory.da
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/widgets/onboarding_page_art.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
 import 'package:context_app/shared/widgets/midnight_kyoto_backdrop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -73,79 +74,74 @@ class _OnboardingWelcomeScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: midnightKyotoTheme(),
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundDark,
-        body: MidnightKyotoBackdrop(
-          child: IntroductionScreen(
-            globalBackgroundColor: Colors.transparent,
-            allowImplicitScrolling: true,
-            showSkipButton: true,
-            showBackButton: false,
-            showNextButton: true,
-            skip: Text(
-              'onboarding.skip'.tr(),
-              style: const TextStyle(
-                color: AppColors.textSecondaryDark,
-                fontWeight: FontWeight.w600,
-              ),
+    final cs = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
+      body: MidnightKyotoBackdrop(
+        child: IntroductionScreen(
+          globalBackgroundColor: Colors.transparent,
+          allowImplicitScrolling: true,
+          showSkipButton: true,
+          showBackButton: false,
+          showNextButton: true,
+          skip: Text(
+            'onboarding.skip'.tr(),
+            style: TextStyle(
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
-            next: const Icon(Icons.arrow_forward, color: AppColors.primary),
-            done: Text(
-              'onboarding.get_started'.tr(),
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onSkip: _finish,
-            onDone: _finish,
-            dotsDecorator: DotsDecorator(
-              activeColor: AppColors.primary,
-              color: AppColors.white20,
-              size: const Size(6, 6),
-              activeSize: const Size(24, 6),
-              activeShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            pages: [
-              _page(
-                serialLabel: '01',
-                chipKey: 'onboarding.chip.discovery',
-                titleKey: 'onboarding.welcome.title',
-                bodyKey: 'onboarding.welcome.body',
-                icon: Icons.auto_stories,
-                accent: AppColors.primary,
-              ),
-              _page(
-                serialLabel: '02',
-                chipKey: 'onboarding.chip.ai_guide',
-                titleKey: 'onboarding.quick_guide.title',
-                bodyKey: 'onboarding.quick_guide.body',
-                icon: Icons.camera_alt_rounded,
-                accent: AppColors.primary,
-              ),
-              _page(
-                serialLabel: '03',
-                chipKey: 'onboarding.chip.explore',
-                titleKey: 'onboarding.explore.title',
-                bodyKey: 'onboarding.explore.body',
-                icon: Icons.explore_rounded,
-                accent: AppColors.primary,
-              ),
-              _page(
-                serialLabel: '04',
-                chipKey: 'onboarding.chip.passport',
-                titleKey: 'onboarding.journey.title',
-                bodyKey: 'onboarding.journey.body',
-                icon: Icons.headphones_rounded,
-                accent: AppColors.amber,
-                footer: _SampleCtaFooter(onTap: _playSample),
-              ),
-            ],
           ),
+          next: Icon(Icons.arrow_forward, color: cs.primary),
+          done: Text(
+            'onboarding.get_started'.tr(),
+            style: TextStyle(color: cs.primary, fontWeight: FontWeight.w700),
+          ),
+          onSkip: _finish,
+          onDone: _finish,
+          dotsDecorator: DotsDecorator(
+            activeColor: cs.primary,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+            size: const Size(6, 6),
+            activeSize: const Size(24, 6),
+            activeShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          pages: [
+            _page(
+              serialLabel: '01',
+              chipKey: 'onboarding.chip.discovery',
+              titleKey: 'onboarding.welcome.title',
+              bodyKey: 'onboarding.welcome.body',
+              icon: Icons.auto_stories,
+              accent: cs.primary,
+            ),
+            _page(
+              serialLabel: '02',
+              chipKey: 'onboarding.chip.ai_guide',
+              titleKey: 'onboarding.quick_guide.title',
+              bodyKey: 'onboarding.quick_guide.body',
+              icon: Icons.camera_alt_rounded,
+              accent: cs.primary,
+            ),
+            _page(
+              serialLabel: '03',
+              chipKey: 'onboarding.chip.explore',
+              titleKey: 'onboarding.explore.title',
+              bodyKey: 'onboarding.explore.body',
+              icon: Icons.explore_rounded,
+              accent: cs.primary,
+            ),
+            _page(
+              serialLabel: '04',
+              chipKey: 'onboarding.chip.passport',
+              titleKey: 'onboarding.journey.title',
+              bodyKey: 'onboarding.journey.body',
+              icon: Icons.headphones_rounded,
+              accent: cs.tertiary,
+              footer: _SampleCtaFooter(onTap: _playSample),
+            ),
+          ],
         ),
       ),
     );
@@ -160,16 +156,17 @@ class _OnboardingWelcomeScreenState
     required Color accent,
     Widget? footer,
   }) {
-    const titleStyle = TextStyle(
+    final cs = Theme.of(context).colorScheme;
+    final titleStyle = TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.w800,
       letterSpacing: -0.5,
-      color: AppColors.textPrimaryDark,
+      color: cs.onSurface,
     );
-    const bodyStyle = TextStyle(
+    final bodyStyle = TextStyle(
       fontSize: 15,
       height: 1.55,
-      color: AppColors.textSecondaryDark,
+      color: cs.onSurfaceVariant,
     );
 
     return PageViewModel(
@@ -215,31 +212,23 @@ class _SampleCtaFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FilledButton.icon(
+        PillButton(
+          label: 'onboarding.try_sample'.tr(),
+          icon: Icons.play_arrow_rounded,
+          fullWidth: true,
           onPressed: onTap,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: const StadiumBorder(),
-            textStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          icon: const Icon(Icons.play_arrow_rounded),
-          label: Text('onboarding.try_sample'.tr()),
         ),
         const SizedBox(height: 12),
         Text(
           'onboarding.try_sample_hint'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             height: 1.5,
-            color: AppColors.textTertiaryDark,
+            color: cs.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),

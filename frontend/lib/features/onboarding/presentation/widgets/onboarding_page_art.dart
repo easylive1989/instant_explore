@@ -69,7 +69,7 @@ class _GhostSerial extends StatelessWidget {
           fontWeight: FontWeight.w900,
           height: 1.0,
           letterSpacing: -8,
-          color: Color(0x14FFFFFF),
+          color: AppColors.surfaceVariant,
         ),
       ),
     );
