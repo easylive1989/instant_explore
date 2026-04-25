@@ -18,6 +18,8 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationContent narrationContent;
+
+  /// Whether to start playback automatically after initialisation.
   final bool autoPlay;
 
   const NarrationScreen({

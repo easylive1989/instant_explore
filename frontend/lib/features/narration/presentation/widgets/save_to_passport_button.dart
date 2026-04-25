@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// 儲存到護照的按鈕
+/// 儲存到護照的按鈕。
+///
+/// 導覽內容已在生成時自動儲存到歷程，此按鈕僅導航到成功頁面。
 class SaveToPassportButton extends ConsumerWidget {
   final Place place;
 
