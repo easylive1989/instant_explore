@@ -113,7 +113,7 @@ class _OnboardingWelcomeScreenState
               chipKey: 'onboarding.chip.discovery',
               titleKey: 'onboarding.welcome.title',
               bodyKey: 'onboarding.welcome.body',
-              icon: Icons.auto_stories,
+              imageAsset: 'assets/images/onboarding/discovery.png',
               accent: cs.primary,
             ),
             _page(
@@ -121,7 +121,7 @@ class _OnboardingWelcomeScreenState
               chipKey: 'onboarding.chip.ai_guide',
               titleKey: 'onboarding.quick_guide.title',
               bodyKey: 'onboarding.quick_guide.body',
-              icon: Icons.camera_alt_rounded,
+              imageAsset: 'assets/images/onboarding/ai_guide.png',
               accent: cs.primary,
             ),
             _page(
@@ -129,7 +129,7 @@ class _OnboardingWelcomeScreenState
               chipKey: 'onboarding.chip.explore',
               titleKey: 'onboarding.explore.title',
               bodyKey: 'onboarding.explore.body',
-              icon: Icons.explore_rounded,
+              imageAsset: 'assets/images/onboarding/explore.png',
               accent: cs.primary,
             ),
             _page(
@@ -137,7 +137,7 @@ class _OnboardingWelcomeScreenState
               chipKey: 'onboarding.chip.passport',
               titleKey: 'onboarding.journey.title',
               bodyKey: 'onboarding.journey.body',
-              icon: Icons.headphones_rounded,
+              imageAsset: 'assets/images/onboarding/passport.png',
               accent: cs.tertiary,
               footer: _SampleCtaFooter(onTap: _playSample),
             ),
@@ -152,7 +152,7 @@ class _OnboardingWelcomeScreenState
     required String chipKey,
     required String titleKey,
     required String bodyKey,
-    required IconData icon,
+    required String imageAsset,
     required Color accent,
     Widget? footer,
   }) {
@@ -189,7 +189,7 @@ class _OnboardingWelcomeScreenState
         ),
       ),
       image: OnboardingPageArt(
-        icon: icon,
+        imageAsset: imageAsset,
         serialLabel: serialLabel,
         chipLabel: chipKey.tr(),
         accent: accent,

@@ -9,22 +9,21 @@ import 'package:flutter/material.dart';
 ///      top-left — creates the magazine/Wired editorial rhythm.
 ///   2. A slowly pulsing radial glow in the page's accent color so the
 ///      dark canvas feels alive rather than static.
-///   3. The feature icon, scaled larger than the default Material size.
-///   4. A glass-morphic chip label (uppercase) anchoring the icon to the
+///   3. The feature image, scaled larger than the default Material size.
+///   4. A glass-morphic chip label (uppercase) anchoring the image to the
 ///      page's topic.
 ///
-/// All layers are vector-only — no image assets — so the welcome flow stays
-/// fully offline and the bundle size is untouched.
+/// The welcome flow now uses image assets to better represent the topics.
 class OnboardingPageArt extends StatelessWidget {
   const OnboardingPageArt({
     super.key,
-    required this.icon,
+    required this.imageAsset,
     required this.serialLabel,
     required this.chipLabel,
     this.accent = AppColors.primary,
   });
 
-  final IconData icon;
+  final String imageAsset;
   final String serialLabel;
   final String chipLabel;
   final Color accent;
@@ -41,7 +40,12 @@ class OnboardingPageArt extends StatelessWidget {
           PulsingGlow(
             color: accent,
             size: 260,
-            child: Icon(icon, size: 84, color: accent),
+            child: Image.asset(
+              imageAsset,
+              width: 120,
+              height: 120,
+              fit: BoxFit.contain,
+            ),
           ),
           Positioned(
             bottom: 8,
