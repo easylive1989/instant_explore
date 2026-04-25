@@ -1,4 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
@@ -33,8 +34,8 @@ void main() {
       'then a place card is rendered for each place',
       (tester) async {
         final places = [
-          buildPlace(id: 'p1', name: 'Senso-ji', userRatingCount: 200),
-          buildPlace(id: 'p2', name: 'Meiji Shrine', userRatingCount: 150),
+          buildPlace(id: 'p1', name: 'Senso-ji'),
+          buildPlace(id: 'p2', name: 'Meiji Shrine'),
         ];
 
         await _givenExploreScreen(tester, places: places);
@@ -44,22 +45,34 @@ void main() {
     );
 
     testWidgets(
-      'given a review-count filter of 500, when the list is filtered, '
-      'then only places with enough ratings are shown',
+      'given a distance filter of 500 m, when the list is filtered, '
+      'then only places within range are shown',
       (tester) async {
+        // Place near origin (lat 0, lon 0), one within 500 m, one outside.
         final places = [
-          buildPlace(id: 'p1', name: 'Popular', userRatingCount: 800),
-          buildPlace(id: 'p2', name: 'Obscure', userRatingCount: 20),
+          buildPlace(
+            id: 'p1',
+            name: 'Near',
+            latitude: 0.001, // ~111 m
+            longitude: 0.0,
+          ),
+          buildPlace(
+            id: 'p2',
+            name: 'Far',
+            latitude: 0.01, // ~1111 m
+            longitude: 0.0,
+          ),
         ];
 
         await _givenExploreScreen(
           tester,
           places: places,
-          minReviewCount: 500,
+          maxDistance: 500.0,
+          userLocation: const PlaceLocation(latitude: 0.0, longitude: 0.0),
         );
 
-        _thenPlaceNamesAreVisible(['Popular']);
-        _thenPlaceNamesAreHidden(['Obscure']);
+        _thenPlaceNamesAreVisible(['Near']);
+        _thenPlaceNamesAreHidden(['Far']);
       },
     );
 
@@ -133,22 +146,22 @@ void main() {
     );
 
     testWidgets(
-      'given the filter is at its default value, when the screen renders, '
-      'then no active dot is shown',
+      'given the filter is at its default value (5000 m), when the screen '
+      'renders, then no active dot is shown',
       (tester) async {
-        await _givenExploreScreen(tester, minReviewCount: 100);
+        await _givenExploreScreen(tester, maxDistance: 5000.0);
 
         // The active dot is an 8x8 BoxDecoration in the filter-button stack.
-        // When inactive, it is not present.
+        // When inactive (maxDistance == 5000), it is not present.
         expect(_activeDotFinder(), findsNothing);
       },
     );
 
     testWidgets(
-      'given a non-default minReviewCount, when the screen renders, '
+      'given a non-default maxDistance, when the screen renders, '
       'then the active dot is shown',
       (tester) async {
-        await _givenExploreScreen(tester, minReviewCount: 500);
+        await _givenExploreScreen(tester, maxDistance: 500.0);
 
         expect(_activeDotFinder(), findsOneWidget);
       },
@@ -164,7 +177,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('explore.filter.title'), findsOneWidget);
-        expect(find.text('explore.filter.min_reviews'), findsOneWidget);
+        expect(find.text('explore.filter.max_distance'), findsOneWidget);
         expect(find.text('explore.filter.reset'), findsOneWidget);
       },
     );
@@ -218,20 +231,24 @@ Future<void> _givenExploreScreen(
   List<Place> places = const [],
   FakePlacesRepository? repo,
   InMemorySavedLocationsRepository? savedRepo,
-  int minReviewCount = 0,
+  double maxDistance = 5000.0,
+  PlaceLocation? userLocation,
 }) async {
+  final fakeLocation = FakeLocationService(
+    location: userLocation ?? const PlaceLocation(latitude: 25.0, longitude: 121.0),
+  );
   await pumpScreen(
     tester,
     child: const ExploreScreen(),
     overrides: [
-      locationServiceProvider.overrideWithValue(FakeLocationService()),
+      locationServiceProvider.overrideWithValue(fakeLocation),
       placesRepositoryProvider.overrideWithValue(
         repo ?? FakePlacesRepository(nearbyPlaces: places),
       ),
       savedLocationsRepositoryProvider.overrideWithValue(
         savedRepo ?? InMemorySavedLocationsRepository(),
       ),
-      minReviewCountProvider.overrideWith((ref) => minReviewCount),
+      maxDistanceProvider.overrideWith((ref) => maxDistance),
     ],
   );
   // Let async searchNearby + filtered places provider resolve.
@@ -269,7 +286,6 @@ Future<void> _givenExploreScreenWithRouter(
       savedLocationsRepositoryProvider.overrideWithValue(
         InMemorySavedLocationsRepository(),
       ),
-      minReviewCountProvider.overrideWith((ref) => 0),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));

@@ -13,8 +13,6 @@ class PlaceJsonMapper {
       'latitude': p.location.latitude,
       'longitude': p.location.longitude,
     },
-    'rating': p.rating,
-    'userRatingCount': p.userRatingCount,
     'types': p.types,
     'photos': p.photos
         .map(
@@ -52,8 +50,6 @@ class PlaceJsonMapper {
         latitude: (loc['latitude'] as num).toDouble(),
         longitude: (loc['longitude'] as num).toDouble(),
       ),
-      rating: (json['rating'] as num?)?.toDouble(),
-      userRatingCount: (json['userRatingCount'] as num?)?.toInt(),
       types: (json['types'] as List? ?? []).cast<String>(),
       photos: photos,
       category: PlaceCategory.values.firstWhere(

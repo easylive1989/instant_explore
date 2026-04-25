@@ -31,7 +31,6 @@ Location Information:
 - Address: ${place.formattedAddress}
 - Category: ${_getCategoryDescription(place.category)}
 - Types: ${place.types.join(', ')}
-${place.rating != null ? '- Rating: ${place.rating}/5.0' : ''}
 
 Requirements:
 - Language: $languageName

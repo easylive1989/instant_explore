@@ -126,8 +126,8 @@
     "refresh": "Refresh",
     "filter": {
       "title": "Filters",
-      "min_reviews": "Minimum reviews",
-      "description": "Filter out places with too few reviews to avoid showing non-genuine attractions.",
+      "max_distance": "Maximum distance",
+      "description": "Show only places within the selected distance from your current location.",
       "reset": "Reset to default"
     }
   },

@@ -7,7 +7,7 @@ class FakeLocationService implements LocationService {
   final Exception? error;
 
   FakeLocationService({
-    this.location = const PlaceLocation(latitude: 25.034, longitude: 121.564),
+    this.location = const PlaceLocation(latitude: 25.0, longitude: 121.0),
     this.error,
   });
 

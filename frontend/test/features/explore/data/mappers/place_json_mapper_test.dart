@@ -12,8 +12,6 @@ void main() {
       name: '清水寺',
       formattedAddress: '',
       location: PlaceLocation(latitude: 34.9948, longitude: 135.785),
-      rating: null,
-      userRatingCount: null,
       types: ['Q5393308'],
       photos: [
         PlacePhoto(

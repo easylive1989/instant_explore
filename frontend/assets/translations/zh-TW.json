@@ -126,8 +126,8 @@
     "refresh": "重新整理",
     "filter": {
       "title": "篩選條件",
-      "min_reviews": "最低評論數",
-      "description": "過濾評論數不足的地點，避免顯示非真正的景點。",
+      "max_distance": "最大距離",
+      "description": "只顯示在您目前位置指定距離內的地點。",
       "reset": "重設為預設值"
     }
   },

@@ -50,8 +50,6 @@ void main() {
     required String id,
     required String name,
     required PlaceLocation location,
-    double? rating,
-    int? userRatingCount = 100,
   }) {
     return Place(
       id: id,
@@ -68,31 +66,26 @@ void main() {
         ),
       ],
       category: PlaceCategory.modernUrban,
-      rating: rating,
-      userRatingCount: userRatingCount,
     );
   }
 
-  group('SearchNearbyPlacesUseCase - 權重排序邏輯', () {
-    test('距離相近時，高評分地點應排在前面', () async {
-      // 兩個地點距離使用者都很近（差距 < 200m）
-      final nearHighRating = createPlace(
+  group('SearchNearbyPlacesUseCase - 距離排序邏輯', () {
+    test('較近的地點應排在前面', () async {
+      final near = createPlace(
         id: '1',
-        name: 'High Rating Place',
+        name: 'Near Place',
         location: const PlaceLocation(
-          latitude: 25.0331, // 約 10m 遠
+          latitude: 25.0331, // 約 11m
           longitude: 121.5654,
         ),
-        rating: 4.8,
       );
-      final nearLowRating = createPlace(
+      final far = createPlace(
         id: '2',
-        name: 'Low Rating Place',
+        name: 'Far Place',
         location: const PlaceLocation(
-          latitude: 25.0332, // 約 20m 遠
+          latitude: 25.0360, // 約 333m
           longitude: 121.5654,
         ),
-        rating: 2.5,
       );
 
       when(
@@ -101,153 +94,28 @@ void main() {
           language: testLanguage,
           radius: testRadius,
         ),
-      ).thenAnswer((_) async => [nearLowRating, nearHighRating]);
+      ).thenAnswer((_) async => [far, near]);
 
       final result = await useCase.execute(language: testLanguage);
 
-      expect(result.first.name, 'High Rating Place');
-      expect(result.last.name, 'Low Rating Place');
+      expect(result.places.first.name, 'Near Place');
+      expect(result.places.last.name, 'Far Place');
     });
 
-    test('稍遠但高評分的地點應排在很近但低評分的前面', () async {
-      // 低評分地點非常近，高評分地點稍遠但在容許範圍內
-      final veryNearLowRating = createPlace(
-        id: '1',
-        name: 'Very Near Low Rating',
-        location: const PlaceLocation(
-          latitude: 25.0330, // 約 0m
-          longitude: 121.5654,
-        ),
-        rating: 1.5,
-      );
-      final slightlyFarHighRating = createPlace(
-        id: '2',
-        name: 'Slightly Far High Rating',
-        location: const PlaceLocation(
-          latitude: 25.0340, // 約 110m 遠
-          longitude: 121.5654,
-        ),
-        rating: 4.9,
-      );
-
+    test('結果應包含正確的使用者位置', () async {
       when(
         () => mockPlacesRepository.getNearbyPlaces(
           userLocation,
           language: testLanguage,
           radius: testRadius,
         ),
-      ).thenAnswer((_) async => [veryNearLowRating, slightlyFarHighRating]);
+      ).thenAnswer((_) async => []);
 
       final result = await useCase.execute(language: testLanguage);
 
-      // 距離差 < 200m，應該優先看評分
-      expect(result.first.name, 'Slightly Far High Rating');
-      expect(result.last.name, 'Very Near Low Rating');
+      expect(result.userLocation, userLocation);
     });
 
-    test('距離差異超過容許範圍時，使用綜合分數排序', () async {
-      // 近但評分一般的地點 vs 遠但評分高的地點
-      final nearMediumRating = createPlace(
-        id: '1',
-        name: 'Near Medium Rating',
-        location: const PlaceLocation(
-          latitude: 25.0335, // 約 55m 遠
-          longitude: 121.5654,
-        ),
-        rating: 3.5,
-      );
-      final farHighRating = createPlace(
-        id: '2',
-        name: 'Far High Rating',
-        location: const PlaceLocation(
-          latitude: 25.0360, // 約 330m 遠 (超過 200m 容許範圍)
-          longitude: 121.5654,
-        ),
-        rating: 5.0,
-      );
-
-      when(
-        () => mockPlacesRepository.getNearbyPlaces(
-          userLocation,
-          language: testLanguage,
-          radius: testRadius,
-        ),
-      ).thenAnswer((_) async => [farHighRating, nearMediumRating]);
-
-      final result = await useCase.execute(language: testLanguage);
-
-      // 距離差 > 200m，使用綜合分數
-      // 這裡主要測試排序有執行
-      expect(result.length, 2);
-    });
-
-    test('沒有評分的地點應該被正確處理 (評分視為 0)', () async {
-      final noRating = createPlace(
-        id: '1',
-        name: 'No Rating Place',
-        location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
-        rating: null,
-      );
-      final hasRating = createPlace(
-        id: '2',
-        name: 'Has Rating Place',
-        location: const PlaceLocation(latitude: 25.0332, longitude: 121.5654),
-        rating: 4.0,
-      );
-
-      when(
-        () => mockPlacesRepository.getNearbyPlaces(
-          userLocation,
-          language: testLanguage,
-          radius: testRadius,
-        ),
-      ).thenAnswer((_) async => [noRating, hasRating]);
-
-      final result = await useCase.execute(language: testLanguage);
-
-      // 有評分的應該排在前面
-      expect(result.first.name, 'Has Rating Place');
-      expect(result.last.name, 'No Rating Place');
-    });
-
-    test('相同評分時，較近的地點應排在前面（使用綜合分數）', () async {
-      // 距離差需要超過 200m，才會使用綜合分數排序
-      final sameRatingNear = createPlace(
-        id: '1',
-        name: 'Near',
-        location: const PlaceLocation(
-          latitude: 25.0335, // 約 55m
-          longitude: 121.5654,
-        ),
-        rating: 4.0,
-      );
-      final sameRatingFar = createPlace(
-        id: '2',
-        name: 'Far',
-        location: const PlaceLocation(
-          latitude: 25.0360, // 約 330m (距離差 > 200m)
-          longitude: 121.5654,
-        ),
-        rating: 4.0,
-      );
-
-      when(
-        () => mockPlacesRepository.getNearbyPlaces(
-          userLocation,
-          language: testLanguage,
-          radius: testRadius,
-        ),
-      ).thenAnswer((_) async => [sameRatingFar, sameRatingNear]);
-
-      final result = await useCase.execute(language: testLanguage);
-
-      // 評分相同但距離差 > 200m，使用綜合分數，距離近的分數較高
-      expect(result.first.name, 'Near');
-      expect(result.last.name, 'Far');
-    });
-  });
-
-  group('Get Nearby Places Correctly', () {
     test('空列表應該正確處理', () async {
       when(
         () => mockPlacesRepository.getNearbyPlaces(
@@ -259,7 +127,7 @@ void main() {
 
       final result = await useCase.execute(language: testLanguage);
 
-      expect(result, isEmpty);
+      expect(result.places, isEmpty);
     });
 
     test('單一地點應該正確處理', () async {
@@ -267,7 +135,6 @@ void main() {
         id: '1',
         name: 'Only Place',
         location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
-        rating: 4.5,
       );
 
       when(
@@ -280,13 +147,39 @@ void main() {
 
       final result = await useCase.execute(language: testLanguage);
 
-      final expected = createPlace(
+      expect(result.places.single.name, 'Only Place');
+    });
+
+    test('多個地點依距離升序排列', () async {
+      final p1 = createPlace(
         id: '1',
-        name: 'Only Place',
+        name: 'Closest',
         location: const PlaceLocation(latitude: 25.0331, longitude: 121.5654),
-        rating: 4.5,
       );
-      expect(result.single, equals(expected));
+      final p2 = createPlace(
+        id: '2',
+        name: 'Middle',
+        location: const PlaceLocation(latitude: 25.0340, longitude: 121.5654),
+      );
+      final p3 = createPlace(
+        id: '3',
+        name: 'Farthest',
+        location: const PlaceLocation(latitude: 25.0360, longitude: 121.5654),
+      );
+
+      when(
+        () => mockPlacesRepository.getNearbyPlaces(
+          userLocation,
+          language: testLanguage,
+          radius: testRadius,
+        ),
+      ).thenAnswer((_) async => [p3, p1, p2]);
+
+      final result = await useCase.execute(language: testLanguage);
+
+      expect(result.places[0].name, 'Closest');
+      expect(result.places[1].name, 'Middle');
+      expect(result.places[2].name, 'Farthest');
     });
   });
 }

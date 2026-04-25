@@ -1,3 +1,4 @@
+import 'package:context_app/core/utils/geo_utils.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
@@ -8,6 +9,7 @@ import 'package:context_app/features/explore/domain/services/location_service.da
 import 'package:context_app/features/explore/data/repositories/places_repository_impl.dart';
 import 'package:context_app/features/explore/data/repositories/caching_places_repository.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/settings/providers.dart';
 
 // Infrastructure Providers
@@ -32,19 +34,27 @@ final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
 
 // Filter Providers
 
-/// 使用者設定的最低評論數門檻，預設 100
-final minReviewCountProvider = StateProvider<int>((ref) => 100);
+/// 使用者目前位置，由 [PlacesController] 在載入附近地點時更新
+final userLocationProvider = StateProvider<PlaceLocation?>((ref) => null);
 
-/// 根據評論數過濾後的地點列表
+/// 距離過濾上限（公尺），預設 5000（顯示全部）
+final maxDistanceProvider = StateProvider<double>((ref) => 5000.0);
+
+/// 根據最大距離過濾後的地點列表
 ///
-/// 監聽 [placesControllerProvider] 和 [minReviewCountProvider]，
-/// 當任一改變時自動重新過濾，不會重新呼叫 API。
+/// 監聽 [placesControllerProvider]、[maxDistanceProvider] 與
+/// [userLocationProvider]，當任一改變時自動重新過濾。
 final filteredPlacesProvider = Provider<AsyncValue<List<Place>>>((ref) {
   final placesAsync = ref.watch(placesControllerProvider);
-  final minCount = ref.watch(minReviewCountProvider);
+  final maxDistance = ref.watch(maxDistanceProvider);
+  final userLocation = ref.watch(userLocationProvider);
 
   return placesAsync.whenData((places) {
-    return places.where((p) => (p.userRatingCount ?? 0) >= minCount).toList();
+    if (userLocation == null) return places;
+    return places.where((p) {
+      final distance = calculateHaversineDistance(userLocation, p.location);
+      return distance <= maxDistance;
+    }).toList();
   });
 });
 
@@ -66,24 +76,25 @@ final placesControllerProvider =
 class PlacesController extends AsyncNotifier<List<Place>> {
   @override
   Future<List<Place>> build() async {
-    // 使用 ref.watch 監聽語言變化
-    // 當語言改變時，會自動觸發重新載入
     final language = ref.watch(currentLanguageProvider);
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    return useCase.execute(language: language);
+    final result = await useCase.execute(language: language);
+    ref.read(userLocationProvider.notifier).state = result.userLocation;
+    return result.places;
   }
 
   Future<List<Place>> _loadNearbyPlaces() async {
     final language = ref.read(currentLanguageProvider);
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    return useCase.execute(language: language);
+    final result = await useCase.execute(language: language);
+    ref.read(userLocationProvider.notifier).state = result.userLocation;
+    return result.places;
   }
 
   Future<void> search(String query) async {
     final language = ref.read(currentLanguageProvider);
 
     if (query.isEmpty) {
-      // If query is empty, reload nearby places
       state = const AsyncValue.loading();
       state = await AsyncValue.guard(() => _loadNearbyPlaces());
       return;
@@ -99,10 +110,6 @@ class PlacesController extends AsyncNotifier<List<Place>> {
   /// 強制重新整理（忽略快取）
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final language = ref.read(currentLanguageProvider);
-      final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-      return useCase.execute(language: language);
-    });
+    state = await AsyncValue.guard(() => _loadNearbyPlaces());
   }
 }

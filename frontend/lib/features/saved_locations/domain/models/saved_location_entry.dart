@@ -14,8 +14,6 @@ class SavedLocationEntry extends Equatable {
   final String formattedAddress;
   final double latitude;
   final double longitude;
-  final double? rating;
-  final int? userRatingCount;
   final List<String> types;
   final List<Map<String, dynamic>> photosJson;
   final String categoryKey;
@@ -27,8 +25,6 @@ class SavedLocationEntry extends Equatable {
     required this.formattedAddress,
     required this.latitude,
     required this.longitude,
-    this.rating,
-    this.userRatingCount,
     required this.types,
     required this.photosJson,
     required this.categoryKey,
@@ -43,8 +39,6 @@ class SavedLocationEntry extends Equatable {
       formattedAddress: place.formattedAddress,
       latitude: place.location.latitude,
       longitude: place.location.longitude,
-      rating: place.rating,
-      userRatingCount: place.userRatingCount,
       types: place.types,
       photosJson: place.photos
           .map(
@@ -80,8 +74,6 @@ class SavedLocationEntry extends Equatable {
       name: name,
       formattedAddress: formattedAddress,
       location: PlaceLocation(latitude: latitude, longitude: longitude),
-      rating: rating,
-      userRatingCount: userRatingCount,
       types: types,
       photos: photos,
       category: PlaceCategory.values.firstWhere(
@@ -97,8 +89,6 @@ class SavedLocationEntry extends Equatable {
     'formatted_address': formattedAddress,
     'latitude': latitude,
     'longitude': longitude,
-    'rating': rating,
-    'user_rating_count': userRatingCount,
     'types': types,
     'photos': photosJson,
     'category_key': categoryKey,
@@ -112,8 +102,6 @@ class SavedLocationEntry extends Equatable {
       formattedAddress: json['formatted_address'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      rating: (json['rating'] as num?)?.toDouble(),
-      userRatingCount: json['user_rating_count'] as int?,
       types: (json['types'] as List<dynamic>).cast<String>(),
       photosJson: (json['photos'] as List<dynamic>)
           .map((p) => Map<String, dynamic>.from(p as Map))

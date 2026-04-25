@@ -59,8 +59,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   Widget build(BuildContext context) {
     final placesState = ref.watch(filteredPlacesProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final minReviewCount = ref.watch(minReviewCountProvider);
-    final isFilterActive = minReviewCount != 100;
+    final maxDistance = ref.watch(maxDistanceProvider);
+    final isFilterActive = maxDistance < 5000.0;
 
     return Scaffold(
       floatingActionButton: const SavedLocationsFab(),
@@ -208,38 +208,39 @@ class _FilterPanel extends ConsumerStatefulWidget {
 class _FilterPanelState extends ConsumerState<_FilterPanel> {
   late double _sliderValue;
 
-  /// 滑桿的刻度值：0, 10, 50, 100, 200, 500, 1000
-  static const List<int> _steps = [0, 10, 50, 100, 200, 500, 1000];
+  /// 滑桿的刻度值（公尺）：250, 500, 1000, 2000, 5000
+  static const List<double> _steps = [250, 500, 1000, 2000, 5000];
 
   @override
   void initState() {
     super.initState();
-    final current = ref.read(minReviewCountProvider);
+    final current = ref.read(maxDistanceProvider);
     _sliderValue = _valueToSlider(current);
   }
 
-  /// 將評論數對應到滑桿位置（0.0 ~ 1.0）
-  double _valueToSlider(int value) {
+  /// 將距離值對應到滑桿位置（0.0 ~ 1.0）
+  double _valueToSlider(double value) {
     for (int i = 0; i < _steps.length; i++) {
-      if (value <= _steps[i]) {
-        if (i == 0) return 0.0;
-        final prev = _steps[i - 1];
-        final curr = _steps[i];
-        final fraction = (value - prev) / (curr - prev);
-        return (i - 1 + fraction) / (_steps.length - 1);
-      }
+      if (value <= _steps[i]) return i / (_steps.length - 1);
     }
     return 1.0;
   }
 
-  /// 將滑桿位置轉換為評論數
-  int _sliderToValue(double slider) {
-    final pos = slider * (_steps.length - 1);
-    final lower = pos.floor().clamp(0, _steps.length - 2);
-    final fraction = pos - lower;
-    final value =
-        _steps[lower] + ((_steps[lower + 1] - _steps[lower]) * fraction);
-    return value.round();
+  /// 將滑桿位置轉換為距離值
+  double _sliderToValue(double slider) {
+    final index = (slider * (_steps.length - 1)).round().clamp(
+      0,
+      _steps.length - 1,
+    );
+    return _steps[index];
+  }
+
+  String _formatDistance(double meters) {
+    if (meters >= 1000) {
+      final km = meters / 1000;
+      return km == km.roundToDouble() ? '${km.toInt()} km' : '$km km';
+    }
+    return '${meters.toInt()} m';
   }
 
   @override
@@ -270,7 +271,7 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
           ),
           const SizedBox(height: 24),
           Text(
-            'explore.filter.min_reviews'.tr(),
+            'explore.filter.max_distance'.tr(),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -287,15 +288,15 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
                     });
                   },
                   onChangeEnd: (value) {
-                    ref.read(minReviewCountProvider.notifier).state =
+                    ref.read(maxDistanceProvider.notifier).state =
                         _sliderToValue(value);
                   },
                 ),
               ),
               SizedBox(
-                width: 60,
+                width: 64,
                 child: Text(
-                  '$currentValue',
+                  _formatDistance(currentValue),
                   textAlign: TextAlign.center,
                   style: Theme.of(
                     context,
@@ -309,8 +310,8 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('0', style: Theme.of(context).textTheme.labelSmall),
-                Text('1000', style: Theme.of(context).textTheme.labelSmall),
+                Text('250 m', style: Theme.of(context).textTheme.labelSmall),
+                Text('5 km', style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           ),
@@ -325,9 +326,9 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             variant: PillButtonVariant.ghost,
             fullWidth: true,
             onPressed: () {
-              ref.read(minReviewCountProvider.notifier).state = 100;
+              ref.read(maxDistanceProvider.notifier).state = 5000.0;
               setState(() {
-                _sliderValue = _valueToSlider(100);
+                _sliderValue = _valueToSlider(5000.0);
               });
             },
           ),

@@ -21,8 +21,6 @@ Place buildPlace({
   double longitude = 121.0,
   PlaceCategory category = PlaceCategory.modernUrban,
   List<PlacePhoto> photos = const [],
-  double? rating,
-  int? userRatingCount,
   List<String> types = const [],
 }) {
   return Place(
@@ -30,8 +28,6 @@ Place buildPlace({
     name: name,
     formattedAddress: formattedAddress,
     location: PlaceLocation(latitude: latitude, longitude: longitude),
-    rating: rating,
-    userRatingCount: userRatingCount,
     types: types,
     photos: photos,
     category: category,

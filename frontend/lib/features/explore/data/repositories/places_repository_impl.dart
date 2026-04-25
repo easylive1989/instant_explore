@@ -158,8 +158,6 @@ class PlacesRepositoryImpl implements PlacesRepository {
       name: dto.title,
       formattedAddress: '',
       location: PlaceLocation(latitude: dto.lat, longitude: dto.lon),
-      rating: null,
-      userRatingCount: null,
       types: entity.p31ClassIds,
       photos: dto.thumbnailUrl == null
           ? const []

@@ -14,8 +14,6 @@ Place _makePlace({
     name: 'Test Place',
     formattedAddress: 'Test Address',
     location: const PlaceLocation(latitude: 25.0, longitude: 121.5),
-    rating: 4.5,
-    userRatingCount: 200,
     types: const ['tourist_attraction', 'point_of_interest'],
     photos: photos,
     category: PlaceCategory.historicalCultural,
@@ -33,8 +31,6 @@ void main() {
       expect(entry.formattedAddress, 'Test Address');
       expect(entry.latitude, 25.0);
       expect(entry.longitude, 121.5);
-      expect(entry.rating, 4.5);
-      expect(entry.userRatingCount, 200);
       expect(entry.types, ['tourist_attraction', 'point_of_interest']);
       expect(entry.categoryKey, 'historicalCultural');
       expect(entry.savedAt, isNotNull);
@@ -68,8 +64,6 @@ void main() {
       expect(restored.formattedAddress, place.formattedAddress);
       expect(restored.location.latitude, place.location.latitude);
       expect(restored.location.longitude, place.location.longitude);
-      expect(restored.rating, place.rating);
-      expect(restored.userRatingCount, place.userRatingCount);
       expect(restored.types, place.types);
       expect(restored.category, place.category);
     });
@@ -89,7 +83,10 @@ void main() {
       expect(restored.photos.first.url, photo.url);
       expect(restored.photos.first.widthPx, photo.widthPx);
       expect(restored.photos.first.heightPx, photo.heightPx);
-      expect(restored.photos.first.authorAttributions, photo.authorAttributions);
+      expect(
+        restored.photos.first.authorAttributions,
+        photo.authorAttributions,
+      );
     });
   });
 
@@ -104,8 +101,6 @@ void main() {
       expect(restored.formattedAddress, original.formattedAddress);
       expect(restored.latitude, original.latitude);
       expect(restored.longitude, original.longitude);
-      expect(restored.rating, original.rating);
-      expect(restored.userRatingCount, original.userRatingCount);
       expect(restored.types, original.types);
       expect(restored.categoryKey, original.categoryKey);
       expect(restored.savedAt, original.savedAt);
@@ -124,23 +119,6 @@ void main() {
 
       expect(restored.photosJson.length, 1);
       expect(restored.photosJson.first['url'], 'https://example.com/photo.jpg');
-    });
-
-    test('handles null rating', () {
-      const place = Place(
-        id: 'no-rating',
-        name: 'No Rating Place',
-        formattedAddress: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final original = SavedLocationEntry.fromPlace(place);
-      final restored = SavedLocationEntry.fromJson(original.toJson());
-
-      expect(restored.rating, isNull);
-      expect(restored.userRatingCount, isNull);
     });
   });
 
