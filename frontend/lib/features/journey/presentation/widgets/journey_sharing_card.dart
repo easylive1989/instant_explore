@@ -11,6 +11,13 @@ import 'package:flutter/material.dart';
 ///
 /// This widget is rendered off-screen via [RepaintBoundary] and
 /// captured as an image by [JourneySharingService].
+///
+/// Colors here are mostly hardcoded by design: the captured image
+/// must look identical across iOS/Android, system theme changes,
+/// and future MK theme adjustments. Only [AppColors.primary] is
+/// referenced through the brand token (Midnight Kyoto's electric
+/// blue is the brand identity); other values are share-asset
+/// constants and intentionally not theme-driven.
 class JourneySharingCard extends StatelessWidget {
   final String placeName;
   final String placeAddress;
@@ -145,7 +152,7 @@ class _PlaceholderHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF137fec), Color(0xFF0D5BB5)],
+          colors: [AppColors.primary, Color(0xFF0D5BB5)],
         ),
       ),
       child: Stack(
