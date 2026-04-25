@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -20,16 +20,7 @@ class SettingsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: colorScheme.onSurface.withValues(alpha: 0.1),
-            height: 1.0,
-          ),
-        ),
-        title: Text('settings.title'.tr(), style: textTheme.titleLarge),
-      ),
+      appBar: MidnightAppBar(title: Text('settings.title'.tr())),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -99,17 +90,13 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
+      padding: const EdgeInsets.only(left: 4),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
-          color: colorScheme.onSurfaceVariant,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.0,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(letterSpacing: 1.0),
       ),
     );
   }
@@ -147,10 +134,11 @@ class _LanguageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return _SettingsTile(
       icon: Icons.language,
-      iconColor: AppColors.primary,
-      iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+      iconColor: cs.primary,
+      iconBgColor: cs.primary.withValues(alpha: 0.2),
       title: 'settings.change_language'.tr(),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -211,8 +199,8 @@ class _OnboardingSection extends ConsumerWidget {
       children: [
         _SettingsTile(
           icon: Icons.school_outlined,
-          iconColor: AppColors.primary,
-          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          iconColor: colorScheme.primary,
+          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
           title: 'settings_onboarding.replay'.tr(),
           trailing: Icon(
             Icons.arrow_forward_ios,
@@ -247,8 +235,8 @@ class _SubscriptionSection extends StatelessWidget {
         children: [
           _SettingsTile(
             icon: Icons.workspace_premium,
-            iconColor: AppColors.amber,
-            iconBgColor: AppColors.amber.withValues(alpha: 0.2),
+            iconColor: colorScheme.tertiary,
+            iconBgColor: colorScheme.tertiary.withValues(alpha: 0.2),
             title: 'subscription.premium_active'.tr(),
             trailing: formattedDate.isNotEmpty
                 ? Text(
@@ -270,8 +258,8 @@ class _SubscriptionSection extends StatelessWidget {
       children: [
         _SettingsTile(
           icon: Icons.workspace_premium,
-          iconColor: AppColors.primary,
-          iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+          iconColor: colorScheme.primary,
+          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
           title: 'subscription.upgrade_cta'.tr(),
           trailing: Icon(
             Icons.arrow_forward_ios,
@@ -301,8 +289,8 @@ class _UsageSection extends StatelessWidget {
         usageAsync.when(
           data: (status) => _SettingsTile(
             icon: Icons.bar_chart,
-            iconColor: AppColors.primary,
-            iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+            iconColor: colorScheme.primary,
+            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
             title: 'settings.daily_usage'.tr(),
             trailing: Text(
               isPremium
@@ -328,8 +316,8 @@ class _UsageSection extends StatelessWidget {
           ),
           error: (_, __) => _SettingsTile(
             icon: Icons.bar_chart,
-            iconColor: AppColors.primary,
-            iconBgColor: AppColors.primary.withValues(alpha: 0.2),
+            iconColor: colorScheme.primary,
+            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
             title: 'settings.daily_usage'.tr(),
           ),
         ),
