@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
@@ -76,7 +75,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'common.error_prefix'.tr()}: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -117,7 +116,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('${'common.error_prefix'.tr()}: $e'),
-              backgroundColor: AppColors.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
           // Only reset deleting state if error occurred (if success, widget might be removed)
@@ -197,7 +196,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                   shape: BoxShape.circle,
                   border: Border.all(color: colorScheme.surface, width: 3),
                   boxShadow: [
@@ -211,8 +210,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                   child: Container(
                     width: 6,
                     height: 6,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colorScheme.onPrimary,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -237,8 +236,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                                 _formatDateLabel(
                                   widget.entry.createdAt,
                                 ).toUpperCase(),
-                                style: const TextStyle(
-                                  color: AppColors.primary,
+                                style: TextStyle(
+                                  color: colorScheme.primary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.5,
@@ -352,12 +351,12 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               if (_isSharing)
-                                const SizedBox(
+                                SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: AdaptiveProgressIndicator(
                                     strokeWidth: 2,
-                                    color: AppColors.primary,
+                                    color: colorScheme.primary,
                                   ),
                                 )
                               else
@@ -368,12 +367,12 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                                 ),
                               const SizedBox(width: 16),
                               if (_isDeleting)
-                                const SizedBox(
+                                SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: AdaptiveProgressIndicator(
                                     strokeWidth: 2,
-                                    color: AppColors.primary,
+                                    color: colorScheme.primary,
                                   ),
                                 )
                               else

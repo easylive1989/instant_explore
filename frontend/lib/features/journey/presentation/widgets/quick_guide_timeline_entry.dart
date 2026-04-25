@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
@@ -105,7 +104,7 @@ class _QuickGuideTimelineEntryState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'common.error_prefix'.tr()}: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -144,7 +143,7 @@ class _QuickGuideTimelineEntryState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('${'common.error_prefix'.tr()}: $e'),
-              backgroundColor: AppColors.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
           setState(() => _isDeleting = false);
@@ -317,12 +316,12 @@ class _QuickGuideTimelineEntryState
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             if (_isSharing)
-                              const SizedBox(
+                              SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: AdaptiveProgressIndicator(
                                   strokeWidth: 2,
-                                  color: AppColors.primary,
+                                  color: colorScheme.primary,
                                 ),
                               )
                             else
@@ -333,12 +332,12 @@ class _QuickGuideTimelineEntryState
                               ),
                             const SizedBox(width: 16),
                             if (_isDeleting)
-                              const SizedBox(
+                              SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: AdaptiveProgressIndicator(
                                   strokeWidth: 2,
-                                  color: AppColors.primary,
+                                  color: colorScheme.primary,
                                 ),
                               )
                             else

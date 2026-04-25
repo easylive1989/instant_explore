@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
@@ -57,11 +56,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                   Expanded(
                     child: Text(
                       'passport.title'.tr(),
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
+                      style: Theme.of(context).textTheme.displayLarge,
                     ),
                   ),
                   if (isTimeline)
@@ -277,8 +272,8 @@ class _CurrentTripBanner extends ConsumerWidget {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      AppColors.primary.withValues(alpha: 0.85),
-                      AppColors.primary.withValues(alpha: 0.65),
+                      colorScheme.primary.withValues(alpha: 0.85),
+                      colorScheme.primary.withValues(alpha: 0.65),
                     ],
                   ),
                 ),
@@ -289,9 +284,9 @@ class _CurrentTripBanner extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.flag_outlined,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
@@ -311,8 +306,8 @@ class _CurrentTripBanner extends ConsumerWidget {
                             ),
                             Text(
                               trip.name,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -324,7 +319,7 @@ class _CurrentTripBanner extends ConsumerWidget {
                       ),
                       AdaptiveButton(
                         style: AdaptiveButtonStyle.text,
-                        foregroundColor: Colors.white,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         onPressed: () =>
                             ref.read(currentTripIdProvider.notifier).clear(),
@@ -371,7 +366,7 @@ class _TripGridView extends ConsumerWidget {
       error: (error, _) => Center(
         child: Text(
           '${'trip.load_error'.tr()}: $error',
-          style: const TextStyle(color: AppColors.error),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),
     );
@@ -434,14 +429,16 @@ class _FilterChips extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary
+              ? colorScheme.primary
               : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : colorScheme.onSurfaceVariant,
+            color: selected
+                ? colorScheme.onPrimary
+                : colorScheme.onSurfaceVariant,
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
@@ -517,7 +514,7 @@ class _JourneyList extends ConsumerWidget {
       error: (error, stack) => Center(
         child: Text(
           '${'passport.load_error'.tr()}: $error',
-          style: const TextStyle(color: AppColors.error),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),
     );
