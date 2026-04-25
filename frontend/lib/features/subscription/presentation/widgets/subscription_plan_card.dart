@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Paywall plan card in the Midnight Kyoto brand language.
@@ -22,12 +21,15 @@ class SubscriptionPlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.surfaceDarkCard, AppColors.surfaceDark],
+          colors: [
+            Theme.of(context).colorScheme.surfaceContainerHigh,
+            Theme.of(context).colorScheme.surfaceContainer,
+          ],
         ),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
@@ -145,13 +147,12 @@ class _SkeletonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white10,
+        color: Theme.of(context).colorScheme.outlineVariant,
         borderRadius: BorderRadius.circular(height / 2),
       ),
+      child: SizedBox(width: width, height: height),
     );
   }
 }
@@ -164,15 +165,13 @@ class _Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           message,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondaryDark,
-          ),
+          style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
         Align(
@@ -181,7 +180,7 @@ class _Error extends StatelessWidget {
             key: const ValueKey('planCard.retry'),
             onPressed: onRetry,
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
+              foregroundColor: cs.primary,
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 32),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -214,16 +213,17 @@ class _Ready extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           planLabel,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: SubscriptionPlanCard._planLabelFontSize,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
-            color: AppColors.textTertiaryDark,
+            color: cs.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 12),
@@ -233,20 +233,20 @@ class _Ready extends StatelessWidget {
           children: [
             Text(
               priceString,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: SubscriptionPlanCard._priceFontSize,
                 fontWeight: FontWeight.w900,
-                color: AppColors.textPrimaryDark,
+                color: cs.onSurface,
                 height: 1,
               ),
             ),
             const SizedBox(width: 6),
             Text(
               periodLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: SubscriptionPlanCard._periodFontSize,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryDark,
+                color: cs.onSurfaceVariant,
               ),
             ),
           ],
@@ -254,15 +254,15 @@ class _Ready extends StatelessWidget {
         const SizedBox(height: 16),
         const _Divider(),
         const SizedBox(height: 16),
-        ...bullets.map(_bulletRow),
+        ...bullets.map((b) => _bulletRow(b, cs)),
         const SizedBox(height: 16),
         const _Divider(),
         const SizedBox(height: 12),
         Text(
           autoRenewNotice,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: SubscriptionPlanCard._noticeFontSize,
-            color: AppColors.textTertiaryDark,
+            color: cs.onSurfaceVariant,
             height: 1.4,
           ),
         ),
@@ -270,27 +270,23 @@ class _Ready extends StatelessWidget {
     );
   }
 
-  Widget _bulletRow(String text) {
+  Widget _bulletRow(String text, ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '✦',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.primary,
-              height: 1.4,
-            ),
+            style: TextStyle(fontSize: 14, color: cs.primary, height: 1.4),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: SubscriptionPlanCard._bulletFontSize,
-                color: AppColors.textPrimaryDark,
+                color: cs.onSurface,
                 height: 1.4,
               ),
             ),
@@ -306,6 +302,11 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(height: 1, color: AppColors.glassBorder);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.outlineVariant,
+      ),
+      child: const SizedBox(height: 1),
+    );
   }
 }

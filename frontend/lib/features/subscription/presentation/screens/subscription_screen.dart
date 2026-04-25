@@ -113,7 +113,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'common.error_prefix'.tr()}: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -141,7 +141,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'common.error_prefix'.tr()}: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -156,7 +156,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${'common.error_prefix'.tr()}: $uri'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -188,107 +188,102 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: midnightKyotoTheme(),
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundDark,
-        body: MidnightKyotoBackdrop(
-          child: SafeArea(
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: AdaptiveIconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      color: AppColors.textPrimaryDark,
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+    final cs = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
+      body: MidnightKyotoBackdrop(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: AdaptiveIconButton(
+                  icon: Icon(Icons.close, color: cs.onSurface),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 8),
-                        const _PremiumIcon(),
-                        const SizedBox(height: 20),
-                        Text(
-                          'subscription.category_label'.tr(),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.8,
-                            color: AppColors.textSecondaryDark,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+                      const _PremiumIcon(),
+                      const SizedBox(height: 20),
+                      Text(
+                        'subscription.category_label'.tr(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.8,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      _entry(
+                        visible: _showHeadline,
+                        child: Text(
+                          'subscription.headline'.tr(),
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: cs.onSurface,
+                            height: 1.2,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
-                        _entry(
-                          visible: _showHeadline,
-                          child: Text(
-                            'subscription.headline'.tr(),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                              color: AppColors.textPrimaryDark,
-                              height: 1.2,
-                            ),
-                            textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      _entry(
+                        visible: _showSubheadline,
+                        child: Text(
+                          'subscription.subheadline'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            height: 1.55,
+                            color: cs.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      _entry(
+                        visible: _showPlanCard,
+                        child: SubscriptionPlanCard(
+                          state: _cardState(),
+                          onRetry: _loadPlan,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _SubscribeButton(
+                        isLoading: _isPurchasing,
+                        onPressed: _isPurchasing || _plan == null
+                            ? null
+                            : _purchase,
+                      ),
+                      const SizedBox(height: 4),
+                      AdaptiveButton(
+                        style: AdaptiveButtonStyle.text,
+                        foregroundColor: cs.onSurfaceVariant,
+                        onPressed: _isPurchasing ? null : _restore,
+                        child: Text(
+                          'subscription.restore'.tr(),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        _entry(
-                          visible: _showSubheadline,
-                          child: Text(
-                            'subscription.subheadline'.tr(),
-                            style: const TextStyle(
-                              fontSize: 15,
-                              height: 1.55,
-                              color: AppColors.textSecondaryDark,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-                        _entry(
-                          visible: _showPlanCard,
-                          child: SubscriptionPlanCard(
-                            state: _cardState(),
-                            onRetry: _loadPlan,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        _SubscribeButton(
-                          isLoading: _isPurchasing,
-                          onPressed: _isPurchasing || _plan == null
-                              ? null
-                              : _purchase,
-                        ),
-                        const SizedBox(height: 4),
-                        AdaptiveButton(
-                          style: AdaptiveButtonStyle.text,
-                          foregroundColor: AppColors.textSecondaryDark,
-                          onPressed: _isPurchasing ? null : _restore,
-                          child: Text(
-                            'subscription.restore'.tr(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondaryDark,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _LegalFooter(onOpen: _openUrl),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      _LegalFooter(onOpen: _openUrl),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -301,21 +296,20 @@ class _PremiumIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return SizedBox(
       width: 120,
       height: 120,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(
-            width: 120,
-            height: 120,
+          DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.primary.withValues(alpha: 0.25),
-                  AppColors.primary.withValues(alpha: 0),
+                  cs.primary.withValues(alpha: 0.25),
+                  cs.primary.withValues(alpha: 0),
                 ],
               ),
             ),
@@ -324,14 +318,10 @@ class _PremiumIcon extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: cs.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: const Icon(
-              Icons.workspace_premium,
-              size: 40,
-              color: AppColors.primary,
-            ),
+            child: Icon(Icons.workspace_premium, size: 40, color: cs.primary),
           ),
         ],
       ),
@@ -347,28 +337,24 @@ class _SubscribeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return SizedBox(
       height: 56,
       child: FilledButton.icon(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
-          disabledForegroundColor: Colors.white70,
-          shape: const StadiumBorder(),
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         icon: isLoading
             ? const SizedBox.shrink()
             : const Icon(Icons.lock_open_rounded),
         label: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 22,
                 height: 22,
                 child: AdaptiveProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: cs.onPrimary,
                 ),
               )
             : Text('subscription.subscribe'.tr()),
@@ -384,9 +370,11 @@ class _LegalFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const linkStyle = TextStyle(
+    final cs = Theme.of(context).colorScheme;
+    final muted = cs.onSurfaceVariant.withValues(alpha: 0.7);
+    final linkStyle = TextStyle(
       fontSize: 12,
-      color: AppColors.textTertiaryDark,
+      color: muted,
       decoration: TextDecoration.underline,
     );
     return Row(
@@ -397,12 +385,9 @@ class _LegalFooter extends StatelessWidget {
           onTap: () => onOpen(Uri.parse(LegalUrls.termsOfUse)),
           child: Text('subscription.terms'.tr(), style: linkStyle),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            '·',
-            style: TextStyle(fontSize: 12, color: AppColors.textTertiaryDark),
-          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text('·', style: TextStyle(fontSize: 12, color: muted)),
         ),
         GestureDetector(
           behavior: HitTestBehavior.opaque,

@@ -27,20 +27,3 @@ class MidnightKyotoBackdrop extends StatelessWidget {
     );
   }
 }
-
-/// [ThemeData] that pairs with [MidnightKyotoBackdrop].
-///
-/// Locks both the scaffold background and the colorScheme surface to
-/// the deep night navy so the radial wash reads correctly and the
-/// brand's primary electric-blue stays dominant for buttons and
-/// highlights, regardless of the user's system theme.
-ThemeData midnightKyotoTheme() {
-  final base = ThemeData.dark(useMaterial3: true);
-  return base.copyWith(
-    scaffoldBackgroundColor: AppColors.backgroundDark,
-    colorScheme: base.colorScheme.copyWith(
-      primary: AppColors.primary,
-      surface: AppColors.backgroundDark,
-    ),
-  );
-}
