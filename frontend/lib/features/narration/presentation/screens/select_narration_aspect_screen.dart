@@ -1,22 +1,23 @@
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
+import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/presentation/controllers/extensions/narration_aspect_extension.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
+import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/usage/providers.dart';
+import 'package:context_app/shared/extensions/place_category_extension.dart';
+import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/shared/extensions/place_category_extension.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/presentation/controllers/extensions/narration_aspect_extension.dart';
-import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
-import 'package:context_app/features/narration/providers.dart';
-import 'package:context_app/features/usage/providers.dart';
-import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
 class SelectNarrationAspectScreen extends ConsumerStatefulWidget {
   final Place place;
@@ -146,9 +147,9 @@ class _SelectNarrationAspectScreenState
               leading: isGenerating
                   ? null
                   : AdaptiveIconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_ios_new,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -166,13 +167,15 @@ class _SelectNarrationAspectScreenState
               ),
               child: Container(
                 padding: const EdgeInsets.all(20.0),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      AppColors.backgroundDark,
-                      Color(0xCC101922),
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(
+                        context,
+                      ).colorScheme.surface.withValues(alpha: 0.8),
                       Colors.transparent,
                     ],
                   ),
@@ -184,11 +187,7 @@ class _SelectNarrationAspectScreenState
                     // Place Name
                     Text(
                       widget.place.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
                     const SizedBox(height: 8),
 
@@ -202,16 +201,12 @@ class _SelectNarrationAspectScreenState
 
                     // Content area: loading spinner or aspect options
                     if (isGenerating)
-                      _GeneratingIndicator()
+                      const _GeneratingIndicator()
                     else ...[
                       // Title
                       Text(
                         'config_screen.select_aspect_title'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 16),
 
@@ -248,23 +243,13 @@ class _SelectNarrationAspectScreenState
                       const SizedBox(height: 24),
 
                       // Start Button
-                      AdaptiveButton(
-                        expanded: true,
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        icon: const Icon(Icons.play_arrow, color: Colors.white),
+                      PillButton(
+                        label: 'config_screen.start_button'.tr(),
+                        icon: Icons.play_arrow,
+                        fullWidth: true,
                         onPressed: selectedAspects.isEmpty
                             ? null
                             : _onStartPressed,
-                        child: Text(
-                          'config_screen.start_button'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -280,18 +265,23 @@ class _SelectNarrationAspectScreenState
 }
 
 class _GeneratingIndicator extends StatelessWidget {
+  const _GeneratingIndicator();
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AdaptiveProgressIndicator(color: AppColors.primary),
+            AdaptiveProgressIndicator(color: cs.primary),
             const SizedBox(height: 16),
             Text(
               'config_screen.generating'.tr(),
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -330,12 +320,12 @@ class _BackgroundImage extends StatelessWidget {
         color: const Color(0x66000000),
         colorBlendMode: BlendMode.darken,
         cacheManager: PlaceImageCacheManager.instance,
-        placeholder: (context, url) => Container(
-          color: Colors.black,
+        placeholder: (context, url) => ColoredBox(
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           child: const Center(child: AdaptiveProgressIndicator()),
         ),
-        errorWidget: (context, url, error) => Container(
-          color: Colors.black,
+        errorWidget: (context, url, error) => ColoredBox(
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           child: const Icon(
             Icons.image_not_supported,
             size: 48,
@@ -345,58 +335,64 @@ class _BackgroundImage extends StatelessWidget {
       );
     }
 
-    return Container(color: Colors.black);
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surfaceContainerLowest,
+    );
   }
 }
 
 class _CategoryBadge extends StatelessWidget {
-  final Place place;
-
   const _CategoryBadge({required this.place});
+  final Place place;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    final color = place.category.color;
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: place.category.color.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: place.category.color, width: 1),
+        color: color.withValues(alpha: 0.2),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(place.category.icon, size: 16, color: Colors.white),
-          const SizedBox(width: 6),
-          Text(
-            place.category.translationKey.tr(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(place.category.icon, size: 12, color: color),
+            const SizedBox(width: 4),
+            Text(
+              place.category.translationKey.tr().toUpperCase(),
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _AddressRow extends StatelessWidget {
-  final Place place;
-
   const _AddressRow({required this.place});
+  final Place place;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       children: [
-        const Icon(Icons.location_on, color: Colors.white70, size: 16),
+        Icon(Icons.location_on, color: cs.onSurfaceVariant, size: 16),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             place.formattedAddress,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -420,63 +416,74 @@ class AspectOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    final cs = Theme.of(context).colorScheme;
+
+    return PressScale(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0x1A137FEC) : const Color(0xCC192633),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : Colors.white.withValues(alpha: 0.1),
-            width: 2,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary
-                    : Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? cs.primaryContainer
+                  : cs.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? cs.primary : cs.outlineVariant,
+                width: isSelected ? 2 : 1,
               ),
-              child: Icon(aspect.icon, color: Colors.white),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
-                  Text(
-                    aspect.translationKey.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isSelected ? cs.primary : cs.surfaceContainerHigh,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      aspect.icon,
+                      color: isSelected ? cs.onPrimary : cs.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    aspect.descriptionKey.tr(),
-                    style: TextStyle(
-                      color: isSelected ? Colors.blue[200] : Colors.white70,
-                      fontSize: 14,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          aspect.translationKey.tr(),
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          aspect.descriptionKey.tr(),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: isSelected
+                                    ? cs.onPrimaryContainer
+                                    : cs.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
                     ),
+                  ),
+                  Icon(
+                    isSelected
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                    color: isSelected ? cs.primary : cs.onSurfaceVariant,
                   ),
                 ],
               ),
             ),
-            if (isSelected)
-              const Icon(Icons.check_box, color: AppColors.primary)
-            else
-              const Icon(Icons.check_box_outline_blank, color: Colors.white54),
-          ],
+          ),
         ),
       ),
     );

@@ -9,7 +9,7 @@ import 'package:context_app/features/narration/domain/models/narration_aspect.da
 import 'package:context_app/features/narration/presentation/screens/select_narration_aspect_screen.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
-import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -352,14 +352,14 @@ void _thenStartButtonIsEnabled(WidgetTester tester) {
   expect(_findStartButton(tester).onPressed, isNotNull);
 }
 
-/// Locates the primary start CTA by finding the [AdaptiveButton] that
+/// Locates the primary start CTA by finding the [PillButton] that
 /// wraps the start-button label.
-AdaptiveButton _findStartButton(WidgetTester tester) {
+PillButton _findStartButton(WidgetTester tester) {
   final buttonFinder = find.ancestor(
     of: find.text('config_screen.start_button'),
-    matching: find.byType(AdaptiveButton),
+    matching: find.byType(PillButton),
   );
-  return tester.widget<AdaptiveButton>(buttonFinder.first);
+  return tester.widget<PillButton>(buttonFinder.first);
 }
 
 /// 1x1 transparent PNG — minimal valid bytes to feed Image.memory.
