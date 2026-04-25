@@ -11,9 +11,12 @@ void main() {
       expect(theme.colorScheme.primary, AppColors.primary);
     });
 
-    test('uses backgroundDark as scaffoldBackgroundColor', () {
-      expect(theme.scaffoldBackgroundColor, AppColors.backgroundDark);
-    });
+    test(
+      'uses transparent scaffoldBackgroundColor (AmbientBackdrop paints background)',
+      () {
+        expect(theme.scaffoldBackgroundColor, Colors.transparent);
+      },
+    );
 
     test('uses backgroundDark as colorScheme.surface', () {
       expect(theme.colorScheme.surface, AppColors.backgroundDark);

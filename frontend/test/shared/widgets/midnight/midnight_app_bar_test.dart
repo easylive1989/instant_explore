@@ -28,12 +28,12 @@ void main() {
     });
 
     testWidgets('renders leading and actions', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           appBar: MidnightAppBar(
-            title: const Text('Title'),
-            leading: const Icon(Icons.menu),
-            actions: [const Icon(Icons.search)],
+            title: Text('Title'),
+            leading: Icon(Icons.menu),
+            actions: [Icon(Icons.search)],
           ),
         ),
       ));

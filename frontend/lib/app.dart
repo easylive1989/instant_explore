@@ -9,6 +9,7 @@ import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/share/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
 
 /// Main application widget using go_router for navigation.
 ///
@@ -83,12 +84,14 @@ class LorescapeApp extends ConsumerWidget {
       localizationsDelegates: context.localizationDelegates,
       routerConfig: router,
       builder: (context, child) {
-        return Stack(
-          children: [
-            child!,
-            if (pendingShare != null && pendingShare.isLoading)
-              const _ShareLoadingOverlay(),
-          ],
+        return AmbientBackdrop(
+          child: Stack(
+            children: [
+              child!,
+              if (pendingShare != null && pendingShare.isLoading)
+                const _ShareLoadingOverlay(),
+            ],
+          ),
         );
       },
     );
