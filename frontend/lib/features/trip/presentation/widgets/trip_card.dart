@@ -44,7 +44,7 @@ class TripCard extends StatelessWidget {
               ],
             ),
             border: isCurrent
-                ? Border.all(color: AppColors.amber, width: 2)
+                ? Border.all(color: colorScheme.tertiary, width: 2)
                 : null,
           ),
           child: Padding(
@@ -62,7 +62,7 @@ class TripCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.amber,
+                        color: colorScheme.tertiary,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

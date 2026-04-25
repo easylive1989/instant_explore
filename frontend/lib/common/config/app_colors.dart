@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Midnight Kyoto color tokens.
 ///
-/// Names follow Material 3 conventions where possible. Legacy aliases
-/// (`surfaceDarkPlayer`, `surfaceDarkConfig`, `surfaceDarkCard`,
-/// `success`, `amber`, `errorBg`) are kept for backwards-compat with
-/// existing screens; they will be replaced in S3.
+/// Names follow Material 3 conventions where possible.
 class AppColors {
   AppColors._();
 
@@ -78,40 +75,9 @@ class AppColors {
   static const Color white20 = Color(0x33FFFFFF);
   static const Color black20 = Color(0x33000000);
 
-  // --- Legacy (S3 will remove these) ---
-  @Deprecated('Use surfaceContainer; will be removed in S3.')
-  static const Color surfaceDark = surfaceContainer;
-  @Deprecated('Use surfaceContainer; will be removed in S3.')
-  static const Color surfaceDarkPlayer = Color(0xFF182430);
-  @Deprecated('Use surfaceContainer; will be removed in S3.')
-  static const Color surfaceDarkConfig = Color(0xFF192633);
-  @Deprecated('Use surfaceContainer; will be removed in S3.')
-  static const Color surfaceDarkCard = Color(0xFF1C2732);
-
   /// Success green for confirmation states.
   ///
   /// Distinct from MK's primary blue and tertiary orange — semantic
   /// "success" colour for save / completion confirmations.
   static const Color success = Color(0xFF10B981);
-  @Deprecated('Use a tertiary or new token; will be removed in S3.')
-  static const Color amber = Color(0xFFF59E0B);
-  @Deprecated('Use errorContainer or your own opacity; will be removed in S3.')
-  static const Color errorBg = Color(0x1AF44336);
-
-  // --- Legacy text aliases ---
-  @Deprecated('Use onSurface (dark theme is now mandatory).')
-  static const Color textPrimaryLight = Color(0xFF0F172A);
-  @Deprecated('Use onSurfaceVariant (dark theme is now mandatory).')
-  static const Color textSecondaryLight = Color(0xFF64748B);
-  @Deprecated('Use onSurface; will be removed in S3.')
-  static const Color textPrimaryDark = onSurface;
-  @Deprecated('Use onSurfaceVariant; will be removed in S3.')
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
-  @Deprecated('Use onSurfaceVariant; will be removed in S3.')
-  static const Color textTertiaryDark = Colors.white60;
-  @Deprecated('Use onSurfaceVariant; will be removed in S3.')
-  static const Color textQuaternaryDark = Colors.white54;
-
-  @Deprecated('Light theme retired; use backgroundDark.')
-  static const Color backgroundLight = Color(0xFFF6F7F8);
 }

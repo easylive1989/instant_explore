@@ -99,13 +99,13 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: AppColors.amber.withValues(alpha: 0.2),
+              color: colorScheme.tertiary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.play_circle_outline,
               size: 28,
-              color: AppColors.amber,
+              color: colorScheme.tertiary,
             ),
           ),
           const SizedBox(height: 16),
@@ -187,9 +187,9 @@ class _WatchAdDialogState extends State<_WatchAdDialog> {
                 : () => Navigator.of(context).pop(false),
             child: Text(
               'settings.cancel'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondaryDark,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
