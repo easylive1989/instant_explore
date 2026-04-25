@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/shared/extensions/place_category_extension.dart';
@@ -52,7 +51,7 @@ class _DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 12),
       child: Row(
         children: [
-          const Icon(Icons.bookmark, color: AppColors.primary, size: 24),
+          Icon(Icons.bookmark, color: colorScheme.primary, size: 24),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

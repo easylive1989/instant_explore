@@ -1,4 +1,3 @@
-import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_dialog.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +41,13 @@ class SavedLocationsFab extends ConsumerWidget {
                 context,
               ).push(_SavedLocationsRoute(fabRect: fabRect));
             },
-            backgroundColor: AppColors.primary,
             child: Badge(
               isLabelVisible: count > 0,
               label: Text('$count', style: const TextStyle(fontSize: 10)),
-              child: const Icon(Icons.bookmark, color: Colors.white),
+              child: Icon(
+                Icons.bookmark,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
         );
@@ -100,7 +101,7 @@ class _SavedLocationsRoute extends PageRouteBuilder<void> {
           final rectTween = RectTween(begin: fabRect, end: dialogRect);
           final radiusTween = Tween<double>(begin: 28, end: 20);
           final colorTween = ColorTween(
-            begin: AppColors.primary,
+            begin: Theme.of(context).colorScheme.primary,
             end: colorScheme.surface,
           );
 
@@ -162,9 +163,11 @@ class _SavedLocationsRoute extends PageRouteBuilder<void> {
                             child: Center(
                               child: Opacity(
                                 opacity: iconOpacity.value,
-                                child: const Icon(
+                                child: Icon(
                                   Icons.bookmark,
-                                  color: Colors.white,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   size: 24,
                                 ),
                               ),
