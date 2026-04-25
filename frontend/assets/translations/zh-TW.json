@@ -355,5 +355,8 @@
     "confirm_replay_title": "重新進行新手導覽？",
     "confirm_replay_body": "下次開啟 App 會再次顯示歡迎畫面。",
     "confirm_replay_action": "確定"
+  },
+  "narration": {
+    "grounding_info_tooltip": "顯示資料來源"
   }
 }

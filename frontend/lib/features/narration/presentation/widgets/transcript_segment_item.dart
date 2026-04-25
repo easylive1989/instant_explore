@@ -6,7 +6,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class TranscriptSegmentItem extends StatelessWidget {
   final NarrationSegment segment;
   final bool isActive;
-  final Color primaryColor;
   final AutoScrollController scrollController;
   final int index;
 
@@ -14,19 +13,19 @@ class TranscriptSegmentItem extends StatelessWidget {
     super.key,
     required this.segment,
     required this.isActive,
-    required this.primaryColor,
     required this.scrollController,
     required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AutoScrollTag(
       key: ValueKey(index),
       controller: scrollController,
       index: index,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 32.0),
+        padding: const EdgeInsets.only(bottom: 32),
         child: isActive
             ? Stack(
                 clipBehavior: Clip.none,
@@ -36,19 +35,17 @@ class TranscriptSegmentItem extends StatelessWidget {
                     top: 6,
                     bottom: 6,
                     width: 4,
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: primaryColor,
+                        color: cs.primary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   Text(
                     segment.text,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.w800,
                       height: 1.4,
                     ),
                   ),
@@ -56,10 +53,10 @@ class TranscriptSegmentItem extends StatelessWidget {
               )
             : Text(
                 segment.text,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontSize: 20,
                   height: 1.6,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
       ),

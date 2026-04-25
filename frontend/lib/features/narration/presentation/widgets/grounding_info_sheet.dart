@@ -111,7 +111,10 @@ class _SourceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.link),
+      leading: Icon(
+        Icons.link,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       title: Text(source.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(source.uri, maxLines: 1, overflow: TextOverflow.ellipsis),
       onTap: () async {

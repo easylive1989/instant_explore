@@ -355,5 +355,8 @@
     "confirm_replay_title": "Replay the welcome tour?",
     "confirm_replay_body": "The welcome screens will show again the next time you open the app.",
     "confirm_replay_action": "OK"
+  },
+  "narration": {
+    "grounding_info_tooltip": "Show sources"
   }
 }
