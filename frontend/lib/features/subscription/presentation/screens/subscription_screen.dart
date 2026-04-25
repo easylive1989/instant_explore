@@ -324,7 +324,14 @@ class _PremiumIcon extends StatelessWidget {
               color: cs.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Icons.workspace_premium, size: 40, color: cs.primary),
+            child: Center(
+              child: Image.asset(
+                'assets/images/subscription/premium_badge.png',
+                width: 60,
+                height: 60,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
         ],
       ),

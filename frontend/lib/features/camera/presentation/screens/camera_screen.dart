@@ -180,10 +180,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 說明文字
-            Icon(
-              Icons.camera_alt_rounded,
-              size: 80,
-              color: AppColors.primary.withValues(alpha: 0.5),
+            Image.asset(
+              'assets/images/camera/camera_icon.png',
+              width: 120,
+              height: 120,
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: 24),
             Text(
