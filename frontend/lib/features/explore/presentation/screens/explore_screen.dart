@@ -60,7 +60,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final placesState = ref.watch(filteredPlacesProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final maxDistance = ref.watch(maxDistanceProvider);
-    final isFilterActive = maxDistance < 5000.0;
+    final isFilterActive = maxDistance < 30000.0;
 
     return Scaffold(
       floatingActionButton: const SavedLocationsFab(),
@@ -208,8 +208,16 @@ class _FilterPanel extends ConsumerStatefulWidget {
 class _FilterPanelState extends ConsumerState<_FilterPanel> {
   late double _sliderValue;
 
-  /// 滑桿的刻度值（公尺）：250, 500, 1000, 2000, 5000
-  static const List<double> _steps = [250, 500, 1000, 2000, 5000];
+  /// 滑桿的刻度值（公尺）：500, 1000, 2000, 5000, 10000, 20000, 30000
+  static const List<double> _steps = [
+    500,
+    1000,
+    2000,
+    5000,
+    10000,
+    20000,
+    30000,
+  ];
 
   @override
   void initState() {
@@ -310,8 +318,8 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('250 m', style: Theme.of(context).textTheme.labelSmall),
-                Text('5 km', style: Theme.of(context).textTheme.labelSmall),
+                Text('500 m', style: Theme.of(context).textTheme.labelSmall),
+                Text('30 km', style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           ),
@@ -326,9 +334,9 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             variant: PillButtonVariant.ghost,
             fullWidth: true,
             onPressed: () {
-              ref.read(maxDistanceProvider.notifier).state = 5000.0;
+              ref.read(maxDistanceProvider.notifier).state = 30000.0;
               setState(() {
-                _sliderValue = _valueToSlider(5000.0);
+                _sliderValue = _valueToSlider(30000.0);
               });
             },
           ),

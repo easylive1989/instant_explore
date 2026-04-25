@@ -41,12 +41,12 @@ void main() {
   }
 
   group('filteredPlacesProvider', () {
-    test('預設 maxDistance 為 5000', () {
+    test('預設 maxDistance 為 10000', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final max = container.read(maxDistanceProvider);
-      expect(max, 5000.0);
+      expect(max, 10000.0);
     });
 
     test('userLocation 為 null 時顯示全部地點', () {
@@ -84,14 +84,14 @@ void main() {
       });
     });
 
-    test('maxDistance 5000 時顯示全部地點', () {
+    test('maxDistance 30000 時顯示全部地點', () {
       final container = buildContainer(
         places: [
           createPlace(id: '1', name: 'A', distanceMeters: 500),
           createPlace(id: '2', name: 'B', distanceMeters: 2000),
           createPlace(id: '3', name: 'C', distanceMeters: 4000),
         ],
-        maxDistance: 5000.0,
+        maxDistance: 30000.0,
         location: userLocation,
       );
       addTearDown(container.dispose);
