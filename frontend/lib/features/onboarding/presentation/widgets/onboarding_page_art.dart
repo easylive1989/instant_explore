@@ -31,7 +31,7 @@ class OnboardingPageArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 320,
+      height: 440,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
@@ -39,11 +39,11 @@ class OnboardingPageArt extends StatelessWidget {
           _GhostSerial(label: serialLabel),
           PulsingGlow(
             color: accent,
-            size: 260,
+            size: 380,
             child: Image.asset(
               imageAsset,
-              width: 120,
-              height: 120,
+              width: 240,
+              height: 240,
               fit: BoxFit.contain,
             ),
           ),
