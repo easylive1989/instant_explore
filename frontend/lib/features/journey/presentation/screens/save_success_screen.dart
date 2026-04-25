@@ -1,6 +1,7 @@
 import 'package:context_app/common/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/midnight/midnight.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +20,6 @@ class SaveSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const successColor = AppColors.success;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -62,7 +62,7 @@ class SaveSuccessScreen extends StatelessWidget {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: successColor.withValues(alpha: 0.1),
+                      color: AppColors.success.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -70,7 +70,7 @@ class SaveSuccessScreen extends StatelessWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: successColor.withValues(alpha: 0.2),
+                      color: AppColors.success.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -78,7 +78,7 @@ class SaveSuccessScreen extends StatelessWidget {
                     width: 80,
                     height: 80,
                     decoration: const BoxDecoration(
-                      color: successColor,
+                      color: AppColors.success,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -193,43 +193,18 @@ class SaveSuccessScreen extends StatelessWidget {
 
               Column(
                 children: [
-                  AdaptiveButton(
-                    expanded: true,
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                  PillButton(
+                    label: 'passport.view_button'.tr(),
+                    icon: Icons.arrow_forward,
+                    fullWidth: true,
                     onPressed: onViewPassport,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'passport.view_button'.tr(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward, size: 20),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 12),
-                  AdaptiveButton(
-                    expanded: true,
-                    style: AdaptiveButtonStyle.text,
-                    backgroundColor: colorScheme.surfaceContainerHigh,
-                    foregroundColor: colorScheme.onSurface,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                  PillButton(
+                    label: 'passport.continue_tour'.tr(),
+                    variant: PillButtonVariant.secondary,
+                    fullWidth: true,
                     onPressed: onContinueTour ?? () => context.pop(),
-                    child: Text(
-                      'passport.continue_tour'.tr(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ),
                 ],
               ),

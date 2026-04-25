@@ -87,7 +87,11 @@ class AppColors {
   static const Color surfaceDarkConfig = Color(0xFF192633);
   @Deprecated('Use surfaceContainer; will be removed in S3.')
   static const Color surfaceDarkCard = Color(0xFF1C2732);
-  @Deprecated('Use a tertiary or new token; will be removed in S3.')
+
+  /// Success green for confirmation states.
+  ///
+  /// Distinct from MK's primary blue and tertiary orange — semantic
+  /// "success" colour for save / completion confirmations.
   static const Color success = Color(0xFF10B981);
   @Deprecated('Use a tertiary or new token; will be removed in S3.')
   static const Color amber = Color(0xFFF59E0B);
