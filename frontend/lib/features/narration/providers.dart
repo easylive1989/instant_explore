@@ -64,6 +64,7 @@ final narrationGenerationControllerProvider =
         useCase,
         journeyRepository,
         () => ref.read(currentTripIdProvider),
+        () => ref.invalidate(usageStatusProvider),
       );
     });
 

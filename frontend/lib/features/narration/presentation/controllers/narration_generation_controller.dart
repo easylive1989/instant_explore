@@ -70,11 +70,13 @@ class NarrationGenerationController
   final CreateNarrationUseCase _createNarrationUseCase;
   final JourneyRepository _journeyRepository;
   final String? Function() _currentTripIdGetter;
+  final void Function() _onUsageConsumed;
 
   NarrationGenerationController(
     this._createNarrationUseCase,
     this._journeyRepository,
     this._currentTripIdGetter,
+    this._onUsageConsumed,
   ) : super(const NarrationGenerationState());
 
   /// Generates narration content for the given place and aspects.
@@ -97,6 +99,7 @@ class NarrationGenerationController
         language: language,
       );
 
+      _onUsageConsumed();
       await _autoSaveToJourney(place, aspects, content, language);
 
       state = NarrationGenerationState(
