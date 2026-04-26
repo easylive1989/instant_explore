@@ -299,42 +299,11 @@ class _PremiumIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return SizedBox(
+    return Image.asset(
+      'assets/images/subscription/premium_badge.png',
       width: 120,
       height: 120,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  cs.primary.withValues(alpha: 0.25),
-                  cs.primary.withValues(alpha: 0),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Center(
-              child: Image.asset(
-                'assets/images/subscription/premium_badge.png',
-                width: 60,
-                height: 60,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ],
-      ),
+      fit: BoxFit.contain,
     );
   }
 }
