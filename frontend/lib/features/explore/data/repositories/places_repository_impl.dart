@@ -18,6 +18,7 @@ class PlacesRepositoryImpl implements PlacesRepository {
 
   static const int _minResultsBeforeRetry = 3;
   static const double _retryRadiusFactor = 5.0;
+  static const double _maxRetryRadius = 30000.0;
 
   @override
   Future<List<Place>> getNearbyPlaces(
@@ -49,12 +50,14 @@ class PlacesRepositoryImpl implements PlacesRepository {
     double radius,
   ) async {
     final places = await _searchAtRadius(location, wikiLang, radius);
-    if (places.length >= _minResultsBeforeRetry) return places;
-    final retried = await _searchAtRadius(
-      location,
-      wikiLang,
-      radius * _retryRadiusFactor,
+    if (places.length >= _minResultsBeforeRetry || radius >= _maxRetryRadius) {
+      return places;
+    }
+    final retryRadius = (radius * _retryRadiusFactor).clamp(
+      radius,
+      _maxRetryRadius,
     );
+    final retried = await _searchAtRadius(location, wikiLang, retryRadius);
     return retried.length > places.length ? retried : places;
   }
 
@@ -116,7 +119,17 @@ class PlacesRepositoryImpl implements PlacesRepository {
       );
       if (category == null) return null;
 
-      return _placeFromDto(combined.dto, combined.entity, category);
+      final lat = combined.dto.lat ?? combined.entity.coordinates?.$1;
+      final lon = combined.dto.lon ?? combined.entity.coordinates?.$2;
+      if (lat == null || lon == null) return null;
+
+      return _placeFromDto(
+        combined.dto,
+        combined.entity,
+        category,
+        lat: lat,
+        lon: lon,
+      );
     } on AppError {
       rethrow;
     } catch (e, stackTrace) {
@@ -143,7 +156,13 @@ class PlacesRepositoryImpl implements PlacesRepository {
       if (entity == null) continue;
       final category = WikidataCategoryMapper.categorize(entity.p31ClassIds);
       if (category == null) continue;
-      places.add(_placeFromDto(dto, entity, category));
+
+      // Prefer Wikipedia coordinates; fall back to Wikidata P625.
+      final lat = dto.lat ?? entity.coordinates?.$1;
+      final lon = dto.lon ?? entity.coordinates?.$2;
+      if (lat == null || lon == null) continue;
+
+      places.add(_placeFromDto(dto, entity, category, lat: lat, lon: lon));
     }
     return places;
   }
@@ -151,13 +170,15 @@ class PlacesRepositoryImpl implements PlacesRepository {
   Place _placeFromDto(
     WikiGeoSearchResultDto dto,
     WikidataEntityDto entity,
-    PlaceCategory category,
-  ) {
+    PlaceCategory category, {
+    required double lat,
+    required double lon,
+  }) {
     return Place(
       id: 'wikidata:${entity.id}',
       name: dto.title,
       formattedAddress: '',
-      location: PlaceLocation(latitude: dto.lat, longitude: dto.lon),
+      location: PlaceLocation(latitude: lat, longitude: lon),
       types: entity.p31ClassIds,
       photos: dto.thumbnailUrl == null
           ? const []

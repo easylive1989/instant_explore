@@ -95,8 +95,8 @@ void main() {
             const WikiGeoSearchResultDto(
               pageId: 1,
               title: 'orphan',
-              lat: 0,
-              lon: 0,
+              lat: 0.0,
+              lon: 0.0,
               // no wikidataId
             ),
           ]);
@@ -247,6 +247,42 @@ void main() {
   });
 
   group('searchPlaces', () {
+    test('uses P625 coords from entity when DTO has null lat/lon', () async {
+      when(
+        () => mockService.searchByText(
+          any(),
+          wikiLang: any(named: 'wikiLang'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          const WikiGeoSearchResultDto(
+            pageId: 1,
+            title: 'No-Coord Temple',
+            wikidataId: 'Q123',
+            // lat and lon are null
+          ),
+        ],
+      );
+      when(() => mockService.fetchEntities(any())).thenAnswer(
+        (_) async => {
+          'Q123': const WikidataEntityDto(
+            id: 'Q123',
+            p31ClassIds: ['Q5393308'], // temple → kept
+            coordinates: (25.1, 121.5),
+          ),
+        },
+      );
+
+      final result = await repository.searchPlaces(
+        'temple',
+        language: testLanguage,
+      );
+
+      expect(result, hasLength(1));
+      expect(result.first.location.latitude, 25.1);
+      expect(result.first.location.longitude, 121.5);
+    });
+
     test('calls searchByText and applies P31 filter', () async {
       when(() => mockService.searchByText(
             any(),

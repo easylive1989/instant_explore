@@ -12,18 +12,20 @@ class SearchNearbyPlacesUseCase {
   final LocationService _locationService;
   final PlacesRepository _placesRepository;
 
-  // Maximum search radius in meters.
-  static const _maxDistance = 1000.0;
+  static const double _defaultRadius = 1000.0;
 
   SearchNearbyPlacesUseCase(this._locationService, this._placesRepository);
 
-  Future<NearbyPlacesResult> execute({required Language language}) async {
+  Future<NearbyPlacesResult> execute({
+    required Language language,
+    double radius = _defaultRadius,
+  }) async {
     final userLocation = await _locationService.getCurrentLocation();
 
     final places = await _placesRepository.getNearbyPlaces(
       userLocation,
       language: language,
-      radius: _maxDistance,
+      radius: radius,
     );
 
     return (

@@ -112,13 +112,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               _searchController.clear();
+                              ref.read(searchQueryProvider.notifier).state = '';
                               ref
                                   .read(placesControllerProvider.notifier)
                                   .search('');
                             },
                           )
                         : null,
+                    onChanged: (value) => setState(() {}),
                     onSubmitted: (value) {
+                      ref.read(searchQueryProvider.notifier).state = value;
                       ref.read(placesControllerProvider.notifier).search(value);
                     },
                   ),
@@ -296,8 +299,13 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
                     });
                   },
                   onChangeEnd: (value) {
-                    ref.read(maxDistanceProvider.notifier).state =
-                        _sliderToValue(value);
+                    final newDistance = _sliderToValue(value);
+                    ref.read(maxDistanceProvider.notifier).state = newDistance;
+                    if (ref.read(searchQueryProvider).isEmpty) {
+                      ref
+                          .read(placesControllerProvider.notifier)
+                          .refresh(radius: newDistance);
+                    }
                   },
                 ),
               ),
@@ -334,10 +342,16 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             variant: PillButtonVariant.ghost,
             fullWidth: true,
             onPressed: () {
-              ref.read(maxDistanceProvider.notifier).state = 30000.0;
+              const defaultDistance = 30000.0;
+              ref.read(maxDistanceProvider.notifier).state = defaultDistance;
               setState(() {
-                _sliderValue = _valueToSlider(30000.0);
+                _sliderValue = _valueToSlider(defaultDistance);
               });
+              if (ref.read(searchQueryProvider).isEmpty) {
+                ref
+                    .read(placesControllerProvider.notifier)
+                    .refresh(radius: defaultDistance);
+              }
             },
           ),
         ],

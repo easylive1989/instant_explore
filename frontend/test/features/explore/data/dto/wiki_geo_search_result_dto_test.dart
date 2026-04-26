@@ -45,9 +45,23 @@ void main() {
       expect(dto.wikidataId, isNull);
     });
 
-    test('returns null when coordinates are missing', () {
+    test('returns null when both coordinates and wikidataId are missing', () {
       final page = {'pageid': 1, 'title': 'Bad page'};
       expect(WikiGeoSearchResultDto.fromPage(page), isNull);
+    });
+
+    test('returns DTO with null coords when no coords but has wikidataId', () {
+      final page = {
+        'pageid': 99,
+        'title': 'No-Coord Place',
+        'pageprops': {'wikibase_item': 'Q999'},
+      };
+
+      final dto = WikiGeoSearchResultDto.fromPage(page)!;
+
+      expect(dto.lat, isNull);
+      expect(dto.lon, isNull);
+      expect(dto.wikidataId, 'Q999');
     });
   });
 }

@@ -40,16 +40,22 @@ final userLocationProvider = StateProvider<PlaceLocation?>((ref) => null);
 /// 距離過濾上限（公尺），預設 10000
 final maxDistanceProvider = StateProvider<double>((ref) => 10000.0);
 
+/// 目前的搜尋關鍵字；空字串表示顯示附近地點模式
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
 /// 根據最大距離過濾後的地點列表
 ///
 /// 監聽 [placesControllerProvider]、[maxDistanceProvider] 與
 /// [userLocationProvider]，當任一改變時自動重新過濾。
+/// 在搜尋模式（[searchQueryProvider] 非空）下跳過距離過濾。
 final filteredPlacesProvider = Provider<AsyncValue<List<Place>>>((ref) {
   final placesAsync = ref.watch(placesControllerProvider);
   final maxDistance = ref.watch(maxDistanceProvider);
   final userLocation = ref.watch(userLocationProvider);
+  final searchQuery = ref.watch(searchQueryProvider);
 
   return placesAsync.whenData((places) {
+    if (searchQuery.isNotEmpty) return places;
     if (userLocation == null) return places;
     return places.where((p) {
       final distance = calculateHaversineDistance(userLocation, p.location);
@@ -77,16 +83,21 @@ class PlacesController extends AsyncNotifier<List<Place>> {
   @override
   Future<List<Place>> build() async {
     final language = ref.watch(currentLanguageProvider);
+    final radius = ref.read(maxDistanceProvider);
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    final result = await useCase.execute(language: language);
+    final result = await useCase.execute(language: language, radius: radius);
     ref.read(userLocationProvider.notifier).state = result.userLocation;
     return result.places;
   }
 
-  Future<List<Place>> _loadNearbyPlaces() async {
+  Future<List<Place>> _loadNearbyPlaces({double? radius}) async {
     final language = ref.read(currentLanguageProvider);
+    final double effectiveRadius = radius ?? ref.read(maxDistanceProvider);
     final useCase = ref.read(searchNearbyPlacesUseCaseProvider);
-    final result = await useCase.execute(language: language);
+    final result = await useCase.execute(
+      language: language,
+      radius: effectiveRadius,
+    );
     ref.read(userLocationProvider.notifier).state = result.userLocation;
     return result.places;
   }
@@ -107,9 +118,9 @@ class PlacesController extends AsyncNotifier<List<Place>> {
     });
   }
 
-  /// 強制重新整理（忽略快取）
-  Future<void> refresh() async {
+  /// 強制重新整理（忽略快取），可傳入新的搜尋半徑
+  Future<void> refresh({double? radius}) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _loadNearbyPlaces());
+    state = await AsyncValue.guard(() => _loadNearbyPlaces(radius: radius));
   }
 }

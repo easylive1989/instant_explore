@@ -102,6 +102,28 @@ void main() {
       });
     });
 
+    test('search 模式下跳過距離過濾，全部地點顯示', () {
+      final container = ProviderContainer(
+        overrides: [
+          placesControllerProvider.overrideWith(
+            () => _FakePlacesController([
+              createPlace(id: '1', name: 'Near', distanceMeters: 200),
+              createPlace(id: '2', name: 'Far', distanceMeters: 20000),
+            ]),
+          ),
+          maxDistanceProvider.overrideWith((ref) => 500.0),
+          userLocationProvider.overrideWith((ref) => userLocation),
+          searchQueryProvider.overrideWith((ref) => 'temple'),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final filtered = container.read(filteredPlacesProvider);
+      filtered.whenData((places) {
+        expect(places.length, 2);
+      });
+    });
+
     test('剛好在邊界上的地點應通過過濾', () {
       final container = buildContainer(
         places: [

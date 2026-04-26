@@ -47,6 +47,52 @@ void main() {
       expect(dto.p31ClassIds, isEmpty);
     });
 
+    test('extracts P625 coordinates', () {
+      final entity = {
+        'id': 'Q221716',
+        'claims': {
+          'P31': [
+            {
+              'mainsnak': {
+                'datavalue': {
+                  'value': {'id': 'Q5393308'},
+                },
+              },
+            },
+          ],
+          'P625': [
+            {
+              'mainsnak': {
+                'datavalue': {
+                  'value': {
+                    'latitude': 25.037222,
+                    'longitude': 121.499722,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      final dto = WikidataEntityDto.fromEntity(entity);
+
+      expect(dto.coordinates, isNotNull);
+      expect(dto.coordinates!.$1, closeTo(25.037222, 0.000001));
+      expect(dto.coordinates!.$2, closeTo(121.499722, 0.000001));
+    });
+
+    test('returns null coordinates when P625 missing', () {
+      final entity = {
+        'id': 'Q1',
+        'claims': <String, dynamic>{},
+      };
+
+      final dto = WikidataEntityDto.fromEntity(entity);
+
+      expect(dto.coordinates, isNull);
+    });
+
     test('skips malformed P31 claims without raising', () {
       final entity = {
         'id': 'Q1',
