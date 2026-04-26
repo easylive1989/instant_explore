@@ -8,6 +8,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 ///
 /// 此類別透過快取機制減少 API 呼叫次數：
 /// - 若快取未過期且使用者位置未大幅移動，直接回傳快取資料
+/// - 快取以語言為 key，切換語言後會從 API 重新取得對應語言的資料
 /// - 否則呼叫底層 Repository 取得新資料並更新快取
 class CachingPlacesRepository implements PlacesRepository {
   final PlacesRepository _delegate;
@@ -21,40 +22,38 @@ class CachingPlacesRepository implements PlacesRepository {
     required Language language,
     required double radius,
   }) async {
-    // 檢查是否需要重新搜尋（快取過期或移動超過門檻距離）
-    final shouldRefresh = await _cacheService.shouldRefresh(location);
+    final lang = _langKey(language);
+    final shouldRefresh = await _cacheService.shouldRefresh(location, lang);
 
     if (!shouldRefresh) {
-      // 使用快取資料
-      final cachedPlaces = await _cacheService.getCachedPlaces();
+      final cachedPlaces = await _cacheService.getCachedPlaces(lang);
       if (cachedPlaces != null && cachedPlaces.isNotEmpty) {
         return cachedPlaces;
       }
     }
 
-    // 呼叫底層 Repository 取得新資料
     final places = await _delegate.getNearbyPlaces(
       location,
       language: language,
       radius: radius,
     );
 
-    // 儲存到快取
-    await _cacheService.cachePlaces(places);
-    await _cacheService.saveLastSearchLocation(location);
+    await _cacheService.cachePlaces(places, lang);
+    await _cacheService.saveLastSearchLocation(location, lang);
 
     return places;
   }
 
   @override
   Future<List<Place>> searchPlaces(String query, {required Language language}) {
-    // 關鍵字搜尋不使用快取，直接委派給底層 Repository
     return _delegate.searchPlaces(query, language: language);
   }
 
   @override
   Future<Place?> getPlaceById(String placeId, {required Language language}) {
-    // 單一地點查詢不使用快取
     return _delegate.getPlaceById(placeId, language: language);
   }
+
+  String _langKey(Language language) =>
+      language.code.split('-').first.toLowerCase();
 }
