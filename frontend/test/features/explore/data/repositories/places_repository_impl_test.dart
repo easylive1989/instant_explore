@@ -383,7 +383,7 @@ void main() {
       when(() => mockLandmarkService.findLandmarkIdsForQuery(
             any(),
             wikiLang: any(named: 'wikiLang'),
-          )).thenThrow(AppError(
+          )).thenThrow(const AppError(
         type: PlaceError.searchFailed,
         message: 'sparql failed',
       ));
