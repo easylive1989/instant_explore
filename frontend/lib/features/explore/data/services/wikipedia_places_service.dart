@@ -262,6 +262,169 @@ class WikipediaPlacesService {
     }
     return null;
   }
+
+  /// Resolves Wikidata [ids] to Wikipedia page DTOs in the same order.
+  ///
+  /// Looks up each entity's sitelink for [wikiLang] (falling back to
+  /// `enwiki`) and fetches the corresponding Wikipedia article info in
+  /// batches. Ids without a usable sitelink are silently skipped.
+  Future<List<WikiGeoSearchResultDto>> fetchPagesByWikidataIds(
+    List<String> ids, {
+    required String wikiLang,
+  }) async {
+    if (ids.isEmpty) return const [];
+
+    final titlesByLang = await _resolveSitelinkTitles(ids, wikiLang: wikiLang);
+    if (titlesByLang.isEmpty) return const [];
+
+    final dtosByQid = <String, WikiGeoSearchResultDto>{};
+    for (final entry in titlesByLang.entries) {
+      final titles = entry.value.values.toSet().toList();
+      final dtos = await _fetchPagesByTitles(titles, wikiLang: entry.key);
+      for (final dto in dtos) {
+        final qid = dto.wikidataId;
+        if (qid != null) dtosByQid.putIfAbsent(qid, () => dto);
+      }
+    }
+
+    final result = <WikiGeoSearchResultDto>[];
+    for (final id in ids) {
+      final dto = dtosByQid[id];
+      if (dto != null) result.add(dto);
+    }
+    return result;
+  }
+
+  Future<Map<String, Map<String, String>>> _resolveSitelinkTitles(
+    List<String> ids, {
+    required String wikiLang,
+  }) async {
+    final preferred = <String, String>{};
+    final fallback = <String, String>{};
+
+    for (var i = 0; i < ids.length; i += _batchSize) {
+      final chunk = ids.sublist(
+        i,
+        i + _batchSize > ids.length ? ids.length : i + _batchSize,
+      );
+      final raw = await _fetchSitelinksChunk(chunk);
+      raw.forEach((qid, sitelinks) {
+        final preferredTitle = sitelinks['${wikiLang}wiki'];
+        if (preferredTitle != null) {
+          preferred[qid] = preferredTitle;
+          return;
+        }
+        final enTitle = sitelinks['enwiki'];
+        if (enTitle != null) fallback[qid] = enTitle;
+      });
+    }
+
+    final result = <String, Map<String, String>>{};
+    if (preferred.isNotEmpty) result[wikiLang] = preferred;
+    if (fallback.isNotEmpty) result['en'] = fallback;
+    return result;
+  }
+
+  Future<Map<String, Map<String, String>>> _fetchSitelinksChunk(
+    List<String> ids,
+  ) async {
+    final uri = Uri.https('www.wikidata.org', '/w/api.php', {
+      'action': 'wbgetentities',
+      'ids': ids.join('|'),
+      'props': 'sitelinks',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+    if (response.statusCode != 200) {
+      throw AppError(
+        type: PlaceError.searchFailed,
+        message: 'Wikidata sitelinks lookup failed',
+        context: {'status_code': response.statusCode},
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final entities = data['entities'];
+    if (entities is! Map) return const {};
+
+    final result = <String, Map<String, String>>{};
+    for (final entry in entities.entries) {
+      final value = entry.value;
+      if (value is! Map) continue;
+      final sitelinks = value['sitelinks'];
+      if (sitelinks is! Map) continue;
+      final perWiki = <String, String>{};
+      for (final sitelink in sitelinks.entries) {
+        final link = sitelink.value;
+        if (link is! Map) continue;
+        final title = link['title'];
+        if (title is String) perWiki[sitelink.key as String] = title;
+      }
+      if (perWiki.isNotEmpty) result[entry.key as String] = perWiki;
+    }
+    return result;
+  }
+
+  Future<List<WikiGeoSearchResultDto>> _fetchPagesByTitles(
+    List<String> titles, {
+    required String wikiLang,
+  }) async {
+    if (titles.isEmpty) return const [];
+
+    final results = <WikiGeoSearchResultDto>[];
+    for (var i = 0; i < titles.length; i += _batchSize) {
+      final chunk = titles.sublist(
+        i,
+        i + _batchSize > titles.length ? titles.length : i + _batchSize,
+      );
+      results.addAll(await _fetchPagesByTitlesChunk(chunk, wikiLang: wikiLang));
+    }
+    return results;
+  }
+
+  Future<List<WikiGeoSearchResultDto>> _fetchPagesByTitlesChunk(
+    List<String> titles, {
+    required String wikiLang,
+  }) async {
+    final uri = Uri.https('$wikiLang.wikipedia.org', '/w/api.php', {
+      'action': 'query',
+      'titles': titles.join('|'),
+      'prop': 'pageimages|coordinates|pageprops',
+      'pithumbsize': '$_thumbSize',
+      'ppprop': 'wikibase_item',
+      'format': 'json',
+    });
+
+    final response = await _client.get(
+      uri,
+      headers: {'User-Agent': _userAgent},
+    );
+    if (response.statusCode != 200) {
+      throw AppError(
+        type: PlaceError.searchFailed,
+        message: 'Wikipedia titles lookup failed',
+        context: {'status_code': response.statusCode},
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final pages = (data['query'] as Map?)?['pages'];
+    if (pages is! Map) return const [];
+
+    final out = <WikiGeoSearchResultDto>[];
+    for (final page in pages.values) {
+      if (page is! Map) continue;
+      final dto = WikiGeoSearchResultDto.fromPage(
+        Map<String, dynamic>.from(page),
+      );
+      if (dto != null) out.add(dto);
+    }
+    return out;
+  }
 }
 
 /// Combined result of [WikipediaPlacesService.fetchEntityById].

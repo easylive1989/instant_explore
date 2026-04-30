@@ -2,6 +2,7 @@ import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/data/dto/wiki_geo_search_result_dto.dart';
 import 'package:context_app/features/explore/data/dto/wikidata_entity_dto.dart';
 import 'package:context_app/features/explore/data/mappers/wikidata_category_mapper.dart';
+import 'package:context_app/features/explore/data/services/wikidata_landmark_query_service.dart';
 import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
 import 'package:context_app/features/explore/domain/errors/place_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -13,8 +14,12 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 
 class PlacesRepositoryImpl implements PlacesRepository {
   final WikipediaPlacesService _service;
+  final WikidataLandmarkQueryService _landmarkService;
 
-  PlacesRepositoryImpl(this._service);
+  PlacesRepositoryImpl(
+    this._service, {
+    WikidataLandmarkQueryService? landmarkService,
+  }) : _landmarkService = landmarkService ?? WikidataLandmarkQueryService();
 
   static const int _minResultsBeforeRetry = 3;
   static const double _retryRadiusFactor = 5.0;
@@ -82,6 +87,9 @@ class PlacesRepositoryImpl implements PlacesRepository {
   }) async {
     try {
       final wikiLang = _wikiLang(language);
+      final regionLandmarks = await _searchRegionLandmarks(query, wikiLang);
+      if (regionLandmarks.isNotEmpty) return regionLandmarks;
+
       final dtos = await _service.searchByText(query, wikiLang: wikiLang);
       return _buildPlaces(dtos);
     } on AppError {
@@ -94,6 +102,35 @@ class PlacesRepositoryImpl implements PlacesRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  /// Resolves [query] to a region (country/city) and returns its famous
+  /// landmarks ranked by Wikipedia sitelink count.
+  ///
+  /// Returns empty when the query does not resolve to a region or when
+  /// the region has no whitelisted landmarks. Errors from the SPARQL
+  /// service are swallowed so the caller can fall back to the regular
+  /// text-search path.
+  Future<List<Place>> _searchRegionLandmarks(
+    String query,
+    String wikiLang,
+  ) async {
+    final List<String> ids;
+    try {
+      ids = await _landmarkService.findLandmarkIdsForQuery(
+        query,
+        wikiLang: wikiLang,
+      );
+    } on AppError {
+      return const [];
+    }
+    if (ids.isEmpty) return const [];
+
+    final dtos = await _service.fetchPagesByWikidataIds(
+      ids,
+      wikiLang: wikiLang,
+    );
+    return _buildPlaces(dtos);
   }
 
   static const String _wikidataPrefix = 'wikidata:';

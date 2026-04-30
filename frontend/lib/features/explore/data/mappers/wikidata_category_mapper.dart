@@ -55,4 +55,10 @@ class WikidataCategoryMapper {
     }
     return null;
   }
+
+  /// All Wikidata Q-ids treated as landmark categories.
+  ///
+  /// Exposed for callers that need to filter places by P31 outside the
+  /// app process (e.g. SPARQL `VALUES` clauses).
+  static Iterable<String> get whitelistedClassIds => _whitelist.keys;
 }
