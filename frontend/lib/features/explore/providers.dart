@@ -1,6 +1,7 @@
 import 'package:context_app/core/utils/geo_utils.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
+import 'package:context_app/features/explore/data/services/wikidata_landmark_query_service.dart';
 import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
 import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,10 +22,19 @@ final wikipediaPlacesServiceProvider = Provider<WikipediaPlacesService>((ref) {
   return WikipediaPlacesService();
 });
 
+final wikidataLandmarkQueryServiceProvider =
+    Provider<WikidataLandmarkQueryService>((ref) {
+      return WikidataLandmarkQueryService();
+    });
+
 final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
   final service = ref.watch(wikipediaPlacesServiceProvider);
+  final landmarkService = ref.watch(wikidataLandmarkQueryServiceProvider);
   final cacheService = ref.watch(placesCacheServiceProvider);
-  final apiRepository = PlacesRepositoryImpl(service);
+  final apiRepository = PlacesRepositoryImpl(
+    service,
+    landmarkService: landmarkService,
+  );
   return CachingPlacesRepository(apiRepository, cacheService);
 });
 

@@ -276,4 +276,156 @@ void main() {
       );
     });
   });
+
+  group('WikipediaPlacesService.fetchPagesByWikidataIds', () {
+    test('returns empty for empty input without HTTP', () async {
+      final mockClient = MockClient((_) async {
+        fail('HTTP should not be called for empty list');
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+      expect(
+        await service.fetchPagesByWikidataIds(const [], wikiLang: 'en'),
+        isEmpty,
+      );
+    });
+
+    test('preserves input order and stamps wikidataId on each DTO', () async {
+      final mockClient = MockClient((req) async {
+        if (req.url.host == 'www.wikidata.org') {
+          expect(req.url.queryParameters['action'], 'wbgetentities');
+          expect(req.url.queryParameters['props'], 'sitelinks');
+          return http.Response.bytes(
+            utf8.encode(jsonEncode({
+              'entities': {
+                'Q190077': {
+                  'sitelinks': {
+                    'zhwiki': {'title': '米爾福德峽灣'},
+                    'enwiki': {'title': 'Milford Sound'},
+                  },
+                },
+                'Q47481': {
+                  'sitelinks': {
+                    'zhwiki': {'title': '皇后鎮'},
+                    'enwiki': {'title': 'Queenstown'},
+                  },
+                },
+              },
+            })),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        expect(req.url.host, 'zh.wikipedia.org');
+        final titles = req.url.queryParameters['titles']!.split('|');
+        expect(titles.toSet(), {'米爾福德峽灣', '皇后鎮'});
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'query': {
+              'pages': {
+                '1': {
+                  'pageid': 1,
+                  'title': '米爾福德峽灣',
+                  'coordinates': [{'lat': -44.6, 'lon': 167.9}],
+                  'pageprops': {'wikibase_item': 'Q190077'},
+                },
+                '2': {
+                  'pageid': 2,
+                  'title': '皇后鎮',
+                  'coordinates': [{'lat': -45.0, 'lon': 168.7}],
+                  'pageprops': {'wikibase_item': 'Q47481'},
+                },
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final results = await service.fetchPagesByWikidataIds(
+        const ['Q190077', 'Q47481'],
+        wikiLang: 'zh',
+      );
+
+      expect(results.map((d) => d.wikidataId).toList(),
+          ['Q190077', 'Q47481']);
+      expect(results.map((d) => d.title).toList(),
+          ['米爾福德峽灣', '皇后鎮']);
+    });
+
+    test('falls back to enwiki sitelink when preferred lang missing',
+        () async {
+      Uri? wikiUri;
+      final mockClient = MockClient((req) async {
+        if (req.url.host == 'www.wikidata.org') {
+          return http.Response.bytes(
+            utf8.encode(jsonEncode({
+              'entities': {
+                'Q1': {
+                  'sitelinks': {
+                    'enwiki': {'title': 'Cathedral Cove'},
+                  },
+                },
+              },
+            })),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        wikiUri = req.url;
+        return http.Response.bytes(
+          utf8.encode(jsonEncode({
+            'query': {
+              'pages': {
+                '1': {
+                  'pageid': 1,
+                  'title': 'Cathedral Cove',
+                  'coordinates': [{'lat': -36.8, 'lon': 175.8}],
+                  'pageprops': {'wikibase_item': 'Q1'},
+                },
+              },
+            },
+          })),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final results = await service.fetchPagesByWikidataIds(
+        const ['Q1'],
+        wikiLang: 'zh',
+      );
+
+      expect(results, hasLength(1));
+      expect(results.first.title, 'Cathedral Cove');
+      expect(wikiUri?.host, 'en.wikipedia.org');
+    });
+
+    test('skips ids with no usable sitelink', () async {
+      final mockClient = MockClient((req) async {
+        if (req.url.host == 'www.wikidata.org') {
+          return http.Response.bytes(
+            utf8.encode(jsonEncode({
+              'entities': {
+                'Q1': {'sitelinks': {}},
+              },
+            })),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }
+        fail('Wikipedia should not be called when there are no titles');
+      });
+      final service = WikipediaPlacesService(client: mockClient);
+
+      final results = await service.fetchPagesByWikidataIds(
+        const ['Q1'],
+        wikiLang: 'en',
+      );
+
+      expect(results, isEmpty);
+    });
+  });
 }
