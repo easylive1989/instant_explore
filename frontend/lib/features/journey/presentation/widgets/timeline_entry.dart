@@ -1,7 +1,5 @@
-import 'dart:async';
-
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
+import 'package:context_app/features/share/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -36,25 +34,24 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   bool _isDeleting = false;
   bool _isSharing = false;
 
-  Future<void> _shareAsCard() async {
+  Future<void> _shareAsLink() async {
     if (_isSharing || _isDeleting) return;
     setState(() => _isSharing = true);
 
-    unawaited(
-      JourneySharingService.shareJourneyCard(
-        context: context,
-        placeName: widget.entry.place.name,
-        placeAddress: widget.entry.place.address,
-        narrationExcerpt: widget.entry.narrationContent.text,
-        visitedAt: widget.entry.createdAt,
-        imageUrl: widget.entry.place.imageUrl,
-        onSheetPresented: () {
-          if (mounted) {
-            setState(() => _isSharing = false);
-          }
-        },
-      ),
-    );
+    final service = ref.read(journeyShareServiceProvider);
+    final url = await service.shareJourneyLink(widget.entry);
+
+    if (!mounted) return;
+    setState(() => _isSharing = false);
+
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('share_link.error'.tr()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   Future<void> _showMoveToTripSheet() async {
@@ -362,8 +359,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               else
                                 _ActionButton(
                                   icon: Icons.share_outlined,
-                                  label: 'share_card.share'.tr(),
-                                  onTap: _shareAsCard,
+                                  label: 'share_link.share'.tr(),
+                                  onTap: _shareAsLink,
                                 ),
                               const SizedBox(width: 16),
                               if (_isDeleting)

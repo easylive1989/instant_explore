@@ -16,6 +16,7 @@ class ApiConfig {
   final String geminiApiKey;
   final String revenueCatApiKeyIos;
   final String revenueCatApiKeyAndroid;
+  final String shareBaseUrl;
 
   const ApiConfig({
     required this.googleMapsApiKey,
@@ -28,6 +29,7 @@ class ApiConfig {
     required this.geminiApiKey,
     required this.revenueCatApiKeyIos,
     required this.revenueCatApiKeyAndroid,
+    required this.shareBaseUrl,
   });
 
   /// 從環境變數建立配置
@@ -66,6 +68,10 @@ class ApiConfig {
       revenueCatApiKeyAndroid: String.fromEnvironment(
         'REVENUECAT_API_KEY_ANDROID',
         defaultValue: '',
+      ),
+      shareBaseUrl: String.fromEnvironment(
+        'SHARE_BASE_URL',
+        defaultValue: 'https://lorescape.app',
       ),
     );
   }

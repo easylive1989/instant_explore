@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 /// A passport-style stamp badge with an icon and short label.
 ///
-/// Used to decorate PDF cover and section headers, matching the aesthetic
-/// of [JourneySharingCard].
+/// Used to decorate PDF cover and section headers.
 class PdfStampDecoration extends StatelessWidget {
   final String label;
   final IconData icon;

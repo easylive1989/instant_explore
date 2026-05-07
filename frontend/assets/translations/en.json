@@ -315,11 +315,10 @@
     "delete_confirm": "Remove",
     "cancel": "Cancel"
   },
-  "share_card": {
+  "share_link": {
     "share": "Share",
-    "visited": "Visited",
-    "explore_more": "Explore More",
-    "share_text": "I explored this place with Lorescape"
+    "share_text": "I explored this place with Lorescape — check out the story:",
+    "error": "Failed to share. Please try again."
   },
   "onboarding": {
     "skip": "Skip",

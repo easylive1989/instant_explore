@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:context_app/app/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/data/share_intent_handler.dart';
+import 'package:context_app/features/share/data/shared_journey_repository.dart';
+import 'package:context_app/features/share/domain/services/journey_share_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _log = Logger('ShareProviders');
 
@@ -14,6 +18,26 @@ final _log = Logger('ShareProviders');
 final shareIntentHandlerProvider = Provider<ShareIntentHandler>((ref) {
   final repository = ref.watch(placesRepositoryProvider);
   return ShareIntentHandler(repository);
+});
+
+/// Provides the [SharedJourneyRepository] used to persist shared
+/// journeys to Supabase and produce public share URLs.
+final sharedJourneyRepositoryProvider = Provider<SharedJourneyRepository>((
+  ref,
+) {
+  final config = ref.watch(apiConfigProvider);
+  return SharedJourneyRepository(
+    client: Supabase.instance.client,
+    shareBaseUrl: config.shareBaseUrl,
+  );
+});
+
+/// Provides the [JourneyShareService] used by UI to share a journey
+/// entry as a public link via the system share sheet.
+final journeyShareServiceProvider = Provider<JourneyShareService>((ref) {
+  return JourneyShareService(
+    repository: ref.watch(sharedJourneyRepositoryProvider),
+  );
 });
 
 /// Holds the [Place] resolved from an incoming share intent.

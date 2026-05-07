@@ -1,5 +1,30 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Create a `.env.local` file in this directory with the following keys before running the app:
+
+```bash
+# Supabase project that hosts the `shared_journeys` table.
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+
+# Public origin used when generating canonical share URLs (no trailing slash).
+NEXT_PUBLIC_SHARE_BASE_URL=https://lorescape.app
+```
+
+## Shared Journey Pages
+
+Routes under `/s/[id]` render journey stories shared from the Lorescape mobile
+app. They are server-rendered, fetch the row from `public.shared_journeys`
+through the Supabase anon key, and emit Open Graph / Twitter Card metadata so
+links unfurl nicely in social apps.
+
+The corresponding Supabase migration lives at
+`supabase/migrations/20260507000000_create_shared_journeys.sql` and creates a
+public `shared_journey_images` storage bucket for camera-captured images
+shared from the Quick Guide flow.
+
 ## Getting Started
 
 First, run the development server:

@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
+import 'package:context_app/features/share/providers.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -36,25 +34,27 @@ class _QuickGuideTimelineEntryState
   bool _isDeleting = false;
   bool _isSharing = false;
 
-  Future<void> _shareAsCard() async {
+  Future<void> _shareAsLink() async {
     if (_isSharing || _isDeleting) return;
     setState(() => _isSharing = true);
 
-    unawaited(
-      JourneySharingService.shareJourneyCard(
-        context: context,
-        placeName: 'quick_guide.title'.tr(),
-        placeAddress: '',
-        narrationExcerpt: widget.entry.aiDescription,
-        visitedAt: widget.entry.createdAt,
-        imageBytes: widget.entry.imageBytes,
-        onSheetPresented: () {
-          if (mounted) {
-            setState(() => _isSharing = false);
-          }
-        },
-      ),
+    final service = ref.read(journeyShareServiceProvider);
+    final url = await service.shareQuickGuideLink(
+      widget.entry,
+      defaultTitle: 'quick_guide.title'.tr(),
     );
+
+    if (!mounted) return;
+    setState(() => _isSharing = false);
+
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('share_link.error'.tr()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   void _navigateToPlayer() {
@@ -327,8 +327,8 @@ class _QuickGuideTimelineEntryState
                             else
                               _ActionButton(
                                 icon: Icons.share_outlined,
-                                label: 'share_card.share'.tr(),
-                                onTap: _shareAsCard,
+                                label: 'share_link.share'.tr(),
+                                onTap: _shareAsLink,
                               ),
                             const SizedBox(width: 16),
                             if (_isDeleting)
