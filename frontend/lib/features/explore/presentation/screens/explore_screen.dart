@@ -2,6 +2,7 @@ import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/providers.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/daily_story_card.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
@@ -128,6 +129,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 ],
               ),
             ),
+            const DailyStoryCard(),
             Expanded(
               child: placesState.when(
                 data: (places) => places.isEmpty

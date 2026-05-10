@@ -1,3 +1,4 @@
+import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
@@ -9,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/fake_location_service.dart';
 import '../../../../fakes/fake_places_repository.dart';
+import '../../../../fakes/in_memory_daily_story_repository.dart';
 import '../../../../fakes/in_memory_saved_locations_repository.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
@@ -249,6 +251,9 @@ Future<void> _givenExploreScreen(
         savedRepo ?? InMemorySavedLocationsRepository(),
       ),
       maxDistanceProvider.overrideWith((ref) => maxDistance),
+      dailyStoryRepositoryProvider.overrideWithValue(
+        InMemoryDailyStoryRepository(),
+      ),
     ],
   );
   // Let async searchNearby + filtered places provider resolve.
@@ -285,6 +290,9 @@ Future<void> _givenExploreScreenWithRouter(
       ),
       savedLocationsRepositoryProvider.overrideWithValue(
         InMemorySavedLocationsRepository(),
+      ),
+      dailyStoryRepositoryProvider.overrideWithValue(
+        InMemoryDailyStoryRepository(),
       ),
     ],
   );
