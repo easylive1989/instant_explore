@@ -1,8 +1,9 @@
 # Lorescape Backend
 
 VPS backend for Lorescape:
-- **Daily story cron job** (P2) — generates daily place narratives via Gemini, writes to Supabase
-- **FastAPI app** (placeholder) — will host future APIs
+- **Daily story scheduler** — APScheduler inside the FastAPI container fires
+  the daily story job at 23:30 Asia/Taipei every day. No host-side cron.
+- **FastAPI app** — currently exposes `/health`; placeholder for future APIs.
 
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
 
@@ -17,27 +18,30 @@ cp .env.example .env  # then fill in real values
 pytest
 ```
 
-## Run the cron job manually (for testing)
+## Run the daily story job manually (for testing / back-fill)
 
 ```bash
 python -m lorescape_backend.daily_story         # for tomorrow (default)
 python -m lorescape_backend.daily_story 2026-05-15  # for specific date
 ```
 
-## Run the FastAPI dev server
+## Run the FastAPI dev server (with the scheduler attached)
 
 ```bash
 uvicorn lorescape_backend.api:app --reload --port 8000
 ```
+
+The scheduler will start in the background. Manually-triggered jobs via the
+CLI above run independently of the in-process scheduler.
 
 ---
 
 ## Deploying to a VPS
 
 Topology: Docker Compose. The container is on the docker network only — no
-host port is published, because the cron job uses `docker exec` and there is
-no public HTTP surface yet. When future endpoints need exposure, add a
-`ports:` entry to `docker-compose.yml` (or front with nginx) at that point.
+host port is published, because the scheduler runs in-process and there is no
+public HTTP surface yet. When future endpoints need exposure, add a `ports:`
+entry to `docker-compose.yml` (or front with nginx) at that point.
 
 ### One-time bootstrap (manual, on the VPS)
 
@@ -52,21 +56,17 @@ cd /opt/lorescape/backend
 cp .env.example .env
 $EDITOR .env
 
-# First build + run
+# First build + run. The container starts the scheduler immediately.
 docker compose up -d --build
 docker compose ps  # api should be Up (healthy)
 
 # Smoke test — verify env vars resolved and SDKs import
 docker exec lorescape-backend python -c \
   "from lorescape_backend.config import Config; Config.from_env(); print('config ok')"
-
-# Install crontab
-sudo mkdir -p /var/log/lorescape
-crontab -l 2>/dev/null > /tmp/cron.bak || true
-cat /opt/lorescape/backend/deploy/crontab.example >> /tmp/cron.bak
-crontab /tmp/cron.bak
-crontab -l  # verify
 ```
+
+That's it. No crontab, no `docker exec` from outside — the container's own
+APScheduler thread fires the job every day at 23:30 Asia/Taipei.
 
 ### Subsequent updates (automated by CI)
 
@@ -74,7 +74,8 @@ Once bootstrap is done, every `master` push automatically:
 
 1. SSHes into the VPS via `appleboy/ssh-action`
 2. `git fetch && git reset --hard origin/master` in `/opt/lorescape`
-3. `docker compose up -d --build` in `backend/`
+3. `docker compose up -d --build` in `backend/` (which restarts the
+   container, which restarts the scheduler)
 
 See the `deploy-backend` job in `.github/workflows/ci.yml`.
 
