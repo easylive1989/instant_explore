@@ -1,4 +1,5 @@
 import 'package:context_app/features/camera/providers.dart';
+import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
@@ -19,6 +20,7 @@ import '../fakes/fake_location_service.dart';
 import '../fakes/fake_places_repository.dart';
 import '../fakes/fake_quick_guide_ai_service.dart';
 import '../fakes/fake_subscription_service.dart';
+import '../fakes/in_memory_daily_story_repository.dart';
 import '../fakes/in_memory_journey_repository.dart';
 import '../fakes/in_memory_onboarding_repository.dart';
 import '../fakes/in_memory_quick_guide_repository.dart';
@@ -108,6 +110,9 @@ List<Override> _mainScreenOverrides() {
     imageAnalysisServiceProvider.overrideWithValue(FakeImageAnalysisService()),
     onboardingRepositoryProvider.overrideWithValue(
       InMemoryOnboardingRepository(welcomeDone: true),
+    ),
+    dailyStoryRepositoryProvider.overrideWithValue(
+      InMemoryDailyStoryRepository(),
     ),
   ];
 }
