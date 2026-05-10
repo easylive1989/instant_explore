@@ -55,7 +55,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'passport.title'.tr(),
+                      'journey.title'.tr(),
                       style: Theme.of(context).textTheme.displayLarge,
                     ),
                   ),
@@ -107,7 +107,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                                 value;
                           },
                           decoration: InputDecoration(
-                            hintText: 'passport.search_hint'.tr(),
+                            hintText: 'journey.search_hint'.tr(),
                             prefixIcon: Icon(
                               Icons.search,
                               color: colorScheme.onSurfaceVariant,
@@ -183,7 +183,7 @@ class _ViewModeToggle extends ConsumerWidget {
           _buildSegment(
             context: context,
             ref: ref,
-            label: 'passport.view_timeline'.tr(),
+            label: 'journey.view_timeline'.tr(),
             selected: viewMode == JourneyViewMode.timeline,
             target: JourneyViewMode.timeline,
             colorScheme: colorScheme,
@@ -191,7 +191,7 @@ class _ViewModeToggle extends ConsumerWidget {
           _buildSegment(
             context: context,
             ref: ref,
-            label: 'passport.view_by_trip'.tr(),
+            label: 'journey.view_by_trip'.tr(),
             selected: viewMode == JourneyViewMode.byTrip,
             target: JourneyViewMode.byTrip,
             colorScheme: colorScheme,
@@ -386,7 +386,7 @@ class _FilterChips extends ConsumerWidget {
         children: [
           _buildChip(
             context: context,
-            label: 'passport.filter_all'.tr(),
+            label: 'journey.filter_all'.tr(),
             selected: currentFilter == JourneyFilter.all,
             colorScheme: colorScheme,
             onTap: () => ref.read(journeyFilterProvider.notifier).state =
@@ -395,7 +395,7 @@ class _FilterChips extends ConsumerWidget {
           const SizedBox(width: 8),
           _buildChip(
             context: context,
-            label: 'passport.filter_narration'.tr(),
+            label: 'journey.filter_narration'.tr(),
             selected: currentFilter == JourneyFilter.narration,
             colorScheme: colorScheme,
             onTap: () => ref.read(journeyFilterProvider.notifier).state =
@@ -404,7 +404,7 @@ class _FilterChips extends ConsumerWidget {
           const SizedBox(width: 8),
           _buildChip(
             context: context,
-            label: 'passport.filter_quick_guide'.tr(),
+            label: 'journey.filter_quick_guide'.tr(),
             selected: currentFilter == JourneyFilter.quickGuide,
             colorScheme: colorScheme,
             onTap: () => ref.read(journeyFilterProvider.notifier).state =
@@ -475,8 +475,8 @@ class _JourneyList extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(
                     hasActiveFilter
-                        ? 'passport.no_results'.tr()
-                        : 'passport.no_entries'.tr(),
+                        ? 'journey.no_results'.tr()
+                        : 'journey.no_entries'.tr(),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 15,
@@ -513,7 +513,7 @@ class _JourneyList extends ConsumerWidget {
       loading: () => const Center(child: AdaptiveProgressIndicator()),
       error: (error, stack) => Center(
         child: Text(
-          '${'passport.load_error'.tr()}: $error',
+          '${'journey.load_error'.tr()}: $error',
           style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),

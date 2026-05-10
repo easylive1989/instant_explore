@@ -43,7 +43,6 @@
     "loading": "正在生成導覽內容...",
     "error": "發生錯誤",
     "retry": "重試",
-    "save_to_passport": "儲存至探索歷程",
     "error_generating": "無法生成導覽內容",
     "error_playing": "播放錯誤",
     "please_login": "請先登入",
@@ -53,16 +52,16 @@
   "bottom_nav": {
     "home": "首頁",
     "quick_guide": "快速導覽",
-    "passport": "歷程",
+    "journey": "歷程",
     "settings": "設定"
   },
-  "passport": {
+  "journey": {
     "title": "歷程",
     "title_uppercase": "探索歷程",
     "no_entries": "尚未儲存任何導覽",
     "load_error": "載入失敗",
     "item_saved": "已儲存！",
-    "added_to_passport": "已新增至您的探索歷程",
+    "added_to_journey": "已新增至您的探索歷程",
     "view_button": "查看探索歷程",
     "continue_tour": "繼續導覽",
     "delete_title": "刪除紀錄",
@@ -185,7 +184,7 @@
     "show_password": "顯示密碼",
     "hide_password": "隱藏密碼",
     "login_to_save": "登入以儲存",
-    "login_to_save_subtitle": "登入後即可將導覽儲存到護照",
+    "login_to_save_subtitle": "登入後即可將導覽儲存到您的歷程",
     "later": "稍後再說"
   },
   "validation": {
@@ -353,13 +352,13 @@
     },
     "journey": {
       "title": "自動累積文化足跡",
-      "body": "聽過的故事、問過的問題，都會變成你專屬的知識護照。"
+      "body": "聽過的故事、問過的問題，都會變成你專屬的知識歷程。"
     },
     "chip": {
       "discovery": "DISCOVERY",
       "ai_guide": "AI GUIDE",
       "explore": "NEARBY",
-      "passport": "PASSPORT"
+      "journey": "JOURNEY"
     }
   },
   "settings_onboarding": {

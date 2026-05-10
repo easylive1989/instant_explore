@@ -1,7 +1,7 @@
 import 'package:context_app/app/config/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// A passport-style stamp badge with an icon and short label.
+/// A stamp badge with an icon and short label.
 ///
 /// Used to decorate PDF cover and section headers, matching the aesthetic
 /// of [JourneySharingCard].

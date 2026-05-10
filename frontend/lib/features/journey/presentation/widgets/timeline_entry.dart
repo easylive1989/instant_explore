@@ -87,15 +87,12 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
     final confirmed = await showAdaptiveAlertDialog<bool>(
       context: context,
-      title: 'passport.delete_title'.tr(),
-      content: 'passport.delete_message'.tr(),
+      title: 'journey.delete_title'.tr(),
+      content: 'journey.delete_message'.tr(),
       actions: [
+        AdaptiveDialogAction<bool>(label: 'journey.cancel'.tr(), result: false),
         AdaptiveDialogAction<bool>(
-          label: 'passport.cancel'.tr(),
-          result: false,
-        ),
-        AdaptiveDialogAction<bool>(
-          label: 'passport.delete_confirm'.tr(),
+          label: 'journey.delete_confirm'.tr(),
           isDestructive: true,
           result: true,
         ),
@@ -158,9 +155,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
     final entryDate = DateTime(date.year, date.month, date.day);
 
     if (entryDate == today) {
-      return 'passport.today'.tr();
+      return 'journey.today'.tr();
     } else if (entryDate == yesterday) {
-      return 'passport.yesterday'.tr();
+      return 'journey.yesterday'.tr();
     } else {
       return DateFormat('MMM d').format(date);
     }
@@ -378,7 +375,7 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                               else
                                 _ActionButton(
                                   icon: Icons.delete_outline,
-                                  label: 'passport.delete_confirm'.tr(),
+                                  label: 'journey.delete_confirm'.tr(),
                                   onTap: _showDeleteConfirmDialog,
                                 ),
                             ],

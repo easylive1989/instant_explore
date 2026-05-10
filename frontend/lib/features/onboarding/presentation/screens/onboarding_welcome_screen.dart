@@ -134,10 +134,10 @@ class _OnboardingWelcomeScreenState
             ),
             _page(
               serialLabel: '04',
-              chipKey: 'onboarding.chip.passport',
+              chipKey: 'onboarding.chip.journey',
               titleKey: 'onboarding.journey.title',
               bodyKey: 'onboarding.journey.body',
-              imageAsset: 'assets/images/onboarding/passport.png',
+              imageAsset: 'assets/images/onboarding/journey.png',
               accent: cs.tertiary,
               footer: _SampleCtaFooter(onTap: _playSample),
             ),

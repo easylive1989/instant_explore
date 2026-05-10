@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Refactor the narration player ecosystem (6 widget files) to use Midnight Kyoto components from S2 — `PillIconButton` for controls, `PillButton.secondary` for save-to-passport, `PillIconButton.ghost` for grounding info, and `textTheme` everywhere — while removing parent-to-child Color parameter passing.
+**Goal:** Refactor the narration player ecosystem (6 widget files) to use Midnight Kyoto components from S2 — `PillIconButton` for controls, `PillButton.secondary` for save-to-journey, `PillIconButton.ghost` for grounding info, and `textTheme` everywhere — while removing parent-to-child Color parameter passing.
 
 **Architecture:** Single source-of-truth refactor. Child widgets stop receiving `primaryColor` / `backgroundColor` / `surfaceColor` and read directly from `Theme.of(context).colorScheme`. Scaffold no longer paints a solid background — `AmbientBackdrop` (S2) handles it globally.
 
@@ -19,7 +19,7 @@
 - `frontend/lib/features/narration/presentation/widgets/narration_control_panel.dart`
 - `frontend/lib/features/narration/presentation/widgets/narration_transcript_area.dart`
 - `frontend/lib/features/narration/presentation/widgets/transcript_segment_item.dart`
-- `frontend/lib/features/narration/presentation/widgets/save_to_passport_button.dart`
+- `frontend/lib/features/narration/presentation/widgets/save_to_journey_button.dart`
 - `frontend/lib/features/narration/presentation/widgets/grounding_info_sheet.dart`
 - (test) `frontend/test/features/narration/presentation/screens/narration_screen_test.dart`
 - (test) `frontend/test/features/narration/presentation/widgets/grounding_info_sheet_test.dart` (only if assertions break)
@@ -410,7 +410,7 @@ class _ControlsRow extends StatelessWidget {
 
 Verify that `PlayerState` is exported from `controllers/player_state.dart` — that import path may need adjustment after reading the file.
 
-#### Step 4: Refactor `save_to_passport_button.dart`
+#### Step 4: Refactor `save_to_journey_button.dart`
 
 - [ ] Drop `surfaceColor` parameter.
 - [ ] Replace entire body with `PillButton(secondary, fullWidth, icon: Icons.bookmark_add)`.
@@ -425,11 +425,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// 儲存到護照的按鈕
-class SaveToPassportButton extends ConsumerWidget {
+/// 儲存到歷程的按鈕
+class SaveToJourneyButton extends ConsumerWidget {
   final Place place;
 
-  const SaveToPassportButton({super.key, required this.place});
+  const SaveToJourneyButton({super.key, required this.place});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -439,19 +439,19 @@ class SaveToPassportButton extends ConsumerWidget {
         playerState.content == null;
 
     return PillButton(
-      label: easy.tr('player_screen.save_to_passport'),
+      label: easy.tr('player_screen.save_to_journey'),
       icon: Icons.bookmark_add,
       variant: PillButtonVariant.secondary,
       fullWidth: true,
       onPressed: isDisabled
           ? null
-          : () => context.pushNamed('passport_success', extra: place),
+          : () => context.pushNamed('journey_success', extra: place),
     );
   }
 }
 ```
 
-⚠️ **Check before committing:** is this widget referenced anywhere outside `narration_screen.dart`? If yes, those callers need to drop the `surfaceColor:` named arg too. Grep for `SaveToPassportButton(` in `lib/` first.
+⚠️ **Check before committing:** is this widget referenced anywhere outside `narration_screen.dart`? If yes, those callers need to drop the `surfaceColor:` named arg too. Grep for `SaveToJourneyButton(` in `lib/` first.
 
 #### Step 5: Refactor `grounding_info_sheet.dart`
 
@@ -685,7 +685,7 @@ cd /Users/paulwu/Documents/Github/instant_explore && \
     frontend/lib/features/narration/presentation/widgets/narration_control_panel.dart \
     frontend/lib/features/narration/presentation/widgets/narration_transcript_area.dart \
     frontend/lib/features/narration/presentation/widgets/transcript_segment_item.dart \
-    frontend/lib/features/narration/presentation/widgets/save_to_passport_button.dart \
+    frontend/lib/features/narration/presentation/widgets/save_to_journey_button.dart \
     frontend/lib/features/narration/presentation/widgets/grounding_info_sheet.dart \
     frontend/test/features/narration/presentation/screens/narration_screen_test.dart \
     frontend/assets/translations/zh-TW.json \
@@ -694,7 +694,7 @@ cd /Users/paulwu/Documents/Github/instant_explore && \
 feat(narration): apply Midnight Kyoto components to player screen
 
 Refactors all six player widgets to use PillIconButton (filled play /
-ghost skip + grounding info), PillButton.secondary for save-to-passport
+ghost skip + grounding info), PillButton.secondary for save-to-journey
 (drops AppColors.amber and the bespoke icon-in-circle), textTheme for
 transcript and headers. Child widgets stop receiving primaryColor /
 backgroundColor / surfaceColor params; they read directly from
@@ -712,7 +712,7 @@ EOF
 
 **Spec coverage:**
 - ✅ Player play/skip → Step 3
-- ✅ Save-to-passport → Step 4
+- ✅ Save-to-journey → Step 4
 - ✅ Grounding info → Step 6
 - ✅ Transcript → Steps 1-2
 - ✅ Header → Step 6
@@ -725,4 +725,4 @@ EOF
 **Type consistency:** Verify these before edits:
 - `PlayerState` import path in `narration_control_panel.dart`
 - Translation key `narration.grounding_info_tooltip` existence
-- `SaveToPassportButton(surfaceColor:)` callers (grep `lib/`)
+- `SaveToJourneyButton(surfaceColor:)` callers (grep `lib/`)

@@ -6,7 +6,7 @@
 
 ## 背景與目標
 
-把資訊保存到 passport 後出現的成功畫面。視覺上是「儀式感成功 confirmation」hero——三層成功圓 + 大標題 + 預覽卡片 + 兩個 CTA 按鈕。已大量使用 `colorScheme.X`，剩 3 處 hardcoded 需要清掉。
+把資訊保存到 journey 後出現的成功畫面。視覺上是「儀式感成功 confirmation」hero——三層成功圓 + 大標題 + 預覽卡片 + 兩個 CTA 按鈕。已大量使用 `colorScheme.X`，剩 3 處 hardcoded 需要清掉。
 
 順便處理 S1 時對 `AppColors.success` 的過度棄用：success green 是有語意的設計 token，不該被改掉。**這次取消 deprecation**。
 
@@ -66,14 +66,14 @@ static const Color success = Color(0xFF10B981);
 
 **移除 `const successColor` 別名**，直接使用 `AppColors.success`（因為已不再 deprecated）。
 
-**Primary CTA "View passport"**——改 PillButton：
+**Primary CTA "View journey"**——改 PillButton：
 
 ```dart
 PillButton(
-  label: 'passport.view_button'.tr(),
+  label: 'journey.view_button'.tr(),
   icon: Icons.arrow_forward,
   fullWidth: true,
-  onPressed: onViewPassport,
+  onPressed: onViewJourney,
 ),
 ```
 
@@ -85,7 +85,7 @@ PillButton(
 
 ```dart
 PillButton(
-  label: 'passport.continue_tour'.tr(),
+  label: 'journey.continue_tour'.tr(),
   variant: PillButtonVariant.secondary,
   fullWidth: true,
   onPressed: onContinueTour ?? () => context.pop(),
@@ -121,7 +121,7 @@ Widget build(BuildContext context) {
 ## 測試策略
 
 無獨立 widget test。pre-commit hook 全 suite 執行，注意：
-- 任何 navigation test 若觸及 `passport_success` 路由，預期不受影響（行為不變）。
+- 任何 navigation test 若觸及 `journey_success` 路由，預期不受影響（行為不變）。
 
 ## 風險與緩解
 

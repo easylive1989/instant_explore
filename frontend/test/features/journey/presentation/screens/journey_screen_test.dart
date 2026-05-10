@@ -106,7 +106,7 @@ void main() {
           seededQuickGuides: [quick],
         );
 
-        final chipFinder = find.text('passport.filter_quick_guide');
+        final chipFinder = find.text('journey.filter_quick_guide');
         await tester.ensureVisible(chipFinder);
         await tester.tap(chipFinder);
         await tester.pumpAndSettle();
@@ -126,7 +126,7 @@ void main() {
         await _whenUserTapsNarrationFilterChip(tester);
 
         expect(find.byIcon(Icons.search_off), findsOneWidget);
-        expect(find.text('passport.no_results'), findsOneWidget);
+        expect(find.text('journey.no_results'), findsOneWidget);
       },
     );
 
@@ -246,7 +246,7 @@ void main() {
       (tester) async {
         await _givenJourneyScreenWithRouter(tester);
 
-        await tester.tap(find.text('passport.view_by_trip'));
+        await tester.tap(find.text('journey.view_by_trip'));
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(Icons.add));
@@ -356,18 +356,18 @@ Future<void> _whenUserTapsSearchToggle(WidgetTester tester) async {
 }
 
 Future<void> _whenUserSelectsByTripView(WidgetTester tester) async {
-  await tester.tap(find.text('passport.view_by_trip'));
+  await tester.tap(find.text('journey.view_by_trip'));
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
 }
 
 Future<void> _whenUserTapsNarrationFilterChip(WidgetTester tester) async {
-  await tester.tap(find.text('passport.filter_narration'));
+  await tester.tap(find.text('journey.filter_narration'));
   await tester.pump(const Duration(milliseconds: 10));
 }
 
 void _thenNoEntriesStateIsVisible() {
-  expect(find.text('passport.no_entries'), findsOneWidget);
+  expect(find.text('journey.no_entries'), findsOneWidget);
 }
 
 void _thenTimelineShowsEntries({required int count}) {

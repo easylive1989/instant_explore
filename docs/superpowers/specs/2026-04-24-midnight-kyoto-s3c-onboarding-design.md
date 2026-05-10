@@ -108,7 +108,7 @@ dotsDecorator: DotsDecorator(
 ```dart
 _page(
   serialLabel: '04',
-  chipKey: 'onboarding.chip.passport',
+  chipKey: 'onboarding.chip.journey',
   titleKey: 'onboarding.journey.title',
   bodyKey: 'onboarding.journey.body',
   icon: Icons.headphones_rounded,

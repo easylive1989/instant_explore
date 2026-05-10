@@ -168,7 +168,7 @@ PlanCard Dismissible（左滑）
 |------|-----|------|---------|
 | 1 | Explore | `Icons.home` | `bottom_nav.home` |
 | 2 | **Plans**（新增） | `Icons.map_outlined` | `bottom_nav.plan` |
-| 3 | Journey | `Icons.book` | `bottom_nav.passport` |
+| 3 | Journey | `Icons.book` | `bottom_nav.journey` |
 | 4 | Settings | `Icons.settings` | `bottom_nav.settings` |
 
 ### Plan Screen

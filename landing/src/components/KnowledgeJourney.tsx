@@ -19,11 +19,11 @@ const stats = [
   },
 ];
 
-export default function KnowledgePassport() {
+export default function KnowledgeJourney() {
   return (
-    <section id="passport" className="text-center">
+    <section id="journey" className="text-center">
       <h2 className="text-4xl font-black mb-16 tracking-tighter">
-        Your Knowledge Passport
+        Your Knowledge Journey
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {stats.map((stat) => (

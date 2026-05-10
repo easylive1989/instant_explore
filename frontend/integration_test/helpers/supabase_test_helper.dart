@@ -45,14 +45,4 @@ class SupabaseTestHelper {
     final client = Supabase.instance.client;
     await client.auth.signOut();
   }
-
-  /// 清除所有 tables（用於完整清理）
-  static Future<void> cleanupAllTables() async {
-    final client = Supabase.instance.client;
-    // 刪除所有資料（需 service_role 權限，這裡用 trick 繞過 DELETE verify）
-    // 使用 nil UUID 避免 22P02 invalid input syntax for type uuid error
-    const nilUuid = '00000000-0000-0000-0000-000000000000';
-    await client.from('passport_entries').delete().neq('id', nilUuid);
-    await client.from('daily_usage').delete().neq('id', nilUuid);
-  }
 }
