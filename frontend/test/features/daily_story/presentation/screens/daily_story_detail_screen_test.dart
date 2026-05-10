@@ -62,7 +62,7 @@ void main() {
   group('DailyStoryDetailScreen', () {
     testWidgets(
       'given a story, when the screen loads, '
-      'then place name, location, era, story body and Wikipedia button are visible',
+      'then place name, location, era and story body are visible',
       (tester) async {
         final story = _story();
         await _pumpDetail(tester, story: story);
@@ -71,9 +71,11 @@ void main() {
         expect(find.text(story.placeLocation), findsOneWidget);
         expect(find.text(story.era), findsOneWidget);
         expect(find.textContaining('完整故事內容'), findsAtLeastNWidgets(1));
+        // Wikipedia button intentionally removed — story page should focus
+        // entirely on the narrative.
         expect(
           find.text('daily_story.detail_read_more_wikipedia'),
-          findsOneWidget,
+          findsNothing,
         );
       },
     );

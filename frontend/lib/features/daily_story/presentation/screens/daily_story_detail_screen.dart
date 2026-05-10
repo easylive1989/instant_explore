@@ -3,7 +3,6 @@ import 'package:context_app/features/daily_story/domain/models/daily_story.dart'
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DailyStoryDetailScreen extends StatelessWidget {
   final DailyStory story;
@@ -55,23 +54,10 @@ class DailyStoryDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(story.story, style: theme.textTheme.bodyLarge),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => _openWikipedia(context),
-              icon: const Icon(Icons.open_in_new),
-              label: Text('daily_story.detail_read_more_wikipedia'.tr()),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _openWikipedia(BuildContext context) async {
-    final uri = Uri.parse(story.wikipediaUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 }
 
