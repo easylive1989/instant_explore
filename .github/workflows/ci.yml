@@ -101,6 +101,30 @@ jobs:
           # After linking, only the DB password is needed for `db push`
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
 
+  # 部署 Backend 到 VPS（Docker compose）
+  # 第一次部署需要手動到 VPS：clone repo 到 /opt/lorescape、cp .env.example .env
+  # 並填入 secrets、跑 `docker compose up -d --build`、安裝 crontab。之後每次
+  # master 上動到 backend/** 就由這個 job 自動 git pull + rebuild。
+  deploy-backend:
+    name: Deploy Backend to VPS
+    runs-on: ubuntu-latest
+    needs: [unit-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/lorescape
+            git fetch --prune origin master
+            git reset --hard origin/master
+            cd backend
+            docker compose up -d --build
+
   # Android 建置與部署
   build-android:
     name: Build & Deploy Android AAB

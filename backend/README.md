@@ -34,68 +34,62 @@ uvicorn lorescape_backend.api:app --reload --port 8000
 
 ## Deploying to a VPS
 
-Two supported topologies. Pick whichever fits your VPS layout.
+Topology: Docker Compose. The container is on the docker network only — no
+host port is published, because the cron job uses `docker exec` and there is
+no public HTTP surface yet. When future endpoints need exposure, add a
+`ports:` entry to `docker-compose.yml` (or front with nginx) at that point.
 
-### Option A — system Python + cron (lowest ceremony)
+### One-time bootstrap (manual, on the VPS)
 
 ```bash
-# On the VPS (assumes a Debian/Ubuntu-style host with python3.11)
-sudo mkdir -p /opt/lorescape-backend
-sudo chown $USER:$USER /opt/lorescape-backend
-git clone https://github.com/easylive1989/instant_explore /tmp/instant_explore
-cp -r /tmp/instant_explore/backend/* /opt/lorescape-backend/
-cd /opt/lorescape-backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+ssh root@<your-vps-ip>
 
-# Configure secrets
+git clone https://github.com/easylive1989/instant_explore /opt/lorescape
+cd /opt/lorescape/backend
+
+# Configure secrets — required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+# GEMINI_API_KEY. Optional but recommended: DISCORD_WEBHOOK_URL.
 cp .env.example .env
-$EDITOR .env  # fill in real values
+$EDITOR .env
 
-# Smoke test (will fail on Wikipedia/Gemini/Supabase if env vars are wrong)
-python -m lorescape_backend.daily_story 2030-01-01
+# First build + run
+docker compose up -d --build
+docker compose ps  # api should be Up (healthy)
 
-# Install the cron schedule
+# Smoke test — verify env vars resolved and SDKs import
+docker exec lorescape-backend python -c \
+  "from lorescape_backend.config import Config; Config.from_env(); print('config ok')"
+
+# Install crontab
 sudo mkdir -p /var/log/lorescape
-sudo chown $USER:$USER /var/log/lorescape
 crontab -l 2>/dev/null > /tmp/cron.bak || true
-cat /opt/lorescape-backend/deploy/crontab.example >> /tmp/cron.bak
+cat /opt/lorescape/backend/deploy/crontab.example >> /tmp/cron.bak
 crontab /tmp/cron.bak
 crontab -l  # verify
 ```
 
-### Option B — Docker Compose
+### Subsequent updates (automated by CI)
 
-```bash
-# On the VPS
-git clone https://github.com/easylive1989/instant_explore /opt/instant_explore
-cd /opt/instant_explore/backend
-cp .env.example .env
-$EDITOR .env  # fill in real values
+Once bootstrap is done, every `master` push automatically:
 
-docker compose up -d --build
-docker compose ps
-curl http://localhost:8000/health
-# Expected: {"status":"ok"}
+1. SSHes into the VPS via `appleboy/ssh-action`
+2. `git fetch && git reset --hard origin/master` in `/opt/lorescape`
+3. `docker compose up -d --build` in `backend/`
 
-# Install cron to call the container
-crontab -e
-# Add the Docker line from deploy/crontab.example
-```
+See the `deploy-backend` job in `.github/workflows/ci.yml`.
+
+Required GitHub secrets:
+- `VPS_HOST` — VPS IP or hostname
+- `VPS_USER` — SSH user (e.g. `root`)
+- `VPS_SSH_KEY` — SSH private key with permission to write `/opt/lorescape`
 
 ### After deployment — manual smoke test
 
 Force a one-off run for tomorrow's date and check Supabase:
 
 ```bash
-# Option A
-cd /opt/lorescape-backend && source .venv/bin/activate
-python -m lorescape_backend.daily_story $(date -v+1d +%Y-%m-%d)  # macOS
-# or: python -m lorescape_backend.daily_story $(date -d tomorrow +%Y-%m-%d)  # Linux
-
-# Option B
-docker exec lorescape-backend python -m lorescape_backend.daily_story $(date -d tomorrow +%Y-%m-%d)
+docker exec lorescape-backend python -m lorescape_backend.daily_story \
+  $(date -d tomorrow +%Y-%m-%d)
 ```
 
 Then in Supabase Dashboard SQL Editor:
@@ -111,11 +105,12 @@ Expected: two rows (`zh-TW` + `en`) for tomorrow's date with `story_len` ≈ 300
 
 ### Discord webhook (optional but recommended)
 
-If `DISCORD_WEBHOOK_URL` is set in `.env`, all-retries-failed will post a message to the channel. To test the wiring without breaking anything:
+If `DISCORD_WEBHOOK_URL` is set in `.env`, all-retries-failed will post a
+message to the channel. To test the wiring without breaking anything:
 
 ```bash
-# Run with an intentionally wrong Supabase URL to force failure
-SUPABASE_URL=https://invalid.local python -m lorescape_backend.daily_story 2099-01-01
+docker exec -e SUPABASE_URL=https://invalid.local lorescape-backend \
+  python -m lorescape_backend.daily_story 2099-01-01
 ```
 
 You should see the Discord message appear after ~36 seconds (1+5+30 backoff).
