@@ -47,8 +47,13 @@ final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
 /// 使用者目前位置，由 [PlacesController] 在載入附近地點時更新
 final userLocationProvider = StateProvider<PlaceLocation?>((ref) => null);
 
-/// 距離過濾上限（公尺），預設 10000
-final maxDistanceProvider = StateProvider<double>((ref) => 10000.0);
+/// 探索頁面預設的距離過濾上限（公尺）。
+const double kDefaultMaxDistanceMeters = 10000.0;
+
+/// 距離過濾上限（公尺），預設 [kDefaultMaxDistanceMeters]
+final maxDistanceProvider = StateProvider<double>(
+  (ref) => kDefaultMaxDistanceMeters,
+);
 
 /// 目前的搜尋關鍵字；空字串表示顯示附近地點模式
 final searchQueryProvider = StateProvider<String>((ref) => '');

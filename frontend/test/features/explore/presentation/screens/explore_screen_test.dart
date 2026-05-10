@@ -148,13 +148,13 @@ void main() {
     );
 
     testWidgets(
-      'given the filter is at its default value (30000 m), when the screen '
+      'given the filter is at its default value (10000 m), when the screen '
       'renders, then no active dot is shown',
       (tester) async {
-        await _givenExploreScreen(tester, maxDistance: 30000.0);
+        await _givenExploreScreen(tester, maxDistance: 10000.0);
 
         // The active dot is an 8x8 BoxDecoration in the filter-button stack.
-        // When inactive (maxDistance == 30000), it is not present.
+        // It is hidden whenever maxDistance == kDefaultMaxDistanceMeters.
         expect(_activeDotFinder(), findsNothing);
       },
     );
@@ -233,7 +233,7 @@ Future<void> _givenExploreScreen(
   List<Place> places = const [],
   FakePlacesRepository? repo,
   InMemorySavedLocationsRepository? savedRepo,
-  double maxDistance = 30000.0,
+  double maxDistance = 10000.0,
   PlaceLocation? userLocation,
 }) async {
   final fakeLocation = FakeLocationService(

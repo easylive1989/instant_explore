@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
@@ -61,7 +62,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final placesState = ref.watch(filteredPlacesProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final maxDistance = ref.watch(maxDistanceProvider);
-    final isFilterActive = maxDistance < 30000.0;
+    final isFilterActive = maxDistance != kDefaultMaxDistanceMeters;
 
     return Scaffold(
       floatingActionButton: const SavedLocationsFab(),
@@ -366,15 +367,15 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
             variant: PillButtonVariant.ghost,
             fullWidth: true,
             onPressed: () {
-              const defaultDistance = 30000.0;
-              ref.read(maxDistanceProvider.notifier).state = defaultDistance;
+              ref.read(maxDistanceProvider.notifier).state =
+                  kDefaultMaxDistanceMeters;
               setState(() {
-                _sliderValue = _valueToSlider(defaultDistance);
+                _sliderValue = _valueToSlider(kDefaultMaxDistanceMeters);
               });
               if (ref.read(searchQueryProvider).isEmpty) {
                 ref
                     .read(placesControllerProvider.notifier)
-                    .refresh(radius: defaultDistance);
+                    .refresh(radius: kDefaultMaxDistanceMeters);
               }
             },
           ),
@@ -403,15 +404,7 @@ class PlaceCard extends ConsumerWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                place.category.getImageAssetPath(context),
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-              ),
-            ),
+            _PlaceAvatar(place: place),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -445,6 +438,41 @@ class PlaceCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PlaceAvatar extends StatelessWidget {
+  const _PlaceAvatar({required this.place});
+
+  final Place place;
+
+  static const _size = 64.0;
+  static const _radius = 12.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = place.primaryPhoto?.url;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(_radius),
+      child: photoUrl != null
+          ? CachedNetworkImage(
+              imageUrl: photoUrl,
+              width: _size,
+              height: _size,
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) => _categoryFallback(context),
+            )
+          : _categoryFallback(context),
+    );
+  }
+
+  Widget _categoryFallback(BuildContext context) {
+    return Image.asset(
+      place.category.getImageAssetPath(context),
+      width: _size,
+      height: _size,
+      fit: BoxFit.cover,
     );
   }
 }
