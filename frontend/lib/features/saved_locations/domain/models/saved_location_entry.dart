@@ -11,10 +11,10 @@ import 'package:equatable/equatable.dart';
 class SavedLocationEntry extends Equatable {
   final String placeId;
   final String name;
-  final String formattedAddress;
+  final String address;
   final double latitude;
   final double longitude;
-  final List<String> types;
+  final List<String> tags;
   final List<Map<String, dynamic>> photosJson;
   final String categoryKey;
   final DateTime savedAt;
@@ -22,10 +22,10 @@ class SavedLocationEntry extends Equatable {
   const SavedLocationEntry({
     required this.placeId,
     required this.name,
-    required this.formattedAddress,
+    required this.address,
     required this.latitude,
     required this.longitude,
-    required this.types,
+    required this.tags,
     required this.photosJson,
     required this.categoryKey,
     required this.savedAt,
@@ -36,17 +36,17 @@ class SavedLocationEntry extends Equatable {
     return SavedLocationEntry(
       placeId: place.id,
       name: place.name,
-      formattedAddress: place.formattedAddress,
+      address: place.address,
       latitude: place.location.latitude,
       longitude: place.location.longitude,
-      types: place.types,
+      tags: place.tags,
       photosJson: place.photos
           .map(
             (p) => {
               'url': p.url,
-              'width_px': p.widthPx,
-              'height_px': p.heightPx,
-              'author_attributions': p.authorAttributions,
+              'width_px': p.width,
+              'height_px': p.height,
+              'author_attributions': p.attributions,
             },
           )
           .toList(),
@@ -61,9 +61,9 @@ class SavedLocationEntry extends Equatable {
         .map(
           (p) => PlacePhoto(
             url: p['url'] as String,
-            widthPx: p['width_px'] as int,
-            heightPx: p['height_px'] as int,
-            authorAttributions: (p['author_attributions'] as List<dynamic>)
+            width: p['width_px'] as int,
+            height: p['height_px'] as int,
+            attributions: (p['author_attributions'] as List<dynamic>)
                 .cast<String>(),
           ),
         )
@@ -72,9 +72,9 @@ class SavedLocationEntry extends Equatable {
     return Place(
       id: placeId,
       name: name,
-      formattedAddress: formattedAddress,
+      address: address,
       location: PlaceLocation(latitude: latitude, longitude: longitude),
-      types: types,
+      tags: tags,
       photos: photos,
       category: PlaceCategory.values.firstWhere(
         (c) => c.name == categoryKey,
@@ -86,10 +86,10 @@ class SavedLocationEntry extends Equatable {
   Map<String, dynamic> toJson() => {
     'place_id': placeId,
     'name': name,
-    'formatted_address': formattedAddress,
+    'formatted_address': address,
     'latitude': latitude,
     'longitude': longitude,
-    'types': types,
+    'types': tags,
     'photos': photosJson,
     'category_key': categoryKey,
     'saved_at': savedAt.toIso8601String(),
@@ -99,10 +99,10 @@ class SavedLocationEntry extends Equatable {
     return SavedLocationEntry(
       placeId: json['place_id'] as String,
       name: json['name'] as String,
-      formattedAddress: json['formatted_address'] as String,
+      address: json['formatted_address'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      types: (json['types'] as List<dynamic>).cast<String>(),
+      tags: (json['types'] as List<dynamic>).cast<String>(),
       photosJson: (json['photos'] as List<dynamic>)
           .map((p) => Map<String, dynamic>.from(p as Map))
           .toList(),

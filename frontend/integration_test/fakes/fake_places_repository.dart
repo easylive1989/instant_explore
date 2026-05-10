@@ -6,15 +6,15 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 
 /// 測試用的假地點儲存庫
 ///
-/// 回傳預設的地點列表，模擬 Google Places API
+/// 回傳預設的地點列表
 class FakePlacesRepository implements PlacesRepository {
   /// 預設的測試地點 A (台北 101)
   static const fakePlaceA = Place(
     id: 'fake_place_a',
     name: '台北 101',
-    formattedAddress: '台北市信義區信義路五段7號',
+    address: '台北市信義區信義路五段7號',
     location: PlaceLocation(latitude: 25.0339, longitude: 121.5645),
-    types: ['tourist_attraction', 'point_of_interest'],
+    tags: ['tourist_attraction', 'point_of_interest'],
     photos: [],
     category: PlaceCategory.modernUrban,
   );
@@ -23,9 +23,9 @@ class FakePlacesRepository implements PlacesRepository {
   static const fakePlaceB = Place(
     id: 'fake_place_b',
     name: '國立故宮博物院',
-    formattedAddress: '台北市士林區至善路二段221號',
+    address: '台北市士林區至善路二段221號',
     location: PlaceLocation(latitude: 25.1024, longitude: 121.5485),
-    types: ['museum', 'tourist_attraction'],
+    tags: ['museum', 'tourist_attraction'],
     photos: [],
     category: PlaceCategory.museumArt,
   );
@@ -34,9 +34,9 @@ class FakePlacesRepository implements PlacesRepository {
   static const fakePlaceC = Place(
     id: 'fake_place_c',
     name: '龍山寺',
-    formattedAddress: '台北市萬華區廣州街211號',
+    address: '台北市萬華區廣州街211號',
     location: PlaceLocation(latitude: 25.0372, longitude: 121.4997),
-    types: ['temple', 'place_of_worship'],
+    tags: ['temple', 'place_of_worship'],
     photos: [],
     category: PlaceCategory.historicalCultural,
   );
@@ -79,7 +79,7 @@ class FakePlacesRepository implements PlacesRepository {
         .where(
           (place) =>
               place.name.toLowerCase().contains(query.toLowerCase()) ||
-              place.formattedAddress.toLowerCase().contains(
+              place.address.toLowerCase().contains(
                 query.toLowerCase(),
               ),
         )

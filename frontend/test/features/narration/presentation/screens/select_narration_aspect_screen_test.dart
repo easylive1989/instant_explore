@@ -34,13 +34,13 @@ void main() {
       (tester) async {
         final place = buildPlace(
           name: 'Fushimi Inari',
-          formattedAddress: '68 Fukakusa Yabunouchicho',
+          address: '68 Fukakusa Yabunouchicho',
         );
 
         await _givenSelectNarrationAspectScreen(tester, place: place);
 
         _thenPlaceHeaderIsVisible(place.name);
-        _thenAddressIsVisible(place.formattedAddress);
+        _thenAddressIsVisible(place.address);
       },
     );
 

@@ -10,15 +10,15 @@ void main() {
     const place = Place(
       id: 'wikidata:Q221716',
       name: '清水寺',
-      formattedAddress: '',
+      address: '',
       location: PlaceLocation(latitude: 34.9948, longitude: 135.785),
-      types: ['Q5393308'],
+      tags: ['Q5393308'],
       photos: [
         PlacePhoto(
           url: 'https://img/x.jpg',
-          widthPx: 400,
-          heightPx: 300,
-          authorAttributions: [],
+          width: 400,
+          height: 300,
+          attributions: [],
         ),
       ],
       category: PlaceCategory.historicalCultural,
@@ -34,9 +34,9 @@ void main() {
       final noPhotos = Place(
         id: place.id,
         name: place.name,
-        formattedAddress: place.formattedAddress,
+        address: place.address,
         location: place.location,
-        types: place.types,
+        tags: place.tags,
         photos: const [],
         category: place.category,
       );

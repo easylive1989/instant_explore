@@ -42,7 +42,7 @@ class JourneyEntry {
     final savedPlace = SavedPlace(
       id: place.id,
       name: place.name,
-      address: place.formattedAddress,
+      address: place.address,
       imageUrl: imageUrl,
     );
 

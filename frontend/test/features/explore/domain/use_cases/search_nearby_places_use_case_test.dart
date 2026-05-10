@@ -54,15 +54,15 @@ void main() {
     return Place(
       id: id,
       name: name,
-      formattedAddress: 'Test Address',
+      address: 'Test Address',
       location: location,
-      types: const ['tourist_attraction'],
+      tags: const ['tourist_attraction'],
       photos: const [
         PlacePhoto(
           url: 'https://example.com/photo.jpg',
-          widthPx: 200,
-          heightPx: 200,
-          authorAttributions: [],
+          width: 200,
+          height: 200,
+          attributions: [],
         ),
       ],
       category: PlaceCategory.modernUrban,

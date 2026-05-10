@@ -179,7 +179,7 @@ class _SavedLocationTile extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          entry.formattedAddress,
+          entry.address,
           style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

@@ -1,6 +1,6 @@
 /// 景點類型分類
 ///
-/// 用於將 Google Places API 的原始類型對應到五種主要景點類型
+/// 用於將 Wikidata 類別對應到五種主要景點類型
 enum PlaceCategory {
   /// 人文古蹟類 (Historical & Cultural Sites)
   /// 如：寺廟、古城、皇宮、故居

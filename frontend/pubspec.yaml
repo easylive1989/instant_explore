@@ -44,13 +44,10 @@ dependencies:
   # Google Sign In
   google_sign_in: ^6.2.1
   
-  # Google Maps
-  google_maps_flutter: ^2.12.3
-  
   # Location services
   geolocator: ^14.0.2
-  
-  # HTTP requests for Places API
+
+  # HTTP requests
   http: ^1.2.2
   image_picker: ^1.2.1
   cached_network_image: ^3.4.1

@@ -73,9 +73,9 @@ class _QuickGuideTimelineEntryState
     final place = Place(
       id: 'quick-guide-${widget.entry.id}',
       name: 'quick_guide.title'.tr(),
-      formattedAddress: '',
+      address: '',
       location: const PlaceLocation(latitude: 0, longitude: 0),
-      types: const [],
+      tags: const [],
       photos: const [],
       category: PlaceCategory.modernUrban,
     );

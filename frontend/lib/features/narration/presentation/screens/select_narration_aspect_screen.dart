@@ -390,7 +390,7 @@ class _AddressRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            place.formattedAddress,
+            place.address,
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),

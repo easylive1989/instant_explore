@@ -63,9 +63,9 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
     final place = Place(
       id: 'quick-guide-${DateTime.now().millisecondsSinceEpoch}',
       name: 'quick_guide.title'.tr(),
-      formattedAddress: '',
+      address: '',
       location: const PlaceLocation(latitude: 0, longitude: 0),
-      types: const [],
+      tags: const [],
       photos: const [],
       category: PlaceCategory.modernUrban,
     );

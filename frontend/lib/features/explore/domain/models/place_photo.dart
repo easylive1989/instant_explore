@@ -8,21 +8,21 @@ class PlacePhoto extends Equatable {
   final String url;
 
   /// 照片寬度 (像素)
-  final int widthPx;
+  final int width;
 
   /// 照片高度 (像素)
-  final int heightPx;
+  final int height;
 
   /// 作者歸屬資訊
-  final List<String> authorAttributions;
+  final List<String> attributions;
 
   const PlacePhoto({
     required this.url,
-    required this.widthPx,
-    required this.heightPx,
-    required this.authorAttributions,
+    required this.width,
+    required this.height,
+    required this.attributions,
   });
 
   @override
-  List<Object?> get props => [url, widthPx, heightPx, authorAttributions];
+  List<Object?> get props => [url, width, height, attributions];
 }

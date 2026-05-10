@@ -114,9 +114,7 @@ patrol test \
   --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
   --dart-define=SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
   --dart-define=GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID:-""} \
-  --dart-define=GOOGLE_IOS_CLIENT_ID=${GOOGLE_IOS_CLIENT_ID:-""} \
-  --dart-define=GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-""} \
-  --dart-define=GOOGLE_DIRECTIONS_API_KEY=${GOOGLE_DIRECTIONS_API_KEY:-""}
+  --dart-define=GOOGLE_IOS_CLIENT_ID=${GOOGLE_IOS_CLIENT_ID:-""}
 
 TEST_EXIT_CODE=$?
 set -e  # 重新啟用 errexit
