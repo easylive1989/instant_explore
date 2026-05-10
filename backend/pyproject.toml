@@ -1,0 +1,31 @@
+[project]
+name = "lorescape-backend"
+version = "0.1.0"
+description = "VPS backend for Lorescape (daily story cron + future APIs)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.32,<1",
+    "supabase>=2.10,<3",
+    "google-genai>=0.8,<2",
+    "requests>=2.32,<3",
+    "python-dotenv>=1,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "pytest-mock>=3.14,<4",
+    "requests-mock>=1.12,<2",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
