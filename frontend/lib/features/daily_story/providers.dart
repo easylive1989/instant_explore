@@ -52,3 +52,14 @@ final dailyStoryHistoryProvider = FutureProvider<List<DailyStory>>((ref) async {
     limit: 30,
   );
 });
+
+/// History list keyed by the DB [language] string. Used by
+/// [DailyStoryHistoryScreen] for the same testability reason as
+/// [todayDailyStoryByLanguageProvider].
+final dailyStoryHistoryByLanguageProvider =
+    FutureProvider.family<List<DailyStory>, String>((ref, language) async {
+      final repo = ref.watch(dailyStoryRepositoryProvider);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      return repo.fetchHistory(language: language, before: today, limit: 30);
+    });
