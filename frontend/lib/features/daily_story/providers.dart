@@ -28,6 +28,17 @@ final todayDailyStoryProvider = FutureProvider<DailyStory?>((ref) async {
   return repo.fetchToday(language: dbLanguageOf(language));
 });
 
+/// Today's daily story keyed by the DB [language] string (e.g. `'zh-TW'`).
+///
+/// Used by [DailyStoryCard] so it can resolve the language from
+/// [EasyLocalization] context rather than [currentLanguageProvider], which
+/// makes widget tests simpler to set up.
+final todayDailyStoryByLanguageProvider =
+    FutureProvider.family<DailyStory?, String>((ref, language) async {
+      final repo = ref.watch(dailyStoryRepositoryProvider);
+      return repo.fetchToday(language: language);
+    });
+
 /// History list — last 30 days strictly before today.
 final dailyStoryHistoryProvider = FutureProvider<List<DailyStory>>((ref) async {
   final language = ref.watch(currentLanguageProvider);
