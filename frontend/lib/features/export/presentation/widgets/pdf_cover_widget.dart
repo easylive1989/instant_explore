@@ -3,7 +3,7 @@ import 'package:context_app/features/export/presentation/widgets/pdf_stamp_decor
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Passport-style cover page for a Trip PDF export.
+/// Cover page for a Trip PDF export.
 ///
 /// Intended to be rendered off-screen via `RepaintBoundary` and captured
 /// as a PNG, then embedded as the first page of the PDF document.

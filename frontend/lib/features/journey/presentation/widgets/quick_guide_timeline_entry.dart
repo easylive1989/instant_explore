@@ -116,15 +116,12 @@ class _QuickGuideTimelineEntryState
 
     final confirmed = await showAdaptiveAlertDialog<bool>(
       context: context,
-      title: 'passport.delete_title'.tr(),
-      content: 'passport.delete_message'.tr(),
+      title: 'journey.delete_title'.tr(),
+      content: 'journey.delete_message'.tr(),
       actions: [
+        AdaptiveDialogAction<bool>(label: 'journey.cancel'.tr(), result: false),
         AdaptiveDialogAction<bool>(
-          label: 'passport.cancel'.tr(),
-          result: false,
-        ),
-        AdaptiveDialogAction<bool>(
-          label: 'passport.delete_confirm'.tr(),
+          label: 'journey.delete_confirm'.tr(),
           isDestructive: true,
           result: true,
         ),
@@ -158,8 +155,8 @@ class _QuickGuideTimelineEntryState
     final yesterday = today.subtract(const Duration(days: 1));
     final entryDate = DateTime(date.year, date.month, date.day);
 
-    if (entryDate == today) return 'passport.today'.tr();
-    if (entryDate == yesterday) return 'passport.yesterday'.tr();
+    if (entryDate == today) return 'journey.today'.tr();
+    if (entryDate == yesterday) return 'journey.yesterday'.tr();
     return DateFormat('MMM d').format(date);
   }
 
@@ -343,7 +340,7 @@ class _QuickGuideTimelineEntryState
                             else
                               _ActionButton(
                                 icon: Icons.delete_outline,
-                                label: 'passport.delete_confirm'.tr(),
+                                label: 'journey.delete_confirm'.tr(),
                                 onTap: _showDeleteConfirmDialog,
                               ),
                           ],

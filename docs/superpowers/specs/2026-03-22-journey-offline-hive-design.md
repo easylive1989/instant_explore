@@ -30,7 +30,7 @@
 - `lib/features/journey/providers.dart` — 使用 `HiveJourneyRepository`，移除 Supabase 相關 provider
 - `lib/features/journey/presentation/screens/journey_screen.dart` — 移除 auth gate
 - `lib/features/journey/presentation/widgets/timeline_entry.dart` — 呼叫 `delete(id)` 取代 `deleteJourneyEntry(id)`
-- `lib/features/narration/presentation/widgets/save_to_passport_button.dart` — 移除 auth check 與登入 dialog
+- `lib/features/narration/presentation/widgets/save_to_journey_button.dart` — 移除 auth check 與登入 dialog
 - `lib/features/narration/presentation/controllers/player_controller.dart` — 移除 `userId` 參數，呼叫 `save()` 取代 `addJourneyEntry()`
 - `test/features/journey/domain/models/journey_entry_test.dart` — 移除 `userId` 參數及相關 assertions
 
@@ -159,7 +159,7 @@ final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((ref) {
 - 移除 `_buildLoginPrompt` 方法
 - 移除 `login_dialog.dart`、`auth/providers.dart` imports
 
-### SaveToPassportButton
+### SaveToJourneyButton
 
 移除：
 ```dart

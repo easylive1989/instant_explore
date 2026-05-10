@@ -20,9 +20,9 @@ export default function Navbar() {
           </a>
           <a
             className="text-white/60 font-medium tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95"
-            href="#passport"
+            href="#journey"
           >
-            Passport
+            Journey
           </a>
         </div>
         <a

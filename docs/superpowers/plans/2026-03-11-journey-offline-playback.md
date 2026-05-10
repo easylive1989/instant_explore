@@ -73,7 +73,7 @@ void main() {
     mockQueryBuilder = MockSupabaseQueryBuilder();
     repository = SupabaseJourneyRepository(mockClient);
 
-    when(() => mockClient.from('passport_entries'))
+    when(() => mockClient.from('journey_entries'))
         .thenReturn(mockQueryBuilder);
   });
 

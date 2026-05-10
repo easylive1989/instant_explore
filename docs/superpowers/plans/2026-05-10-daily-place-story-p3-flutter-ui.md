@@ -1210,7 +1210,7 @@ git commit -m "feat(daily-story): add DailyStoryHistoryScreen"
 
 - [ ] **Step 1: Add 2 routes**
 
-Add the following two `GoRoute` entries inside the existing `routes:` list of `RouterConfig.createRouter` (place them after `/passport/success` for grouping):
+Add the following two `GoRoute` entries inside the existing `routes:` list of `RouterConfig.createRouter` (place them after `/journey/success` for grouping):
 
 ```dart
 GoRoute(

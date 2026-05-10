@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Token-cleanup pass on three journey files (~1357 lines): route every `AppColors.primary` / `AppColors.error` / `Colors.white` (where `Colors.white` is being used as a primary-on contrast) through `colorScheme`, switch the main passport title to `textTheme.displayLarge`, preserve `_FilterChips`/`_ViewModeToggle`/`_CurrentTripBanner` custom designs, keep the quick-guide camera node's distinctive `Color(0xFF2A7AE4)` as design intent.
+**Goal:** Token-cleanup pass on three journey files (~1357 lines): route every `AppColors.primary` / `AppColors.error` / `Colors.white` (where `Colors.white` is being used as a primary-on contrast) through `colorScheme`, switch the main journey title to `textTheme.displayLarge`, preserve `_FilterChips`/`_ViewModeToggle`/`_CurrentTripBanner` custom designs, keep the quick-guide camera node's distinctive `Color(0xFF2A7AE4)` as design intent.
 
 **Architecture:** Three source files in one commit (they're tightly coupled — `journey_screen` instantiates both timeline entries). Existing tests preserved.
 
@@ -35,7 +35,7 @@
   Before:
   ```dart
   Text(
-    'passport.title'.tr(),
+    'journey.title'.tr(),
     style: TextStyle(
       fontSize: 40,
       fontWeight: FontWeight.bold,
@@ -47,7 +47,7 @@
   After:
   ```dart
   Text(
-    'passport.title'.tr(),
+    'journey.title'.tr(),
     style: Theme.of(context).textTheme.displayLarge,
   ),
   ```
@@ -133,7 +133,7 @@
   ),
   ```
 
-- [ ] **f) `_JourneyList` error** — same change as Step e for the `passport.load_error` Text.
+- [ ] **f) `_JourneyList` error** — same change as Step e for the `journey.load_error` Text.
 
 - [ ] **g) Cleanup imports**: After all the edits above, run:
   ```

@@ -8,7 +8,6 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/presentation/screens/select_narration_aspect_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/journey/presentation/screens/save_success_screen.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/screens/onboarding_welcome_screen.dart';
@@ -57,7 +56,7 @@ class RouterConfig {
           name: 'home',
           builder: (context, state) {
             final tab = state.uri.queryParameters['tab'];
-            final index = tab == 'passport' ? 2 : 0;
+            final index = tab == 'journey' ? 2 : 0;
             return MainScreen(initialIndex: index);
           },
         ),
@@ -113,22 +112,6 @@ class RouterConfig {
               place: place,
               narrationContent: narrationContent,
               autoPlay: autoPlay,
-            );
-          },
-        ),
-        GoRoute(
-          path: '/passport/success',
-          name: 'passport_success',
-          builder: (context, state) {
-            final place = state.extra as Place;
-            return SaveSuccessScreen(
-              place: place,
-              onViewPassport: () {
-                context.go('/?tab=passport');
-              },
-              onContinueTour: () {
-                context.pop();
-              },
             );
           },
         ),

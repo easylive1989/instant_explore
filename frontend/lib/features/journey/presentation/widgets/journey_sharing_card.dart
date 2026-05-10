@@ -6,8 +6,8 @@ import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-/// A beautiful sharing card that renders a Journey entry as a
-/// passport-style card suitable for social media sharing.
+/// A beautiful sharing card that renders a Journey entry
+/// suitable for social media sharing.
 ///
 /// This widget is rendered off-screen via [RepaintBoundary] and
 /// captured as an image by [JourneySharingService].

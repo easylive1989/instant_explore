@@ -176,7 +176,7 @@ class _OnboardingSection extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('passport.cancel'.tr()),
+            child: Text('journey.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),

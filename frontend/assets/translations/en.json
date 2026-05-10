@@ -43,7 +43,6 @@
     "loading": "Generating narration content...",
     "error": "An error occurred",
     "retry": "Retry",
-    "save_to_passport": "Save to Journey of Exploration",
     "error_generating": "Failed to generate narration",
     "error_playing": "Playback error",
     "please_login": "Please login first",
@@ -53,16 +52,16 @@
   "bottom_nav": {
     "home": "Home",
     "quick_guide": "Quick Guide",
-    "passport": "Journey",
+    "journey": "Journey",
     "settings": "Settings"
   },
-  "passport": {
+  "journey": {
     "title": "Journey",
     "title_uppercase": "JOURNEY OF EXPLORATION",
     "no_entries": "No saved tours yet",
     "load_error": "Failed to load",
     "item_saved": "Item Saved!",
-    "added_to_passport": "has been added to your Journey of Exploration.",
+    "added_to_journey": "has been added to your Journey of Exploration.",
     "view_button": "View Journey of Exploration",
     "continue_tour": "Continue Tour",
     "delete_title": "Delete Entry",
@@ -185,7 +184,7 @@
     "show_password": "Show password",
     "hide_password": "Hide password",
     "login_to_save": "Sign in to save",
-    "login_to_save_subtitle": "Sign in to save your narration to your passport",
+    "login_to_save_subtitle": "Sign in to save your narration to your journey",
     "later": "Maybe later"
   },
   "validation": {
@@ -352,14 +351,14 @@
       "body": "Open the map, discover historical places around you, and start a voice tour with a single tap."
     },
     "journey": {
-      "title": "A cultural passport, written for you",
-      "body": "Every tour and question becomes part of your own personal knowledge passport."
+      "title": "A cultural journey, written for you",
+      "body": "Every tour and question becomes part of your own personal knowledge journey."
     },
     "chip": {
       "discovery": "DISCOVERY",
       "ai_guide": "AI GUIDE",
       "explore": "NEARBY",
-      "passport": "PASSPORT"
+      "journey": "JOURNEY"
     }
   },
   "settings_onboarding": {

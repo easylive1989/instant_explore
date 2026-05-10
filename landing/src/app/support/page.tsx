@@ -116,7 +116,7 @@ export default function SupportPage() {
                   A: You can request account deletion at any time. Go to{" "}
                   <strong>[Settings]</strong> &gt;{" "}
                   <strong>[Delete Account]</strong> within the app. All your
-                  personal data and &quot;Knowledge Passport&quot; records
+                  personal data and &quot;Knowledge Journey&quot; records
                   will be permanently deleted immediately. You can also
                   contact us via email for assistance.
                 </p>

@@ -61,13 +61,13 @@ static const Color success = Color(0xFF10B981);
     backgroundColor: AppColors.primary,
     foregroundColor: Colors.white,
     padding: const EdgeInsets.symmetric(vertical: 18),
-    onPressed: onViewPassport,
+    onPressed: onViewJourney,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'passport.view_button'.tr(),
+          'journey.view_button'.tr(),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -83,10 +83,10 @@ static const Color success = Color(0xFF10B981);
   Replace with:
   ```dart
   PillButton(
-    label: 'passport.view_button'.tr(),
+    label: 'journey.view_button'.tr(),
     icon: Icons.arrow_forward,
     fullWidth: true,
-    onPressed: onViewPassport,
+    onPressed: onViewJourney,
   ),
   ```
 
@@ -102,7 +102,7 @@ static const Color success = Color(0xFF10B981);
     padding: const EdgeInsets.symmetric(vertical: 18),
     onPressed: onContinueTour ?? () => context.pop(),
     child: Text(
-      'passport.continue_tour'.tr(),
+      'journey.continue_tour'.tr(),
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w500,
@@ -114,7 +114,7 @@ static const Color success = Color(0xFF10B981);
   Replace with:
   ```dart
   PillButton(
-    label: 'passport.continue_tour'.tr(),
+    label: 'journey.continue_tour'.tr(),
     variant: PillButtonVariant.secondary,
     fullWidth: true,
     onPressed: onContinueTour ?? () => context.pop(),

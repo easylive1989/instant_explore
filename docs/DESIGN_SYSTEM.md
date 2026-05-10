@@ -16,7 +16,7 @@
 
 ### 表面與卡片顏色 (Surface Colors)
 用於卡片、對話框、底部導航欄等。
-- **Surface Dark (Default)**: `#1c2630` (通用卡片背景 - 用於 Home, Passport, Settings 等)
+- **Surface Dark (Default)**: `#1c2630` (通用卡片背景 - 用於 Home, Journey, Settings 等)
 - **Surface Dark (Player)**: `#182430` (沈浸式播放器面板)
 - **Surface Dark (Config)**: `#192633` (導覽設定頁面)
 - **Glass Effect**: `rgba(255, 255, 255, 0.08)` + `backdrop-filter: blur(12px)` (首頁卡片)
@@ -58,7 +58,7 @@
 - **關鍵元素**:
   - 頂部 "Explore" 標題與 "Refresh" 按鈕。
   - 列表式景點卡片 (玻璃擬態 Glassmorphism)。
-  - 底部導航欄 (Home, Map, Passport, Profile)。
+  - 底部導航欄 (Home, Map, Journey, Profile)。
   - 背景有地圖紋理與呼吸燈動畫。
 
 ### 2. Immersive Player (沈浸式播放器)
@@ -70,8 +70,8 @@
   - 底部控制面板 (播放/暫停、進度條、儲存按鈕)。
   - 頂部透明導航列。
 
-### 3. Knowledge Passport (知識護照)
-- **路徑**: `docs/design/knowledge_passport/`
+### 3. Knowledge Journey (知識歷程)
+- **路徑**: `docs/design/knowledge_journey/`
 - **描述**: 使用者學習歷程與收藏的知識庫。
 - **關鍵元素**:
   - 頂部篩選 Chips (Chronological, Location, Saved)。
@@ -109,15 +109,7 @@
   - 列表項目包含圖示與文字說明。
   - 危險操作 (Delete Account) 使用紅色標示。
 
-### 8. Save to Knowledge Passport (儲存成功)
-- **路徑**: `docs/design/save_to_knowledge_passport/`
-- **描述**: 將內容加入護照後的成功回饋。
-- **關鍵元素**:
-  - 大型成功動畫圖示 (Pulse effect)。
-  - 預覽卡片。
-  - 兩個主要行動按鈕 (View Passport, Continue Tour)。
-
-### 9. AI Over Limit (使用限制提示)
+### 8. AI Over Limit (使用限制提示)
 - **路徑**: `docs/design/ai_over_limit/`
 - **描述**: 當 AI 使用量耗盡時的彈出視窗。
 - **關鍵元素**:

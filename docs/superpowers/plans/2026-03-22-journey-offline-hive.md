@@ -21,7 +21,7 @@
 - `lib/features/journey/domain/repositories/journey_repository.dart` — Replace methods with `getAll()`/`save()`/`delete()`
 - `lib/features/journey/providers.dart` — Use `HiveJourneyRepository`, remove Supabase providers
 - `lib/features/narration/presentation/controllers/player_controller.dart` — Remove `userId` param from `saveToJourney()`
-- `lib/features/narration/presentation/widgets/save_to_passport_button.dart` — Remove auth check/login dialog
+- `lib/features/narration/presentation/widgets/save_to_journey_button.dart` — Remove auth check/login dialog
 - `lib/features/journey/presentation/screens/journey_screen.dart` — Remove auth gate, show list directly
 - `lib/features/journey/presentation/widgets/timeline_entry.dart` — Change `.deleteJourneyEntry()` → `.delete()`
 - `test/features/journey/domain/models/journey_entry_test.dart` — Remove `userId` param and assertions
@@ -740,11 +740,11 @@ cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/featur
 ## Task 5: Update UI components
 
 **Files:**
-- Modify: `lib/features/narration/presentation/widgets/save_to_passport_button.dart`
+- Modify: `lib/features/narration/presentation/widgets/save_to_journey_button.dart`
 - Modify: `lib/features/journey/presentation/screens/journey_screen.dart`
 - Modify: `lib/features/journey/presentation/widgets/timeline_entry.dart`
 
-- [ ] **Step 1: Update `save_to_passport_button.dart`**
+- [ ] **Step 1: Update `save_to_journey_button.dart`**
 
 Replace the entire file with:
 
@@ -758,23 +758,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// 儲存到護照的按鈕
-class SaveToPassportButton extends ConsumerStatefulWidget {
+/// 儲存到歷程的按鈕
+class SaveToJourneyButton extends ConsumerStatefulWidget {
   final Place place;
   final Color surfaceColor;
 
-  const SaveToPassportButton({
+  const SaveToJourneyButton({
     super.key,
     required this.place,
     required this.surfaceColor,
   });
 
   @override
-  ConsumerState<SaveToPassportButton> createState() =>
-      _SaveToPassportButtonState();
+  ConsumerState<SaveToJourneyButton> createState() =>
+      _SaveToJourneyButtonState();
 }
 
-class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
+class _SaveToJourneyButtonState extends ConsumerState<SaveToJourneyButton> {
   bool _isSaving = false;
 
   @override
@@ -805,7 +805,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                     language: Language(locale),
                   );
                   if (context.mounted) {
-                    context.pushNamed('passport_success', extra: widget.place);
+                    context.pushNamed('journey_success', extra: widget.place);
                   }
                 } catch (e) {
                   if (context.mounted) {
@@ -873,7 +873,7 @@ class _SaveToPassportButtonState extends ConsumerState<SaveToPassportButton> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        easy.tr('player_screen.save_to_passport'),
+                        easy.tr('player_screen.save_to_journey'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -912,7 +912,7 @@ class JourneyScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundDark,
         title: Text(
-          'passport.title'.tr(),
+          'journey.title'.tr(),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -931,7 +931,7 @@ class JourneyScreen extends ConsumerWidget {
         if (entries.isEmpty) {
           return Center(
             child: Text(
-              'passport.no_entries'.tr(),
+              'journey.no_entries'.tr(),
               style: const TextStyle(color: Colors.white70),
             ),
           );
@@ -953,7 +953,7 @@ class JourneyScreen extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
         child: Text(
-          '${'passport.load_error'.tr()}: $error',
+          '${'journey.load_error'.tr()}: $error',
           style: const TextStyle(color: AppColors.error),
         ),
       ),
@@ -983,7 +983,7 @@ New:
 - [ ] **Step 4: Run analyzer on the UI files**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze lib/features/narration/presentation/widgets/save_to_passport_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart
+cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart
 ```
 
 Expected: No issues in these three files.
@@ -991,7 +991,7 @@ Expected: No issues in these three files.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/narration/presentation/widgets/save_to_passport_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart && git commit -m "feat: remove auth gate from Journey UI"
+cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart && git commit -m "feat: remove auth gate from Journey UI"
 ```
 
 ---

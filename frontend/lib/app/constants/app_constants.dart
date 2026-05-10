@@ -4,15 +4,6 @@
 class AppConstants {
   AppConstants._();
 
-  /// Supabase table names
-  static const String diaryEntriesTable = 'diary_entries';
-  static const String diaryTagsTable = 'diary_tags';
-  static const String diaryEntryTagsTable = 'diary_entry_tags';
-  static const String diaryImagesTable = 'diary_images';
-
-  /// Supabase storage buckets
-  static const String diaryImagesBucket = 'diary-images';
-
   /// Date and time formats
   static const String dateFormat = 'yyyy-MM-dd';
   static const String dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';

@@ -45,10 +45,6 @@ void main() {
     await SupabaseTestHelper.signInTestUser();
   });
 
-  tearDown(() async {
-    await SupabaseTestHelper.cleanupAllTables();
-  });
-
   patrolTest('generate narration success', ($) async {
     // Arrange
     await $.pumpWidgetAndSettle(createTestApp());

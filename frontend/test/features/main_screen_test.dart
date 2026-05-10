@@ -46,7 +46,7 @@ void main() {
     );
 
     testWidgets(
-      'given initial tab is the passport, when the screen is shown, '
+      'given initial tab is the journey, when the screen is shown, '
       'then the journey tab content is rendered',
       (tester) async {
         await _givenMainScreen(tester, initialIndex: 2);
