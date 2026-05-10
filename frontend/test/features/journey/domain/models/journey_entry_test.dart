@@ -15,9 +15,9 @@ void main() {
       const place = Place(
         id: 'place-1',
         name: 'Test Place',
-        formattedAddress: 'Test Address',
+        address: 'Test Address',
         location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.historicalCultural,
       );
@@ -57,17 +57,17 @@ void main() {
       () {
         const placePhoto = PlacePhoto(
           url: 'https://example.com/photo.jpg',
-          widthPx: 800,
-          heightPx: 600,
-          authorAttributions: ['Author Name'],
+          width: 800,
+          height: 600,
+          attributions: ['Author Name'],
         );
 
         const place = Place(
           id: 'place-2',
           name: 'Place With Photo',
-          formattedAddress: 'Address 2',
+          address: 'Address 2',
           location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-          types: [],
+          tags: [],
           photos: [placePhoto],
           category: PlaceCategory.naturalLandscape,
         );
@@ -107,9 +107,9 @@ void main() {
       const place = Place(
         id: 'place-1',
         name: 'Place With Photo',
-        formattedAddress: 'Test Address',
+        address: 'Test Address',
         location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );
@@ -147,9 +147,9 @@ void main() {
       const place = Place(
         id: 'place-rt',
         name: 'Round Trip Place',
-        formattedAddress: 'RT Address',
+        address: 'RT Address',
         location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.historicalCultural,
       );
@@ -183,9 +183,9 @@ void main() {
       const place = Place(
         id: 'p1',
         name: 'Test',
-        formattedAddress: 'Addr',
+        address: 'Addr',
         location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );
@@ -209,9 +209,9 @@ void main() {
       const place = Place(
         id: 'p1',
         name: 'Test',
-        formattedAddress: 'Addr',
+        address: 'Addr',
         location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );
@@ -236,9 +236,9 @@ void main() {
       const place = Place(
         id: 'p1',
         name: 'Test',
-        formattedAddress: 'Addr',
+        address: 'Addr',
         location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );
@@ -267,9 +267,9 @@ void main() {
       const place = Place(
         id: 'p1',
         name: 'Test',
-        formattedAddress: 'Addr',
+        address: 'Addr',
         location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );
@@ -296,9 +296,9 @@ void main() {
       const place = Place(
         id: 'p1',
         name: 'Test',
-        formattedAddress: 'Addr',
+        address: 'Addr',
         location: PlaceLocation(latitude: 0, longitude: 0),
-        types: [],
+        tags: [],
         photos: [],
         category: PlaceCategory.modernUrban,
       );

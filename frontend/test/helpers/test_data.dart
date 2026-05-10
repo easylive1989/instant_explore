@@ -16,19 +16,19 @@ import 'package:context_app/features/trip/domain/models/trip.dart';
 Place buildPlace({
   String id = 'place-1',
   String name = 'Test Place',
-  String formattedAddress = '123 Test Street',
+  String address = '123 Test Street',
   double latitude = 25.0,
   double longitude = 121.0,
   PlaceCategory category = PlaceCategory.modernUrban,
   List<PlacePhoto> photos = const [],
-  List<String> types = const [],
+  List<String> tags = const [],
 }) {
   return Place(
     id: id,
     name: name,
-    formattedAddress: formattedAddress,
+    address: address,
     location: PlaceLocation(latitude: latitude, longitude: longitude),
-    types: types,
+    tags: tags,
     photos: photos,
     category: category,
   );
@@ -78,7 +78,7 @@ JourneyEntry buildJourneyEntry({
     place: SavedPlace(
       id: resolvedPlace.id,
       name: resolvedPlace.name,
-      address: resolvedPlace.formattedAddress,
+      address: resolvedPlace.address,
       imageUrl: resolvedPlace.primaryPhoto?.url,
     ),
     narrationContent: resolvedContent,

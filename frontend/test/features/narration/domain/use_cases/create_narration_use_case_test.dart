@@ -47,9 +47,9 @@ void main() {
   const testPlace = Place(
     id: 'test-place-id',
     name: 'Test Place',
-    formattedAddress: '123 Test St, Test City',
+    address: '123 Test St, Test City',
     location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-    types: ['tourist_attraction'],
+    tags: ['tourist_attraction'],
     photos: [],
     category: PlaceCategory.historicalCultural,
   );

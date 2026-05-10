@@ -16,9 +16,9 @@ void main() {
   const testPlace = Place(
     id: 'ChIJ_1',
     name: '台北101',
-    formattedAddress: '台北市信義區信義路五段7號',
+    address: '台北市信義區信義路五段7號',
     location: PlaceLocation(latitude: 25.03, longitude: 121.56),
-    types: ['tourist_attraction'],
+    tags: ['tourist_attraction'],
     photos: [],
     category: PlaceCategory.modernUrban,
   );

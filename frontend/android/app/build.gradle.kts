@@ -60,10 +60,6 @@ android {
             }
         }
 
-        
-        // Support for dart-define environment variables
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = dartEnvironmentVariables["GOOGLE_MAPS_API_KEY"] ?: ""
-        
         // Patrol configuration for E2E testing
         testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"

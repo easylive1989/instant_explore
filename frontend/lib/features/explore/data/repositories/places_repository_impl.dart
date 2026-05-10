@@ -214,17 +214,17 @@ class PlacesRepositoryImpl implements PlacesRepository {
     return Place(
       id: 'wikidata:${entity.id}',
       name: dto.title,
-      formattedAddress: '',
+      address: '',
       location: PlaceLocation(latitude: lat, longitude: lon),
-      types: entity.p31ClassIds,
+      tags: entity.p31ClassIds,
       photos: dto.thumbnailUrl == null
           ? const []
           : [
               PlacePhoto(
                 url: dto.thumbnailUrl!,
-                widthPx: dto.thumbnailWidth ?? 0,
-                heightPx: dto.thumbnailHeight ?? 0,
-                authorAttributions: const [],
+                width: dto.thumbnailWidth ?? 0,
+                height: dto.thumbnailHeight ?? 0,
+                attributions: const [],
               ),
             ],
       category: category,

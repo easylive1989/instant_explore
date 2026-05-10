@@ -110,7 +110,7 @@ Future<void> _givenSaveSuccessScreen(
 
 void _thenSavedPlaceInfoIsVisible(Place place) {
   expect(find.text(place.name), findsOneWidget);
-  expect(find.text(place.formattedAddress), findsOneWidget);
+  expect(find.text(place.address), findsOneWidget);
 }
 
 void _thenPrimaryActionsAreVisible() {

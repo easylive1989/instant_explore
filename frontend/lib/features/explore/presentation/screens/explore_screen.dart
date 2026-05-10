@@ -402,7 +402,7 @@ class PlaceCard extends ConsumerWidget {
                   _CategoryChip(category: place.category),
                   const SizedBox(height: 8),
                   Text(
-                    place.formattedAddress,
+                    place.address,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

@@ -174,7 +174,7 @@ class SaveSuccessScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            place.formattedAddress,
+                            place.address,
                             style: TextStyle(
                               color: colorScheme.onSurfaceVariant,
                               fontSize: 12,

@@ -72,7 +72,7 @@ class FirebaseImageAnalysisService implements ImageAnalysisService {
 - description: 50 字以內的簡短描述
 - category: 分類，只能是以下之一：historical_cultural, natural_landscape, modern_urban, museum_art, food_market
 - address: 如果是知名景點，提供地址；否則為 null
-- types: 相關的類型標籤陣列（如 ["temple", "religious_site"]）
+- tags: 相關的類型標籤陣列（如 ["temple", "religious_site"]）
 
 只回覆 JSON，不要有其他文字。
 ''';
@@ -85,7 +85,7 @@ Respond in JSON format with the following fields:
 - description: A brief description within 50 words
 - category: Category, must be one of: historical_cultural, natural_landscape, modern_urban, museum_art, food_market
 - address: If it's a famous landmark, provide the address; otherwise null
-- types: Array of related type tags (e.g., ["tower", "landmark"])
+- tags: Array of related type tags (e.g., ["tower", "landmark"])
 
 Only respond with JSON, no other text.
 ''';
@@ -114,10 +114,8 @@ Only respond with JSON, no other text.
       final description = json['description'] as String? ?? '';
       final categoryStr = json['category'] as String? ?? 'modern_urban';
       final address = json['address'] as String?;
-      final types =
-          (json['types'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
+      final tags =
+          (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
           [];
 
       final category = PlaceCategoryMapper.fromString(categoryStr);
@@ -127,7 +125,7 @@ Only respond with JSON, no other text.
         description: description,
         category: category,
         address: address,
-        types: types,
+        tags: tags,
       );
     } catch (e) {
       debugPrint('Error parsing response: $e');
@@ -136,7 +134,7 @@ Only respond with JSON, no other text.
         name: '未知景點',
         description: '無法識別此圖片內容',
         category: PlaceCategory.modernUrban,
-        types: [],
+        tags: [],
       );
     }
   }

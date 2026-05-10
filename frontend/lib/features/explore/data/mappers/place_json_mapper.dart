@@ -8,19 +8,19 @@ class PlaceJsonMapper {
   static Map<String, dynamic> toJson(Place p) => {
     'id': p.id,
     'name': p.name,
-    'formattedAddress': p.formattedAddress,
+    'address': p.address,
     'location': {
       'latitude': p.location.latitude,
       'longitude': p.location.longitude,
     },
-    'types': p.types,
+    'tags': p.tags,
     'photos': p.photos
         .map(
           (photo) => {
             'url': photo.url,
-            'widthPx': photo.widthPx,
-            'heightPx': photo.heightPx,
-            'authorAttributions': photo.authorAttributions,
+            'width': photo.width,
+            'height': photo.height,
+            'attributions': photo.attributions,
           },
         )
         .toList(),
@@ -34,10 +34,9 @@ class PlaceJsonMapper {
         .map(
           (p) => PlacePhoto(
             url: p['url'] as String,
-            widthPx: (p['widthPx'] as num?)?.toInt() ?? 0,
-            heightPx: (p['heightPx'] as num?)?.toInt() ?? 0,
-            authorAttributions: (p['authorAttributions'] as List? ?? [])
-                .cast<String>(),
+            width: (p['width'] as num?)?.toInt() ?? 0,
+            height: (p['height'] as num?)?.toInt() ?? 0,
+            attributions: (p['attributions'] as List? ?? []).cast<String>(),
           ),
         )
         .toList();
@@ -45,12 +44,12 @@ class PlaceJsonMapper {
     return Place(
       id: json['id'] as String,
       name: json['name'] as String,
-      formattedAddress: json['formattedAddress'] as String? ?? '',
+      address: json['address'] as String? ?? '',
       location: PlaceLocation(
         latitude: (loc['latitude'] as num).toDouble(),
         longitude: (loc['longitude'] as num).toDouble(),
       ),
-      types: (json['types'] as List? ?? []).cast<String>(),
+      tags: (json['tags'] as List? ?? []).cast<String>(),
       photos: photos,
       category: PlaceCategory.values.firstWhere(
         (c) => c.name == json['category'],

@@ -15,9 +15,9 @@ SavedLocationEntry _makeEntry({
   final place = Place(
     id: placeId,
     name: 'Place $placeId',
-    formattedAddress: 'Address $placeId',
+    address: 'Address $placeId',
     location: const PlaceLocation(latitude: 25.0, longitude: 121.5),
-    types: const [],
+    tags: const [],
     photos: const [],
     category: PlaceCategory.historicalCultural,
   );
@@ -27,10 +27,10 @@ SavedLocationEntry _makeEntry({
     return SavedLocationEntry(
       placeId: entry.placeId,
       name: entry.name,
-      formattedAddress: entry.formattedAddress,
+      address: entry.address,
       latitude: entry.latitude,
       longitude: entry.longitude,
-      types: entry.types,
+      tags: entry.tags,
       photosJson: entry.photosJson,
       categoryKey: entry.categoryKey,
       savedAt: savedAt,
@@ -128,7 +128,7 @@ void main() {
 
     expect(restored.placeId, original.placeId);
     expect(restored.name, original.name);
-    expect(restored.formattedAddress, original.formattedAddress);
+    expect(restored.address, original.address);
     expect(restored.latitude, original.latitude);
     expect(restored.longitude, original.longitude);
     expect(restored.categoryKey, original.categoryKey);

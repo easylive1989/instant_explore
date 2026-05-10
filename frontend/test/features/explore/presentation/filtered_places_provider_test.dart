@@ -16,9 +16,9 @@ void main() {
     return Place(
       id: id,
       name: name,
-      formattedAddress: 'Test Address',
+      address: 'Test Address',
       location: PlaceLocation(latitude: latOffset, longitude: 0.0),
-      types: const ['tourist_attraction'],
+      tags: const ['tourist_attraction'],
       photos: const [],
       category: PlaceCategory.modernUrban,
     );

@@ -28,9 +28,9 @@ You are a professional tour guide creating an engaging audio narration for a loc
 
 Location Information:
 - Name: ${place.name}
-- Address: ${place.formattedAddress}
+- Address: ${place.address}
 - Category: ${_getCategoryDescription(place.category)}
-- Types: ${place.types.join(', ')}
+- Tags: ${place.tags.join(', ')}
 
 Requirements:
 - Language: $languageName

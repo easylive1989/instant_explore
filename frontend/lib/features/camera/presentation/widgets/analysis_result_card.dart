@@ -105,7 +105,7 @@ class AnalysisResultCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // 地址
-          if (place.formattedAddress.isNotEmpty)
+          if (place.address.isNotEmpty)
             Row(
               children: [
                 Icon(
@@ -116,7 +116,7 @@ class AnalysisResultCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    place.formattedAddress,
+                    place.address,
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontSize: 14,

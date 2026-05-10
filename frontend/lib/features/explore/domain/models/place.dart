@@ -9,18 +9,18 @@ import 'package:equatable/equatable.dart';
 class Place extends Equatable {
   final String id;
   final String name;
-  final String formattedAddress;
+  final String address;
   final PlaceLocation location;
-  final List<String> types;
+  final List<String> tags;
   final List<PlacePhoto> photos;
   final PlaceCategory category;
 
   const Place({
     required this.id,
     required this.name,
-    required this.formattedAddress,
+    required this.address,
     required this.location,
-    required this.types,
+    required this.tags,
     required this.photos,
     required this.category,
   });
@@ -34,9 +34,9 @@ class Place extends Equatable {
   List<Object?> get props => [
     id,
     name,
-    formattedAddress,
+    address,
     location,
-    types,
+    tags,
     photos,
     category,
   ];

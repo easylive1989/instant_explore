@@ -84,10 +84,10 @@ SavedLocationEntry _entry({
   return SavedLocationEntry(
     placeId: id,
     name: 'Name $id',
-    formattedAddress: 'Addr $id',
+    address: 'Addr $id',
     latitude: 25.0,
     longitude: 121.0,
-    types: const [],
+    tags: const [],
     photosJson: const [],
     categoryKey: category.name,
     savedAt: DateTime(2024, 1, 1),

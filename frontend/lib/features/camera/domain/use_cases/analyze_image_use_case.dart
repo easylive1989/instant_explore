@@ -42,9 +42,9 @@ class AnalyzeImageUseCase {
     return Place(
       id: id,
       name: result.name,
-      formattedAddress: result.address ?? '由相機拍攝',
+      address: result.address ?? '由相機拍攝',
       location: const PlaceLocation(latitude: 0, longitude: 0),
-      types: result.types,
+      tags: result.tags,
       photos: const <PlacePhoto>[],
       category: result.category,
     );

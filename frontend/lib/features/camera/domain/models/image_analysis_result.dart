@@ -17,13 +17,13 @@ class ImageAnalysisResult {
   final String? address;
 
   /// 額外的類型標籤
-  final List<String> types;
+  final List<String> tags;
 
   const ImageAnalysisResult({
     required this.name,
     required this.description,
     required this.category,
     this.address,
-    this.types = const [],
+    this.tags = const [],
   });
 }

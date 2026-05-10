@@ -12,9 +12,9 @@ Place _makePlace({
   return Place(
     id: id,
     name: 'Test Place',
-    formattedAddress: 'Test Address',
+    address: 'Test Address',
     location: const PlaceLocation(latitude: 25.0, longitude: 121.5),
-    types: const ['tourist_attraction', 'point_of_interest'],
+    tags: const ['tourist_attraction', 'point_of_interest'],
     photos: photos,
     category: PlaceCategory.historicalCultural,
   );
@@ -28,10 +28,10 @@ void main() {
 
       expect(entry.placeId, 'place-1');
       expect(entry.name, 'Test Place');
-      expect(entry.formattedAddress, 'Test Address');
+      expect(entry.address, 'Test Address');
       expect(entry.latitude, 25.0);
       expect(entry.longitude, 121.5);
-      expect(entry.types, ['tourist_attraction', 'point_of_interest']);
+      expect(entry.tags, ['tourist_attraction', 'point_of_interest']);
       expect(entry.categoryKey, 'historicalCultural');
       expect(entry.savedAt, isNotNull);
     });
@@ -39,9 +39,9 @@ void main() {
     test('preserves photo data', () {
       const photo = PlacePhoto(
         url: 'https://example.com/photo.jpg',
-        widthPx: 800,
-        heightPx: 600,
-        authorAttributions: ['Author'],
+        width: 800,
+        height: 600,
+        attributions: ['Author'],
       );
       final place = _makePlace(photos: [photo]);
       final entry = SavedLocationEntry.fromPlace(place);
@@ -61,19 +61,19 @@ void main() {
 
       expect(restored.id, place.id);
       expect(restored.name, place.name);
-      expect(restored.formattedAddress, place.formattedAddress);
+      expect(restored.address, place.address);
       expect(restored.location.latitude, place.location.latitude);
       expect(restored.location.longitude, place.location.longitude);
-      expect(restored.types, place.types);
+      expect(restored.tags, place.tags);
       expect(restored.category, place.category);
     });
 
     test('reconstructs photos correctly', () {
       const photo = PlacePhoto(
         url: 'https://example.com/photo.jpg',
-        widthPx: 800,
-        heightPx: 600,
-        authorAttributions: ['Author'],
+        width: 800,
+        height: 600,
+        attributions: ['Author'],
       );
       final place = _makePlace(photos: [photo]);
       final entry = SavedLocationEntry.fromPlace(place);
@@ -81,11 +81,11 @@ void main() {
 
       expect(restored.photos.length, 1);
       expect(restored.photos.first.url, photo.url);
-      expect(restored.photos.first.widthPx, photo.widthPx);
-      expect(restored.photos.first.heightPx, photo.heightPx);
+      expect(restored.photos.first.width, photo.width);
+      expect(restored.photos.first.height, photo.height);
       expect(
-        restored.photos.first.authorAttributions,
-        photo.authorAttributions,
+        restored.photos.first.attributions,
+        photo.attributions,
       );
     });
   });
@@ -98,10 +98,10 @@ void main() {
 
       expect(restored.placeId, original.placeId);
       expect(restored.name, original.name);
-      expect(restored.formattedAddress, original.formattedAddress);
+      expect(restored.address, original.address);
       expect(restored.latitude, original.latitude);
       expect(restored.longitude, original.longitude);
-      expect(restored.types, original.types);
+      expect(restored.tags, original.tags);
       expect(restored.categoryKey, original.categoryKey);
       expect(restored.savedAt, original.savedAt);
     });
@@ -109,9 +109,9 @@ void main() {
     test('toJson/fromJson preserves photos through round-trip', () {
       const photo = PlacePhoto(
         url: 'https://example.com/photo.jpg',
-        widthPx: 800,
-        heightPx: 600,
-        authorAttributions: ['Author'],
+        width: 800,
+        height: 600,
+        attributions: ['Author'],
       );
       final place = _makePlace(photos: [photo]);
       final original = SavedLocationEntry.fromPlace(place);

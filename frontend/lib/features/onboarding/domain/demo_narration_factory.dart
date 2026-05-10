@@ -20,9 +20,9 @@ class DemoNarrationFactory {
     return const Place(
       id: _demoPlaceId,
       name: '伏見稻荷大社',
-      formattedAddress: '68 Fukakusa Yabunouchicho, Fushimi Ward, Kyoto',
+      address: '68 Fukakusa Yabunouchicho, Fushimi Ward, Kyoto',
       location: PlaceLocation(latitude: 34.9671, longitude: 135.7727),
-      types: ['tourist_attraction', 'place_of_worship'],
+      tags: ['tourist_attraction', 'place_of_worship'],
       photos: [],
       category: PlaceCategory.historicalCultural,
     );
