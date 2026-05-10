@@ -129,29 +129,51 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 ],
               ),
             ),
-            const DailyStoryCard(),
             Expanded(
               child: placesState.when(
-                data: (places) => places.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No places found',
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 16,
+                loading: () => ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: const [
+                    DailyStoryCard(),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 80),
+                      child: Center(child: AdaptiveProgressIndicator()),
+                    ),
+                  ],
+                ),
+                error: (error, stack) => ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: [
+                    const DailyStoryCard(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text('${'common.error_prefix'.tr()}: $error'),
+                      ),
+                    ),
+                  ],
+                ),
+                data: (places) => ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: places.length + (places.isEmpty ? 2 : 1),
+                  itemBuilder: (context, index) {
+                    if (index == 0) return const DailyStoryCard();
+                    if (places.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: Text(
+                            'No places found',
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: places.length,
-                        itemBuilder: (context, index) {
-                          return PlaceCard(place: places[index]);
-                        },
-                      ),
-                loading: () => const Center(child: AdaptiveProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text('${'common.error_prefix'.tr()}: $error'),
+                      );
+                    }
+                    return PlaceCard(place: places[index - 1]);
+                  },
                 ),
               ),
             ),

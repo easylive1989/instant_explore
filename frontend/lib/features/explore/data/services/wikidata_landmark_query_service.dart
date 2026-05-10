@@ -120,10 +120,7 @@ class WikidataLandmarkQueryService {
     return ids;
   }
 
-  static String _buildSparql({
-    required String regionQid,
-    required int limit,
-  }) {
+  static String _buildSparql({required String regionQid, required int limit}) {
     final values = WikidataCategoryMapper.whitelistedClassIds
         .map((id) => 'wd:$id')
         .join(' ');
