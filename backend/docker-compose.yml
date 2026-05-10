@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    image: lorescape-backend:latest
+    container_name: lorescape-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file: .env
+    # Healthcheck via the /health endpoint
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

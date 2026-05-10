@@ -1,0 +1,14 @@
+# Lorescape daily_story_job — run every day at 23:30 Asia/Taipei.
+# The job generates stories for "tomorrow" so they are visible at 00:00.
+#
+# Install with:
+#   crontab -e
+# then paste the lines below.
+
+TZ=Asia/Taipei
+
+# Plain Python (system cron + venv)
+30 23 * * * cd /opt/lorescape-backend && /opt/lorescape-backend/.venv/bin/python -m lorescape_backend.daily_story >> /var/log/lorescape/daily_story.log 2>&1
+
+# Or, via Docker:
+# 30 23 * * * docker exec lorescape-backend python -m lorescape_backend.daily_story >> /var/log/lorescape/daily_story.log 2>&1
