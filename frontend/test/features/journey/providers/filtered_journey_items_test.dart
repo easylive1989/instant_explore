@@ -32,6 +32,7 @@ JourneyEntry _makeNarration({
     ),
     narrationAspects: const {NarrationAspect.historicalBackground},
     createdAt: createdAt ?? DateTime(2026, 4, 1),
+    updatedAt: createdAt ?? DateTime(2026, 4, 1),
     language: Language.english,
   );
 }
@@ -47,6 +48,7 @@ QuickGuideEntry _makeQuickGuide({
     imageBytes: Uint8List.fromList([0, 1, 2]),
     aiDescription: description,
     createdAt: createdAt ?? DateTime(2026, 4, 2),
+    updatedAt: createdAt ?? DateTime(2026, 4, 2),
     language: Language.english,
   );
 }

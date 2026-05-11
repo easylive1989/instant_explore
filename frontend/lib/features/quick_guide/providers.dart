@@ -1,7 +1,7 @@
 import 'package:context_app/features/quick_guide/data/gemini_quick_guide_ai_service.dart';
-import 'package:context_app/features/quick_guide/data/hive_quick_guide_repository.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/features/quick_guide/domain/services/quick_guide_ai_service.dart';
 import 'package:context_app/features/quick_guide/domain/use_cases/generate_quick_guide_use_case.dart';
 import 'package:context_app/features/quick_guide/presentation/controllers/quick_guide_controller.dart';
@@ -15,7 +15,7 @@ final quickGuideAiServiceProvider = Provider<QuickGuideAiService>((ref) {
 });
 
 final quickGuideRepositoryProvider = Provider<QuickGuideRepository>((ref) {
-  return HiveQuickGuideRepository();
+  return ref.watch(syncingQuickGuideRepositoryProvider);
 });
 
 final generateQuickGuideUseCaseProvider = Provider<GenerateQuickGuideUseCase>((

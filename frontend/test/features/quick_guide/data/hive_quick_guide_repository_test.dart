@@ -15,11 +15,13 @@ QuickGuideEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     language: const Language('zh-TW'),
   );
   // Return a copy with the desired id and createdAt.
+  final resolvedCreatedAt = createdAt ?? entry.createdAt;
   return QuickGuideEntry(
     id: id,
     imageBytes: entry.imageBytes,
     aiDescription: entry.aiDescription,
-    createdAt: createdAt ?? entry.createdAt,
+    createdAt: resolvedCreatedAt,
+    updatedAt: resolvedCreatedAt,
     language: entry.language,
   );
 }

@@ -34,6 +34,7 @@ SavedLocationEntry _makeEntry({
       photosJson: entry.photosJson,
       categoryKey: entry.categoryKey,
       savedAt: savedAt,
+      updatedAt: savedAt,
     );
   }
   return entry;

@@ -1,8 +1,8 @@
-import 'package:context_app/features/journey/data/hive_journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 export 'package:context_app/features/quick_guide/providers.dart'
@@ -15,7 +15,7 @@ enum JourneyFilter { all, narration, quickGuide }
 enum JourneyViewMode { timeline, byTrip }
 
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
-  return HiveJourneyRepository();
+  return ref.watch(syncingJourneyRepositoryProvider);
 });
 
 final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((ref) {

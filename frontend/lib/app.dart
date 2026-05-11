@@ -8,6 +8,8 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/share/providers.dart';
+import 'package:context_app/features/sync/domain/services/sync_session.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/midnight/midnight.dart';
 
@@ -30,6 +32,14 @@ class LorescapeApp extends ConsumerWidget {
     // itself stays in `initial` until this completes, so the router
     // redirect knows to wait instead of flashing `/onboarding`.
     ref.read(onboardingControllerProvider.notifier).ensureLoaded();
+
+    // When the sync session becomes active (toggle on + signed in),
+    // run a full sync pass. Re-entry is guarded inside the coordinator.
+    ref.listen<SyncSession>(syncSessionProvider, (prev, next) {
+      if (next.isActive && !(prev?.isActive ?? false)) {
+        ref.read(syncCoordinatorProvider).runFullSync();
+      }
+    });
 
     // Listen for resolved shared places and save directly.
     ref.listen<AsyncValue<Place>?>(pendingSharedPlaceProvider, (prev, next) {

@@ -6,10 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 Trip _makeTrip({String id = 't1', DateTime? createdAt}) {
+  final resolved = createdAt ?? DateTime(2026, 4, 17);
   return Trip(
     id: id,
     name: 'Trip $id',
-    createdAt: createdAt ?? DateTime(2026, 4, 17),
+    createdAt: resolved,
+    updatedAt: resolved,
   );
 }
 
@@ -73,6 +75,7 @@ void main() {
         id: 'dup',
         name: 'Renamed',
         createdAt: DateTime(2026, 4, 17),
+        updatedAt: DateTime(2026, 4, 17),
       ),
     );
 

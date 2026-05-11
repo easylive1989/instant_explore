@@ -17,6 +17,7 @@ Trip _trip() => Trip(
   id: 't1',
   name: 'Kyoto Trip',
   createdAt: DateTime(2026, 4, 10),
+  updatedAt: DateTime(2026, 4, 10),
 );
 
 PdfEntryData _narration(String title) => PdfEntryData(

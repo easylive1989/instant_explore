@@ -1,3 +1,4 @@
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/providers.dart';
@@ -15,6 +16,7 @@ import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../fakes/fake_auth_service.dart';
 import '../fakes/fake_image_analysis_service.dart';
 import '../fakes/fake_location_service.dart';
 import '../fakes/fake_places_repository.dart';
@@ -94,6 +96,7 @@ Future<void> _givenMainScreen(
 
 List<Override> _mainScreenOverrides() {
   return [
+    authServiceProvider.overrideWithValue(FakeAuthService()),
     placesRepositoryProvider.overrideWithValue(FakePlacesRepository()),
     locationServiceProvider.overrideWithValue(FakeLocationService()),
     journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),

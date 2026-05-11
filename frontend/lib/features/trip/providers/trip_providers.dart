@@ -1,13 +1,13 @@
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/trip/data/hive_trip_repository.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/domain/repositories/trip_repository.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
-  return HiveTripRepository();
+  return ref.watch(syncingTripRepositoryProvider);
 });
 
 /// All trips, newest first. autoDispose so callers don't keep stale lists.

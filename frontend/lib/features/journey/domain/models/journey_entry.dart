@@ -10,6 +10,7 @@ class JourneyEntry {
   final NarrationContent narrationContent;
   final Set<NarrationAspect> narrationAspects;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final Language language;
 
   /// 所屬旅程的 id，`null` 代表尚未歸類（會顯示在「未分類」）。
@@ -21,6 +22,7 @@ class JourneyEntry {
     required this.narrationContent,
     required this.narrationAspects,
     required this.createdAt,
+    required this.updatedAt,
     required this.language,
     this.tripId,
   });
@@ -46,12 +48,14 @@ class JourneyEntry {
       imageUrl: imageUrl,
     );
 
+    final now = DateTime.now();
     return JourneyEntry(
       id: id,
       place: savedPlace,
       narrationContent: content,
       narrationAspects: aspects,
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
       language: language,
       tripId: tripId,
     );
@@ -64,6 +68,7 @@ class JourneyEntry {
     narrationContent: narrationContent,
     narrationAspects: narrationAspects,
     createdAt: createdAt,
+    updatedAt: DateTime.now(),
     language: language,
     tripId: tripId,
   );
@@ -77,6 +82,7 @@ class JourneyEntry {
     'narration_text': narrationContent.text,
     'narration_styles': narrationAspects.map((a) => a.key).toList(),
     'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
     'language': language.code,
     'trip_id': tripId,
   };
@@ -116,12 +122,19 @@ class JourneyEntry {
       narrationAspects = {aspect};
     }
 
+    final createdAt = DateTime.parse(json['created_at'] as String);
+    final updatedAtRaw = json['updated_at'] as String?;
+    final updatedAt = updatedAtRaw != null
+        ? DateTime.parse(updatedAtRaw)
+        : createdAt;
+
     return JourneyEntry(
       id: json['id'] as String,
       place: place,
       narrationContent: narrationContent,
       narrationAspects: narrationAspects,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       language: language,
       tripId: json['trip_id'] as String?,
     );

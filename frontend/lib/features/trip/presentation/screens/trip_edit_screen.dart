@@ -65,19 +65,24 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
       final repo = ref.read(tripRepositoryProvider);
       final existing = _isEditMode ? await repo.getById(widget.tripId!) : null;
 
-      final trip = existing != null
-          ? existing.copyWith(
-              name: _nameController.text.trim(),
-              startDate: _startDate,
-              endDate: _endDate,
-            )
-          : Trip(
-              id: const Uuid().v4(),
-              name: _nameController.text.trim(),
-              startDate: _startDate,
-              endDate: _endDate,
-              createdAt: DateTime.now(),
-            );
+      final Trip trip;
+      if (existing != null) {
+        trip = existing.copyWith(
+          name: _nameController.text.trim(),
+          startDate: _startDate,
+          endDate: _endDate,
+        );
+      } else {
+        final now = DateTime.now();
+        trip = Trip(
+          id: const Uuid().v4(),
+          name: _nameController.text.trim(),
+          startDate: _startDate,
+          endDate: _endDate,
+          createdAt: now,
+          updatedAt: now,
+        );
+      }
 
       await repo.save(trip);
 

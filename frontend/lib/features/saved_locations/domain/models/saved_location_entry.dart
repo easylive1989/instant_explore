@@ -18,6 +18,7 @@ class SavedLocationEntry extends Equatable {
   final List<Map<String, dynamic>> photosJson;
   final String categoryKey;
   final DateTime savedAt;
+  final DateTime updatedAt;
 
   const SavedLocationEntry({
     required this.placeId,
@@ -29,10 +30,12 @@ class SavedLocationEntry extends Equatable {
     required this.photosJson,
     required this.categoryKey,
     required this.savedAt,
+    required this.updatedAt,
   });
 
   /// Creates from a [Place] domain model.
   factory SavedLocationEntry.fromPlace(Place place) {
+    final now = DateTime.now();
     return SavedLocationEntry(
       placeId: place.id,
       name: place.name,
@@ -51,7 +54,8 @@ class SavedLocationEntry extends Equatable {
           )
           .toList(),
       categoryKey: place.category.name,
-      savedAt: DateTime.now(),
+      savedAt: now,
+      updatedAt: now,
     );
   }
 
@@ -93,9 +97,16 @@ class SavedLocationEntry extends Equatable {
     'photos': photosJson,
     'category_key': categoryKey,
     'saved_at': savedAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
   };
 
   factory SavedLocationEntry.fromJson(Map<String, dynamic> json) {
+    final savedAt = DateTime.parse(json['saved_at'] as String);
+    final updatedAtRaw = json['updated_at'] as String?;
+    final updatedAt = updatedAtRaw != null
+        ? DateTime.parse(updatedAtRaw)
+        : savedAt;
+
     return SavedLocationEntry(
       placeId: json['place_id'] as String,
       name: json['name'] as String,
@@ -107,7 +118,8 @@ class SavedLocationEntry extends Equatable {
           .map((p) => Map<String, dynamic>.from(p as Map))
           .toList(),
       categoryKey: json['category_key'] as String,
-      savedAt: DateTime.parse(json['saved_at'] as String),
+      savedAt: savedAt,
+      updatedAt: updatedAt,
     );
   }
 
