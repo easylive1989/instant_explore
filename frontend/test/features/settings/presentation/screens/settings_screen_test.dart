@@ -5,10 +5,8 @@ import 'package:context_app/features/settings/presentation/screens/settings_scre
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/providers.dart';
-import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

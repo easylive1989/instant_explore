@@ -22,12 +22,14 @@ JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     language: const Language('zh-TW'),
   );
 
+  final resolvedCreatedAt = createdAt ?? DateTime.now();
   return JourneyEntry(
     id: id,
     place: place,
     narrationContent: content,
     narrationAspects: aspects,
-    createdAt: createdAt ?? DateTime.now(),
+    createdAt: resolvedCreatedAt,
+    updatedAt: resolvedCreatedAt,
     language: const Language('zh-TW'),
   );
 }

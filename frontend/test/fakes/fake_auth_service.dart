@@ -31,7 +31,7 @@ class FakeAuthService implements AuthService {
     if (shouldFailSignIn) {
       throw const AuthFailureException('forced failure');
     }
-    final user = const AuthUser(
+    const user = AuthUser(
       id: 'fake-google-user',
       email: 'fake@example.com',
       displayName: 'Fake User',
@@ -47,7 +47,7 @@ class FakeAuthService implements AuthService {
     if (shouldFailSignIn) {
       throw const AuthFailureException('forced failure');
     }
-    final user = const AuthUser(
+    const user = AuthUser(
       id: 'fake-apple-user',
       email: 'apple@example.com',
       displayName: 'Apple User',
