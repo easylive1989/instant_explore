@@ -88,6 +88,7 @@ class RevenueCatSubscriptionService implements SubscriptionService {
     return SubscriptionPlan(
       priceString: package.storeProduct.priceString,
       period: _mapPeriod(package.packageType),
+      packageIdentifier: package.identifier,
     );
   }
 

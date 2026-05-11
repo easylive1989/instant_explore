@@ -7,8 +7,15 @@
 class SubscriptionPlan {
   final String priceString;
   final SubscriptionPeriod period;
+  final String packageIdentifier;
+  final bool isBestValue;
 
-  const SubscriptionPlan({required this.priceString, required this.period});
+  const SubscriptionPlan({
+    required this.priceString,
+    required this.period,
+    required this.packageIdentifier,
+    this.isBestValue = false,
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -16,10 +23,13 @@ class SubscriptionPlan {
       other is SubscriptionPlan &&
           runtimeType == other.runtimeType &&
           priceString == other.priceString &&
-          period == other.period;
+          period == other.period &&
+          packageIdentifier == other.packageIdentifier &&
+          isBestValue == other.isBestValue;
 
   @override
-  int get hashCode => Object.hash(priceString, period);
+  int get hashCode =>
+      Object.hash(priceString, period, packageIdentifier, isBestValue);
 }
 
 /// 訂閱方案週期
