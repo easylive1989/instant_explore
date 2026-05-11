@@ -139,6 +139,7 @@ void main() {
           plan: const SubscriptionPlan(
             priceString: 'NT\$90',
             period: SubscriptionPeriod.monthly,
+            packageIdentifier: r'$rc_monthly',
           ),
         );
         await tester.tap(find.byKey(const ValueKey('planCard.retry')));
@@ -156,6 +157,7 @@ FakeSubscriptionService _serviceWithPlan() {
       plan: const SubscriptionPlan(
         priceString: 'NT\$90',
         period: SubscriptionPeriod.monthly,
+        packageIdentifier: r'$rc_monthly',
       ),
     );
 }
