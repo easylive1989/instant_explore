@@ -12,12 +12,7 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 typedef UrlLauncher = Future<bool> Function(Uri uri);
 
-/// Midnight Kyoto paywall screen.
-///
-/// Displays the current subscription plan with the billed amount as the
-/// dominant typographic element, a clear subscription period, and
-/// functional Terms of Use and Privacy Policy links. Complies with App
-/// Store Review Guidelines 3.1.2(c).
+/// Midnight Kyoto paywall screen. Multi-plan: Weekly / Monthly / Yearly.
 class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key, UrlLauncher? launchUrl})
     : _launchUrl = launchUrl;
@@ -30,12 +25,13 @@ class SubscriptionScreen extends ConsumerStatefulWidget {
 
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   bool _isPurchasing = false;
-  bool _isLoadingPlan = true;
-  SubscriptionPlan? _plan;
-  String? _planError;
+  bool _isLoadingPlans = true;
+  List<SubscriptionPlan> _plans = const [];
+  SubscriptionPeriod? _selectedPeriod;
+  String? _plansError;
   bool _showHeadline = false;
   bool _showSubheadline = false;
-  bool _showPlanCard = false;
+  bool _showPlanCards = false;
 
   static Future<bool> _defaultLaunchUrl(Uri uri) {
     return url_launcher.launchUrl(
@@ -49,7 +45,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPlan();
+    _loadPlans();
     _scheduleEntryAnimation();
   }
 
@@ -62,7 +58,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     setState(() => _showSubheadline = true);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     if (!mounted) return;
-    setState(() => _showPlanCard = true);
+    setState(() => _showPlanCards = true);
   }
 
   Widget _entry({required bool visible, required Widget child}) {
@@ -79,36 +75,47 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
   }
 
-  Future<void> _loadPlan() async {
+  Future<void> _loadPlans() async {
     setState(() {
-      _isLoadingPlan = true;
-      _planError = null;
+      _isLoadingPlans = true;
+      _plansError = null;
     });
     try {
       final plans = await ref
           .read(subscriptionServiceProvider)
           .getAvailablePlans();
       if (!mounted) return;
+      if (plans.isEmpty) {
+        setState(() {
+          _plansError = 'subscription.plan_load_failed'.tr();
+          _isLoadingPlans = false;
+        });
+        return;
+      }
       setState(() {
-        _plan = plans.isEmpty ? null : plans.first;
-        _isLoadingPlan = false;
+        _plans = plans;
+        _selectedPeriod =
+            plans.any((p) => p.period == SubscriptionPeriod.yearly)
+            ? SubscriptionPeriod.yearly
+            : plans.first.period;
+        _isLoadingPlans = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
-        _planError = 'subscription.plan_load_failed'.tr();
-        _isLoadingPlan = false;
+        _plansError = 'subscription.plan_load_failed'.tr();
+        _isLoadingPlans = false;
       });
     }
   }
 
   Future<void> _purchase() async {
+    final period = _selectedPeriod;
+    if (period == null) return;
     setState(() => _isPurchasing = true);
     try {
       final service = ref.read(subscriptionServiceProvider);
-      final result = _plan == null
-          ? null
-          : await service.purchase(_plan!.period);
+      final result = await service.purchase(period);
       if (result != null && result.isPremium && mounted) {
         Navigator.of(context).pop(true);
       }
@@ -120,6 +127,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
+        await _loadPlans();
       }
     } finally {
       if (mounted) setState(() => _isPurchasing = false);
@@ -166,28 +174,73 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     }
   }
 
-  SubscriptionPlanCardState _cardState() {
-    if (_isLoadingPlan) return const SubscriptionPlanCardState.loading();
-    if (_planError != null) {
-      return SubscriptionPlanCardState.error(message: _planError!);
-    }
-    final plan = _plan;
-    if (plan == null) {
-      return SubscriptionPlanCardState.error(
-        message: 'subscription.plan_load_failed'.tr(),
-      );
-    }
+  String _planLabelKey(SubscriptionPeriod period) => switch (period) {
+    SubscriptionPeriod.weekly => 'subscription.plan_weekly',
+    SubscriptionPeriod.monthly => 'subscription.plan_monthly',
+    SubscriptionPeriod.yearly => 'subscription.plan_yearly',
+  };
+
+  String _periodLabelKey(SubscriptionPeriod period) => switch (period) {
+    SubscriptionPeriod.weekly => 'subscription.period_weekly',
+    SubscriptionPeriod.monthly => 'subscription.period_monthly',
+    SubscriptionPeriod.yearly => 'subscription.period_yearly',
+  };
+
+  String _subscribeLabel(SubscriptionPeriod? period) => switch (period) {
+    SubscriptionPeriod.weekly => 'subscription.subscribe_weekly'.tr(),
+    SubscriptionPeriod.monthly => 'subscription.subscribe_monthly'.tr(),
+    SubscriptionPeriod.yearly => 'subscription.subscribe_yearly'.tr(),
+    null => 'subscription.subscribe_yearly'.tr(),
+  };
+
+  SubscriptionPlanCardState _cardState(SubscriptionPlan plan) {
     return SubscriptionPlanCardState.ready(
-      planLabel: 'subscription.plan_label'.tr(),
+      planLabel: _planLabelKey(plan.period).tr(),
       priceString: plan.priceString,
-      periodLabel: 'subscription.plan_period'.tr(),
+      periodLabel: _periodLabelKey(plan.period).tr(),
       bullets: [
         'subscription.benefit_unlimited'.tr(),
         'subscription.benefit_no_ads'.tr(),
         'subscription.benefit_route'.tr(),
       ],
       autoRenewNotice: 'subscription.auto_renew_notice'.tr(),
-      selected: true,
+      selected: plan.period == _selectedPeriod,
+      isBestValue: plan.isBestValue,
+      onTap: _isPurchasing
+          ? null
+          : () => setState(() => _selectedPeriod = plan.period),
+    );
+  }
+
+  Widget _plansSection() {
+    if (_isLoadingPlans) {
+      return const Column(
+        children: [
+          SubscriptionPlanCard(state: SubscriptionPlanCardState.loading()),
+          SizedBox(height: 12),
+          SubscriptionPlanCard(state: SubscriptionPlanCardState.loading()),
+          SizedBox(height: 12),
+          SubscriptionPlanCard(state: SubscriptionPlanCardState.loading()),
+        ],
+      );
+    }
+    final err = _plansError;
+    if (err != null) {
+      return SubscriptionPlanCard(
+        state: SubscriptionPlanCardState.error(message: err),
+        onRetry: _loadPlans,
+      );
+    }
+    return IgnorePointer(
+      ignoring: _isPurchasing,
+      child: Column(
+        children: [
+          for (var i = 0; i < _plans.length; i++) ...[
+            if (i > 0) const SizedBox(height: 12),
+            SubscriptionPlanCard(state: _cardState(_plans[i])),
+          ],
+        ],
+      ),
     );
   }
 
@@ -258,17 +311,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         ),
                       ),
                       const SizedBox(height: 28),
-                      _entry(
-                        visible: _showPlanCard,
-                        child: SubscriptionPlanCard(
-                          state: _cardState(),
-                          onRetry: _loadPlan,
-                        ),
-                      ),
+                      _entry(visible: _showPlanCards, child: _plansSection()),
                       const SizedBox(height: 20),
                       _SubscribeButton(
                         isLoading: _isPurchasing,
-                        onPressed: _isPurchasing || _plan == null
+                        label: _subscribeLabel(_selectedPeriod),
+                        onPressed:
+                            _isPurchasing ||
+                                _plans.isEmpty ||
+                                _selectedPeriod == null
                             ? null
                             : _purchase,
                       ),
@@ -314,10 +365,15 @@ class _PremiumIcon extends StatelessWidget {
 }
 
 class _SubscribeButton extends StatelessWidget {
-  const _SubscribeButton({required this.isLoading, required this.onPressed});
+  const _SubscribeButton({
+    required this.isLoading,
+    required this.onPressed,
+    required this.label,
+  });
 
   final bool isLoading;
   final VoidCallback? onPressed;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +397,7 @@ class _SubscribeButton extends StatelessWidget {
                   color: cs.onPrimary,
                 ),
               )
-            : Text('subscription.subscribe'.tr()),
+            : Text(label),
       ),
     );
   }

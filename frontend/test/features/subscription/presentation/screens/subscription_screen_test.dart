@@ -10,6 +10,24 @@ import 'package:go_router/go_router.dart';
 import '../../../../fakes/fake_subscription_service.dart';
 import '../../../../helpers/pump_app.dart';
 
+const _kWeekly = SubscriptionPlan(
+  priceString: 'NT\$30',
+  period: SubscriptionPeriod.weekly,
+  packageIdentifier: r'$rc_weekly',
+);
+const _kMonthly = SubscriptionPlan(
+  priceString: 'NT\$90',
+  period: SubscriptionPeriod.monthly,
+  packageIdentifier: r'$rc_monthly',
+);
+const _kYearly = SubscriptionPlan(
+  priceString: 'NT\$900',
+  period: SubscriptionPeriod.yearly,
+  packageIdentifier: r'$rc_annual',
+  isBestValue: true,
+);
+const _kAllPlans = [_kWeekly, _kMonthly, _kYearly];
+
 void main() {
   setUpAll(() async {
     await initTestEnvironment();
@@ -17,46 +35,81 @@ void main() {
 
   group('SubscriptionScreen', () {
     testWidgets(
-      'given a ready plan, when the screen loads, '
-      'then the localized price string is rendered',
+      'given plans loaded, when the screen first shows, '
+      'then yearly is selected and Best value badge is visible',
       (tester) async {
-        final service = _serviceWithPlan();
+        await _givenScreen(tester, _serviceWith(_kAllPlans));
 
-        await _givenSubscriptionScreen(tester, service: service);
-
-        expect(find.text('NT\$90'), findsOneWidget);
-        expect(find.text('subscription.plan_period'), findsOneWidget);
-        expect(find.text('subscription.plan_label'), findsOneWidget);
+        expect(find.text('subscription.plan_yearly'), findsOneWidget);
+        expect(find.text('subscription.badge_best_value'), findsOneWidget);
+        expect(find.text('subscription.subscribe_yearly'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'given the screen is shown, when it loads, '
-      'then the benefits and primary actions are visible',
+      'given yearly selected, when the user taps the weekly card, '
+      'then subscribe button label changes to Subscribe Weekly',
       (tester) async {
-        await _givenSubscriptionScreen(tester, service: _serviceWithPlan());
+        await _givenScreen(tester, _serviceWith(_kAllPlans));
 
-        expect(find.text('subscription.benefit_no_ads'), findsOneWidget);
-        expect(find.text('subscription.benefit_unlimited'), findsOneWidget);
-        expect(find.text('subscription.benefit_route'), findsOneWidget);
-        expect(find.text('subscription.subscribe'), findsOneWidget);
-        expect(find.text('subscription.restore'), findsOneWidget);
+        await tester.tap(find.text('subscription.plan_weekly'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('subscription.subscribe_weekly'), findsOneWidget);
+        expect(find.text('subscription.subscribe_yearly'), findsNothing);
       },
     );
 
     testWidgets(
-      'given a successful purchase, when the user subscribes, '
-      'then the screen dismisses with a positive result',
+      'given the user taps subscribe, when purchase succeeds, '
+      'then the service is called with the selected period and the screen pops',
       (tester) async {
-        final service = _serviceWithPlan()
-          ..stubPurchase(
-            status: const SubscriptionStatus(isPremium: true),
-          );
+        final service = _serviceWith(_kAllPlans)
+          ..stubPurchase(status: const SubscriptionStatus(isPremium: true));
 
-        await _givenSubscriptionScreenOnRoute(tester, service);
-        await _whenUserTapsSubscribe(tester);
+        await _givenScreenOnRoute(tester, service);
 
+        await tester.scrollUntilVisible(
+          find.text('subscription.subscribe_yearly'),
+          100,
+        );
+        await tester.tap(find.text('subscription.subscribe_yearly'));
+        await tester.pumpAndSettle();
+
+        expect(service.purchaseCalls, [SubscriptionPeriod.yearly]);
         expect(find.byType(SubscriptionScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given the service returns only weekly + monthly, when the screen loads, '
+      'then weekly is selected by default (yearly missing) and only two cards render',
+      (tester) async {
+        await _givenScreen(tester, _serviceWith(const [_kWeekly, _kMonthly]));
+
+        expect(find.text('subscription.plan_weekly'), findsOneWidget);
+        expect(find.text('subscription.plan_monthly'), findsOneWidget);
+        expect(find.text('subscription.plan_yearly'), findsNothing);
+        expect(find.text('subscription.subscribe_weekly'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given the service throws on load, when retry is tapped, '
+      'then getAvailablePlans is called again and plans render',
+      (tester) async {
+        final service = FakeSubscriptionService()
+          ..stubGetAvailablePlans(error: Exception('network'));
+
+        await _givenScreen(tester, service);
+
+        expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
+
+        service.stubGetAvailablePlans(plans: _kAllPlans);
+        await tester.tap(find.byKey(const ValueKey('planCard.retry')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('NT\$900'), findsOneWidget);
       },
     );
 
@@ -64,11 +117,17 @@ void main() {
       'given no prior purchase, when the user taps restore, '
       'then the no-purchases snackbar is shown',
       (tester) async {
-        final service = _serviceWithPlan()
+        final service = _serviceWith(_kAllPlans)
           ..stubRestore(status: SubscriptionStatus.free);
 
-        await _givenSubscriptionScreen(tester, service: service);
-        await _whenUserTapsRestore(tester);
+        await _givenScreen(tester, service);
+
+        await tester.scrollUntilVisible(
+          find.text('subscription.restore'),
+          100,
+        );
+        await tester.tap(find.text('subscription.restore'));
+        await tester.pumpAndSettle();
 
         expect(find.text('subscription.no_purchases_found'), findsOneWidget);
       },
@@ -79,9 +138,9 @@ void main() {
       'then the injected launcher is called with the terms URL',
       (tester) async {
         final launched = <Uri>[];
-        await _givenSubscriptionScreen(
+        await _givenScreen(
           tester,
-          service: _serviceWithPlan(),
+          _serviceWith(_kAllPlans),
           launcher: (uri) async {
             launched.add(uri);
             return true;
@@ -104,9 +163,9 @@ void main() {
       'then the injected launcher is called with the privacy URL',
       (tester) async {
         final launched = <Uri>[];
-        await _givenSubscriptionScreen(
+        await _givenScreen(
           tester,
-          service: _serviceWithPlan(),
+          _serviceWith(_kAllPlans),
           launcher: (uri) async {
             launched.add(uri);
             return true;
@@ -123,52 +182,16 @@ void main() {
         expect(launched, [Uri.parse(LegalUrls.privacyPolicy)]);
       },
     );
-
-    testWidgets(
-      'given the plan fails to load, when retry is tapped, '
-      'then getAvailablePlans is called again',
-      (tester) async {
-        final service = FakeSubscriptionService()
-          ..stubGetAvailablePlans(error: Exception('network'));
-
-        await _givenSubscriptionScreen(tester, service: service);
-
-        expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
-
-        service.stubGetAvailablePlans(
-          plans: const [
-            SubscriptionPlan(
-              priceString: 'NT\$90',
-              period: SubscriptionPeriod.monthly,
-              packageIdentifier: r'$rc_monthly',
-            ),
-          ],
-        );
-        await tester.tap(find.byKey(const ValueKey('planCard.retry')));
-        await tester.pumpAndSettle();
-
-        expect(find.text('NT\$90'), findsOneWidget);
-      },
-    );
   });
 }
 
-FakeSubscriptionService _serviceWithPlan() {
-  return FakeSubscriptionService()
-    ..stubGetAvailablePlans(
-      plans: const [
-        SubscriptionPlan(
-          priceString: 'NT\$90',
-          period: SubscriptionPeriod.monthly,
-          packageIdentifier: r'$rc_monthly',
-        ),
-      ],
-    );
+FakeSubscriptionService _serviceWith(List<SubscriptionPlan> plans) {
+  return FakeSubscriptionService()..stubGetAvailablePlans(plans: plans);
 }
 
-Future<void> _givenSubscriptionScreen(
-  WidgetTester tester, {
-  required FakeSubscriptionService service,
+Future<void> _givenScreen(
+  WidgetTester tester,
+  FakeSubscriptionService service, {
   Future<bool> Function(Uri)? launcher,
 }) async {
   await pumpScreen(
@@ -179,7 +202,7 @@ Future<void> _givenSubscriptionScreen(
   await tester.pumpAndSettle();
 }
 
-Future<void> _givenSubscriptionScreenOnRoute(
+Future<void> _givenScreenOnRoute(
   WidgetTester tester,
   FakeSubscriptionService service,
 ) async {
@@ -196,24 +219,6 @@ Future<void> _givenSubscriptionScreenOnRoute(
   );
   final context = tester.element(find.byType(_Host));
   GoRouter.of(context).push('/subscription');
-  await tester.pumpAndSettle();
-}
-
-Future<void> _whenUserTapsSubscribe(WidgetTester tester) async {
-  await tester.scrollUntilVisible(
-    find.text('subscription.subscribe'),
-    100,
-  );
-  await tester.tap(find.text('subscription.subscribe'));
-  await tester.pumpAndSettle();
-}
-
-Future<void> _whenUserTapsRestore(WidgetTester tester) async {
-  await tester.scrollUntilVisible(
-    find.text('subscription.restore'),
-    100,
-  );
-  await tester.tap(find.text('subscription.restore'));
   await tester.pumpAndSettle();
 }
 
