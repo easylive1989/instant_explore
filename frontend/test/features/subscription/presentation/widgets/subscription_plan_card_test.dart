@@ -36,6 +36,7 @@ void main() {
             periodLabel: '/ month',
             bullets: ['Unlimited', 'Ad-free', 'Routes'],
             autoRenewNotice: 'Auto-renews monthly. Cancel anytime.',
+            selected: true,
           ),
         );
 
@@ -65,6 +66,7 @@ void main() {
             periodLabel: '/ month',
             bullets: ['Unlimited', 'Ad-free', 'Routes'],
             autoRenewNotice: 'Notice',
+            selected: true, // bullets only render in the selected state
           ),
         );
 
@@ -90,6 +92,91 @@ void main() {
 
         expect(retryCount, 1);
         expect(find.text('oops'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a ready state with isBestValue=true, when the card is shown, '
+      'then the Best value badge text is visible',
+      (tester) async {
+        await _pumpCard(
+          tester,
+          const SubscriptionPlanCardState.ready(
+            planLabel: 'YEARLY PLAN',
+            priceString: 'NT\$900',
+            periodLabel: '/ year',
+            bullets: ['Unlimited'],
+            autoRenewNotice: 'auto',
+            isBestValue: true,
+          ),
+        );
+
+        expect(find.text('subscription.badge_best_value'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a ready state with selected=true, when the card is shown, '
+      'then the selection check icon is visible',
+      (tester) async {
+        await _pumpCard(
+          tester,
+          const SubscriptionPlanCardState.ready(
+            planLabel: 'MONTHLY PLAN',
+            priceString: 'NT\$90',
+            periodLabel: '/ month',
+            bullets: ['Unlimited'],
+            autoRenewNotice: 'auto',
+            selected: true,
+          ),
+        );
+
+        expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given selected=false, when the card is shown, '
+      'then bullets are not rendered',
+      (tester) async {
+        await _pumpCard(
+          tester,
+          const SubscriptionPlanCardState.ready(
+            planLabel: 'WEEKLY PLAN',
+            priceString: 'NT\$30',
+            periodLabel: '/ week',
+            bullets: ['Unlimited', 'Ad-free'],
+            autoRenewNotice: 'auto',
+            selected: false,
+          ),
+        );
+
+        expect(find.text('Unlimited'), findsNothing);
+        expect(find.text('Ad-free'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given an onTap callback, when the card is tapped, '
+      'then onTap is invoked exactly once',
+      (tester) async {
+        var taps = 0;
+        await _pumpCard(
+          tester,
+          SubscriptionPlanCardState.ready(
+            planLabel: 'WEEKLY PLAN',
+            priceString: 'NT\$30',
+            periodLabel: '/ week',
+            bullets: const ['Unlimited'],
+            autoRenewNotice: 'auto',
+            onTap: () => taps++,
+          ),
+        );
+
+        await tester.tap(find.text('WEEKLY PLAN'));
+        await tester.pump();
+
+        expect(taps, 1);
       },
     );
   });

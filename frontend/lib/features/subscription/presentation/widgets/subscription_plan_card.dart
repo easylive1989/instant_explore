@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Paywall plan card in the Midnight Kyoto brand language.
@@ -19,6 +20,53 @@ class SubscriptionPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return switch (state) {
+      SubscriptionPlanCardStateLoading() => _cardShell(
+        context,
+        borderColor: cs.outlineVariant,
+        child: const _Loading(),
+      ),
+      SubscriptionPlanCardStateError(:final message) => _cardShell(
+        context,
+        borderColor: cs.outlineVariant,
+        child: _Error(message: message, onRetry: onRetry),
+      ),
+      SubscriptionPlanCardStateReady(
+        :final planLabel,
+        :final priceString,
+        :final periodLabel,
+        :final bullets,
+        :final autoRenewNotice,
+        :final selected,
+        :final isBestValue,
+        :final onTap,
+      ) =>
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: _cardShell(
+            context,
+            borderColor: selected ? cs.primary : cs.outlineVariant,
+            child: _Ready(
+              planLabel: planLabel,
+              priceString: priceString,
+              periodLabel: periodLabel,
+              bullets: bullets,
+              autoRenewNotice: autoRenewNotice,
+              selected: selected,
+              isBestValue: isBestValue,
+            ),
+          ),
+        ),
+    };
+  }
+
+  Widget _cardShell(
+    BuildContext context, {
+    required Color borderColor,
+    required Widget child,
+  }) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -29,7 +77,7 @@ class SubscriptionPlanCard extends StatelessWidget {
             Theme.of(context).colorScheme.surfaceContainer,
           ],
         ),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: borderColor, width: 2),
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
@@ -40,27 +88,7 @@ class SubscriptionPlanCard extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(20),
-      child: switch (state) {
-        SubscriptionPlanCardStateLoading() => const _Loading(),
-        SubscriptionPlanCardStateError(:final message) => _Error(
-          message: message,
-          onRetry: onRetry,
-        ),
-        SubscriptionPlanCardStateReady(
-          :final planLabel,
-          :final priceString,
-          :final periodLabel,
-          :final bullets,
-          :final autoRenewNotice,
-        ) =>
-          _Ready(
-            planLabel: planLabel,
-            priceString: priceString,
-            periodLabel: periodLabel,
-            bullets: bullets,
-            autoRenewNotice: autoRenewNotice,
-          ),
-      },
+      child: child,
     );
   }
 }
@@ -81,6 +109,9 @@ sealed class SubscriptionPlanCardState {
     required String periodLabel,
     required List<String> bullets,
     required String autoRenewNotice,
+    bool selected,
+    bool isBestValue,
+    VoidCallback? onTap,
   }) = SubscriptionPlanCardStateReady;
 }
 
@@ -100,6 +131,9 @@ final class SubscriptionPlanCardStateReady extends SubscriptionPlanCardState {
     required this.periodLabel,
     required this.bullets,
     required this.autoRenewNotice,
+    this.selected = false,
+    this.isBestValue = false,
+    this.onTap,
   });
 
   final String planLabel;
@@ -107,6 +141,9 @@ final class SubscriptionPlanCardStateReady extends SubscriptionPlanCardState {
   final String periodLabel;
   final List<String> bullets;
   final String autoRenewNotice;
+  final bool selected;
+  final bool isBestValue;
+  final VoidCallback? onTap;
 }
 
 class _Loading extends StatelessWidget {
@@ -203,6 +240,8 @@ class _Ready extends StatelessWidget {
     required this.periodLabel,
     required this.bullets,
     required this.autoRenewNotice,
+    required this.selected,
+    required this.isBestValue,
   });
 
   final String planLabel;
@@ -210,6 +249,8 @@ class _Ready extends StatelessWidget {
   final String periodLabel;
   final List<String> bullets;
   final String autoRenewNotice;
+  final bool selected;
+  final bool isBestValue;
 
   @override
   Widget build(BuildContext context) {
@@ -217,14 +258,25 @@ class _Ready extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          planLabel,
-          style: TextStyle(
-            fontSize: SubscriptionPlanCard._planLabelFontSize,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-            color: cs.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            if (selected) ...[
+              Icon(Icons.check_circle, size: 16, color: cs.primary),
+              const SizedBox(width: 6),
+            ],
+            Expanded(
+              child: Text(
+                planLabel,
+                style: TextStyle(
+                  fontSize: SubscriptionPlanCard._planLabelFontSize,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+            if (isBestValue) const _BestValueBadge(),
+          ],
         ),
         const SizedBox(height: 12),
         Row(
@@ -251,21 +303,23 @@ class _Ready extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        const _Divider(),
-        const SizedBox(height: 16),
-        ...bullets.map((b) => _bulletRow(b, cs)),
-        const SizedBox(height: 16),
-        const _Divider(),
-        const SizedBox(height: 12),
-        Text(
-          autoRenewNotice,
-          style: TextStyle(
-            fontSize: SubscriptionPlanCard._noticeFontSize,
-            color: cs.onSurfaceVariant,
-            height: 1.4,
+        if (selected) ...[
+          const SizedBox(height: 16),
+          const _Divider(),
+          const SizedBox(height: 16),
+          ...bullets.map((b) => _bulletRow(b, cs)),
+          const SizedBox(height: 16),
+          const _Divider(),
+          const SizedBox(height: 12),
+          Text(
+            autoRenewNotice,
+            style: TextStyle(
+              fontSize: SubscriptionPlanCard._noticeFontSize,
+              color: cs.onSurfaceVariant,
+              height: 1.4,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -292,6 +346,31 @@ class _Ready extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BestValueBadge extends StatelessWidget {
+  const _BestValueBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        'subscription.badge_best_value'.tr(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: cs.onPrimaryContainer,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }

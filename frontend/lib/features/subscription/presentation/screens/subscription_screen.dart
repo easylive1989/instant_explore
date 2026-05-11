@@ -187,6 +187,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         'subscription.benefit_route'.tr(),
       ],
       autoRenewNotice: 'subscription.auto_renew_notice'.tr(),
+      selected: true,
     );
   }
 
