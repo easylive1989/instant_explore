@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/features/auth/domain/services/auth_service.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/midnight/midnight.dart';
@@ -27,6 +30,14 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: 'settings.preferences'.tr()),
           const SizedBox(height: 8),
           _SectionContainer(children: [_LanguageTile(controller: controller)]),
+          const SizedBox(height: 32),
+          _SectionHeader(title: 'settings.account_section'.tr()),
+          const SizedBox(height: 8),
+          const _AccountSection(),
+          const SizedBox(height: 32),
+          _SectionHeader(title: 'settings.sync_section'.tr()),
+          const SizedBox(height: 8),
+          const _SyncSection(),
           const SizedBox(height: 32),
           _SectionHeader(title: 'settings.daily_usage'.tr()),
           const SizedBox(height: 8),
@@ -319,6 +330,195 @@ class _UsageSection extends StatelessWidget {
             iconColor: colorScheme.primary,
             iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
             title: 'settings.daily_usage'.tr(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================================
+// Account & Sync sections
+// ============================================================================
+
+class _AccountSection extends ConsumerWidget {
+  const _AccountSection();
+
+  Future<void> _handleSignIn(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool useApple,
+  }) async {
+    final service = ref.read(authServiceProvider);
+    try {
+      if (useApple) {
+        await service.signInWithApple();
+      } else {
+        await service.signInWithGoogle();
+      }
+    } on AuthCancelledException {
+      return;
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('settings.sign_in_failed'.tr()),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('settings.sign_out'.tr()),
+        content: Text('settings.logout_confirm'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('settings.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('settings.sign_out'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(authServiceProvider).signOut();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (user != null) {
+      return _SectionContainer(
+        children: [
+          _SettingsTile(
+            icon: Icons.person,
+            iconColor: colorScheme.primary,
+            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
+            title: 'settings.account_signed_in_as'.tr(
+              namedArgs: {'name': user.displayName ?? user.email ?? user.id},
+            ),
+            trailing: TextButton(
+              onPressed: () => _handleSignOut(context, ref),
+              child: Text('settings.sign_out'.tr()),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return _SectionContainer(
+      children: [
+        _SettingsTile(
+          icon: Icons.person_outline,
+          iconColor: colorScheme.primary,
+          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
+          title: 'settings.account_not_signed_in'.tr(),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FilledButton.icon(
+                key: const ValueKey('sign_in_google'),
+                icon: const Icon(Icons.login),
+                label: Text('settings.sign_in_google'.tr()),
+                onPressed: () =>
+                    _handleSignIn(context, ref, useApple: false),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('sign_in_apple'),
+                icon: const Icon(Icons.apple),
+                label: Text('settings.sign_in_apple'.tr()),
+                onPressed: () => _handleSignIn(context, ref, useApple: true),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SyncSection extends ConsumerWidget {
+  const _SyncSection();
+
+  Future<void> _handleToggle(WidgetRef ref, bool value) async {
+    await ref.read(syncSettingsProvider.notifier).setEnabled(value);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final enabled = ref.watch(syncSettingsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSignedIn = user != null;
+
+    final subtitle = !isSignedIn
+        ? 'settings.sync_requires_signin'.tr()
+        : (enabled
+              ? 'settings.sync_toggle_subtitle_on'.tr()
+              : 'settings.sync_toggle_subtitle_off'.tr());
+
+    return _SectionContainer(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.cloud_sync,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'settings.sync_toggle'.tr(),
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                key: const ValueKey('sync_toggle_switch'),
+                value: enabled && isSignedIn,
+                onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
+              ),
+            ],
           ),
         ),
       ],

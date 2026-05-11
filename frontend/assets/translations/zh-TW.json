@@ -216,7 +216,21 @@
     "theme": "外觀",
     "theme_dark": "深色",
     "theme_light": "淺色",
-    "theme_system": "跟隨系統"
+    "theme_system": "跟隨系統",
+    "sync_section": "雲端同步",
+    "sync_toggle": "同步到雲端",
+    "sync_toggle_subtitle_on": "您的地點與旅程會在裝置間保持同步。",
+    "sync_toggle_subtitle_off": "登入以備份並在裝置間同步。",
+    "sync_requires_signin": "請先登入以啟用雲端同步。",
+    "sync_in_progress": "同步中…",
+    "sync_disable_keeps_cloud": "關閉同步會保留雲端資料，本機資料不會變動。",
+    "account_section": "帳號",
+    "account_signed_in_as": "已登入：{name}",
+    "account_not_signed_in": "尚未登入",
+    "sign_in_google": "使用 Google 繼續",
+    "sign_in_apple": "使用 Apple 繼續",
+    "sign_out": "登出",
+    "sign_in_failed": "登入失敗，請再試一次。"
   },
   "place_category": {
     "historical_cultural": "人文古蹟",

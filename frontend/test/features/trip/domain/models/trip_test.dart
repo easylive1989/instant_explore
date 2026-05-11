@@ -9,7 +9,9 @@ Trip _makeTrip({
   String? coverImageUrl,
   String? description,
   DateTime? createdAt,
+  DateTime? updatedAt,
 }) {
+  final resolvedCreatedAt = createdAt ?? DateTime(2026, 4, 17);
   return Trip(
     id: id,
     name: name,
@@ -17,7 +19,8 @@ Trip _makeTrip({
     endDate: endDate,
     coverImageUrl: coverImageUrl,
     description: description,
-    createdAt: createdAt ?? DateTime(2026, 4, 17),
+    createdAt: resolvedCreatedAt,
+    updatedAt: updatedAt ?? resolvedCreatedAt,
   );
 }
 

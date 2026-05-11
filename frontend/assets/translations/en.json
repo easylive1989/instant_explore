@@ -216,7 +216,21 @@
     "theme": "Appearance",
     "theme_dark": "Dark",
     "theme_light": "Light",
-    "theme_system": "System"
+    "theme_system": "System",
+    "sync_section": "Cloud Sync",
+    "sync_toggle": "Sync to Cloud",
+    "sync_toggle_subtitle_on": "Your places and journeys stay in sync across devices.",
+    "sync_toggle_subtitle_off": "Sign in to back up and sync across devices.",
+    "sync_requires_signin": "Sign in to enable cloud sync.",
+    "sync_in_progress": "Syncing…",
+    "sync_disable_keeps_cloud": "Disabling sync keeps cloud data — local stays unchanged.",
+    "account_section": "Account",
+    "account_signed_in_as": "Signed in as {name}",
+    "account_not_signed_in": "Not signed in",
+    "sign_in_google": "Continue with Google",
+    "sign_in_apple": "Continue with Apple",
+    "sign_out": "Sign out",
+    "sign_in_failed": "Sign-in failed. Please try again."
   },
   "place_category": {
     "historical_cultural": "Historical & Cultural",

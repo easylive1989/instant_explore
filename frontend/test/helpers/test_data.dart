@@ -41,13 +41,16 @@ Trip buildTrip({
   DateTime? startDate,
   DateTime? endDate,
   DateTime? createdAt,
+  DateTime? updatedAt,
 }) {
+  final resolvedCreatedAt = createdAt ?? DateTime(2024, 1, 1);
   return Trip(
     id: id,
     name: name,
     startDate: startDate,
     endDate: endDate,
-    createdAt: createdAt ?? DateTime(2024, 1, 1),
+    createdAt: resolvedCreatedAt,
+    updatedAt: updatedAt ?? resolvedCreatedAt,
   );
 }
 
@@ -68,11 +71,13 @@ JourneyEntry buildJourneyEntry({
   NarrationContent? content,
   Set<NarrationAspect> aspects = const {NarrationAspect.historicalBackground},
   DateTime? createdAt,
+  DateTime? updatedAt,
   Language language = Language.english,
   String? tripId,
 }) {
   final resolvedPlace = place ?? buildPlace();
   final resolvedContent = content ?? buildNarrationContent();
+  final resolvedCreatedAt = createdAt ?? DateTime(2024, 1, 2, 10);
   return JourneyEntry(
     id: id,
     place: SavedPlace(
@@ -83,7 +88,8 @@ JourneyEntry buildJourneyEntry({
     ),
     narrationContent: resolvedContent,
     narrationAspects: aspects,
-    createdAt: createdAt ?? DateTime(2024, 1, 2, 10),
+    createdAt: resolvedCreatedAt,
+    updatedAt: updatedAt ?? resolvedCreatedAt,
     language: language,
     tripId: tripId,
   );
@@ -95,14 +101,17 @@ QuickGuideEntry buildQuickGuideEntry({
   Uint8List? imageBytes,
   String aiDescription = 'A short description from fake AI.',
   DateTime? createdAt,
+  DateTime? updatedAt,
   Language language = Language.english,
   String? tripId,
 }) {
+  final resolvedCreatedAt = createdAt ?? DateTime(2024, 1, 1, 12);
   return QuickGuideEntry(
     id: id,
     imageBytes: imageBytes ?? Uint8List.fromList(const [0, 1, 2, 3]),
     aiDescription: aiDescription,
-    createdAt: createdAt ?? DateTime(2024, 1, 1, 12),
+    createdAt: resolvedCreatedAt,
+    updatedAt: updatedAt ?? resolvedCreatedAt,
     language: language,
     tripId: tripId,
   );

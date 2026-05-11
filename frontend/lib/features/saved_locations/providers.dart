@@ -1,14 +1,14 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/saved_locations/data/hive_saved_locations_repository.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
+import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Singleton repository provider.
 final savedLocationsRepositoryProvider = Provider<SavedLocationsRepository>((
   ref,
 ) {
-  return HiveSavedLocationsRepository();
+  return ref.watch(syncingSavedLocationsRepositoryProvider);
 });
 
 /// Notifier that manages the saved locations list.

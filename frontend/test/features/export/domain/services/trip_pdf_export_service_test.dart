@@ -29,11 +29,15 @@ Trip _trip({
   String id = 't1',
   String name = 'Kyoto Getaway',
   DateTime? createdAt,
-}) => Trip(
-  id: id,
-  name: name,
-  createdAt: createdAt ?? DateTime(2026, 4, 10),
-);
+}) {
+  final resolved = createdAt ?? DateTime(2026, 4, 10);
+  return Trip(
+    id: id,
+    name: name,
+    createdAt: resolved,
+    updatedAt: resolved,
+  );
+}
 
 JourneyItem _narrationItem({
   String id = 'j1',
@@ -56,6 +60,7 @@ JourneyItem _narrationItem({
       ),
       narrationAspects: const {NarrationAspect.historicalBackground},
       createdAt: createdAt ?? DateTime(2026, 4, 10, 12),
+      updatedAt: createdAt ?? DateTime(2026, 4, 10, 12),
       language: const Language('zh-TW'),
       tripId: 't1',
     ),

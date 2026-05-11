@@ -13,11 +13,13 @@ class Trip extends Equatable {
   final String? coverImageUrl;
   final String? description;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   const Trip({
     required this.id,
     required this.name,
     required this.createdAt,
+    required this.updatedAt,
     this.startDate,
     this.endDate,
     this.coverImageUrl,
@@ -39,6 +41,7 @@ class Trip extends Equatable {
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       description: description ?? this.description,
       createdAt: createdAt,
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -50,11 +53,18 @@ class Trip extends Equatable {
     'cover_image_url': coverImageUrl,
     'description': description,
     'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
   };
 
   factory Trip.fromJson(Map<String, dynamic> json) {
     DateTime? parseDate(Object? v) =>
         v is String && v.isNotEmpty ? DateTime.parse(v) : null;
+
+    final createdAt = DateTime.parse(json['created_at'] as String);
+    final updatedAtRaw = json['updated_at'] as String?;
+    final updatedAt = updatedAtRaw != null
+        ? DateTime.parse(updatedAtRaw)
+        : createdAt;
 
     return Trip(
       id: json['id'] as String,
@@ -63,7 +73,8 @@ class Trip extends Equatable {
       endDate: parseDate(json['end_date']),
       coverImageUrl: json['cover_image_url'] as String?,
       description: json['description'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 
@@ -76,5 +87,6 @@ class Trip extends Equatable {
     coverImageUrl,
     description,
     createdAt,
+    updatedAt,
   ];
 }

@@ -107,6 +107,7 @@ SavedLocationEntry _entry({
     photosJson: const [],
     categoryKey: category.name,
     savedAt: savedAt ?? DateTime(2024, 1, 1),
+    updatedAt: savedAt ?? DateTime(2024, 1, 1),
   );
 }
 

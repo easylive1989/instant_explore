@@ -11,6 +11,7 @@ class QuickGuideEntry {
   final Uint8List imageBytes;
   final String aiDescription;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final Language language;
 
   /// 所屬旅程的 id，`null` 代表尚未歸類（會顯示在「未分類」）。
@@ -21,6 +22,7 @@ class QuickGuideEntry {
     required this.imageBytes,
     required this.aiDescription,
     required this.createdAt,
+    required this.updatedAt,
     required this.language,
     this.tripId,
   });
@@ -36,11 +38,13 @@ class QuickGuideEntry {
     required Language language,
     String? tripId,
   }) {
+    final now = DateTime.now();
     return QuickGuideEntry(
       id: id,
       imageBytes: imageBytes,
       aiDescription: aiDescription,
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
       language: language,
       tripId: tripId,
     );
@@ -52,6 +56,7 @@ class QuickGuideEntry {
     imageBytes: imageBytes,
     aiDescription: aiDescription,
     createdAt: createdAt,
+    updatedAt: DateTime.now(),
     language: language,
     tripId: tripId,
   );
@@ -61,16 +66,24 @@ class QuickGuideEntry {
     'image_base64': base64Encode(imageBytes),
     'ai_description': aiDescription,
     'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
     'language': language.code,
     'trip_id': tripId,
   };
 
   factory QuickGuideEntry.fromJson(Map<String, dynamic> json) {
+    final createdAt = DateTime.parse(json['created_at'] as String);
+    final updatedAtRaw = json['updated_at'] as String?;
+    final updatedAt = updatedAtRaw != null
+        ? DateTime.parse(updatedAtRaw)
+        : createdAt;
+
     return QuickGuideEntry(
       id: json['id'] as String,
       imageBytes: base64Decode(json['image_base64'] as String),
       aiDescription: json['ai_description'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       language: Language(json['language'] as String? ?? 'zh-TW'),
       tripId: json['trip_id'] as String?,
     );
