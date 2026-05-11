@@ -23,4 +23,4 @@ class SubscriptionPlan {
 }
 
 /// 訂閱方案週期
-enum SubscriptionPeriod { monthly, yearly }
+enum SubscriptionPeriod { weekly, monthly, yearly }
