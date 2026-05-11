@@ -20,17 +20,18 @@ abstract class SubscriptionService {
   /// 取得當前訂閱狀態
   Future<SubscriptionStatus> getStatus();
 
-  /// 購買訂閱
+  /// 購買指定週期的訂閱方案。
   ///
-  /// 回傳購買後的訂閱狀態
-  /// 使用者取消時回傳 null
-  Future<SubscriptionStatus?> purchase();
+  /// 回傳購買後的訂閱狀態。使用者取消時回傳 `null`。
+  /// 若當前 offering 沒有對應 [period] 的 package，丟出
+  /// [SubscriptionPlanNotAvailableException]。
+  Future<SubscriptionStatus?> purchase(SubscriptionPeriod period);
 
   /// 恢復購買
   Future<SubscriptionStatus> restorePurchases();
 
-  /// 取得目前可購買的方案資訊（含已本地化的價格字串）
+  /// 取得目前可購買的方案列表，固定回傳順序：weekly → monthly → yearly。
   ///
-  /// 若沒有任何可用 offerings 則回傳 null。
-  Future<SubscriptionPlan?> getCurrentPlan();
+  /// 若沒有任何可用 offerings 則回傳空 list；UI 應顯示載入錯誤。
+  Future<List<SubscriptionPlan>> getAvailablePlans();
 }

@@ -85,10 +85,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       _planError = null;
     });
     try {
-      final plan = await ref.read(subscriptionServiceProvider).getCurrentPlan();
+      final plans = await ref
+          .read(subscriptionServiceProvider)
+          .getAvailablePlans();
       if (!mounted) return;
       setState(() {
-        _plan = plan;
+        _plan = plans.isEmpty ? null : plans.first;
         _isLoadingPlan = false;
       });
     } catch (e) {
@@ -104,7 +106,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     setState(() => _isPurchasing = true);
     try {
       final service = ref.read(subscriptionServiceProvider);
-      final result = await service.purchase();
+      final result = _plan == null
+          ? null
+          : await service.purchase(_plan!.period);
       if (result != null && result.isPremium && mounted) {
         Navigator.of(context).pop(true);
       }

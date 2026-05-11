@@ -126,21 +126,23 @@ void main() {
 
     testWidgets(
       'given the plan fails to load, when retry is tapped, '
-      'then getCurrentPlan is called again',
+      'then getAvailablePlans is called again',
       (tester) async {
         final service = FakeSubscriptionService()
-          ..stubGetCurrentPlan(error: Exception('network'));
+          ..stubGetAvailablePlans(error: Exception('network'));
 
         await _givenSubscriptionScreen(tester, service: service);
 
         expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
 
-        service.stubGetCurrentPlan(
-          plan: const SubscriptionPlan(
-            priceString: 'NT\$90',
-            period: SubscriptionPeriod.monthly,
-            packageIdentifier: r'$rc_monthly',
-          ),
+        service.stubGetAvailablePlans(
+          plans: const [
+            SubscriptionPlan(
+              priceString: 'NT\$90',
+              period: SubscriptionPeriod.monthly,
+              packageIdentifier: r'$rc_monthly',
+            ),
+          ],
         );
         await tester.tap(find.byKey(const ValueKey('planCard.retry')));
         await tester.pumpAndSettle();
@@ -153,12 +155,14 @@ void main() {
 
 FakeSubscriptionService _serviceWithPlan() {
   return FakeSubscriptionService()
-    ..stubGetCurrentPlan(
-      plan: const SubscriptionPlan(
-        priceString: 'NT\$90',
-        period: SubscriptionPeriod.monthly,
-        packageIdentifier: r'$rc_monthly',
-      ),
+    ..stubGetAvailablePlans(
+      plans: const [
+        SubscriptionPlan(
+          priceString: 'NT\$90',
+          period: SubscriptionPeriod.monthly,
+          packageIdentifier: r'$rc_monthly',
+        ),
+      ],
     );
 }
 

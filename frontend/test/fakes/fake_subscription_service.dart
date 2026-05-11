@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:context_app/features/subscription/domain/errors/subscription_errors.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/domain/services/subscription_service.dart';
@@ -14,14 +15,18 @@ class FakeSubscriptionService implements SubscriptionService {
   SubscriptionStatus? _restoreResult;
   Exception? _purchaseError;
   Exception? _restoreError;
-  SubscriptionPlan? _currentPlan;
-  Exception? _currentPlanError;
+  List<SubscriptionPlan> _plans = const [];
+  Exception? _plansError;
+  final List<SubscriptionPeriod> _purchaseCalls = [];
 
   final StreamController<SubscriptionStatus> _controller =
       StreamController<SubscriptionStatus>.broadcast();
 
   FakeSubscriptionService({SubscriptionStatus initial = SubscriptionStatus.free})
     : _current = initial;
+
+  /// Inspect the periods that [purchase] was invoked with, in order.
+  List<SubscriptionPeriod> get purchaseCalls => List.unmodifiable(_purchaseCalls);
 
   /// Sets the value returned by [purchase].
   ///
@@ -38,13 +43,16 @@ class FakeSubscriptionService implements SubscriptionService {
     _restoreError = error;
   }
 
-  /// Sets the value returned by [getCurrentPlan].
+  /// Sets the value returned by [getAvailablePlans].
   ///
-  /// When [plan] is `null`, [getCurrentPlan] simulates "no offerings".
-  /// When [error] is non-null, [getCurrentPlan] throws it.
-  void stubGetCurrentPlan({SubscriptionPlan? plan, Exception? error}) {
-    _currentPlan = plan;
-    _currentPlanError = error;
+  /// When [plans] is `null`, [getAvailablePlans] returns an empty list
+  /// (matching "no offerings"). When [error] is non-null, it throws.
+  void stubGetAvailablePlans({
+    List<SubscriptionPlan>? plans,
+    Exception? error,
+  }) {
+    _plans = plans ?? const [];
+    _plansError = error;
   }
 
   /// Emits [status] on [statusStream] and updates current status.
@@ -71,8 +79,13 @@ class FakeSubscriptionService implements SubscriptionService {
   Future<SubscriptionStatus> getStatus() async => _current;
 
   @override
-  Future<SubscriptionStatus?> purchase() async {
+  Future<SubscriptionStatus?> purchase(SubscriptionPeriod period) async {
+    _purchaseCalls.add(period);
     if (_purchaseError != null) throw _purchaseError!;
+    final exists = _plans.any((p) => p.period == period);
+    if (!exists && _plans.isNotEmpty) {
+      throw SubscriptionPlanNotAvailableException(period);
+    }
     if (_purchaseResult != null) {
       emit(_purchaseResult!);
     }
@@ -88,9 +101,9 @@ class FakeSubscriptionService implements SubscriptionService {
   }
 
   @override
-  Future<SubscriptionPlan?> getCurrentPlan() async {
-    if (_currentPlanError != null) throw _currentPlanError!;
-    return _currentPlan;
+  Future<List<SubscriptionPlan>> getAvailablePlans() async {
+    if (_plansError != null) throw _plansError!;
+    return _plans;
   }
 
   Future<void> dispose() async {
