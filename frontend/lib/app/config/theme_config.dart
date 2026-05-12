@@ -50,7 +50,7 @@ class ThemeConfig {
     return ThemeData(
       useMaterial3: true,
       colorScheme: _darkColorScheme,
-      scaffoldBackgroundColor: Colors.transparent,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
 
       // Typography — Midnight Kyoto editorial rhythm
       textTheme: const TextTheme(

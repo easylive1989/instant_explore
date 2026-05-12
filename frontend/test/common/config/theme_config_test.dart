@@ -12,9 +12,10 @@ void main() {
     });
 
     test(
-      'uses transparent scaffoldBackgroundColor (AmbientBackdrop paints background)',
+      'uses opaque backgroundDark scaffoldBackgroundColor so page transitions '
+      'do not bleed through to the screen below',
       () {
-        expect(theme.scaffoldBackgroundColor, Colors.transparent);
+        expect(theme.scaffoldBackgroundColor, AppColors.backgroundDark);
       },
     );
 
