@@ -66,7 +66,11 @@ class AdaptiveButton extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [icon!, const SizedBox(width: 8), child],
+      children: [
+        icon!,
+        const SizedBox(width: 8),
+        Flexible(child: child),
+      ],
     );
   }
 
@@ -128,6 +132,19 @@ class AdaptiveButton extends StatelessWidget {
         );
       case AdaptiveButtonStyle.outlined:
         final outlineColor = foregroundColor ?? primary;
+        Widget borderBox = DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(color: outlineColor),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: cupertinoChild,
+          ),
+        );
+        if (expanded) {
+          borderBox = SizedBox(width: double.infinity, child: borderBox);
+        }
         return CupertinoButton(
           onPressed: onPressed,
           padding:
@@ -139,19 +156,7 @@ class AdaptiveButton extends StatelessWidget {
             style: TextStyle(color: outlineColor),
             child: IconTheme.merge(
               data: IconThemeData(color: outlineColor),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border.all(color: outlineColor),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: cupertinoChild,
-                ),
-              ),
+              child: borderBox,
             ),
           ),
         );

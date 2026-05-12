@@ -220,33 +220,39 @@ class _ImageSourceSelector extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 48),
-            AdaptiveButton(
-              expanded: true,
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              icon: const Icon(Icons.camera_alt, size: 24),
-              onPressed: () => onPickImage(ImageSource.camera),
-              child: Text(
-                'quick_guide.take_photo'.tr(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            SizedBox(
+              width: 260,
+              child: AdaptiveButton(
+                expanded: true,
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                icon: const Icon(Icons.camera_alt, size: 22),
+                onPressed: () => onPickImage(ImageSource.camera),
+                child: Text(
+                  'quick_guide.take_photo'.tr(),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            AdaptiveButton(
-              expanded: true,
-              style: AdaptiveButtonStyle.outlined,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              icon: const Icon(Icons.photo_library, size: 24),
-              onPressed: () => onPickImage(ImageSource.gallery),
-              child: Text(
-                'quick_guide.from_gallery'.tr(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            SizedBox(
+              width: 260,
+              child: AdaptiveButton(
+                expanded: true,
+                style: AdaptiveButtonStyle.outlined,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                icon: const Icon(Icons.photo_library, size: 22),
+                onPressed: () => onPickImage(ImageSource.gallery),
+                child: Text(
+                  'quick_guide.from_gallery'.tr(),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
