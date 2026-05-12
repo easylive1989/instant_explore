@@ -34,11 +34,7 @@ class SupabaseJourneyRemoteDataSource
 
   @override
   Future<void> delete(String id) async {
-    await _client
-        .from(_table)
-        .delete()
-        .eq('user_id', _userId)
-        .eq('id', id);
+    await _client.from(_table).delete().eq('user_id', _userId).eq('id', id);
   }
 
   Map<String, dynamic> _toRow(JourneyEntry entry) => {

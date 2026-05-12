@@ -31,8 +31,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Sync preference (toggle state) and session.
 // ---------------------------------------------------------------------------
 
-final syncSettingsProvider =
-    NotifierProvider<SyncSettingsNotifier, bool>(SyncSettingsNotifier.new);
+final syncSettingsProvider = NotifierProvider<SyncSettingsNotifier, bool>(
+  SyncSettingsNotifier.new,
+);
 
 /// Combined live snapshot: toggle is on AND user is signed in.
 final syncSessionProvider = Provider<SyncSession>((ref) {

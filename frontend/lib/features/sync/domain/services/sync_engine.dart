@@ -52,11 +52,7 @@ class SyncEngine<T> {
       try {
         await saveLocal(item);
       } catch (e, stack) {
-        _log.warning(
-          'Failed to apply ${descriptor.name} locally',
-          e,
-          stack,
-        );
+        _log.warning('Failed to apply ${descriptor.name} locally', e, stack);
       }
     }
     for (final item in result.toPush) {

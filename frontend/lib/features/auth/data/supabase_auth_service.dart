@@ -82,9 +82,7 @@ class SupabaseAuthService implements AuthService {
   Future<AuthUser> signInWithApple() async {
     try {
       final rawNonce = _generateNonce();
-      final hashedNonce = sha256
-          .convert(utf8.encode(rawNonce))
-          .toString();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
 
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: const [
@@ -139,11 +137,7 @@ class SupabaseAuthService implements AuthService {
         metadata['full_name'] as String? ??
         metadata['name'] as String? ??
         user.email;
-    return AuthUser(
-      id: user.id,
-      email: user.email,
-      displayName: displayName,
-    );
+    return AuthUser(id: user.id, email: user.email, displayName: displayName);
   }
 
   static String _generateNonce([int length = 32]) {

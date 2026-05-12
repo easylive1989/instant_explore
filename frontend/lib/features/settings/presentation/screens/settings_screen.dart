@@ -432,8 +432,7 @@ class _AccountSection extends ConsumerWidget {
                 key: const ValueKey('sign_in_google'),
                 icon: const Icon(Icons.login),
                 label: Text('settings.sign_in_google'.tr()),
-                onPressed: () =>
-                    _handleSignIn(context, ref, useApple: false),
+                onPressed: () => _handleSignIn(context, ref, useApple: false),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
