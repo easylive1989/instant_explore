@@ -32,7 +32,9 @@ class SavedLocationsFab extends ConsumerWidget {
           maintainSize: true,
           maintainAnimation: true,
           child: FloatingActionButton(
-            heroTag: 'saved_locations_fab',
+            // Hero handled by the inner bookmark icon; disable the FAB's own
+            // Hero wrap so the inner Hero is not nested inside another.
+            heroTag: null,
             shape: const CircleBorder(),
             onPressed: () {
               final box = context.findRenderObject() as RenderBox?;
@@ -44,9 +46,12 @@ class SavedLocationsFab extends ConsumerWidget {
             child: Badge(
               isLabelVisible: count > 0,
               label: Text('$count', style: const TextStyle(fontSize: 10)),
-              child: Icon(
-                Icons.bookmark,
-                color: Theme.of(context).colorScheme.onPrimary,
+              child: Hero(
+                tag: 'saved_locations_bookmark_icon',
+                child: Icon(
+                  Icons.bookmark,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
             ),
           ),
@@ -105,13 +110,6 @@ class _SavedLocationsRoute extends PageRouteBuilder<void> {
             end: colorScheme.surface,
           );
 
-          // FAB icon is visible at the start and fades out early.
-          final iconOpacity = Tween<double>(begin: 1, end: 0).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
-            ),
-          );
           // Dialog content fades in after the morph is mostly done.
           final contentOpacity = Tween<double>(begin: 0, end: 1).animate(
             CurvedAnimation(
@@ -137,43 +135,19 @@ class _SavedLocationsRoute extends PageRouteBuilder<void> {
                       elevation: 8,
                       borderRadius: BorderRadius.circular(radius),
                       clipBehavior: Clip.antiAlias,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // Dialog content laid out at final dialog size,
-                          // clipped to the current morph rect. Ignores
-                          // pointer events until nearly fully visible.
-                          IgnorePointer(
-                            ignoring: contentOpacity.value < 0.95,
-                            child: Opacity(
-                              opacity: contentOpacity.value,
-                              child: OverflowBox(
-                                alignment: Alignment.topLeft,
-                                minWidth: dialogRect.width,
-                                maxWidth: dialogRect.width,
-                                minHeight: dialogRect.height,
-                                maxHeight: dialogRect.height,
-                                child: child,
-                              ),
-                            ),
+                      child: IgnorePointer(
+                        ignoring: contentOpacity.value < 0.95,
+                        child: Opacity(
+                          opacity: contentOpacity.value,
+                          child: OverflowBox(
+                            alignment: Alignment.topLeft,
+                            minWidth: dialogRect.width,
+                            maxWidth: dialogRect.width,
+                            minHeight: dialogRect.height,
+                            maxHeight: dialogRect.height,
+                            child: child,
                           ),
-                          // FAB's bookmark icon, visible during the
-                          // circular phase of the morph.
-                          IgnorePointer(
-                            child: Center(
-                              child: Opacity(
-                                opacity: iconOpacity.value,
-                                child: Icon(
-                                  Icons.bookmark,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                  size: 24,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

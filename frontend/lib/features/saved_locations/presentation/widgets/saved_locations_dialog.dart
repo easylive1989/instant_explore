@@ -51,7 +51,31 @@ class _DialogHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 12),
       child: Row(
         children: [
-          Icon(Icons.bookmark, color: colorScheme.primary, size: 24),
+          Hero(
+            tag: 'saved_locations_bookmark_icon',
+            flightShuttleBuilder:
+                (
+                  flightContext,
+                  animation,
+                  flightDirection,
+                  fromHeroContext,
+                  toHeroContext,
+                ) {
+                  final scheme = Theme.of(flightContext).colorScheme;
+                  final isPush = flightDirection == HeroFlightDirection.push;
+                  final fromColor = isPush ? scheme.onPrimary : scheme.primary;
+                  final toColor = isPush ? scheme.primary : scheme.onPrimary;
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, _) => Icon(
+                      Icons.bookmark,
+                      size: 24,
+                      color: Color.lerp(fromColor, toColor, animation.value),
+                    ),
+                  );
+                },
+            child: Icon(Icons.bookmark, color: colorScheme.primary, size: 24),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
