@@ -138,7 +138,9 @@ class AdaptiveButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding:
+                padding ??
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: cupertinoChild,
           ),
         );
@@ -147,9 +149,7 @@ class AdaptiveButton extends StatelessWidget {
         }
         return CupertinoButton(
           onPressed: onPressed,
-          padding:
-              padding ??
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.zero,
           minimumSize: minSize,
           color: backgroundColor,
           child: DefaultTextStyle.merge(
