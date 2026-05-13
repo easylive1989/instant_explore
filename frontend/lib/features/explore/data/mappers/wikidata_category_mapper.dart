@@ -16,18 +16,16 @@ class WikidataCategoryMapper {
     'Q16560': PlaceCategory.historicalCultural, // palace
     'Q4989906': PlaceCategory.historicalCultural, // monument
     'Q839954': PlaceCategory.historicalCultural, // archaeological site
-    'Q22746': PlaceCategory.historicalCultural, // historic site
     'Q123314524': PlaceCategory.historicalCultural, // yamajiro
     'Q667783': PlaceCategory.historicalCultural, // sandō
-    'Q162633': PlaceCategory.historicalCultural, // academy (書院)
+    'Q162633': PlaceCategory.historicalCultural, // academy
     'Q44539': PlaceCategory.historicalCultural, // temple (generic)
-    'Q1200957': PlaceCategory.historicalCultural, // pilgrimage site
     'Q15243209': PlaceCategory.historicalCultural, // historic district
-    'Q1785071': PlaceCategory.historicalCultural, // national historic site (US)
+    'Q1785071': PlaceCategory.historicalCultural, // fort
+    'Q2065736': PlaceCategory.historicalCultural, // cultural property
     // --- museum / art ---
     'Q33506': PlaceCategory.museumArt, // museum
     'Q207694': PlaceCategory.museumArt, // art museum
-    'Q2065736': PlaceCategory.museumArt, // cultural institution
     'Q7075': PlaceCategory.museumArt, // library
     // --- natural landscape ---
     'Q22698': PlaceCategory.naturalLandscape, // park
@@ -38,12 +36,13 @@ class WikidataCategoryMapper {
     'Q46169': PlaceCategory.naturalLandscape, // national park
     'Q40080': PlaceCategory.naturalLandscape, // beach
     'Q43501': PlaceCategory.naturalLandscape, // zoo
-    'Q130003': PlaceCategory.naturalLandscape, // aquarium
+    'Q2281788': PlaceCategory.naturalLandscape, // public aquarium
+    'Q6629955': PlaceCategory.naturalLandscape, // forest park
     // --- modern / urban ---
     'Q570116': PlaceCategory.modernUrban, // tourist attraction
     'Q12280': PlaceCategory.modernUrban, // bridge
     'Q11303': PlaceCategory.modernUrban, // skyscraper
-    'Q44782': PlaceCategory.modernUrban, // urban park
+    'Q22746': PlaceCategory.modernUrban, // urban park
   };
 
   /// Returns the [PlaceCategory] of the first whitelisted P31 class id,

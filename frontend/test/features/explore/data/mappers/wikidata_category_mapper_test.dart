@@ -46,9 +46,23 @@ void main() {
       );
     });
 
-    test('urban park (Q22698) → naturalLandscape', () {
+    test('park (Q22698) → naturalLandscape', () {
       expect(
         WikidataCategoryMapper.categorize(['Q22698']),
+        PlaceCategory.naturalLandscape,
+      );
+    });
+
+    test('forest park (Q6629955) → naturalLandscape', () {
+      expect(
+        WikidataCategoryMapper.categorize(['Q6629955']),
+        PlaceCategory.naturalLandscape,
+      );
+    });
+
+    test('public aquarium (Q2281788) → naturalLandscape', () {
+      expect(
+        WikidataCategoryMapper.categorize(['Q2281788']),
         PlaceCategory.naturalLandscape,
       );
     });
@@ -59,6 +73,24 @@ void main() {
         PlaceCategory.modernUrban,
       );
     });
+
+    test('urban park (Q22746) → modernUrban', () {
+      expect(
+        WikidataCategoryMapper.categorize(['Q22746']),
+        PlaceCategory.modernUrban,
+      );
+    });
+
+    test(
+      'urban park + forest park (e.g. Wenxin Forest Park Q5507841) → '
+      'modernUrban',
+      () {
+        expect(
+          WikidataCategoryMapper.categorize(['Q22746', 'Q6629955']),
+          PlaceCategory.modernUrban,
+        );
+      },
+    );
 
     test('returns first whitelist hit when multiple P31 values', () {
       // street (not in WL) + sandō (in WL, cultural)
