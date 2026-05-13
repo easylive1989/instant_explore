@@ -17,14 +17,14 @@ class NarrationControlPanel extends ConsumerWidget {
     final playerController = ref.read(playerControllerProvider.notifier);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
       child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _ProgressBar(progress: playerState.progress),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             _ControlsRow(
               playerState: playerState,
               onPlayPause: () => playerController.playPause(),
@@ -35,7 +35,7 @@ class NarrationControlPanel extends ConsumerWidget {
                   ? playerController.skipToNextSegment
                   : null,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 4),
           ],
         ),
       ),
@@ -94,15 +94,15 @@ class _ControlsRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 48 + 24,
+          width: 40 + 20,
           child: playerState.shouldShowSkipButtons
               ? Padding(
-                  padding: const EdgeInsets.only(right: 24),
+                  padding: const EdgeInsets.only(right: 20),
                   child: Opacity(
                     opacity: playerState.canSkipPrevious ? 1.0 : 0.0,
                     child: PillIconButton(
                       icon: Icons.skip_previous,
-                      size: 48,
+                      size: 40,
                       variant: PillIconButtonVariant.ghost,
                       onPressed: onSkipPrev,
                     ),
@@ -112,21 +112,21 @@ class _ControlsRow extends StatelessWidget {
         ),
         PillIconButton(
           icon: playerState.isPlaying ? Icons.pause : Icons.play_arrow,
-          size: 64,
+          size: 52,
           onPressed: playerState.isLoading || playerState.hasError
               ? null
               : onPlayPause,
         ),
         SizedBox(
-          width: 48 + 24,
+          width: 40 + 20,
           child: playerState.shouldShowSkipButtons
               ? Padding(
-                  padding: const EdgeInsets.only(left: 24),
+                  padding: const EdgeInsets.only(left: 20),
                   child: Opacity(
                     opacity: playerState.canSkipNext ? 1.0 : 0.0,
                     child: PillIconButton(
                       icon: Icons.skip_next,
-                      size: 48,
+                      size: 40,
                       variant: PillIconButtonVariant.ghost,
                       onPressed: onSkipNext,
                     ),
