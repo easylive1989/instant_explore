@@ -21,6 +21,8 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         story="...",
         image_url="https://upload.wikimedia.org/x.jpg",
         wikipedia_url="https://zh.wikipedia.org/wiki/...",
+        threads_summary="短摘",
+        hashtags=("rome", "colosseum"),
     )
 
     insert_story(client, row)
@@ -38,6 +40,8 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         "story": "...",
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
+        "threads_summary": "短摘",
+        "hashtags": ["rome", "colosseum"],
     }
     # Verify on_conflict kwarg
     assert chain.upsert.call_args.kwargs.get("on_conflict") == "publish_date,language"
@@ -62,6 +66,7 @@ def test_insert_story_handles_null_image_url():
             story="...",
             image_url=None,
             wikipedia_url="https://en.wikipedia.org/wiki/X",
+            threads_summary="t",
         ),
     )
 

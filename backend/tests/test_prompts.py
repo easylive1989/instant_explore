@@ -48,9 +48,18 @@ def test_system_instruction_forbids_inventing_facts():
     assert "strictly" in lower or "do not introduce" in lower or "do not invent" in lower
 
 
-def test_response_schema_requires_four_fields():
+def test_response_schema_requires_six_fields():
     required = GEMINI_RESPONSE_SCHEMA.get("required", [])
-    assert set(required) == {"place_name", "place_location", "era", "story"}
+    assert set(required) == {
+        "place_name", "place_location", "era", "story",
+        "threads_summary", "hashtags",
+    }
+
+
+def test_response_schema_hashtags_is_array_of_strings():
+    hashtags = GEMINI_RESPONSE_SCHEMA["properties"]["hashtags"]
+    assert hashtags["type"] == "ARRAY"
+    assert hashtags["items"]["type"] == "STRING"
 
 
 def test_build_user_prompt_raises_on_unknown_language():

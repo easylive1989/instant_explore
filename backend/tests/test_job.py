@@ -37,8 +37,14 @@ def test_run_once_happy_path_calls_each_step(
         f"https://{lang}.wikipedia.org/wiki/{title}"
     )
     generate_story.side_effect = [
-        GeneratedStory("羅馬競技場", "義大利羅馬", "公元 70-80 年", "中文故事"),
-        GeneratedStory("Colosseum", "Rome, Italy", "70-80 CE", "english story"),
+        GeneratedStory(
+            "羅馬競技場", "義大利羅馬", "公元 70-80 年", "中文故事",
+            threads_summary="中短", hashtags=("colosseum",),
+        ),
+        GeneratedStory(
+            "Colosseum", "Rome, Italy", "70-80 CE", "english story",
+            threads_summary="en short", hashtags=("rome", "colosseum"),
+        ),
     ]
 
     run_once(fake_config, date(2026, 5, 11))
@@ -89,7 +95,9 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
     )
     # Simulate: zh has no langlink, en is just the same article
     fetch_langlink.return_value = None
-    generate_story.return_value = GeneratedStory("X", "Y", "Z", "S")
+    generate_story.return_value = GeneratedStory(
+        "X", "Y", "Z", "S", threads_summary="t", hashtags=(),
+    )
 
     run_once(fake_config, date(2026, 5, 11))
 
@@ -153,6 +161,12 @@ def test_run_with_retry_skips_discord_when_no_webhook_configured(
     config_no_webhook = Config(
         supabase_url="https://x", supabase_service_role_key="k",
         gemini_api_key="g", discord_webhook_url=None,
+        discord_bot_token=None,
+        discord_review_channel_id=None,
+        discord_approver_ids=(),
+        threads_user_id=None, threads_access_token=None,
+        ig_user_id=None, meta_page_access_token=None,
+        brand_handle_threads="", brand_handle_ig="", cta_text="",
     )
     run_once_mock.side_effect = RuntimeError("boom")
     with pytest.raises(RuntimeError):
@@ -162,3 +176,142 @@ def test_run_with_retry_skips_discord_when_no_webhook_configured(
 
 def test_languages_list_matches_spec():
     assert LANGUAGES == ["zh-TW", "en"]
+
+
+# ---------------------------------------------------------------------------
+# send_today_for_review / run_generate_and_review
+# ---------------------------------------------------------------------------
+
+
+def _en_row():
+    return {
+        "id": "row-en",
+        "place_name": "Colosseum",
+        "place_location": "Rome, Italy",
+        "era": "70-80 CE",
+        "story": "An English story.",
+        "threads_summary": "Short.",
+        "hashtags": ["rome"],
+        "image_url": "https://upload.wikimedia.org/x.jpg",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Colosseum",
+        "discord_message_id": None,
+    }
+
+
+def _supabase_with_select_and_update(row):
+    select = MagicMock()
+    select.eq.return_value = select
+    select.limit.return_value = select
+    select.execute.return_value = MagicMock(data=[row] if row else [])
+
+    update_chain = MagicMock()
+    update_chain.eq.return_value = update_chain
+    update_chain.execute.return_value = MagicMock(data=None)
+
+    table = MagicMock()
+    table.select.return_value = select
+    table.update.return_value = update_chain
+
+    client = MagicMock()
+    client.table.return_value = table
+    return client, table, update_chain
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+def test_send_today_for_review_posts_and_writes_message_id(
+    send, create, fake_config
+):
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    row = _en_row()
+    client, table, update_chain = _supabase_with_select_and_update(row)
+    create.return_value = client
+    send.return_value = "msg-abc"
+
+    send_today_for_review(fake_config, _date(2026, 5, 12))
+
+    send.assert_called_once()
+    payload = send.call_args.kwargs["payload"]
+    assert payload.place_name == "Colosseum"
+    assert payload.threads_summary == "Short."
+    # message id written back to the row
+    update_payload = table.update.call_args[0][0]
+    assert update_payload == {"discord_message_id": "msg-abc"}
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+def test_send_today_for_review_skipped_if_already_posted(
+    send, create, fake_config
+):
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    row = _en_row()
+    row["discord_message_id"] = "already-there"
+    client, _, _ = _supabase_with_select_and_update(row)
+    create.return_value = client
+
+    send_today_for_review(fake_config, _date(2026, 5, 12))
+
+    send.assert_not_called()
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+def test_send_today_for_review_no_op_when_review_disabled(
+    send, create
+):
+    from datetime import date as _date
+    from lorescape_backend.config import Config
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    disabled = Config(
+        supabase_url="https://x", supabase_service_role_key="k",
+        gemini_api_key="g", discord_webhook_url=None,
+        discord_bot_token=None,
+        discord_review_channel_id=None,
+        discord_approver_ids=(),
+        threads_user_id=None, threads_access_token=None,
+        ig_user_id=None, meta_page_access_token=None,
+        brand_handle_threads="", brand_handle_ig="", cta_text="",
+    )
+
+    send_today_for_review(disabled, _date(2026, 5, 12))
+
+    create.assert_not_called()
+    send.assert_not_called()
+
+
+@patch("lorescape_backend.daily_story.job.run_with_retry")
+@patch("lorescape_backend.daily_story.job.send_today_for_review")
+def test_run_generate_and_review_calls_both_in_order(
+    review, gen, fake_config
+):
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import run_generate_and_review
+
+    run_generate_and_review(fake_config, _date(2026, 5, 12))
+
+    gen.assert_called_once_with(fake_config, _date(2026, 5, 12))
+    review.assert_called_once_with(fake_config, _date(2026, 5, 12))
+
+
+@patch("lorescape_backend.daily_story.job.discord_notify.notify_failure")
+@patch("lorescape_backend.daily_story.job.run_with_retry")
+@patch("lorescape_backend.daily_story.job.send_today_for_review")
+def test_run_generate_and_review_swallows_review_failure(
+    review, gen, notify, fake_config
+):
+    """Review send failure must not raise — story is already in DB."""
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import run_generate_and_review
+
+    review.side_effect = RuntimeError("Discord down")
+
+    # Should not raise.
+    run_generate_and_review(fake_config, _date(2026, 5, 12))
+
+    notify.assert_called_once()

@@ -1,7 +1,7 @@
 """Insert daily story rows into Supabase."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import date
 
 
@@ -16,12 +16,20 @@ class StoryRow:
     story: str
     image_url: str | None
     wikipedia_url: str
+    threads_summary: str
+    hashtags: tuple[str, ...] = field(default_factory=tuple)
 
 
 def insert_story(supabase, row: StoryRow) -> None:
-    """Upsert a row into daily_stories (idempotent on (publish_date, language))."""
+    """Upsert a row into daily_stories (idempotent on (publish_date, language)).
+
+    The new social-publishing columns (discord_message_id, review_state, etc.)
+    are written separately by the discord_review and publisher modules — this
+    function only writes the story content itself.
+    """
     payload = asdict(row)
     payload["publish_date"] = row.publish_date.isoformat()
+    payload["hashtags"] = list(row.hashtags)
     (
         supabase.table("daily_stories")
         .upsert(payload, on_conflict="publish_date,language")

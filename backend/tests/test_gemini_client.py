@@ -16,6 +16,8 @@ def test_generate_story_parses_json_response(mock_client_cls):
             "place_location": "義大利羅馬",
             "era": "公元 70-80 年",
             "story": "...",
+            "threads_summary": "short version",
+            "hashtags": ["rome", "ancientWonders", "colosseum"],
         }
     )
     mock_client = MagicMock()
@@ -34,6 +36,8 @@ def test_generate_story_parses_json_response(mock_client_cls):
         place_location="義大利羅馬",
         era="公元 70-80 年",
         story="...",
+        threads_summary="short version",
+        hashtags=("rome", "ancientWonders", "colosseum"),
     )
     mock_client_cls.assert_called_once_with(api_key="key")
     call_kwargs = mock_client.models.generate_content.call_args.kwargs
@@ -44,7 +48,14 @@ def test_generate_story_parses_json_response(mock_client_cls):
 def test_generate_story_passes_system_instruction_and_temperature(mock_client_cls):
     mock_response = MagicMock()
     mock_response.text = json.dumps(
-        {"place_name": "X", "place_location": "Y", "era": "Z", "story": "S"}
+        {
+            "place_name": "X",
+            "place_location": "Y",
+            "era": "Z",
+            "story": "S",
+            "threads_summary": "T",
+            "hashtags": [],
+        }
     )
     mock_client = MagicMock()
     mock_client.models.generate_content.return_value = mock_response

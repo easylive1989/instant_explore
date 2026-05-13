@@ -29,8 +29,20 @@ GEMINI_RESPONSE_SCHEMA = {
         "place_location": {"type": "STRING"},
         "era": {"type": "STRING"},
         "story": {"type": "STRING"},
+        "threads_summary": {"type": "STRING"},
+        "hashtags": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"},
+        },
     },
-    "required": ["place_name", "place_location", "era", "story"],
+    "required": [
+        "place_name",
+        "place_location",
+        "era",
+        "story",
+        "threads_summary",
+        "hashtags",
+    ],
 }
 
 
@@ -66,9 +78,23 @@ def build_user_prompt(
         "- Do NOT end the story with a redundant 'place name, location, era' "
         "summary — those values are returned as separate fields below.\n"
         "\n"
+        f"Also produce a punchier 300-400 character version of the same story "
+        f"in {language_name}, ending on a hook or open question rather than "
+        "wrapping up neatly. This shorter version must fit comfortably under "
+        "500 characters total — it will be posted as a single Threads post.\n"
+        "\n"
+        "Also produce 3-5 hashtags drawn from the country, era, and theme "
+        "of this place. Each tag should be a single lowerCamelCase word "
+        "without the '#' prefix, ASCII letters/digits only (so they work as "
+        "hashtags on English-language social media regardless of the story "
+        "language).\n"
+        "\n"
         "Output JSON with these fields:\n"
         "- place_name: localized place name only (no extras)\n"
         "- place_location: localized location (e.g. country/city)\n"
         "- era: the era your story takes place in\n"
         "- story: the 700-1200 character narrative\n"
+        "- threads_summary: the 300-400 character punchier version\n"
+        "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings "
+        "(no '#' prefix)\n"
     )

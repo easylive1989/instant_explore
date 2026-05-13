@@ -2,45 +2,53 @@
 
 Hosts:
 - `/health` endpoint (placeholder for monitoring)
-- An APScheduler that runs the daily story job at 23:30 Asia/Taipei
-  inside the container — no host-side cron required.
+- An APScheduler with two daily jobs at Asia/Taipei:
+    09:00 — generate today's story and post it to Discord for review
+    21:00 — read review reactions and publish to Threads / Instagram
 
-The CLI entrypoint (`python -m lorescape_backend.daily_story [YYYY-MM-DD]`)
-is preserved for manual triggering / back-filling specific dates.
+Manual CLIs (preserved for back-fill / debugging):
+- `python -m lorescape_backend.daily_story [YYYY-MM-DD]`
+- `python -m lorescape_backend.social.publisher [YYYY-MM-DD]`
 """
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from datetime import date, timedelta
+from datetime import date
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 
 from lorescape_backend.config import Config
-from lorescape_backend.daily_story.job import run_with_retry
+from lorescape_backend.daily_story.job import run_generate_and_review
+from lorescape_backend.social.publisher import run_publish_job
 
-DAILY_STORY_JOB_ID = "daily_story"
+GENERATE_JOB_ID = "daily_story_generate"
+PUBLISH_JOB_ID = "daily_story_publish"
 SCHEDULER_TIMEZONE = "Asia/Taipei"
-JOB_HOUR = 23
-JOB_MINUTE = 30
+GENERATE_HOUR = 9
+PUBLISH_HOUR = 21
 
 
-def _register_daily_job(scheduler: BackgroundScheduler, config: Config) -> None:
-    """Schedule `run_with_retry` to fire daily at 23:30 Asia/Taipei.
+def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
+    """Register the generate and publish jobs on the scheduler."""
 
-    Each invocation generates the story for *tomorrow* so it is visible at
-    the next 00:00 to users.
-    """
+    def _generate() -> None:
+        run_generate_and_review(config, date.today())
 
-    def _run() -> None:
-        target = date.today() + timedelta(days=1)
-        run_with_retry(config, target)
+    def _publish() -> None:
+        run_publish_job(config, date.today())
 
     scheduler.add_job(
-        _run,
-        trigger=CronTrigger(hour=JOB_HOUR, minute=JOB_MINUTE),
-        id=DAILY_STORY_JOB_ID,
+        _generate,
+        trigger=CronTrigger(hour=GENERATE_HOUR, minute=0),
+        id=GENERATE_JOB_ID,
+        replace_existing=True,
+    )
+    scheduler.add_job(
+        _publish,
+        trigger=CronTrigger(hour=PUBLISH_HOUR, minute=0),
+        id=PUBLISH_JOB_ID,
         replace_existing=True,
     )
 
@@ -49,7 +57,7 @@ def _register_daily_job(scheduler: BackgroundScheduler, config: Config) -> None:
 async def lifespan(app: FastAPI):
     config = Config.from_env()
     scheduler = BackgroundScheduler(timezone=SCHEDULER_TIMEZONE)
-    _register_daily_job(scheduler, config)
+    _register_jobs(scheduler, config)
     scheduler.start()
     try:
         yield

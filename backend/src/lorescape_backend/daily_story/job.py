@@ -5,12 +5,14 @@ import logging
 import time
 import traceback
 from datetime import date
+from typing import Any
 
 from supabase import create_client
 
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story import (
     discord_notify,
+    discord_review,
     gemini_client,
     place_picker,
     prompts,
@@ -21,6 +23,7 @@ from lorescape_backend.daily_story import (
 logger = logging.getLogger(__name__)
 
 LANGUAGES = ["zh-TW", "en"]
+REVIEW_LANGUAGE = "en"  # the row we hand off to the social-publishing flow
 RETRY_DELAYS = [1, 5, 30]  # delays before retries 1, 2, 3 → 4 total attempts
 
 
@@ -64,6 +67,8 @@ def run_once(config: Config, target_date: date) -> None:
                 story=story.story,
                 image_url=summary.image_url,
                 wikipedia_url=wiki_url,
+                threads_summary=story.threads_summary,
+                hashtags=story.hashtags,
             ),
         )
 
@@ -102,3 +107,84 @@ def run_with_retry(config: Config, target_date: date) -> None:
             ),
         )
     raise last_exc
+
+
+def send_today_for_review(config: Config, target_date: date) -> None:
+    """Find the EN row for target_date and post it to Discord for review.
+
+    Idempotent: if discord_message_id is already set on the row, the function
+    does nothing (avoids re-posting the same story when the job runs twice).
+    """
+    if not config.review_enabled:
+        logger.info("Discord review not configured; skipping review step")
+        return
+
+    supabase = create_client(config.supabase_url, config.supabase_service_role_key)
+    row = _load_review_row(supabase, target_date)
+    if row is None:
+        logger.warning(
+            "No %s row found for %s — nothing to send for review",
+            REVIEW_LANGUAGE, target_date.isoformat(),
+        )
+        return
+    if row.get("discord_message_id"):
+        logger.info(
+            "Row %s already has discord_message_id; skipping re-post", row["id"]
+        )
+        return
+
+    payload = discord_review.ReviewPayload(
+        place_name=row["place_name"],
+        era=row["era"],
+        place_location=row["place_location"],
+        story=row["story"],
+        threads_summary=row.get("threads_summary") or "",
+        image_url=row.get("image_url"),
+        wikipedia_url=row["wikipedia_url"],
+    )
+    message_id = discord_review.send_for_review(
+        bot_token=config.discord_bot_token,  # type: ignore[arg-type]
+        channel_id=config.discord_review_channel_id,  # type: ignore[arg-type]
+        payload=payload,
+    )
+    (
+        supabase.table("daily_stories")
+        .update({"discord_message_id": message_id})
+        .eq("id", row["id"])
+        .execute()
+    )
+    logger.info(
+        "Sent %s story to Discord for review (message_id=%s)",
+        target_date.isoformat(), message_id,
+    )
+
+
+def run_generate_and_review(config: Config, target_date: date) -> None:
+    """Top-level entrypoint for the 09:00 cron: generate + send for review."""
+    run_with_retry(config, target_date)
+    try:
+        send_today_for_review(config, target_date)
+    except Exception:  # noqa: BLE001 — review send is best-effort
+        logger.exception(
+            "send_today_for_review failed; story is in DB but not in Discord"
+        )
+        if config.discord_webhook_url:
+            discord_notify.notify_failure(
+                webhook_url=config.discord_webhook_url,
+                date_str=target_date.isoformat(),
+                error_message="Story generated but Discord review send failed",
+                traceback_str=traceback.format_exc(),
+            )
+
+
+def _load_review_row(supabase, target_date: date) -> dict[str, Any] | None:
+    response = (
+        supabase.table("daily_stories")
+        .select("*")
+        .eq("publish_date", target_date.isoformat())
+        .eq("language", REVIEW_LANGUAGE)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None

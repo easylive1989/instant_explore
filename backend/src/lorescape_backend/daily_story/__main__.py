@@ -1,16 +1,19 @@
 """CLI entrypoint: `python -m lorescape_backend.daily_story [YYYY-MM-DD]`.
 
 If a date argument is given, run for that date.
-Otherwise default to tomorrow (cron runs at 23:30 to publish for next day).
+Otherwise default to today (cron runs at 09:00 to generate today's story).
+
+Always runs generation + Discord review post (when configured). The publish
+step is a separate CLI: `python -m lorescape_backend.social.publisher`.
 """
 from __future__ import annotations
 
 import logging
 import sys
-from datetime import date, timedelta
+from datetime import date
 
 from lorescape_backend.config import Config
-from lorescape_backend.daily_story.job import run_with_retry
+from lorescape_backend.daily_story.job import run_generate_and_review
 
 
 def main(argv: list[str]) -> int:
@@ -20,12 +23,9 @@ def main(argv: list[str]) -> int:
     )
     config = Config.from_env()
 
-    if argv:
-        target = date.fromisoformat(argv[0])
-    else:
-        target = date.today() + timedelta(days=1)
+    target = date.fromisoformat(argv[0]) if argv else date.today()
 
-    run_with_retry(config, target)
+    run_generate_and_review(config, target)
     return 0
 
 
