@@ -20,46 +20,52 @@ String dbLanguageOf(Language language) {
   return 'en';
 }
 
-/// Today's daily story for the current app language. `null` if no story
-/// has been published yet (e.g. brand-new install + cron hasn't run).
-final todayDailyStoryProvider = FutureProvider<DailyStory?>((ref) async {
+/// The latest published daily story for the current app language. `null` if
+/// no story has been published yet (e.g. brand-new install + cron hasn't run).
+///
+/// If today's story hasn't been generated, this naturally falls back to the
+/// most recent prior day's story.
+final latestDailyStoryProvider = FutureProvider<DailyStory?>((ref) async {
   final language = ref.watch(currentLanguageProvider);
   final repo = ref.watch(dailyStoryRepositoryProvider);
-  return repo.fetchToday(language: dbLanguageOf(language));
+  return repo.fetchLatest(language: dbLanguageOf(language));
 });
 
-/// Today's daily story keyed by the DB [language] string (e.g. `'zh-TW'`).
+/// Latest daily story keyed by the DB [language] string (e.g. `'zh-TW'`).
 ///
 /// Used by [DailyStoryCard] so it can resolve the language from
 /// [EasyLocalization] context rather than [currentLanguageProvider], which
 /// makes widget tests simpler to set up.
-final todayDailyStoryByLanguageProvider =
+final latestDailyStoryByLanguageProvider =
     FutureProvider.family<DailyStory?, String>((ref, language) async {
       final repo = ref.watch(dailyStoryRepositoryProvider);
-      return repo.fetchToday(language: language);
+      return repo.fetchLatest(language: language);
     });
 
-/// History list — last 30 days strictly before today.
+/// History list — up to 30 stories strictly older than the latest one (which
+/// is already shown on the card). Falls back to "before today" if there is no
+/// latest story yet.
 final dailyStoryHistoryProvider = FutureProvider<List<DailyStory>>((ref) async {
   final language = ref.watch(currentLanguageProvider);
   final repo = ref.watch(dailyStoryRepositoryProvider);
-  // Use start-of-today so today's story is included via fetchToday only.
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  return repo.fetchHistory(
-    language: dbLanguageOf(language),
-    before: today,
-    limit: 30,
-  );
+  final dbLanguage = dbLanguageOf(language);
+  final latest = await repo.fetchLatest(language: dbLanguage);
+  final before = latest?.publishDate ?? _startOfToday();
+  return repo.fetchHistory(language: dbLanguage, before: before, limit: 30);
 });
 
 /// History list keyed by the DB [language] string. Used by
 /// [DailyStoryHistoryScreen] for the same testability reason as
-/// [todayDailyStoryByLanguageProvider].
+/// [latestDailyStoryByLanguageProvider].
 final dailyStoryHistoryByLanguageProvider =
     FutureProvider.family<List<DailyStory>, String>((ref, language) async {
       final repo = ref.watch(dailyStoryRepositoryProvider);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      return repo.fetchHistory(language: language, before: today, limit: 30);
+      final latest = await repo.fetchLatest(language: language);
+      final before = latest?.publishDate ?? _startOfToday();
+      return repo.fetchHistory(language: language, before: before, limit: 30);
     });
+
+DateTime _startOfToday() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}

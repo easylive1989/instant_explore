@@ -15,7 +15,7 @@ class DailyStoryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final language = _dbLanguageFromLocale(context.locale);
-    final asyncStory = ref.watch(todayDailyStoryByLanguageProvider(language));
+    final asyncStory = ref.watch(latestDailyStoryByLanguageProvider(language));
     return asyncStory.when(
       loading: () => const _LoadingCard(),
       error: (_, __) =>
