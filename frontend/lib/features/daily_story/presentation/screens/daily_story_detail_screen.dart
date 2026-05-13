@@ -53,11 +53,41 @@ class DailyStoryDetailScreen extends StatelessWidget {
               value: story.era,
             ),
             const SizedBox(height: 16),
-            Text(story.story, style: theme.textTheme.bodyLarge),
+            _StoryBody(text: story.story, style: theme.textTheme.bodyLarge),
           ],
         ),
       ),
     );
+  }
+}
+
+class _StoryBody extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  const _StoryBody({required this.text, this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    final paragraphs = _splitIntoParagraphs(text);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < paragraphs.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12),
+          Text(paragraphs[i], style: style),
+        ],
+      ],
+    );
+  }
+
+  static List<String> _splitIntoParagraphs(String text) {
+    final normalized = text.replaceAll('\r\n', '\n').trim();
+    final parts = normalized
+        .split(RegExp(r'\n+'))
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .toList();
+    return parts.isEmpty ? [normalized] : parts;
   }
 }
 
