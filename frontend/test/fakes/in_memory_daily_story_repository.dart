@@ -3,7 +3,7 @@ import 'package:context_app/features/daily_story/domain/repositories/daily_story
 
 /// In-memory fake repository for widget/integration tests.
 ///
-/// Stories can be seeded via [seed]. `fetchToday` returns the latest matching
+/// Stories can be seeded via [seed]. `fetchLatest` returns the latest matching
 /// row by `publishDate`; `fetchHistory` returns rows strictly older than
 /// `before`.
 class InMemoryDailyStoryRepository implements DailyStoryRepository {
@@ -23,7 +23,7 @@ class InMemoryDailyStoryRepository implements DailyStoryRepository {
   }
 
   @override
-  Future<DailyStory?> fetchToday({required String language}) async {
+  Future<DailyStory?> fetchLatest({required String language}) async {
     _maybeThrow();
     final matching = _stories.where((s) => s.language == language).toList()
       ..sort((a, b) => b.publishDate.compareTo(a.publishDate));

@@ -1,10 +1,13 @@
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 
 abstract class DailyStoryRepository {
-  /// Returns the most recent published story in [language] whose
-  /// `publish_date` is on or before today (Asia/Taipei). Returns `null`
-  /// if no row exists yet (e.g. the cron job hasn't run for the first time).
-  Future<DailyStory?> fetchToday({required String language});
+  /// Returns the most recently published story in [language] (highest
+  /// `publish_date`). Returns `null` if no row exists yet (e.g. the cron job
+  /// hasn't run for the first time).
+  ///
+  /// Server-side RLS already hides future-dated rows, so this naturally falls
+  /// back to yesterday's story when today's hasn't been generated yet.
+  Future<DailyStory?> fetchLatest({required String language});
 
   /// Returns up to [limit] stories in [language] strictly older than
   /// [before], ordered by `publish_date` descending. Used for the history

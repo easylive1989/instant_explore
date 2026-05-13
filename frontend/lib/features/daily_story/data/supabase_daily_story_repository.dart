@@ -10,7 +10,7 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
   static const _table = 'daily_stories';
 
   @override
-  Future<DailyStory?> fetchToday({required String language}) async {
+  Future<DailyStory?> fetchLatest({required String language}) async {
     final rows = await _client
         .from(_table)
         .select()
