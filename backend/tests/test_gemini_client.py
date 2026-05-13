@@ -41,7 +41,7 @@ def test_generate_story_parses_json_response(mock_client_cls):
     )
     mock_client_cls.assert_called_once_with(api_key="key")
     call_kwargs = mock_client.models.generate_content.call_args.kwargs
-    assert call_kwargs["model"] == "gemini-2.5-flash"
+    assert call_kwargs["model"] == "gemini-2.5-pro"
 
 
 @patch("lorescape_backend.daily_story.gemini_client.genai.Client")
