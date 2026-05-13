@@ -25,8 +25,11 @@ class LorescapeApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    // Initialise share intent listeners (idempotent).
-    ref.watch(shareIntentInitProvider);
+    // Share intent temporarily disabled — Wikipedia-backed search has too low
+    // a hit rate for Google Maps shares. Re-enable along with the platform
+    // entries (AndroidManifest intent-filter, iOS ShareExtension activation
+    // rule) once a higher-coverage data source is in place.
+    // ref.watch(shareIntentInitProvider);
 
     // Kick off the onboarding state load on app start. The controller
     // itself stays in `initial` until this completes, so the router

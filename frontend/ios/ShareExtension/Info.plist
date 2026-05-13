@@ -11,13 +11,18 @@
     <dict>
         <key>NSExtensionAttributes</key>
         <dict>
+            <!-- Share extension temporarily disabled; see lib/app.dart.
+                 Restore to the dict form below to re-enable:
+                 <key>NSExtensionActivationRule</key>
+                 <dict>
+                     <key>NSExtensionActivationSupportsText</key>
+                     <true/>
+                     <key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
+                     <integer>1</integer>
+                 </dict>
+            -->
             <key>NSExtensionActivationRule</key>
-            <dict>
-                <key>NSExtensionActivationSupportsText</key>
-                <true/>
-                <key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
-                <integer>1</integer>
-            </dict>
+            <string>FALSEPREDICATE</string>
         </dict>
         <key>NSExtensionMainStoryboard</key>
         <string>MainInterface</string>
