@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/features/main_screen.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/presentation/screens/select_narration_aspect_screen.dart';
+import 'package:context_app/features/narration/presentation/screens/select_story_hook_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
@@ -80,13 +80,13 @@ class RouterConfig {
           builder: (context, state) {
             final extra = state.extra;
             if (extra is Place) {
-              return SelectNarrationAspectScreen(place: extra);
+              return SelectStoryHookScreen(place: extra);
             }
             final mapExtra = extra as Map<String, dynamic>;
             final place = mapExtra['place'] as Place;
             final capturedImageBytes =
                 mapExtra['capturedImageBytes'] as Uint8List?;
-            return SelectNarrationAspectScreen(
+            return SelectStoryHookScreen(
               place: place,
               capturedImageBytes: capturedImageBytes,
             );

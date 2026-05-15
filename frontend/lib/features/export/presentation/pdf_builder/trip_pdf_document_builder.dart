@@ -6,14 +6,14 @@ import 'package:pdf/widgets.dart' as pw;
 
 /// Per-entry data prepared for PDF rendering.
 ///
-/// Works for both narration entries (with aspects) and quick-guide entries
-/// (aspects list is empty, address is null).
+/// Works for both narration entries (with an optional story hook chip) and
+/// quick-guide entries (chips list is empty, address is null).
 class PdfEntryData {
   final String title;
   final String? address;
   final DateTime date;
   final String bodyText;
-  final List<String> aspectLabels;
+  final List<String> chipLabels;
   final Uint8List? imageBytes;
 
   const PdfEntryData({
@@ -21,17 +21,16 @@ class PdfEntryData {
     required this.date,
     required this.bodyText,
     this.address,
-    this.aspectLabels = const [],
+    this.chipLabels = const [],
     this.imageBytes,
   });
 }
 
 /// Pre-translated strings used while building the PDF.
 class PdfLabels {
-  final String aspectsHeading;
   final String pageOfTotal;
 
-  const PdfLabels({required this.aspectsHeading, required this.pageOfTotal});
+  const PdfLabels({required this.pageOfTotal});
 
   String renderPageOfTotal(int index, int total) => pageOfTotal
       .replaceAll('{index}', '$index')
@@ -150,12 +149,12 @@ class TripPdfDocumentBuilder {
             style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
           ),
         ],
-        if (entry.aspectLabels.isNotEmpty) ...[
+        if (entry.chipLabels.isNotEmpty) ...[
           pw.SizedBox(height: 14),
           pw.Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: entry.aspectLabels
+            children: entry.chipLabels
                 .map(
                   (label) => pw.Container(
                     padding: const pw.EdgeInsets.symmetric(

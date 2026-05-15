@@ -4,7 +4,6 @@ import 'package:context_app/features/export/domain/models/pdf_export_result.dart
 import 'package:context_app/features/export/domain/services/place_image_downloader.dart';
 import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/domain/repositories/trip_repository.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -39,7 +38,6 @@ class TripPdfExportStrings {
   final String tagline;
   final String entryCountLabel;
   final PdfLabels pdfLabels;
-  final Map<NarrationAspect, String> aspectLabels;
 
   const TripPdfExportStrings({
     required this.stampLabel,
@@ -47,7 +45,6 @@ class TripPdfExportStrings {
     required this.tagline,
     required this.entryCountLabel,
     required this.pdfLabels,
-    required this.aspectLabels,
   });
 }
 
@@ -100,7 +97,7 @@ class TripPdfExportService {
     final entries = <PdfEntryData>[];
 
     for (final item in items) {
-      final prepared = await _prepareEntry(item, strings.aspectLabels);
+      final prepared = await _prepareEntry(item);
       entries.add(prepared.data);
       if (prepared.imageMissing) {
         missingImagePlaceNames.add(prepared.data.title);
@@ -139,15 +136,9 @@ class TripPdfExportService {
     );
   }
 
-  Future<_PreparedEntry> _prepareEntry(
-    JourneyItem item,
-    Map<NarrationAspect, String> aspectLabels,
-  ) async {
+  Future<_PreparedEntry> _prepareEntry(JourneyItem item) async {
     return switch (item) {
-      NarrationJourneyItem(:final entry) => _prepareNarration(
-        entry,
-        aspectLabels,
-      ),
+      NarrationJourneyItem(:final entry) => _prepareNarration(entry),
       QuickGuideJourneyItem(:final entry) => _PreparedEntry(
         data: PdfEntryData(
           title: _truncate(entry.aiDescription.split('\n').first, 40),
@@ -160,15 +151,11 @@ class TripPdfExportService {
     };
   }
 
-  Future<_PreparedEntry> _prepareNarration(
-    dynamic narrationEntry,
-    Map<NarrationAspect, String> aspectLabels,
-  ) async {
+  Future<_PreparedEntry> _prepareNarration(dynamic narrationEntry) async {
     final place = narrationEntry.place;
     final download = await imageDownloader.download(place.imageUrl as String?);
-    final aspects = (narrationEntry.narrationAspects as Set<NarrationAspect>)
-        .map((a) => aspectLabels[a] ?? a.key)
-        .toList();
+    final hookTitle = narrationEntry.storyHook?.title as String?;
+    final chips = hookTitle == null ? const <String>[] : [hookTitle];
 
     return _PreparedEntry(
       data: PdfEntryData(
@@ -176,7 +163,7 @@ class TripPdfExportService {
         address: place.address as String?,
         date: narrationEntry.createdAt as DateTime,
         bodyText: narrationEntry.narrationContent.text as String,
-        aspectLabels: aspects,
+        chipLabels: chips,
         imageBytes: download.usedPlaceholder ? null : download.bytes,
       ),
       imageMissing: download.usedPlaceholder,

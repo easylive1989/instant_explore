@@ -3,11 +3,17 @@ import 'dart:io';
 import 'package:context_app/features/journey/data/hive_journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+
+const _hook = StoryHook(
+  id: 'hook-1',
+  title: 'A test hook',
+  teaser: 'Something happened...',
+);
 
 JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
   const place = SavedPlace(
@@ -16,7 +22,6 @@ JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     address: 'Test Address',
   );
 
-  const aspects = {NarrationAspect.historicalBackground};
   final content = NarrationContent.create(
     'Narration text',
     language: const Language('zh-TW'),
@@ -27,7 +32,7 @@ JourneyEntry _makeEntry({String id = 'e1', DateTime? createdAt}) {
     id: id,
     place: place,
     narrationContent: content,
-    narrationAspects: aspects,
+    storyHook: _hook,
     createdAt: resolvedCreatedAt,
     updatedAt: resolvedCreatedAt,
     language: const Language('zh-TW'),
@@ -103,7 +108,7 @@ void main() {
     expect(restored.place.name, original.place.name);
     expect(restored.place.address, original.place.address);
     expect(restored.narrationContent.text, original.narrationContent.text);
-    expect(restored.narrationAspects, original.narrationAspects);
+    expect(restored.storyHook, original.storyHook);
     expect(restored.language.code, original.language.code);
   });
 }

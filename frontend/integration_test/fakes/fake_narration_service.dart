@@ -1,7 +1,7 @@
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
@@ -38,10 +38,9 @@ class FakeNarrationService implements NarrationService {
   @override
   Future<NarrationGenerationResult> generateNarration({
     required Place place,
-    required Set<NarrationAspect> aspects,
     required Language language,
+    StoryHook? hook,
   }) async {
-    // 模擬網路延遲
     await Future<void>.delayed(Duration(milliseconds: delayMs));
 
     if (shouldThrowError) {

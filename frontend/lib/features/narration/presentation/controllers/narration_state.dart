@@ -1,5 +1,4 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state_error_type.dart';
 import 'package:context_app/features/narration/presentation/controllers/playback_state.dart';
@@ -14,9 +13,7 @@ const Object _unset = Object();
 /// 聚合導覽內容和播放狀態
 /// 封裝播放器 UI 所需的所有狀態資訊
 class NarrationState extends Equatable {
-  // Replace the aggregated Narration object with flattened fields or necessary components
   final Place? place;
-  final NarrationAspect? aspect;
   final NarrationContent? content;
 
   /// 播放器狀態（播放運行時狀態）
@@ -30,7 +27,6 @@ class NarrationState extends Equatable {
 
   const NarrationState({
     this.place,
-    this.aspect,
     this.content,
     required this.playerState,
     this.errorType,
@@ -52,14 +48,9 @@ class NarrationState extends Equatable {
   }
 
   /// 建立就緒狀態
-  NarrationState ready(
-    Place place,
-    NarrationAspect? aspect,
-    NarrationContent content,
-  ) {
+  NarrationState ready(Place place, NarrationContent content) {
     return copyWith(
       place: place,
-      aspect: aspect,
       content: content,
       playerState: PlayerState.ready(),
       errorType: null,
@@ -102,7 +93,6 @@ class NarrationState extends Equatable {
 
   /// 更新字符位置（用於段落同步和進度計算）
   NarrationState updateCharPosition(int charPosition) {
-    // 檢查是否播放完成
     final totalChars = content?.text.length ?? 0;
     final isComplete = totalChars > 0 && charPosition >= totalChars;
 
@@ -115,12 +105,8 @@ class NarrationState extends Equatable {
   }
 
   /// 建立副本並更新指定屬性
-  ///
-  /// 使用哨兵物件 [_unset] 區分「明確傳入 null」和「未傳入」，
-  /// 讓可為 null 的欄位（如 aspect、errorType）可以被明確清除。
   NarrationState copyWith({
     Place? place,
-    Object? aspect = _unset,
     NarrationContent? content,
     PlayerState? playerState,
     Object? errorType = _unset,
@@ -128,7 +114,6 @@ class NarrationState extends Equatable {
   }) {
     return NarrationState(
       place: place ?? this.place,
-      aspect: aspect == _unset ? this.aspect : aspect as NarrationAspect?,
       content: content ?? this.content,
       playerState: playerState ?? this.playerState,
       errorType: errorType == _unset
@@ -140,26 +125,13 @@ class NarrationState extends Equatable {
     );
   }
 
-  /// 是否正在播放
   bool get isPlaying => playerState.isPlaying;
-
-  /// 是否暫停中
   bool get isPaused => playerState.isPaused;
-
-  /// 是否載入中
   bool get isLoading => playerState.isLoading;
-
-  /// 是否就緒
   bool get isReady => playerState.isReady;
-
-  /// 是否完成
   bool get isCompleted => playerState.isCompleted;
-
-  /// 是否有錯誤
   bool get hasError => playerState.hasError;
 
-  /// 播放進度百分比 (0.0 - 1.0)
-  /// 基於已播放的文字量計算
   double get progress {
     if (content == null) return 0.0;
     final totalChars = content!.text.length;
@@ -167,7 +139,6 @@ class NarrationState extends Equatable {
     return (playerState.currentCharPosition / totalChars).clamp(0.0, 1.0);
   }
 
-  /// 當前段落索引（用於高亮顯示）
   int? get currentSegmentIndex {
     if (content == null) return null;
     return content!.getSegmentIndexByCharPosition(
@@ -175,20 +146,14 @@ class NarrationState extends Equatable {
     );
   }
 
-  /// 是否應該顯示跳段按鈕
-  /// 只在播放中或暫停時顯示，載入中、完成或錯誤時不顯示
   bool get shouldShowSkipButtons => isPlaying || isPaused;
 
-  /// 是否可以跳到下一段
-  /// 當前不是最後一段時可跳
   bool get canSkipNext {
     if (content == null) return false;
     final currentIndex = currentSegmentIndex ?? 0;
     return currentIndex < content!.segments.length - 1;
   }
 
-  /// 是否可以跳到上一段
-  /// 當前不是第一段時可跳
   bool get canSkipPrevious {
     if (content == null) return false;
     final currentIndex = currentSegmentIndex ?? 0;
@@ -198,7 +163,6 @@ class NarrationState extends Equatable {
   @override
   List<Object?> get props => [
     place,
-    aspect,
     content,
     playerState,
     errorType,

@@ -4,10 +4,16 @@ import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/domain/models/place_photo.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const _hook = StoryHook(
+  id: 'hook-1',
+  title: 'The fire of 1908',
+  teaser: 'A spark in the kitchen almost took this place down...',
+);
 
 void main() {
   group('JourneyEntry.create', () {
@@ -22,7 +28,6 @@ void main() {
         category: PlaceCategory.historicalCultural,
       );
 
-      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Test narration',
         language: Language.traditionalChinese,
@@ -31,8 +36,8 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'test-id',
         place: place,
-        aspects: aspects,
         content: content,
+        hook: _hook,
         language: Language.traditionalChinese,
       );
 
@@ -47,7 +52,7 @@ void main() {
         ),
       );
       expect(entry.narrationContent, equals(content));
-      expect(entry.narrationAspects, equals(aspects));
+      expect(entry.storyHook, equals(_hook));
       expect(entry.language, equals(Language.traditionalChinese));
       expect(entry.id, isNotEmpty);
     });
@@ -72,17 +77,16 @@ void main() {
           category: PlaceCategory.naturalLandscape,
         );
 
-        const aspects = {NarrationAspect.geology};
         final content = NarrationContent.create(
-          'Geology narration',
+          'Story narration',
           language: Language.traditionalChinese,
         );
 
         final entry = JourneyEntry.create(
           id: 'test-id-2',
           place: place,
-          aspects: aspects,
           content: content,
+          hook: _hook,
           language: Language.traditionalChinese,
         );
 
@@ -98,7 +102,7 @@ void main() {
           ),
         );
         expect(entry.narrationContent, equals(content));
-        expect(entry.narrationAspects, equals(aspects));
+        expect(entry.storyHook, equals(_hook));
         expect(entry.language, equals(Language.traditionalChinese));
       },
     );
@@ -114,7 +118,6 @@ void main() {
         category: PlaceCategory.modernUrban,
       );
 
-      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Test narration',
         language: Language.traditionalChinese,
@@ -123,7 +126,6 @@ void main() {
       final entry1 = JourneyEntry.create(
         id: 'id-1',
         place: place,
-        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -131,7 +133,6 @@ void main() {
       final entry2 = JourneyEntry.create(
         id: 'id-2',
         place: place,
-        aspects: aspects,
         content: content,
         language: Language.traditionalChinese,
       );
@@ -143,7 +144,7 @@ void main() {
   });
 
   group('JourneyEntry JSON round-trip', () {
-    test('toJson/fromJson preserves all fields', () {
+    test('toJson/fromJson preserves all fields including hook', () {
       const place = Place(
         id: 'place-rt',
         name: 'Round Trip Place',
@@ -154,7 +155,6 @@ void main() {
         category: PlaceCategory.historicalCultural,
       );
 
-      const aspects = {NarrationAspect.historicalBackground};
       final content = NarrationContent.create(
         'Round trip text',
         language: Language.traditionalChinese,
@@ -163,8 +163,8 @@ void main() {
       final original = JourneyEntry.create(
         id: 'round-trip-id',
         place: place,
-        aspects: aspects,
         content: content,
+        hook: _hook,
         language: Language.traditionalChinese,
       );
 
@@ -175,8 +175,40 @@ void main() {
       expect(restored.place.name, original.place.name);
       expect(restored.place.address, original.place.address);
       expect(restored.narrationContent.text, original.narrationContent.text);
-      expect(restored.narrationAspects, original.narrationAspects);
+      expect(restored.storyHook, original.storyHook);
       expect(restored.language, original.language);
+    });
+
+    test('fromJson restores null hook when omitted (back-compat for legacy '
+        'entries that stored aspects)', () {
+      const place = Place(
+        id: 'p-legacy',
+        name: 'Legacy',
+        address: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        tags: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'legacy text',
+        language: Language.traditionalChinese,
+      );
+      final entry = JourneyEntry.create(
+        id: 'legacy-id',
+        place: place,
+        content: content,
+        language: Language.traditionalChinese,
+      );
+
+      final json = entry.toJson();
+      // Simulate a legacy row that still has the old `narration_styles` list
+      // but no story_hook key.
+      json['narration_styles'] = ['historical_background'];
+
+      final restored = JourneyEntry.fromJson(json);
+
+      expect(restored.storyHook, isNull);
     });
 
     test('create defaults tripId to null when omitted', () {
@@ -197,7 +229,6 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'no-trip-id',
         place: place,
-        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.traditionalChinese,
       );
@@ -223,7 +254,6 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'with-trip-id',
         place: place,
-        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.traditionalChinese,
         tripId: 'trip-123',
@@ -249,7 +279,6 @@ void main() {
       final original = JourneyEntry.create(
         id: 'copy-id',
         place: place,
-        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.traditionalChinese,
         tripId: 'trip-a',
@@ -280,7 +309,6 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'legacy-id',
         place: place,
-        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.traditionalChinese,
         tripId: 'will-be-removed',
@@ -309,12 +337,10 @@ void main() {
       final entry = JourneyEntry.create(
         id: 'lang-test-id',
         place: place,
-        aspects: {NarrationAspect.historicalBackground},
         content: content,
         language: Language.english,
       );
       final json = entry.toJson();
-      // language.code returns 'en-US', not 'Instance of Language'
       expect(json['language'], equals(Language.english.code));
     });
   });

@@ -5,8 +5,8 @@ import 'package:context_app/features/usage/domain/repositories/usage_repository.
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -21,6 +21,14 @@ class FakePlace extends Fake implements Place {}
 
 class FakeLanguage extends Fake implements Language {}
 
+class FakeStoryHook extends Fake implements StoryHook {}
+
+const _hook = StoryHook(
+  id: 'hook-1',
+  title: 'The fire of 1908',
+  teaser: 'A spark in the kitchen almost took this place down...',
+);
+
 void main() {
   late CreateNarrationUseCase useCase;
   late MockNarrationService mockNarrationService;
@@ -28,8 +36,8 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakePlace());
-    registerFallbackValue(<NarrationAspect>{NarrationAspect.historicalBackground});
     registerFallbackValue(FakeLanguage());
+    registerFallbackValue(FakeStoryHook());
   });
 
   setUp(() {
@@ -37,7 +45,6 @@ void main() {
     mockUsageRepository = MockUsageRepository();
     useCase = CreateNarrationUseCase(mockNarrationService, mockUsageRepository);
 
-    // 預設：有剩餘額度
     when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
       (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
     );
@@ -59,19 +66,19 @@ void main() {
 許多遊客來到這裡參觀。這是一個著名的景點。
 ''';
 
-  test('成功生成導覽', () async {
+  test('成功生成導覽（with hook）', () async {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
+        hook: _hook,
       ),
     ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     final narrationContent = await useCase.execute(
       place: testPlace,
-      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
+      hook: _hook,
     );
 
     expect(
@@ -85,19 +92,37 @@ void main() {
     );
   });
 
+  test('沒有 hook 時也能生成（fallback 流程）', () async {
+    when(
+      () => mockNarrationService.generateNarration(
+        place: testPlace,
+        language: any(named: 'language'),
+        hook: null,
+      ),
+    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
+
+    final narrationContent = await useCase.execute(
+      place: testPlace,
+      language: Language.traditionalChinese,
+    );
+
+    expect(narrationContent, isNotNull);
+    verify(() => mockUsageRepository.consumeUsage()).called(1);
+  });
+
   test('有剩餘次數時消耗額度', () async {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
+        hook: any(named: 'hook'),
       ),
     ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     await useCase.execute(
       place: testPlace,
-      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
+      hook: _hook,
     );
 
     verify(() => mockUsageRepository.consumeUsage()).called(1);
@@ -111,8 +136,8 @@ void main() {
     expect(
       () => useCase.execute(
         place: testPlace,
-        aspects: {NarrationAspect.historicalBackground},
         language: Language.traditionalChinese,
+        hook: _hook,
       ),
       throwsA(
         isA<AppError>().having(
@@ -126,8 +151,8 @@ void main() {
     verifyNever(
       () => mockNarrationService.generateNarration(
         place: any(named: 'place'),
-        aspects: any(named: 'aspects'),
         language: any(named: 'language'),
+        hook: any(named: 'hook'),
       ),
     );
   });
@@ -140,39 +165,18 @@ void main() {
     when(
       () => mockNarrationService.generateNarration(
         place: testPlace,
-        aspects: {NarrationAspect.historicalBackground},
         language: any(named: 'language'),
+        hook: any(named: 'hook'),
       ),
     ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
 
     final narrationContent = await useCase.execute(
       place: testPlace,
-      aspects: {NarrationAspect.historicalBackground},
       language: Language.traditionalChinese,
+      hook: _hook,
     );
 
     expect(narrationContent, isNotNull);
-    verify(() => mockUsageRepository.consumeUsage()).called(1);
-  });
-
-  test('剩餘次數為 1 時成功生成並消耗最後一次', () async {
-    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
-    );
-    when(
-      () => mockNarrationService.generateNarration(
-        place: testPlace,
-        aspects: {NarrationAspect.historicalBackground},
-        language: any(named: 'language'),
-      ),
-    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
-
-    await useCase.execute(
-      place: testPlace,
-      aspects: {NarrationAspect.historicalBackground},
-      language: Language.traditionalChinese,
-    );
-
     verify(() => mockUsageRepository.consumeUsage()).called(1);
   });
 }

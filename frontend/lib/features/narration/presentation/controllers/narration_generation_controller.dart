@@ -4,8 +4,8 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/domain/errors/usage_error.dart';
@@ -85,8 +85,8 @@ class NarrationGenerationController
   /// On error, sets state to [error] with the appropriate error type.
   Future<void> generate({
     required Place place,
-    required Set<NarrationAspect> aspects,
     required Language language,
+    StoryHook? hook,
   }) async {
     state = const NarrationGenerationState(
       status: NarrationGenerationStatus.generating,
@@ -95,12 +95,12 @@ class NarrationGenerationController
     try {
       final content = await _createNarrationUseCase.execute(
         place: place,
-        aspects: aspects,
         language: language,
+        hook: hook,
       );
 
       _onUsageConsumed();
-      await _autoSaveToJourney(place, aspects, content, language);
+      await _autoSaveToJourney(place, hook, content, language);
 
       state = NarrationGenerationState(
         status: NarrationGenerationStatus.success,
@@ -142,7 +142,7 @@ class NarrationGenerationController
 
   Future<void> _autoSaveToJourney(
     Place place,
-    Set<NarrationAspect> aspects,
+    StoryHook? hook,
     NarrationContent content,
     Language language,
   ) async {
@@ -150,9 +150,9 @@ class NarrationGenerationController
       final entry = JourneyEntry.create(
         id: const Uuid().v4(),
         place: place,
-        aspects: aspects,
         content: content,
         language: language,
+        hook: hook,
         tripId: _currentTripIdGetter(),
       );
       await _journeyRepository.save(entry);

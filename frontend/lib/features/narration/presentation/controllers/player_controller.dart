@@ -49,7 +49,7 @@ class PlayerController extends StateNotifier<NarrationState> {
     await _ttsService.setLanguage(content.language);
 
     // 更新狀態為就緒
-    state = state.ready(place, null, content);
+    state = state.ready(place, content);
   }
 
   /// 設定 TTS 事件監聽器

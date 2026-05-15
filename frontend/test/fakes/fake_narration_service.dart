@@ -1,5 +1,5 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
@@ -9,7 +9,7 @@ class FakeNarrationService implements NarrationService {
   final Exception? error;
 
   Place? lastPlace;
-  Set<NarrationAspect>? lastAspects;
+  StoryHook? lastHook;
   Language? lastLanguage;
 
   FakeNarrationService({
@@ -22,11 +22,11 @@ class FakeNarrationService implements NarrationService {
   @override
   Future<NarrationGenerationResult> generateNarration({
     required Place place,
-    required Set<NarrationAspect> aspects,
     required Language language,
+    StoryHook? hook,
   }) async {
     lastPlace = place;
-    lastAspects = aspects;
+    lastHook = hook;
     lastLanguage = language;
     if (error != null) throw error!;
     return (text: text, grounding: null);
