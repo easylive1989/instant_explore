@@ -25,12 +25,18 @@
   },
   "config_screen": {
     "title": "Select Narration Depth",
-    "select_aspect_title": "Select Narration Aspect",
     "start_button": "Start Guide",
     "generating": "Generating narration...",
     "generation_error_title": "Generation Failed",
     "generation_error_message": "Failed to generate narration. Please try again later.",
     "generation_error_ok": "OK"
+  },
+  "story_hook": {
+    "title": "Which story do you want to hear?",
+    "loading": "Digging up this place's history...",
+    "fallback_title": "A historical story",
+    "fallback_body": "No specific story threads found right now, but we can still share a historical story about this place.",
+    "listen_default_button": "Just play a story"
   },
   "narration_style": {
     "brief": "Brief",
@@ -123,15 +129,7 @@
     "some_images_missing": "{count} images could not be downloaded and were replaced with placeholders",
     "stamp_label": "VISITED",
     "entry_count_label": "{count} places",
-    "aspects_heading": "Aspects",
-    "page_of_total": "Place {index} / {total}",
-    "aspect": {
-      "historical_background": "Historical",
-      "architecture": "Architecture",
-      "customs": "Customs",
-      "geology": "Geology",
-      "myths": "Myths"
-    }
+    "page_of_total": "Place {index} / {total}"
   },
   "explore": {
     "title": "Explore",
@@ -243,18 +241,6 @@
     "museum_art_description": "Museums, art galleries, exhibitions",
     "food_market": "Local Cuisine",
     "food_market_description": "Night markets, food streets, specialty restaurants"
-  },
-  "narration_aspect": {
-    "historical_background": "Historical Background",
-    "historical_background_description": "People, events, and historical context",
-    "architecture": "Architectural Details",
-    "architecture_description": "Materials, techniques, and style",
-    "customs": "Cultural Customs",
-    "customs_description": "Taboos, rituals, and daily practices",
-    "geology": "Geological Formation",
-    "geology_description": "Strata, landforms, and natural formation",
-    "myths": "Legends & Stories",
-    "myths_description": "Folk tales and myths"
   },
   "quick_guide": {
     "title": "Quick Guide",

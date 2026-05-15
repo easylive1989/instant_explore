@@ -1,14 +1,17 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 
 class JourneyEntry {
   final String id;
   final SavedPlace place;
   final NarrationContent narrationContent;
-  final Set<NarrationAspect> narrationAspects;
+
+  /// 使用者挑選的故事鉤子；舊資料或無鉤子流程下為 null。
+  final StoryHook? storyHook;
+
   final DateTime createdAt;
   final DateTime updatedAt;
   final Language language;
@@ -20,10 +23,10 @@ class JourneyEntry {
     required this.id,
     required this.place,
     required this.narrationContent,
-    required this.narrationAspects,
     required this.createdAt,
     required this.updatedAt,
     required this.language,
+    this.storyHook,
     this.tripId,
   });
 
@@ -34,9 +37,9 @@ class JourneyEntry {
   factory JourneyEntry.create({
     required String id,
     required Place place,
-    required Set<NarrationAspect> aspects,
     required NarrationContent content,
     required Language language,
+    StoryHook? hook,
     String? tripId,
   }) {
     final String? imageUrl = place.primaryPhoto?.url;
@@ -53,7 +56,7 @@ class JourneyEntry {
       id: id,
       place: savedPlace,
       narrationContent: content,
-      narrationAspects: aspects,
+      storyHook: hook,
       createdAt: now,
       updatedAt: now,
       language: language,
@@ -66,7 +69,7 @@ class JourneyEntry {
     id: id,
     place: place,
     narrationContent: narrationContent,
-    narrationAspects: narrationAspects,
+    storyHook: storyHook,
     createdAt: createdAt,
     updatedAt: DateTime.now(),
     language: language,
@@ -80,7 +83,7 @@ class JourneyEntry {
     'place_address': place.address,
     'place_image_url': place.imageUrl,
     'narration_text': narrationContent.text,
-    'narration_styles': narrationAspects.map((a) => a.key).toList(),
+    if (storyHook != null) 'story_hook': storyHook!.toJson(),
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
     'language': language.code,
@@ -103,23 +106,10 @@ class JourneyEntry {
       language: language,
     );
 
-    // 向下相容：支援舊的 narration_style（單一字串）
-    // 和新的 narration_styles（字串陣列）
-    Set<NarrationAspect> narrationAspects;
-    if (json.containsKey('narration_styles')) {
-      final styles = (json['narration_styles'] as List<dynamic>).cast<String>();
-      narrationAspects = styles
-          .map((key) => NarrationAspect.fromKey(key))
-          .whereType<NarrationAspect>()
-          .toSet();
-      if (narrationAspects.isEmpty) {
-        narrationAspects = {NarrationAspect.historicalBackground};
-      }
-    } else {
-      final aspect =
-          NarrationAspect.fromKey(json['narration_style'] as String) ??
-          NarrationAspect.historicalBackground;
-      narrationAspects = {aspect};
+    StoryHook? hook;
+    final hookJson = json['story_hook'];
+    if (hookJson is Map) {
+      hook = StoryHook.fromJson(hookJson.cast<String, dynamic>());
     }
 
     final createdAt = DateTime.parse(json['created_at'] as String);
@@ -132,7 +122,7 @@ class JourneyEntry {
       id: json['id'] as String,
       place: place,
       narrationContent: narrationContent,
-      narrationAspects: narrationAspects,
+      storyHook: hook,
       createdAt: createdAt,
       updatedAt: updatedAt,
       language: language,

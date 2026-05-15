@@ -7,7 +7,6 @@ import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:context_app/features/trip/providers/trip_providers.dart';
@@ -419,14 +418,7 @@ TripPdfExportStrings _buildExportStrings() {
     appName: 'app.name'.tr(),
     tagline: 'app.tagline'.tr(),
     entryCountLabel: 'export.entry_count_label'.tr(),
-    pdfLabels: PdfLabels(
-      aspectsHeading: 'export.aspects_heading'.tr(),
-      pageOfTotal: 'export.page_of_total'.tr(),
-    ),
-    aspectLabels: {
-      for (final aspect in NarrationAspect.values)
-        aspect: 'export.aspect.${aspect.key}'.tr(),
-    },
+    pdfLabels: PdfLabels(pageOfTotal: 'export.page_of_total'.tr()),
   );
 }
 

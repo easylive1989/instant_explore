@@ -27,15 +27,12 @@ PdfEntryData _narration(String title) => PdfEntryData(
   bodyText:
       'Kinkaku-ji, the Temple of the Golden Pavilion, reflects centuries of history. '
       'Its gold-leaf exterior shimmers against the koi pond during every season.',
-  aspectLabels: const ['歷史背景', '建築細節'],
+  chipLabels: const ['歷史背景'],
   imageBytes: _tinyPng,
 );
 
 void main() {
-  const labels = PdfLabels(
-    aspectsHeading: 'Aspects',
-    pageOfTotal: 'Place {index} / {total}',
-  );
+  const labels = PdfLabels(pageOfTotal: 'Place {index} / {total}');
 
   final builder = TripPdfDocumentBuilder(
     regularFont: pw.Font.helvetica(),
@@ -55,7 +52,7 @@ void main() {
     expect(String.fromCharCodes(bytes.sublist(0, 5)), equals('%PDF-'));
   });
 
-  test('entry with no image, no address, no aspects still renders', () async {
+  test('entry with no image, no address, no chips still renders', () async {
     final bytes = await builder.build(
       trip: _trip(),
       entries: [

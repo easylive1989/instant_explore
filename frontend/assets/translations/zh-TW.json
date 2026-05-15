@@ -25,12 +25,18 @@
   },
   "config_screen": {
     "title": "選擇解說深度",
-    "select_aspect_title": "選擇導覽面向",
     "start_button": "開始導覽",
     "generating": "正在生成導覽內容...",
     "generation_error_title": "生成失敗",
     "generation_error_message": "導覽內容生成失敗，請稍後再試。",
     "generation_error_ok": "確定"
+  },
+  "story_hook": {
+    "title": "想聽哪段故事？",
+    "loading": "正在挖掘這裡的歷史故事...",
+    "fallback_title": "歷史故事",
+    "fallback_body": "暫時找不到特定的故事線索，仍然可以直接聽一段這個地方的歷史。",
+    "listen_default_button": "直接聽故事"
   },
   "narration_style": {
     "brief": "摘要版",
@@ -123,15 +129,7 @@
     "some_images_missing": "{count} 張圖片無法下載，已以佔位圖代替",
     "stamp_label": "已造訪",
     "entry_count_label": "{count} 個景點",
-    "aspects_heading": "本篇面向",
-    "page_of_total": "景點 {index} / {total}",
-    "aspect": {
-      "historical_background": "歷史背景",
-      "architecture": "建築細節",
-      "customs": "文化習俗",
-      "geology": "地理成因",
-      "myths": "傳說故事"
-    }
+    "page_of_total": "景點 {index} / {total}"
   },
   "explore": {
     "title": "探索",
@@ -243,18 +241,6 @@
     "museum_art_description": "博物館、美術館、畫廊",
     "food_market": "在地美食",
     "food_market_description": "夜市、美食街、特色餐廳"
-  },
-  "narration_aspect": {
-    "historical_background": "歷史背景",
-    "historical_background_description": "人物、事件、時代背景",
-    "architecture": "建築細節",
-    "architecture_description": "建材、工法、建築風格",
-    "customs": "文化禁忌與習俗",
-    "customs_description": "禁忌、儀式、日常習俗",
-    "geology": "地理成因",
-    "geology_description": "地層、地貌、自然成因",
-    "myths": "傳說故事",
-    "myths_description": "民間傳說與神話"
   },
   "quick_guide": {
     "title": "快速導覽",

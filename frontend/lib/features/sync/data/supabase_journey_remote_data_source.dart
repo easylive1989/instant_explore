@@ -1,7 +1,7 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/sync/domain/services/remote_sync_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,7 +45,7 @@ class SupabaseJourneyRemoteDataSource
     'place_address': entry.place.address,
     'place_image_url': entry.place.imageUrl,
     'narration_text': entry.narrationContent.text,
-    'narration_styles': entry.narrationAspects.map((a) => a.key).toList(),
+    'story_hook': entry.storyHook?.toJson(),
     'language': entry.language.code,
     'trip_id': entry.tripId,
     'created_at': entry.createdAt.toIso8601String(),
@@ -54,14 +54,13 @@ class SupabaseJourneyRemoteDataSource
 
   static JourneyEntry _fromRow(Map<String, dynamic> row) {
     final language = Language(row['language'] as String? ?? 'zh-TW');
-    final styles = ((row['narration_styles'] as List?) ?? const [])
-        .cast<String>()
-        .map(NarrationAspect.fromKey)
-        .whereType<NarrationAspect>()
-        .toSet();
-    final aspects = styles.isEmpty
-        ? {NarrationAspect.historicalBackground}
-        : styles;
+
+    StoryHook? hook;
+    final hookRaw = row['story_hook'];
+    if (hookRaw is Map) {
+      hook = StoryHook.fromJson(hookRaw.cast<String, dynamic>());
+    }
+
     final createdAt = DateTime.parse(row['created_at'] as String);
     final updatedAt = row['updated_at'] != null
         ? DateTime.parse(row['updated_at'] as String)
@@ -79,7 +78,7 @@ class SupabaseJourneyRemoteDataSource
         row['narration_text'] as String,
         language: language,
       ),
-      narrationAspects: aspects,
+      storyHook: hook,
       createdAt: createdAt,
       updatedAt: updatedAt,
       language: language,

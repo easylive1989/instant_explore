@@ -8,8 +8,8 @@ import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_do
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/domain/repositories/trip_repository.dart';
@@ -58,7 +58,11 @@ JourneyItem _narrationItem({
         'A long enough body of narration for testing.',
         language: const Language('zh-TW'),
       ),
-      narrationAspects: const {NarrationAspect.historicalBackground},
+      storyHook: const StoryHook(
+        id: 'hook-1',
+        title: 'Test hook',
+        teaser: 'Something happened here...',
+      ),
       createdAt: createdAt ?? DateTime(2026, 4, 10, 12),
       updatedAt: createdAt ?? DateTime(2026, 4, 10, 12),
       language: const Language('zh-TW'),
@@ -72,17 +76,7 @@ TripPdfExportStrings _strings() => const TripPdfExportStrings(
   appName: 'Context',
   tagline: 'Explore instantly',
   entryCountLabel: '{count} places',
-  pdfLabels: PdfLabels(
-    aspectsHeading: 'Aspects',
-    pageOfTotal: 'Place {index} / {total}',
-  ),
-  aspectLabels: {
-    NarrationAspect.historicalBackground: 'Historical',
-    NarrationAspect.architecture: 'Architecture',
-    NarrationAspect.customs: 'Customs',
-    NarrationAspect.geology: 'Geology',
-    NarrationAspect.myths: 'Myths',
-  },
+  pdfLabels: PdfLabels(pageOfTotal: 'Place {index} / {total}'),
 );
 
 void main() {

@@ -4,7 +4,6 @@ import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
@@ -30,7 +29,6 @@ JourneyEntry _makeNarration({
       narrationText,
       language: Language.english,
     ),
-    narrationAspects: const {NarrationAspect.historicalBackground},
     createdAt: createdAt ?? DateTime(2026, 4, 1),
     updatedAt: createdAt ?? DateTime(2026, 4, 1),
     language: Language.english,

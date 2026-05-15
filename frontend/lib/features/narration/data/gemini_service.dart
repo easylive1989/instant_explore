@@ -5,10 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
 import 'package:context_app/features/narration/data/narration_prompt_builder.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/grounding_info.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/settings/domain/models/language.dart'
     as app_lang;
@@ -19,14 +19,14 @@ class GeminiService implements NarrationService {
   /// 生成地點導覽內容
   ///
   /// [place] 地點資訊
-  /// [aspects] 導覽介紹面向（支援多選）
+  /// [hook] 使用者挑選的故事鉤子（可為 null）
   /// [language] 語言代碼（'zh-TW' 或 'en-US'）
   /// 返回適合語音播放的導覽文本
   @override
   Future<NarrationGenerationResult> generateNarration({
     required Place place,
-    required Set<NarrationAspect> aspects,
     required app_lang.Language language,
+    StoryHook? hook,
   }) async {
     try {
       final ai = FirebaseAI.vertexAI();
@@ -35,13 +35,11 @@ class GeminiService implements NarrationService {
         tools: [Tool.googleSearch()],
       );
 
-      // 使用 NarrationPromptBuilder 建立提示詞
-      final promptBuilder = NarrationPromptBuilder(
+      final prompt = NarrationPromptBuilder(
         place: place,
-        aspects: aspects,
+        hook: hook,
         language: language.code,
-      );
-      final prompt = promptBuilder.build();
+      ).build();
 
       final response = await model.generateContent([Content.text(prompt)]);
       final generatedText = response.text ?? '';

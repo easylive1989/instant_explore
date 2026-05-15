@@ -5,9 +5,9 @@ import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/domain/models/narration_aspect.dart';
-import 'package:context_app/features/narration/presentation/controllers/extensions/narration_aspect_extension.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
+import 'package:context_app/features/narration/presentation/controllers/story_hook_controller.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
@@ -20,33 +20,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SelectNarrationAspectScreen extends ConsumerStatefulWidget {
+/// 「挑一段歷史故事」選擇頁。
+///
+/// 開啟時自動呼叫 [StoryHookService] 為景點產生 2-3 個歷史故事鉤子，
+/// 使用者挑一張卡片後再展開為完整 narration。
+/// 若鉤子產生失敗或為空，顯示「直接聽故事」fallback 按鈕。
+class SelectStoryHookScreen extends ConsumerStatefulWidget {
   final Place place;
   final Uint8List? capturedImageBytes;
 
-  const SelectNarrationAspectScreen({
+  const SelectStoryHookScreen({
     super.key,
     required this.place,
     this.capturedImageBytes,
   });
 
   @override
-  ConsumerState<SelectNarrationAspectScreen> createState() =>
-      _SelectNarrationAspectScreenState();
+  ConsumerState<SelectStoryHookScreen> createState() =>
+      _SelectStoryHookScreenState();
 }
 
-class _SelectNarrationAspectScreenState
-    extends ConsumerState<SelectNarrationAspectScreen> {
+class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
   Language _currentLanguage() {
     final locale = EasyLocalization.of(context)?.locale.toLanguageTag();
     return Language(locale ?? 'zh-TW');
   }
 
-  Future<void> _onStartPressed() async {
-    final selectedAspects = ref.read(narrationAspectsProvider);
-    if (selectedAspects.isEmpty) return;
-
-    // Quota check before generation
+  Future<void> _onHookSelected(StoryHook? hook) async {
     final usageRepo = ref.read(usageRepositoryProvider);
     final status = await usageRepo.getUsageStatus();
     if (!status.canUseNarration) {
@@ -62,13 +62,12 @@ class _SelectNarrationAspectScreenState
 
     if (!mounted) return;
 
-    // Start generation on this page
     ref
         .read(narrationGenerationControllerProvider.notifier)
         .generate(
           place: widget.place,
-          aspects: selectedAspects,
           language: _currentLanguage(),
+          hook: hook,
         );
   }
 
@@ -103,10 +102,11 @@ class _SelectNarrationAspectScreenState
 
   @override
   Widget build(BuildContext context) {
-    final selectedAspects = ref.watch(narrationAspectsProvider);
+    final language = _currentLanguage();
+    final hookArgs = StoryHookArgs(place: widget.place, language: language);
+    final hookState = ref.watch(storyHookControllerProvider(hookArgs));
     final generationState = ref.watch(narrationGenerationControllerProvider);
 
-    // Listen for generation success / error
     ref.listen<NarrationGenerationState>(
       narrationGenerationControllerProvider,
       (previous, current) {
@@ -119,25 +119,18 @@ class _SelectNarrationAspectScreenState
       },
     );
 
-    final availableAspects = NarrationAspect.getAspectsForCategory(
-      widget.place.category,
-    );
-
     final photoUrl = widget.place.primaryPhoto?.url;
     final isGenerating = generationState.isGenerating;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: _BackgroundImage(
               photoUrl: photoUrl,
               capturedImageBytes: widget.capturedImageBytes,
             ),
           ),
-
-          // Top Navigation
           Positioned(
             top: 0,
             left: 0,
@@ -156,8 +149,6 @@ class _SelectNarrationAspectScreenState
                     ),
             ),
           ),
-
-          // Bottom Interaction Area
           Positioned(
             bottom: 0,
             left: 0,
@@ -185,75 +176,23 @@ class _SelectNarrationAspectScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Place Name
                     Text(
                       widget.place.name,
                       style: Theme.of(context).textTheme.displayMedium,
                     ),
                     const SizedBox(height: 8),
-
-                    // Place Category Badge
                     _CategoryBadge(place: widget.place),
                     const SizedBox(height: 12),
-
-                    // Place Address
                     _AddressRow(place: widget.place),
                     const SizedBox(height: 24),
-
-                    // Content area: loading spinner or aspect options
                     if (isGenerating)
                       const _GeneratingIndicator()
-                    else ...[
-                      // Title
-                      Text(
-                        'config_screen.select_aspect_title'.tr(),
-                        style: Theme.of(context).textTheme.headlineMedium,
+                    else
+                      _HookContent(
+                        state: hookState,
+                        onHookTap: _onHookSelected,
+                        onListenDefault: () => _onHookSelected(null),
                       ),
-                      const SizedBox(height: 16),
-
-                      // Aspect Options (scrollable)
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: availableAspects.map((aspect) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: AspectOption(
-                                  aspect: aspect,
-                                  isSelected: selectedAspects.contains(aspect),
-                                  onTap: () {
-                                    final notifier = ref.read(
-                                      narrationAspectsProvider.notifier,
-                                    );
-                                    final current = ref.read(
-                                      narrationAspectsProvider,
-                                    );
-                                    if (current.contains(aspect)) {
-                                      notifier.state = {...current}
-                                        ..remove(aspect);
-                                    } else {
-                                      notifier.state = {...current, aspect};
-                                    }
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Start Button
-                      PillButton(
-                        label: 'config_screen.start_button'.tr(),
-                        icon: Icons.play_arrow,
-                        fullWidth: true,
-                        onPressed: selectedAspects.isEmpty
-                            ? null
-                            : _onStartPressed,
-                      ),
-                      const SizedBox(height: 20),
-                    ],
                   ],
                 ),
               ),
@@ -265,27 +204,226 @@ class _SelectNarrationAspectScreenState
   }
 }
 
+class _HookContent extends StatelessWidget {
+  final StoryHookState state;
+  final void Function(StoryHook hook) onHookTap;
+  final VoidCallback onListenDefault;
+
+  const _HookContent({
+    required this.state,
+    required this.onHookTap,
+    required this.onListenDefault,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (state.status) {
+      StoryHookStatus.loading => const _HookLoadingState(),
+      StoryHookStatus.success => _HookListState(
+        hooks: state.hooks,
+        onTap: onHookTap,
+      ),
+      StoryHookStatus.empty || StoryHookStatus.error => _HookFallbackState(
+        onListen: onListenDefault,
+      ),
+    };
+  }
+}
+
+class _HookLoadingState extends StatelessWidget {
+  const _HookLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        children: [
+          AdaptiveProgressIndicator(color: cs.primary),
+          const SizedBox(height: 16),
+          Text(
+            'story_hook.loading'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HookListState extends StatelessWidget {
+  final List<StoryHook> hooks;
+  final void Function(StoryHook hook) onTap;
+
+  const _HookListState({required this.hooks, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'story_hook.title'.tr(),
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        const SizedBox(height: 16),
+        Flexible(
+          child: SingleChildScrollView(
+            child: Column(
+              children: hooks
+                  .map(
+                    (hook) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: StoryHookCard(
+                        hook: hook,
+                        onTap: () => onTap(hook),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+class _HookFallbackState extends StatelessWidget {
+  final VoidCallback onListen;
+  const _HookFallbackState({required this.onListen});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'story_hook.fallback_title'.tr(),
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'story_hook.fallback_body'.tr(),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: 24),
+        PillButton(
+          label: 'story_hook.listen_default_button'.tr(),
+          icon: Icons.play_arrow,
+          fullWidth: true,
+          onPressed: onListen,
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+class StoryHookCard extends StatelessWidget {
+  final StoryHook hook;
+  final VoidCallback onTap;
+
+  const StoryHookCard({super.key, required this.hook, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return PressScale(
+      onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.auto_stories,
+                      color: cs.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hook.title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          hook.teaser,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _GeneratingIndicator extends StatelessWidget {
   const _GeneratingIndicator();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AdaptiveProgressIndicator(color: cs.primary),
-            const SizedBox(height: 16),
-            Text(
-              'config_screen.generating'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        children: [
+          AdaptiveProgressIndicator(color: cs.primary),
+          const SizedBox(height: 16),
+          Text(
+            'config_screen.generating'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }
@@ -399,94 +537,6 @@ class _AddressRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class AspectOption extends StatelessWidget {
-  final NarrationAspect aspect;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const AspectOption({
-    super.key,
-    required this.aspect,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return PressScale(
-      onTap: onTap,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? cs.primaryContainer
-                  : AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? cs.primary : cs.outlineVariant,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      aspect.icon,
-                      color: isSelected ? cs.onPrimary : cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          aspect.translationKey.tr(),
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          aspect.descriptionKey.tr(),
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                color: isSelected
-                                    ? cs.onPrimaryContainer
-                                    : cs.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    isSelected
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
-                    color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
