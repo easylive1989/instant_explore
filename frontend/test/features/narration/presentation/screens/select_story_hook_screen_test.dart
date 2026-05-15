@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:context_app/core/errors/app_error.dart';
@@ -12,6 +13,7 @@ import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,17 +25,22 @@ import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
 
 /// Fake [StoryHookService] returning a fixed list (or throwing).
+///
+/// When [gate] is provided, the future stays pending until the gate is
+/// completed — useful for asserting the loading state.
 class _FakeStoryHookService implements StoryHookService {
   final List<StoryHook> hooks;
   final Object? error;
+  final Completer<void>? gate;
 
-  _FakeStoryHookService({this.hooks = const [], this.error});
+  _FakeStoryHookService({this.hooks = const [], this.error, this.gate});
 
   @override
   Future<List<StoryHook>> generateHooks({
     required Place place,
     required Language language,
   }) async {
+    if (gate != null) await gate!.future;
     if (error != null) throw error!;
     return hooks;
   }
@@ -76,13 +83,22 @@ void main() {
       'given the hook service is still loading, '
       'then the loading state shows the loading copy',
       (tester) async {
+        final gate = Completer<void>();
         await _pumpScreen(
           tester,
-          hookService: _FakeStoryHookService(hooks: const [_hook1, _hook2]),
+          hookService: _FakeStoryHookService(
+            hooks: const [_hook1, _hook2],
+            gate: gate,
+          ),
           settle: false,
         );
 
         expect(find.text('story_hook.loading'), findsOneWidget);
+
+        // Release the gate so autoDispose teardown doesn't leak a pending
+        // future into the next test.
+        gate.complete();
+        await tester.pumpAndSettle();
       },
     );
 
@@ -136,7 +152,7 @@ void main() {
       (tester) async {
         final narrationService = FakeNarrationService();
 
-        await _pumpScreen(
+        await _pumpScreenWithRouter(
           tester,
           hookService: _FakeStoryHookService(hooks: const [_hook1]),
           narrationService: narrationService,
@@ -155,7 +171,7 @@ void main() {
       (tester) async {
         final narrationService = FakeNarrationService();
 
-        await _pumpScreen(
+        await _pumpScreenWithRouter(
           tester,
           hookService: _FakeStoryHookService(hooks: const []),
           narrationService: narrationService,
@@ -276,23 +292,70 @@ Future<void> _pumpScreen(
       place: place ?? buildPlace(),
       capturedImageBytes: capturedImageBytes,
     ),
-    overrides: [
-      narrationServiceProvider.overrideWithValue(
-        narrationService ?? FakeNarrationService(),
-      ),
-      storyHookServiceProvider.overrideWithValue(
-        hookService ?? _FakeStoryHookService(hooks: const [_hook1]),
-      ),
-      journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),
-      usageRepositoryProvider.overrideWithValue(
-        usageRepo ?? InMemoryUsageRepository(),
-      ),
-      rewardedAdServiceProvider.overrideWithValue(FakeRewardedAdService()),
-    ],
+    overrides: _overrides(
+      hookService: hookService,
+      narrationService: narrationService,
+      usageRepo: usageRepo,
+    ),
   );
   if (settle) {
     await tester.pumpAndSettle();
   }
+}
+
+/// Pumps the screen under a GoRouter with a stub `player` route, so that
+/// the screen's success-listener can navigate without throwing.
+Future<void> _pumpScreenWithRouter(
+  WidgetTester tester, {
+  Place? place,
+  _FakeStoryHookService? hookService,
+  FakeNarrationService? narrationService,
+  InMemoryUsageRepository? usageRepo,
+}) async {
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) =>
+            SelectStoryHookScreen(place: place ?? buildPlace()),
+      ),
+      GoRoute(
+        name: 'player',
+        path: '/player',
+        builder: (_, __) => const Scaffold(
+          key: Key('player-screen'),
+          body: SizedBox.shrink(),
+        ),
+      ),
+    ],
+    overrides: _overrides(
+      hookService: hookService,
+      narrationService: narrationService,
+      usageRepo: usageRepo,
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+List<Override> _overrides({
+  _FakeStoryHookService? hookService,
+  FakeNarrationService? narrationService,
+  InMemoryUsageRepository? usageRepo,
+}) {
+  return [
+    narrationServiceProvider.overrideWithValue(
+      narrationService ?? FakeNarrationService(),
+    ),
+    storyHookServiceProvider.overrideWithValue(
+      hookService ?? _FakeStoryHookService(hooks: const [_hook1]),
+    ),
+    journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),
+    usageRepositoryProvider.overrideWithValue(
+      usageRepo ?? InMemoryUsageRepository(),
+    ),
+    rewardedAdServiceProvider.overrideWithValue(FakeRewardedAdService()),
+  ];
 }
 
 /// 1x1 transparent PNG bytes for Image.memory.
