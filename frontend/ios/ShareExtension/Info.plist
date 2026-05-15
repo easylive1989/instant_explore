@@ -12,17 +12,18 @@
         <key>NSExtensionAttributes</key>
         <dict>
             <!-- Share extension temporarily disabled; see lib/app.dart.
-                 Restore to the dict form below to re-enable:
-                 <key>NSExtensionActivationRule</key>
-                 <dict>
-                     <key>NSExtensionActivationSupportsText</key>
-                     <true/>
-                     <key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
-                     <integer>1</integer>
-                 </dict>
-            -->
+                 To re-enable, flip the values below:
+                   NSExtensionActivationSupportsText -> <true/>
+                   NSExtensionActivationSupportsWebURLWithMaxCount -> <integer>1</integer>
+                 The dict form (rather than a string predicate) is required by
+                 App Store / TestFlight upload validation. -->
             <key>NSExtensionActivationRule</key>
-            <string>FALSEPREDICATE</string>
+            <dict>
+                <key>NSExtensionActivationSupportsText</key>
+                <false/>
+                <key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
+                <integer>0</integer>
+            </dict>
         </dict>
         <key>NSExtensionMainStoryboard</key>
         <string>MainInterface</string>
