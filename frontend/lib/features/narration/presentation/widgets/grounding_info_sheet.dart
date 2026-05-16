@@ -1,3 +1,4 @@
+import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/narration/domain/models/grounding_info.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -80,7 +81,7 @@ class _SearchEntryPointViewState extends State<_SearchEntryPointView> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.transparent)
+      ..setBackgroundColor(AppColors.surfaceContainerHigh)
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (request) {
