@@ -182,8 +182,6 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
                     ),
                     const SizedBox(height: 8),
                     _CategoryBadge(place: widget.place),
-                    const SizedBox(height: 12),
-                    _AddressRow(place: widget.place),
                     const SizedBox(height: 24),
                     if (isGenerating)
                       const _GeneratingIndicator()
@@ -223,9 +221,8 @@ class _HookContent extends StatelessWidget {
         hooks: state.hooks,
         onTap: onHookTap,
       ),
-      StoryHookStatus.empty || StoryHookStatus.error => _HookFallbackState(
-        onListen: onListenDefault,
-      ),
+      StoryHookStatus.empty ||
+      StoryHookStatus.error => _HookFallbackState(onListen: onListenDefault),
     };
   }
 }
@@ -238,15 +235,19 @@ class _HookLoadingState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           AdaptiveProgressIndicator(color: cs.primary),
-          const SizedBox(height: 16),
-          Text(
-            'story_hook.loading'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              'story_hook.loading'.tr(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+            ),
           ),
         ],
       ),
@@ -391,10 +392,7 @@ class StoryHookCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
                 ],
               ),
             ),
@@ -413,15 +411,19 @@ class _GeneratingIndicator extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           AdaptiveProgressIndicator(color: cs.primary),
-          const SizedBox(height: 16),
-          Text(
-            'config_screen.generating'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              'config_screen.generating'.tr(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+            ),
           ),
         ],
       ),
@@ -511,32 +513,6 @@ class _CategoryBadge extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AddressRow extends StatelessWidget {
-  const _AddressRow({required this.place});
-  final Place place;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(Icons.location_on, color: cs.onSurfaceVariant, size: 16),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            place.address,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }

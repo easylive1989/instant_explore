@@ -65,17 +65,13 @@ void main() {
   group('SelectStoryHookScreen', () {
     testWidgets(
       'given a place, when the screen loads, '
-      'then the place name and address are rendered',
+      'then the place name is rendered',
       (tester) async {
-        final place = buildPlace(
-          name: 'Fushimi Inari',
-          address: '68 Fukakusa Yabunouchicho',
-        );
+        final place = buildPlace(name: 'Fushimi Inari');
 
         await _pumpScreen(tester, place: place);
 
         expect(find.text(place.name), findsOneWidget);
-        expect(find.text(place.address), findsOneWidget);
       },
     );
 
