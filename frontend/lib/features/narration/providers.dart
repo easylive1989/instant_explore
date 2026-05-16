@@ -2,7 +2,8 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/narration/data/gemini_story_hook_service.dart';
-import 'package:context_app/features/narration/data/tts_service.dart' as tts_impl;
+import 'package:context_app/features/narration/data/tts_service.dart'
+    as tts_impl;
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
 import 'package:context_app/features/narration/domain/services/story_hook_service.dart';
 import 'package:context_app/features/narration/domain/services/tts_service.dart';

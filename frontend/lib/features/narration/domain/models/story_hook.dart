@@ -15,11 +15,7 @@ class StoryHook {
     required this.teaser,
   });
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'teaser': teaser,
-  };
+  Map<String, dynamic> toJson() => {'id': id, 'title': title, 'teaser': teaser};
 
   factory StoryHook.fromJson(Map<String, dynamic> json) => StoryHook(
     id: json['id'] as String,

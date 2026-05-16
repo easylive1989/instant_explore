@@ -50,10 +50,7 @@ class StoryHookController extends StateNotifier<StoryHookState> {
         state = const StoryHookState(status: StoryHookStatus.empty);
         return;
       }
-      state = StoryHookState(
-        status: StoryHookStatus.success,
-        hooks: hooks,
-      );
+      state = StoryHookState(status: StoryHookStatus.success, hooks: hooks);
     } on AppError catch (e) {
       state = StoryHookState(
         status: StoryHookStatus.error,
