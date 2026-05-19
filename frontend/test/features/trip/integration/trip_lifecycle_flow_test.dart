@@ -5,7 +5,6 @@
 // the CurrentTripIdNotifier state, not just the menu label.
 
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.dart';
 import 'package:context_app/features/trip/providers.dart';
