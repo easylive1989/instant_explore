@@ -47,7 +47,7 @@ void main() {
       'then the second attempt produces content and the journey is saved',
       () async {
         final narration = _SequencedNarrationService([
-          AppError(
+          const AppError(
             type: NarrationError.networkError,
             message: 'Temporary network blip',
           ),
@@ -95,7 +95,7 @@ void main() {
       'then the retry path is available — gating retry UI is the screen\'s job',
       () async {
         final narration = _SequencedNarrationService([
-          AppError(
+          const AppError(
             type: NarrationError.configurationError,
             message: 'Missing API key',
           ),

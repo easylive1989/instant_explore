@@ -9,6 +9,7 @@ import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.
 import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 

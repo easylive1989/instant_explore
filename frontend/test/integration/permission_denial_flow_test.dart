@@ -15,7 +15,6 @@ import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_image_analysis_service.dart';
