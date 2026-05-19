@@ -7,7 +7,7 @@ import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

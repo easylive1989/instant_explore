@@ -11,7 +11,7 @@ import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:context_app/features/subscription/providers.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

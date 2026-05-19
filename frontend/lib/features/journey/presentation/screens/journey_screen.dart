@@ -3,7 +3,7 @@ import 'package:context_app/features/journey/presentation/widgets/quick_guide_ti
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/presentation/widgets/trip_grid.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

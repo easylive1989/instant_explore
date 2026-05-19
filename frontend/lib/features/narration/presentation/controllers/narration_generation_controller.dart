@@ -8,7 +8,7 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/domain/errors/usage_error.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

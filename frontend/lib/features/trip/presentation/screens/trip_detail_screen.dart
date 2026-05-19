@@ -9,7 +9,7 @@ import 'package:context_app/features/journey/presentation/widgets/timeline_entry
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

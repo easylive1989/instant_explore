@@ -3,7 +3,7 @@ import 'package:context_app/features/ads/domain/services/rewarded_ad_service.dar
 import 'package:context_app/features/ads/providers.dart';
 import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
