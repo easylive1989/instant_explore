@@ -131,12 +131,11 @@ Future<void> _pumpTripEdit(
   required String tripId,
   required InMemoryTripRepository tripRepo,
 }) async {
-  // TripEditScreen calls context.pop() after save, which requires a
-  // GoRouter ancestor — so use the router pump helper instead of
-  // pumpScreen.
+  // TripEditScreen calls context.pop() after save. Start at `/`
+  // and push onto the stack so pop has somewhere to go — the
+  // existing trip-edit test follows the same pattern.
   await pumpRouterApp(
     tester,
-    initialLocation: '/trip/edit/$tripId',
     routes: [
       GoRoute(
         path: '/',
@@ -150,10 +149,11 @@ Future<void> _pumpTripEdit(
     ],
     overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
   );
-  // Let _loadExistingTrip prefill the form.
-  for (var i = 0; i < 3; i += 1) {
-    await tester.pump(const Duration(milliseconds: 20));
-  }
+  await tester.pump();
+  final context = tester.element(find.text('home-stub'));
+  GoRouter.of(context).push('/trip/edit/$tripId');
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _pumpTripDetail(
