@@ -4,16 +4,19 @@
 // (2) the "set as current / end current" menu actions actually update
 // the CurrentTripIdNotifier state, not just the menu label.
 
+import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.dart';
 import 'package:context_app/features/trip/providers.dart';
-import 'package:context_app/features/journey/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../fakes/in_memory_journey_repository.dart';
+import '../../../fakes/in_memory_quick_guide_repository.dart';
 import '../../../fakes/in_memory_trip_repository.dart';
 import '../../../helpers/pump_app.dart';
 import '../../../helpers/test_data.dart';
@@ -21,6 +24,12 @@ import '../../../helpers/test_data.dart';
 void main() {
   setUpAll(() async {
     await initTestEnvironment();
+  });
+
+  // CurrentTripIdNotifier persists via SharedPreferences, so test 2
+  // would leak its 'kyoto' value into test 3 and skew the menu state.
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
   group('Trip edit save', () {
@@ -37,14 +46,7 @@ void main() {
         );
         await repo.save(original);
 
-        await pumpScreen(
-          tester,
-          child: const TripEditScreen(tripId: 'kyoto'),
-          overrides: [tripRepositoryProvider.overrideWithValue(repo)],
-        );
-        // Let _loadExistingTrip prefill the form.
-        await tester.pump(const Duration(milliseconds: 20));
-        await tester.pump(const Duration(milliseconds: 20));
+        await _pumpTripEdit(tester, tripId: 'kyoto', tripRepo: repo);
 
         await tester.enterText(find.byType(TextFormField), 'Kyoto Renamed');
         await tester.pump();
@@ -125,6 +127,36 @@ void main() {
   });
 }
 
+Future<void> _pumpTripEdit(
+  WidgetTester tester, {
+  required String tripId,
+  required InMemoryTripRepository tripRepo,
+}) async {
+  // TripEditScreen calls context.pop() after save, which requires a
+  // GoRouter ancestor — so use the router pump helper instead of
+  // pumpScreen.
+  await pumpRouterApp(
+    tester,
+    initialLocation: '/trip/edit/$tripId',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const Scaffold(body: Text('home-stub')),
+      ),
+      GoRoute(
+        path: '/trip/edit/:id',
+        builder: (_, state) =>
+            TripEditScreen(tripId: state.pathParameters['id']!),
+      ),
+    ],
+    overrides: [tripRepositoryProvider.overrideWithValue(tripRepo)],
+  );
+  // Let _loadExistingTrip prefill the form.
+  for (var i = 0; i < 3; i += 1) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+}
+
 Future<void> _pumpTripDetail(
   WidgetTester tester, {
   required String tripId,
@@ -151,10 +183,12 @@ Future<void> _pumpTripDetail(
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),
+      quickGuideRepositoryProvider.overrideWithValue(
+        InMemoryQuickGuideRepository(),
+      ),
     ],
   );
   for (var i = 0; i < 3; i += 1) {
     await tester.pump(const Duration(milliseconds: 20));
   }
 }
-

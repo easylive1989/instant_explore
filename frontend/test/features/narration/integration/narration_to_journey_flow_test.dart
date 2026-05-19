@@ -6,10 +6,12 @@
 // to hit, so we test it at the controller level via a real
 // ProviderContainer.
 
+import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/trip/providers.dart';
@@ -91,7 +93,12 @@ void main() {
         final journey = InMemoryJourneyRepository();
         final container = _buildContainer(
           journey: journey,
-          narration: FakeNarrationService(error: Exception('boom')),
+          narration: FakeNarrationService(
+            error: const AppError(
+              type: NarrationError.networkError,
+              message: 'boom',
+            ),
+          ),
         );
         addTearDown(container.dispose);
 

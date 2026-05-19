@@ -58,12 +58,18 @@ void main() {
         final picker = FakeImagePickerService.withImage();
         final usage = InMemoryUsageRepository(usedToday: 1, dailyFreeLimit: 1);
         final ads = FakeRewardedAdService();
+        final pushedPlayer = <Object?>[];
 
-        await _pumpQuickGuide(
+        // After the bonus the retry actually drives the picker -> AI ->
+        // success path which pushes /player; we need a router with that
+        // route registered so the push does not crash on a missing
+        // GoRouter ancestor.
+        await _pumpQuickGuideWithRetryRouter(
           tester,
           picker: picker,
           usage: usage,
           ads: ads,
+          onPlayerPush: pushedPlayer.add,
         );
         await _tapTakePhoto(tester);
         await tester.pumpAndSettle();
@@ -123,7 +129,15 @@ void main() {
           dailyFreeLimit: 10000,
         );
 
-        await _pumpQuickGuide(tester, picker: picker, usage: usage);
+        // Picking succeeds → AI returns text → controller goes to success
+        // → screen pushes /player. Need a router with that route to
+        // catch the navigation instead of crashing.
+        await _pumpQuickGuideWithRetryRouter(
+          tester,
+          picker: picker,
+          usage: usage,
+          onPlayerPush: (_) {},
+        );
         await _tapTakePhoto(tester);
         await tester.pumpAndSettle();
 
@@ -143,6 +157,35 @@ Future<void> _pumpQuickGuide(
   await pumpScreen(
     tester,
     child: const QuickGuideScreen(),
+    overrides: _overrides(picker: picker, usage: usage, ads: ads),
+  );
+}
+
+/// Like [_pumpQuickGuide] but inside a GoRouter that registers `/player`,
+/// so a successful pick → analyse → push does not crash on a missing
+/// GoRouter ancestor.
+Future<void> _pumpQuickGuideWithRetryRouter(
+  WidgetTester tester, {
+  required FakeImagePickerService picker,
+  required InMemoryUsageRepository usage,
+  FakeRewardedAdService? ads,
+  required void Function(Object? extra) onPlayerPush,
+}) async {
+  await pumpRouterApp(
+    tester,
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => const QuickGuideScreen()),
+      GoRoute(
+        path: '/player',
+        builder: (_, state) {
+          onPlayerPush(state.extra);
+          return const Scaffold(
+            key: Key('player-stub'),
+            body: SizedBox.shrink(),
+          );
+        },
+      ),
+    ],
     overrides: _overrides(picker: picker, usage: usage, ads: ads),
   );
 }

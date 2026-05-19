@@ -32,7 +32,10 @@ void main() {
 
         await _advanceToFinalPage(tester);
         await tester.tap(find.text('onboarding.get_started'));
-        await tester.pumpAndSettle();
+        // Cannot pumpAndSettle: OnboardingPageArt's PulsingGlow runs an
+        // infinite animation, so we pump a finite duration long enough
+        // for completeWelcome + go('/') to flush.
+        await _settle(tester);
 
         expect(repo.markWelcomeDoneCalls, 1);
         expect(find.text('home-stub'), findsOneWidget);
@@ -48,7 +51,7 @@ void main() {
 
         await _advanceToFinalPage(tester);
         await tester.tap(find.text('onboarding.try_sample'));
-        await tester.pumpAndSettle();
+        await _settle(tester);
 
         expect(extras, hasLength(1));
         final extra = extras.single as Map<String, dynamic>;
@@ -69,7 +72,7 @@ void main() {
         await scope
             .read(onboardingControllerProvider.notifier)
             .resetAll();
-        await tester.pumpAndSettle();
+        await _settle(tester);
 
         expect(repo.resetCalls, 1);
         expect(
@@ -113,7 +116,16 @@ Future<void> _pumpOnboardingFlow(
 Future<void> _advanceToFinalPage(WidgetTester tester) async {
   for (var i = 0; i < 3; i += 1) {
     await tester.tap(find.byIcon(Icons.arrow_forward));
-    await tester.pumpAndSettle();
+    await _settle(tester);
+  }
+}
+
+/// Replaces pumpAndSettle because the screen's PulsingGlow animation
+/// never quiesces. Six 50ms pumps cover the page transition + any
+/// post-tap async work without hanging.
+Future<void> _settle(WidgetTester tester) async {
+  for (var i = 0; i < 6; i += 1) {
+    await tester.pump(const Duration(milliseconds: 50));
   }
 }
 

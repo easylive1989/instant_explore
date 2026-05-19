@@ -58,7 +58,13 @@ void main() {
     test(
       'given sync off and no user, then isActive is false',
       () async {
-        final container = ProviderContainer();
+        // Without this override syncSessionProvider transitively watches
+        // a real Supabase authStateChanges() stream and crashes.
+        final container = ProviderContainer(
+          overrides: [
+            authServiceProvider.overrideWithValue(FakeAuthService()),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(container.read(syncSessionProvider).isActive, isFalse);
