@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:context_app/features/main_screen.dart';
+import 'package:context_app/app/main_screen.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/presentation/screens/select_story_hook_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';

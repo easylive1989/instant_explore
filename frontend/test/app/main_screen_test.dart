@@ -4,7 +4,7 @@ import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
-import 'package:context_app/features/main_screen.dart';
+import 'package:context_app/app/main_screen.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/quick_guide/providers.dart';
