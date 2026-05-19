@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:context_app/features/settings/data/local_settings_preferences_repository.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/repositories/settings_preferences_repository.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
 import 'package:context_app/features/settings/presentation/controllers/theme_mode_notifier.dart';
+
+// ============================================================================
+// Repositories
+// ============================================================================
+
+/// Persistence for settings (theme mode, etc). Override in tests with a
+/// fake to keep them off SharedPreferences.
+final settingsPreferencesRepositoryProvider =
+    Provider<SettingsPreferencesRepository>((ref) {
+      return LocalSettingsPreferencesRepository();
+    });
 
 // ============================================================================
 // App Info Providers
