@@ -31,9 +31,9 @@ final generateQuickGuideUseCaseProvider = Provider<GenerateQuickGuideUseCase>((
 });
 
 final quickGuideControllerProvider =
-    StateNotifierProvider<QuickGuideController, QuickGuideState>((ref) {
-      return QuickGuideController(ref.watch(generateQuickGuideUseCaseProvider));
-    });
+    NotifierProvider<QuickGuideController, QuickGuideState>(
+      QuickGuideController.new,
+    );
 
 final quickGuideEntriesProvider =
     FutureProvider.autoDispose<List<QuickGuideEntry>>((ref) {

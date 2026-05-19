@@ -66,8 +66,9 @@ class CameraState {
 }
 
 /// 相機控制器
-class CameraController extends StateNotifier<CameraState> {
-  CameraController() : super(const CameraState());
+class CameraController extends Notifier<CameraState> {
+  @override
+  CameraState build() => const CameraState();
 
   /// 設定擷取的圖片
   void setImage(Uint8List imageBytes) {

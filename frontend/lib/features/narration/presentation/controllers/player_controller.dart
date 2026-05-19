@@ -6,13 +6,14 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/presentation/controllers/player_state.dart';
+import 'package:context_app/features/narration/providers.dart';
 
 /// 播放器控制器
 ///
-/// 使用 StateNotifier 管理播放器狀態
+/// 使用 Riverpod Notifier 管理播放器狀態
 /// 僅負責播放控制，不負責生成導覽內容
-class PlayerController extends StateNotifier<NarrationState> {
-  final TtsService _ttsService;
+class PlayerController extends AutoDisposeNotifier<NarrationState> {
+  late TtsService _ttsService;
 
   StreamSubscription<void>? _ttsCompleteSubscription;
   StreamSubscription<void>? _ttsStartSubscription;
@@ -28,8 +29,12 @@ class PlayerController extends StateNotifier<NarrationState> {
   /// 用於防止 onComplete 事件在跳段時誤觸
   bool _isSkipping = false;
 
-  PlayerController(this._ttsService) : super(NarrationState.initial()) {
+  @override
+  NarrationState build() {
+    _ttsService = ref.read(ttsServiceProvider);
     _setupTtsListeners();
+    ref.onDispose(_cleanup);
+    return NarrationState.initial();
   }
 
   /// 使用現有內容初始化（用於播放已生成的導覽）
@@ -225,15 +230,12 @@ class PlayerController extends StateNotifier<NarrationState> {
     }
   }
 
-  @override
-  void dispose() {
+  void _cleanup() {
     _ttsService.stop();
 
     _ttsCompleteSubscription?.cancel();
     _ttsStartSubscription?.cancel();
     _ttsErrorSubscription?.cancel();
     _ttsProgressSubscription?.cancel();
-
-    super.dispose();
   }
 }

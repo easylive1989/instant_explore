@@ -1,7 +1,7 @@
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
-import 'package:context_app/features/narration/domain/services/story_hook_service.dart';
+import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,23 +29,23 @@ class StoryHookState {
 }
 
 /// 為單一景點載入故事鉤子。
-class StoryHookController extends StateNotifier<StoryHookState> {
-  final StoryHookService _service;
-  final Place _place;
-  final Language _language;
-
-  StoryHookController(this._service, this._place, this._language)
-    : super(StoryHookState.loading()) {
-    load();
+class StoryHookController
+    extends AutoDisposeFamilyNotifier<StoryHookState, StoryHookArgs> {
+  @override
+  StoryHookState build(StoryHookArgs arg) {
+    _load(arg.place, arg.language);
+    return StoryHookState.loading();
   }
 
-  Future<void> load() async {
+  /// 重新載入當前 [arg] 對應的故事鉤子。
+  Future<void> load() => _load(arg.place, arg.language);
+
+  Future<void> _load(Place place, Language language) async {
     state = StoryHookState.loading();
     try {
-      final hooks = await _service.generateHooks(
-        place: _place,
-        language: _language,
-      );
+      final hooks = await ref
+          .read(storyHookServiceProvider)
+          .generateHooks(place: place, language: language);
       if (hooks.isEmpty) {
         state = const StoryHookState(status: StoryHookStatus.empty);
         return;

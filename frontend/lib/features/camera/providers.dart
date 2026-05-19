@@ -18,6 +18,4 @@ final analyzeImageUseCaseProvider = Provider<AnalyzeImageUseCase>((ref) {
 
 /// 相機控制器 Provider
 final cameraControllerProvider =
-    StateNotifierProvider<CameraController, CameraState>((ref) {
-      return CameraController();
-    });
+    NotifierProvider<CameraController, CameraState>(CameraController.new);

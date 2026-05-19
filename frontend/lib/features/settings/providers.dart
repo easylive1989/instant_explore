@@ -36,8 +36,8 @@ final currentLanguageProvider = NotifierProvider<LanguageNotifier, Language>(
 
 /// 設定控制器 Provider
 final settingsControllerProvider =
-    StateNotifierProvider<SettingsController, AsyncValue<void>>(
-      (ref) => SettingsController(),
+    NotifierProvider<SettingsController, AsyncValue<void>>(
+      SettingsController.new,
     );
 
 // ============================================================================

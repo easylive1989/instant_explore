@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class SettingsController extends StateNotifier<AsyncValue<void>> {
-  SettingsController() : super(const AsyncValue.data(null));
+class SettingsController extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   void changeLanguage(BuildContext context) {
     final currentLocale = context.locale;
