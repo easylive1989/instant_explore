@@ -40,9 +40,7 @@ class _QuickGuideScreenState extends ConsumerState<QuickGuideScreen> {
   void dispose() {
     final controller = _controller;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.mounted) {
-        controller.reset();
-      }
+      controller.reset();
     });
     super.dispose();
   }
