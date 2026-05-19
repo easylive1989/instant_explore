@@ -1,5 +1,4 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/data/gemini_service.dart';
 import 'package:context_app/features/narration/data/gemini_story_hook_service.dart';
 import 'package:context_app/features/narration/data/tts_service.dart'
@@ -13,7 +12,6 @@ import 'package:context_app/features/narration/presentation/controllers/narratio
 import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/story_hook_controller.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,26 +42,16 @@ final startNarrationUseCaseProvider = Provider<CreateNarrationUseCase>((ref) {
 
 /// NarrationGenerationController Provider — 管理導覽生成的狀態。
 final narrationGenerationControllerProvider =
-    StateNotifierProvider.autoDispose<
+    AutoDisposeNotifierProvider<
       NarrationGenerationController,
       NarrationGenerationState
-    >((ref) {
-      final useCase = ref.watch(startNarrationUseCaseProvider);
-      final journeyRepository = ref.watch(journeyRepositoryProvider);
-      return NarrationGenerationController(
-        useCase,
-        journeyRepository,
-        () => ref.read(currentTripIdProvider),
-        () => ref.invalidate(usageStatusProvider),
-      );
-    });
+    >(NarrationGenerationController.new);
 
 /// PlayerController Provider — 管理播放器狀態。
 final playerControllerProvider =
-    StateNotifierProvider.autoDispose<PlayerController, NarrationState>((ref) {
-      final ttsService = ref.watch(ttsServiceProvider);
-      return PlayerController(ttsService);
-    });
+    AutoDisposeNotifierProvider<PlayerController, NarrationState>(
+      PlayerController.new,
+    );
 
 /// 故事鉤子 controller 的引數包裝。
 ///
@@ -88,8 +76,8 @@ class StoryHookArgs {
 /// 故事鉤子 controller — 依景點與語言載入 2-3 個歷史故事鉤子。
 ///
 /// 使用 family 讓不同景點互不影響；autoDispose 確保離開頁面釋放資源。
-final storyHookControllerProvider = StateNotifierProvider.autoDispose
-    .family<StoryHookController, StoryHookState, StoryHookArgs>((ref, args) {
-      final service = ref.watch(storyHookServiceProvider);
-      return StoryHookController(service, args.place, args.language);
-    });
+final storyHookControllerProvider = AutoDisposeNotifierProviderFamily<
+  StoryHookController,
+  StoryHookState,
+  StoryHookArgs
+>(StoryHookController.new);

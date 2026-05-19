@@ -45,12 +45,12 @@ class LorescapeApp extends ConsumerWidget {
     });
 
     // Listen for resolved shared places and save directly.
-    ref.listen<AsyncValue<Place>?>(pendingSharedPlaceProvider, (prev, next) {
+    ref.listen<AsyncValue<Place>?>(shareIntentControllerProvider, (prev, next) {
       if (next == null) return;
 
       next.when(
         data: (place) {
-          ref.read(pendingSharedPlaceProvider.notifier).state = null;
+          ref.read(shareIntentControllerProvider.notifier).clear();
           // Save the place directly to saved locations.
           ref.read(savedLocationsProvider.notifier).savePlace(place);
           _showSnackBar(
@@ -64,11 +64,11 @@ class LorescapeApp extends ConsumerWidget {
         },
         loading: () {},
         error: (error, _) {
-          ref.read(pendingSharedPlaceProvider.notifier).state = null;
-          // `_resolveAndSetPlace` emits the literal key
-          // `'shared_place.not_found'` when the share was parsed
-          // but no matching place was found — show a more specific
-          // message in that case.
+          ref.read(shareIntentControllerProvider.notifier).clear();
+          // ShareIntentController emits the literal key
+          // `'shared_place.not_found'` when the share was parsed but
+          // no matching place was found — show a more specific message
+          // in that case.
           final messageKey = error == 'shared_place.not_found'
               ? 'shared_place.not_found'
               : 'shared_place.error';
@@ -84,7 +84,7 @@ class LorescapeApp extends ConsumerWidget {
       );
     });
 
-    final pendingShare = ref.watch(pendingSharedPlaceProvider);
+    final pendingShare = ref.watch(shareIntentControllerProvider);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => 'name'.tr(),

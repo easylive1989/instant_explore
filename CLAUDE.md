@@ -163,89 +163,102 @@ Lorescape (an AI-powered voice tour guide app) adopts a **Feature-First** archit
 instant_explore/
 ├── frontend/                    # Flutter application
 │   ├── lib/
-│   │   ├── main.dart            # Application entry point
-│   │   ├── app.dart             # App-level setup (router, theme)
-│   │   ├── firebase_options.dart
-│   │   ├── common/              # Shared configuration & utilities
-│   │   │   ├── config/          # App config, API keys, theme
-│   │   │   ├── constants/       # Global constants
-│   │   │   └── utils/           # Utility functions
-│   │   ├── core/                # Core infrastructure
-│   │   │   ├── errors/          # Shared error types
-│   │   │   ├── services/        # HTTP, storage, analytics, etc.
-│   │   │   └── utils/           # Core-level helpers
-│   │   ├── shared/              # Reusable presentation helpers
-│   │   │   ├── extensions/      # Dart/Flutter extensions
-│   │   │   └── widgets/         # Shared UI components
-│   │   └── features/            # Feature modules
-│   │       ├── ads/             # Ad integration
-│   │       ├── camera/          # Camera capture
-│   │       ├── explore/         # Nearby place exploration
-│   │       ├── export/          # Export journey data
-│   │       ├── journey/         # Cultural footprint log
-│   │       ├── narration/       # AI voice guide (Gemini + TTS)
-│   │       ├── onboarding/      # First-run onboarding flow
-│   │       ├── quick_guide/     # Quick guide entry
-│   │       ├── saved_locations/ # Saved places
-│   │       ├── settings/        # Settings screen
-│   │       ├── share/           # Share functionality
-│   │       ├── subscription/    # RevenueCat subscriptions
-│   │       ├── trip/            # Trip management
-│   │       └── usage/           # Usage tracking / limits
-│   ├── test/                    # Test files
-│   ├── assets/                  # Static resources
+│   │   ├── main.dart            # Application bootstrap & entry point
+│   │   ├── app.dart             # Root MaterialApp, router & theme wiring
+│   │   ├── firebase_options.dart # Auto-generated Firebase platform config
+│   │   ├── app/                 # App-wide configuration (non-feature)
+│   │   │   ├── config/          # Router, theme, API endpoints, env-based config
+│   │   │   ├── constants/       # Global constants (spacing, UI tokens, app values)
+│   │   │   └── utils/           # App-level utilities (validation, formatting)
+│   │   ├── core/                # Framework-agnostic infrastructure shared by features
+│   │   │   ├── errors/          # Cross-cutting error types & error mapping
+│   │   │   ├── services/        # Reusable low-level services (image picker, cache, etc.)
+│   │   │   └── utils/           # Pure helper functions (geo, math, parsing)
+│   │   ├── shared/              # Cross-feature presentation building blocks
+│   │   │   ├── extensions/      # Dart/Flutter extension methods
+│   │   │   └── widgets/         # Reusable UI components (cards, backdrops, effects)
+│   │   └── features/            # Feature modules (see Feature Module Structure below)
+│   ├── test/                    # Unit & widget tests mirroring lib/ structure
+│   ├── integration_test/        # End-to-end integration tests
+│   ├── assets/                  # Static resources (images, fonts, translations)
 │   ├── ios/                     # iOS platform files
 │   ├── android/                 # Android platform files
 │   └── pubspec.yaml             # Flutter project configuration
-├── supabase/                    # Supabase schema & config
-├── docs/                        # Project documentation
-├── landing/                     # Landing page assets
+├── supabase/                    # Supabase schema, migrations & local config
+├── docs/                        # Architecture decisions & design system docs
+├── landing/                     # Marketing / landing page (Next.js)
 └── README.md                    # Project readme
 ```
 
+**Folder ownership rules:**
+
+- `app/` holds anything that configures the running app as a whole and is
+  typically loaded once at startup (router, theme, env config). It must not
+  depend on any `features/` module.
+- `core/` provides plumbing that features build on top of (error types,
+  generic services, pure utilities). It must not depend on `features/` or
+  `app/`.
+- `shared/` is the UI counterpart of `core/`: reusable widgets and
+  extensions that any feature can consume. It must not depend on
+  `features/`.
+- `features/` is where business logic lives. Features may depend on
+  `app/`, `core/`, and `shared/`, but **must not depend on each other**.
+  Cross-feature integration belongs in `app/` (routing) or a use case
+  that takes both feature APIs as inputs.
+
 ### Feature Module Structure
 
-Each Feature module follows Clean Architecture layering internally:
+Each feature module follows Clean Architecture layering internally. Not
+every layer is required — a UI-less integration feature may skip
+`presentation/`, a preferences-only feature may skip `data/` — but when a
+layer exists it MUST sit in the documented location.
 
 ```
 features/[feature_name]/
-├── data/                      # Data sources & external service wrappers
-│   ├── [feature]_service.dart      # API / SDK integration
-│   └── mappers/                    # DTO ↔ domain mappers
-├── domain/                    # Business logic (framework-agnostic)
-│   ├── models/                     # Domain entities & value objects
-│   ├── services/                   # Domain services
-│   ├── use_cases/                  # Application use cases
-│   └── errors/                     # Domain-specific exceptions
-├── presentation/              # Flutter-facing layer
-│   ├── controllers/                # Riverpod notifiers / controllers
-│   ├── screens/                    # Screen widgets
-│   └── widgets/                    # Feature-scoped widgets
-└── providers.dart             # Riverpod providers for this feature
+├── data/                      # External-world adapters; the only layer that touches I/O
+│   ├── [feature]_service.dart      # API/SDK clients & remote data sources
+│   ├── repositories/               # Persistence & caching implementations
+│   ├── dto/                        # Wire-format data transfer objects
+│   └── mappers/                    # DTO ↔ domain entity conversion
+├── domain/                    # Pure business logic; no Flutter or I/O imports
+│   ├── models/                     # Immutable domain entities & value objects
+│   ├── services/                   # Stateless domain services & policies
+│   ├── use_cases/                  # Application use cases orchestrating domain logic
+│   └── errors/                     # Domain-specific exception types
+├── presentation/              # Everything the user sees or touches
+│   ├── controllers/                # Riverpod notifiers holding screen state
+│   ├── screens/                    # Top-level routed screens
+│   └── widgets/                    # Feature-scoped widgets used only inside this feature
+└── providers.dart             # Riverpod provider declarations exposing this feature's API
 ```
 
-### Common Module (`lib/common/`)
+**Dependency direction inside a feature:** `presentation` → `domain` →
+`data`. `domain` never imports from `presentation` or `data`; it defines
+abstractions (repository/service interfaces) that `data` implements.
 
-Shared configuration and utilities used across features:
+### `lib/app/` — Application Configuration
 
-- **config/** - App configuration, theme, secure API key management
-- **constants/** - Global constant definitions
-- **utils/** - Common utility functions
+App-wide setup loaded at startup. Contents must be feature-agnostic.
 
-### Core Module (`lib/core/`)
+- **config/** — Router definitions, theme & color scheme, environment-driven config (API endpoints, keys read from `String.fromEnvironment`), and any singletons configured once per app launch.
+- **constants/** — Global constant values: design tokens (spacing, sizes), UI strings that aren't translated, and other app-wide literals.
+- **utils/** — Helpers that depend on app-level concerns (e.g. validation rules tied to product requirements). Pure helpers belong in `core/utils/` instead.
 
-Core infrastructure that supports feature modules:
+### `lib/core/` — Framework Infrastructure
 
-- **errors/** - Shared error types
-- **services/** - Core services (HTTP, storage, analytics, etc.)
-- **utils/** - Core-level helpers
+Reusable plumbing that features build on. No business logic, no UI.
 
-### Shared Module (`lib/shared/`)
+- **errors/** — Cross-cutting error types (`AppError`, storage errors) and error-mapping helpers used by multiple features.
+- **services/** — Low-level services that wrap platform/SDK capabilities (image picker, cache managers, HTTP, analytics). These are infrastructure, not business logic.
+- **utils/** — Pure utility functions with no Flutter dependency (geo math, parsing helpers). Safe to call from any layer.
 
-Cross-feature presentation helpers:
+### `lib/shared/` — UI Building Blocks
 
-- **widgets/** - Reusable UI components
-- **extensions/** - Dart/Flutter extensions
+The presentation-layer counterpart of `core/`. Anything in here may be
+imported by any feature's `presentation/` layer.
+
+- **widgets/** — Reusable widgets and visual effects that aren't tied to a single feature (cards, backdrops, glow effects, adaptive layouts).
+- **extensions/** — Dart/Flutter extension methods that improve ergonomics across features.
 
 ### Data Flow Architecture
 

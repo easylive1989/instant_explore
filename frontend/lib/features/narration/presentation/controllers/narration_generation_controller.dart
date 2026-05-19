@@ -2,13 +2,15 @@ import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/core/errors/app_error_type.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
-import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
+import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
-import 'package:context_app/features/narration/domain/use_cases/create_narration_use_case.dart';
+import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/domain/errors/usage_error.dart';
+import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -66,18 +68,9 @@ enum NarrationGenerationErrorType {
 /// Similar to [QuickGuideController], this controller handles
 /// AI generation before navigating to the player screen.
 class NarrationGenerationController
-    extends StateNotifier<NarrationGenerationState> {
-  final CreateNarrationUseCase _createNarrationUseCase;
-  final JourneyRepository _journeyRepository;
-  final String? Function() _currentTripIdGetter;
-  final void Function() _onUsageConsumed;
-
-  NarrationGenerationController(
-    this._createNarrationUseCase,
-    this._journeyRepository,
-    this._currentTripIdGetter,
-    this._onUsageConsumed,
-  ) : super(const NarrationGenerationState());
+    extends AutoDisposeNotifier<NarrationGenerationState> {
+  @override
+  NarrationGenerationState build() => const NarrationGenerationState();
 
   /// Generates narration content for the given place and aspects.
   ///
@@ -93,13 +86,11 @@ class NarrationGenerationController
     );
 
     try {
-      final content = await _createNarrationUseCase.execute(
-        place: place,
-        language: language,
-        hook: hook,
-      );
+      final content = await ref
+          .read(startNarrationUseCaseProvider)
+          .execute(place: place, language: language, hook: hook);
 
-      _onUsageConsumed();
+      ref.invalidate(usageStatusProvider);
       await _autoSaveToJourney(place, hook, content, language);
 
       state = NarrationGenerationState(
@@ -153,9 +144,9 @@ class NarrationGenerationController
         content: content,
         language: language,
         hook: hook,
-        tripId: _currentTripIdGetter(),
+        tripId: ref.read(currentTripIdProvider),
       );
-      await _journeyRepository.save(entry);
+      await ref.read(journeyRepositoryProvider).save(entry);
     } catch (_) {
       // Fail silently - don't affect the generation flow.
     }

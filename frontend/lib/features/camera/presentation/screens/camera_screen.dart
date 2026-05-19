@@ -35,9 +35,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   void dispose() {
     final controller = _controller;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.mounted) {
-        controller.reset();
-      }
+      controller.reset();
     });
     super.dispose();
   }

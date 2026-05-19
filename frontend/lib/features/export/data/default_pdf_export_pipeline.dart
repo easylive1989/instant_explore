@@ -5,7 +5,7 @@ import 'package:context_app/features/export/domain/models/pdf_export_result.dart
 import 'package:context_app/features/export/domain/services/place_image_downloader.dart';
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/presentation/cover_renderer.dart';
-import 'package:context_app/features/trip/providers/trip_providers.dart';
+import 'package:context_app/features/trip/providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';

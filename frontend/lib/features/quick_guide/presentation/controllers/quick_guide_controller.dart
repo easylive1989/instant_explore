@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:context_app/features/quick_guide/domain/use_cases/generate_quick_guide_use_case.dart';
+import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The lifecycle of a quick-guide session.
@@ -57,10 +58,9 @@ class QuickGuideState {
 /// Manages the quick-guide capture → describe → save flow.
 ///
 /// 僅負責 UI 狀態管理，業務邏輯委派給 [GenerateQuickGuideUseCase]。
-class QuickGuideController extends StateNotifier<QuickGuideState> {
-  final GenerateQuickGuideUseCase _useCase;
-
-  QuickGuideController(this._useCase) : super(const QuickGuideState());
+class QuickGuideController extends Notifier<QuickGuideState> {
+  @override
+  QuickGuideState build() => const QuickGuideState();
 
   /// Sends [imageBytes] to the AI service via use case.
   ///
@@ -76,11 +76,13 @@ class QuickGuideController extends StateNotifier<QuickGuideState> {
     );
 
     try {
-      final result = await _useCase.execute(
-        imageBytes: imageBytes,
-        mimeType: mimeType,
-        language: language,
-      );
+      final result = await ref
+          .read(generateQuickGuideUseCaseProvider)
+          .execute(
+            imageBytes: imageBytes,
+            mimeType: mimeType,
+            language: language,
+          );
 
       switch (result) {
         case GenerateQuickGuideQuotaExceeded():

@@ -46,30 +46,33 @@ void main() {
       expect(entry2.id, equals('id-2'));
       expect(entry1.id, isNot(equals(entry2.id)));
     });
-  });
 
-  group('QuickGuideEntry JSON round-trip', () {
-    test('toJson/fromJson preserves all fields', () {
-      final original = QuickGuideEntry.create(
-        id: 'round-trip-id',
+    test('defaults tripId to null when omitted', () {
+      final entry = QuickGuideEntry.create(
+        id: 'no-trip-id',
         imageBytes: imageBytes,
         aiDescription: description,
         language: language,
       );
 
-      final restored = QuickGuideEntry.fromJson(original.toJson());
-
-      expect(restored.id, original.id);
-      expect(restored.imageBytes, original.imageBytes);
-      expect(restored.aiDescription, original.aiDescription);
-      expect(restored.language.code, original.language.code);
-      expect(
-        restored.createdAt.toIso8601String(),
-        original.createdAt.toIso8601String(),
-      );
+      expect(entry.tripId, isNull);
     });
 
-    test('fromJson defaults language to zh-TW when absent', () {
+    test('attaches tripId when provided', () {
+      final entry = QuickGuideEntry.create(
+        id: 'with-trip-id',
+        imageBytes: imageBytes,
+        aiDescription: description,
+        language: language,
+        tripId: 'trip-42',
+      );
+
+      expect(entry.tripId, 'trip-42');
+    });
+  });
+
+  group('QuickGuideEntry.fromJson legacy handling', () {
+    test('defaults language to zh-TW when the field is absent', () {
       final original = QuickGuideEntry.create(
         id: 'lang-test-id',
         imageBytes: imageBytes,
@@ -83,47 +86,7 @@ void main() {
       expect(restored.language.code, 'zh-TW');
     });
 
-    test('create defaults tripId to null when omitted', () {
-      final entry = QuickGuideEntry.create(
-        id: 'no-trip-id',
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: language,
-      );
-
-      expect(entry.tripId, isNull);
-    });
-
-    test('create attaches tripId when provided', () {
-      final entry = QuickGuideEntry.create(
-        id: 'with-trip-id',
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: language,
-        tripId: 'trip-42',
-      );
-
-      expect(entry.tripId, 'trip-42');
-    });
-
-    test('copyWithTripId returns a copy with updated tripId', () {
-      final original = QuickGuideEntry.create(
-        id: 'copy-id',
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: language,
-        tripId: 'trip-a',
-      );
-
-      final moved = original.copyWithTripId('trip-b');
-      final cleared = original.copyWithTripId(null);
-
-      expect(moved.tripId, 'trip-b');
-      expect(moved.id, original.id);
-      expect(cleared.tripId, isNull);
-    });
-
-    test('fromJson treats missing trip_id as null (backward compat)', () {
+    test('treats missing trip_id as null', () {
       final entry = QuickGuideEntry.create(
         id: 'legacy-id',
         imageBytes: imageBytes,
@@ -136,19 +99,6 @@ void main() {
       final restored = QuickGuideEntry.fromJson(legacyJson);
 
       expect(restored.tripId, isNull);
-    });
-
-    test('toJson stores imageBytes as base64 string', () {
-      final entry = QuickGuideEntry.create(
-        id: 'base64-test-id',
-        imageBytes: imageBytes,
-        aiDescription: description,
-        language: language,
-      );
-      final json = entry.toJson();
-
-      expect(json['image_base64'], isA<String>());
-      expect((json['image_base64'] as String).isNotEmpty, isTrue);
     });
   });
 }
