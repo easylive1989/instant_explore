@@ -36,7 +36,12 @@ class SearchNearbyPlacesUseCase {
 
   List<Place> _sortByDistance(List<Place> places, PlaceLocation userLocation) {
     final withDistance = places.map((place) {
-      final distance = calculateHaversineDistance(userLocation, place.location);
+      final distance = calculateHaversineDistance(
+        fromLatitude: userLocation.latitude,
+        fromLongitude: userLocation.longitude,
+        toLatitude: place.location.latitude,
+        toLongitude: place.location.longitude,
+      );
       return _PlaceWithDistance(place: place, distance: distance);
     }).toList()..sort((a, b) => a.distance.compareTo(b.distance));
 

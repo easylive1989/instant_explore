@@ -1,6 +1,6 @@
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
-import 'package:context_app/shared/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

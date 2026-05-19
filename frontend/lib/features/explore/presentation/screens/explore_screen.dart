@@ -7,7 +7,7 @@ import 'package:context_app/features/daily_story/presentation/widgets/daily_stor
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
-import 'package:context_app/shared/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
 import 'package:context_app/shared/widgets/midnight/midnight.dart';

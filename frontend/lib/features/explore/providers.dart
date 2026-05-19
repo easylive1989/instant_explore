@@ -73,7 +73,12 @@ final filteredPlacesProvider = Provider<AsyncValue<List<Place>>>((ref) {
     if (searchQuery.isNotEmpty) return places;
     if (userLocation == null) return places;
     return places.where((p) {
-      final distance = calculateHaversineDistance(userLocation, p.location);
+      final distance = calculateHaversineDistance(
+        fromLatitude: userLocation.latitude,
+        fromLongitude: userLocation.longitude,
+        toLatitude: p.location.latitude,
+        toLongitude: p.location.longitude,
+      );
       return distance <= maxDistance;
     }).toList();
   });
