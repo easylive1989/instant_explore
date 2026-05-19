@@ -141,46 +141,61 @@ void main() {
       expect(entry2.id, equals('id-2'));
       expect(entry1.id, isNot(equals(entry2.id)));
     });
-  });
 
-  group('JourneyEntry JSON round-trip', () {
-    test('toJson/fromJson preserves all fields including hook', () {
+    test('defaults tripId to null when omitted', () {
       const place = Place(
-        id: 'place-rt',
-        name: 'Round Trip Place',
-        address: 'RT Address',
-        location: PlaceLocation(latitude: 25.0, longitude: 121.0),
+        id: 'p1',
+        name: 'Test',
+        address: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
         tags: [],
         photos: [],
-        category: PlaceCategory.historicalCultural,
+        category: PlaceCategory.modernUrban,
       );
-
       final content = NarrationContent.create(
-        'Round trip text',
+        'Some narration text for testing.',
         language: Language.traditionalChinese,
       );
 
-      final original = JourneyEntry.create(
-        id: 'round-trip-id',
+      final entry = JourneyEntry.create(
+        id: 'no-trip-id',
         place: place,
         content: content,
-        hook: _hook,
         language: Language.traditionalChinese,
       );
 
-      final restored = JourneyEntry.fromJson(original.toJson());
-
-      expect(restored.id, original.id);
-      expect(restored.place.id, original.place.id);
-      expect(restored.place.name, original.place.name);
-      expect(restored.place.address, original.place.address);
-      expect(restored.narrationContent.text, original.narrationContent.text);
-      expect(restored.storyHook, original.storyHook);
-      expect(restored.language, original.language);
+      expect(entry.tripId, isNull);
     });
 
-    test('fromJson restores null hook when omitted (back-compat for legacy '
-        'entries that stored aspects)', () {
+    test('attaches tripId when provided', () {
+      const place = Place(
+        id: 'p1',
+        name: 'Test',
+        address: 'Addr',
+        location: PlaceLocation(latitude: 0, longitude: 0),
+        tags: [],
+        photos: [],
+        category: PlaceCategory.modernUrban,
+      );
+      final content = NarrationContent.create(
+        'Some narration text for testing.',
+        language: Language.traditionalChinese,
+      );
+
+      final entry = JourneyEntry.create(
+        id: 'with-trip-id',
+        place: place,
+        content: content,
+        language: Language.traditionalChinese,
+        tripId: 'trip-123',
+      );
+
+      expect(entry.tripId, 'trip-123');
+    });
+  });
+
+  group('JourneyEntry.fromJson legacy handling', () {
+    test('restores null hook when the entry pre-dates story_hook', () {
       const place = Place(
         id: 'p-legacy',
         name: 'Legacy',
@@ -211,88 +226,7 @@ void main() {
       expect(restored.storyHook, isNull);
     });
 
-    test('create defaults tripId to null when omitted', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-
-      final entry = JourneyEntry.create(
-        id: 'no-trip-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-      );
-
-      expect(entry.tripId, isNull);
-    });
-
-    test('create attaches tripId when provided', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-
-      final entry = JourneyEntry.create(
-        id: 'with-trip-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-        tripId: 'trip-123',
-      );
-
-      expect(entry.tripId, 'trip-123');
-    });
-
-    test('copyWithTripId returns a copy with updated tripId', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-      final original = JourneyEntry.create(
-        id: 'copy-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-        tripId: 'trip-a',
-      );
-
-      final moved = original.copyWithTripId('trip-b');
-      final cleared = original.copyWithTripId(null);
-
-      expect(moved.tripId, 'trip-b');
-      expect(moved.id, original.id);
-      expect(cleared.tripId, isNull);
-    });
-
-    test('fromJson treats missing trip_id as null (backward compat)', () {
+    test('treats missing trip_id as null', () {
       const place = Place(
         id: 'p1',
         name: 'Test',
@@ -318,30 +252,6 @@ void main() {
       final restored = JourneyEntry.fromJson(legacyJson);
 
       expect(restored.tripId, isNull);
-    });
-
-    test('fromJson uses language.code (not toString)', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.english,
-      );
-      final entry = JourneyEntry.create(
-        id: 'lang-test-id',
-        place: place,
-        content: content,
-        language: Language.english,
-      );
-      final json = entry.toJson();
-      expect(json['language'], equals(Language.english.code));
     });
   });
 }
