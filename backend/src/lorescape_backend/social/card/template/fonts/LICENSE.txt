@@ -1,0 +1,10 @@
+Bundled Google Fonts used by the IG card renderer:
+
+  Cormorant Garamond  — SIL Open Font License 1.1
+  EB Garamond         — SIL Open Font License 1.1
+  Noto Serif TC       — SIL Open Font License 1.1
+
+Full license text: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
+
+Source: Google Fonts (https://fonts.google.com). Re-download via:
+  backend/scripts/download_card_fonts.py
