@@ -76,8 +76,9 @@ class StoryHookArgs {
 /// 故事鉤子 controller — 依景點與語言載入 2-3 個歷史故事鉤子。
 ///
 /// 使用 family 讓不同景點互不影響；autoDispose 確保離開頁面釋放資源。
-final storyHookControllerProvider = AutoDisposeNotifierProviderFamily<
-  StoryHookController,
-  StoryHookState,
-  StoryHookArgs
->(StoryHookController.new);
+final storyHookControllerProvider =
+    AutoDisposeNotifierProviderFamily<
+      StoryHookController,
+      StoryHookState,
+      StoryHookArgs
+    >(StoryHookController.new);

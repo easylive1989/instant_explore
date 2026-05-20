@@ -52,10 +52,7 @@ class ShareIntentController extends Notifier<AsyncValue<Place>?> {
       if (place != null) {
         state = AsyncValue.data(place);
       } else {
-        state = AsyncValue.error(
-          'shared_place.not_found',
-          StackTrace.current,
-        );
+        state = AsyncValue.error('shared_place.not_found', StackTrace.current);
       }
     } catch (e, stack) {
       _log.warning('Failed to resolve shared place', e, stack);
