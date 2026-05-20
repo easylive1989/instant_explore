@@ -2,11 +2,13 @@ import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/app/config/api_config.dart';
+import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/firebase_options.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
@@ -48,13 +50,23 @@ Future<Widget> init() async {
     await RevenueCatSubscriptionService.configureSDK(apiKey: revenueCatApiKey);
   }
 
+  // Eagerly resolve SharedPreferences so analytics providers
+  // (consent repository, install id) can be read synchronously on the
+  // first frame without callers having to deal with AsyncLoading.
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   return EasyLocalization(
     supportedLocales: const [Locale('zh', 'TW'), Locale('en')],
     path: 'assets/translations',
     fallbackLocale: const Locale('zh', 'TW'),
     saveLocale: true,
     child: ProviderScope(
-      overrides: [defaultOnboardingRepositoryOverride],
+      overrides: [
+        defaultOnboardingRepositoryOverride,
+        sharedPreferencesProvider.overrideWith(
+          (ref) async => sharedPreferences,
+        ),
+      ],
       child: const LorescapeApp(),
     ),
   );
