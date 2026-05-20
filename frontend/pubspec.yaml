@@ -93,6 +93,7 @@ dependencies:
 
   # Onboarding
   introduction_screen: ^3.1.14
+  firebase_analytics: ^12.4.1
 
 dev_dependencies:
   flutter_test:
