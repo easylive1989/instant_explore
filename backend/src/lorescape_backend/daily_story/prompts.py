@@ -47,20 +47,54 @@ _BASE_REQUIRED = [
     "hashtags",
 ]
 
+_ZH_CARD_PROPERTIES: dict = {
+    "card_title_ch": {"type": "STRING"},
+    "card_title_sub_ch": {"type": "STRING"},
+    "card_paragraphs_ch": {
+        "type": "ARRAY",
+        "items": {"type": "STRING"},
+        "minItems": 3,
+        "maxItems": 3,
+    },
+    "card_pull_quote_ch": {"type": "STRING"},
+    "card_pull_quote_attrib_ch": {"type": "STRING"},
+    "card_anno_roman": {"type": "STRING"},
+}
+
+_ZH_CARD_REQUIRED = [
+    "card_title_ch",
+    "card_title_sub_ch",
+    "card_paragraphs_ch",
+    "card_pull_quote_ch",
+    "card_pull_quote_attrib_ch",
+    "card_anno_roman",
+]
+
 
 def build_response_schema(language: str) -> dict:
     """Return the Gemini structured-output schema for the given language.
 
-    Phase 2 keeps both languages identical; Phase 2 follow-up (Task 3) adds
-    card-specific fields to the zh-TW schema.
+    zh-TW returns the base fields *minus* `story` *plus* six `card_*` fields
+    used by the IG card renderer. The writer derives `story` from the joined
+    `card_paragraphs_ch`. en keeps the original story-in-a-single-string
+    shape.
     """
-    if language not in _LANGUAGE_NAMES:
-        raise KeyError(f"Unknown language: {language!r}")
-    return {
-        "type": "OBJECT",
-        "properties": dict(_BASE_PROPERTIES),
-        "required": list(_BASE_REQUIRED),
-    }
+    if language == "zh-TW":
+        # Drop `story` from base — zh-TW returns paragraphs instead.
+        base_props = {k: v for k, v in _BASE_PROPERTIES.items() if k != "story"}
+        base_required = [k for k in _BASE_REQUIRED if k != "story"]
+        return {
+            "type": "OBJECT",
+            "properties": {**base_props, **_ZH_CARD_PROPERTIES},
+            "required": base_required + _ZH_CARD_REQUIRED,
+        }
+    if language == "en":
+        return {
+            "type": "OBJECT",
+            "properties": dict(_BASE_PROPERTIES),
+            "required": list(_BASE_REQUIRED),
+        }
+    raise KeyError(f"Unknown language: {language!r}")
 
 
 def build_user_prompt(
@@ -68,9 +102,17 @@ def build_user_prompt(
 ) -> str:
     """Build the user-facing prompt for one (place, language) pair."""
     language_name = _LANGUAGE_NAMES[language]  # KeyError on unknown — intentional
-    return (
+    intro = (
         f'Source material (English Wikipedia extract for "{wikipedia_title}"):\n'
         f"<<<\n{wikipedia_extract}\n>>>\n\n"
+    )
+    if language == "zh-TW":
+        return intro + _zh_tw_body(language_name)
+    return intro + _en_body(language_name)
+
+
+def _en_body(language_name: str) -> str:
+    return (
         f"Write a 700-1200 character true historical short story in {language_name}.\n"
         "\n"
         "Style:\n"
@@ -108,4 +150,64 @@ def build_user_prompt(
         "- threads_summary: the 300-400 character punchier version\n"
         "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings "
         "(no '#' prefix)\n"
+    )
+
+
+def _zh_tw_body(language_name: str) -> str:
+    # Tailored for the IG card layout: 3 short paragraphs (drop-cap on first),
+    # a pull quote, attribution, and a Roman-numeral year for the masthead.
+    return (
+        f"Write a true historical short story in {language_name}, structured as "
+        "exactly 3 paragraphs of 60-100 Traditional Chinese characters each.\n"
+        "\n"
+        "Style:\n"
+        "- Each paragraph centres on a specific moment, person, or turning point.\n"
+        "- Open paragraph 1 with a concrete scene — a dated event, a real person "
+        "acting in a real place. The first character should be a concrete noun "
+        "or name (it will be rendered as a large drop-cap), not a function word "
+        '(e.g. avoid starting with "在", "當", "這", "那").\n'
+        "- Quote real historical lines or chronicler accounts ONLY if they "
+        "appear in the source; otherwise paraphrase.\n"
+        "- Cite specific years (use Han numerals for years in body text, "
+        "e.g. 一八八九年) and reference real named people from the source.\n"
+        "- Do NOT end with a redundant '地名, 地點, 年代' summary — those "
+        "values are returned as separate fields below.\n"
+        "\n"
+        f"Also produce a punchier 300-400 character version of the same story "
+        f"in {language_name} as `threads_summary`, ending on a hook or open "
+        "question. This shorter version must fit under 500 characters total — "
+        "it will be posted as a single Threads post.\n"
+        "\n"
+        "Also produce 3-5 hashtags drawn from the country, era, and theme. "
+        "Each tag is a single lowerCamelCase word without the '#' prefix, "
+        "ASCII letters/digits only.\n"
+        "\n"
+        "ADDITIONALLY, produce the following Instagram-card fields:\n"
+        "- card_title_ch: a punchy Traditional Chinese main title that captures "
+        "the central tension of the story (≤ 14 characters, must NOT just "
+        "repeat the place name).\n"
+        "- card_title_sub_ch: a subtitle that complements the main title "
+        "(≤ 20 characters; full-width quotes 「」allowed).\n"
+        "- card_paragraphs_ch: the same 3 paragraphs above, returned as a "
+        "JSON array of 3 strings (one paragraph per element, no leading/"
+        "trailing whitespace).\n"
+        "- card_pull_quote_ch: one short, dramatic quote from the story, "
+        "wrapped in full-width Chinese quotation marks 「」 or 『』. Prefer "
+        "real quotes from the source over invented lines.\n"
+        "- card_pull_quote_attrib_ch: attribution for the pull quote, "
+        "beginning with the full-width em-dash ──. Use Han numerals for "
+        "years (example: ── 莫泊桑，一八八九).\n"
+        "- card_anno_roman: the representative year of the story as Roman "
+        "numerals (example: 1889 → MDCCCLXXXIX). If the story spans a range, "
+        "pick one representative year.\n"
+        "\n"
+        "Output JSON with these fields:\n"
+        "- place_name: localized place name only (no extras)\n"
+        "- place_location: localized location (e.g. country/city)\n"
+        "- era: the era your story takes place in\n"
+        "- threads_summary: the 300-400 character punchier version\n"
+        "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings\n"
+        "- card_title_ch, card_title_sub_ch, card_paragraphs_ch, "
+        "card_pull_quote_ch, card_pull_quote_attrib_ch, card_anno_roman: "
+        "as described above\n"
     )
