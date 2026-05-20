@@ -228,7 +228,12 @@
     "sign_in_google": "使用 Google 繼續",
     "sign_in_apple": "使用 Apple 繼續",
     "sign_out": "登出",
-    "sign_in_failed": "登入失敗，請再試一次。"
+    "sign_in_failed": "登入失敗，請再試一次。",
+    "privacy_section": "隱私",
+    "analytics_consent": {
+      "title": "分享使用統計",
+      "subtitle": "協助我們改善 Lorescape 的故事與功能，可隨時關閉"
+    }
   },
   "place_category": {
     "historical_cultural": "人文古蹟",

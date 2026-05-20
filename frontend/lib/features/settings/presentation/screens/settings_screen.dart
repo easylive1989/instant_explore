@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:context_app/features/analytics/domain/models/consent_state.dart';
+import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/services/auth_service.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
@@ -38,6 +40,10 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: 'settings.sync_section'.tr()),
           const SizedBox(height: 8),
           const _SyncSection(),
+          const SizedBox(height: 32),
+          _SectionHeader(title: 'settings.privacy_section'.tr()),
+          const SizedBox(height: 8),
+          const _PrivacySection(),
           const SizedBox(height: 32),
           _SectionHeader(title: 'settings.daily_usage'.tr()),
           const SizedBox(height: 8),
@@ -516,6 +522,90 @@ class _SyncSection extends ConsumerWidget {
                 key: const ValueKey('sync_toggle_switch'),
                 value: enabled && isSignedIn,
                 onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================================
+// Privacy section
+// ============================================================================
+
+/// Stream that emits the current analytics consent state and any updates
+/// written via [ConsentRepository.write]. Exposed as a provider so the
+/// Settings toggle can rebuild without holding a `StreamBuilder`.
+final analyticsConsentStreamProvider = StreamProvider<ConsentState>((ref) {
+  return ref.watch(consentRepositoryProvider).watch();
+});
+
+class _PrivacySection extends ConsumerWidget {
+  const _PrivacySection();
+
+  Future<void> _handleToggle(WidgetRef ref, bool value) async {
+    await ref
+        .read(consentRepositoryProvider)
+        .write(ConsentState(enabled: value, updatedAt: DateTime.now()));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final consentAsync = ref.watch(analyticsConsentStreamProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    // Default to opted-in while the first stream value is loading so the
+    // switch never flashes off for users who haven't toggled it.
+    final enabled = consentAsync.valueOrNull?.enabled ?? true;
+
+    return _SectionContainer(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.insights_outlined,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'settings.analytics_consent.title'.tr(),
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'settings.analytics_consent.subtitle'.tr(),
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              AdaptiveSwitch(
+                key: const ValueKey('analytics_consent_switch'),
+                value: enabled,
+                onChanged: (v) => _handleToggle(ref, v),
               ),
             ],
           ),

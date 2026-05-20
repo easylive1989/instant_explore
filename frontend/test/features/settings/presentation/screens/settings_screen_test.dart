@@ -1,3 +1,4 @@
+import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/models/auth_user.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../fakes/fake_auth_service.dart';
+import '../../../../fakes/in_memory_consent_repository.dart';
 import '../../../../fakes/in_memory_onboarding_repository.dart';
 import '../../../../fakes/in_memory_usage_repository.dart';
 import '../../../../helpers/pump_app.dart';
@@ -140,9 +142,12 @@ Future<void> _givenSettingsScreen(
   InMemoryUsageRepository? usage,
   SubscriptionStatus status = SubscriptionStatus.free,
   FakeAuthService? authService,
+  InMemoryConsentRepository? consentRepository,
 }) async {
   final usageRepo = usage ?? InMemoryUsageRepository(usedToday: 0);
   final auth = authService ?? FakeAuthService();
+  final consent = consentRepository ?? InMemoryConsentRepository();
+  addTearDown(consent.dispose);
 
   // The settings screen is taller than the default 800x600 test surface
   // after the onboarding section was added. Enlarging the surface lets
@@ -166,6 +171,7 @@ Future<void> _givenSettingsScreen(
       onboardingRepositoryProvider.overrideWithValue(
         InMemoryOnboardingRepository(welcomeDone: true),
       ),
+      consentRepositoryProvider.overrideWithValue(consent),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));

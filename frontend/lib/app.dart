@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/app/config/theme_config.dart';
 import 'package:context_app/app/config/router_config.dart';
+import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
@@ -24,6 +25,13 @@ class LorescapeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+
+    // Activate the cross-cutting analytics observer for the whole app
+    // lifetime. The Notifier's build() wires up ref.listen on the
+    // narration player state, so a single watch here is all that's
+    // needed to keep the listener alive (the return value is intentionally
+    // discarded).
+    ref.watch(narrationAnalyticsObserverProvider);
 
     // Share intent temporarily disabled — Wikipedia-backed search has too low
     // a hit rate for Google Maps shares. Re-enable along with the platform

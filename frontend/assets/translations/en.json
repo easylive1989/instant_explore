@@ -228,7 +228,12 @@
     "sign_in_google": "Continue with Google",
     "sign_in_apple": "Continue with Apple",
     "sign_out": "Sign out",
-    "sign_in_failed": "Sign-in failed. Please try again."
+    "sign_in_failed": "Sign-in failed. Please try again.",
+    "privacy_section": "Privacy",
+    "analytics_consent": {
+      "title": "Share usage analytics",
+      "subtitle": "Help us improve Lorescape's stories and features. You can turn this off anytime."
+    }
   },
   "place_category": {
     "historical_cultural": "Historical & Cultural",
