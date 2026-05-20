@@ -9,6 +9,7 @@ async event loops just to render a single image.
 """
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -22,24 +23,40 @@ _CARD_HEIGHT = 1350
 
 def render_card(content: CardContent) -> bytes:
     """Render the E0c IG card to PNG bytes (1080×1350)."""
-    base_url = template_dir().as_uri() + "/"  # file:///.../template/
+    base_url = template_dir().as_uri() + "/"
     html = render_html(content, base_url=base_url)
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch()
-        try:
-            page = browser.new_page(
-                viewport={"width": _CARD_WIDTH, "height": _CARD_HEIGHT},
-                device_scale_factor=1.0,
-            )
-            # `<base href="...">` in the template makes card.css and the
-            # bundled font files resolve under file:// — no temp file needed.
-            page.set_content(html, wait_until="networkidle")
-            return page.screenshot(
-                type="png", full_page=False, omit_background=False
-            )
-        finally:
-            browser.close()
+    # Write to a temp file inside the template dir so:
+    #   1. relative paths (card.css, ./fonts/...) resolve via file://
+    #   2. Chromium treats the document as file://-origin, which allows
+    #      loading sibling file:// resources (about:blank from set_content
+    #      would block them as a cross-origin security measure).
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".html",
+        dir=str(template_dir()),
+        encoding="utf-8",
+        delete=False,
+    ) as tmp:
+        tmp.write(html)
+        tmp_path = Path(tmp.name)
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            try:
+                page = browser.new_page(
+                    viewport={"width": _CARD_WIDTH, "height": _CARD_HEIGHT},
+                    device_scale_factor=1.0,
+                )
+                page.goto(tmp_path.as_uri(), wait_until="networkidle")
+                return page.screenshot(
+                    type="png", full_page=False, omit_background=False
+                )
+            finally:
+                browser.close()
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def _cli() -> None:
