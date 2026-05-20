@@ -12,6 +12,11 @@ COPY src ./src
 RUN pip install --upgrade pip && \
     pip install -e .
 
+# Playwright Chromium + its required system libs (for IG card rendering).
+# --with-deps lets Playwright apt-install whatever Chromium needs (libnss,
+# libatk, fonts, etc.) on top of the python:3.11-slim base.
+RUN playwright install --with-deps chromium
+
 EXPOSE 8000
 
 # Default command runs the FastAPI app.
