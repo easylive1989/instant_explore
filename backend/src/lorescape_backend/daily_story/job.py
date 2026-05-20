@@ -52,7 +52,7 @@ def run_once(config: Config, target_date: date) -> None:
                 wikipedia_extract=summary.extract,
                 language=language,
             ),
-            response_schema=prompts.GEMINI_RESPONSE_SCHEMA,
+            response_schema=prompts.build_response_schema(language),
         )
 
         story_writer.insert_story(

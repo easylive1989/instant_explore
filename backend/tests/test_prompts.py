@@ -1,8 +1,39 @@
+import pytest
+
 from lorescape_backend.daily_story.prompts import (
-    GEMINI_RESPONSE_SCHEMA,
     SYSTEM_INSTRUCTION,
+    build_response_schema,
     build_user_prompt,
 )
+
+
+def test_build_response_schema_en_requires_six_fields():
+    schema = build_response_schema("en")
+    assert set(schema["required"]) == {
+        "place_name", "place_location", "era", "story",
+        "threads_summary", "hashtags",
+    }
+
+
+def test_build_response_schema_zh_tw_requires_six_fields():
+    schema = build_response_schema("zh-TW")
+    # Same set as en for Task 2 — Task 3 will add card_* fields here.
+    assert set(schema["required"]) == {
+        "place_name", "place_location", "era", "story",
+        "threads_summary", "hashtags",
+    }
+
+
+def test_build_response_schema_hashtags_is_array_of_strings():
+    schema = build_response_schema("en")
+    hashtags = schema["properties"]["hashtags"]
+    assert hashtags["type"] == "ARRAY"
+    assert hashtags["items"]["type"] == "STRING"
+
+
+def test_build_response_schema_raises_on_unknown_language():
+    with pytest.raises(KeyError):
+        build_response_schema("ja")
 
 
 def test_build_user_prompt_includes_extract_and_language_name_zh_tw():
@@ -48,21 +79,6 @@ def test_system_instruction_forbids_inventing_facts():
     assert "strictly" in lower or "do not introduce" in lower or "do not invent" in lower
 
 
-def test_response_schema_requires_six_fields():
-    required = GEMINI_RESPONSE_SCHEMA.get("required", [])
-    assert set(required) == {
-        "place_name", "place_location", "era", "story",
-        "threads_summary", "hashtags",
-    }
-
-
-def test_response_schema_hashtags_is_array_of_strings():
-    hashtags = GEMINI_RESPONSE_SCHEMA["properties"]["hashtags"]
-    assert hashtags["type"] == "ARRAY"
-    assert hashtags["items"]["type"] == "STRING"
-
-
 def test_build_user_prompt_raises_on_unknown_language():
-    import pytest
     with pytest.raises(KeyError):
         build_user_prompt(wikipedia_title="X", wikipedia_extract="Y", language="ja")

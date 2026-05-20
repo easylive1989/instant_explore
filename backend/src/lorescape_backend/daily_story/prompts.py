@@ -20,36 +20,47 @@ SYSTEM_INSTRUCTION = (
 )
 
 
-# JSON schema for Gemini structured output.
-# Uses uppercase types per google-genai schema conventions.
-GEMINI_RESPONSE_SCHEMA = {
-    "type": "OBJECT",
-    "properties": {
-        "place_name": {"type": "STRING"},
-        "place_location": {"type": "STRING"},
-        "era": {"type": "STRING"},
-        "story": {"type": "STRING"},
-        "threads_summary": {"type": "STRING"},
-        "hashtags": {
-            "type": "ARRAY",
-            "items": {"type": "STRING"},
-        },
-    },
-    "required": [
-        "place_name",
-        "place_location",
-        "era",
-        "story",
-        "threads_summary",
-        "hashtags",
-    ],
-}
-
-
 _LANGUAGE_NAMES = {
     "zh-TW": "Traditional Chinese (zh-TW)",
     "en": "English (en)",
 }
+
+
+_BASE_PROPERTIES: dict = {
+    "place_name": {"type": "STRING"},
+    "place_location": {"type": "STRING"},
+    "era": {"type": "STRING"},
+    "story": {"type": "STRING"},
+    "threads_summary": {"type": "STRING"},
+    "hashtags": {
+        "type": "ARRAY",
+        "items": {"type": "STRING"},
+    },
+}
+
+_BASE_REQUIRED = [
+    "place_name",
+    "place_location",
+    "era",
+    "story",
+    "threads_summary",
+    "hashtags",
+]
+
+
+def build_response_schema(language: str) -> dict:
+    """Return the Gemini structured-output schema for the given language.
+
+    Phase 2 keeps both languages identical; Phase 2 follow-up (Task 3) adds
+    card-specific fields to the zh-TW schema.
+    """
+    if language not in _LANGUAGE_NAMES:
+        raise KeyError(f"Unknown language: {language!r}")
+    return {
+        "type": "OBJECT",
+        "properties": dict(_BASE_PROPERTIES),
+        "required": list(_BASE_REQUIRED),
+    }
 
 
 def build_user_prompt(
