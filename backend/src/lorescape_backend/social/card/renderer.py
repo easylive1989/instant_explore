@@ -40,3 +40,20 @@ def render_card(content: CardContent) -> bytes:
             )
         finally:
             browser.close()
+
+
+def _cli() -> None:
+    """Write the Eiffel demo card to /tmp/eiffel.png for visual inspection.
+
+    Usage:
+        uv run python -m lorescape_backend.social.card.renderer
+    """
+    from ._demo import EIFFEL_DEMO
+
+    out = Path("/tmp/eiffel.png")
+    out.write_bytes(render_card(EIFFEL_DEMO))
+    print(f"wrote {out} ({out.stat().st_size} bytes)")
+
+
+if __name__ == "__main__":
+    _cli()
