@@ -1,5 +1,5 @@
 import 'package:context_app/app/config/app_colors.dart';
-import 'package:context_app/features/export/data/default_pdf_export_pipeline.dart';
+import 'package:context_app/features/export/presentation/default_pdf_export_pipeline.dart';
 import 'package:context_app/features/export/domain/models/pdf_export_result.dart';
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';

@@ -11,7 +11,7 @@ import 'package:context_app/features/narration/presentation/controllers/story_ho
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
-import 'package:context_app/shared/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
 import 'package:context_app/shared/widgets/midnight/midnight.dart';

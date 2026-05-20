@@ -1,3 +1,17 @@
+// JourneyEntry encapsulates two non-trivial behaviours worth testing
+// in isolation:
+//
+//   1. create(): maps a rich Place (+ its primary photo) into the
+//      slimmer SavedPlace projection that journeys persist.
+//   2. fromJson(): tolerates legacy rows written before story_hook /
+//      trip_id existed.
+//
+// Pure constructor / parameter-pass-through cases were removed: they
+// only restated the model definition and would pass even when the
+// behaviour above was broken. Real tripId usage is exercised
+// end-to-end in trip_lifecycle_flow_test and narration integration
+// tests.
+
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
@@ -16,49 +30,52 @@ const _hook = StoryHook(
 );
 
 void main() {
-  group('JourneyEntry.create', () {
-    test('creates entry with correct data when place has no photos', () {
-      const place = Place(
-        id: 'place-1',
-        name: 'Test Place',
-        address: 'Test Address',
-        location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.historicalCultural,
-      );
+  group('JourneyEntry.create projects Place onto SavedPlace', () {
+    test(
+      'given a place with no photos, when creating an entry, '
+      'then SavedPlace has no imageUrl',
+      () {
+        const place = Place(
+          id: 'place-1',
+          name: 'Test Place',
+          address: 'Test Address',
+          location: PlaceLocation(latitude: 25.0, longitude: 121.0),
+          tags: [],
+          photos: [],
+          category: PlaceCategory.historicalCultural,
+        );
+        final content = NarrationContent.create(
+          'Test narration',
+          language: Language.traditionalChinese,
+        );
 
-      final content = NarrationContent.create(
-        'Test narration',
-        language: Language.traditionalChinese,
-      );
+        final entry = JourneyEntry.create(
+          id: 'test-id',
+          place: place,
+          content: content,
+          hook: _hook,
+          language: Language.traditionalChinese,
+        );
 
-      final entry = JourneyEntry.create(
-        id: 'test-id',
-        place: place,
-        content: content,
-        hook: _hook,
-        language: Language.traditionalChinese,
-      );
-
-      expect(
-        entry.place,
-        equals(
-          const SavedPlace(
-            id: 'place-1',
-            name: 'Test Place',
-            address: 'Test Address',
+        expect(
+          entry.place,
+          equals(
+            const SavedPlace(
+              id: 'place-1',
+              name: 'Test Place',
+              address: 'Test Address',
+            ),
           ),
-        ),
-      );
-      expect(entry.narrationContent, equals(content));
-      expect(entry.storyHook, equals(_hook));
-      expect(entry.language, equals(Language.traditionalChinese));
-      expect(entry.id, isNotEmpty);
-    });
+        );
+        expect(entry.narrationContent, equals(content));
+        expect(entry.storyHook, equals(_hook));
+        expect(entry.language, equals(Language.traditionalChinese));
+      },
+    );
 
     test(
-      'creates entry with imageUrl from primaryPhoto when place has photos',
+      'given a place with photos, when creating an entry, '
+      'then SavedPlace.imageUrl is taken from the primary photo',
       () {
         const placePhoto = PlacePhoto(
           url: 'https://example.com/photo.jpg',
@@ -66,7 +83,6 @@ void main() {
           height: 600,
           attributions: ['Author Name'],
         );
-
         const place = Place(
           id: 'place-2',
           name: 'Place With Photo',
@@ -76,7 +92,6 @@ void main() {
           photos: [placePhoto],
           category: PlaceCategory.naturalLandscape,
         );
-
         final content = NarrationContent.create(
           'Story narration',
           language: Language.traditionalChinese,
@@ -101,157 +116,74 @@ void main() {
             ),
           ),
         );
-        expect(entry.narrationContent, equals(content));
-        expect(entry.storyHook, equals(_hook));
-        expect(entry.language, equals(Language.traditionalChinese));
       },
     );
-
-    test('preserves distinct IDs passed by caller', () {
-      const place = Place(
-        id: 'place-1',
-        name: 'Place With Photo',
-        address: 'Test Address',
-        location: PlaceLocation(latitude: 25.0, longitude: 121.0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-
-      final content = NarrationContent.create(
-        'Test narration',
-        language: Language.traditionalChinese,
-      );
-
-      final entry1 = JourneyEntry.create(
-        id: 'id-1',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-      );
-
-      final entry2 = JourneyEntry.create(
-        id: 'id-2',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-      );
-
-      expect(entry1.id, equals('id-1'));
-      expect(entry2.id, equals('id-2'));
-      expect(entry1.id, isNot(equals(entry2.id)));
-    });
-
-    test('defaults tripId to null when omitted', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-
-      final entry = JourneyEntry.create(
-        id: 'no-trip-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-      );
-
-      expect(entry.tripId, isNull);
-    });
-
-    test('attaches tripId when provided', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-
-      final entry = JourneyEntry.create(
-        id: 'with-trip-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-        tripId: 'trip-123',
-      );
-
-      expect(entry.tripId, 'trip-123');
-    });
   });
 
   group('JourneyEntry.fromJson legacy handling', () {
-    test('restores null hook when the entry pre-dates story_hook', () {
-      const place = Place(
-        id: 'p-legacy',
-        name: 'Legacy',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'legacy text',
-        language: Language.traditionalChinese,
-      );
-      final entry = JourneyEntry.create(
-        id: 'legacy-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-      );
+    test(
+      'given a legacy row written before story_hook existed, '
+      'when deserialising, then storyHook is null',
+      () {
+        const place = Place(
+          id: 'p-legacy',
+          name: 'Legacy',
+          address: 'Addr',
+          location: PlaceLocation(latitude: 0, longitude: 0),
+          tags: [],
+          photos: [],
+          category: PlaceCategory.modernUrban,
+        );
+        final content = NarrationContent.create(
+          'legacy text',
+          language: Language.traditionalChinese,
+        );
+        final entry = JourneyEntry.create(
+          id: 'legacy-id',
+          place: place,
+          content: content,
+          language: Language.traditionalChinese,
+        );
 
-      final json = entry.toJson();
-      // Simulate a legacy row that still has the old `narration_styles` list
-      // but no story_hook key.
-      json['narration_styles'] = ['historical_background'];
+        final json = entry.toJson();
+        json['narration_styles'] = ['historical_background'];
 
-      final restored = JourneyEntry.fromJson(json);
+        final restored = JourneyEntry.fromJson(json);
 
-      expect(restored.storyHook, isNull);
-    });
+        expect(restored.storyHook, isNull);
+      },
+    );
 
-    test('treats missing trip_id as null', () {
-      const place = Place(
-        id: 'p1',
-        name: 'Test',
-        address: 'Addr',
-        location: PlaceLocation(latitude: 0, longitude: 0),
-        tags: [],
-        photos: [],
-        category: PlaceCategory.modernUrban,
-      );
-      final content = NarrationContent.create(
-        'Some narration text for testing.',
-        language: Language.traditionalChinese,
-      );
-      final entry = JourneyEntry.create(
-        id: 'legacy-id',
-        place: place,
-        content: content,
-        language: Language.traditionalChinese,
-        tripId: 'will-be-removed',
-      );
-      final legacyJson = entry.toJson()..remove('trip_id');
+    test(
+      'given a legacy row missing trip_id, when deserialising, '
+      'then tripId is null',
+      () {
+        const place = Place(
+          id: 'p1',
+          name: 'Test',
+          address: 'Addr',
+          location: PlaceLocation(latitude: 0, longitude: 0),
+          tags: [],
+          photos: [],
+          category: PlaceCategory.modernUrban,
+        );
+        final content = NarrationContent.create(
+          'Some narration text for testing.',
+          language: Language.traditionalChinese,
+        );
+        final entry = JourneyEntry.create(
+          id: 'legacy-id',
+          place: place,
+          content: content,
+          language: Language.traditionalChinese,
+          tripId: 'will-be-removed',
+        );
+        final legacyJson = entry.toJson()..remove('trip_id');
 
-      final restored = JourneyEntry.fromJson(legacyJson);
+        final restored = JourneyEntry.fromJson(legacyJson);
 
-      expect(restored.tripId, isNull);
-    });
+        expect(restored.tripId, isNull);
+      },
+    );
   });
 }
