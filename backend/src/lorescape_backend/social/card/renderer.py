@@ -1,0 +1,76 @@
+"""Playwright-based IG card renderer.
+
+Opens a headless Chromium with a 1080×1350 viewport, loads the Jinja2-
+rendered HTML (CSS + local fonts referenced via file://), and screenshots
+the page.
+
+Synchronous API for ergonomics: callers should not have to worry about
+async event loops just to render a single image.
+"""
+from __future__ import annotations
+
+import tempfile
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright
+
+from .content import CardContent
+from .template import render_html, template_dir
+
+_CARD_WIDTH = 1080
+_CARD_HEIGHT = 1350
+
+
+def render_card(content: CardContent) -> bytes:
+    """Render the E0c IG card to PNG bytes (1080×1350)."""
+    base_url = template_dir().as_uri() + "/"
+    html = render_html(content, base_url=base_url)
+
+    # Write to a temp file inside the template dir so:
+    #   1. relative paths (card.css, ./fonts/...) resolve via file://
+    #   2. Chromium treats the document as file://-origin, which allows
+    #      loading sibling file:// resources (about:blank from set_content
+    #      would block them as a cross-origin security measure).
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".html",
+        dir=str(template_dir()),
+        encoding="utf-8",
+        delete=False,
+    ) as tmp:
+        tmp.write(html)
+        tmp_path = Path(tmp.name)
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            try:
+                page = browser.new_page(
+                    viewport={"width": _CARD_WIDTH, "height": _CARD_HEIGHT},
+                    device_scale_factor=1.0,
+                )
+                page.goto(tmp_path.as_uri(), wait_until="networkidle")
+                return page.screenshot(
+                    type="png", full_page=False, omit_background=False
+                )
+            finally:
+                browser.close()
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+def _cli() -> None:
+    """Write the Eiffel demo card to /tmp/eiffel.png for visual inspection.
+
+    Usage:
+        uv run python -m lorescape_backend.social.card.renderer
+    """
+    from ._demo import EIFFEL_DEMO
+
+    out = Path("/tmp/eiffel.png")
+    out.write_bytes(render_card(EIFFEL_DEMO))
+    print(f"wrote {out} ({out.stat().st_size} bytes)")
+
+
+if __name__ == "__main__":
+    _cli()
