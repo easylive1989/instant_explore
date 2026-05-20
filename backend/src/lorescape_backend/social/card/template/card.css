@@ -1,0 +1,310 @@
+@import url("./fonts/fonts.css");
+
+/* ============================================================
+   Lorescape IG Card — E0c · 朱印方塊 · 中文版
+   1080×1350 (4:5). Editorial × ancient-book. No chapter.
+   ============================================================ */
+
+:root {
+  --paper:        #f3ead7;
+  --paper-deep:   #e8dcc0;
+  --ink:          #1a1410;
+  --ink-soft:     #3a2e22;
+  --ink-muted:    #6a5a44;
+  --vermilion:    #b6321c;
+  --vermilion-dk: #7a1f10;
+  --rule:         rgba(26,20,16,0.55);
+  --rule-soft:    rgba(26,20,16,0.22);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  font-family: "EB Garamond", "Noto Serif TC", serif;
+  color: var(--ink);
+}
+
+/* ----------- Card ----------- */
+.ls-card {
+  width: 1080px;
+  height: 1350px;
+  position: relative;
+  background: var(--paper);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 760px 1fr;
+  isolation: isolate;
+}
+
+/* Subtle paper grain across whole card */
+.ls-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(120,90,50,0.10) 1px, transparent 1px),
+    radial-gradient(rgba(80,60,40,0.08) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Hairline inner border (古籍 frame) */
+.ls-card::after {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border: 1px solid var(--rule);
+  outline: 1px solid var(--rule-soft);
+  outline-offset: 6px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ============================================================
+   Photo plate
+   ============================================================ */
+.ls-photo {
+  position: relative;
+  overflow: hidden;
+}
+.ls-photo__img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.92) contrast(1.02);
+}
+.ls-photo__tint {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(20,12,8,0.55) 0%,
+      rgba(20,12,8,0.10) 35%,
+      rgba(20,12,8,0.20) 65%,
+      rgba(122,31,16,0.78) 100%);
+  mix-blend-mode: multiply;
+}
+.ls-photo__grain {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+/* Coordinates — top-right */
+.ls-coord {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  z-index: 3;
+  text-align: right;
+  color: var(--paper);
+  font-family: "EB Garamond", serif;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  line-height: 1.7;
+  opacity: 0.85;
+}
+.ls-coord__year {
+  font-style: italic;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+/* Title block — bottom of photo */
+.ls-title {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  bottom: 56px;
+  z-index: 3;
+  color: var(--paper);
+}
+.ls-title__ch {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: 78px;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.35);
+}
+.ls-title__ch-sub {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: 0.22em;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Vertical book-spine label running up left edge of photo */
+.ls-spine {
+  position: absolute;
+  top: 60px;
+  bottom: 60px;
+  left: 28px;
+  width: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ls-spine span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: "Noto Serif TC", serif;
+  color: var(--paper);
+  font-size: 12px;
+  letter-spacing: 0.6em;
+  opacity: 0.65;
+}
+
+/* ============================================================
+   Text plate (lower half) — single Chinese column only
+   ============================================================ */
+.ls-text {
+  position: relative;
+  padding: 52px 110px 40px;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 0;
+}
+
+/* Folio band — E0c · seal · double rules + vermilion diamond */
+.ls-folio.ls-folio--seal {
+  position: absolute;
+  top: -3px;
+  left: 70px;
+  right: 70px;
+  height: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  z-index: 2;
+}
+.ls-folio__num {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+}
+.ls-folio__seal {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: var(--vermilion);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 4px var(--paper);
+}
+
+/* Verse rows — Chinese-only single column */
+.ls-verse {
+  display: contents;
+}
+.ls-verse__ch {
+  padding-bottom: 22px;
+}
+.ls-verse:not(:last-child) .ls-verse__ch {
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 18px;
+}
+
+/* Drop-cap for the first Chinese verse */
+.ls-verse--first .ls-verse__ch {
+  position: relative;
+}
+.ls-dropcap {
+  float: left;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  color: var(--vermilion);
+  font-size: 78px;
+  line-height: 0.85;
+  padding: 6px 12px 0 0;
+  margin-top: 4px;
+}
+
+/* Body text — Chinese only, larger than dual mode */
+.ls-body-ch {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 400;
+  font-size: 19.5px;
+  line-height: 1.85;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  text-align: justify;
+  text-justify: inter-character;
+  margin: 0;
+}
+
+/* Pull-quote */
+.ls-quote {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 22px 0 0 0;
+  border-top: 1px solid var(--rule-soft);
+  text-align: center;
+  position: relative;
+}
+.ls-quote::before {
+  content: "❦";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--paper);
+  padding: 0 14px;
+  color: var(--vermilion);
+  font-size: 22px;
+}
+.ls-quote__ch {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--vermilion-dk);
+  letter-spacing: 0.06em;
+  margin: 0 0 8px 0;
+}
+.ls-quote__attrib {
+  font-family: "EB Garamond", serif;
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* Footer marginalia — grid-flow so it never overlaps body */
+.ls-foot {
+  grid-column: 1 / -1;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: "EB Garamond", serif;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.ls-foot__brand {
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: none;
+}
