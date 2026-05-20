@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+{# `base_url` is injected by the Playwright renderer so relative paths
+   (card.css, ./fonts/...) resolve via file://. Pure-HTML unit tests
+   pass an empty string, which yields a no-op <base href="">. #}
+<base href="{{ base_url }}" />
+<link rel="stylesheet" href="card.css" />
+</head>
+<body>
+<div class="ls-card">
+  {# ============ PHOTO PLATE ============ #}
+  <div class="ls-photo">
+    <div class="ls-photo__img" style="background-image: url('{{ content.photo_url | safe }}');"></div>
+    <div class="ls-photo__tint"></div>
+    <div class="ls-photo__grain"></div>
+
+    <div class="ls-spine"><span>{{ content.location_en }}</span></div>
+
+    <div class="ls-coord">
+      <div class="ls-coord__year">Anno · {{ content.anno_roman }}</div>
+      <div>{{ content.location_coord }}</div>
+    </div>
+
+    <div class="ls-title">
+      <h1 class="ls-title__ch">{{ content.title_ch }}</h1>
+      <p class="ls-title__ch-sub">{{ content.title_ch_sub }}</p>
+    </div>
+  </div>
+
+  {# ============ TEXT PLATE (ZH-only, single column) ============ #}
+  <div class="ls-text ls-text--single is-ch">
+    <div class="ls-folio ls-folio--seal">
+      <span class="ls-folio__num"><span class="ls-folio__seal"></span></span>
+    </div>
+
+    {% for paragraph in content.paragraphs_ch %}
+      <div class="ls-verse {% if loop.first %}ls-verse--first{% endif %}">
+        <div class="ls-verse__ch">
+          <p class="ls-body-ch">
+            {% if loop.first %}<span class="ls-dropcap">{{ paragraph[:1] }}</span>{{ paragraph[1:] }}{% else %}{{ paragraph }}{% endif %}
+          </p>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="ls-quote">
+      <p class="ls-quote__ch">{{ content.pull_quote_ch }}</p>
+      <p class="ls-quote__attrib">{{ content.pull_quote_attrib_ch }}</p>
+    </div>
+
+    <div class="ls-foot">
+      <span>{{ content.location_ch }} · {{ content.city_ch }} {{ content.city_en }}</span>
+      <span class="ls-foot__brand">Lorescape · 拾景</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
