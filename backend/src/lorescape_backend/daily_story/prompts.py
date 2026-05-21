@@ -187,7 +187,7 @@ def _zh_tw_body(language_name: str) -> str:
         "the central tension of the story (≤ 14 characters, must NOT just "
         "repeat the place name).\n"
         "- card_title_sub_ch: a subtitle that complements the main title "
-        "(≤ 20 characters; full-width quotes 「」allowed).\n"
+        "(≤ 20 characters; full-width quotes 「」 allowed).\n"
         "- card_paragraphs_ch: the same 3 paragraphs above, returned as a "
         "JSON array of 3 strings (one paragraph per element, no leading/"
         "trailing whitespace).\n"
