@@ -20,7 +20,9 @@ from supabase import create_client
 
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story import discord_notify, discord_review
-from lorescape_backend.social import caption, instagram, threads
+from lorescape_backend.social import card_storage, caption, instagram, threads
+from lorescape_backend.social.card import mapper
+from lorescape_backend.social.card.renderer import render_card
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,7 @@ def _process_row(supabase, config: Config, row: dict[str, Any]) -> None:
 
 
 def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
-    story_copy = caption.StoryCopy(
+    en_story_copy = caption.StoryCopy(
         place_name=row["place_name"],
         era=row["era"],
         story=row["story"],
@@ -86,18 +88,35 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
         hashtags=tuple(row.get("hashtags") or ()),
     )
     threads_text = caption.build_threads_caption(
-        story=story_copy,
+        story=en_story_copy,
         brand_handle=config.brand_handle_threads,
         cta_text=config.cta_text,
     )
-    ig_text = caption.build_full_caption(
-        story=story_copy,
-        brand_handle=config.brand_handle_ig,
-        cta_text=config.cta_text,
-    )
+
+    zh_row = _load_zh_tw_row(supabase, row["publish_date"])
+    place_row = _load_place_row(supabase, row["place_id"])
+    card_content = None
+    if zh_row is not None and place_row is not None:
+        card_content = mapper.build_card_content(zh_row, place_row)
+
+    ig_caption = None
+    if card_content is not None:
+        zh_story_copy = caption.StoryCopy(
+            place_name=zh_row["place_name"],
+            era=zh_row["era"],
+            story=zh_row["story"],
+            threads_summary=zh_row["threads_summary"] or "",
+            hashtags=tuple(zh_row.get("hashtags") or ()),
+        )
+        ig_caption = caption.build_full_caption(
+            story=zh_story_copy,
+            brand_handle=config.brand_handle_ig,
+            cta_text=config.cta_text,
+        )
 
     threads_post_id: str | None = None
     ig_post_id: str | None = None
+    publish_error: str | None = None
     try:
         if config.threads_enabled:
             threads_post_id = threads.publish(
@@ -109,15 +128,21 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
         else:
             logger.info("Threads not configured; skipping Threads publish")
 
-        if config.instagram_enabled and row.get("image_url"):
+        if config.instagram_enabled and card_content is not None:
+            png = render_card(card_content)
+            path = f"{row['publish_date']}/{zh_row['id']}.png"
+            card_url = card_storage.upload_card_png(supabase, png, path=path)
             ig_post_id = instagram.publish(
                 ig_user_id=config.ig_user_id,  # type: ignore[arg-type]
                 access_token=config.meta_page_access_token,  # type: ignore[arg-type]
-                image_url=row["image_url"],
-                caption=ig_text,
+                image_url=card_url,
+                caption=ig_caption,  # type: ignore[arg-type]
             )
-        elif not row.get("image_url"):
-            logger.info("Row %s has no image_url; skipping IG publish", row["id"])
+        elif card_content is None:
+            logger.info(
+                "Row %s missing card content; skipping IG publish", row["id"]
+            )
+            publish_error = "ig_skipped_missing_card_content"
         else:
             logger.info("Instagram not configured; skipping IG publish")
 
@@ -149,6 +174,7 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
         extra={
             "threads_post_id": threads_post_id,
             "ig_post_id": ig_post_id,
+            "publish_error": publish_error,
         },
     )
 
@@ -163,6 +189,31 @@ def _load_pending_rows(supabase, target_date: date) -> list[dict[str, Any]]:
         .execute()
     )
     return response.data or []
+
+
+def _load_zh_tw_row(supabase, publish_date: str) -> dict[str, Any] | None:
+    response = (
+        supabase.table("daily_stories")
+        .select("*")
+        .eq("publish_date", publish_date)
+        .eq("language", "zh-TW")
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None
+
+
+def _load_place_row(supabase, place_id: str) -> dict[str, Any] | None:
+    response = (
+        supabase.table("daily_story_places")
+        .select("*")
+        .eq("id", place_id)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None
 
 
 def _update_state(
