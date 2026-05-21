@@ -255,8 +255,8 @@ def _try_publish(supabase, config: Config, en_row: dict) -> None:
 | ✓                 | ✓                   | ✗            | Only Threads；published；publish_error 記錄跳過 IG  |
 | ✓                 | ✗                   | -            | Only Threads；published                         |
 | ✗                 | ✓                   | ✓            | Only IG；published                              |
-| ✗                 | ✓                   | ✗            | 都不發；skipped（沒事可做）                         |
-| ✗                 | ✗                   | -            | 都不發；skipped                                    |
+| ✗                 | ✓                   | ✗            | 都不發；published, `publish_error='ig_skipped_missing_card_content'` |
+| ✗                 | ✗                   | -            | 都不發；published, no `publish_error`              |
 
 ## Config 變更 (`config.py`)
 
