@@ -36,6 +36,9 @@ def insert_story(supabase, row: StoryRow) -> None:
     """
     payload = asdict(row)
     payload["publish_date"] = row.publish_date.isoformat()
+    # asdict leaves tuple-typed fields as tuples, but the Supabase JSON
+    # serializer needs lists for text[] / jsonb columns. Any new tuple field
+    # added to StoryRow must be explicitly converted here.
     payload["hashtags"] = list(row.hashtags)
     if row.card_paragraphs_ch is not None:
         payload["card_paragraphs_ch"] = list(row.card_paragraphs_ch)
