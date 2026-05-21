@@ -18,6 +18,13 @@ class StoryRow:
     wikipedia_url: str
     threads_summary: str
     hashtags: tuple[str, ...] = field(default_factory=tuple)
+    # IG card fields — populated only on the zh-TW path.
+    card_title_ch: str | None = None
+    card_title_sub_ch: str | None = None
+    card_paragraphs_ch: tuple[str, ...] | None = None
+    card_pull_quote_ch: str | None = None
+    card_pull_quote_attrib_ch: str | None = None
+    card_anno_roman: str | None = None
 
 
 def insert_story(supabase, row: StoryRow) -> None:
@@ -30,6 +37,8 @@ def insert_story(supabase, row: StoryRow) -> None:
     payload = asdict(row)
     payload["publish_date"] = row.publish_date.isoformat()
     payload["hashtags"] = list(row.hashtags)
+    if row.card_paragraphs_ch is not None:
+        payload["card_paragraphs_ch"] = list(row.card_paragraphs_ch)
     (
         supabase.table("daily_stories")
         .upsert(payload, on_conflict="publish_date,language")
