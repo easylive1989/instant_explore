@@ -315,3 +315,107 @@ def test_run_generate_and_review_swallows_review_failure(
     run_generate_and_review(fake_config, _date(2026, 5, 12))
 
     notify.assert_called_once()
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
+@patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
+@patch("lorescape_backend.daily_story.job.story_writer.insert_story")
+@patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
+def test_run_once_zh_tw_joins_paragraphs_and_passes_card_fields(
+    mark_used, insert_story, generate_story, fetch_langlink,
+    fetch_summary, pick_next, create_client, fake_config,
+):
+    pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Eiffel Tower")
+    fetch_summary.return_value = WikipediaSummary(
+        title="Eiffel Tower",
+        extract="Built 1889 by Gustave Eiffel.",
+        image_url="https://upload.wikimedia.org/x.jpg",
+        en_url="https://en.wikipedia.org/wiki/Eiffel_Tower",
+    )
+    fetch_langlink.side_effect = lambda title, lang: (
+        f"https://{lang}.wikipedia.org/wiki/{title}"
+    )
+    generate_story.side_effect = [
+        # zh-TW: paragraphs + card fields, story is None
+        GeneratedStory(
+            place_name="艾菲爾鐵塔",
+            place_location="巴黎",
+            era="十九世紀末",
+            story=None,
+            threads_summary="短摘",
+            hashtags=("paris", "eiffelTower"),
+            card_title_ch="討厭鐵塔的文學大師",
+            card_title_sub_ch="莫泊桑的「專屬午餐位」",
+            card_paragraphs_ch=("第一段", "第二段", "第三段"),
+            card_pull_quote_ch="「看不見鐵塔的地方。」",
+            card_pull_quote_attrib_ch="—— 莫泊桑，一八八九",
+            card_anno_roman="MDCCCLXXXIX",
+        ),
+        # en: original shape
+        GeneratedStory(
+            place_name="Eiffel Tower",
+            place_location="Paris",
+            era="Late 19th century",
+            story="english story",
+            threads_summary="en short",
+            hashtags=("paris",),
+        ),
+    ]
+
+    run_once(fake_config, date(2026, 5, 21))
+
+    # zh-TW row: schema is the zh-TW one, story is the joined paragraphs,
+    # and all card fields are passed through.
+    zh_call, en_call = insert_story.call_args_list
+    zh_row = zh_call.args[1]
+    assert zh_row.language == "zh-TW"
+    assert zh_row.story == "第一段\n\n第二段\n\n第三段"
+    assert zh_row.card_title_ch == "討厭鐵塔的文學大師"
+    assert zh_row.card_paragraphs_ch == ("第一段", "第二段", "第三段")
+    assert zh_row.card_anno_roman == "MDCCCLXXXIX"
+
+    # en row: story unchanged, card fields all None
+    en_row = en_call.args[1]
+    assert en_row.language == "en"
+    assert en_row.story == "english story"
+    assert en_row.card_title_ch is None
+    assert en_row.card_paragraphs_ch is None
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
+@patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
+@patch("lorescape_backend.daily_story.job.story_writer.insert_story")
+@patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
+def test_run_once_passes_per_language_response_schema(
+    mark_used, insert_story, generate_story, fetch_langlink,
+    fetch_summary, pick_next, create_client, fake_config,
+):
+    from lorescape_backend.daily_story import prompts
+
+    pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Colosseum")
+    fetch_summary.return_value = WikipediaSummary(
+        title="Colosseum", extract="...", image_url=None,
+        en_url="https://en.wikipedia.org/wiki/Colosseum",
+    )
+    fetch_langlink.return_value = None
+    generate_story.return_value = GeneratedStory(
+        place_name="X", place_location="Y", era="Z",
+        story="s", threads_summary="t", hashtags=(),
+        card_paragraphs_ch=("a", "b", "c"),
+    )
+
+    run_once(fake_config, date(2026, 5, 21))
+
+    # First call (zh-TW) gets the zh-TW schema; second call (en) gets en schema.
+    zh_schema = generate_story.call_args_list[0].kwargs["response_schema"]
+    en_schema = generate_story.call_args_list[1].kwargs["response_schema"]
+    assert zh_schema == prompts.build_response_schema("zh-TW")
+    assert en_schema == prompts.build_response_schema("en")
+    # Sanity: they differ
+    assert zh_schema != en_schema
