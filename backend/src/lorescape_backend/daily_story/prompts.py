@@ -79,6 +79,8 @@ def build_response_schema(language: str) -> dict:
     `card_paragraphs_ch`. en keeps the original story-in-a-single-string
     shape.
     """
+    if language not in _LANGUAGE_NAMES:
+        raise KeyError(f"Unknown language: {language!r}")
     if language == "zh-TW":
         # Drop `story` from base — zh-TW returns paragraphs instead.
         base_props = {k: v for k, v in _BASE_PROPERTIES.items() if k != "story"}
@@ -88,13 +90,12 @@ def build_response_schema(language: str) -> dict:
             "properties": {**base_props, **_ZH_CARD_PROPERTIES},
             "required": base_required + _ZH_CARD_REQUIRED,
         }
-    if language == "en":
-        return {
-            "type": "OBJECT",
-            "properties": dict(_BASE_PROPERTIES),
-            "required": list(_BASE_REQUIRED),
-        }
-    raise KeyError(f"Unknown language: {language!r}")
+    # language == "en"
+    return {
+        "type": "OBJECT",
+        "properties": dict(_BASE_PROPERTIES),
+        "required": list(_BASE_REQUIRED),
+    }
 
 
 def build_user_prompt(
