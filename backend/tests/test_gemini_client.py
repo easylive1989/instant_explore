@@ -83,3 +83,75 @@ def test_generate_story_passes_system_instruction_and_temperature(mock_client_cl
         assert config.temperature == 0.3
         assert config.response_mime_type == "application/json"
         assert config.response_schema["required"] == ["story"]
+
+
+@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
+def test_generate_story_parses_zh_tw_card_fields(mock_client_cls):
+    mock_response = MagicMock()
+    mock_response.text = json.dumps(
+        {
+            "place_name": "艾菲爾鐵塔",
+            "place_location": "巴黎",
+            "era": "十九世紀末",
+            "threads_summary": "短摘",
+            "hashtags": ["paris", "eiffelTower"],
+            "card_title_ch": "討厭鐵塔的文學大師",
+            "card_title_sub_ch": "莫泊桑的「專屬午餐位」",
+            "card_paragraphs_ch": ["第一段", "第二段", "第三段"],
+            "card_pull_quote_ch": "「看不見艾菲爾鐵塔的地方。」",
+            "card_pull_quote_attrib_ch": "—— 莫泊桑，一八八九",
+            "card_anno_roman": "MDCCCLXXXIX",
+        }
+    )
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_response
+    mock_client_cls.return_value = mock_client
+
+    result = generate_story(
+        api_key="key",
+        system_instruction="sys",
+        user_prompt="user",
+        response_schema={"type": "OBJECT"},
+    )
+
+    # story is None for zh-TW path (writer derives it from paragraphs)
+    assert result.story is None
+    assert result.card_title_ch == "討厭鐵塔的文學大師"
+    assert result.card_title_sub_ch == "莫泊桑的「專屬午餐位」"
+    assert result.card_paragraphs_ch == ("第一段", "第二段", "第三段")
+    assert result.card_pull_quote_ch == "「看不見艾菲爾鐵塔的地方。」"
+    assert result.card_pull_quote_attrib_ch == "—— 莫泊桑，一八八九"
+    assert result.card_anno_roman == "MDCCCLXXXIX"
+
+
+@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
+def test_generate_story_leaves_card_fields_none_when_absent(mock_client_cls):
+    mock_response = MagicMock()
+    mock_response.text = json.dumps(
+        {
+            "place_name": "X",
+            "place_location": "Y",
+            "era": "Z",
+            "story": "english story",
+            "threads_summary": "T",
+            "hashtags": [],
+        }
+    )
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_response
+    mock_client_cls.return_value = mock_client
+
+    result = generate_story(
+        api_key="key",
+        system_instruction="sys",
+        user_prompt="user",
+        response_schema={"type": "OBJECT"},
+    )
+
+    assert result.story == "english story"
+    assert result.card_title_ch is None
+    assert result.card_title_sub_ch is None
+    assert result.card_paragraphs_ch is None
+    assert result.card_pull_quote_ch is None
+    assert result.card_pull_quote_attrib_ch is None
+    assert result.card_anno_roman is None

@@ -13,14 +13,25 @@ GEMINI_TEMPERATURE = 0.3
 
 @dataclass(frozen=True)
 class GeneratedStory:
-    """Structured output from the Gemini story generation call."""
+    """Structured output from the Gemini story generation call.
+
+    Card fields are populated only on the zh-TW path; en leaves them None.
+    For zh-TW, `story` is also None — the writer derives it by joining
+    `card_paragraphs_ch`.
+    """
 
     place_name: str
     place_location: str
     era: str
-    story: str
+    story: str | None
     threads_summary: str
     hashtags: tuple[str, ...]
+    card_title_ch: str | None = None
+    card_title_sub_ch: str | None = None
+    card_paragraphs_ch: tuple[str, ...] | None = None
+    card_pull_quote_ch: str | None = None
+    card_pull_quote_attrib_ch: str | None = None
+    card_anno_roman: str | None = None
 
 
 def generate_story(
@@ -51,11 +62,18 @@ def generate_story(
     )
 
     data = json.loads(response.text)
+    paragraphs = data.get("card_paragraphs_ch")
     return GeneratedStory(
         place_name=data["place_name"],
         place_location=data["place_location"],
         era=data["era"],
-        story=data["story"],
+        story=data.get("story"),
         threads_summary=data["threads_summary"],
         hashtags=tuple(data["hashtags"]),
+        card_title_ch=data.get("card_title_ch"),
+        card_title_sub_ch=data.get("card_title_sub_ch"),
+        card_paragraphs_ch=tuple(paragraphs) if paragraphs is not None else None,
+        card_pull_quote_ch=data.get("card_pull_quote_ch"),
+        card_pull_quote_attrib_ch=data.get("card_pull_quote_attrib_ch"),
+        card_anno_roman=data.get("card_anno_roman"),
     )
