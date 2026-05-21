@@ -129,6 +129,7 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
             logger.info("Threads not configured; skipping Threads publish")
 
         if config.instagram_enabled and card_content is not None:
+            # card_content is non-None implies zh_row was loaded successfully.
             png = render_card(card_content)
             path = f"{row['publish_date']}/{zh_row['id']}.png"
             card_url = card_storage.upload_card_png(supabase, png, path=path)
