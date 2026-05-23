@@ -37,6 +37,76 @@ supabase db psql --linked -c "
 
 **為什麼**：沒這兩個值，後端的 `config.instagram_enabled` 永遠是 `False`，整個 IG 流程跳過。
 
+這步分兩個 sub-step：1.A 是把帳號身份準備好（一次性、Meta 平台架構強制要求），1.B 才是跑 script 換 token。
+
+### Step 1.A — IG 帳號改成 Business + 連 Facebook Page（首次設定）
+
+如果你的 `love.lorescape` 已經是 Business / Creator **且**已連 FB Page，跳到 Step 1.B。
+
+如果不確定：開 IG mobile app → 個人檔案頁 → 看右上角 hamburger menu 裡有沒有 **Insights**（洞察報告）、**Professional dashboard** 這類選項——有就是 Business / Creator，沒有就是 Personal。
+
+> **為什麼一定要 Facebook Page**：Meta Graph API 不接受純個人 IG 帳號發文。API 的 OAuth 流程靠 **Page Access Token** 授權，而 Page Token 只能從「你管理的 FB Page」拿；Meta 又規定 IG 升級成 Business 必須掛到某個 FB Page 之下。Page 不需要實際發 FB 文，純粹當 administrative parent。
+
+#### 1.A.1 — 先準備一個 Facebook Page（如果還沒有）
+
+Page 必須由「將來會跑 token-helper 的那個 Facebook 帳號」當 admin。
+
+1. 用 desktop browser 登入 https://facebook.com（用會管 Lorescape 的個人 Facebook 帳號）
+2. 左側 sidebar 找 **Pages** → 點 **Create new Page**（或直接開 https://www.facebook.com/pages/create）
+3. 填：
+   - **Page name**：`Lorescape`（任意，但選好之後改名很麻煩）
+   - **Category**：選 `Travel Service` / `Media & News Company` / `Travel Company` 任一即可
+   - **Bio**（可選）：一句介紹
+4. 點 **Create Page**
+5. 後續它會引導加大頭貼、cover 圖、連結等——這些**全部可以跳過 / 之後再補**，因為這 Page 不需要實際內容
+6. 確認你（當前登入的 FB 帳號）的角色是 **Admin** → Page 設定 → **Page access** 應該寫 "You have full control"
+
+#### 1.A.2 — 把 `love.lorescape` IG 切成 Business 並連到 Page
+
+這步要在 **IG 手機 app** 操作，web 版選項不完整。
+
+1. 打開 IG app → 切到 `love.lorescape` 帳號
+2. 個人檔案頁 → 右上角 hamburger menu (≡) → **Settings and activity**
+3. 滾下去找 **For professionals** 段 → 點 **Account type and tools**（舊版可能叫 **Switch to professional account**）
+4. 點 **Switch to professional account**（如果已經是 Creator，先按 **Switch account type → Switch to business account** 也行——Creator 也能用 API，但 Business 對 content publish 權限最齊）
+5. 選類別（Category）：選 `Travel & Transportation` / `Personal Blog` / `Media` 任一
+6. 跳出 **Are you a business or a creator?** → **選 Business**
+   - Business vs Creator：兩者都能用 Graph API 發 IG 文。但 Business 還支援 Shopping、Insights tab 比較完整，未來擴充比較不卡。如果之前已經是 Creator 也可以不換、跳到下一步
+7. 接下來 IG 會引導加 contact info（email / phone / address）——**全部可以 Skip**
+8. 重點來了：**Connect to Facebook** 那一頁
+   - **Connect an existing Page** → 選剛剛在 1.A.1 建的 `Lorescape` Page
+   - （如果沒有 Page 可選：IG app 內也提供「Create new Page」入口，但流程比 desktop 簡陋，推薦用 1.A.1 在 desktop 先建好）
+9. 完成。回到個人檔案，hamburger menu 裡會多出 **Insights** 和 **Professional dashboard**
+
+#### 1.A.3 — 驗證 IG ↔ Page 雙向都掛好
+
+**從 Page 那邊看**：
+
+1. desktop facebook.com → 切到 `Lorescape` Page 身份（左上角頭像下拉）
+2. Page 設定 → **Linked accounts** → **Instagram** → 應該看到 `@love.lorescape` 已連結
+
+**從 IG 那邊看**：
+
+IG app → 個人檔案 → **Edit profile** → 滾到底 → **Page** 欄位應該顯示 `Lorescape`
+
+兩邊都對才能繼續到 Step 1.B。
+
+#### 1.A.4 — Meta App 給權限（一次性）
+
+確認 https://developers.facebook.com/apps/1635287081082476 的 App Review 頁面已經啟用：
+
+- ✅ `pages_show_list`
+- ✅ `pages_read_engagement`
+- ✅ `pages_manage_posts`
+- ✅ `instagram_basic`
+- ✅ `instagram_content_publish`
+
+這些 Lorescape App 應該已啟用（見 `docs/social_publisher_setup.md` 的 use cases）。如果有變動就回那邊勾。
+
+### Step 1.B — 跑 `meta_token_helper.py` 換 token
+
+1.A 全綠之後才跑這步：
+
 ```bash
 cd /Users/paulwu/Documents/Github/instant_explore
 python scripts/meta_token_helper.py --platform instagram
@@ -47,7 +117,7 @@ Script 會引導你完成：
 1. 輸入 App ID `1635287081082476` 與 App Secret（在 Meta Developer Console 設定頁查）
 2. 開 Graph API Explorer、授權、複製短效 User Token 貼回 script
 3. Script 自動換成 60 天長效 User Token
-4. Script 列出你的 Facebook Pages → 選 Lorescape 對應那個
+4. Script 列出你的 Facebook Pages → 選 `Lorescape`（如果 1.A 有確實連上，這裡會出現；沒出現就回 1.A 檢查）
 5. Script 換出永久 Page Access Token
 6. Script 解析出 IG Business Account ID
 7. Script 在終端機印出兩行，類似：
@@ -55,12 +125,6 @@ Script 會引導你完成：
    IG_USER_ID=17841...
    META_PAGE_ACCESS_TOKEN=EAAX...
    ```
-
-### 前置條件（如果第一次跑）
-
-- IG 帳號 `love.lorescape` 已設為 Business / Creator
-- IG 已連結到 Facebook Page
-- Meta App 已啟用權限：`pages_show_list`、`pages_read_engagement`、`pages_manage_posts`、`instagram_basic`、`instagram_content_publish`
 
 完整背景見 `docs/social_publisher_setup.md`。
 
@@ -224,12 +288,16 @@ ssh root@<vps> 'cd /opt/lorescape && docker compose exec backend python -m lores
 
 ```
 [ ] Deploy workflow 跑過、migration 上 production
-[ ] Step 1: 跑 meta_token_helper.py → .env + VPS env
-[ ] Step 2: Supabase Dashboard → Storage → New bucket "ig-cards" (Public)
-[ ] Step 3.1: SQL Editor → 跑 backfill listing query
-[ ] Step 3.2: 一筆筆 update（找 Wikipedia 抓 lat/lng）
-[ ] Step 3.3: 重跑 listing query，預期 0 列
-[ ] Step 4: 隔天觀察 daily_stories 跟 IG 帳號實際發文
+[ ] Step 1.A.1: desktop FB 建 Lorescape Page (admin = 你本人 FB)
+[ ] Step 1.A.2: IG app 把 love.lorescape 切 Business + 連上面那個 Page
+[ ] Step 1.A.3: 雙向驗證 IG ↔ Page 都掛好
+[ ] Step 1.A.4: Meta App 5 個 IG/Page 權限已啟用
+[ ] Step 1.B:   跑 meta_token_helper.py → .env + VPS env
+[ ] Step 2:     Supabase Dashboard → Storage → New bucket "ig-cards" (Public)
+[ ] Step 3.1:   SQL Editor → 跑 backfill listing query
+[ ] Step 3.2:   一筆筆 update（找 Wikipedia 抓 lat/lng）
+[ ] Step 3.3:   重跑 listing query，預期 0 列
+[ ] Step 4:     隔天觀察 daily_stories 跟 IG 帳號實際發文
 ```
 
 四步全綠之後，從那天起每天 09:00 產文、晚上 21:00 經 Discord 審核後自動發 Threads + IG 圖卡。
