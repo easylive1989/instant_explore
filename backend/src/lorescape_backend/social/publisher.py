@@ -1,6 +1,6 @@
 """21:00 Asia/Taipei publish job: read Discord reactions, post to Threads/IG.
 
-State machine (per `daily_stories` row, only the en row is published):
+State machine (per `daily_stories` row, only the zh-TW row is tracked):
 
     pending → published   (✅ reaction → both APIs called, at least Threads OK)
     pending → rejected    (❌ reaction)
@@ -10,6 +10,11 @@ State machine (per `daily_stories` row, only the en row is published):
                            no discord_message_id yet — both are recoverable
                            by fixing config and re-running the back-fill flow
                            described in backend/README.md)
+
+The zh-TW row carries the review state and Discord message id (matching what
+the reviewer sees). When publishing, the EN partner row is loaded separately
+to source Threads copy; if it's missing, Threads is skipped (publish_error
+= "threads_skipped_missing_en_row") but IG can still publish from zh-TW.
 
 Idempotent: only rows still in 'pending' are touched.
 """
@@ -29,7 +34,8 @@ from lorescape_backend.social.card.renderer import render_card
 
 logger = logging.getLogger(__name__)
 
-PUBLISH_LANGUAGE = "en"
+PUBLISH_LANGUAGE = "zh-TW"
+THREADS_LANGUAGE = "en"
 
 
 def run_publish_job(config: Config, target_date: date | None = None) -> None:
@@ -105,37 +111,42 @@ def _process_row(supabase, config: Config, row: dict[str, Any]) -> None:
 
 
 def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
-    en_story_copy = caption.StoryCopy(
+    # `row` is the zh-TW pending row (carries review state); use it directly
+    # for IG card + caption. Load the EN partner separately for Threads copy.
+    zh_story_copy = caption.StoryCopy(
         place_name=row["place_name"],
         era=row["era"],
         story=row["story"],
         threads_summary=row["threads_summary"] or "",
         hashtags=tuple(row.get("hashtags") or ()),
     )
-    threads_text = caption.build_threads_caption(
-        story=en_story_copy,
-        brand_handle=config.brand_handle_threads,
-        cta_text=config.cta_text,
-    )
 
-    zh_row = _load_zh_tw_row(supabase, row["publish_date"])
     place_row = _load_place_row(supabase, row["place_id"])
     card_content = None
-    if zh_row is not None and place_row is not None:
-        card_content = mapper.build_card_content(zh_row, place_row)
+    if place_row is not None:
+        card_content = mapper.build_card_content(row, place_row)
 
     ig_caption = None
     if card_content is not None:
-        zh_story_copy = caption.StoryCopy(
-            place_name=zh_row["place_name"],
-            era=zh_row["era"],
-            story=zh_row["story"],
-            threads_summary=zh_row["threads_summary"] or "",
-            hashtags=tuple(zh_row.get("hashtags") or ()),
-        )
         ig_caption = caption.build_full_caption(
             story=zh_story_copy,
             brand_handle=config.brand_handle_ig,
+            cta_text=config.cta_text,
+        )
+
+    en_row = _load_en_row(supabase, row["publish_date"])
+    threads_text: str | None = None
+    if en_row is not None:
+        en_story_copy = caption.StoryCopy(
+            place_name=en_row["place_name"],
+            era=en_row["era"],
+            story=en_row["story"],
+            threads_summary=en_row["threads_summary"] or "",
+            hashtags=tuple(en_row.get("hashtags") or ()),
+        )
+        threads_text = caption.build_threads_caption(
+            story=en_story_copy,
+            brand_handle=config.brand_handle_threads,
             cta_text=config.cta_text,
         )
 
@@ -143,20 +154,25 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
     ig_post_id: str | None = None
     publish_error: str | None = None
     try:
-        if config.threads_enabled:
+        if config.threads_enabled and threads_text is not None:
             threads_post_id = threads.publish(
                 user_id=config.threads_user_id,  # type: ignore[arg-type]
                 access_token=config.threads_access_token,  # type: ignore[arg-type]
                 text=threads_text,
                 image_url=row.get("image_url"),
             )
+        elif threads_text is None:
+            logger.info(
+                "Row %s missing EN partner; skipping Threads publish",
+                row["id"],
+            )
+            publish_error = "threads_skipped_missing_en_row"
         else:
             logger.info("Threads not configured; skipping Threads publish")
 
         if config.instagram_enabled and card_content is not None:
-            # card_content is non-None implies zh_row was loaded successfully.
             png = render_card(card_content)
-            path = f"{row['publish_date']}/{zh_row['id']}.png"
+            path = f"{row['publish_date']}/{row['id']}.png"
             card_url = card_storage.upload_card_png(supabase, png, path=path)
             ig_post_id = instagram.publish(
                 ig_user_id=config.ig_user_id,  # type: ignore[arg-type]
@@ -168,7 +184,8 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
             logger.info(
                 "Row %s missing card content; skipping IG publish", row["id"]
             )
-            publish_error = "ig_skipped_missing_card_content"
+            if publish_error is None:
+                publish_error = "ig_skipped_missing_card_content"
         else:
             logger.info("Instagram not configured; skipping IG publish")
 
@@ -217,12 +234,12 @@ def _load_pending_rows(supabase, target_date: date) -> list[dict[str, Any]]:
     return response.data or []
 
 
-def _load_zh_tw_row(supabase, publish_date: str) -> dict[str, Any] | None:
+def _load_en_row(supabase, publish_date: str) -> dict[str, Any] | None:
     response = (
         supabase.table("daily_stories")
         .select("*")
         .eq("publish_date", publish_date)
-        .eq("language", "zh-TW")
+        .eq("language", THREADS_LANGUAGE)
         .limit(1)
         .execute()
     )

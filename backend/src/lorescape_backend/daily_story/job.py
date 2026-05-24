@@ -23,7 +23,7 @@ from lorescape_backend.daily_story import (
 logger = logging.getLogger(__name__)
 
 LANGUAGES = ["zh-TW", "en"]
-REVIEW_LANGUAGE = "en"  # the row we hand off to the social-publishing flow
+REVIEW_LANGUAGE = "zh-TW"  # the row we hand off to the social-publishing flow
 RETRY_DELAYS = [1, 5, 30]  # delays before retries 1, 2, 3 → 4 total attempts
 
 
@@ -136,10 +136,18 @@ def send_today_for_review(config: Config, target_date: date) -> None:
     supabase = create_client(config.supabase_url, config.supabase_service_role_key)
     row = _load_review_row(supabase, target_date)
     if row is None:
-        logger.warning(
-            "No %s row found for %s — nothing to send for review",
-            REVIEW_LANGUAGE, target_date.isoformat(),
+        error_message = (
+            f"No {REVIEW_LANGUAGE} row found for {target_date.isoformat()} — "
+            f"Discord review not posted"
         )
+        logger.warning(error_message)
+        if config.discord_webhook_url:
+            discord_notify.notify_failure(
+                webhook_url=config.discord_webhook_url,
+                date_str=target_date.isoformat(),
+                error_message=error_message,
+                traceback_str="",
+            )
         return
     if row.get("discord_message_id"):
         logger.info(

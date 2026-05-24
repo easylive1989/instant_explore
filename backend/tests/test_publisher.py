@@ -8,27 +8,7 @@ from lorescape_backend.social.publisher import run_publish_job
 
 
 def _row(**overrides):
-    base = dict(
-        id="row-1",
-        publish_date="2026-05-12",
-        language="en",
-        place_id="place-1",
-        place_name="Colosseum",
-        place_location="Rome",
-        era="70-80 CE",
-        story="story body",
-        threads_summary="short",
-        hashtags=["rome"],
-        image_url="https://upload.wikimedia.org/x.jpg",
-        wikipedia_url="https://en.wikipedia.org/wiki/Colosseum",
-        review_state="pending",
-        discord_message_id="msg-1",
-    )
-    base.update(overrides)
-    return base
-
-
-def _zh_row(**overrides):
+    """The primary pending row: zh-TW (carries review_state + discord_message_id)."""
     base = dict(
         id="row-zh-1",
         publish_date="2026-05-12",
@@ -42,12 +22,34 @@ def _zh_row(**overrides):
         wikipedia_url="https://zh.wikipedia.org/wiki/...",
         threads_summary="中文短摘",
         hashtags=["rome", "colosseum"],
+        review_state="pending",
+        discord_message_id="msg-1",
         card_title_ch="石頭裡的吶喊",
         card_title_sub_ch="鬥獸場百年",
         card_paragraphs_ch=["第一段", "第二段", "第三段"],
         card_pull_quote_ch="「我們將娛樂血腥化為藝術。」",
         card_pull_quote_attrib_ch="—— 塔西陀",
         card_anno_roman="LXXX",
+    )
+    base.update(overrides)
+    return base
+
+
+def _en_row(**overrides):
+    """The partner row loaded for Threads copy."""
+    base = dict(
+        id="row-en-1",
+        publish_date="2026-05-12",
+        language="en",
+        place_id="place-1",
+        place_name="Colosseum",
+        place_location="Rome",
+        era="70-80 CE",
+        story="story body",
+        threads_summary="short",
+        hashtags=["rome"],
+        image_url="https://upload.wikimedia.org/x.jpg",
+        wikipedia_url="https://en.wikipedia.org/wiki/Colosseum",
     )
     base.update(overrides)
     return base
@@ -70,13 +72,13 @@ def _place_row(**overrides):
 
 
 def _supabase_multi_table(
-    *, en_rows, zh_row=None, place_row=None
+    *, zh_rows, en_row=None, place_row=None
 ):
     """Build a supabase mock that dispatches by table name.
 
-    `client.table("daily_stories")` first responds to a select-pending-en query
-    (returns en_rows). Subsequent select calls on daily_stories (the zh-TW
-    lookup) return zh_row wrapped in a list if non-None.
+    `client.table("daily_stories")` first responds to the select-pending-zh-TW
+    query (returns zh_rows). Subsequent select calls on daily_stories (the EN
+    partner lookup) return en_row wrapped in a list if non-None.
     `client.table("daily_story_places")` returns place_row wrapped in a list.
     `client.table(...).update(...)` always returns a passing chain.
     """
@@ -92,12 +94,12 @@ def _supabase_multi_table(
         return chain
 
     daily_stories_table = MagicMock()
-    # The first .select() call serves the pending-en query; subsequent calls
-    # serve the zh-TW lookup. Returning chains that resolve the same data
-    # works because the publisher only calls .execute() at the end.
+    # First .select() serves the pending-zh-TW query; subsequent calls serve
+    # the EN partner lookup. Returning chains that resolve the same data works
+    # because the publisher only calls .execute() at the end.
     daily_stories_calls = [
-        _make_select_chain(en_rows),
-        _make_select_chain([zh_row] if zh_row else []),
+        _make_select_chain(zh_rows),
+        _make_select_chain([en_row] if en_row else []),
     ]
     daily_stories_table.select.side_effect = daily_stories_calls
     daily_stories_table.update.return_value = update_chain
@@ -129,11 +131,11 @@ def _supabase_multi_table(
 def test_approved_row_publishes_to_threads_and_ig(
     upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
-    zh = _zh_row()
+    zh = _row()
+    en = _en_row()
     place = _place_row()
     client, ds_table, places_table, update_chain = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=place,
+        zh_rows=[zh], en_row=en, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"
@@ -144,8 +146,11 @@ def test_approved_row_publishes_to_threads_and_ig(
 
     run_publish_job(fake_config, date(2026, 5, 12))
 
-    # Threads called with the en row's content
+    # Threads called with the en partner row's content
     th_pub.assert_called_once()
+    th_kwargs = th_pub.call_args.kwargs
+    # Threads text is the EN caption — contains the EN place_name
+    assert "Colosseum" in th_kwargs["text"]
     # render_card called once with a CardContent derived from zh + place
     render.assert_called_once()
     # upload called with path = <date>/<zh_row_id>.png
@@ -172,29 +177,31 @@ def test_approved_row_publishes_to_threads_and_ig(
 @patch("lorescape_backend.social.publisher.instagram.publish")
 @patch("lorescape_backend.social.publisher.render_card")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
-def test_approved_row_skips_ig_when_zh_row_missing(
+def test_approved_row_skips_threads_when_en_row_missing(
     upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
+    """If the EN partner is missing, Threads is skipped but IG still publishes."""
+    zh = _row()
+    place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=None, place_row=_place_row(),
+        zh_rows=[zh], en_row=None, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"
-    th_pub.return_value = "th-1"
+    render.return_value = b"\x89PNGfake"
+    upload.return_value = "https://x.supabase.co/storage/v1/object/public/ig-cards/2026-05-12/row-zh-1.png"
+    ig_pub.return_value = "ig-1"
 
     run_publish_job(fake_config, date(2026, 5, 12))
 
-    th_pub.assert_called_once()
-    render.assert_not_called()
-    upload.assert_not_called()
-    ig_pub.assert_not_called()
+    th_pub.assert_not_called()
+    ig_pub.assert_called_once()
 
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "published"
-    assert payload["threads_post_id"] == "th-1"
-    assert payload["ig_post_id"] is None
-    assert payload["publish_error"] == "ig_skipped_missing_card_content"
+    assert payload["threads_post_id"] is None
+    assert payload["ig_post_id"] == "ig-1"
+    assert payload["publish_error"] == "threads_skipped_missing_en_row"
 
 
 @patch("lorescape_backend.social.publisher.create_client")
@@ -205,7 +212,7 @@ def test_rejected_row_does_not_publish(
     ig_pub, th_pub, check, create, fake_config
 ):
     rows = [_row()]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
     check.return_value = "rejected"
 
@@ -222,7 +229,7 @@ def test_rejected_row_does_not_publish(
 @patch("lorescape_backend.social.publisher.threads.publish")
 def test_no_reaction_skips_row(th_pub, check, create, fake_config):
     rows = [_row()]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
     check.return_value = "none"
 
@@ -241,7 +248,7 @@ def test_publish_exception_marks_failed_and_notifies(
     notify, th_pub, check, create, fake_config
 ):
     rows = [_row()]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows, en_row=_en_row())
     create.return_value = client
     check.return_value = "approved"
     th_pub.side_effect = RuntimeError("API blew up")
@@ -257,7 +264,7 @@ def test_publish_exception_marks_failed_and_notifies(
 @patch("lorescape_backend.social.publisher.create_client")
 def test_no_pending_rows_does_nothing(create, fake_config):
     rows = []
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
 
     run_publish_job(fake_config, date(2026, 5, 12))
@@ -280,7 +287,7 @@ def test_review_disabled_leaves_pending_rows_untouched(create):
         brand_handle_threads="", brand_handle_ig="", cta_text="",
     )
     rows = [_row()]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
 
     run_publish_job(config, date(2026, 5, 12))
@@ -310,7 +317,7 @@ def test_review_disabled_pings_webhook_when_configured(notify, create):
         brand_handle_threads="", brand_handle_ig="", cta_text="",
     )
     rows = [_row(), _row(id="row-2")]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
 
     run_publish_job(config, date(2026, 5, 12))
@@ -329,7 +336,7 @@ def test_row_without_discord_message_id_stays_pending(check, create, fake_config
     """If discord_message_id is NULL (e.g. 09:00 ran before Discord was wired),
     the row must stay in `pending` so back-fill can recover it later."""
     rows = [_row(discord_message_id=None)]
-    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    client, table, _, _ = _supabase_multi_table(zh_rows=rows)
     create.return_value = client
 
     run_publish_job(fake_config, date(2026, 5, 12))
@@ -348,10 +355,10 @@ def test_row_without_discord_message_id_stays_pending(check, create, fake_config
 def test_approved_row_skips_ig_when_place_row_missing(
     upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
-    zh = _zh_row()
+    zh = _row()
+    en = _en_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=None,
+        zh_rows=[zh], en_row=en, place_row=None,
     )
     create.return_value = client
     check.return_value = "approved"
@@ -375,11 +382,11 @@ def test_approved_row_skips_ig_when_place_row_missing(
 def test_approved_row_skips_ig_when_card_fields_null(
     upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
-    zh = _zh_row(card_title_ch=None)  # one missing card field → mapper returns None
+    zh = _row(card_title_ch=None)  # one missing card field → mapper returns None
+    en = _en_row()
     place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=place,
+        zh_rows=[zh], en_row=en, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"
@@ -404,11 +411,11 @@ def test_approved_row_skips_ig_when_card_fields_null(
 def test_ig_render_failure_marks_failed_and_notifies(
     notify, upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
-    zh = _zh_row()
+    zh = _row()
+    en = _en_row()
     place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=place,
+        zh_rows=[zh], en_row=en, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"
@@ -433,11 +440,11 @@ def test_ig_render_failure_marks_failed_and_notifies(
 def test_ig_upload_failure_marks_failed_and_notifies(
     notify, upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    en = _row()
-    zh = _zh_row()
+    zh = _row()
+    en = _en_row()
     place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=place,
+        zh_rows=[zh], en_row=en, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"
@@ -475,11 +482,11 @@ def test_threads_disabled_still_publishes_ig(
         ig_user_id="i", meta_page_access_token="p",
         brand_handle_threads="", brand_handle_ig="@brand", cta_text="cta",
     )
-    en = _row()
-    zh = _zh_row()
+    zh = _row()
+    en = _en_row()
     place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(
-        en_rows=[en], zh_row=zh, place_row=place,
+        zh_rows=[zh], en_row=en, place_row=place,
     )
     create.return_value = client
     check.return_value = "approved"

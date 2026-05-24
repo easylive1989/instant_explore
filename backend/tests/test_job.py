@@ -183,17 +183,17 @@ def test_languages_list_matches_spec():
 # ---------------------------------------------------------------------------
 
 
-def _en_row():
+def _zh_row():
     return {
-        "id": "row-en",
-        "place_name": "Colosseum",
-        "place_location": "Rome, Italy",
-        "era": "70-80 CE",
-        "story": "An English story.",
-        "threads_summary": "Short.",
-        "hashtags": ["rome"],
+        "id": "row-zh",
+        "place_name": "羅馬競技場",
+        "place_location": "義大利羅馬",
+        "era": "公元 70-80 年",
+        "story": "第一段\n\n第二段\n\n第三段",
+        "threads_summary": "中文短摘。",
+        "hashtags": ["rome", "colosseum"],
         "image_url": "https://upload.wikimedia.org/x.jpg",
-        "wikipedia_url": "https://en.wikipedia.org/wiki/Colosseum",
+        "wikipedia_url": "https://zh.wikipedia.org/wiki/羅馬競技場",
         "discord_message_id": None,
     }
 
@@ -225,7 +225,7 @@ def test_send_today_for_review_posts_and_writes_message_id(
     from datetime import date as _date
     from lorescape_backend.daily_story.job import send_today_for_review
 
-    row = _en_row()
+    row = _zh_row()
     client, table, update_chain = _supabase_with_select_and_update(row)
     create.return_value = client
     send.return_value = "msg-abc"
@@ -234,8 +234,8 @@ def test_send_today_for_review_posts_and_writes_message_id(
 
     send.assert_called_once()
     payload = send.call_args.kwargs["payload"]
-    assert payload.place_name == "Colosseum"
-    assert payload.threads_summary == "Short."
+    assert payload.place_name == "羅馬競技場"
+    assert payload.threads_summary == "中文短摘。"
     # message id written back to the row
     update_payload = table.update.call_args[0][0]
     assert update_payload == {"discord_message_id": "msg-abc"}
@@ -249,7 +249,7 @@ def test_send_today_for_review_skipped_if_already_posted(
     from datetime import date as _date
     from lorescape_backend.daily_story.job import send_today_for_review
 
-    row = _en_row()
+    row = _zh_row()
     row["discord_message_id"] = "already-there"
     client, _, _ = _supabase_with_select_and_update(row)
     create.return_value = client
@@ -257,6 +257,60 @@ def test_send_today_for_review_skipped_if_already_posted(
     send_today_for_review(fake_config, _date(2026, 5, 12))
 
     send.assert_not_called()
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+@patch("lorescape_backend.daily_story.job.discord_notify.notify_failure")
+def test_send_today_for_review_notifies_webhook_when_zh_row_missing(
+    notify, send, create, fake_config
+):
+    """If no zh-TW row exists, alert via webhook and don't post to Discord."""
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    client, _, _ = _supabase_with_select_and_update(None)
+    create.return_value = client
+
+    send_today_for_review(fake_config, _date(2026, 5, 12))
+
+    send.assert_not_called()
+    notify.assert_called_once()
+    kwargs = notify.call_args.kwargs
+    assert kwargs["webhook_url"] == fake_config.discord_webhook_url
+    assert kwargs["date_str"] == "2026-05-12"
+    assert "zh-TW" in kwargs["error_message"]
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+@patch("lorescape_backend.daily_story.job.discord_notify.notify_failure")
+def test_send_today_for_review_silently_skips_when_zh_row_missing_and_no_webhook(
+    notify, send, create
+):
+    """If the webhook is not configured, the missing row is logged but no alert is sent."""
+    from datetime import date as _date
+    from lorescape_backend.config import Config
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    config = Config(
+        supabase_url="https://x", supabase_service_role_key="k",
+        gemini_api_key="g",
+        discord_webhook_url=None,  # no webhook
+        discord_bot_token="b",
+        discord_review_channel_id="111",
+        discord_approver_ids=("222",),
+        threads_user_id=None, threads_access_token=None,
+        ig_user_id=None, meta_page_access_token=None,
+        brand_handle_threads="", brand_handle_ig="", cta_text="",
+    )
+    client, _, _ = _supabase_with_select_and_update(None)
+    create.return_value = client
+
+    send_today_for_review(config, _date(2026, 5, 12))
+
+    send.assert_not_called()
+    notify.assert_not_called()
 
 
 @patch("lorescape_backend.daily_story.job.create_client")
