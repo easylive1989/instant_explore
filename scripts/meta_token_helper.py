@@ -28,11 +28,14 @@ Reference
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 import textwrap
 import webbrowser
-
-import requests
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 GRAPH_API = "https://graph.facebook.com/v21.0"
 THREADS_API = "https://graph.threads.net/v1.0"
@@ -75,6 +78,7 @@ def _env_block(pairs: list[tuple[str, str]]) -> None:
 def instagram_flow() -> None:
     """Exchange a short-lived token → long-lived user token → Page token,
     then resolve the IG Business Account ID."""
+    import requests  # noqa: PLC0415 — lazy import keeps --refresh dep-free
 
     print(textwrap.dedent("""
     ┌─────────────────────────────────────────────────────┐
@@ -191,6 +195,7 @@ def instagram_flow() -> None:
 
 def threads_flow() -> None:
     """Walk through the Threads OAuth flow to obtain a long-lived token."""
+    import requests  # noqa: PLC0415
 
     print(textwrap.dedent("""
     ┌─────────────────────────────────────────────────────┐
@@ -266,34 +271,102 @@ def threads_flow() -> None:
 
     print(textwrap.dedent("""
   ⚠️  Threads tokens expire after 60 days.
-      Set a calendar reminder to re-run this script before expiry.
+      Set a calendar reminder (or schedule a cron) to refresh before expiry.
       To refresh a non-expired token at any time:
 
-        python scripts/meta_token_helper.py --platform threads --refresh \\
-          --app-id <id> --app-secret <secret> --token <current_token>
+        python scripts/meta_token_helper.py --platform threads --refresh
+
+      Non-interactive mode (for cron):
+
+        THREADS_ACCESS_TOKEN=<current_token> python scripts/meta_token_helper.py \\
+          --platform threads --refresh --write-env backend/.env
     """))
 
 
-def refresh_threads_token() -> None:
-    """Refresh a still-valid long-lived Threads token."""
-    _step(1, "Refresh long-lived Threads token")
-    app_secret = _prompt("App Secret", secret=True)
-    current_token = _prompt("Current long-lived Threads access token", secret=True)
+def refresh_threads_token(write_env: str | None = None) -> None:
+    """Refresh a still-valid long-lived Threads token.
 
-    resp = requests.get(
+    Non-interactive mode is triggered by either setting the
+    ``THREADS_ACCESS_TOKEN`` environment variable, or passing ``--write-env``;
+    in that case prompts are skipped so the script is cron-safe.
+
+    When ``write_env`` is given the matching .env file is rewritten in place
+    so the new token takes effect after the consuming service restarts.
+    """
+    _step(1, "Refresh long-lived Threads token")
+
+    current_token = os.environ.get("THREADS_ACCESS_TOKEN")
+    if current_token:
+        print("  Using THREADS_ACCESS_TOKEN from environment.")
+    else:
+        current_token = _prompt(
+            "Current long-lived Threads access token", secret=True,
+        )
+
+    new_token = _http_get_json(
         f"{THREADS_API}/refresh_access_token",
-        params={
+        {
             "grant_type": "th_refresh_token",
             "access_token": current_token,
         },
-        timeout=30,
-    )
-    _raise_for_status(resp, "refresh Threads token")
-    new_token = resp.json()["access_token"]
+        context="refresh Threads token",
+    )["access_token"]
     _success("Refreshed token", new_token[:20] + "…")
 
-    print("\n  Update backend/.env:")
-    print(f"  THREADS_ACCESS_TOKEN={new_token}\n")
+    if write_env:
+        _rewrite_env_value(write_env, "THREADS_ACCESS_TOKEN", new_token)
+        print(f"\n  ✏️   Updated {write_env}: THREADS_ACCESS_TOKEN")
+    else:
+        print("\n  Update backend/.env:")
+        print(f"  THREADS_ACCESS_TOKEN={new_token}\n")
+
+
+def _http_get_json(url: str, params: dict, context: str) -> dict:
+    """Issue an HTTPS GET and return parsed JSON. stdlib-only."""
+    full_url = f"{url}?{urlencode(params)}"
+    try:
+        with urlopen(full_url, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        print(f"\n  ❌  API error during: {context}")
+        print(f"      Status: {exc.code}")
+        print(f"      Body:   {body}")
+        sys.exit(1)
+    except URLError as exc:
+        print(f"\n  ❌  Network error during: {context}")
+        print(f"      {exc.reason}")
+        sys.exit(1)
+
+
+def _rewrite_env_value(path: str, key: str, value: str) -> None:
+    """Replace ``key=...`` line in a .env file, atomically.
+
+    If the key is missing it is appended. Other lines, including comments and
+    blank lines, are preserved verbatim.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        _die(f"--write-env target not found: {path}")
+
+    prefix = f"{key}="
+    replaced = False
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith(prefix):
+            lines[i] = f"{key}={value}\n"
+            replaced = True
+            break
+    if not replaced:
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
+        lines.append(f"{key}={value}\n")
+
+    tmp_path = f"{path}.tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+    os.replace(tmp_path, path)
 
 
 # ── utilities ─────────────────────────────────────────────────────────────────
@@ -345,13 +418,21 @@ def main() -> None:
         action="store_true",
         help="Refresh an existing long-lived Threads token (threads only)",
     )
+    parser.add_argument(
+        "--write-env",
+        metavar="PATH",
+        help=(
+            "Path to a .env file to update in place with the new "
+            "THREADS_ACCESS_TOKEN (use with --refresh for cron mode)."
+        ),
+    )
     args = parser.parse_args()
 
     if args.platform == "instagram":
         instagram_flow()
     elif args.platform == "threads":
         if args.refresh:
-            refresh_threads_token()
+            refresh_threads_token(write_env=args.write_env)
         else:
             threads_flow()
 
