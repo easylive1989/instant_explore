@@ -4,9 +4,12 @@ State machine (per `daily_stories` row, only the en row is published):
 
     pending → published   (✅ reaction → both APIs called, at least Threads OK)
     pending → rejected    (❌ reaction)
-    pending → skipped     (no reaction by 21:00, or no image and Threads
-                          itself is disabled by config)
+    pending → skipped     (no reaction by 21:00)
     pending → failed      (publish call raised; publish_error filled in)
+    pending → pending     (no transition: review not configured, OR row has
+                           no discord_message_id yet — both are recoverable
+                           by fixing config and re-running the back-fill flow
+                           described in backend/README.md)
 
 Idempotent: only rows still in 'pending' are touched.
 """
@@ -42,12 +45,29 @@ def run_publish_job(config: Config, target_date: date | None = None) -> None:
         return
 
     if not config.review_enabled:
+        # Don't mutate rows: a missing Discord config is recoverable, and
+        # marking rows as `skipped` here would make today permanently
+        # un-publishable once the operator fixes the config. Leave the rows
+        # in `pending` so the back-fill flow can pick them up later.
         logger.warning(
-            "Discord review not configured — marking %d pending row(s) as skipped",
+            "Discord review not configured — leaving %d pending row(s) "
+            "untouched so they can be processed after config is fixed",
             len(rows),
         )
-        for row in rows:
-            _update_state(supabase, row, "skipped")
+        # Surface the silent accumulation: webhook is a separate channel from
+        # the bot token, so it usually survives when review_enabled is False.
+        if config.discord_webhook_url:
+            discord_notify.notify_failure(
+                webhook_url=config.discord_webhook_url,
+                date_str=target_date.isoformat(),
+                error_message=(
+                    f"Publish job: review not configured (missing "
+                    f"DISCORD_BOT_TOKEN / DISCORD_REVIEW_CHANNEL_ID / "
+                    f"DISCORD_APPROVER_IDS); {len(rows)} row(s) left in "
+                    f"`pending`. See backend/README.md back-fill steps."
+                ),
+                traceback_str="",
+            )
         return
 
     for row in rows:
@@ -57,8 +77,13 @@ def run_publish_job(config: Config, target_date: date | None = None) -> None:
 def _process_row(supabase, config: Config, row: dict[str, Any]) -> None:
     message_id = row.get("discord_message_id")
     if not message_id:
-        logger.warning("Row %s has no discord_message_id; marking skipped", row["id"])
-        _update_state(supabase, row, "skipped")
+        # Leave row in `pending` (don't mark skipped) so the back-fill flow
+        # can recover it: operator runs `send_today_for_review` to populate
+        # discord_message_id, reacts on Discord, then re-runs this job.
+        logger.warning(
+            "Row %s has no discord_message_id; leaving in `pending` for "
+            "back-fill (see backend/README.md)", row["id"],
+        )
         return
 
     decision = discord_review.check_reaction(

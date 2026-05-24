@@ -266,7 +266,7 @@ def test_no_pending_rows_does_nothing(create, fake_config):
 
 
 @patch("lorescape_backend.social.publisher.create_client")
-def test_review_disabled_marks_pending_as_skipped(create):
+def test_review_disabled_leaves_pending_rows_untouched(create):
     from lorescape_backend.config import Config
 
     config = Config(
@@ -285,8 +285,58 @@ def test_review_disabled_marks_pending_as_skipped(create):
 
     run_publish_job(config, date(2026, 5, 12))
 
-    payload = table.update.call_args[0][0]
-    assert payload["review_state"] == "skipped"
+    # Rows must stay pending so a later run (after config is fixed) can
+    # still process them. The earlier behaviour of marking them `skipped`
+    # was destructive and made the day permanently un-publishable.
+    table.update.assert_not_called()
+
+
+@patch("lorescape_backend.social.publisher.create_client")
+@patch("lorescape_backend.social.publisher.discord_notify.notify_failure")
+def test_review_disabled_pings_webhook_when_configured(notify, create):
+    """If the failure webhook is set, operator must be alerted that pending
+    rows are silently accumulating because of missing review config."""
+    from lorescape_backend.config import Config
+
+    config = Config(
+        supabase_url="https://x", supabase_service_role_key="k",
+        gemini_api_key="g",
+        discord_webhook_url="https://discord.com/api/webhooks/hook",
+        discord_bot_token=None,  # review disabled
+        discord_review_channel_id=None,
+        discord_approver_ids=(),
+        threads_user_id="u", threads_access_token="t",
+        ig_user_id="i", meta_page_access_token="p",
+        brand_handle_threads="", brand_handle_ig="", cta_text="",
+    )
+    rows = [_row(), _row(id="row-2")]
+    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    create.return_value = client
+
+    run_publish_job(config, date(2026, 5, 12))
+
+    table.update.assert_not_called()
+    notify.assert_called_once()
+    kwargs = notify.call_args.kwargs
+    assert kwargs["webhook_url"] == config.discord_webhook_url
+    assert kwargs["date_str"] == "2026-05-12"
+    assert "2 row" in kwargs["error_message"]
+
+
+@patch("lorescape_backend.social.publisher.create_client")
+@patch("lorescape_backend.social.publisher.discord_review.check_reaction")
+def test_row_without_discord_message_id_stays_pending(check, create, fake_config):
+    """If discord_message_id is NULL (e.g. 09:00 ran before Discord was wired),
+    the row must stay in `pending` so back-fill can recover it later."""
+    rows = [_row(discord_message_id=None)]
+    client, table, _, _ = _supabase_multi_table(en_rows=rows)
+    create.return_value = client
+
+    run_publish_job(fake_config, date(2026, 5, 12))
+
+    # Must not consult Discord, must not mutate the row.
+    check.assert_not_called()
+    table.update.assert_not_called()
 
 
 @patch("lorescape_backend.social.publisher.create_client")

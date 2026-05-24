@@ -2,7 +2,10 @@
 
 VPS backend for Lorescape:
 - **Daily story scheduler** — APScheduler inside the FastAPI container fires
-  the daily story job at 23:30 Asia/Taipei every day. No host-side cron.
+  two jobs every day, both in Asia/Taipei:
+  - `09:00` — generate the day's story and post it to Discord for review
+  - `21:00` — read the Discord ✅/❌ reactions and publish to Threads / IG
+  No host-side cron.
 - **FastAPI app** — currently exposes `/health`; placeholder for future APIs.
 
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
@@ -21,9 +24,12 @@ pytest
 ## Run the daily story job manually (for testing / back-fill)
 
 ```bash
-python -m lorescape_backend.daily_story         # for tomorrow (default)
-python -m lorescape_backend.daily_story 2026-05-15  # for specific date
+python -m lorescape_backend.daily_story             # defaults to today
+python -m lorescape_backend.daily_story 2026-05-15  # for a specific date
 ```
+
+`send_today_for_review` is idempotent — once a row's `discord_message_id` is
+set, re-running won't re-post.
 
 ## Run the FastAPI dev server (with the scheduler attached)
 
@@ -51,8 +57,15 @@ ssh root@<your-vps-ip>
 git clone https://github.com/easylive1989/instant_explore /opt/lorescape
 cd /opt/lorescape/backend
 
-# Configure secrets — required: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
-# GEMINI_API_KEY. Optional but recommended: DISCORD_WEBHOOK_URL.
+# Configure secrets. See .env.example for the full list; in short:
+#   Required for generation:  SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+#                             GEMINI_API_KEY
+#   Required for review flow: DISCORD_BOT_TOKEN, DISCORD_REVIEW_CHANNEL_ID,
+#                             DISCORD_APPROVER_IDS
+#   Required for publishing:  THREADS_USER_ID, THREADS_ACCESS_TOKEN,
+#                             IG_USER_ID, META_PAGE_ACCESS_TOKEN
+#   Optional failure alerts:  DISCORD_WEBHOOK_URL
+# Missing any "required for review/publish" key silently degrades that stage.
 cp .env.example .env
 $EDITOR .env
 
@@ -66,18 +79,22 @@ docker exec lorescape-backend python -c \
 ```
 
 That's it. No crontab, no `docker exec` from outside — the container's own
-APScheduler thread fires the job every day at 23:30 Asia/Taipei.
+APScheduler thread fires the generate job at 09:00 and the publish job at
+21:00, both in Asia/Taipei.
 
 ### Subsequent updates (automated by CI)
 
-Once bootstrap is done, every `master` push automatically:
+The `deploy-backend` job runs every **Friday at 02:00 UTC (10:00 Asia/Taipei)**
+on the `.github/workflows/deploy.yml` cron, and can also be triggered manually
+from the GitHub Actions UI (`workflow_dispatch`). When it runs it:
 
 1. SSHes into the VPS via `appleboy/ssh-action`
 2. `git fetch && git reset --hard origin/master` in `/opt/lorescape`
-3. `docker compose up -d --build` in `backend/` (which restarts the
-   container, which restarts the scheduler)
+3. `docker compose up -d --build` in `backend/` (which rebuilds the
+   container, which restarts the scheduler with the new code)
 
-See the `deploy-backend` job in `.github/workflows/ci.yml`.
+Plain `master` pushes only run CI (lint + unit tests); they do **not** deploy.
+If you need a deploy outside the weekly window, trigger the workflow manually.
 
 Required GitHub secrets:
 - `VPS_HOST` — VPS IP or hostname
@@ -104,14 +121,66 @@ LIMIT 4;
 
 Expected: two rows (`zh-TW` + `en`) for tomorrow's date with `story_len` ≈ 300-500.
 
-### Discord webhook (optional but recommended)
+### Discord wiring
 
-If `DISCORD_WEBHOOK_URL` is set in `.env`, all-retries-failed will post a
-message to the channel. To test the wiring without breaking anything:
+There are **two independent Discord channels** the backend talks to:
+
+| Variable | Channel | Used for |
+| --- | --- | --- |
+| `DISCORD_WEBHOOK_URL` (optional) | any text channel via webhook | failure alerts after all retries (`discord_notify`) |
+| `DISCORD_BOT_TOKEN` + `DISCORD_REVIEW_CHANNEL_ID` + `DISCORD_APPROVER_IDS` | a private review channel | daily review embed at 09:00, ✅/❌ reactions read at 21:00 |
+
+Behaviour when the review-bot keys are missing:
+- 09:00 generate still runs and writes rows to `daily_stories` (with
+  `discord_message_id = NULL`)
+- the review post is **skipped** (logged, but no Discord message is sent)
+- 21:00 publish notices `review_enabled=False` and **leaves rows in `pending`
+  untouched**; if `DISCORD_WEBHOOK_URL` is set, an alert is posted so the
+  operator notices the silent accumulation
+
+Once the operator fixes the config, the rows are NOT auto-published — they
+must be back-filled manually. Per stranded date `YYYY-MM-DD`:
+
+```bash
+# 1. Post the review embed to Discord (populates discord_message_id)
+docker exec lorescape-backend python -c "
+from datetime import date
+from lorescape_backend.config import Config
+from lorescape_backend.daily_story.job import send_today_for_review
+send_today_for_review(Config.from_env(), date.fromisoformat('YYYY-MM-DD'))
+"
+
+# 2. React ✅ (or ❌) on the embed in the review channel.
+
+# 3. Run the publisher for that date.
+docker exec lorescape-backend \
+  python -m lorescape_backend.social.publisher YYYY-MM-DD
+```
+
+The same flow recovers any row that ended up in `pending` with a NULL
+`discord_message_id` for other reasons (e.g. the 09:00 Discord post failed).
+
+To smoke-test the failure webhook without affecting today's data:
 
 ```bash
 docker exec -e SUPABASE_URL=https://invalid.local lorescape-backend \
   python -m lorescape_backend.daily_story 2099-01-01
 ```
 
-You should see the Discord message appear after ~36 seconds (1+5+30 backoff).
+You should see the failure message appear after ~36 seconds (1+5+30 backoff).
+
+To smoke-test the review bot:
+
+```bash
+docker exec lorescape-backend python -c "
+from datetime import date
+from lorescape_backend.config import Config
+from lorescape_backend.daily_story.job import send_today_for_review
+config = Config.from_env()
+print('review_enabled =', config.review_enabled)
+send_today_for_review(config, date.today())
+"
+```
+
+If `review_enabled` prints `True` and an embed appears in the review channel
+with ✅/❌ pre-seeded, the bot is wired correctly.

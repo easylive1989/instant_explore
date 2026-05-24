@@ -48,3 +48,11 @@ yarn-error.log*
 supabase/.branches
 supabase/.temp
 .supabase/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
