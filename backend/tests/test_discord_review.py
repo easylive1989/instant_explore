@@ -88,6 +88,45 @@ def test_send_for_review_omits_image_when_none(requests_mock):
     assert "image" not in embed
 
 
+def test_send_for_review_retries_reaction_once_on_429(requests_mock, mocker):
+    """Per-route bucket 429 on the second seed reaction must retry, not crash."""
+    sleep = mocker.patch(
+        "lorescape_backend.daily_story.discord_review.time.sleep"
+    )
+    requests_mock.post(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
+        json={"id": MESSAGE},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9C%85/@me",
+        json={},
+    )
+    reject_url = (
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9D%8C/@me"
+    )
+    requests_mock.put(
+        reject_url,
+        [
+            {"status_code": 429, "headers": {"Retry-After": "0.25"}, "json": {}},
+            {"status_code": 204, "json": {}},
+        ],
+    )
+
+    msg_id = send_for_review(
+        bot_token="tok", channel_id=CHANNEL, payload=_payload()
+    )
+
+    assert msg_id == MESSAGE
+    reject_calls = [
+        r for r in requests_mock.request_history
+        if r.method == "PUT" and r.url == reject_url
+    ]
+    assert len(reject_calls) == 2
+    sleep.assert_called_once_with(0.25)
+
+
 def _mock_reactions(requests_mock, approve_users, reject_users):
     requests_mock.get(
         f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
