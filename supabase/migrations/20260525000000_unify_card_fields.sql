@@ -3,6 +3,11 @@
 -- (publish_date, language), so the suffix is redundant — and confusing
 -- once en rows also produce card_* content.
 --
+-- DEPLOY ORDER: this migration MUST run back-to-back with the matching
+-- backend deploy (see docs/superpowers/specs/2026-05-25-daily-story-card-
+-- unification-design.md §8). Running standalone will break the 09:00 and
+-- 21:00 Asia/Taipei cron jobs until backend restarts.
+--
 -- Companion changes:
 --   - backend prompts.py / gemini_client.py / story_writer.py / job.py
 --     and social/card/mapper.py all switch to the new column names in the
