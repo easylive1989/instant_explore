@@ -6,10 +6,19 @@ import 'package:equatable/equatable.dart';
 /// `daily_story_places` row. One day has one `DailyStory` per supported
 /// language (zh-TW, en).
 class DailyStory extends Equatable {
+  /// Date this story was published / shown to users (Asia/Taipei calendar).
   final DateTime publishDate;
+
+  /// Language tag matching the app locale: `zh-TW` or `en`.
   final String language;
+
+  /// Localised place name (e.g. "羅馬競技場" or "Colosseum").
   final String placeName;
+
+  /// Localised location string (e.g. "義大利羅馬" or "Rome, Italy").
   final String placeLocation;
+
+  /// Approximate era of the story (e.g. "公元 70-80 年" or "70-80 CE").
   final String era;
 
   /// Legacy plain-text body, joined from [cardParagraphs] when card fields
@@ -17,7 +26,10 @@ class DailyStory extends Equatable {
   /// the legacy layout renders when [cardParagraphs] is null.
   final String story;
 
+  /// Optional image URL (Wikipedia thumbnail). May be null.
   final String? imageUrl;
+
+  /// Wikipedia article URL in the matching language; falls back to en.
   final String wikipediaUrl;
 
   // Card content fields (story-level). All nullable so the App can fall
