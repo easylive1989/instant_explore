@@ -9,6 +9,36 @@ from lorescape_backend.daily_story.place_picker import PickedPlace
 from lorescape_backend.daily_story.wikipedia import WikipediaSummary
 
 
+def _make_story(
+    *,
+    place_name: str = "X",
+    place_location: str = "Y",
+    era: str = "Z",
+    threads_summary: str = "t",
+    hashtags: tuple[str, ...] = (),
+    card_title: str = "title",
+    card_title_sub: str = "subtitle",
+    card_paragraphs: tuple[str, ...] = ("p1", "p2", "p3"),
+    card_pull_quote: str = "quote",
+    card_pull_quote_attrib: str = "attrib",
+    card_anno_roman: str = "MMXXVI",
+) -> GeneratedStory:
+    """Build a GeneratedStory with sensible defaults for tests."""
+    return GeneratedStory(
+        place_name=place_name,
+        place_location=place_location,
+        era=era,
+        threads_summary=threads_summary,
+        hashtags=hashtags,
+        card_title=card_title,
+        card_title_sub=card_title_sub,
+        card_paragraphs=card_paragraphs,
+        card_pull_quote=card_pull_quote,
+        card_pull_quote_attrib=card_pull_quote_attrib,
+        card_anno_roman=card_anno_roman,
+    )
+
+
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
@@ -37,13 +67,19 @@ def test_run_once_happy_path_calls_each_step(
         f"https://{lang}.wikipedia.org/wiki/{title}"
     )
     generate_story.side_effect = [
-        GeneratedStory(
-            "羅馬競技場", "義大利羅馬", "公元 70-80 年", "中文故事",
-            threads_summary="中短", hashtags=("colosseum",),
+        _make_story(
+            place_name="羅馬競技場",
+            place_location="義大利羅馬",
+            era="公元 70-80 年",
+            threads_summary="中短",
+            hashtags=("colosseum",),
         ),
-        GeneratedStory(
-            "Colosseum", "Rome, Italy", "70-80 CE", "english story",
-            threads_summary="en short", hashtags=("rome", "colosseum"),
+        _make_story(
+            place_name="Colosseum",
+            place_location="Rome, Italy",
+            era="70-80 CE",
+            threads_summary="en short",
+            hashtags=("rome", "colosseum"),
         ),
     ]
 
@@ -95,9 +131,7 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
     )
     # Simulate: zh has no langlink, en is just the same article
     fetch_langlink.return_value = None
-    generate_story.return_value = GeneratedStory(
-        "X", "Y", "Z", "S", threads_summary="t", hashtags=(),
-    )
+    generate_story.return_value = _make_story()
 
     run_once(fake_config, date(2026, 5, 11))
 
@@ -378,10 +412,12 @@ def test_run_generate_and_review_swallows_review_failure(
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
 @patch("lorescape_backend.daily_story.job.story_writer.insert_story")
 @patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
-def test_run_once_zh_tw_joins_paragraphs_and_passes_card_fields(
+def test_run_once_both_languages_join_paragraphs_and_pass_card_fields(
     mark_used, insert_story, generate_story, fetch_langlink,
     fetch_summary, pick_next, create_client, fake_config,
 ):
+    """Both zh-TW and en now produce card fields; story column is derived
+    from joining card_paragraphs with '\n\n'."""
     pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Eiffel Tower")
     fetch_summary.return_value = WikipediaSummary(
         title="Eiffel Tower",
@@ -393,50 +429,55 @@ def test_run_once_zh_tw_joins_paragraphs_and_passes_card_fields(
         f"https://{lang}.wikipedia.org/wiki/{title}"
     )
     generate_story.side_effect = [
-        # zh-TW: paragraphs + card fields, story is None
-        GeneratedStory(
+        # zh-TW: paragraphs + card fields
+        _make_story(
             place_name="艾菲爾鐵塔",
             place_location="巴黎",
             era="十九世紀末",
-            story=None,
             threads_summary="短摘",
             hashtags=("paris", "eiffelTower"),
-            card_title_ch="討厭鐵塔的文學大師",
-            card_title_sub_ch="莫泊桑的「專屬午餐位」",
-            card_paragraphs_ch=("第一段", "第二段", "第三段"),
-            card_pull_quote_ch="「看不見鐵塔的地方。」",
-            card_pull_quote_attrib_ch="—— 莫泊桑，一八八九",
+            card_title="討厭鐵塔的文學大師",
+            card_title_sub="莫泊桑的「專屬午餐位」",
+            card_paragraphs=("第一段", "第二段", "第三段"),
+            card_pull_quote="「看不見鐵塔的地方。」",
+            card_pull_quote_attrib="—— 莫泊桑，一八八九",
             card_anno_roman="MDCCCLXXXIX",
         ),
-        # en: original shape
-        GeneratedStory(
+        # en: also has card fields after unification
+        _make_story(
             place_name="Eiffel Tower",
             place_location="Paris",
             era="Late 19th century",
-            story="english story",
             threads_summary="en short",
             hashtags=("paris",),
+            card_title="The Writer Who Hated the Tower",
+            card_title_sub="Maupassant's lunchtime ritual",
+            card_paragraphs=("p1", "p2", "p3"),
+            card_pull_quote="\"The only place I can't see it.\"",
+            card_pull_quote_attrib="— Maupassant, 1889",
+            card_anno_roman="MDCCCLXXXIX",
         ),
     ]
 
     run_once(fake_config, date(2026, 5, 21))
 
-    # zh-TW row: schema is the zh-TW one, story is the joined paragraphs,
-    # and all card fields are passed through.
     zh_call, en_call = insert_story.call_args_list
+
+    # zh-TW row: story joined from paragraphs, all card fields passed through.
     zh_row = zh_call.args[1]
     assert zh_row.language == "zh-TW"
     assert zh_row.story == "第一段\n\n第二段\n\n第三段"
-    assert zh_row.card_title_ch == "討厭鐵塔的文學大師"
-    assert zh_row.card_paragraphs_ch == ("第一段", "第二段", "第三段")
+    assert zh_row.card_title == "討厭鐵塔的文學大師"
+    assert zh_row.card_paragraphs == ("第一段", "第二段", "第三段")
     assert zh_row.card_anno_roman == "MDCCCLXXXIX"
 
-    # en row: story unchanged, card fields all None
+    # en row: now also has card fields and story is the joined paragraphs.
     en_row = en_call.args[1]
     assert en_row.language == "en"
-    assert en_row.story == "english story"
-    assert en_row.card_title_ch is None
-    assert en_row.card_paragraphs_ch is None
+    assert en_row.story == "p1\n\np2\n\np3"
+    assert en_row.card_title == "The Writer Who Hated the Tower"
+    assert en_row.card_paragraphs == ("p1", "p2", "p3")
+    assert en_row.card_anno_roman == "MDCCCLXXXIX"
 
 
 @patch("lorescape_backend.daily_story.job.create_client")
@@ -458,18 +499,12 @@ def test_run_once_passes_per_language_response_schema(
         en_url="https://en.wikipedia.org/wiki/Colosseum",
     )
     fetch_langlink.return_value = None
-    generate_story.return_value = GeneratedStory(
-        place_name="X", place_location="Y", era="Z",
-        story="s", threads_summary="t", hashtags=(),
-        card_paragraphs_ch=("a", "b", "c"),
-    )
+    generate_story.return_value = _make_story(card_paragraphs=("a", "b", "c"))
 
     run_once(fake_config, date(2026, 5, 21))
 
-    # First call (zh-TW) gets the zh-TW schema; second call (en) gets en schema.
+    # Both languages now share the unified card schema.
     zh_schema = generate_story.call_args_list[0].kwargs["response_schema"]
     en_schema = generate_story.call_args_list[1].kwargs["response_schema"]
     assert zh_schema == prompts.build_response_schema("zh-TW")
     assert en_schema == prompts.build_response_schema("en")
-    # Sanity: they differ
-    assert zh_schema != en_schema

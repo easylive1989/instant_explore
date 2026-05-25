@@ -55,13 +55,7 @@ def run_once(config: Config, target_date: date) -> None:
             response_schema=prompts.build_response_schema(language),
         )
 
-        if story.card_paragraphs_ch is not None:
-            # zh-TW path: derive the back-compat `story` column from paragraphs.
-            story_text = "\n\n".join(story.card_paragraphs_ch)
-        else:
-            # en path: Gemini returns `story` directly.
-            assert story.story is not None
-            story_text = story.story
+        story_text = "\n\n".join(story.card_paragraphs)
 
         story_writer.insert_story(
             supabase,
@@ -77,11 +71,11 @@ def run_once(config: Config, target_date: date) -> None:
                 wikipedia_url=wiki_url,
                 threads_summary=story.threads_summary,
                 hashtags=story.hashtags,
-                card_title_ch=story.card_title_ch,
-                card_title_sub_ch=story.card_title_sub_ch,
-                card_paragraphs_ch=story.card_paragraphs_ch,
-                card_pull_quote_ch=story.card_pull_quote_ch,
-                card_pull_quote_attrib_ch=story.card_pull_quote_attrib_ch,
+                card_title=story.card_title,
+                card_title_sub=story.card_title_sub,
+                card_paragraphs=story.card_paragraphs,
+                card_pull_quote=story.card_pull_quote,
+                card_pull_quote_attrib=story.card_pull_quote_attrib,
                 card_anno_roman=story.card_anno_roman,
             ),
         )
