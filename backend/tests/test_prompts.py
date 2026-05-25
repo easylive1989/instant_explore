@@ -93,11 +93,52 @@ def test_build_user_prompt_includes_language_name_en():
 
 
 def test_build_user_prompt_lists_required_fields():
+    for lang in ("en", "zh-TW"):
+        prompt = build_user_prompt(
+            wikipedia_title="X", wikipedia_extract="Y", language=lang
+        )
+        for field in BASE_FIELDS:
+            assert field in prompt, f"{lang} prompt missing base field: {field}"
+        for field in CARD_FIELDS:
+            assert field in prompt, f"{lang} prompt missing card field: {field}"
+        assert "story:" not in prompt, (
+            f"{lang} prompt should no longer list `story` as an output field"
+        )
+
+
+def test_build_user_prompt_en_lists_card_fields_and_drop_cap_rule():
     prompt = build_user_prompt(
-        wikipedia_title="X", wikipedia_extract="Y", language="en"
+        wikipedia_title="Eiffel Tower",
+        wikipedia_extract="Built in 1889 by Gustave Eiffel.",
+        language="en",
     )
-    for field in ("place_name", "place_location", "era", "story"):
-        assert field in prompt
+    for field in CARD_FIELDS:
+        assert field in prompt, f"en prompt missing field: {field}"
+    # 3 paragraphs constraint
+    assert "3 paragraphs" in prompt
+    # drop-cap function-word ban
+    assert "drop-cap" in prompt.lower()
+    assert '"The"' in prompt or "'The'" in prompt  # function-word example
+    # pull quote uses double quotes
+    assert '"..."' in prompt or "double quote" in prompt.lower()
+    # em-dash for attribution
+    assert "—" in prompt  # em-dash, not hyphen
+
+
+def test_build_user_prompt_zh_tw_no_longer_uses_ch_suffix():
+    prompt = build_user_prompt(
+        wikipedia_title="Eiffel Tower",
+        wikipedia_extract="Built in 1889 by Gustave Eiffel.",
+        language="zh-TW",
+    )
+    for old_field in (
+        "card_title_ch",
+        "card_title_sub_ch",
+        "card_paragraphs_ch",
+        "card_pull_quote_ch",
+        "card_pull_quote_attrib_ch",
+    ):
+        assert old_field not in prompt, f"zh-TW prompt still mentions {old_field}"
 
 
 
