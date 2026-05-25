@@ -24,11 +24,11 @@ def _row(**overrides):
         hashtags=["rome", "colosseum"],
         review_state="pending",
         discord_message_id="msg-1",
-        card_title_ch="石頭裡的吶喊",
-        card_title_sub_ch="鬥獸場百年",
-        card_paragraphs_ch=["第一段", "第二段", "第三段"],
-        card_pull_quote_ch="「我們將娛樂血腥化為藝術。」",
-        card_pull_quote_attrib_ch="—— 塔西陀",
+        card_title="石頭裡的吶喊",
+        card_title_sub="鬥獸場百年",
+        card_paragraphs=["第一段", "第二段", "第三段"],
+        card_pull_quote="「我們將娛樂血腥化為藝術。」",
+        card_pull_quote_attrib="—— 塔西陀",
         card_anno_roman="LXXX",
     )
     base.update(overrides)
@@ -382,7 +382,7 @@ def test_approved_row_skips_ig_when_place_row_missing(
 def test_approved_row_skips_ig_when_card_fields_null(
     upload, render, ig_pub, th_pub, check, create, fake_config
 ):
-    zh = _row(card_title_ch=None)  # one missing card field → mapper returns None
+    zh = _row(card_title=None)  # one missing card field → mapper returns None
     en = _en_row()
     place = _place_row()
     client, ds_table, _, _ = _supabase_multi_table(

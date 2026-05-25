@@ -19,11 +19,11 @@ def _zh_tw_row(**overrides) -> dict:
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
         "threads_summary": "短摘",
         "hashtags": ["paris", "eiffelTower"],
-        "card_title_ch": "討厭鐵塔的文學大師",
-        "card_title_sub_ch": "莫泊桑的「專屬午餐位」",
-        "card_paragraphs_ch": ["第一段", "第二段", "第三段"],
-        "card_pull_quote_ch": "「看不見鐵塔的地方。」",
-        "card_pull_quote_attrib_ch": "—— 莫泊桑,一八八九",
+        "card_title": "討厭鐵塔的文學大師",
+        "card_title_sub": "莫泊桑的「專屬午餐位」",
+        "card_paragraphs": ["第一段", "第二段", "第三段"],
+        "card_pull_quote": "「看不見鐵塔的地方。」",
+        "card_pull_quote_attrib": "—— 莫泊桑,一八八九",
         "card_anno_roman": "MDCCCLXXXIX",
     }
     base.update(overrides)
@@ -84,11 +84,11 @@ def test_build_card_content_equator_and_prime_meridian_are_valid():
 
 def test_build_card_content_returns_none_if_any_zh_tw_card_field_missing():
     for field in (
-        "card_title_ch",
-        "card_title_sub_ch",
-        "card_paragraphs_ch",
-        "card_pull_quote_ch",
-        "card_pull_quote_attrib_ch",
+        "card_title",
+        "card_title_sub",
+        "card_paragraphs",
+        "card_pull_quote",
+        "card_pull_quote_attrib",
         "card_anno_roman",
     ):
         row = _zh_tw_row(**{field: None})
@@ -98,7 +98,7 @@ def test_build_card_content_returns_none_if_any_zh_tw_card_field_missing():
 
 
 def test_build_card_content_returns_none_if_zh_tw_card_paragraphs_empty():
-    row = _zh_tw_row(card_paragraphs_ch=[])
+    row = _zh_tw_row(card_paragraphs=[])
     assert build_card_content(row, _place_row()) is None
 
 

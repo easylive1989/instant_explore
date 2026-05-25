@@ -23,11 +23,11 @@ def build_card_content(
     place_location = daily_story_row.get("place_location")
     photo_url = daily_story_row.get("image_url")
 
-    title_ch = daily_story_row.get("card_title_ch")
-    title_ch_sub = daily_story_row.get("card_title_sub_ch")
-    paragraphs = daily_story_row.get("card_paragraphs_ch")
-    pull_quote_ch = daily_story_row.get("card_pull_quote_ch")
-    pull_quote_attrib_ch = daily_story_row.get("card_pull_quote_attrib_ch")
+    title_ch = daily_story_row.get("card_title")
+    title_ch_sub = daily_story_row.get("card_title_sub")
+    paragraphs = daily_story_row.get("card_paragraphs")
+    pull_quote_ch = daily_story_row.get("card_pull_quote")
+    pull_quote_attrib_ch = daily_story_row.get("card_pull_quote_attrib")
     anno_roman = daily_story_row.get("card_anno_roman")
 
     location_en = place_row.get("card_location_en")
