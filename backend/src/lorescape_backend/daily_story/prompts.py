@@ -30,7 +30,6 @@ _BASE_PROPERTIES: dict = {
     "place_name": {"type": "STRING"},
     "place_location": {"type": "STRING"},
     "era": {"type": "STRING"},
-    "story": {"type": "STRING"},
     "threads_summary": {"type": "STRING"},
     "hashtags": {
         "type": "ARRAY",
@@ -39,62 +38,43 @@ _BASE_PROPERTIES: dict = {
 }
 
 _BASE_REQUIRED = [
-    "place_name",
-    "place_location",
-    "era",
-    "story",
-    "threads_summary",
-    "hashtags",
+    "place_name", "place_location", "era",
+    "threads_summary", "hashtags",
 ]
 
-_ZH_CARD_PROPERTIES: dict = {
-    "card_title_ch": {"type": "STRING"},
-    "card_title_sub_ch": {"type": "STRING"},
-    "card_paragraphs_ch": {
+_CARD_PROPERTIES: dict = {
+    "card_title":              {"type": "STRING"},
+    "card_title_sub":          {"type": "STRING"},
+    "card_paragraphs": {
         "type": "ARRAY",
         "items": {"type": "STRING"},
         "minItems": 3,
         "maxItems": 3,
     },
-    "card_pull_quote_ch": {"type": "STRING"},
-    "card_pull_quote_attrib_ch": {"type": "STRING"},
-    "card_anno_roman": {"type": "STRING"},
+    "card_pull_quote":         {"type": "STRING"},
+    "card_pull_quote_attrib":  {"type": "STRING"},
+    "card_anno_roman":         {"type": "STRING"},
 }
 
-_ZH_CARD_REQUIRED = [
-    "card_title_ch",
-    "card_title_sub_ch",
-    "card_paragraphs_ch",
-    "card_pull_quote_ch",
-    "card_pull_quote_attrib_ch",
-    "card_anno_roman",
+_CARD_REQUIRED = [
+    "card_title", "card_title_sub", "card_paragraphs",
+    "card_pull_quote", "card_pull_quote_attrib", "card_anno_roman",
 ]
 
 
 def build_response_schema(language: str) -> dict:
     """Return the Gemini structured-output schema for the given language.
 
-    zh-TW returns the base fields *minus* `story` *plus* six `card_*` fields
-    used by the IG card renderer. The writer derives `story` from the joined
-    `card_paragraphs_ch`. en keeps the original story-in-a-single-string
-    shape.
+    Both languages produce the base fields PLUS the card_* fields. The
+    legacy `story` text column is derived by the writer from
+    `card_paragraphs`.
     """
     if language not in _LANGUAGE_NAMES:
         raise KeyError(f"Unknown language: {language!r}")
-    if language == "zh-TW":
-        # Drop `story` from base — zh-TW returns paragraphs instead.
-        base_props = {k: v for k, v in _BASE_PROPERTIES.items() if k != "story"}
-        base_required = [k for k in _BASE_REQUIRED if k != "story"]
-        return {
-            "type": "OBJECT",
-            "properties": {**base_props, **_ZH_CARD_PROPERTIES},
-            "required": base_required + _ZH_CARD_REQUIRED,
-        }
-    # language == "en"
     return {
         "type": "OBJECT",
-        "properties": dict(_BASE_PROPERTIES),
-        "required": list(_BASE_REQUIRED),
+        "properties": {**_BASE_PROPERTIES, **_CARD_PROPERTIES},
+        "required": _BASE_REQUIRED + _CARD_REQUIRED,
     }
 
 
