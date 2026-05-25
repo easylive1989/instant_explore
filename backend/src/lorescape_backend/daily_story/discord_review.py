@@ -13,6 +13,7 @@ Bot permissions required in the review channel:
 from __future__ import annotations
 
 import logging
+import time
 import urllib.parse
 from dataclasses import dataclass
 from typing import Literal
@@ -30,6 +31,8 @@ ReviewDecision = Literal["approved", "rejected", "none"]
 # Discord embed limits (per their docs).
 _EMBED_DESCRIPTION_LIMIT = 4096
 _REQUEST_TIMEOUT = 10
+# Cap Retry-After we honor so a misbehaving header can't stall the job.
+_MAX_RETRY_AFTER_SECONDS = 5.0
 
 
 @dataclass(frozen=True)
@@ -137,10 +140,29 @@ def _add_self_reaction(
         f"{DISCORD_API}/channels/{channel_id}/messages/{message_id}"
         f"/reactions/{encoded}/@me"
     )
-    response = requests.put(
-        url, headers=_bot_headers(bot_token), timeout=_REQUEST_TIMEOUT
-    )
+    headers = _bot_headers(bot_token)
+    response = requests.put(url, headers=headers, timeout=_REQUEST_TIMEOUT)
+    # Reactions share a tight per-route bucket (~1 req / 250 ms per channel);
+    # seeding ✅ and ❌ back-to-back can 429. Honor Retry-After once.
+    if response.status_code == 429:
+        delay = _parse_retry_after(response)
+        logger.warning(
+            "discord reaction rate-limited; sleeping %.2fs then retrying once",
+            delay,
+        )
+        time.sleep(delay)
+        response = requests.put(url, headers=headers, timeout=_REQUEST_TIMEOUT)
     response.raise_for_status()
+
+
+def _parse_retry_after(response: requests.Response) -> float:
+    """Discord returns Retry-After in seconds (sometimes fractional)."""
+    raw = response.headers.get("Retry-After", "1")
+    try:
+        delay = float(raw)
+    except ValueError:
+        delay = 1.0
+    return max(0.0, min(delay, _MAX_RETRY_AFTER_SECONDS))
 
 
 def _list_reaction_users(
