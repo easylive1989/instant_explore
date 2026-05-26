@@ -8,17 +8,22 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
   SupabaseDailyStoryRepository(this._client);
 
   static const _table = 'daily_stories';
+  // Pull the daily_story_places row alongside each story so the App can
+  // render card spine / footer fields without a second round-trip.
+  // `!left` so we still get the story row even if the place join is empty.
+  static const _select =
+      '*, daily_story_places!left(card_location_en, card_city_ch, card_city_en)';
 
   @override
   Future<DailyStory?> fetchLatest({required String language}) async {
     final rows = await _client
         .from(_table)
-        .select()
+        .select(_select)
         .eq('language', language)
         .order('publish_date', ascending: false)
         .limit(1);
     if (rows.isEmpty) return null;
-    return _fromRow(rows.first);
+    return rowToStory(rows.first);
   }
 
   @override
@@ -29,15 +34,19 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
   }) async {
     final rows = await _client
         .from(_table)
-        .select()
+        .select(_select)
         .eq('language', language)
         .lt('publish_date', _isoDate(before))
         .order('publish_date', ascending: false)
         .limit(limit);
-    return rows.map(_fromRow).toList();
+    return rows.map(rowToStory).toList();
   }
 
-  static DailyStory _fromRow(Map<String, dynamic> row) {
+  /// Public for testability. Parses a single row (possibly with the
+  /// `daily_story_places` join expanded) into a [DailyStory].
+  static DailyStory rowToStory(Map<String, dynamic> row) {
+    final place = row['daily_story_places'] as Map<String, dynamic>?;
+    final paragraphsRaw = row['card_paragraphs'];
     return DailyStory(
       publishDate: DateTime.parse(row['publish_date'] as String),
       language: row['language'] as String,
@@ -47,6 +56,17 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
       story: row['story'] as String,
       imageUrl: row['image_url'] as String?,
       wikipediaUrl: row['wikipedia_url'] as String,
+      cardTitle: row['card_title'] as String?,
+      cardTitleSub: row['card_title_sub'] as String?,
+      cardParagraphs: paragraphsRaw == null
+          ? null
+          : (paragraphsRaw as List).cast<String>(),
+      cardPullQuote: row['card_pull_quote'] as String?,
+      cardPullQuoteAttrib: row['card_pull_quote_attrib'] as String?,
+      cardAnnoRoman: row['card_anno_roman'] as String?,
+      cardLocationEn: place?['card_location_en'] as String?,
+      cardCityCh: place?['card_city_ch'] as String?,
+      cardCityEn: place?['card_city_en'] as String?,
     );
   }
 

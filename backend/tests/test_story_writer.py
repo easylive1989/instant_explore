@@ -42,12 +42,12 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
         "threads_summary": "短摘",
         "hashtags": ["rome", "colosseum"],
-        "card_title_ch": None,
-        "card_title_sub_ch": None,
-        "card_paragraphs_ch": None,
-        "card_pull_quote_ch": None,
-        "card_pull_quote_attrib_ch": None,
-        "card_anno_roman": None,
+        "card_title": "",
+        "card_title_sub": "",
+        "card_paragraphs": [],
+        "card_pull_quote": "",
+        "card_pull_quote_attrib": "",
+        "card_anno_roman": "",
     }
     # Verify on_conflict kwarg
     assert chain.upsert.call_args.kwargs.get("on_conflict") == "publish_date,language"
@@ -99,11 +99,11 @@ def test_insert_story_writes_zh_tw_card_fields_with_paragraphs_as_list():
         wikipedia_url="https://zh.wikipedia.org/wiki/...",
         threads_summary="短摘",
         hashtags=("paris", "eiffelTower"),
-        card_title_ch="討厭鐵塔的文學大師",
-        card_title_sub_ch="莫泊桑的「專屬午餐位」",
-        card_paragraphs_ch=("第一段", "第二段", "第三段"),
-        card_pull_quote_ch="「看不見艾菲爾鐵塔的地方。」",
-        card_pull_quote_attrib_ch="—— 莫泊桑，一八八九",
+        card_title="討厭鐵塔的文學大師",
+        card_title_sub="莫泊桑的「專屬午餐位」",
+        card_paragraphs=("第一段", "第二段", "第三段"),
+        card_pull_quote="「看不見艾菲爾鐵塔的地方。」",
+        card_pull_quote_attrib="—— 莫泊桑，一八八九",
         card_anno_roman="MDCCCLXXXIX",
     )
 
@@ -111,16 +111,17 @@ def test_insert_story_writes_zh_tw_card_fields_with_paragraphs_as_list():
 
     payload = chain.upsert.call_args[0][0]
     # text[] columns must be JSON arrays, not tuples
-    assert payload["card_paragraphs_ch"] == ["第一段", "第二段", "第三段"]
-    assert isinstance(payload["card_paragraphs_ch"], list)
-    assert payload["card_title_ch"] == "討厭鐵塔的文學大師"
-    assert payload["card_title_sub_ch"] == "莫泊桑的「專屬午餐位」"
-    assert payload["card_pull_quote_ch"] == "「看不見艾菲爾鐵塔的地方。」"
-    assert payload["card_pull_quote_attrib_ch"] == "—— 莫泊桑，一八八九"
+    assert payload["card_paragraphs"] == ["第一段", "第二段", "第三段"]
+    assert isinstance(payload["card_paragraphs"], list)
+    assert payload["card_title"] == "討厭鐵塔的文學大師"
+    assert payload["card_title_sub"] == "莫泊桑的「專屬午餐位」"
+    assert payload["card_pull_quote"] == "「看不見艾菲爾鐵塔的地方。」"
+    assert payload["card_pull_quote_attrib"] == "—— 莫泊桑，一八八九"
     assert payload["card_anno_roman"] == "MDCCCLXXXIX"
 
 
-def test_insert_story_leaves_card_fields_null_for_en_row():
+def test_insert_story_writes_en_card_fields_too():
+    """Both languages now carry card fields; en is no longer an exception."""
     chain = MagicMock()
     chain.upsert.return_value = chain
     chain.execute.return_value = MagicMock(data=[{"id": "x"}])
@@ -134,22 +135,26 @@ def test_insert_story_leaves_card_fields_null_for_en_row():
         place_name="Eiffel Tower",
         place_location="Paris",
         era="Late 19th century",
-        story="English story",
+        story="P1\n\nP2\n\nP3",
         image_url=None,
         wikipedia_url="https://en.wikipedia.org/wiki/Eiffel_Tower",
         threads_summary="t",
-        hashtags=(),
+        hashtags=("paris", "eiffelTower"),
+        card_title="The Writer Who Hated the Tower",
+        card_title_sub="Maupassant's lunch spot",
+        card_paragraphs=("P1", "P2", "P3"),
+        card_pull_quote="\"The one place you can't see the Eiffel Tower.\"",
+        card_pull_quote_attrib="— Maupassant, 1889",
+        card_anno_roman="MDCCCLXXXIX",
     )
 
     insert_story(client, row)
 
     payload = chain.upsert.call_args[0][0]
-    for field in (
-        "card_title_ch",
-        "card_title_sub_ch",
-        "card_paragraphs_ch",
-        "card_pull_quote_ch",
-        "card_pull_quote_attrib_ch",
-        "card_anno_roman",
-    ):
-        assert payload[field] is None, f"expected {field} to be None for en row"
+    assert payload["card_paragraphs"] == ["P1", "P2", "P3"]
+    assert isinstance(payload["card_paragraphs"], list)
+    assert payload["card_title"] == "The Writer Who Hated the Tower"
+    assert payload["card_title_sub"] == "Maupassant's lunch spot"
+    assert payload["card_pull_quote"] == "\"The one place you can't see the Eiffel Tower.\""
+    assert payload["card_pull_quote_attrib"] == "— Maupassant, 1889"
+    assert payload["card_anno_roman"] == "MDCCCLXXXIX"

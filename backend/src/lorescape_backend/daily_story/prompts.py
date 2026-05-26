@@ -30,7 +30,6 @@ _BASE_PROPERTIES: dict = {
     "place_name": {"type": "STRING"},
     "place_location": {"type": "STRING"},
     "era": {"type": "STRING"},
-    "story": {"type": "STRING"},
     "threads_summary": {"type": "STRING"},
     "hashtags": {
         "type": "ARRAY",
@@ -39,62 +38,43 @@ _BASE_PROPERTIES: dict = {
 }
 
 _BASE_REQUIRED = [
-    "place_name",
-    "place_location",
-    "era",
-    "story",
-    "threads_summary",
-    "hashtags",
+    "place_name", "place_location", "era",
+    "threads_summary", "hashtags",
 ]
 
-_ZH_CARD_PROPERTIES: dict = {
-    "card_title_ch": {"type": "STRING"},
-    "card_title_sub_ch": {"type": "STRING"},
-    "card_paragraphs_ch": {
+_CARD_PROPERTIES: dict = {
+    "card_title":              {"type": "STRING"},
+    "card_title_sub":          {"type": "STRING"},
+    "card_paragraphs": {
         "type": "ARRAY",
         "items": {"type": "STRING"},
         "minItems": 3,
         "maxItems": 3,
     },
-    "card_pull_quote_ch": {"type": "STRING"},
-    "card_pull_quote_attrib_ch": {"type": "STRING"},
-    "card_anno_roman": {"type": "STRING"},
+    "card_pull_quote":         {"type": "STRING"},
+    "card_pull_quote_attrib":  {"type": "STRING"},
+    "card_anno_roman":         {"type": "STRING"},
 }
 
-_ZH_CARD_REQUIRED = [
-    "card_title_ch",
-    "card_title_sub_ch",
-    "card_paragraphs_ch",
-    "card_pull_quote_ch",
-    "card_pull_quote_attrib_ch",
-    "card_anno_roman",
+_CARD_REQUIRED = [
+    "card_title", "card_title_sub", "card_paragraphs",
+    "card_pull_quote", "card_pull_quote_attrib", "card_anno_roman",
 ]
 
 
 def build_response_schema(language: str) -> dict:
     """Return the Gemini structured-output schema for the given language.
 
-    zh-TW returns the base fields *minus* `story` *plus* six `card_*` fields
-    used by the IG card renderer. The writer derives `story` from the joined
-    `card_paragraphs_ch`. en keeps the original story-in-a-single-string
-    shape.
+    Both languages produce the base fields PLUS the card_* fields. The
+    legacy `story` text column is derived by the writer from
+    `card_paragraphs`.
     """
     if language not in _LANGUAGE_NAMES:
         raise KeyError(f"Unknown language: {language!r}")
-    if language == "zh-TW":
-        # Drop `story` from base — zh-TW returns paragraphs instead.
-        base_props = {k: v for k, v in _BASE_PROPERTIES.items() if k != "story"}
-        base_required = [k for k in _BASE_REQUIRED if k != "story"]
-        return {
-            "type": "OBJECT",
-            "properties": {**base_props, **_ZH_CARD_PROPERTIES},
-            "required": base_required + _ZH_CARD_REQUIRED,
-        }
-    # language == "en"
     return {
         "type": "OBJECT",
-        "properties": dict(_BASE_PROPERTIES),
-        "required": list(_BASE_REQUIRED),
+        "properties": {**_BASE_PROPERTIES, **_CARD_PROPERTIES},
+        "required": _BASE_REQUIRED + _CARD_REQUIRED,
     }
 
 
@@ -114,43 +94,57 @@ def build_user_prompt(
 
 def _en_body(language_name: str) -> str:
     return (
-        f"Write a 700-1200 character true historical short story in {language_name}.\n"
+        f"Write a true historical short story in {language_name}, structured as "
+        "exactly 3 paragraphs of 60-100 English words each.\n"
         "\n"
         "Style:\n"
-        "- Multiple short paragraphs, each centred on a specific moment, "
-        "person, or turning point.\n"
-        "- Open with a concrete scene — a dated event, a person acting in a "
-        'place — not a textbook summary like "X is a landmark in Y".\n'
+        "- Each paragraph centres on a specific moment, person, or turning point.\n"
+        "- Open paragraph 1 with a concrete scene — a dated event, a real person "
+        "acting in a real place. The first word will be rendered as a large "
+        "drop-cap; it must be a concrete noun or proper name, NOT a function "
+        'word (avoid starting with "The", "A", "An", "In", "On", "At", "It", '
+        '"This", "That").\n'
         "- Quote real historical lines or chronicler accounts ONLY if they "
         "appear in the source; otherwise paraphrase.\n"
-        "- Cite specific years or eras (e.g. '1492', '70-80 CE', '明朝') "
-        "when stating events.\n"
-        "- Reference real named people from the source (rulers, architects, "
-        "chroniclers, generals, etc).\n"
-        "- Close with one short reflective line about the landmark's enduring "
-        "significance.\n"
-        "- Do NOT end the story with a redundant 'place name, location, era' "
-        "summary — those values are returned as separate fields below.\n"
+        "- Cite specific years or eras (e.g. '1492', '70-80 CE') and reference "
+        "real named people from the source (rulers, architects, chroniclers).\n"
+        "- Do NOT end with a redundant 'place name, location, era' summary — "
+        "those values are returned as separate fields below.\n"
         "\n"
         f"Also produce a punchier 300-400 character version of the same story "
-        f"in {language_name}, ending on a hook or open question rather than "
-        "wrapping up neatly. This shorter version must fit comfortably under "
-        "500 characters total — it will be posted as a single Threads post.\n"
+        f"in {language_name} as `threads_summary`, ending on a hook or open "
+        "question. This shorter version must fit under 500 characters total — "
+        "it will be posted as a single Threads post.\n"
         "\n"
-        "Also produce 3-5 hashtags drawn from the country, era, and theme "
-        "of this place. Each tag should be a single lowerCamelCase word "
-        "without the '#' prefix, ASCII letters/digits only (so they work as "
-        "hashtags on English-language social media regardless of the story "
-        "language).\n"
+        "Also produce 3-5 hashtags drawn from the country, era, and theme. "
+        "Each tag is a single lowerCamelCase word without the '#' prefix, "
+        "ASCII letters/digits only.\n"
+        "\n"
+        "ADDITIONALLY, produce the following Instagram-card fields:\n"
+        "- card_title: a punchy English main title capturing the central "
+        "tension (≤ 28 characters, must NOT just repeat the place name).\n"
+        "- card_title_sub: a subtitle complementing the main title "
+        "(≤ 50 characters).\n"
+        "- card_paragraphs: the same 3 paragraphs above, returned as a JSON "
+        "array of 3 strings (one paragraph per element, no leading/trailing "
+        "whitespace).\n"
+        "- card_pull_quote: one short, dramatic quote from the story, wrapped "
+        'in straight double quotes "...". Prefer real quotes from the source '
+        "over invented lines.\n"
+        "- card_pull_quote_attrib: attribution for the pull quote, beginning "
+        "with an em-dash —. Example: — Suetonius, 121 CE.\n"
+        "- card_anno_roman: the representative year of the story as Roman "
+        "numerals (example: 1889 → MDCCCLXXXIX). If the story spans a range, "
+        "pick one representative year.\n"
         "\n"
         "Output JSON with these fields:\n"
         "- place_name: localized place name only (no extras)\n"
         "- place_location: localized location (e.g. country/city)\n"
         "- era: the era your story takes place in\n"
-        "- story: the 700-1200 character narrative\n"
         "- threads_summary: the 300-400 character punchier version\n"
-        "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings "
-        "(no '#' prefix)\n"
+        "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings\n"
+        "- card_title, card_title_sub, card_paragraphs, card_pull_quote, "
+        "card_pull_quote_attrib, card_anno_roman: as described above\n"
     )
 
 
@@ -184,18 +178,18 @@ def _zh_tw_body(language_name: str) -> str:
         "ASCII letters/digits only.\n"
         "\n"
         "ADDITIONALLY, produce the following Instagram-card fields:\n"
-        "- card_title_ch: a punchy Traditional Chinese main title that captures "
+        "- card_title: a punchy Traditional Chinese main title that captures "
         "the central tension of the story (≤ 14 characters, must NOT just "
         "repeat the place name).\n"
-        "- card_title_sub_ch: a subtitle that complements the main title "
+        "- card_title_sub: a subtitle that complements the main title "
         "(≤ 20 characters; full-width quotes 「」 allowed).\n"
-        "- card_paragraphs_ch: the same 3 paragraphs above, returned as a "
+        "- card_paragraphs: the same 3 paragraphs above, returned as a "
         "JSON array of 3 strings (one paragraph per element, no leading/"
         "trailing whitespace).\n"
-        "- card_pull_quote_ch: one short, dramatic quote from the story, "
+        "- card_pull_quote: one short, dramatic quote from the story, "
         "wrapped in full-width Chinese quotation marks 「」 or 『』. Prefer "
         "real quotes from the source over invented lines.\n"
-        "- card_pull_quote_attrib_ch: attribution for the pull quote, "
+        "- card_pull_quote_attrib: attribution for the pull quote, "
         "beginning with the full-width em-dash ──. Use Han numerals for "
         "years (example: ── 莫泊桑，一八八九).\n"
         "- card_anno_roman: the representative year of the story as Roman "
@@ -208,7 +202,7 @@ def _zh_tw_body(language_name: str) -> str:
         "- era: the era your story takes place in\n"
         "- threads_summary: the 300-400 character punchier version\n"
         "- hashtags: array of 3-5 lowerCamelCase ASCII hashtag strings\n"
-        "- card_title_ch, card_title_sub_ch, card_paragraphs_ch, "
-        "card_pull_quote_ch, card_pull_quote_attrib_ch, card_anno_roman: "
+        "- card_title, card_title_sub, card_paragraphs, "
+        "card_pull_quote, card_pull_quote_attrib, card_anno_roman: "
         "as described above\n"
     )

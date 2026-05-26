@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
+import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +14,6 @@ class DailyStoryDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('daily_story.detail_title'.tr()),
@@ -23,39 +24,52 @@ class DailyStoryDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (story.imageUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: CachedNetworkImage(
-                    imageUrl: story.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) =>
-                        const Icon(Icons.image_not_supported_outlined),
-                  ),
+      body: story.hasCardLayout
+          ? CardLayoutBody(story: story)
+          : _LegacyLayoutBody(story: story),
+    );
+  }
+}
+
+class _LegacyLayoutBody extends StatelessWidget {
+  final DailyStory story;
+  const _LegacyLayoutBody({required this.story});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (story.imageUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: CachedNetworkImage(
+                  imageUrl: story.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) =>
+                      const Icon(Icons.image_not_supported_outlined),
                 ),
               ),
-            const SizedBox(height: 16),
-            Text(story.placeName, style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            _MetaRow(
-              label: 'daily_story.detail_location_label'.tr(),
-              value: story.placeLocation,
             ),
-            _MetaRow(
-              label: 'daily_story.detail_era_label'.tr(),
-              value: story.era,
-            ),
-            const SizedBox(height: 16),
-            _StoryBody(text: story.story, style: theme.textTheme.bodyLarge),
-          ],
-        ),
+          const SizedBox(height: 16),
+          Text(story.placeName, style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 8),
+          _MetaRow(
+            label: 'daily_story.detail_location_label'.tr(),
+            value: story.placeLocation,
+          ),
+          _MetaRow(
+            label: 'daily_story.detail_era_label'.tr(),
+            value: story.era,
+          ),
+          const SizedBox(height: 16),
+          _StoryBody(text: story.story, style: theme.textTheme.bodyLarge),
+        ],
       ),
     );
   }
