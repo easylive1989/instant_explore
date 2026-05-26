@@ -15,9 +15,10 @@ def build_card_content(
 ) -> CardContent | None:
     """Return a CardContent if every required field is present, else None.
 
-    `daily_story_row` is expected to be a zh-TW row (the only language that
-    carries `card_*` fields). `place_row` is the matching
-    `daily_story_places` row joined on `place_id`.
+    `daily_story_row` is the zh-TW row — the IG card layout is Chinese-only.
+    en rows also carry `card_*` fields now (consumed by the App), but the
+    IG publisher gates on language and never feeds them here. `place_row`
+    is the matching `daily_story_places` row joined on `place_id`.
     """
     place_name = daily_story_row.get("place_name")
     place_location = daily_story_row.get("place_location")

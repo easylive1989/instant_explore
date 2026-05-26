@@ -6,7 +6,9 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CardContent:
-    """Data needed to render one E0c (Chinese-only) IG card."""
+    """Data needed to render one E0c IG card (Chinese-only output;
+    rendering uses Chinese typography & quotation marks even though
+    `daily_stories.card_*` columns are now language-neutral)."""
 
     title_ch: str
     title_ch_sub: str
