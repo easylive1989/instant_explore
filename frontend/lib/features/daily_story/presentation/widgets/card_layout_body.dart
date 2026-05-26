@@ -187,8 +187,8 @@ class _DropCapParagraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (text.isEmpty) return _BodyParagraph(text: text);
-    final first = text.substring(0, 1);
-    final rest = text.substring(1);
+    final first = text.characters.first;
+    final rest = text.characters.skip(1).toString();
     return RichText(
       text: TextSpan(
         style: GoogleFonts.notoSerifTc(

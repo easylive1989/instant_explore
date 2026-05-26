@@ -128,13 +128,22 @@ void main() {
     );
 
     testWidgets(
+      'given both city fields are present, '
+      'when rendered, '
+      'then footer shows place location + cardCityCh + cardCityEn',
+      (tester) async {
+        await _pump(tester, _fullCardStory());
+        expect(find.text('義大利羅馬 · 羅馬 Rome'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'given only cardCityEn is null, '
       'when rendered, '
       'then footer shows place location + cardCityCh',
       (tester) async {
         await _pump(tester, _fullCardStory(cardCityEn: null));
-        expect(find.textContaining('義大利羅馬'), findsOneWidget);
-        expect(find.textContaining('羅馬'), findsAtLeastNWidgets(1));
+        expect(find.text('義大利羅馬 · 羅馬'), findsOneWidget);
       },
     );
   });
