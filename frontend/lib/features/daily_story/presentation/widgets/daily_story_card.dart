@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
+import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/card_preview_card.dart';
 import 'package:context_app/features/daily_story/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +26,10 @@ class DailyStoryCard extends ConsumerWidget {
         if (story == null) {
           return _EmptyCard(onPressed: () => context.push(_historyRoute));
         }
-        return _StoryCard(
-          story: story,
-          onTap: () => context.push(_detailRoute, extra: story),
-        );
+        void onTap() => context.push(_detailRoute, extra: story);
+        return story.hasCardLayout
+            ? CardPreviewCard(story: story, onTap: onTap)
+            : _StoryCard(story: story, onTap: onTap);
       },
     );
   }
