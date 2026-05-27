@@ -1,6 +1,8 @@
 """Discord review-flow REST client tests."""
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from lorescape_backend.daily_story.discord_review import (
@@ -15,23 +17,16 @@ CHANNEL = "777"
 MESSAGE = "9999"
 APPROVER_A = "111"
 APPROVER_B = "222"
+FAKE_PNG = b"\x89PNG\r\n\x1a\nfake-card-bytes"
 
 
 def _payload(**overrides) -> ReviewPayload:
-    base = dict(
-        place_name="Colosseum",
-        era="70-80 CE",
-        place_location="Rome, Italy",
-        story="A vivid story",
-        threads_summary="Short summary",
-        image_url="https://upload.wikimedia.org/x.jpg",
-        wikipedia_url="https://en.wikipedia.org/wiki/Colosseum",
-    )
+    base = dict(card_png=FAKE_PNG, publish_date="2026-05-12")
     base.update(overrides)
     return ReviewPayload(**base)
 
 
-def test_send_for_review_posts_message_then_adds_two_reactions(requests_mock):
+def test_send_for_review_uploads_png_then_adds_two_reactions(requests_mock):
     requests_mock.post(
         f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
         json={"id": MESSAGE},
@@ -53,17 +48,29 @@ def test_send_for_review_posts_message_then_adds_two_reactions(requests_mock):
 
     assert msg_id == MESSAGE
     history = requests_mock.request_history
-    assert history[0].method == "POST"
-    body = history[0].json()
-    embed = body["embeds"][0]
-    assert "Colosseum" in embed["title"]
-    assert "70-80 CE" in embed["title"]
-    assert embed["image"]["url"] == "https://upload.wikimedia.org/x.jpg"
+    post = history[0]
+    assert post.method == "POST"
+
+    # Multipart body must carry the PNG and a JSON payload, not a text embed.
+    content_type = post.headers["Content-Type"]
+    assert content_type.startswith("multipart/form-data")
+    body = post.body
+    if isinstance(body, str):
+        body = body.encode("latin-1")
+    assert FAKE_PNG in body
+    assert b"image/png" in body
+    assert b'name="files[0]"' in body
+    assert b'name="payload_json"' in body
+    # The instruction lives in the message content, not as a story preview.
+    assert b"React" in body and b"21:00" in body
+    # No leftover story / threads fields from the old text-based flow.
+    assert b"embeds" not in body
+
     # Reaction calls authenticated as the bot.
     assert any("Bot tok" in r.headers.get("Authorization", "") for r in history)
 
 
-def test_send_for_review_omits_image_when_none(requests_mock):
+def test_send_for_review_filename_includes_publish_date(requests_mock):
     requests_mock.post(
         f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
         json={"id": MESSAGE},
@@ -82,10 +89,13 @@ def test_send_for_review_omits_image_when_none(requests_mock):
     send_for_review(
         bot_token="tok",
         channel_id=CHANNEL,
-        payload=_payload(image_url=None),
+        payload=_payload(publish_date="2026-05-12"),
     )
-    embed = requests_mock.request_history[0].json()["embeds"][0]
-    assert "image" not in embed
+
+    body = requests_mock.request_history[0].body
+    if isinstance(body, str):
+        body = body.encode("latin-1")
+    assert b"ig-card-2026-05-12.png" in body
 
 
 def test_send_for_review_retries_reaction_once_on_429(requests_mock, mocker):

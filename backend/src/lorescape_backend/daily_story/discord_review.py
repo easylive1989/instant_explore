@@ -1,17 +1,20 @@
 """Discord review-flow client (REST only — no Gateway).
 
-The bot posts a daily-story preview to a private review channel and adds the
-two approval reactions. Later, the publish job reads the reactions to decide
-what to do.
+The bot posts the rendered IG card PNG to a private review channel and
+adds the two approval reactions. Reviewers approve/reject based on the
+image alone — the same image that will be published to Instagram —
+rather than on a text preview. Later, the publish job reads the
+reactions to decide what to do.
 
 Bot permissions required in the review channel:
 - Send Messages
-- Embed Links
+- Attach Files
 - Add Reactions
 - Read Message History
 """
 from __future__ import annotations
 
+import json
 import logging
 import time
 import urllib.parse
@@ -28,33 +31,30 @@ REJECT_EMOJI = "❌"
 
 ReviewDecision = Literal["approved", "rejected", "none"]
 
-# Discord embed limits (per their docs).
-_EMBED_DESCRIPTION_LIMIT = 4096
-_REQUEST_TIMEOUT = 10
+_REQUEST_TIMEOUT = 30
 # Cap Retry-After we honor so a misbehaving header can't stall the job.
 _MAX_RETRY_AFTER_SECONDS = 5.0
+_REVIEW_INSTRUCTION = "React ✅ to publish at 21:00 Asia/Taipei · ❌ to skip"
 
 
 @dataclass(frozen=True)
 class ReviewPayload:
-    """The subset of a daily story we surface in the review embed."""
+    """The rendered IG card the reviewer will approve or reject."""
 
-    place_name: str
-    era: str
-    place_location: str
-    story: str
-    threads_summary: str
-    image_url: str | None
-    wikipedia_url: str
+    card_png: bytes
+    publish_date: str  # ISO date, only used in the attachment filename / log
 
 
 def send_for_review(
     *, bot_token: str, channel_id: str, payload: ReviewPayload
 ) -> str:
-    """Post the review message and seed it with ✅/❌. Returns message id."""
-    embed = _build_embed(payload)
-    message_id = _post_message(
-        bot_token=bot_token, channel_id=channel_id, embed=embed
+    """Post the IG card image and seed it with ✅/❌. Returns message id."""
+    message_id = _post_image_message(
+        bot_token=bot_token,
+        channel_id=channel_id,
+        png_bytes=payload.card_png,
+        filename=f"ig-card-{payload.publish_date}.png",
+        content=_REVIEW_INSTRUCTION,
     )
     for emoji in (APPROVE_EMOJI, REJECT_EMOJI):
         _add_self_reaction(
@@ -94,38 +94,32 @@ def check_reaction(
     return "none"
 
 
-def _build_embed(payload: ReviewPayload) -> dict:
-    description_lines = [
-        payload.story,
-        "",
-        "📱 *Threads version:*",
-        payload.threads_summary,
-    ]
-    description = "\n".join(description_lines)
-    if len(description) > _EMBED_DESCRIPTION_LIMIT:
-        description = description[: _EMBED_DESCRIPTION_LIMIT - 1] + "…"
-
-    embed: dict = {
-        "title": f"📜 {payload.place_name} · {payload.era}",
-        "description": description,
-        "url": payload.wikipedia_url,
-        "footer": {
-            "text": "React ✅ to publish at 21:00 Asia/Taipei · ❌ to skip",
-        },
-        "fields": [
-            {"name": "Location", "value": payload.place_location, "inline": True},
-        ],
+def _post_image_message(
+    *,
+    bot_token: str,
+    channel_id: str,
+    png_bytes: bytes,
+    filename: str,
+    content: str,
+) -> str:
+    """POST /channels/{id}/messages as multipart with the PNG attached."""
+    files = {
+        "files[0]": (filename, png_bytes, "image/png"),
+        "payload_json": (
+            None,
+            json.dumps({"content": content}),
+            "application/json",
+        ),
     }
-    if payload.image_url:
-        embed["image"] = {"url": payload.image_url}
-    return embed
-
-
-def _post_message(*, bot_token: str, channel_id: str, embed: dict) -> str:
+    # Don't set Content-Type — requests fills in the multipart boundary.
+    headers = {
+        "Authorization": f"Bot {bot_token}",
+        "User-Agent": "lorescape-daily-story (https://github.com, 0.1.0)",
+    }
     response = requests.post(
         f"{DISCORD_API}/channels/{channel_id}/messages",
-        headers=_bot_headers(bot_token),
-        json={"embeds": [embed]},
+        headers=headers,
+        files=files,
         timeout=_REQUEST_TIMEOUT,
     )
     response.raise_for_status()
