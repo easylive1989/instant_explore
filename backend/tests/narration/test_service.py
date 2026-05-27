@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 
-from lorescape_backend.daily_story.wikipedia import WikipediaSummary
 from lorescape_backend.narration import service
 from lorescape_backend.narration.models import (
     HookItem,
@@ -11,19 +10,13 @@ from lorescape_backend.narration.models import (
 )
 
 
-def _summary() -> WikipediaSummary:
-    return WikipediaSummary(
-        title="Arles",
-        extract="Roman colony; Van Gogh painted here in 1888.",
-        image_url=None,
-        en_url="https://en.wikipedia.org/wiki/Arles",
-    )
+_INTRO_EXTRACT = "Roman colony; Van Gogh painted here in 1888."
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_summary")
+@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
 def test_generate_hooks_returns_parsed_hooks(gen_mock, fetch_mock):
-    fetch_mock.return_value = _summary()
+    fetch_mock.return_value = _INTRO_EXTRACT
     gen_mock.return_value = {
         "hooks": [
             {"id": "h1", "title": "T1", "teaser": "Te1"},
@@ -48,10 +41,10 @@ def test_generate_hooks_returns_parsed_hooks(gen_mock, fetch_mock):
     fetch_mock.assert_called_once_with("Arles")
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_summary")
+@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
 def test_generate_hooks_handles_insufficient_source(gen_mock, fetch_mock):
-    fetch_mock.return_value = _summary()
+    fetch_mock.return_value = _INTRO_EXTRACT
     gen_mock.return_value = {"hooks": [], "insufficient_source": True}
 
     result = service.generate_hooks(
@@ -75,10 +68,10 @@ def test_generate_hooks_rejects_unsupported_language():
         )
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_summary")
+@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
 def test_generate_narration_returns_parsed_response(gen_mock, fetch_mock):
-    fetch_mock.return_value = _summary()
+    fetch_mock.return_value = _INTRO_EXTRACT
     gen_mock.return_value = {
         "place_name": "亞爾",
         "place_location": "法國普羅旺斯",
@@ -111,10 +104,10 @@ def test_generate_narration_returns_parsed_response(gen_mock, fetch_mock):
     assert "444 天的悲劇" in call_kwargs["user_prompt"]
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_summary")
+@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
 def test_generate_narration_without_hook_invites_self_pick(gen_mock, fetch_mock):
-    fetch_mock.return_value = _summary()
+    fetch_mock.return_value = _INTRO_EXTRACT
     gen_mock.return_value = {
         "place_name": "Arles",
         "place_location": "Provence",

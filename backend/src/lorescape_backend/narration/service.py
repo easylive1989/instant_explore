@@ -32,7 +32,7 @@ def _validate_language(language: str) -> None:
 def generate_hooks(*, api_key: str, request: HooksRequest) -> HooksResponse:
     """Surface 2-3 narrative angles for `request.wikipedia_title`."""
     _validate_language(request.language)
-    summary = wikipedia.fetch_summary(request.wikipedia_title)
+    extract = wikipedia.fetch_intro_extract(request.wikipedia_title)
     payload = gemini_client.generate_structured(
         api_key=api_key,
         system_instruction=prompts.hooks_system_instruction(request.language),
@@ -40,7 +40,7 @@ def generate_hooks(*, api_key: str, request: HooksRequest) -> HooksResponse:
             place_name=request.place_name,
             location=request.location,
             wikipedia_title=request.wikipedia_title,
-            wikipedia_extract=summary.extract,
+            wikipedia_extract=extract,
         ),
         response_schema=prompts.hooks_response_schema(request.language),
     )
@@ -56,7 +56,7 @@ def generate_narration(
 ) -> NarrationResponse:
     """Generate the long-form 3-paragraph story for `request`."""
     _validate_language(request.language)
-    summary = wikipedia.fetch_summary(request.wikipedia_title)
+    extract = wikipedia.fetch_intro_extract(request.wikipedia_title)
     hook = (
         StoryHook(title=request.hook.title, teaser=request.hook.teaser)
         if request.hook is not None
@@ -69,7 +69,7 @@ def generate_narration(
             place_name=request.place_name,
             location=request.location,
             wikipedia_title=request.wikipedia_title,
-            wikipedia_extract=summary.extract,
+            wikipedia_extract=extract,
             language=request.language,
             hook=hook,
         ),

@@ -48,6 +48,41 @@ def fetch_summary(title: str) -> WikipediaSummary:
     )
 
 
+def fetch_intro_extract(title: str) -> str:
+    """Fetch the plaintext intro section of `title` via MediaWiki extracts API.
+
+    The REST `/page/summary` endpoint only returns the lead paragraph
+    (~200 chars for many places), which is too thin to ground a real
+    story. The MediaWiki `prop=extracts` query with `exintro=1` returns
+    the full intro section (typically 1-5k chars) — enough to mention
+    the people and events a story needs.
+
+    Returns the extracted plaintext (may be empty if the page has no
+    intro or does not exist).
+    """
+    response = requests.get(
+        _API_URL,
+        params={
+            "action": "query",
+            "format": "json",
+            "titles": title,
+            "prop": "extracts",
+            "explaintext": 1,
+            "exintro": 1,
+            "redirects": 1,
+        },
+        headers={"User-Agent": USER_AGENT},
+        timeout=30,
+    )
+    response.raise_for_status()
+    pages = response.json().get("query", {}).get("pages", {})
+    for page in pages.values():
+        extract = page.get("extract")
+        if extract:
+            return extract
+    return ""
+
+
 def fetch_langlink_url(title: str, target_lang: str) -> str | None:
     """Find the URL of `title`'s article in `target_lang` (e.g. 'zh').
 

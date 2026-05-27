@@ -35,6 +35,18 @@ def test_system_instruction_lists_layered_fallback(language):
 
 
 @pytest.mark.parametrize("language", ["zh-TW", "en"])
+def test_system_instruction_forbids_meta_narration_about_absence(language):
+    """When the source is thin, the model must emit insufficient_source — not
+    write apologetic meta-prose ("we don't know...") to fill paragraphs."""
+    instruction = build_story_system_instruction(language)
+    lower = instruction.lower()
+    assert "meta-narration" in lower
+    assert "insufficient_source" in instruction
+    # Forbid the actual failure mode we observed
+    assert "we do not know" in lower or "do not write meta" in lower
+
+
+@pytest.mark.parametrize("language", ["zh-TW", "en"])
 def test_system_instruction_requires_3_paragraph_format(language):
     instruction = build_story_system_instruction(language)
     assert "3 paragraphs" in instruction

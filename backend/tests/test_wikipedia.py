@@ -3,6 +3,7 @@ import requests_mock
 
 from lorescape_backend.daily_story.wikipedia import (
     WikipediaSummary,
+    fetch_intro_extract,
     fetch_summary,
     fetch_langlink_url,
 )
@@ -78,6 +79,57 @@ def test_fetch_langlink_url_returns_target_lang_wiki_url():
         )
         url = fetch_langlink_url("Colosseum", "zh")
     assert url == "https://zh.wikipedia.org/wiki/%E7%BE%85%E9%A6%AC%E9%AC%A5%E7%8D%B8%E5%A0%B4"
+
+
+INTRO_EXTRACT_RESPONSE = {
+    "query": {
+        "pages": {
+            "12345": {
+                "pageid": 12345,
+                "ns": 0,
+                "title": "Arles",
+                "extract": (
+                    "Arles is a coastal city in southern France...\n"
+                    "Vincent van Gogh lived in Arles from 1888 to 1889..."
+                ),
+            }
+        }
+    }
+}
+
+
+def test_fetch_intro_extract_returns_plaintext_intro():
+    with requests_mock.Mocker() as m:
+        m.get("https://en.wikipedia.org/w/api.php", json=INTRO_EXTRACT_RESPONSE)
+        extract = fetch_intro_extract("Arles")
+    assert "Vincent van Gogh" in extract
+    assert "1888" in extract
+
+
+def test_fetch_intro_extract_returns_empty_when_page_missing():
+    response = {
+        "query": {
+            "pages": {
+                "-1": {"ns": 0, "title": "Nope", "missing": ""}
+            }
+        }
+    }
+    with requests_mock.Mocker() as m:
+        m.get("https://en.wikipedia.org/w/api.php", json=response)
+        assert fetch_intro_extract("Nope") == ""
+
+
+def test_fetch_intro_extract_passes_correct_params():
+    with requests_mock.Mocker() as m:
+        m.get("https://en.wikipedia.org/w/api.php", json=INTRO_EXTRACT_RESPONSE)
+        fetch_intro_extract("Arles")
+        sent = m.request_history[0].qs
+    # MediaWiki extracts API requires these params
+    assert sent["action"] == ["query"]
+    assert sent["prop"] == ["extracts"]
+    assert sent["explaintext"] == ["1"]
+    assert sent["exintro"] == ["1"]
+    assert sent["titles"] == ["arles"]  # requests_mock lowercases qs values
 
 
 def test_fetch_langlink_url_returns_none_when_no_langlink():

@@ -7,7 +7,7 @@ from typing import Any
 from google import genai
 from google.genai import types
 
-NARRATION_MODEL = "gemini-2.5-flash"
+NARRATION_MODEL = "gemini-3.5-flash"
 NARRATION_TEMPERATURE = 0.3
 
 
