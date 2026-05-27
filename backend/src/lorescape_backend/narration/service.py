@@ -75,11 +75,18 @@ def generate_narration(
         ),
         response_schema=prompts.narration_response_schema(request.language),
     )
+    insufficient = bool(payload.get("insufficient_source", False))
+    # Defence-in-depth: when the model flagged insufficient_source, we do
+    # NOT trust whatever it put in `paragraphs`. Observed failure mode:
+    # the model regurgitates the in-prompt positive example when it has
+    # no real source material. Always return empty paragraphs in that
+    # case so the App never renders stale/wrong story content.
+    raw_paragraphs = payload.get("paragraphs", []) if not insufficient else []
     return NarrationResponse(
         place_name=payload["place_name"],
         location=payload["place_location"],
         era=payload["era"],
-        paragraphs=list(payload.get("paragraphs", [])),
-        pull_quote=payload.get("pull_quote", ""),
-        insufficient_source=bool(payload.get("insufficient_source", False)),
+        paragraphs=list(raw_paragraphs),
+        pull_quote=payload.get("pull_quote", "") if not insufficient else "",
+        insufficient_source=insufficient,
     )

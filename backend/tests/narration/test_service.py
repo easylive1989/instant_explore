@@ -128,6 +128,41 @@ def test_generate_narration_without_hook_invites_self_pick(gen_mock, fetch_mock)
     assert "No specific narrative anchor" in call_kwargs["user_prompt"]
 
 
+@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.narration.service.gemini_client.generate_structured")
+def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
+    gen_mock, fetch_mock,
+):
+    """If the model flags insufficient_source, the service MUST discard
+    whatever it put in `paragraphs` and `pull_quote` — observed failure
+    mode: model regurgitates the in-prompt positive example."""
+    fetch_mock.return_value = ""
+    gen_mock.return_value = {
+        "place_name": "Fake Place",
+        "place_location": "",
+        "era": "",
+        # Model leaked the positive example into paragraphs anyway.
+        "paragraphs": [
+            "一八八八年二月，文森·梵谷踏上亞爾...",
+            "一八八八年二月，文森·梵谷踏上亞爾...",
+            "一八八八年二月，文森·梵谷踏上亞爾...",
+        ],
+        "pull_quote": "「我看見麥田」",
+        "insufficient_source": True,
+    }
+
+    result = service.generate_narration(
+        api_key="K",
+        request=NarrationRequest(
+            place_name="Fake", wikipedia_title="Fake", language="zh-TW",
+        ),
+    )
+
+    assert result.insufficient_source is True
+    assert result.paragraphs == []
+    assert result.pull_quote == ""
+
+
 def test_generate_narration_rejects_unsupported_language():
     with pytest.raises(service.UnsupportedLanguageError):
         service.generate_narration(
