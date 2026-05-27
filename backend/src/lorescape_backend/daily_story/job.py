@@ -19,6 +19,8 @@ from lorescape_backend.daily_story import (
     story_writer,
     wikipedia,
 )
+from lorescape_backend.social.card import mapper
+from lorescape_backend.social.card.renderer import render_card
 
 logger = logging.getLogger(__name__)
 
@@ -118,10 +120,12 @@ def run_with_retry(config: Config, target_date: date) -> None:
 
 
 def send_today_for_review(config: Config, target_date: date) -> None:
-    """Find the EN row for target_date and post it to Discord for review.
+    """Render today's IG card and post the PNG to Discord for review.
 
-    Idempotent: if discord_message_id is already set on the row, the function
-    does nothing (avoids re-posting the same story when the job runs twice).
+    Reviewers approve/reject the actual image that will be posted to
+    Instagram, not a text preview. Idempotent: if discord_message_id is
+    already set on the row, the function does nothing (avoids re-posting
+    the same card when the job runs twice).
     """
     if not config.review_enabled:
         logger.info("Discord review not configured; skipping review step")
@@ -149,14 +153,29 @@ def send_today_for_review(config: Config, target_date: date) -> None:
         )
         return
 
+    place_row = _load_place_row(supabase, row["place_id"])
+    card_content = (
+        mapper.build_card_content(row, place_row) if place_row else None
+    )
+    if card_content is None:
+        error_message = (
+            f"Row {row['id']} missing IG card content — "
+            f"Discord review not posted for {target_date.isoformat()}"
+        )
+        logger.warning(error_message)
+        if config.discord_webhook_url:
+            discord_notify.notify_failure(
+                webhook_url=config.discord_webhook_url,
+                date_str=target_date.isoformat(),
+                error_message=error_message,
+                traceback_str="",
+            )
+        return
+
+    png = render_card(card_content)
     payload = discord_review.ReviewPayload(
-        place_name=row["place_name"],
-        era=row["era"],
-        place_location=row["place_location"],
-        story=row["story"],
-        threads_summary=row.get("threads_summary") or "",
-        image_url=row.get("image_url"),
-        wikipedia_url=row["wikipedia_url"],
+        card_png=png,
+        publish_date=target_date.isoformat(),
     )
     message_id = discord_review.send_for_review(
         bot_token=config.discord_bot_token,  # type: ignore[arg-type]
@@ -199,6 +218,18 @@ def _load_review_row(supabase, target_date: date) -> dict[str, Any] | None:
         .select("*")
         .eq("publish_date", target_date.isoformat())
         .eq("language", REVIEW_LANGUAGE)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None
+
+
+def _load_place_row(supabase, place_id: str) -> dict[str, Any] | None:
+    response = (
+        supabase.table("daily_story_places")
+        .select("*")
+        .eq("id", place_id)
         .limit(1)
         .execute()
     )

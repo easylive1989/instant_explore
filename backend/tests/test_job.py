@@ -220,6 +220,7 @@ def test_languages_list_matches_spec():
 def _zh_row():
     return {
         "id": "row-zh",
+        "place_id": "place-1",
         "place_name": "羅馬競技場",
         "place_location": "義大利羅馬",
         "era": "公元 70-80 年",
@@ -229,50 +230,126 @@ def _zh_row():
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/羅馬競技場",
         "discord_message_id": None,
+        "card_title": "石頭裡的吶喊",
+        "card_title_sub": "鬥獸場百年",
+        "card_paragraphs": ["第一段", "第二段", "第三段"],
+        "card_pull_quote": "「我們將娛樂血腥化為藝術。」",
+        "card_pull_quote_attrib": "—— 塔西陀",
+        "card_anno_roman": "LXXX",
     }
 
 
-def _supabase_with_select_and_update(row):
-    select = MagicMock()
-    select.eq.return_value = select
-    select.limit.return_value = select
-    select.execute.return_value = MagicMock(data=[row] if row else [])
+def _place_row():
+    return {
+        "id": "place-1",
+        "name": "Colosseum",
+        "wikipedia_title_en": "Colosseum",
+        "country": "Italy",
+        "card_location_en": "COLOSSEUM · ROME",
+        "card_city_ch": "羅",
+        "card_city_en": "ROME",
+        "latitude": 41.8902,
+        "longitude": 12.4922,
+    }
+
+
+def _supabase_with_select_and_update(row, place_row=None):
+    """Mock supabase client supporting daily_stories + daily_story_places.
+
+    `row` is the zh-TW review row (None to simulate missing). `place_row`
+    is the joined daily_story_places row (None to simulate missing). The
+    `daily_stories` table responds with `row` for the first .select() call
+    (review-row lookup); the `daily_story_places` table responds with
+    `place_row` for its lookup. .update() on daily_stories always passes.
+    """
+    def _select_chain(data):
+        chain = MagicMock()
+        chain.eq.return_value = chain
+        chain.limit.return_value = chain
+        chain.execute.return_value = MagicMock(data=data)
+        return chain
 
     update_chain = MagicMock()
     update_chain.eq.return_value = update_chain
     update_chain.execute.return_value = MagicMock(data=None)
 
-    table = MagicMock()
-    table.select.return_value = select
-    table.update.return_value = update_chain
+    daily_stories_table = MagicMock()
+    daily_stories_table.select.return_value = _select_chain([row] if row else [])
+    daily_stories_table.update.return_value = update_chain
+
+    places_table = MagicMock()
+    places_table.select.return_value = _select_chain(
+        [place_row] if place_row else []
+    )
+
+    def _table(name):
+        if name == "daily_stories":
+            return daily_stories_table
+        if name == "daily_story_places":
+            return places_table
+        raise AssertionError(f"unexpected table: {name}")
 
     client = MagicMock()
-    client.table.return_value = table
-    return client, table, update_chain
+    client.table.side_effect = _table
+    return client, daily_stories_table, update_chain
 
 
 @patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.render_card")
 @patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
-def test_send_today_for_review_posts_and_writes_message_id(
-    send, create, fake_config
+def test_send_today_for_review_renders_card_and_posts_image(
+    send, render, create, fake_config
 ):
     from datetime import date as _date
     from lorescape_backend.daily_story.job import send_today_for_review
 
     row = _zh_row()
-    client, table, update_chain = _supabase_with_select_and_update(row)
+    place = _place_row()
+    client, table, _ = _supabase_with_select_and_update(row, place_row=place)
     create.return_value = client
+    render.return_value = b"\x89PNGfake-card"
     send.return_value = "msg-abc"
 
     send_today_for_review(fake_config, _date(2026, 5, 12))
 
+    # Card rendered from the joined zh-TW + place rows, not stubbed in test.
+    render.assert_called_once()
+    rendered_card = render.call_args[0][0]
+    assert rendered_card.title_ch == "石頭裡的吶喊"
+
+    # Discord receives the PNG bytes — no story / threads text fields.
     send.assert_called_once()
     payload = send.call_args.kwargs["payload"]
-    assert payload.place_name == "羅馬競技場"
-    assert payload.threads_summary == "中文短摘。"
+    assert payload.card_png == b"\x89PNGfake-card"
+    assert payload.publish_date == "2026-05-12"
+
     # message id written back to the row
     update_payload = table.update.call_args[0][0]
     assert update_payload == {"discord_message_id": "msg-abc"}
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.render_card")
+@patch("lorescape_backend.daily_story.job.discord_review.send_for_review")
+@patch("lorescape_backend.daily_story.job.discord_notify.notify_failure")
+def test_send_today_for_review_notifies_when_card_content_missing(
+    notify, send, render, create, fake_config
+):
+    """If card fields are missing, don't render or post — alert via webhook."""
+    from datetime import date as _date
+    from lorescape_backend.daily_story.job import send_today_for_review
+
+    row = _zh_row()
+    row["card_title"] = None  # mapper rejects when any required field is empty
+    client, _, _ = _supabase_with_select_and_update(row, place_row=_place_row())
+    create.return_value = client
+
+    send_today_for_review(fake_config, _date(2026, 5, 12))
+
+    render.assert_not_called()
+    send.assert_not_called()
+    notify.assert_called_once()
+    assert "card content" in notify.call_args.kwargs["error_message"]
 
 
 @patch("lorescape_backend.daily_story.job.create_client")
