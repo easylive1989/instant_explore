@@ -127,7 +127,8 @@ jobs:
             --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
             --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
             --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }} \
-            --dart-define=REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }}
+            --dart-define=REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }} \
+            --dart-define=BACKEND_BASE_URL=https://api.lorescape.app
         env:
           RELEASESTOREPASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
           RELEASEKEYPASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
@@ -241,7 +242,8 @@ jobs:
             --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
             --dart-define=GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }} \
             --dart-define=GOOGLE_IOS_CLIENT_ID=${{ secrets.GOOGLE_IOS_CLIENT_ID }} \
-            --dart-define=REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }}
+            --dart-define=REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }} \
+            --dart-define=BACKEND_BASE_URL=https://api.lorescape.app
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

@@ -114,7 +114,8 @@ patrol test \
   --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
   --dart-define=SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
   --dart-define=GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID:-""} \
-  --dart-define=GOOGLE_IOS_CLIENT_ID=${GOOGLE_IOS_CLIENT_ID:-""}
+  --dart-define=GOOGLE_IOS_CLIENT_ID=${GOOGLE_IOS_CLIENT_ID:-""} \
+  --dart-define=BACKEND_BASE_URL=${BACKEND_BASE_URL:-https://api.lorescape.app}
 
 TEST_EXIT_CODE=$?
 set -e  # 重新啟用 errexit

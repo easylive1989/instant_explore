@@ -38,6 +38,14 @@ def run_once(config: Config, target_date: date) -> None:
         raise RuntimeError("No active places available in daily_story_places")
 
     summary = wikipedia.fetch_summary(place.wikipedia_title_en)
+    # Use the richer MediaWiki intro extract (typically 5-10× longer than
+    # the REST summary's lead paragraph) so the model has enough source
+    # material to ground a real story on. The summary call above is still
+    # needed for image_url and en_url.
+    intro_extract = (
+        wikipedia.fetch_intro_extract(place.wikipedia_title_en)
+        or summary.extract
+    )
 
     for language in LANGUAGES:
         target_lang = language.split("-")[0]  # 'zh-TW' → 'zh', 'en' → 'en'
@@ -48,10 +56,10 @@ def run_once(config: Config, target_date: date) -> None:
 
         story = gemini_client.generate_story(
             api_key=config.gemini_api_key,
-            system_instruction=prompts.SYSTEM_INSTRUCTION,
+            system_instruction=prompts.SYSTEM_INSTRUCTION_FOR(language),
             user_prompt=prompts.build_user_prompt(
                 wikipedia_title=place.wikipedia_title_en,
-                wikipedia_extract=summary.extract,
+                wikipedia_extract=intro_extract,
                 language=language,
             ),
             response_schema=prompts.build_response_schema(language),

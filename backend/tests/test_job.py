@@ -44,6 +44,7 @@ def _make_story(
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
 @patch("lorescape_backend.daily_story.job.story_writer.insert_story")
@@ -53,12 +54,14 @@ def test_run_once_happy_path_calls_each_step(
     insert_story,
     generate_story,
     fetch_langlink,
+    fetch_intro_extract,
     fetch_summary,
     pick_next,
     create_client,
     fake_config,
 ):
     pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Colosseum")
+    fetch_intro_extract.return_value = "Long intro extract text for tests."
     fetch_summary.return_value = WikipediaSummary(
         title="Colosseum",
         extract="Built 70-80 CE.",
@@ -110,6 +113,7 @@ def test_run_once_raises_when_no_place(pick_next, create_client, fake_config):
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
 @patch("lorescape_backend.daily_story.job.story_writer.insert_story")
@@ -119,12 +123,14 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
     insert_story,
     generate_story,
     fetch_langlink,
+    fetch_intro_extract,
     fetch_summary,
     pick_next,
     create_client,
     fake_config,
 ):
     pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Colosseum")
+    fetch_intro_extract.return_value = "Long intro extract text for tests."
     fetch_summary.return_value = WikipediaSummary(
         title="Colosseum",
         extract="Built 70-80 CE.",
@@ -487,17 +493,19 @@ def test_run_generate_and_review_swallows_review_failure(
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
 @patch("lorescape_backend.daily_story.job.story_writer.insert_story")
 @patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
 def test_run_once_both_languages_join_paragraphs_and_pass_card_fields(
     mark_used, insert_story, generate_story, fetch_langlink,
-    fetch_summary, pick_next, create_client, fake_config,
+    fetch_intro_extract, fetch_summary, pick_next, create_client, fake_config,
 ):
     """Both zh-TW and en now produce card fields; story column is derived
     from joining card_paragraphs with '\n\n'."""
     pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Eiffel Tower")
+    fetch_intro_extract.return_value = "Long intro extract text for tests."
     fetch_summary.return_value = WikipediaSummary(
         title="Eiffel Tower",
         extract="Built 1889 by Gustave Eiffel.",
@@ -562,17 +570,19 @@ def test_run_once_both_languages_join_paragraphs_and_pass_card_fields(
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
 @patch("lorescape_backend.daily_story.job.story_writer.insert_story")
 @patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
 def test_run_once_passes_per_language_response_schema(
     mark_used, insert_story, generate_story, fetch_langlink,
-    fetch_summary, pick_next, create_client, fake_config,
+    fetch_intro_extract, fetch_summary, pick_next, create_client, fake_config,
 ):
     from lorescape_backend.daily_story import prompts
 
     pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Colosseum")
+    fetch_intro_extract.return_value = "Long intro extract text for tests."
     fetch_summary.return_value = WikipediaSummary(
         title="Colosseum", extract="...", image_url=None,
         en_url="https://en.wikipedia.org/wiki/Colosseum",

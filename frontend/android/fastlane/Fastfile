@@ -21,11 +21,13 @@ platform :android do
     # 切換到 Flutter 專案根目錄
     Dir.chdir("../../") do
       # 建置 Release AAB
+      backend_base_url = ENV['BACKEND_BASE_URL'] || 'https://api.lorescape.app'
       sh("fvm flutter build appbundle --release " +
          "--dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']} " +
          "--dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']} " +
          "--dart-define=GOOGLE_WEB_CLIENT_ID=#{ENV['GOOGLE_WEB_CLIENT_ID']} " +
-         "--dart-define=GOOGLE_IOS_CLIENT_ID=#{ENV['GOOGLE_IOS_CLIENT_ID']}")
+         "--dart-define=GOOGLE_IOS_CLIENT_ID=#{ENV['GOOGLE_IOS_CLIENT_ID']} " +
+         "--dart-define=BACKEND_BASE_URL=#{backend_base_url}")
       
       UI.success("✅ Android App Bundle 建置完成！")
       UI.message("📍 AAB 位置: #{Dir.pwd}/build/app/outputs/bundle/release/app-release.aab")

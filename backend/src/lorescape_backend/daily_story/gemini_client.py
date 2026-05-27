@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from google import genai
 from google.genai import types
 
-GEMINI_MODEL = "gemini-2.5-pro"
+GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_TEMPERATURE = 0.3
 
 
