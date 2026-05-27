@@ -18,6 +18,8 @@ class StoryRow:
     wikipedia_url: str
     threads_summary: str
     hashtags: tuple[str, ...] = field(default_factory=tuple)
+    # Long-form 3-paragraph narration used by App story view & TTS.
+    paragraphs: tuple[str, ...] = field(default_factory=tuple)
     # IG card fields — populated on every row (both zh-TW and en).
     card_title: str = ""
     card_title_sub: str = ""
@@ -39,6 +41,7 @@ def insert_story(supabase, row: StoryRow) -> None:
     # asdict leaves tuple-typed fields as tuples, but the Supabase JSON
     # serializer needs lists for text[] / jsonb columns.
     payload["hashtags"] = list(row.hashtags)
+    payload["paragraphs"] = list(row.paragraphs)
     payload["card_paragraphs"] = list(row.card_paragraphs)
     (
         supabase.table("daily_stories")

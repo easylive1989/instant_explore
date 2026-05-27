@@ -1,0 +1,165 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
+import 'package:http/http.dart' as http;
+
+/// Result of a narration call from the backend.
+class NarrationApiResult {
+  final String placeName;
+  final String location;
+  final String era;
+  final List<String> paragraphs;
+  final String pullQuote;
+  final bool insufficientSource;
+
+  const NarrationApiResult({
+    required this.placeName,
+    required this.location,
+    required this.era,
+    required this.paragraphs,
+    required this.pullQuote,
+    required this.insufficientSource,
+  });
+
+  /// Convenience: paragraphs joined with blank lines for TTS / display.
+  String get text => paragraphs.join('\n\n');
+}
+
+/// Thin HTTP client for the backend narration endpoints.
+///
+/// Wraps `/narration` (long story) and `/narration/hooks` (2-3 angles).
+class NarrationApiClient {
+  final String baseUrl;
+  final http.Client _httpClient;
+  final Duration timeout;
+
+  NarrationApiClient({
+    required this.baseUrl,
+    http.Client? httpClient,
+    this.timeout = const Duration(seconds: 60),
+  }) : _httpClient = httpClient ?? http.Client();
+
+  Future<List<StoryHook>> fetchHooks({
+    required String placeName,
+    required String location,
+    required String wikipediaTitle,
+    required String language,
+  }) async {
+    final body = {
+      'place_name': placeName,
+      'location': location,
+      'wikipedia_title': wikipediaTitle,
+      'language': language,
+    };
+    final data = await _post('/narration/hooks', body);
+    final hooks = (data['hooks'] as List?) ?? const [];
+    return hooks
+        .whereType<Map>()
+        .map((raw) {
+          final map = raw.cast<String, dynamic>();
+          return StoryHook(
+            id: map['id'] as String,
+            title: map['title'] as String,
+            teaser: map['teaser'] as String,
+          );
+        })
+        .toList(growable: false);
+  }
+
+  Future<NarrationApiResult> fetchNarration({
+    required String placeName,
+    required String location,
+    required String wikipediaTitle,
+    required String language,
+    StoryHook? hook,
+  }) async {
+    final body = <String, dynamic>{
+      'place_name': placeName,
+      'location': location,
+      'wikipedia_title': wikipediaTitle,
+      'language': language,
+      if (hook != null) 'hook': hook.toJson(),
+    };
+    final data = await _post('/narration', body);
+    final paragraphs = (data['paragraphs'] as List?) ?? const [];
+    return NarrationApiResult(
+      placeName: data['place_name'] as String? ?? '',
+      location: data['location'] as String? ?? '',
+      era: data['era'] as String? ?? '',
+      paragraphs: paragraphs.map((e) => e.toString()).toList(growable: false),
+      pullQuote: data['pull_quote'] as String? ?? '',
+      insufficientSource: data['insufficient_source'] as bool? ?? false,
+    );
+  }
+
+  Future<Map<String, dynamic>> _post(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    if (baseUrl.isEmpty) {
+      throw const AppError(
+        type: NarrationError.unknown,
+        message: 'BACKEND_BASE_URL 未設定，無法呼叫故事服務',
+      );
+    }
+    final uri = Uri.parse('$baseUrl$path');
+    try {
+      final response = await _httpClient
+          .post(
+            uri,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(utf8.decode(response.bodyBytes))
+            as Map<String, dynamic>;
+      }
+      throw AppError(
+        type: response.statusCode == 400
+            ? NarrationError.unknown
+            : NarrationError.serverError,
+        message: '後端故事服務回應錯誤 (${response.statusCode})',
+        context: {
+          'status_code': response.statusCode,
+          'response_body': response.body,
+        },
+      );
+    } on SocketException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.networkError,
+        message: '網路連線失敗',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.networkError,
+        message: '連線逾時',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } on FormatException catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.serverError,
+        message: '後端回應格式錯誤',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    } on AppError {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw AppError(
+        type: NarrationError.unknown,
+        message: '呼叫故事服務時發生未預期的錯誤',
+        originalException: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+}

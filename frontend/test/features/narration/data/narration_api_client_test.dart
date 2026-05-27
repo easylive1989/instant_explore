@@ -1,0 +1,187 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:context_app/core/errors/app_error.dart';
+import 'package:context_app/features/narration/data/narration_api_client.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
+import 'package:context_app/features/narration/domain/models/story_hook.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+
+void main() {
+  group('NarrationApiClient', () {
+    test('fetchHooks 解析後端回傳的 hooks 陣列', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.url.path, '/narration/hooks');
+        expect(jsonDecode(request.body), {
+          'place_name': 'Arles',
+          'location': 'Provence',
+          'wikipedia_title': 'Arles',
+          'language': 'zh-TW',
+        });
+        return http.Response(
+          jsonEncode({
+            'hooks': [
+              {'id': 'h1', 'title': 'T1', 'teaser': 'Te1'},
+              {'id': 'h2', 'title': 'T2', 'teaser': 'Te2'},
+            ],
+            'insufficient_source': false,
+          }),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      final hooks = await client.fetchHooks(
+        placeName: 'Arles',
+        location: 'Provence',
+        wikipediaTitle: 'Arles',
+        language: 'zh-TW',
+      );
+
+      expect(hooks, hasLength(2));
+      expect(hooks.first.id, 'h1');
+      expect(hooks.first.title, 'T1');
+    });
+
+    test('fetchNarration 解析後端回傳的長故事', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.url.path, '/narration');
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['place_name'], 'Arles');
+        expect(body['language'], 'zh-TW');
+        expect(body['hook'], {
+          'id': 'h',
+          'title': '梵谷',
+          'teaser': '444 天',
+        });
+        return http.Response.bytes(
+          utf8.encode(
+            jsonEncode({
+              'place_name': '亞爾',
+              'location': '法國普羅旺斯',
+              'era': '十九世紀末',
+              'paragraphs': ['一', '二', '三'],
+              'pull_quote': '「我看見麥田」',
+              'insufficient_source': false,
+            }),
+          ),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      final result = await client.fetchNarration(
+        placeName: 'Arles',
+        location: 'Provence',
+        wikipediaTitle: 'Arles',
+        language: 'zh-TW',
+        hook: const StoryHook(id: 'h', title: '梵谷', teaser: '444 天'),
+      );
+
+      expect(result.placeName, '亞爾');
+      expect(result.paragraphs, ['一', '二', '三']);
+      expect(result.text, '一\n\n二\n\n三');
+      expect(result.pullQuote, '「我看見麥田」');
+      expect(result.insufficientSource, false);
+    });
+
+    test('400 回應拋出 AppError', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({'detail': 'Unsupported language'}),
+          400,
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      await expectLater(
+        client.fetchNarration(
+          placeName: 'x',
+          location: '',
+          wikipediaTitle: 'x',
+          language: 'ja',
+        ),
+        throwsA(isA<AppError>()),
+      );
+    });
+
+    test('500 回應映射為 serverError', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response('boom', 500);
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      try {
+        await client.fetchHooks(
+          placeName: 'x',
+          location: '',
+          wikipediaTitle: 'x',
+          language: 'en',
+        );
+        fail('expected AppError');
+      } on AppError catch (e) {
+        expect(e.type, NarrationError.serverError);
+      }
+    });
+
+    test('SocketException 映射為 networkError', () async {
+      final mockClient = MockClient((request) async {
+        throw const SocketException('no route to host');
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      try {
+        await client.fetchHooks(
+          placeName: 'x',
+          location: '',
+          wikipediaTitle: 'x',
+          language: 'en',
+        );
+        fail('expected AppError');
+      } on AppError catch (e) {
+        expect(e.type, NarrationError.networkError);
+      }
+    });
+
+    test('未設定 baseUrl 時拋出可辨識的 AppError', () async {
+      final client = NarrationApiClient(baseUrl: '');
+
+      try {
+        await client.fetchHooks(
+          placeName: 'x',
+          location: '',
+          wikipediaTitle: 'x',
+          language: 'en',
+        );
+        fail('expected AppError');
+      } on AppError catch (e) {
+        expect(e.type, NarrationError.unknown);
+        expect(e.message, contains('BACKEND_BASE_URL'));
+      }
+    });
+  });
+}

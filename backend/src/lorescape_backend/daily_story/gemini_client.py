@@ -15,8 +15,10 @@ GEMINI_TEMPERATURE = 0.3
 class GeneratedStory:
     """Structured output from the Gemini story generation call.
 
-    Both languages now produce card fields. The `story` text column is
-    derived downstream by joining `card_paragraphs` with '\n\n'.
+    `paragraphs` holds the long-form (3 × 200-300 zh chars / 80-130 en
+    words) story for App display and TTS. `card_paragraphs` holds the
+    same story compressed to the Instagram card layout (3 × 60-100
+    chars/words).
     """
 
     place_name: str
@@ -24,6 +26,7 @@ class GeneratedStory:
     era: str
     threads_summary: str
     hashtags: tuple[str, ...]
+    paragraphs: tuple[str, ...]
     card_title: str
     card_title_sub: str
     card_paragraphs: tuple[str, ...]
@@ -66,6 +69,7 @@ def generate_story(
         era=data["era"],
         threads_summary=data["threads_summary"],
         hashtags=tuple(data["hashtags"]),
+        paragraphs=tuple(data["paragraphs"]),
         card_title=data["card_title"],
         card_title_sub=data["card_title_sub"],
         card_paragraphs=tuple(data["card_paragraphs"]),

@@ -14,6 +14,7 @@ class ApiConfig {
   final String geminiApiKey;
   final String revenueCatApiKeyIos;
   final String revenueCatApiKeyAndroid;
+  final String backendBaseUrl;
 
   const ApiConfig({
     required this.supabaseUrl,
@@ -24,6 +25,7 @@ class ApiConfig {
     required this.geminiApiKey,
     required this.revenueCatApiKeyIos,
     required this.revenueCatApiKeyAndroid,
+    required this.backendBaseUrl,
   });
 
   /// 從環境變數建立配置
@@ -53,6 +55,10 @@ class ApiConfig {
       ),
       revenueCatApiKeyAndroid: String.fromEnvironment(
         'REVENUECAT_API_KEY_ANDROID',
+        defaultValue: '',
+      ),
+      backendBaseUrl: String.fromEnvironment(
+        'BACKEND_BASE_URL',
         defaultValue: '',
       ),
     );

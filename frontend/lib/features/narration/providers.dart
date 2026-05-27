@@ -1,6 +1,8 @@
+import 'package:context_app/app/config/api_config.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/data/gemini_service.dart';
-import 'package:context_app/features/narration/data/gemini_story_hook_service.dart';
+import 'package:context_app/features/narration/data/narration_api_client.dart';
+import 'package:context_app/features/narration/data/narration_api_service.dart';
+import 'package:context_app/features/narration/data/story_hook_api_service.dart';
 import 'package:context_app/features/narration/data/tts_service.dart'
     as tts_impl;
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
@@ -15,13 +17,19 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// 共享的 narration HTTP client。讀取 BACKEND_BASE_URL 設定。
+final narrationApiClientProvider = Provider<NarrationApiClient>((ref) {
+  final config = ref.watch(apiConfigProvider);
+  return NarrationApiClient(baseUrl: config.backendBaseUrl);
+});
+
 final narrationServiceProvider = Provider<NarrationService>((ref) {
-  return GeminiService();
+  return NarrationApiService(ref.watch(narrationApiClientProvider));
 });
 
 /// 產生故事鉤子用的 service；不計入 narration 每日額度。
 final storyHookServiceProvider = Provider<StoryHookService>((ref) {
-  return GeminiStoryHookService();
+  return StoryHookApiService(ref.watch(narrationApiClientProvider));
 });
 
 /// TtsService Provider — 提供 TTS 語音合成服務。

@@ -42,6 +42,7 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
         "threads_summary": "短摘",
         "hashtags": ["rome", "colosseum"],
+        "paragraphs": [],
         "card_title": "",
         "card_title_sub": "",
         "card_paragraphs": [],
@@ -118,6 +119,36 @@ def test_insert_story_writes_zh_tw_card_fields_with_paragraphs_as_list():
     assert payload["card_pull_quote"] == "「看不見艾菲爾鐵塔的地方。」"
     assert payload["card_pull_quote_attrib"] == "—— 莫泊桑，一八八九"
     assert payload["card_anno_roman"] == "MDCCCLXXXIX"
+
+
+def test_insert_story_writes_long_paragraphs_as_list():
+    """Long-form `paragraphs` is jsonb; must be serialized as a JSON list."""
+    chain = MagicMock()
+    chain.upsert.return_value = chain
+    chain.execute.return_value = MagicMock(data=[{"id": "x"}])
+    client = MagicMock()
+    client.table.return_value = chain
+
+    insert_story(
+        client,
+        StoryRow(
+            publish_date=date(2026, 5, 27),
+            language="zh-TW",
+            place_id="place-1",
+            place_name="X",
+            place_location="Y",
+            era="Z",
+            story="...",
+            image_url=None,
+            wikipedia_url="https://example.org",
+            threads_summary="t",
+            paragraphs=("長段一", "長段二", "長段三"),
+        ),
+    )
+
+    payload = chain.upsert.call_args[0][0]
+    assert payload["paragraphs"] == ["長段一", "長段二", "長段三"]
+    assert isinstance(payload["paragraphs"], list)
 
 
 def test_insert_story_writes_en_card_fields_too():

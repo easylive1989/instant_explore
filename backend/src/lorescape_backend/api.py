@@ -21,6 +21,7 @@ from fastapi import FastAPI
 
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story.job import run_generate_and_review
+from lorescape_backend.narration.routes import router as narration_router
 from lorescape_backend.social.publisher import run_publish_job
 
 GENERATE_JOB_ID = "daily_story_generate"
@@ -66,6 +67,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Lorescape Backend", version="0.1.0", lifespan=lifespan)
+app.include_router(narration_router)
 
 
 @app.get("/health")
