@@ -4,10 +4,11 @@ services:
     image: lorescape-backend:latest
     container_name: lorescape-backend
     restart: unless-stopped
-    # No host port published. The cron job uses `docker exec` to run the
-    # daily story job; the FastAPI app is reachable from inside the docker
-    # network only. Add a `ports:` entry (or front with nginx) when the
-    # FastAPI surface needs public exposure.
+    # Bind only to host loopback; Caddy on the host fronts public traffic
+    # (api.lorescape.app → 127.0.0.1:8001 → container :8000). Picking 8001
+    # because 8000 is already taken by another project on this VPS.
+    ports:
+      - "127.0.0.1:8001:8000"
     env_file: .env
     # Healthcheck via the /health endpoint (runs inside the container).
     healthcheck:
