@@ -143,6 +143,29 @@ void main() {
     );
 
     testWidgets(
+      'given the service throws insufficientSource, '
+      'then the no-story message is shown and the listen button is NOT',
+      (tester) async {
+        await _pumpScreen(
+          tester,
+          hookService: _FakeStoryHookService(
+            error: const AppError(type: NarrationError.insufficientSource),
+          ),
+        );
+
+        expect(
+          find.text('story_hook.insufficient_source_title'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('story_hook.insufficient_source_body'),
+          findsOneWidget,
+        );
+        expect(find.text('story_hook.listen_default_button'), findsNothing);
+      },
+    );
+
+    testWidgets(
       'given a hook card, when tapped, '
       'then narration generation is triggered with that hook',
       (tester) async {

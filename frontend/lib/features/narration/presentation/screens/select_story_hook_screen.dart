@@ -85,12 +85,19 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
 
   void _showErrorDialog(NarrationGenerationState genState) {
     ref.read(narrationGenerationControllerProvider.notifier).reset();
+    final isInsufficient =
+        genState.errorType == NarrationGenerationErrorType.insufficientSource;
+    final title = isInsufficient
+        ? 'config_screen.generation_insufficient_source_title'.tr()
+        : 'config_screen.generation_error_title'.tr();
+    final content = isInsufficient
+        ? 'config_screen.generation_insufficient_source_message'.tr()
+        : (genState.errorMessage ??
+              'config_screen.generation_error_message'.tr());
     showAdaptiveAlertDialog<void>(
       context: context,
-      title: 'config_screen.generation_error_title'.tr(),
-      content:
-          genState.errorMessage ??
-          'config_screen.generation_error_message'.tr(),
+      title: title,
+      content: content,
       actions: [
         AdaptiveDialogAction<void>(
           label: 'config_screen.generation_error_ok'.tr(),
@@ -221,6 +228,8 @@ class _HookContent extends StatelessWidget {
         hooks: state.hooks,
         onTap: onHookTap,
       ),
+      StoryHookStatus.insufficientSource =>
+        const _HookInsufficientSourceState(),
       StoryHookStatus.empty ||
       StoryHookStatus.error => _HookFallbackState(onListen: onListenDefault),
     };
@@ -288,6 +297,46 @@ class _HookListState extends StatelessWidget {
                   .toList(),
             ),
           ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+/// Shown when the backend reports `insufficient_source: true` — the
+/// place has no Wikipedia-backed historical content. We deliberately
+/// do NOT offer a "listen anyway" button here: the follow-up
+/// /narration call would just hit the same dead-end. The user should
+/// pick a different place via the back button.
+class _HookInsufficientSourceState extends StatelessWidget {
+  const _HookInsufficientSourceState();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.menu_book_outlined, color: cs.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'story_hook.insufficient_source_title'.tr(),
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'story_hook.insufficient_source_body'.tr(),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 20),
       ],

@@ -55,6 +55,10 @@ enum NarrationGenerationErrorType {
   server,
   configurationError,
   contentGenerationFailed,
+
+  /// Backend reported insufficient_source — the place genuinely has no
+  /// historical content to tell a story about. Not retryable.
+  insufficientSource,
   unknown;
 
   bool get isRetryable => switch (this) {
@@ -118,6 +122,8 @@ class NarrationGenerationController
           NarrationGenerationErrorType.configurationError,
         NarrationError.contentGenerationFailed =>
           NarrationGenerationErrorType.contentGenerationFailed,
+        NarrationError.insufficientSource =>
+          NarrationGenerationErrorType.insufficientSource,
         _ => NarrationGenerationErrorType.unknown,
       };
     }

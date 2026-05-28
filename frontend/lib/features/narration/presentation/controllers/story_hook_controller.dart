@@ -1,12 +1,17 @@
 import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 故事鉤子載入狀態。
-enum StoryHookStatus { loading, success, empty, error }
+///
+/// `empty` 與 `insufficientSource` 是兩種不同的「沒結果」：
+/// - `empty` — 後端找到資料但挑不出明確角度；仍可嘗試「直接聽故事」
+/// - `insufficientSource` — 後端 Wikipedia 內容根本不足；不該再勸使用者重試
+enum StoryHookStatus { loading, success, empty, insufficientSource, error }
 
 class StoryHookState {
   final StoryHookStatus status;
@@ -25,6 +30,7 @@ class StoryHookState {
   bool get isLoading => status == StoryHookStatus.loading;
   bool get isSuccess => status == StoryHookStatus.success;
   bool get isEmpty => status == StoryHookStatus.empty;
+  bool get isInsufficientSource => status == StoryHookStatus.insufficientSource;
   bool get hasError => status == StoryHookStatus.error;
 }
 
@@ -52,6 +58,13 @@ class StoryHookController
       }
       state = StoryHookState(status: StoryHookStatus.success, hooks: hooks);
     } on AppError catch (e) {
+      if (e.type == NarrationError.insufficientSource) {
+        state = StoryHookState(
+          status: StoryHookStatus.insufficientSource,
+          errorMessage: e.message,
+        );
+        return;
+      }
       state = StoryHookState(
         status: StoryHookStatus.error,
         errorMessage: e.message,

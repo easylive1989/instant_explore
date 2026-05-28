@@ -20,6 +20,11 @@ enum NarrationError implements AppErrorType {
   /// 內容生成失敗（生成的內容為空或無效）
   contentGenerationFailed,
 
+  /// 後端找不到足夠的歷史資料可講故事 (insufficient_source: true)。
+  /// 與 contentGenerationFailed 不同 — 這不是系統錯誤，是「這個地點本來就
+  /// 沒有故事可講」，不該勸使用者重試。
+  insufficientSource,
+
   /// TTS 播放錯誤
   ttsPlaybackError,
 

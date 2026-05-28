@@ -7,6 +7,14 @@ import 'package:context_app/features/narration/domain/errors/narration_error.dar
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:http/http.dart' as http;
 
+/// Result of a /narration/hooks call from the backend.
+class HooksApiResult {
+  final List<StoryHook> hooks;
+  final bool insufficientSource;
+
+  const HooksApiResult({required this.hooks, required this.insufficientSource});
+}
+
 /// Result of a narration call from the backend.
 class NarrationApiResult {
   final String placeName;
@@ -43,7 +51,7 @@ class NarrationApiClient {
     this.timeout = const Duration(seconds: 60),
   }) : _httpClient = httpClient ?? http.Client();
 
-  Future<List<StoryHook>> fetchHooks({
+  Future<HooksApiResult> fetchHooks({
     required String placeName,
     required String location,
     required String wikipediaTitle,
@@ -57,17 +65,20 @@ class NarrationApiClient {
     };
     final data = await _post('/narration/hooks', body);
     final hooks = (data['hooks'] as List?) ?? const [];
-    return hooks
-        .whereType<Map>()
-        .map((raw) {
-          final map = raw.cast<String, dynamic>();
-          return StoryHook(
-            id: map['id'] as String,
-            title: map['title'] as String,
-            teaser: map['teaser'] as String,
-          );
-        })
-        .toList(growable: false);
+    return HooksApiResult(
+      hooks: hooks
+          .whereType<Map>()
+          .map((raw) {
+            final map = raw.cast<String, dynamic>();
+            return StoryHook(
+              id: map['id'] as String,
+              title: map['title'] as String,
+              teaser: map['teaser'] as String,
+            );
+          })
+          .toList(growable: false),
+      insufficientSource: data['insufficient_source'] as bool? ?? false,
+    );
   }
 
   Future<NarrationApiResult> fetchNarration({

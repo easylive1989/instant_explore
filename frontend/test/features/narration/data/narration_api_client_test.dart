@@ -38,16 +38,42 @@ void main() {
         httpClient: mockClient,
       );
 
-      final hooks = await client.fetchHooks(
+      final result = await client.fetchHooks(
         placeName: 'Arles',
         location: 'Provence',
         wikipediaTitle: 'Arles',
         language: 'zh-TW',
       );
 
-      expect(hooks, hasLength(2));
-      expect(hooks.first.id, 'h1');
-      expect(hooks.first.title, 'T1');
+      expect(result.hooks, hasLength(2));
+      expect(result.hooks.first.id, 'h1');
+      expect(result.hooks.first.title, 'T1');
+      expect(result.insufficientSource, isFalse);
+    });
+
+    test('fetchHooks 解析 insufficient_source=true 與空 hooks', () async {
+      final mockClient = MockClient((_) async {
+        return http.Response(
+          jsonEncode({'hooks': [], 'insufficient_source': true}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      final result = await client.fetchHooks(
+        placeName: 'Fake',
+        location: '',
+        wikipediaTitle: 'Fake',
+        language: 'zh-TW',
+      );
+
+      expect(result.hooks, isEmpty);
+      expect(result.insufficientSource, isTrue);
     });
 
     test('fetchNarration 解析後端回傳的長故事', () async {

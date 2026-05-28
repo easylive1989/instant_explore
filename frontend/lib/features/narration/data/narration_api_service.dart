@@ -1,5 +1,7 @@
+import 'package:context_app/core/errors/app_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/data/narration_api_client.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/narration/domain/models/grounding_info.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/domain/services/narration_service.dart';
@@ -30,6 +32,12 @@ class NarrationApiService implements NarrationService {
       language: language.code,
       hook: hook,
     );
+    if (result.insufficientSource) {
+      throw const AppError(
+        type: NarrationError.insufficientSource,
+        message: '這個景點目前沒有足夠的歷史資料可講故事',
+      );
+    }
     return (text: result.text, grounding: null);
   }
 }

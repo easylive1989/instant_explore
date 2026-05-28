@@ -29,6 +29,8 @@
     "generating": "Generating narration...",
     "generation_error_title": "Generation Failed",
     "generation_error_message": "Failed to generate narration. Please try again later.",
+    "generation_insufficient_source_title": "No story to tell",
+    "generation_insufficient_source_message": "Wikipedia has no historical figures or events recorded for this place, so we can't tell you a real story here. Try another spot.",
     "generation_error_ok": "OK"
   },
   "story_hook": {
@@ -36,7 +38,9 @@
     "loading": "Digging up this place's history...",
     "fallback_title": "A historical story",
     "fallback_body": "No specific story threads found right now, but we can still share a historical story about this place.",
-    "listen_default_button": "Just play a story"
+    "listen_default_button": "Just play a story",
+    "insufficient_source_title": "No story to tell here",
+    "insufficient_source_body": "Wikipedia has no historical figures or events recorded for this place. Try another spot."
   },
   "narration_style": {
     "brief": "Brief",
