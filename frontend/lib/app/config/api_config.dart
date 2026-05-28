@@ -11,7 +11,6 @@ class ApiConfig {
   final String supabaseServiceRoleKey;
   final String googleWebClientId;
   final String googleIosClientId;
-  final String geminiApiKey;
   final String revenueCatApiKeyIos;
   final String revenueCatApiKeyAndroid;
   final String backendBaseUrl;
@@ -22,7 +21,6 @@ class ApiConfig {
     required this.supabaseServiceRoleKey,
     required this.googleWebClientId,
     required this.googleIosClientId,
-    required this.geminiApiKey,
     required this.revenueCatApiKeyIos,
     required this.revenueCatApiKeyAndroid,
     required this.backendBaseUrl,
@@ -48,7 +46,6 @@ class ApiConfig {
         'GOOGLE_IOS_CLIENT_ID',
         defaultValue: '',
       ),
-      geminiApiKey: String.fromEnvironment('GEMINI_API_KEY', defaultValue: ''),
       revenueCatApiKeyIos: String.fromEnvironment(
         'REVENUECAT_API_KEY_IOS',
         defaultValue: '',
@@ -77,9 +74,6 @@ class ApiConfig {
     if (googleWebClientId.isEmpty) {
       missingKeys.add('GOOGLE_WEB_CLIENT_ID');
     }
-    if (geminiApiKey.isEmpty) {
-      missingKeys.add('GEMINI_API_KEY');
-    }
 
     if (missingKeys.isNotEmpty) {
       debugPrint('⚠️ 警告: 以下 API 金鑰未設定: ${missingKeys.join(', ')}');
@@ -94,15 +88,9 @@ class ApiConfig {
   bool get isSupabaseConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
-  /// 取得 Gemini 是否已配置
-  bool get isGeminiConfigured => geminiApiKey.isNotEmpty;
-
   @override
   String toString() {
-    return 'ApiConfig('
-        'supabaseConfigured: $isSupabaseConfigured, '
-        'geminiConfigured: $isGeminiConfigured'
-        ')';
+    return 'ApiConfig(supabaseConfigured: $isSupabaseConfigured)';
   }
 }
 
