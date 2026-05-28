@@ -4,26 +4,15 @@ import 'package:context_app/features/daily_story/domain/models/daily_story_card_
 import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class DailyStoryDetailScreen extends StatelessWidget {
   final DailyStory story;
   const DailyStoryDetailScreen({super.key, required this.story});
 
-  static const _historyRoute = '/daily-story/history';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('daily_story.detail_title'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => context.push(_historyRoute),
-            child: Text('daily_story.detail_history_button'.tr()),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(story.placeName)),
       body: story.hasCardLayout
           ? CardLayoutBody(story: story)
           : _LegacyLayoutBody(story: story),

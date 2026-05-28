@@ -69,8 +69,7 @@ enum NarrationGenerationErrorType {
 
 /// Manages the narration generation flow on the config screen.
 ///
-/// Similar to [QuickGuideController], this controller handles
-/// AI generation before navigating to the player screen.
+/// Handles AI generation before navigating to the player screen.
 class NarrationGenerationController
     extends AutoDisposeNotifier<NarrationGenerationState> {
   @override

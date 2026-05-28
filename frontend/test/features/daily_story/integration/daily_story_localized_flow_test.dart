@@ -1,12 +1,12 @@
 // Daily Story is one of the few features that switches its content
 // based on the app language: the cron writes 'zh-TW' and 'en' rows
 // and the providers pick whichever matches dbLanguageOf(currentLanguage).
-// Existing card tests covered only the zh-TW path. These tests pin the
-// language-aware behaviour and the repository-error fallback so the
-// card never silently shows the wrong locale or a stale story.
+// These tests pin the language-aware behaviour and the repository-error
+// fallback so the Story tab never silently shows the wrong locale or
+// crashes on a transient backend error.
 
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
-import 'package:context_app/features/daily_story/presentation/widgets/daily_story_card.dart';
+import 'package:context_app/features/daily_story/presentation/screens/story_list_screen.dart';
 import 'package:context_app/features/daily_story/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,7 +32,7 @@ DailyStory _story({
   );
 }
 
-Future<void> _pumpCard(
+Future<void> _pumpList(
   WidgetTester tester, {
   required InMemoryDailyStoryRepository repo,
   Locale locale = const Locale('zh', 'TW'),
@@ -42,23 +42,17 @@ Future<void> _pumpCard(
     routes: [
       GoRoute(
         path: '/',
-        builder: (_, __) => const Scaffold(body: DailyStoryCard()),
+        builder: (_, __) => const StoryListScreen(),
       ),
       GoRoute(
         path: '/daily-story/detail',
         builder: (_, __) =>
             const Scaffold(body: SizedBox(key: Key('detail-stub'))),
       ),
-      GoRoute(
-        path: '/daily-story/history',
-        builder: (_, __) =>
-            const Scaffold(body: SizedBox(key: Key('history-stub'))),
-      ),
     ],
     overrides: [dailyStoryRepositoryProvider.overrideWithValue(repo)],
     locale: locale,
   );
-  // Let the FutureProvider settle.
   for (var i = 0; i < 3; i += 1) {
     await tester.pump(const Duration(milliseconds: 20));
   }
@@ -80,7 +74,7 @@ void main() {
             _story(language: 'en', placeName: 'Colosseum'),
           ]);
 
-        await _pumpCard(tester, repo: repo, locale: const Locale('zh', 'TW'));
+        await _pumpList(tester, repo: repo, locale: const Locale('zh', 'TW'));
 
         expect(find.text('羅馬競技場'), findsOneWidget);
         expect(find.text('Colosseum'), findsNothing);
@@ -97,7 +91,7 @@ void main() {
             _story(language: 'en', placeName: 'Colosseum'),
           ]);
 
-        await _pumpCard(tester, repo: repo, locale: const Locale('en'));
+        await _pumpList(tester, repo: repo, locale: const Locale('en'));
 
         expect(find.text('Colosseum'), findsOneWidget);
         expect(find.text('羅馬競技場'), findsNothing);
@@ -105,18 +99,18 @@ void main() {
     );
 
     testWidgets(
-      'given the repository throws on fetchLatest, when the card loads, '
-      'then no crash occurs and the card stays mounted',
+      'given the repository throws on fetchLatest, when the list loads, '
+      'then no crash occurs and the screen stays mounted',
       (tester) async {
         final repo = InMemoryDailyStoryRepository()
           ..errorOnNextCall = Exception('Supabase unreachable');
 
-        await _pumpCard(tester, repo: repo);
+        await _pumpList(tester, repo: repo);
 
         expect(
-          find.byType(DailyStoryCard),
+          find.byType(StoryListScreen),
           findsOneWidget,
-          reason: 'card should swallow the error and stay on screen',
+          reason: 'screen should surface the error without crashing',
         );
       },
     );

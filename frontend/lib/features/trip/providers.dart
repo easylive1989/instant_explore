@@ -25,13 +25,13 @@ final tripByIdProvider = FutureProvider.autoDispose.family<Trip?, String>((
 
 /// 當前「進行中」的旅程 id（持久化到 SharedPreferences）。
 ///
-/// 新建立的 narration / quick guide 條目會自動帶上此 id；若為 `null`
-/// 則條目屬於「未分類」。
+/// 新建立的 narration 條目會自動帶上此 id；若為 `null` 則條目屬於
+/// 「未分類」。
 final currentTripIdProvider = NotifierProvider<CurrentTripIdNotifier, String?>(
   CurrentTripIdNotifier.new,
 );
 
-/// 取得某個 trip 的 JourneyItem（narration + quick guide）。
+/// 取得某個 trip 的 JourneyItem。
 ///
 /// 傳入 `null` 表示「未分類」群組（tripId 為 null 的條目）。
 final journeyItemsForTripProvider = FutureProvider.autoDispose
@@ -40,7 +40,6 @@ final journeyItemsForTripProvider = FutureProvider.autoDispose
       return items.where((item) {
         final itemTripId = switch (item) {
           NarrationJourneyItem(:final entry) => entry.tripId,
-          QuickGuideJourneyItem(:final entry) => entry.tripId,
         };
         return itemTripId == tripId;
       }).toList();
@@ -57,7 +56,6 @@ final tripItemCountsProvider = FutureProvider.autoDispose<Map<String?, int>>((
   for (final item in items) {
     final tripId = switch (item) {
       NarrationJourneyItem(:final entry) => entry.tripId,
-      QuickGuideJourneyItem(:final entry) => entry.tripId,
     };
     counts[tripId] = (counts[tripId] ?? 0) + 1;
   }

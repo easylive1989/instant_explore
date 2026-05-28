@@ -58,10 +58,6 @@ Future<void> _pumpDetail(
         builder: (_, state) =>
             DailyStoryDetailScreen(story: state.extra as DailyStory),
       ),
-      GoRoute(
-        path: '/daily-story/history',
-        builder: (_, __) => const Scaffold(body: SizedBox(key: Key('hist'))),
-      ),
     ],
   );
   await tester.tap(find.text('go'));
@@ -75,35 +71,42 @@ void main() {
 
   group('DailyStoryDetailScreen', () {
     testWidgets(
-      'given a story, when the screen loads, '
-      'then place name, location, era and story body are visible',
+      'given a legacy story, when the screen loads, '
+      'then the AppBar title shows the place name',
       (tester) async {
         final story = _legacyStory();
         await _pumpDetail(tester, story: story);
 
-        expect(find.text(story.placeName), findsOneWidget);
-        expect(find.text(story.placeLocation), findsOneWidget);
-        expect(find.text(story.era), findsOneWidget);
-        expect(find.textContaining('完整故事內容'), findsAtLeastNWidgets(1));
-        // Wikipedia button intentionally removed — story page should focus
-        // entirely on the narrative.
-        expect(
-          find.text('daily_story.detail_read_more_wikipedia'),
-          findsNothing,
-        );
+        final appBar = tester.widget<AppBar>(find.byType(AppBar));
+        expect(appBar.title, isA<Text>());
+        expect((appBar.title as Text).data, equals(story.placeName));
       },
     );
 
     testWidgets(
-      'given the screen is open, when the user taps the history button, '
-      'then the history route is pushed',
+      'given a legacy story, when the screen loads, '
+      'then location, era and story body are visible',
+      (tester) async {
+        final story = _legacyStory();
+        await _pumpDetail(tester, story: story);
+
+        expect(find.text(story.placeLocation), findsOneWidget);
+        expect(find.text(story.era), findsOneWidget);
+        expect(find.textContaining('完整故事內容'), findsAtLeastNWidgets(1));
+      },
+    );
+
+    testWidgets(
+      'given the detail screen, when the screen renders, '
+      'then no history navigation button is shown',
       (tester) async {
         await _pumpDetail(tester, story: _legacyStory());
 
-        await tester.tap(find.text('daily_story.detail_history_button'));
-        await tester.pumpAndSettle();
-
-        expect(find.byKey(const Key('hist')), findsOneWidget);
+        expect(
+          find.text('daily_story.detail_history_button'),
+          findsNothing,
+          reason: 'history button was removed when Story tab became the entry',
+        );
       },
     );
 
@@ -116,7 +119,6 @@ void main() {
 
         expect(find.text('血腥的盛宴'), findsOneWidget);
         expect(find.text('從石灰岩堆砌的命運舞台'), findsOneWidget);
-        // legacy meta rows should NOT appear in card layout
         expect(find.text('daily_story.detail_location_label'), findsNothing);
       },
     );

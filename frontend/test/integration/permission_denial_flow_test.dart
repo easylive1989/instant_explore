@@ -4,30 +4,20 @@
 // point so a regression doesn't ship the app stuck on a blank screen.
 
 import 'package:context_app/core/services/image_picker_service.dart';
-import 'package:context_app/features/ads/providers.dart';
 import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
 import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
-import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
-import 'package:context_app/features/trip/providers.dart';
-import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_image_analysis_service.dart';
 import '../fakes/fake_image_picker_service.dart';
 import '../fakes/fake_location_service.dart';
 import '../fakes/fake_places_repository.dart';
-import '../fakes/fake_quick_guide_ai_service.dart';
-import '../fakes/fake_rewarded_ad_service.dart';
 import '../fakes/in_memory_daily_story_repository.dart';
-import '../fakes/in_memory_quick_guide_repository.dart';
 import '../fakes/in_memory_saved_locations_repository.dart';
-import '../fakes/in_memory_trip_repository.dart';
-import '../fakes/in_memory_usage_repository.dart';
 import '../helpers/pump_app.dart';
 
 void main() {
@@ -105,48 +95,6 @@ void main() {
         // Even after a thrown picker the selector stays in view — the
         // screen does not crash or get stuck on a loading state.
         expect(find.text('camera.take_photo'), findsOneWidget);
-      },
-    );
-  });
-
-  group('Quick Guide picker denied', () {
-    testWidgets(
-      'given the picker throws on the quick guide screen, '
-      'when the user taps Take Photo, then the screen resets to the '
-      'source selector and the AI service is never called',
-      (tester) async {
-        final picker = FakeImagePickerService(
-          error: Exception('Camera permission denied'),
-        );
-        final ai = FakeQuickGuideAiService();
-
-        await pumpScreen(
-          tester,
-          child: const QuickGuideScreen(),
-          overrides: [
-            quickGuideRepositoryProvider.overrideWithValue(
-              InMemoryQuickGuideRepository(),
-            ),
-            quickGuideAiServiceProvider.overrideWithValue(ai),
-            tripRepositoryProvider.overrideWithValue(InMemoryTripRepository()),
-            usageRepositoryProvider.overrideWithValue(
-              InMemoryUsageRepository(),
-            ),
-            rewardedAdServiceProvider.overrideWithValue(
-              FakeRewardedAdService(),
-            ),
-            imagePickerServiceProvider.overrideWithValue(picker),
-          ],
-        );
-        await tester.tap(find.text('quick_guide.take_photo'));
-        await tester.pumpAndSettle();
-
-        expect(picker.pickCount, 1);
-        // The source selector remains in place; the AI service never
-        // got an image since the picker failed before it could deliver
-        // bytes.
-        expect(find.text('quick_guide.take_photo'), findsOneWidget);
-        expect(ai.lastImageBytes, isNull);
       },
     );
   });

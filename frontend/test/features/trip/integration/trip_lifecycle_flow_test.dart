@@ -15,7 +15,6 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../fakes/in_memory_journey_repository.dart';
-import '../../../fakes/in_memory_quick_guide_repository.dart';
 import '../../../fakes/in_memory_trip_repository.dart';
 import '../../../helpers/pump_app.dart';
 import '../../../helpers/test_data.dart';
@@ -182,9 +181,6 @@ Future<void> _pumpTripDetail(
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(InMemoryJourneyRepository()),
-      quickGuideRepositoryProvider.overrideWithValue(
-        InMemoryQuickGuideRepository(),
-      ),
     ],
   );
   for (var i = 0; i < 3; i += 1) {

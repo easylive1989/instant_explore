@@ -4,7 +4,6 @@ import 'package:context_app/features/export/domain/models/pdf_export_result.dart
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
@@ -82,14 +81,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     setState(() => _moving = true);
     try {
       final journeyRepo = ref.read(journeyRepositoryProvider);
-      final quickGuideRepo = ref.read(quickGuideRepositoryProvider);
       await Future.wait(
         items.where((it) => _selectedIds.contains(it.id)).map((item) {
           return switch (item) {
             NarrationJourneyItem(:final entry) => journeyRepo.save(
-              entry.copyWithTripId(selection.tripId),
-            ),
-            QuickGuideJourneyItem(:final entry) => quickGuideRepo.save(
               entry.copyWithTripId(selection.tripId),
             ),
           };
@@ -316,14 +311,10 @@ class _TripMenuButton extends ConsumerWidget {
 
   Future<void> _orphanItemsOfTrip(WidgetRef ref, String tripId) async {
     final journeyRepo = ref.read(journeyRepositoryProvider);
-    final quickGuideRepo = ref.read(quickGuideRepositoryProvider);
     final journeyEntries = await journeyRepo.getAll();
-    final quickGuideEntries = await quickGuideRepo.getAll();
     await Future.wait([
       for (final e in journeyEntries.where((e) => e.tripId == tripId))
         journeyRepo.save(e.copyWithTripId(null)),
-      for (final e in quickGuideEntries.where((e) => e.tripId == tripId))
-        quickGuideRepo.save(e.copyWithTripId(null)),
     ]);
   }
 
@@ -461,11 +452,6 @@ class _ItemsList extends StatelessWidget {
             final isLast = index == items.length - 1;
             final entryWidget = switch (item) {
               NarrationJourneyItem(:final entry) => TimelineEntry(
-                key: ValueKey(item.id),
-                entry: entry,
-                isLast: isLast,
-              ),
-              QuickGuideJourneyItem(:final entry) => QuickGuideTimelineEntry(
                 key: ValueKey(item.id),
                 entry: entry,
                 isLast: isLast,

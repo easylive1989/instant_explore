@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/in_memory_journey_repository.dart';
-import '../../../../fakes/in_memory_quick_guide_repository.dart';
 import '../../../../fakes/in_memory_trip_repository.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
@@ -261,7 +260,6 @@ void main() {
           tripId: 'kyoto',
           tripRepo: tripRepo,
           journeyRepo: InMemoryJourneyRepository(),
-          quickGuideRepo: InMemoryQuickGuideRepository(),
         );
 
         await tester.tap(find.byIcon(Icons.more_vert));
@@ -382,14 +380,12 @@ Future<void> _givenTripDetailScreen(
   for (final entry in seededJourneys) {
     await journeyRepo.save(entry);
   }
-  final quickGuideRepo = InMemoryQuickGuideRepository();
 
   await _givenTripDetailScreenWithRepos(
     tester,
     tripId: tripId,
     tripRepo: tripRepo,
     journeyRepo: journeyRepo,
-    quickGuideRepo: quickGuideRepo,
     currentTripIdInitial: currentTripIdInitial,
   );
 }
@@ -399,7 +395,6 @@ Future<void> _givenTripDetailScreenWithRepos(
   required String? tripId,
   required InMemoryTripRepository tripRepo,
   required InMemoryJourneyRepository journeyRepo,
-  InMemoryQuickGuideRepository? quickGuideRepo,
   String? currentTripIdInitial,
 }) async {
   await pumpScreen(
@@ -408,9 +403,6 @@ Future<void> _givenTripDetailScreenWithRepos(
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(journeyRepo),
-      quickGuideRepositoryProvider.overrideWithValue(
-        quickGuideRepo ?? InMemoryQuickGuideRepository(),
-      ),
       if (currentTripIdInitial != null)
         currentTripIdProvider.overrideWith(
           () => _StaticCurrentTripIdNotifier(currentTripIdInitial),
@@ -426,7 +418,6 @@ Future<void> _givenTripDetailScreenWithRouter(
   required String? tripId,
   required InMemoryTripRepository tripRepo,
   required InMemoryJourneyRepository journeyRepo,
-  InMemoryQuickGuideRepository? quickGuideRepo,
 }) async {
   await pumpRouterApp(
     tester,
@@ -451,9 +442,6 @@ Future<void> _givenTripDetailScreenWithRouter(
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(journeyRepo),
-      quickGuideRepositoryProvider.overrideWithValue(
-        quickGuideRepo ?? InMemoryQuickGuideRepository(),
-      ),
     ],
   );
   await tester.tap(find.text('to-detail'));

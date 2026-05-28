@@ -1,8 +1,8 @@
 import 'package:context_app/app/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:context_app/features/daily_story/presentation/screens/story_list_screen.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
-import 'package:context_app/features/quick_guide/presentation/screens/quick_guide_screen.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:context_app/features/settings/presentation/screens/settings_screen.dart';
 
@@ -20,8 +20,8 @@ class _MainScreenState extends State<MainScreen> {
   Locale? _currentLocale;
 
   static const List<Widget> _widgetOptions = <Widget>[
+    StoryListScreen(),
     ExploreScreen(),
-    QuickGuideScreen(),
     JourneyScreen(),
     SettingsScreen(),
   ];
@@ -57,12 +57,12 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: 'bottom_nav.home'.tr(),
+            icon: const Icon(Icons.auto_stories),
+            label: 'bottom_nav.stories'.tr(),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.camera_alt_outlined),
-            label: 'bottom_nav.quick_guide'.tr(),
+            icon: const Icon(Icons.home),
+            label: 'bottom_nav.home'.tr(),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.book),

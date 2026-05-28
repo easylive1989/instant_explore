@@ -17,7 +17,6 @@ import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.
 import 'package:context_app/features/trip/presentation/screens/trip_list_screen.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/presentation/screens/daily_story_detail_screen.dart';
-import 'package:context_app/features/daily_story/presentation/screens/daily_story_history_screen.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -122,11 +121,6 @@ class RouterConfig {
             final story = state.extra as DailyStory;
             return DailyStoryDetailScreen(story: story);
           },
-        ),
-        GoRoute(
-          path: '/daily-story/history',
-          name: 'daily_story_history',
-          builder: (context, state) => const DailyStoryHistoryScreen(),
         ),
         GoRoute(
           path: '/camera',

@@ -12,7 +12,6 @@ void main() {
           NarrationEventSource.savedLocations.wireName,
           'saved_locations',
         );
-        expect(NarrationEventSource.quickGuide.wireName, 'quick_guide');
         expect(NarrationEventSource.onboarding.wireName, 'onboarding');
       });
 

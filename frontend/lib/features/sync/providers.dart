@@ -2,18 +2,13 @@ import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/journey/data/hive_journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
-import 'package:context_app/features/quick_guide/data/hive_quick_guide_repository.dart';
-import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
-import 'package:context_app/features/quick_guide/domain/repositories/quick_guide_repository.dart';
 import 'package:context_app/features/saved_locations/data/hive_saved_locations_repository.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
 import 'package:context_app/features/sync/data/supabase_journey_remote_data_source.dart';
-import 'package:context_app/features/sync/data/supabase_quick_guide_remote_data_source.dart';
 import 'package:context_app/features/sync/data/supabase_saved_locations_remote_data_source.dart';
 import 'package:context_app/features/sync/data/supabase_trip_remote_data_source.dart';
 import 'package:context_app/features/sync/data/syncing_journey_repository.dart';
-import 'package:context_app/features/sync/data/syncing_quick_guide_repository.dart';
 import 'package:context_app/features/sync/data/syncing_saved_locations_repository.dart';
 import 'package:context_app/features/sync/data/syncing_trip_repository.dart';
 import 'package:context_app/features/sync/domain/services/remote_sync_data_source.dart';
@@ -50,10 +45,6 @@ final localJourneyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return HiveJourneyRepository();
 });
 
-final localQuickGuideRepositoryProvider = Provider<QuickGuideRepository>((ref) {
-  return HiveQuickGuideRepository();
-});
-
 final localTripRepositoryProvider = Provider<TripRepository>((ref) {
   return HiveTripRepository();
 });
@@ -74,13 +65,6 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 final journeyRemoteDataSourceProvider =
     Provider<RemoteSyncDataSource<JourneyEntry>>((ref) {
       return SupabaseJourneyRemoteDataSource(ref.watch(supabaseClientProvider));
-    });
-
-final quickGuideRemoteDataSourceProvider =
-    Provider<RemoteSyncDataSource<QuickGuideEntry>>((ref) {
-      return SupabaseQuickGuideRemoteDataSource(
-        ref.watch(supabaseClientProvider),
-      );
     });
 
 final tripRemoteDataSourceProvider = Provider<RemoteSyncDataSource<Trip>>((
@@ -109,22 +93,6 @@ final journeySyncEngineProvider = Provider<SyncEngine<JourneyEntry>>((ref) {
       updatedAtOf: (e) => e.updatedAt,
     ),
     remote: ref.watch(journeyRemoteDataSourceProvider),
-    loadLocal: local.getAll,
-    saveLocal: local.save,
-  );
-});
-
-final quickGuideSyncEngineProvider = Provider<SyncEngine<QuickGuideEntry>>((
-  ref,
-) {
-  final local = ref.watch(localQuickGuideRepositoryProvider);
-  return SyncEngine<QuickGuideEntry>(
-    descriptor: SyncEntityDescriptor<QuickGuideEntry>(
-      name: 'quick_guide_entry',
-      idOf: (e) => e.id,
-      updatedAtOf: (e) => e.updatedAt,
-    ),
-    remote: ref.watch(quickGuideRemoteDataSourceProvider),
     loadLocal: local.getAll,
     saveLocal: local.save,
   );
@@ -171,16 +139,6 @@ final syncingJourneyRepositoryProvider = Provider<JourneyRepository>((ref) {
   );
 });
 
-final syncingQuickGuideRepositoryProvider = Provider<QuickGuideRepository>((
-  ref,
-) {
-  return SyncingQuickGuideRepository(
-    local: ref.watch(localQuickGuideRepositoryProvider),
-    engine: ref.watch(quickGuideSyncEngineProvider),
-    session: () => ref.read(syncSessionProvider),
-  );
-});
-
 final syncingTripRepositoryProvider = Provider<TripRepository>((ref) {
   return SyncingTripRepository(
     local: ref.watch(localTripRepositoryProvider),
@@ -205,7 +163,6 @@ final syncingSavedLocationsRepositoryProvider =
 final syncCoordinatorProvider = Provider<SyncCoordinator>((ref) {
   return SyncCoordinator(
     journey: ref.watch(journeySyncEngineProvider),
-    quickGuide: ref.watch(quickGuideSyncEngineProvider),
     trip: ref.watch(tripSyncEngineProvider),
     savedLocations: ref.watch(savedLocationsSyncEngineProvider),
   );

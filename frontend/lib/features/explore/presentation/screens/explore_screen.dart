@@ -3,7 +3,6 @@ import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/providers.dart';
-import 'package:context_app/features/daily_story/presentation/widgets/daily_story_card.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
@@ -132,50 +131,29 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ),
             Expanded(
               child: placesState.when(
-                loading: () => ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: const [
-                    DailyStoryCard(),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 80),
-                      child: Center(child: AdaptiveProgressIndicator()),
-                    ),
-                  ],
+                loading: () => const Center(child: AdaptiveProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('${'common.error_prefix'.tr()}: $error'),
                 ),
-                error: (error, stack) => ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    const DailyStoryCard(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(
-                        child: Text('${'common.error_prefix'.tr()}: $error'),
-                      ),
-                    ),
-                  ],
-                ),
-                data: (places) => ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: places.length + (places.isEmpty ? 2 : 1),
-                  itemBuilder: (context, index) {
-                    if (index == 0) return const DailyStoryCard();
-                    if (places.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 40),
-                        child: Center(
-                          child: Text(
-                            'No places found',
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 16,
-                            ),
-                          ),
+                data: (places) {
+                  if (places.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No places found',
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 16,
                         ),
-                      );
-                    }
-                    return PlaceCard(place: places[index - 1]);
-                  },
-                ),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: places.length,
+                    itemBuilder: (context, index) =>
+                        PlaceCard(place: places[index]),
+                  );
+                },
               ),
             ),
           ],

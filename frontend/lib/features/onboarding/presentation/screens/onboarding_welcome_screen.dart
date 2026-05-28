@@ -118,14 +118,6 @@ class _OnboardingWelcomeScreenState
             ),
             _page(
               serialLabel: '02',
-              chipKey: 'onboarding.chip.ai_guide',
-              titleKey: 'onboarding.quick_guide.title',
-              bodyKey: 'onboarding.quick_guide.body',
-              imageAsset: 'assets/images/onboarding/ai_guide.png',
-              accent: cs.primary,
-            ),
-            _page(
-              serialLabel: '03',
               chipKey: 'onboarding.chip.explore',
               titleKey: 'onboarding.explore.title',
               bodyKey: 'onboarding.explore.body',
@@ -133,7 +125,7 @@ class _OnboardingWelcomeScreenState
               accent: cs.primary,
             ),
             _page(
-              serialLabel: '04',
+              serialLabel: '03',
               chipKey: 'onboarding.chip.journey',
               titleKey: 'onboarding.journey.title',
               bodyKey: 'onboarding.journey.body',

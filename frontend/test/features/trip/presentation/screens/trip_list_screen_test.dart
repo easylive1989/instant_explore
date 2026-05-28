@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/in_memory_journey_repository.dart';
-import '../../../../fakes/in_memory_quick_guide_repository.dart';
 import '../../../../fakes/in_memory_trip_repository.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
@@ -91,7 +90,6 @@ Future<void> _givenTripListScreen(
   for (final entry in seededJourneys) {
     await journeyRepo.save(entry);
   }
-  final quickGuideRepo = InMemoryQuickGuideRepository();
 
   await pumpScreen(
     tester,
@@ -99,7 +97,6 @@ Future<void> _givenTripListScreen(
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(journeyRepo),
-      quickGuideRepositoryProvider.overrideWithValue(quickGuideRepo),
     ],
   );
   // Allow async providers (tripsProvider, tripItemCountsProvider) to resolve.
@@ -110,7 +107,6 @@ Future<void> _givenTripListScreen(
 Future<void> _givenTripListScreenWithRouter(WidgetTester tester) async {
   final tripRepo = InMemoryTripRepository();
   final journeyRepo = InMemoryJourneyRepository();
-  final quickGuideRepo = InMemoryQuickGuideRepository();
 
   await pumpRouterApp(
     tester,
@@ -121,7 +117,6 @@ Future<void> _givenTripListScreenWithRouter(WidgetTester tester) async {
     overrides: [
       tripRepositoryProvider.overrideWithValue(tripRepo),
       journeyRepositoryProvider.overrideWithValue(journeyRepo),
-      quickGuideRepositoryProvider.overrideWithValue(quickGuideRepo),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));

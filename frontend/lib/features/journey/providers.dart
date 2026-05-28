@@ -1,15 +1,11 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
-import 'package:context_app/features/quick_guide/providers.dart';
 import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-export 'package:context_app/features/quick_guide/providers.dart'
-    show quickGuideRepositoryProvider, quickGuideEntriesProvider;
-
 /// Filter type for the journey list.
-enum JourneyFilter { all, narration, quickGuide }
+enum JourneyFilter { all, narration }
 
 /// Journey 頁的檢視模式：完整時間軸 或 依旅程分群。
 enum JourneyViewMode { timeline, byTrip }
@@ -22,20 +18,14 @@ final myJourneyProvider = FutureProvider.autoDispose<List<JourneyEntry>>((ref) {
   return ref.watch(journeyRepositoryProvider).getAll();
 });
 
-/// Combined provider returning all journey items (narration + quick guide)
-/// sorted newest first.
+/// Combined provider returning all journey items sorted newest first.
 final allJourneyItemsProvider = FutureProvider.autoDispose<List<JourneyItem>>((
   ref,
 ) async {
   final narrationEntries = await ref.watch(journeyRepositoryProvider).getAll();
-  final quickGuideEntries = await ref
-      .watch(quickGuideRepositoryProvider)
-      .getAll();
 
-  final items = <JourneyItem>[
-    ...narrationEntries.map(NarrationJourneyItem.new),
-    ...quickGuideEntries.map(QuickGuideJourneyItem.new),
-  ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  final items = <JourneyItem>[...narrationEntries.map(NarrationJourneyItem.new)]
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   return items;
 });
@@ -69,7 +59,6 @@ final filteredJourneyItemsProvider =
           result = result.where((item) {
             return switch (filter) {
               JourneyFilter.narration => item is NarrationJourneyItem,
-              JourneyFilter.quickGuide => item is QuickGuideJourneyItem,
               JourneyFilter.all => true,
             };
           }).toList();

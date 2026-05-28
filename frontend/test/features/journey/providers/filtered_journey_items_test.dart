@@ -1,11 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/journey/domain/models/saved_place.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,22 +28,6 @@ JourneyEntry _makeNarration({
     ),
     createdAt: createdAt ?? DateTime(2026, 4, 1),
     updatedAt: createdAt ?? DateTime(2026, 4, 1),
-    language: Language.english,
-  );
-}
-
-QuickGuideEntry _makeQuickGuide({
-  String id = 'q1',
-  String description =
-      'A beautiful shrine gate standing near the river.',
-  DateTime? createdAt,
-}) {
-  return QuickGuideEntry(
-    id: id,
-    imageBytes: Uint8List.fromList([0, 1, 2]),
-    aiDescription: description,
-    createdAt: createdAt ?? DateTime(2026, 4, 2),
-    updatedAt: createdAt ?? DateTime(2026, 4, 2),
     language: Language.english,
   );
 }
@@ -91,19 +72,12 @@ void main() {
           'Tokyo Tower is an iconic landmark in the city.',
     ),
   );
-  final quickGuide1 = QuickGuideJourneyItem(
-    _makeQuickGuide(
-      id: 'q1',
-      description:
-          'A beautiful shrine gate standing near the river.',
-    ),
-  );
 
   group('filteredJourneyItemsProvider', () {
     test('returns all items when no filter or search applied',
         () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
       );
 
       // Wait for async provider to resolve.
@@ -112,12 +86,12 @@ void main() {
       final result =
           container.read(filteredJourneyItemsProvider);
       final items = result.value!;
-      expect(items.length, 3);
+      expect(items.length, 2);
     });
 
     test('filters by narration type', () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         filter: JourneyFilter.narration,
       );
 
@@ -132,23 +106,9 @@ void main() {
       );
     });
 
-    test('filters by quick guide type', () async {
-      final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
-        filter: JourneyFilter.quickGuide,
-      );
-
-      await container.read(allJourneyItemsProvider.future);
-
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
-      expect(items.length, 1);
-      expect(items.first, isA<QuickGuideJourneyItem>());
-    });
-
     test('searches by place name (case-insensitive)', () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         query: 'kyoto',
       );
 
@@ -162,7 +122,7 @@ void main() {
 
     test('searches by narration content', () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         query: 'iconic landmark',
       );
 
@@ -174,25 +134,10 @@ void main() {
       expect(items.first.id, 'n2');
     });
 
-    test('searches quick guide by AI description', () async {
-      final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
-        query: 'shrine gate',
-      );
-
-      await container.read(allJourneyItemsProvider.future);
-
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
-      expect(items.length, 1);
-      expect(items.first.id, 'q1');
-    });
-
     test('combines filter and search', () async {
       // Search "japan" matches both narrations (address).
-      // Filter narration only → should exclude quick guide.
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         query: 'japan',
         filter: JourneyFilter.narration,
       );
@@ -210,7 +155,7 @@ void main() {
 
     test('returns empty list when nothing matches', () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         query: 'xyznonexistent',
       );
 
@@ -223,7 +168,7 @@ void main() {
 
     test('trims whitespace in search query', () async {
       final container = _createContainer(
-        items: [narration1, narration2, quickGuide1],
+        items: [narration1, narration2],
         query: '  kyoto  ',
       );
 

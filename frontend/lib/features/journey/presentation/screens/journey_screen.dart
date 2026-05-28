@@ -1,5 +1,4 @@
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/presentation/widgets/trip_grid.dart';
@@ -401,15 +400,6 @@ class _FilterChips extends ConsumerWidget {
             onTap: () => ref.read(journeyFilterProvider.notifier).state =
                 JourneyFilter.narration,
           ),
-          const SizedBox(width: 8),
-          _buildChip(
-            context: context,
-            label: 'journey.filter_quick_guide'.tr(),
-            selected: currentFilter == JourneyFilter.quickGuide,
-            colorScheme: colorScheme,
-            onTap: () => ref.read(journeyFilterProvider.notifier).state =
-                JourneyFilter.quickGuide,
-          ),
         ],
       ),
     );
@@ -497,11 +487,6 @@ class _JourneyList extends ConsumerWidget {
 
             return switch (item) {
               NarrationJourneyItem(:final entry) => TimelineEntry(
-                key: ValueKey(item.id),
-                entry: entry,
-                isLast: isLast,
-              ),
-              QuickGuideJourneyItem(:final entry) => QuickGuideTimelineEntry(
                 key: ValueKey(item.id),
                 entry: entry,
                 isLast: isLast,

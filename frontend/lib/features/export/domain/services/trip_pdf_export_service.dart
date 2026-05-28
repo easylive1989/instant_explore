@@ -139,15 +139,6 @@ class TripPdfExportService {
   Future<_PreparedEntry> _prepareEntry(JourneyItem item) async {
     return switch (item) {
       NarrationJourneyItem(:final entry) => _prepareNarration(entry),
-      QuickGuideJourneyItem(:final entry) => _PreparedEntry(
-        data: PdfEntryData(
-          title: _truncate(entry.aiDescription.split('\n').first, 40),
-          date: entry.createdAt,
-          bodyText: entry.aiDescription,
-          imageBytes: entry.imageBytes,
-        ),
-        imageMissing: false,
-      ),
     };
   }
 
@@ -182,9 +173,6 @@ class TripPdfExportService {
     String pad(int v) => v.toString().padLeft(2, '0');
     return 'journey_${createdAt.year}-${pad(createdAt.month)}-${pad(createdAt.day)}';
   }
-
-  String _truncate(String input, int max) =>
-      input.length <= max ? input : '${input.substring(0, max)}…';
 }
 
 class _PreparedEntry {

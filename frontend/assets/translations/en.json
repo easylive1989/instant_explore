@@ -3,17 +3,8 @@
   "audio_ready": "Audio Ready",
   "current_location": "Current Location",
   "daily_story": {
-    "card_label": "Today's Story",
-    "card_cta": "Read",
-    "card_loading": "Loading today's story…",
-    "card_empty_title": "Today's story is being prepared",
-    "card_empty_cta": "See past stories",
-    "detail_title": "Today's Story",
     "detail_era_label": "Era",
-    "detail_location_label": "Location",
-    "detail_history_button": "Past stories",
-    "history_title": "Past stories",
-    "history_empty": "No past stories yet"
+    "detail_location_label": "Location"
   },
   "explore_nearby": "Explore Nearby",
   "tap_to_start": "Tap to start AI audio guide",
@@ -60,10 +51,14 @@
     "suggested_retry": "Suggested retry after {delay}"
   },
   "bottom_nav": {
+    "stories": "Stories",
     "home": "Home",
-    "quick_guide": "Quick Guide",
     "journey": "Journey",
     "settings": "Settings"
+  },
+  "story": {
+    "list_title": "Stories",
+    "list_empty": "No stories yet"
   },
   "journey": {
     "title": "Journey",
@@ -85,7 +80,6 @@
     "search_hint": "Search places or content...",
     "filter_all": "All",
     "filter_narration": "Narration",
-    "filter_quick_guide": "Quick Guide",
     "no_results": "No matching entries found",
     "view_timeline": "Timeline",
     "view_by_trip": "By Trip"
@@ -251,17 +245,6 @@
     "food_market": "Local Cuisine",
     "food_market_description": "Night markets, food streets, specialty restaurants"
   },
-  "quick_guide": {
-    "title": "Quick Guide",
-    "instruction": "Capture what you see",
-    "instruction_subtitle": "AI will instantly describe the photo content",
-    "take_photo": "Take Photo",
-    "from_gallery": "Choose from Gallery",
-    "analyzing": "AI is reading the photo...",
-    "analysis_error": "Failed to read photo, please try again",
-    "save_to_journey": "Save to Journey",
-    "saved": "Saved to Journey!"
-  },
   "camera": {
     "title": "Photo Recognition",
     "instruction": "Capture a landmark or dish",
@@ -357,10 +340,6 @@
     "welcome": {
       "title": "Welcome to Lorescape",
       "body": "Your AI pocket historian — giving every stop along the way real meaning."
-    },
-    "quick_guide": {
-      "title": "Snap it. Understand it.",
-      "body": "Spot something interesting? Take a photo and let the AI tell you its story."
     },
     "explore": {
       "title": "Find hidden history nearby",

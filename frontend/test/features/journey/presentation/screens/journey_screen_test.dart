@@ -1,10 +1,8 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:context_app/features/journey/presentation/widgets/quick_guide_timeline_entry.dart';
 import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/quick_guide/domain/models/quick_guide_entry.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
 import 'package:context_app/features/trip/providers.dart';
@@ -14,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/in_memory_journey_repository.dart';
-import '../../../../fakes/in_memory_quick_guide_repository.dart';
 import '../../../../fakes/in_memory_trip_repository.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
@@ -76,57 +73,18 @@ void main() {
     );
 
     testWidgets(
-      'given narration and quick-guide entries exist, when the user filters '
-      'to narration only, then only narration entries remain',
+      'given narration entries exist, when the user taps the narration filter, '
+      'then narration entries remain visible',
       (tester) async {
         final narration = buildJourneyEntry(id: 'n1');
-        final quick = buildQuickGuideEntry(id: 'q1');
 
         await _givenJourneyScreen(
           tester,
           seededJourneys: [narration],
-          seededQuickGuides: [quick],
         );
         await _whenUserTapsNarrationFilterChip(tester);
 
         _thenOnlyNarrationEntriesRemain();
-      },
-    );
-
-    testWidgets(
-      'given mixed entries, when the user switches to the quick-guide filter, '
-      'then only quick-guide entries remain',
-      (tester) async {
-        final narration = buildJourneyEntry(id: 'n1');
-        final quick = buildQuickGuideEntry(id: 'q1');
-
-        await _givenJourneyScreen(
-          tester,
-          seededJourneys: [narration],
-          seededQuickGuides: [quick],
-        );
-
-        final chipFinder = find.text('journey.filter_quick_guide');
-        await tester.ensureVisible(chipFinder);
-        await tester.tap(chipFinder);
-        await tester.pumpAndSettle();
-
-        expect(find.byType(QuickGuideTimelineEntry), findsOneWidget);
-        expect(find.byType(TimelineEntry), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'given a non-matching filter is active, when the list has no results, '
-      'then the search-off icon and no-results copy are shown',
-      (tester) async {
-        final quick = buildQuickGuideEntry(id: 'q1');
-
-        await _givenJourneyScreen(tester, seededQuickGuides: [quick]);
-        await _whenUserTapsNarrationFilterChip(tester);
-
-        expect(find.byIcon(Icons.search_off), findsOneWidget);
-        expect(find.text('journey.no_results'), findsOneWidget);
       },
     );
 
@@ -262,13 +220,11 @@ Future<void> _givenJourneyScreen(
   WidgetTester tester, {
   List<JourneyEntry> seededJourneys = const [],
   List<Trip> seededTrips = const [],
-  List<QuickGuideEntry> seededQuickGuides = const [],
   String? currentTripIdInitial,
 }) async {
   final overrides = await _buildJourneyOverrides(
     seededJourneys: seededJourneys,
     seededTrips: seededTrips,
-    seededQuickGuides: seededQuickGuides,
     currentTripIdInitial: currentTripIdInitial,
   );
 
@@ -285,12 +241,10 @@ Future<void> _givenJourneyScreenWithRouter(
   WidgetTester tester, {
   List<JourneyEntry> seededJourneys = const [],
   List<Trip> seededTrips = const [],
-  List<QuickGuideEntry> seededQuickGuides = const [],
 }) async {
   final overrides = await _buildJourneyOverrides(
     seededJourneys: seededJourneys,
     seededTrips: seededTrips,
-    seededQuickGuides: seededQuickGuides,
   );
 
   await pumpRouterApp(
@@ -314,16 +268,11 @@ Future<void> _givenJourneyScreenWithRouter(
 Future<List<Override>> _buildJourneyOverrides({
   List<JourneyEntry> seededJourneys = const [],
   List<Trip> seededTrips = const [],
-  List<QuickGuideEntry> seededQuickGuides = const [],
   String? currentTripIdInitial,
 }) async {
   final journeyRepo = InMemoryJourneyRepository();
   for (final entry in seededJourneys) {
     await journeyRepo.save(entry);
-  }
-  final quickGuideRepo = InMemoryQuickGuideRepository();
-  for (final entry in seededQuickGuides) {
-    await quickGuideRepo.save(entry);
   }
   final tripRepo = InMemoryTripRepository();
   for (final trip in seededTrips) {
@@ -332,7 +281,6 @@ Future<List<Override>> _buildJourneyOverrides({
 
   return [
     journeyRepositoryProvider.overrideWithValue(journeyRepo),
-    quickGuideRepositoryProvider.overrideWithValue(quickGuideRepo),
     tripRepositoryProvider.overrideWithValue(tripRepo),
     if (currentTripIdInitial != null)
       currentTripIdProvider.overrideWith(
@@ -384,5 +332,4 @@ void _thenTripCardIsVisible(String name) {
 
 void _thenOnlyNarrationEntriesRemain() {
   expect(find.byType(TimelineEntry), findsOneWidget);
-  expect(find.byType(QuickGuideTimelineEntry), findsNothing);
 }

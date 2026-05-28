@@ -3,17 +3,8 @@
   "audio_ready": "音訊就緒",
   "current_location": "目前位置",
   "daily_story": {
-    "card_label": "今日故事",
-    "card_cta": "閱讀",
-    "card_loading": "今日故事準備中…",
-    "card_empty_title": "今日故事準備中",
-    "card_empty_cta": "看過去的故事",
-    "detail_title": "今日故事",
     "detail_era_label": "年代",
-    "detail_location_label": "地點",
-    "detail_history_button": "歷史故事",
-    "history_title": "歷史故事",
-    "history_empty": "尚無歷史故事"
+    "detail_location_label": "地點"
   },
   "explore_nearby": "探索周邊",
   "tap_to_start": "點擊以開始 AI 語音導覽",
@@ -60,10 +51,14 @@
     "suggested_retry": "建議 {delay} 後重試"
   },
   "bottom_nav": {
+    "stories": "故事",
     "home": "首頁",
-    "quick_guide": "快速導覽",
     "journey": "歷程",
     "settings": "設定"
+  },
+  "story": {
+    "list_title": "故事",
+    "list_empty": "還沒有故事"
   },
   "journey": {
     "title": "歷程",
@@ -85,7 +80,6 @@
     "search_hint": "搜尋地點或內容...",
     "filter_all": "全部",
     "filter_narration": "語音導覽",
-    "filter_quick_guide": "快速導覽",
     "no_results": "找不到符合的紀錄",
     "view_timeline": "全部時間軸",
     "view_by_trip": "依旅程"
@@ -251,17 +245,6 @@
     "food_market": "在地美食",
     "food_market_description": "夜市、美食街、特色餐廳"
   },
-  "quick_guide": {
-    "title": "快速導覽",
-    "instruction": "拍攝眼前的景色",
-    "instruction_subtitle": "AI 將立即介紹照片中的內容",
-    "take_photo": "拍照",
-    "from_gallery": "從相簿選擇",
-    "analyzing": "AI 正在解讀照片...",
-    "analysis_error": "解讀失敗，請重試",
-    "save_to_journey": "儲存至旅程",
-    "saved": "已儲存到旅程！"
-  },
   "camera": {
     "title": "拍照辨識",
     "instruction": "拍攝景點或美食",
@@ -357,10 +340,6 @@
     "welcome": {
       "title": "歡迎來到 Lorescape",
       "body": "您的 AI 口袋歷史學家，讓每一次的駐足都充滿意義。"
-    },
-    "quick_guide": {
-      "title": "拍照即刻解讀",
-      "body": "遇到感興趣的景點或招牌？拍一張照片，AI 立刻告訴你它背後的故事。"
     },
     "explore": {
       "title": "自由探索身邊的寶藏",
