@@ -11,6 +11,10 @@ generic guidebook blurb.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lorescape_backend.sources.models import SourceBundle
 
 
 LANGUAGE_NAMES: dict[str, str] = {
@@ -157,35 +161,66 @@ def build_story_user_prompt(
     *,
     place_name: str,
     location: str,
-    wikipedia_title: str,
-    wikipedia_extract: str,
+    source_bundle: "SourceBundle",
     hook: StoryHook | None = None,
 ) -> str:
-    """User prompt: feed the LLM the place + wiki extract + optional hook."""
-    lines = [
-        f"Place: {place_name}",
-        f"Location: {location}",
-        f'Source material (English Wikipedia extract for "{wikipedia_title}"):',
-        "<<<",
-        wikipedia_extract,
-        ">>>",
+    """Render the multi-source user prompt for the story call."""
+    lines: list[str] = [f"Place: {place_name}", f"Location: {location}"]
+    if source_bundle.wikidata_id:
+        lines.append(f"Wikidata ID: {source_bundle.wikidata_id}")
+    lines.append("")
+    lines.append(
+        "Source materials (multiple providers; use any/all to ground the story):"
+    )
+
+    zh = _find_extract(source_bundle, "wikipedia_zh")
+    en = _find_extract(source_bundle, "wikipedia_en")
+    facts = _find_extract(source_bundle, "wikidata_facts")
+
+    if zh is not None:
+        lines += [
+            "",
+            f'[1] Chinese Wikipedia extract (zh) — title: "{zh.title}"',
+            "<<<",
+            zh.text,
+            ">>>",
+        ]
+    if en is not None:
+        lines += [
+            "",
+            f'[2] English Wikipedia extract (en) — title: "{en.title}"',
+            "<<<",
+            en.text,
+            ">>>",
+        ]
+    if facts is not None:
+        lines += [
+            "",
+            "[3] Structured facts (Wikidata)",
+            facts.text,
+        ]
+
+    lines += [
+        "",
+        "GROUNDING RULES:",
+        "- Prefer concrete facts (years, named entities, events) from the sources above.",
+        "- If sources are in a different language than the output, translate facts; do NOT invent.",
+        "- Treat structured facts as ground truth even if Wiki extracts are short.",
+        "- If you cannot find at least one named entity (person/year/event) to ground the story, return insufficient_source=true.",
     ]
+
     if hook is not None:
-        lines.extend(
-            [
-                "",
-                "Narrative anchor (you MUST develop this specific thread; "
-                "do not bounce between unrelated topics):",
-                f"- Title: {hook.title}",
-                f"- Teaser: {hook.teaser}",
-            ]
-        )
-    else:
-        lines.extend(
-            [
-                "",
-                "No specific narrative anchor — pick the most evocative "
-                "real-world thread the source can ground.",
-            ]
-        )
+        lines += [
+            "",
+            f"HOOK to expand: {hook.title}",
+            f"Teaser: {hook.teaser}",
+        ]
+
     return "\n".join(lines)
+
+
+def _find_extract(bundle: "SourceBundle", provider: str):
+    for e in bundle.extracts:
+        if e.provider == provider:
+            return e
+    return None

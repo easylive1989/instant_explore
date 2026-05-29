@@ -22,10 +22,20 @@ class StoryHookApiService implements StoryHookService {
     required Place place,
     required Language language,
   }) async {
+    final wikidataId = _extractWikidataId(place.id);
+    if (wikidataId == null) {
+      // Defensive: the Explore flow always emits `wikidata:`-prefixed ids.
+      // Landing here indicates an upstream bug; degrade gracefully with the
+      // same UX as a backend insufficient_source response.
+      throw const AppError(
+        type: NarrationError.insufficientSource,
+        message: '這個景點目前沒有足夠的歷史資料可講故事',
+      );
+    }
     final result = await client.fetchHooks(
       placeName: place.name,
       location: place.address,
-      wikipediaTitle: place.name,
+      wikidataId: wikidataId,
       language: language.code,
     );
     if (result.insufficientSource) {
@@ -36,4 +46,14 @@ class StoryHookApiService implements StoryHookService {
     }
     return result.hooks;
   }
+}
+
+/// Extracts the raw Wikidata Q-id from a `wikidata:`-prefixed place id.
+///
+/// Returns `null` when [placeId] does not carry the expected prefix,
+/// signalling that the caller should degrade gracefully.
+String? _extractWikidataId(String placeId) {
+  const prefix = 'wikidata:';
+  if (!placeId.startsWith(prefix)) return null;
+  return placeId.substring(prefix.length);
 }

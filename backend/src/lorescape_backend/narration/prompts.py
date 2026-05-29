@@ -8,6 +8,11 @@ Two paths share the same story-quality skeleton from
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lorescape_backend.sources.models import SourceBundle
+
 from lorescape_backend.shared.story_prompt import (
     LANGUAGE_NAMES,
     StoryHook,
@@ -60,8 +65,7 @@ def build_narration_user_prompt(
     *,
     place_name: str,
     location: str,
-    wikipedia_title: str,
-    wikipedia_extract: str,
+    source_bundle: "SourceBundle",
     language: str,
     hook: StoryHook | None = None,
 ) -> str:
@@ -69,11 +73,8 @@ def build_narration_user_prompt(
     if language not in LANGUAGE_NAMES:
         raise KeyError(f"Unknown language: {language!r}")
     base = build_story_user_prompt(
-        place_name=place_name,
-        location=location,
-        wikipedia_title=wikipedia_title,
-        wikipedia_extract=wikipedia_extract,
-        hook=hook,
+        place_name=place_name, location=location,
+        source_bundle=source_bundle, hook=hook,
     )
     tail = _zh_tw_output_spec() if language == "zh-TW" else _en_output_spec()
     return base + "\n\n" + tail
@@ -91,7 +92,7 @@ def _en_output_spec() -> str:
         "- place_name: localized place name.\n"
         "- place_location: localized location (country / city).\n"
         "- era: the era your story takes place in.\n"
-        "- insufficient_source: true when the Wikipedia extract is too "
+        "- insufficient_source: true when the provided sources are too "
         "thin to support the story-spine constraints. When true, leave "
         "`paragraphs` as an empty JSON array."
     )
@@ -107,7 +108,7 @@ def _zh_tw_output_spec() -> str:
         "- place_name: 在地化的地名。\n"
         "- place_location: 在地化的位置（國家／城市）。\n"
         "- era: 故事發生的時代。\n"
-        "- insufficient_source: 當 Wikipedia 內容不足以撐起故事骨架時"
+        "- insufficient_source: 當提供的來源內容不足以撐起故事骨架時"
         "回傳 true，此時 `paragraphs` 留空陣列。"
     )
 
@@ -208,16 +209,9 @@ def build_hooks_user_prompt(
     *,
     place_name: str,
     location: str,
-    wikipedia_title: str,
-    wikipedia_extract: str,
+    source_bundle: "SourceBundle",
 ) -> str:
-    return "\n".join(
-        [
-            f"Place: {place_name}",
-            f"Location: {location}",
-            f'Source material (English Wikipedia extract for "{wikipedia_title}"):',
-            "<<<",
-            wikipedia_extract,
-            ">>>",
-        ]
+    return build_story_user_prompt(
+        place_name=place_name, location=location,
+        source_bundle=source_bundle, hook=None,
     )

@@ -14,12 +14,13 @@ void main() {
     test('fetchHooks 解析後端回傳的 hooks 陣列', () async {
       final mockClient = MockClient((request) async {
         expect(request.url.path, '/narration/hooks');
-        expect(jsonDecode(request.body), {
-          'place_name': 'Arles',
-          'location': 'Provence',
-          'wikipedia_title': 'Arles',
-          'language': 'zh-TW',
-        });
+        final body =
+            jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['place_name'], 'Arles');
+        expect(body['location'], 'Provence');
+        expect(body['wikidata_id'], 'Q12345');
+        expect(body['language'], 'zh-TW');
+        expect(body.containsKey('wikipedia_title'), isFalse);
         return http.Response(
           jsonEncode({
             'hooks': [
@@ -41,7 +42,7 @@ void main() {
       final result = await client.fetchHooks(
         placeName: 'Arles',
         location: 'Provence',
-        wikipediaTitle: 'Arles',
+        wikidataId: 'Q12345',
         language: 'zh-TW',
       );
 
@@ -68,7 +69,7 @@ void main() {
       final result = await client.fetchHooks(
         placeName: 'Fake',
         location: '',
-        wikipediaTitle: 'Fake',
+        wikidataId: 'Q99999',
         language: 'zh-TW',
       );
 
@@ -82,6 +83,8 @@ void main() {
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         expect(body['place_name'], 'Arles');
         expect(body['language'], 'zh-TW');
+        expect(body['wikidata_id'], 'Q12345');
+        expect(body.containsKey('wikipedia_title'), isFalse);
         expect(body['hook'], {
           'id': 'h',
           'title': '梵谷',
@@ -111,7 +114,7 @@ void main() {
       final result = await client.fetchNarration(
         placeName: 'Arles',
         location: 'Provence',
-        wikipediaTitle: 'Arles',
+        wikidataId: 'Q12345',
         language: 'zh-TW',
         hook: const StoryHook(id: 'h', title: '梵谷', teaser: '444 天'),
       );
@@ -140,7 +143,7 @@ void main() {
         client.fetchNarration(
           placeName: 'x',
           location: '',
-          wikipediaTitle: 'x',
+          wikidataId: 'Q1',
           language: 'ja',
         ),
         throwsA(isA<AppError>()),
@@ -161,7 +164,7 @@ void main() {
         await client.fetchHooks(
           placeName: 'x',
           location: '',
-          wikipediaTitle: 'x',
+          wikidataId: 'Q1',
           language: 'en',
         );
         fail('expected AppError');
@@ -184,7 +187,7 @@ void main() {
         await client.fetchHooks(
           placeName: 'x',
           location: '',
-          wikipediaTitle: 'x',
+          wikidataId: 'Q1',
           language: 'en',
         );
         fail('expected AppError');
@@ -200,7 +203,7 @@ void main() {
         await client.fetchHooks(
           placeName: 'x',
           location: '',
-          wikipediaTitle: 'x',
+          wikidataId: 'Q1',
           language: 'en',
         );
         fail('expected AppError');
