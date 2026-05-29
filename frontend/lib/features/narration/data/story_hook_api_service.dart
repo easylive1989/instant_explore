@@ -25,7 +25,7 @@ class StoryHookApiService implements StoryHookService {
     final result = await client.fetchHooks(
       placeName: place.name,
       location: place.address,
-      wikipediaTitle: place.name,
+      wikidataId: place.id,
       language: language.code,
     );
     if (result.insufficientSource) {

@@ -54,13 +54,13 @@ class NarrationApiClient {
   Future<HooksApiResult> fetchHooks({
     required String placeName,
     required String location,
-    required String wikipediaTitle,
+    required String wikidataId,
     required String language,
   }) async {
     final body = {
       'place_name': placeName,
       'location': location,
-      'wikipedia_title': wikipediaTitle,
+      'wikidata_id': wikidataId,
       'language': language,
     };
     final data = await _post('/narration/hooks', body);
@@ -84,14 +84,14 @@ class NarrationApiClient {
   Future<NarrationApiResult> fetchNarration({
     required String placeName,
     required String location,
-    required String wikipediaTitle,
+    required String wikidataId,
     required String language,
     StoryHook? hook,
   }) async {
     final body = <String, dynamic>{
       'place_name': placeName,
       'location': location,
-      'wikipedia_title': wikipediaTitle,
+      'wikidata_id': wikidataId,
       'language': language,
       if (hook != null) 'hook': hook.toJson(),
     };

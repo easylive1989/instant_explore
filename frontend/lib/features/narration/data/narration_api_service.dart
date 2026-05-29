@@ -28,7 +28,7 @@ class NarrationApiService implements NarrationService {
     final result = await client.fetchNarration(
       placeName: place.name,
       location: place.address,
-      wikipediaTitle: place.name,
+      wikidataId: place.id,
       language: language.code,
       hook: hook,
     );
