@@ -2,6 +2,29 @@ import pytest
 
 from lorescape_backend.narration import prompts
 from lorescape_backend.shared.story_prompt import StoryHook
+from lorescape_backend.sources.models import SourceBundle, SourceExtract
+
+
+def _bundle_en(extract_text: str, title: str = "Macaron Park") -> SourceBundle:
+    ex = SourceExtract(
+        provider="wikipedia_en", title=title, text=extract_text,
+        char_count=len(extract_text), has_named_entity=True,
+    )
+    return SourceBundle(
+        wikidata_id="Q1", place_name=title,
+        extracts=[ex], total_chars=len(extract_text), is_sufficient=True,
+    )
+
+
+def _bundle_zh(extract_text: str, title: str = "亞爾") -> SourceBundle:
+    ex = SourceExtract(
+        provider="wikipedia_en", title=title, text=extract_text,
+        char_count=len(extract_text), has_named_entity=True,
+    )
+    return SourceBundle(
+        wikidata_id="Q2", place_name=title,
+        extracts=[ex], total_chars=len(extract_text), is_sufficient=True,
+    )
 
 
 # ---------- narration (long-form story) ----------
@@ -44,8 +67,7 @@ def test_narration_user_prompt_includes_place_and_extract():
     prompt = prompts.build_narration_user_prompt(
         place_name="亞爾",
         location="法國普羅旺斯",
-        wikipedia_title="Arles",
-        wikipedia_extract="Built in Roman times...",
+        source_bundle=_bundle_zh("Built in Roman times...", title="Arles"),
         language="zh-TW",
     )
     assert "亞爾" in prompt
@@ -54,14 +76,15 @@ def test_narration_user_prompt_includes_place_and_extract():
     assert "paragraphs" in prompt
     assert "pull_quote" in prompt
     assert "insufficient_source" in prompt
+    # new source-agnostic wording
+    assert "提供的來源內容不足" in prompt
 
 
 def test_narration_user_prompt_with_hook_locks_thread():
     prompt = prompts.build_narration_user_prompt(
         place_name="Arles",
         location="Provence",
-        wikipedia_title="Arles",
-        wikipedia_extract="...",
+        source_bundle=_bundle_en("...", title="Arles"),
         language="en",
         hook=StoryHook(title="Yellow House", teaser="444 days that ended in madness"),
     )
@@ -73,7 +96,7 @@ def test_narration_user_prompt_raises_on_unknown_language():
     with pytest.raises(KeyError):
         prompts.build_narration_user_prompt(
             place_name="X", location="Y",
-            wikipedia_title="X", wikipedia_extract="Z",
+            source_bundle=_bundle_en("Z", title="X"),
             language="ja",
         )
 
@@ -106,11 +129,19 @@ def test_hooks_system_instruction_enforces_fact_boundary():
 
 
 def test_hooks_user_prompt_carries_extract():
+    ex = SourceExtract(
+        provider="wikipedia_en", title="Eiffel Tower",
+        text="Built in 1889...",
+        char_count=len("Built in 1889..."), has_named_entity=True,
+    )
+    bundle = SourceBundle(
+        wikidata_id="Q243", place_name="艾菲爾鐵塔",
+        extracts=[ex], total_chars=len("Built in 1889..."), is_sufficient=True,
+    )
     prompt = prompts.build_hooks_user_prompt(
         place_name="艾菲爾鐵塔",
         location="巴黎",
-        wikipedia_title="Eiffel Tower",
-        wikipedia_extract="Built in 1889...",
+        source_bundle=bundle,
     )
     assert "艾菲爾鐵塔" in prompt
     assert "Built in 1889..." in prompt
