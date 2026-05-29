@@ -118,3 +118,64 @@ def test_post_narration_rejects_unsupported_language():
         },
     )
     assert response.status_code == 400
+
+
+@patch("lorescape_backend.narration.routes.service.generate_narration")
+def test_narration_route_accepts_wikidata_id(gen_narration):
+    gen_narration.return_value = NarrationResponse(
+        place_name="Test",
+        location="Somewhere",
+        era="modern",
+        paragraphs=["a", "a", "a"],
+        pull_quote="x",
+        insufficient_source=False,
+    )
+    client = TestClient(_make_app())
+
+    res = client.post(
+        "/narration",
+        json={
+            "wikidata_id": "Q1",
+            "place_name": "Test",
+            "location": "Somewhere",
+            "language": "en",
+        },
+    )
+    assert res.status_code == 200
+
+
+@patch("lorescape_backend.narration.routes.service.generate_narration")
+def test_narration_route_accepts_legacy_wikipedia_title(gen_narration):
+    gen_narration.return_value = NarrationResponse(
+        place_name="Macaron Park",
+        location="Taoyuan",
+        era="modern",
+        paragraphs=["a", "a", "a"],
+        pull_quote="x",
+        insufficient_source=False,
+    )
+    client = TestClient(_make_app())
+
+    res = client.post(
+        "/narration",
+        json={
+            "wikipedia_title": "Macaron Park",
+            "place_name": "Macaron Park",
+            "location": "Taoyuan",
+            "language": "en",
+        },
+    )
+    assert res.status_code == 200
+
+
+def test_narration_route_400_when_no_identity_provided():
+    client = TestClient(_make_app())
+    res = client.post(
+        "/narration",
+        json={
+            "place_name": "x",
+            "location": "y",
+            "language": "en",
+        },
+    )
+    assert res.status_code in (400, 422)
