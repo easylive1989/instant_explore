@@ -101,14 +101,14 @@ TODAY=$(date -u +%F)
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?publish_date=eq.${TODAY}&select=id,language,place_name,review_state,discord_message_id,threads_summary,hashtags,card_title_ch,card_paragraphs_ch,reviewed_at,published_at,threads_post_id,ig_post_id,publish_error,created_at"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?publish_date=eq.${TODAY}&select=id,language,place_name,review_state,discord_message_id,hashtags,card_title_ch,card_paragraphs_ch,reviewed_at,published_at,ig_post_id,publish_error,created_at"
 ```
 
 Check:
 - Both `en` and `zh-TW` rows exist
 - `review_state` per row (pending / published / rejected / skipped / failed)
 - **Which** row has `discord_message_id` — that's the row the deployed publisher will track. Cross-check with Step 1's deployed commit (see Gotchas).
-- `threads_summary` + `hashtags` populated on whichever row will feed Threads
+- `hashtags` populated on the zh-TW row (feeds IG caption)
 - `card_title_ch` + `card_paragraphs_ch` populated on the zh-TW row (IG card source)
 
 ### Step 4 — Place metadata complete?
@@ -169,10 +169,10 @@ Predict the 21:00 verdict per `discord_review.check_reaction`:
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?or=(review_state.eq.failed,publish_error.not.is.null)&order=publish_date.desc&limit=10&select=publish_date,language,review_state,publish_error,threads_post_id,ig_post_id"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?or=(review_state.eq.failed,publish_error.not.is.null)&order=publish_date.desc&limit=10&select=publish_date,language,review_state,publish_error,ig_post_id"
 ```
 
-`threads_skipped_missing_en_row` / `ig_skipped_missing_card_content` are recoverable design choices, not crashes. Anything else = real failure with traceback in `publish_error`.
+`ig_skipped_missing_card_content` is a recoverable design choice, not a crash. Anything else = real failure with traceback in `publish_error`.
 
 ### Step 8 — Scheduler timezone drift?
 
@@ -217,7 +217,7 @@ curl -s \
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?language=eq.en&order=publish_date.desc&limit=14&select=publish_date,review_state,threads_post_id,ig_post_id,publish_error"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?language=eq.en&order=publish_date.desc&limit=14&select=publish_date,review_state,ig_post_id,publish_error"
 ```
 
 ### Pickable places remaining
