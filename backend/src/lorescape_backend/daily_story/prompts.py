@@ -18,6 +18,7 @@ from lorescape_backend.shared.story_prompt import (
     build_story_system_instruction,
     build_story_user_prompt,
 )
+from lorescape_backend.sources.models import SourceBundle, SourceExtract
 
 
 # Public re-export so callers (`job.py`) keep a stable import surface.
@@ -104,11 +105,29 @@ def build_user_prompt(
     """
     if language not in LANGUAGE_NAMES:
         raise KeyError(f"Unknown language: {language!r}")
+    bundle = SourceBundle(
+        wikidata_id=None,
+        place_name=wikipedia_title,
+        extracts=(
+            [
+                SourceExtract(
+                    provider="wikipedia_en",
+                    title=wikipedia_title,
+                    text=wikipedia_extract,
+                    char_count=len(wikipedia_extract),
+                    has_named_entity=True,
+                )
+            ]
+            if wikipedia_extract
+            else []
+        ),
+        total_chars=len(wikipedia_extract) if wikipedia_extract else 0,
+        is_sufficient=True,
+    )
     base = build_story_user_prompt(
         place_name=wikipedia_title,
         location=wikipedia_title,
-        wikipedia_title=wikipedia_title,
-        wikipedia_extract=wikipedia_extract,
+        source_bundle=bundle,
         hook=None,
     )
     if language == "zh-TW":
