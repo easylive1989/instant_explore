@@ -61,8 +61,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'bottom_nav.stories'.tr(),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: 'bottom_nav.home'.tr(),
+            icon: const Icon(Icons.explore),
+            label: 'bottom_nav.explore'.tr(),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.book),

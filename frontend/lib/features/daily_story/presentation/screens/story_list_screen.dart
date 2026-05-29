@@ -20,8 +20,21 @@ class StoryListScreen extends ConsumerWidget {
     final history = ref.watch(dailyStoryHistoryByLanguageProvider(language));
 
     return Scaffold(
-      appBar: AppBar(title: Text('story.list_title'.tr())),
-      body: _build(context, latest, history),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              child: Text(
+                'story.list_title'.tr(),
+                style: Theme.of(context).textTheme.displayLarge,
+              ),
+            ),
+            Expanded(child: _build(context, latest, history)),
+          ],
+        ),
+      ),
     );
   }
 

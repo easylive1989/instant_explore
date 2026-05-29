@@ -55,12 +55,12 @@ void main() {
     );
 
     testWidgets(
-      'given the story tab is active, when the user selects home, '
+      'given the story tab is active, when the user selects explore, '
       'then the explore tab content is rendered',
       (tester) async {
         await _givenMainScreen(tester);
 
-        await _whenUserSelectsBottomNavItem(tester, 'bottom_nav.home');
+        await _whenUserSelectsBottomNavItem(tester, 'bottom_nav.explore');
 
         _thenExploreTabIsActive();
       },

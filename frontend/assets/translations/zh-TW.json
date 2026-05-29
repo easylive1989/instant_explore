@@ -52,7 +52,7 @@
   },
   "bottom_nav": {
     "stories": "故事",
-    "home": "首頁",
+    "explore": "探索",
     "journey": "歷程",
     "settings": "設定"
   },
@@ -78,8 +78,6 @@
     "replay": "重播",
     "login_required": "登入後即可查看您的旅程記錄",
     "search_hint": "搜尋地點或內容...",
-    "filter_all": "全部",
-    "filter_narration": "語音導覽",
     "no_results": "找不到符合的紀錄",
     "view_timeline": "全部時間軸",
     "view_by_trip": "依旅程"

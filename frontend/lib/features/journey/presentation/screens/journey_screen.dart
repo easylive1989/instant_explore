@@ -148,9 +148,6 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                     : const SizedBox.shrink(),
               ),
 
-            // Filter chips (timeline mode only)
-            if (isTimeline) _FilterChips(),
-
             // Main content
             Expanded(
               child: isTimeline ? _JourneyList() : const _TripGridView(),
@@ -372,79 +369,12 @@ class _TripGridView extends ConsumerWidget {
   }
 }
 
-class _FilterChips extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentFilter = ref.watch(journeyFilterProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
-      child: Row(
-        children: [
-          _buildChip(
-            context: context,
-            label: 'journey.filter_all'.tr(),
-            selected: currentFilter == JourneyFilter.all,
-            colorScheme: colorScheme,
-            onTap: () => ref.read(journeyFilterProvider.notifier).state =
-                JourneyFilter.all,
-          ),
-          const SizedBox(width: 8),
-          _buildChip(
-            context: context,
-            label: 'journey.filter_narration'.tr(),
-            selected: currentFilter == JourneyFilter.narration,
-            colorScheme: colorScheme,
-            onTap: () => ref.read(journeyFilterProvider.notifier).state =
-                JourneyFilter.narration,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required BuildContext context,
-    required String label,
-    required bool selected,
-    required ColorScheme colorScheme,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.primary
-              : colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected
-                ? colorScheme.onPrimary
-                : colorScheme.onSurfaceVariant,
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _JourneyList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncItems = ref.watch(filteredJourneyItemsProvider);
     final query = ref.watch(journeySearchQueryProvider).trim();
-    final filter = ref.watch(journeyFilterProvider);
-    final hasActiveFilter = query.isNotEmpty || filter != JourneyFilter.all;
+    final hasActiveFilter = query.isNotEmpty;
 
     return asyncItems.when(
       data: (items) {

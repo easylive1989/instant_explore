@@ -73,22 +73,6 @@ void main() {
     );
 
     testWidgets(
-      'given narration entries exist, when the user taps the narration filter, '
-      'then narration entries remain visible',
-      (tester) async {
-        final narration = buildJourneyEntry(id: 'n1');
-
-        await _givenJourneyScreen(
-          tester,
-          seededJourneys: [narration],
-        );
-        await _whenUserTapsNarrationFilterChip(tester);
-
-        _thenOnlyNarrationEntriesRemain();
-      },
-    );
-
-    testWidgets(
       'given the search field is open, when the user types a query, '
       'then a clear-search suffix icon is revealed',
       (tester) async {
@@ -309,11 +293,6 @@ Future<void> _whenUserSelectsByTripView(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 20));
 }
 
-Future<void> _whenUserTapsNarrationFilterChip(WidgetTester tester) async {
-  await tester.tap(find.text('journey.filter_narration'));
-  await tester.pump(const Duration(milliseconds: 10));
-}
-
 void _thenNoEntriesStateIsVisible() {
   expect(find.text('journey.no_entries'), findsOneWidget);
 }
@@ -328,8 +307,4 @@ void _thenSearchFieldIsVisible() {
 
 void _thenTripCardIsVisible(String name) {
   expect(find.text(name), findsOneWidget);
-}
-
-void _thenOnlyNarrationEntriesRemain() {
-  expect(find.byType(TimelineEntry), findsOneWidget);
 }

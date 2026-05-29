@@ -33,12 +33,10 @@ JourneyEntry _makeNarration({
 }
 
 /// Creates a [ProviderContainer] with [allJourneyItemsProvider]
-/// overridden with the given items, plus the specified search
-/// query and filter.
+/// overridden with the given items, plus the specified search query.
 ProviderContainer _createContainer({
   required List<JourneyItem> items,
   String query = '',
-  JourneyFilter filter = JourneyFilter.all,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -49,11 +47,7 @@ ProviderContainer _createContainer({
   );
 
   if (query.isNotEmpty) {
-    container.read(journeySearchQueryProvider.notifier).state =
-        query;
-  }
-  if (filter != JourneyFilter.all) {
-    container.read(journeyFilterProvider.notifier).state = filter;
+    container.read(journeySearchQueryProvider.notifier).state = query;
   }
 
   return container;
@@ -68,42 +62,19 @@ void main() {
       id: 'n2',
       placeName: 'Tokyo Tower',
       placeAddress: 'Tokyo, Japan',
-      narrationText:
-          'Tokyo Tower is an iconic landmark in the city.',
+      narrationText: 'Tokyo Tower is an iconic landmark in the city.',
     ),
   );
 
   group('filteredJourneyItemsProvider', () {
-    test('returns all items when no filter or search applied',
-        () async {
-      final container = _createContainer(
-        items: [narration1, narration2],
-      );
+    test('returns all items when no search applied', () async {
+      final container = _createContainer(items: [narration1, narration2]);
 
-      // Wait for async provider to resolve.
       await container.read(allJourneyItemsProvider.future);
 
-      final result =
-          container.read(filteredJourneyItemsProvider);
+      final result = container.read(filteredJourneyItemsProvider);
       final items = result.value!;
       expect(items.length, 2);
-    });
-
-    test('filters by narration type', () async {
-      final container = _createContainer(
-        items: [narration1, narration2],
-        filter: JourneyFilter.narration,
-      );
-
-      await container.read(allJourneyItemsProvider.future);
-
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
-      expect(items.length, 2);
-      expect(
-        items.every((i) => i is NarrationJourneyItem),
-        isTrue,
-      );
     });
 
     test('searches by place name (case-insensitive)', () async {
@@ -114,8 +85,7 @@ void main() {
 
       await container.read(allJourneyItemsProvider.future);
 
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
+      final items = container.read(filteredJourneyItemsProvider).value!;
       expect(items.length, 1);
       expect(items.first.id, 'n1');
     });
@@ -128,29 +98,9 @@ void main() {
 
       await container.read(allJourneyItemsProvider.future);
 
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
+      final items = container.read(filteredJourneyItemsProvider).value!;
       expect(items.length, 1);
       expect(items.first.id, 'n2');
-    });
-
-    test('combines filter and search', () async {
-      // Search "japan" matches both narrations (address).
-      final container = _createContainer(
-        items: [narration1, narration2],
-        query: 'japan',
-        filter: JourneyFilter.narration,
-      );
-
-      await container.read(allJourneyItemsProvider.future);
-
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
-      expect(items.length, 2);
-      expect(
-        items.every((i) => i is NarrationJourneyItem),
-        isTrue,
-      );
     });
 
     test('returns empty list when nothing matches', () async {
@@ -161,8 +111,7 @@ void main() {
 
       await container.read(allJourneyItemsProvider.future);
 
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
+      final items = container.read(filteredJourneyItemsProvider).value!;
       expect(items, isEmpty);
     });
 
@@ -174,8 +123,7 @@ void main() {
 
       await container.read(allJourneyItemsProvider.future);
 
-      final items =
-          container.read(filteredJourneyItemsProvider).value!;
+      final items = container.read(filteredJourneyItemsProvider).value!;
       expect(items.length, 1);
       expect(items.first.id, 'n1');
     });

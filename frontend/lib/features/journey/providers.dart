@@ -4,9 +4,6 @@ import 'package:context_app/features/journey/domain/repositories/journey_reposit
 import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Filter type for the journey list.
-enum JourneyFilter { all, narration }
-
 /// Journey 頁的檢視模式：完整時間軸 或 依旅程分群。
 enum JourneyViewMode { timeline, byTrip }
 
@@ -35,43 +32,21 @@ final journeySearchQueryProvider = StateProvider.autoDispose<String>(
   (ref) => '',
 );
 
-/// Current type filter selected by the user.
-final journeyFilterProvider = StateProvider.autoDispose<JourneyFilter>(
-  (ref) => JourneyFilter.all,
-);
-
 /// Journey 頁當前的檢視模式。
 final journeyViewModeProvider = StateProvider.autoDispose<JourneyViewMode>(
   (ref) => JourneyViewMode.timeline,
 );
 
-/// Items after applying search query and type filter.
+/// Items after applying the search query.
 final filteredJourneyItemsProvider =
     Provider.autoDispose<AsyncValue<List<JourneyItem>>>((ref) {
       final asyncItems = ref.watch(allJourneyItemsProvider);
       final query = ref.watch(journeySearchQueryProvider).trim().toLowerCase();
-      final filter = ref.watch(journeyFilterProvider);
 
       return asyncItems.whenData((items) {
-        var result = items;
-
-        if (filter != JourneyFilter.all) {
-          result = result.where((item) {
-            return switch (filter) {
-              JourneyFilter.narration => item is NarrationJourneyItem,
-              JourneyFilter.all => true,
-            };
-          }).toList();
-        }
-
-        if (query.isNotEmpty) {
-          result = result
-              .where(
-                (item) => item.searchableText.toLowerCase().contains(query),
-              )
-              .toList();
-        }
-
-        return result;
+        if (query.isEmpty) return items;
+        return items
+            .where((item) => item.searchableText.toLowerCase().contains(query))
+            .toList();
       });
     });

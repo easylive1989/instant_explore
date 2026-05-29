@@ -52,7 +52,7 @@
   },
   "bottom_nav": {
     "stories": "Stories",
-    "home": "Home",
+    "explore": "Explore",
     "journey": "Journey",
     "settings": "Settings"
   },
@@ -78,8 +78,6 @@
     "replay": "Replay",
     "login_required": "Sign in to view your journey history",
     "search_hint": "Search places or content...",
-    "filter_all": "All",
-    "filter_narration": "Narration",
     "no_results": "No matching entries found",
     "view_timeline": "Timeline",
     "view_by_trip": "By Trip"
