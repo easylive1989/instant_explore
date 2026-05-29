@@ -21,11 +21,8 @@ def _fake_config() -> Config:
         discord_bot_token=None,
         discord_review_channel_id=None,
         discord_approver_ids=(),
-        threads_user_id=None,
-        threads_access_token=None,
         ig_user_id=None,
         meta_page_access_token=None,
-        brand_handle_threads="",
         brand_handle_ig="",
         cta_text="",
     )

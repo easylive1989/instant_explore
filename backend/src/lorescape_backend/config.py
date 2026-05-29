@@ -23,17 +23,11 @@ class Config:
     discord_review_channel_id: str | None
     discord_approver_ids: tuple[str, ...]
 
-    # Threads (Meta). When access token is missing, Threads publishing is
-    # skipped silently — useful for dry-runs while Meta setup is in progress.
-    threads_user_id: str | None
-    threads_access_token: str | None
-
     # Instagram Business via Meta Graph. When token is missing, IG is skipped.
     ig_user_id: str | None
     meta_page_access_token: str | None
 
     # Branding bits stamped into every published post.
-    brand_handle_threads: str
     brand_handle_ig: str
     cta_text: str
 
@@ -61,11 +55,8 @@ class Config:
             discord_bot_token=optional("DISCORD_BOT_TOKEN"),
             discord_review_channel_id=optional("DISCORD_REVIEW_CHANNEL_ID"),
             discord_approver_ids=approver_ids,
-            threads_user_id=optional("THREADS_USER_ID"),
-            threads_access_token=optional("THREADS_ACCESS_TOKEN"),
             ig_user_id=optional("IG_USER_ID"),
             meta_page_access_token=optional("META_PAGE_ACCESS_TOKEN"),
-            brand_handle_threads=os.environ.get("BRAND_HANDLE_THREADS", ""),
             brand_handle_ig=os.environ.get("BRAND_HANDLE_IG", ""),
             cta_text=os.environ.get("CTA_TEXT", _DEFAULT_CTA_TEXT),
         )
@@ -78,10 +69,6 @@ class Config:
             and self.discord_review_channel_id
             and self.discord_approver_ids
         )
-
-    @property
-    def threads_enabled(self) -> bool:
-        return bool(self.threads_user_id and self.threads_access_token)
 
     @property
     def instagram_enabled(self) -> bool:

@@ -83,7 +83,6 @@ def _fake_generate_story(**_kwargs):
         place_name="羅馬競技場",
         place_location="義大利羅馬",
         era="公元 70-80 年",
-        threads_summary="短摘要",
         hashtags=("history",),
         paragraphs=("長段一", "長段二", "長段三"),
         card_title="血腥的盛宴",

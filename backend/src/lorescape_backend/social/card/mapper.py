@@ -1,7 +1,7 @@
 """Compose CardContent from a joined daily_stories + daily_story_places pair.
 
 Returns None if any field required to render an E0c card is missing. This
-lets the publisher gracefully skip IG while still publishing Threads.
+lets the publisher gracefully skip IG when the card isn't ready.
 """
 from __future__ import annotations
 

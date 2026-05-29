@@ -1,6 +1,6 @@
 """Shared prompt skeleton for landmark stories.
 
-Both `daily_story` (cron-driven IG/Threads post) and `narration`
+Both `daily_story` (cron-driven IG post) and `narration`
 (on-demand App experience) build their LLM prompts on top of this
 skeleton so a single source of truth governs story quality.
 

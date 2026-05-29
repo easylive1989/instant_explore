@@ -21,7 +21,6 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         story="...",
         image_url="https://upload.wikimedia.org/x.jpg",
         wikipedia_url="https://zh.wikipedia.org/wiki/...",
-        threads_summary="短摘",
         hashtags=("rome", "colosseum"),
     )
 
@@ -40,7 +39,6 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         "story": "...",
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
-        "threads_summary": "短摘",
         "hashtags": ["rome", "colosseum"],
         "paragraphs": [],
         "card_title": "",
@@ -73,7 +71,6 @@ def test_insert_story_handles_null_image_url():
             story="...",
             image_url=None,
             wikipedia_url="https://en.wikipedia.org/wiki/X",
-            threads_summary="t",
         ),
     )
 
@@ -98,7 +95,6 @@ def test_insert_story_writes_zh_tw_card_fields_with_paragraphs_as_list():
         story="第一段\n\n第二段\n\n第三段",
         image_url=None,
         wikipedia_url="https://zh.wikipedia.org/wiki/...",
-        threads_summary="短摘",
         hashtags=("paris", "eiffelTower"),
         card_title="討厭鐵塔的文學大師",
         card_title_sub="莫泊桑的「專屬午餐位」",
@@ -141,7 +137,6 @@ def test_insert_story_writes_long_paragraphs_as_list():
             story="...",
             image_url=None,
             wikipedia_url="https://example.org",
-            threads_summary="t",
             paragraphs=("長段一", "長段二", "長段三"),
         ),
     )
@@ -169,7 +164,6 @@ def test_insert_story_writes_en_card_fields_too():
         story="P1\n\nP2\n\nP3",
         image_url=None,
         wikipedia_url="https://en.wikipedia.org/wiki/Eiffel_Tower",
-        threads_summary="t",
         hashtags=("paris", "eiffelTower"),
         card_title="The Writer Who Hated the Tower",
         card_title_sub="Maupassant's lunch spot",

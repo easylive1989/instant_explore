@@ -24,7 +24,6 @@ class GeneratedStory:
     place_name: str
     place_location: str
     era: str
-    threads_summary: str
     hashtags: tuple[str, ...]
     paragraphs: tuple[str, ...]
     card_title: str
@@ -67,7 +66,6 @@ def generate_story(
         place_name=data["place_name"],
         place_location=data["place_location"],
         era=data["era"],
-        threads_summary=data["threads_summary"],
         hashtags=tuple(data["hashtags"]),
         paragraphs=tuple(data["paragraphs"]),
         card_title=data["card_title"],

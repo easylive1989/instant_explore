@@ -63,7 +63,7 @@ def test_send_for_review_uploads_png_then_adds_two_reactions(requests_mock):
     assert b'name="payload_json"' in body
     # The instruction lives in the message content, not as a story preview.
     assert b"React" in body and b"21:00" in body
-    # No leftover story / threads fields from the old text-based flow.
+    # No leftover story fields from the old text-based flow.
     assert b"embeds" not in body
 
     # Reaction calls authenticated as the bot.
