@@ -19,7 +19,7 @@ CARD_FIELDS = {
 
 BASE_FIELDS = {
     "place_name", "place_location", "era",
-    "threads_summary", "hashtags",
+    "hashtags",
 }
 
 STORY_FIELDS = {"paragraphs"}

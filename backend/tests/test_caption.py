@@ -1,11 +1,10 @@
-"""Caption builders for Threads and Instagram."""
+"""Caption builder for Instagram."""
 from __future__ import annotations
 
 from lorescape_backend.social.caption import (
     BRAND_TAGS,
     StoryCopy,
     build_full_caption,
-    build_threads_caption,
 )
 
 
@@ -14,7 +13,6 @@ def _story(**overrides) -> StoryCopy:
         place_name="Colosseum",
         era="70-80 CE",
         story="A long story body. " * 20,  # ~400 chars
-        threads_summary="A punchy summary about the Colosseum.",
         hashtags=("rome", "colosseum", "ancientWonders"),
     )
     base.update(overrides)
@@ -55,35 +53,3 @@ def test_full_caption_under_ig_limit_when_story_is_huge():
         cta_text="Explore more.",
     )
     assert len(out) <= 2200
-
-
-def test_threads_caption_under_500_chars():
-    out = build_threads_caption(
-        story=_story(),
-        brand_handle="@instant_explore",
-        cta_text="Explore more.",
-    )
-    assert len(out) <= 500
-    assert "Colosseum · 70-80 CE" in out
-    assert "punchy summary" in out
-
-
-def test_threads_caption_drops_extras_if_summary_alone_overflows():
-    long_summary = "L" * 480  # leaves no room for header + extras
-    out = build_threads_caption(
-        story=_story(threads_summary=long_summary),
-        brand_handle="@instant_explore",
-        cta_text="Explore more.",
-    )
-    assert len(out) <= 500
-
-
-def test_threads_caption_handles_empty_brand_and_cta():
-    out = build_threads_caption(
-        story=_story(),
-        brand_handle="",
-        cta_text="",
-    )
-    assert len(out) <= 500
-    # Header + summary still there.
-    assert "Colosseum · 70-80 CE" in out

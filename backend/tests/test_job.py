@@ -14,7 +14,6 @@ def _make_story(
     place_name: str = "X",
     place_location: str = "Y",
     era: str = "Z",
-    threads_summary: str = "t",
     hashtags: tuple[str, ...] = (),
     paragraphs: tuple[str, ...] = ("long1", "long2", "long3"),
     card_title: str = "title",
@@ -29,7 +28,6 @@ def _make_story(
         place_name=place_name,
         place_location=place_location,
         era=era,
-        threads_summary=threads_summary,
         hashtags=hashtags,
         paragraphs=paragraphs,
         card_title=card_title,
@@ -76,14 +74,12 @@ def test_run_once_happy_path_calls_each_step(
             place_name="羅馬競技場",
             place_location="義大利羅馬",
             era="公元 70-80 年",
-            threads_summary="中短",
             hashtags=("colosseum",),
         ),
         _make_story(
             place_name="Colosseum",
             place_location="Rome, Italy",
             era="70-80 CE",
-            threads_summary="en short",
             hashtags=("rome", "colosseum"),
         ),
     ]
@@ -206,9 +202,8 @@ def test_run_with_retry_skips_discord_when_no_webhook_configured(
         discord_bot_token=None,
         discord_review_channel_id=None,
         discord_approver_ids=(),
-        threads_user_id=None, threads_access_token=None,
         ig_user_id=None, meta_page_access_token=None,
-        brand_handle_threads="", brand_handle_ig="", cta_text="",
+        brand_handle_ig="", cta_text="",
     )
     run_once_mock.side_effect = RuntimeError("boom")
     with pytest.raises(RuntimeError):
@@ -233,7 +228,6 @@ def _zh_row():
         "place_location": "義大利羅馬",
         "era": "公元 70-80 年",
         "story": "第一段\n\n第二段\n\n第三段",
-        "threads_summary": "中文短摘。",
         "hashtags": ["rome", "colosseum"],
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/羅馬競技場",
@@ -325,7 +319,7 @@ def test_send_today_for_review_renders_card_and_posts_image(
     rendered_card = render.call_args[0][0]
     assert rendered_card.title_ch == "石頭裡的吶喊"
 
-    # Discord receives the PNG bytes — no story / threads text fields.
+    # Discord receives the PNG bytes — no story text fields.
     send.assert_called_once()
     payload = send.call_args.kwargs["payload"]
     assert payload.card_png == b"\x89PNGfake-card"
@@ -419,9 +413,8 @@ def test_send_today_for_review_silently_skips_when_zh_row_missing_and_no_webhook
         discord_bot_token="b",
         discord_review_channel_id="111",
         discord_approver_ids=("222",),
-        threads_user_id=None, threads_access_token=None,
         ig_user_id=None, meta_page_access_token=None,
-        brand_handle_threads="", brand_handle_ig="", cta_text="",
+        brand_handle_ig="", cta_text="",
     )
     client, _, _ = _supabase_with_select_and_update(None)
     create.return_value = client
@@ -447,9 +440,8 @@ def test_send_today_for_review_no_op_when_review_disabled(
         discord_bot_token=None,
         discord_review_channel_id=None,
         discord_approver_ids=(),
-        threads_user_id=None, threads_access_token=None,
         ig_user_id=None, meta_page_access_token=None,
-        brand_handle_threads="", brand_handle_ig="", cta_text="",
+        brand_handle_ig="", cta_text="",
     )
 
     send_today_for_review(disabled, _date(2026, 5, 12))
@@ -521,7 +513,6 @@ def test_run_once_both_languages_join_paragraphs_and_pass_card_fields(
             place_name="艾菲爾鐵塔",
             place_location="巴黎",
             era="十九世紀末",
-            threads_summary="短摘",
             hashtags=("paris", "eiffelTower"),
             card_title="討厭鐵塔的文學大師",
             card_title_sub="莫泊桑的「專屬午餐位」",
@@ -535,7 +526,6 @@ def test_run_once_both_languages_join_paragraphs_and_pass_card_fields(
             place_name="Eiffel Tower",
             place_location="Paris",
             era="Late 19th century",
-            threads_summary="en short",
             hashtags=("paris",),
             card_title="The Writer Who Hated the Tower",
             card_title_sub="Maupassant's lunchtime ritual",

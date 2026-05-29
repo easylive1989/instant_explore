@@ -4,7 +4,7 @@ Hosts:
 - `/health` endpoint (placeholder for monitoring)
 - An APScheduler with two daily jobs at Asia/Taipei:
     09:00 — generate today's story and post it to Discord for review
-    21:00 — read review reactions and publish to Threads / Instagram
+    21:00 — read review reactions and publish to Instagram
 
 Manual CLIs (preserved for back-fill / debugging):
 - `python -m lorescape_backend.daily_story [YYYY-MM-DD]`

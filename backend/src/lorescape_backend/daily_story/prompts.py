@@ -3,7 +3,7 @@
 The story spine + fact-boundary rules live in
 `lorescape_backend.shared.story_prompt`. This module composes those
 core rules with daily-story-specific output requirements (IG card,
-Threads summary, hashtags).
+hashtags).
 
 Output contract:
 - `paragraphs`: long-form 3-paragraph story (200-300 zh chars / 80-130
@@ -35,7 +35,6 @@ _BASE_PROPERTIES: dict = {
     "place_name": {"type": "STRING"},
     "place_location": {"type": "STRING"},
     "era": {"type": "STRING"},
-    "threads_summary": {"type": "STRING"},
     "hashtags": {
         "type": "ARRAY",
         "items": {"type": "STRING"},
@@ -44,7 +43,7 @@ _BASE_PROPERTIES: dict = {
 
 _BASE_REQUIRED = [
     "place_name", "place_location", "era",
-    "threads_summary", "hashtags",
+    "hashtags",
 ]
 
 _STORY_PROPERTIES: dict = {
@@ -147,9 +146,6 @@ def _en_output_spec() -> str:
         "first character must be a concrete noun or proper name (it "
         "will be rendered as a large drop-cap); avoid starting with "
         '"The", "A", "An", "In", "On", "At", "It", "This", "That".\n'
-        "- threads_summary: a punchier 300-400 character version of the "
-        "story ending on a hook or open question. Total must fit under "
-        "500 characters — it will be posted as a single Threads post.\n"
         "- hashtags: 3-5 lowerCamelCase ASCII tags (no '#' prefix) drawn "
         "from the country, era, and theme.\n"
         "- card_title: a punchy English main title capturing the central "
@@ -181,9 +177,6 @@ def _zh_tw_output_spec() -> str:
         "`paragraphs` 相同，只是壓縮。第一個字必須是具體名詞或人名"
         "（會被放大成 drop-cap），避免以「在」「當」「這」「那」"
         "等虛詞開頭。\n"
-        "- threads_summary: 同一故事的 300-400 字精簡版本，以鉤子或"
-        "開放問題收尾。整體長度需在 500 字以內，將以單則 Threads "
-        "貼文發出。\n"
         "- hashtags: 3-5 個 lowerCamelCase ASCII 標籤（不含 '#'），"
         "取自國家、時代、主題。\n"
         "- card_title: 精煉的繁體中文主標，抓住故事的核心張力"

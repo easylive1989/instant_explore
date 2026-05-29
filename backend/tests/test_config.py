@@ -28,11 +28,8 @@ def test_from_env_optionals_default_to_none_or_empty(monkeypatch):
     monkeypatch.delenv("DISCORD_BOT_TOKEN", raising=False)
     monkeypatch.delenv("DISCORD_REVIEW_CHANNEL_ID", raising=False)
     monkeypatch.delenv("DISCORD_APPROVER_IDS", raising=False)
-    monkeypatch.delenv("THREADS_USER_ID", raising=False)
-    monkeypatch.delenv("THREADS_ACCESS_TOKEN", raising=False)
     monkeypatch.delenv("IG_USER_ID", raising=False)
     monkeypatch.delenv("META_PAGE_ACCESS_TOKEN", raising=False)
-    monkeypatch.delenv("BRAND_HANDLE_THREADS", raising=False)
     monkeypatch.delenv("BRAND_HANDLE_IG", raising=False)
 
     config = Config.from_env()
@@ -40,11 +37,8 @@ def test_from_env_optionals_default_to_none_or_empty(monkeypatch):
     assert config.discord_bot_token is None
     assert config.discord_review_channel_id is None
     assert config.discord_approver_ids == ()
-    assert config.threads_user_id is None
-    assert config.threads_access_token is None
     assert config.ig_user_id is None
     assert config.meta_page_access_token is None
-    assert config.brand_handle_threads == ""
     assert config.brand_handle_ig == ""
     # CTA defaults to a non-empty branded sentence.
     assert config.cta_text
@@ -67,18 +61,14 @@ def test_review_enabled_requires_all_three(monkeypatch):
     assert Config.from_env().review_enabled is False
 
 
-def test_threads_and_instagram_enabled_flags(monkeypatch):
+def test_instagram_enabled_flag(monkeypatch):
     _baseline_env(monkeypatch)
     config = Config.from_env()
-    assert config.threads_enabled is False
     assert config.instagram_enabled is False
 
-    monkeypatch.setenv("THREADS_USER_ID", "u")
-    monkeypatch.setenv("THREADS_ACCESS_TOKEN", "t")
     monkeypatch.setenv("IG_USER_ID", "i")
     monkeypatch.setenv("META_PAGE_ACCESS_TOKEN", "p")
     config = Config.from_env()
-    assert config.threads_enabled is True
     assert config.instagram_enabled is True
 
 

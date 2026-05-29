@@ -1,6 +1,8 @@
 # Social Publisher Setup Guide
 
-自動發文系統的設定記錄，包含 Meta（Instagram + Threads）API 的取得流程、已完成項目，以及接手人員需要繼續完成的步驟。
+自動發文系統的設定記錄，包含 Instagram API 的取得流程、已完成項目，以及接手人員需要繼續完成的步驟。
+
+> 註：Threads 發文管線已於 2026-05-29 移除（commit refactor/remove-threads-publishing），目前 publisher 只處理 Instagram。若日後恢復 Threads，可參考 git 歷史中對應的 `social/threads.py`、Threads token helper 與 `THREADS_*` 環境變數。
 
 ---
 
@@ -9,16 +11,12 @@
 後端（`backend/`）有一個排程發文系統：
 - 每日由 APScheduler cron job 觸發
 - 從 Supabase 取出待發文的 story
-- 透過 Discord bot 確認（人工 ✅/❌ 審核）後，自動發佈到 Threads 和 Instagram
+- 透過 Discord bot 確認（人工 ✅/❌ 審核）後，自動發佈到 Instagram
 - 相關程式碼位於 `backend/src/lorescape_backend/social/`
 
 ### 需要填入 `backend/.env` 的金鑰
 
 ```dotenv
-# ── Threads (Meta) ────────────────────────────────────────────────────────────
-THREADS_USER_ID=           # love.lorescape 帳號的 Threads User ID（數字）
-THREADS_ACCESS_TOKEN=      # 長效存取 token（60 天有效）
-
 # ── Instagram Business via Meta Graph API ─────────────────────────────────────
 IG_USER_ID=                # IG Business Account ID（數字）
 META_PAGE_ACCESS_TOKEN=    # Facebook Page 長效存取 token（永久有效）
@@ -46,7 +44,6 @@ DISCORD_APPROVER_IDS=
 
 ### 已啟用的 Use Cases
 
-- ✅ 存取 Threads API
 - ✅ 管理 Instagram 的訊息和內容
 - ✅ 管理粉絲專頁的所有內容
 
@@ -56,75 +53,26 @@ DISCORD_APPROVER_IDS=
 
 ### 1. `backend/.env.example` 更新
 
-已加入所有社群發文所需的環境變數（Threads、Instagram、Discord review bot、品牌 handle）。
+已加入所有社群發文所需的環境變數（Instagram、Discord review bot、品牌 handle）。
 
 ### 2. `scripts/meta_token_helper.py` 建立
 
-互動式 token 換發工具，支援：
+互動式 token 換發工具：
 
 ```bash
 # Instagram（取得 IG_USER_ID + META_PAGE_ACCESS_TOKEN）
 python scripts/meta_token_helper.py --platform instagram
-
-# Threads（取得 THREADS_USER_ID + THREADS_ACCESS_TOKEN）
-python scripts/meta_token_helper.py --platform threads
-
-# 刷新即將到期的 Threads token
-python scripts/meta_token_helper.py --platform threads --refresh
 ```
 
 ### 3. Meta App 建立與 Use Case 設定
 
 - 在 Meta Developer Console 建立了「Lorescape」App
-- 新增 Threads API、Instagram API、Facebook Pages 三個 use case
-- 已在 `backend/src/lorescape_backend/social/` 實作 Threads 和 Instagram 的發文邏輯
+- 新增 Instagram API、Facebook Pages 兩個 use case
+- 已在 `backend/src/lorescape_backend/social/` 實作 Instagram 的發文邏輯
 
 ---
 
 ## 尚未完成的項目
-
-### ❌ Threads Token（優先級：中）
-
-**問題描述：** Threads 的 User Token Generator 需要測試帳號先接受 app 邀請，但 `love.lorescape` 帳號在 Threads app 中接受邀請後，Meta 後端仍回傳 `error_code: 1349245`（user has not accepted invite）。
-
-**目前狀態：**
-- `love.lorescape` 已加為 Threads 測試人員（App Roles 頁可看到）
-- 邀請在 Threads app 的 Apps and Websites → Invites 頁面仍停留在 Invites tab，未移到 Active
-
-**接手步驟：**
-
-1. 前往 https://developers.facebook.com/apps/1635287081082476/roles/roles/
-2. 切到「Threads 測試人員」tab，確認 `love.lorescape` 狀態
-3. 如果還是 pending，嘗試移除再重新加一次，然後立刻到 Threads app 接受邀請
-4. 接受後立刻前往 https://developers.facebook.com/apps/1635287081082476/use_cases/customize/settings/?use_case_enum=THREADS_API&business_id=2469452706849983&selected_tab=settings&product_route=threads-api
-5. 在頁面底部「用戶權杖產生器」點擊「產生存取權杖」
-6. 授權完成後取得短效 token，執行以下指令換成長效 token：
-
-```bash
-cd /path/to/instant_explore
-python scripts/meta_token_helper.py --platform threads
-```
-
-或手動執行：
-
-```bash
-# 短效 → 長效（把 SHORT_TOKEN 替換成實際 token）
-curl -X GET "https://graph.threads.net/v1.0/access_token" \
-  -d "grant_type=th_exchange_token" \
-  -d "client_secret=APP_SECRET" \
-  -d "access_token=SHORT_TOKEN"
-```
-
-7. 將結果填入 `backend/.env`：
-   ```
-   THREADS_USER_ID=<user_id from token exchange>
-   THREADS_ACCESS_TOKEN=<long_lived_token>
-   ```
-
-> ⚠️ Threads token 60 天後過期，需定期刷新：
-> `python scripts/meta_token_helper.py --platform threads --refresh`
-
----
 
 ### ❌ Instagram Token（優先級：高）
 
@@ -193,7 +141,6 @@ META_PAGE_ACCESS_TOKEN=<長字串>
 
 - `instagram_content_publish`
 - `pages_manage_posts`
-- `threads_content_publish`
 
 申請前需要：
 1. 提供隱私政策 URL
@@ -207,7 +154,7 @@ META_PAGE_ACCESS_TOKEN=<長字串>
 | 檔案 | 說明 |
 |------|------|
 | `backend/.env.example` | 所有環境變數範本 |
-| `scripts/meta_token_helper.py` | Meta/Threads token 互動換發工具 |
-| `backend/src/lorescape_backend/social/threads.py` | Threads 發文邏輯 |
+| `scripts/meta_token_helper.py` | Meta token 互動換發工具 |
 | `backend/src/lorescape_backend/social/instagram.py` | Instagram 發文邏輯 |
-| `backend/src/lorescape_backend/config.py` | 設定載入（含 threads_enabled / instagram_enabled 判斷）|
+| `backend/src/lorescape_backend/social/publisher.py` | 21:00 publish job orchestrator |
+| `backend/src/lorescape_backend/config.py` | 設定載入（含 instagram_enabled 判斷）|

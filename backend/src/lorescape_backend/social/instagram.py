@@ -1,6 +1,6 @@
 """Instagram Business publishing via the Meta Graph API.
 
-Two-step pattern matching Threads: create a media container, then publish.
+Two-step pattern: create a media container, then publish.
 The IG Business account must be linked to a Facebook Page, and the access
 token must be a long-lived Page access token with `instagram_content_publish`.
 

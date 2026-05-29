@@ -4,7 +4,7 @@ VPS backend for Lorescape:
 - **Daily story scheduler** — APScheduler inside the FastAPI container fires
   two jobs every day, both in Asia/Taipei:
   - `09:00` — generate the day's story and post it to Discord for review
-  - `21:00` — read the Discord ✅/❌ reactions and publish to Threads / IG
+  - `21:00` — read the Discord ✅/❌ reactions and publish to IG
   No host-side cron.
 - **FastAPI app** — currently exposes `/health`; placeholder for future APIs.
 
@@ -62,8 +62,7 @@ cd /opt/lorescape/backend
 #                             GEMINI_API_KEY
 #   Required for review flow: DISCORD_BOT_TOKEN, DISCORD_REVIEW_CHANNEL_ID,
 #                             DISCORD_APPROVER_IDS
-#   Required for publishing:  THREADS_USER_ID, THREADS_ACCESS_TOKEN,
-#                             IG_USER_ID, META_PAGE_ACCESS_TOKEN
+#   Required for publishing:  IG_USER_ID, META_PAGE_ACCESS_TOKEN
 #   Optional failure alerts:  DISCORD_WEBHOOK_URL
 # Missing any "required for review/publish" key silently degrades that stage.
 cp .env.example .env

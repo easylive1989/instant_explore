@@ -16,7 +16,6 @@ class StoryRow:
     story: str
     image_url: str | None
     wikipedia_url: str
-    threads_summary: str
     hashtags: tuple[str, ...] = field(default_factory=tuple)
     # Long-form 3-paragraph narration used by App story view & TTS.
     paragraphs: tuple[str, ...] = field(default_factory=tuple)

@@ -138,7 +138,6 @@ def _row_content_empty(row: dict[str, Any]) -> dict[str, bool]:
         "card_pull_quote_attrib": not (
             row.get("card_pull_quote_attrib") or ""
         ).strip(),
-        "threads_summary": not (row.get("threads_summary") or "").strip(),
         "hashtags": not (row.get("hashtags") or []),
     }
 
@@ -353,7 +352,7 @@ def check_recent_failures(
         supabase.table("daily_stories")
         .select(
             "publish_date,language,review_state,publish_error,"
-            "threads_post_id,ig_post_id"
+            "ig_post_id"
         )
         .or_("review_state.eq.failed,publish_error.not.is.null")
         .gte("publish_date", cutoff.isoformat())
@@ -372,9 +371,7 @@ def check_recent_failures(
     real_failures = [r for r in rows if r.get("review_state") == "failed"]
     skip_signals = [
         r for r in rows
-        if (r.get("publish_error") or "").startswith((
-            "threads_skipped_", "ig_skipped_",
-        ))
+        if (r.get("publish_error") or "").startswith("ig_skipped_")
     ]
     sev: Severity = "warn" if real_failures else "info"
     report.findings.append(Finding(

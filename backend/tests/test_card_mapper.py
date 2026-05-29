@@ -17,7 +17,6 @@ def _zh_tw_row(**overrides) -> dict:
         "story": "第一段\n\n第二段\n\n第三段",
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
-        "threads_summary": "短摘",
         "hashtags": ["paris", "eiffelTower"],
         "card_title": "討厭鐵塔的文學大師",
         "card_title_sub": "莫泊桑的「專屬午餐位」",

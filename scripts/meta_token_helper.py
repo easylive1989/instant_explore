@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-"""Meta / Threads token helper for the Lorescape social publisher.
+"""Meta token helper for the Lorescape social publisher.
 
 Run this script once to exchange a short-lived token for the long-lived
-tokens needed by the automated posting system, then paste the values into
-backend/.env.
+tokens needed by the automated Instagram posting system, then paste the
+values into backend/.env.
 
 Usage
 -----
   # Instagram (Facebook Page + IG Business)
   python scripts/meta_token_helper.py --platform instagram
-
-  # Threads
-  python scripts/meta_token_helper.py --platform threads
 
 The script walks you through each step interactively and prints the exact
 env-var lines to copy into backend/.env at the end.
@@ -28,17 +25,11 @@ Reference
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import sys
 import textwrap
 import webbrowser
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import urlopen
 
 GRAPH_API = "https://graph.facebook.com/v21.0"
-THREADS_API = "https://graph.threads.net/v1.0"
 
 
 # ── shared helpers ────────────────────────────────────────────────────────────
@@ -78,7 +69,7 @@ def _env_block(pairs: list[tuple[str, str]]) -> None:
 def instagram_flow() -> None:
     """Exchange a short-lived token → long-lived user token → Page token,
     then resolve the IG Business Account ID."""
-    import requests  # noqa: PLC0415 — lazy import keeps --refresh dep-free
+    import requests  # noqa: PLC0415
 
     print(textwrap.dedent("""
     ┌─────────────────────────────────────────────────────┐
@@ -191,184 +182,6 @@ def instagram_flow() -> None:
     """))
 
 
-# ── Threads flow ───────────────────────────────────────────────────────────────
-
-def threads_flow() -> None:
-    """Walk through the Threads OAuth flow to obtain a long-lived token."""
-    import requests  # noqa: PLC0415
-
-    print(textwrap.dedent("""
-    ┌─────────────────────────────────────────────────────┐
-    │  Threads API — token setup                          │
-    └─────────────────────────────────────────────────────┘
-
-    Before you start, make sure:
-      • Your Meta Developer App has the Threads API product added
-      • OAuth Redirect URI is set (you can use https://localhost/ for now)
-      (See scripts/social_publisher_setup/README.md §4)
-    """))
-
-    _step(1, "App credentials")
-    print("  Find these in https://developers.facebook.com/apps → your app → Settings → Basic")
-    app_id = _prompt("App ID")
-    app_secret = _prompt("App Secret", secret=True)
-    redirect_uri = _prompt("OAuth Redirect URI (e.g. https://localhost/)")
-
-    _step(2, "Open Threads OAuth URL in browser")
-    oauth_url = (
-        f"https://threads.net/oauth/authorize"
-        f"?client_id={app_id}"
-        f"&redirect_uri={redirect_uri}"
-        f"&scope=threads_basic,threads_content_publish"
-        f"&response_type=code"
-    )
-    print(f"\n  Opening: {oauth_url}\n")
-    _open_browser(oauth_url)
-    print("  After authorising, your browser will redirect to something like:")
-    print("    https://localhost/?code=AQXXX...#_")
-    print("  Copy only the CODE part (everything between ?code= and #_)\n")
-    auth_code = _prompt("Paste the authorization code here", secret=True)
-    # Strip trailing '#_' if user copied it
-    auth_code = auth_code.split("#")[0].strip()
-
-    _step(3, "Exchange code → short-lived Threads token")
-    resp = requests.post(
-        "https://graph.threads.net/oauth/access_token",
-        data={
-            "client_id": app_id,
-            "client_secret": app_secret,
-            "grant_type": "authorization_code",
-            "redirect_uri": redirect_uri,
-            "code": auth_code,
-        },
-        timeout=30,
-    )
-    _raise_for_status(resp, "exchange code → short-lived Threads token")
-    data = resp.json()
-    short_token = data["access_token"]
-    threads_user_id = str(data["user_id"])
-    _success("Threads User ID", threads_user_id)
-    _success("Short-lived token obtained", short_token[:20] + "…")
-
-    _step(4, "Exchange → long-lived Threads token (valid 60 days)")
-    resp = requests.get(
-        f"{THREADS_API}/access_token",
-        params={
-            "grant_type": "th_exchange_token",
-            "client_secret": app_secret,
-            "access_token": short_token,
-        },
-        timeout=30,
-    )
-    _raise_for_status(resp, "exchange short→long-lived Threads token")
-    long_token = resp.json()["access_token"]
-    _success("Long-lived Threads token obtained", long_token[:20] + "…")
-
-    _env_block([
-        ("THREADS_USER_ID", threads_user_id),
-        ("THREADS_ACCESS_TOKEN", long_token),
-    ])
-
-    print(textwrap.dedent("""
-  ⚠️  Threads tokens expire after 60 days.
-      Set a calendar reminder (or schedule a cron) to refresh before expiry.
-      To refresh a non-expired token at any time:
-
-        python scripts/meta_token_helper.py --platform threads --refresh
-
-      Non-interactive mode (for cron):
-
-        THREADS_ACCESS_TOKEN=<current_token> python scripts/meta_token_helper.py \\
-          --platform threads --refresh --write-env backend/.env
-    """))
-
-
-def refresh_threads_token(write_env: str | None = None) -> None:
-    """Refresh a still-valid long-lived Threads token.
-
-    Non-interactive mode is triggered by either setting the
-    ``THREADS_ACCESS_TOKEN`` environment variable, or passing ``--write-env``;
-    in that case prompts are skipped so the script is cron-safe.
-
-    When ``write_env`` is given the matching .env file is rewritten in place
-    so the new token takes effect after the consuming service restarts.
-    """
-    _step(1, "Refresh long-lived Threads token")
-
-    current_token = os.environ.get("THREADS_ACCESS_TOKEN")
-    if current_token:
-        print("  Using THREADS_ACCESS_TOKEN from environment.")
-    else:
-        current_token = _prompt(
-            "Current long-lived Threads access token", secret=True,
-        )
-
-    new_token = _http_get_json(
-        f"{THREADS_API}/refresh_access_token",
-        {
-            "grant_type": "th_refresh_token",
-            "access_token": current_token,
-        },
-        context="refresh Threads token",
-    )["access_token"]
-    _success("Refreshed token", new_token[:20] + "…")
-
-    if write_env:
-        _rewrite_env_value(write_env, "THREADS_ACCESS_TOKEN", new_token)
-        print(f"\n  ✏️   Updated {write_env}: THREADS_ACCESS_TOKEN")
-    else:
-        print("\n  Update backend/.env:")
-        print(f"  THREADS_ACCESS_TOKEN={new_token}\n")
-
-
-def _http_get_json(url: str, params: dict, context: str) -> dict:
-    """Issue an HTTPS GET and return parsed JSON. stdlib-only."""
-    full_url = f"{url}?{urlencode(params)}"
-    try:
-        with urlopen(full_url, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        print(f"\n  ❌  API error during: {context}")
-        print(f"      Status: {exc.code}")
-        print(f"      Body:   {body}")
-        sys.exit(1)
-    except URLError as exc:
-        print(f"\n  ❌  Network error during: {context}")
-        print(f"      {exc.reason}")
-        sys.exit(1)
-
-
-def _rewrite_env_value(path: str, key: str, value: str) -> None:
-    """Replace ``key=...`` line in a .env file, atomically.
-
-    If the key is missing it is appended. Other lines, including comments and
-    blank lines, are preserved verbatim.
-    """
-    try:
-        with open(path, encoding="utf-8") as f:
-            lines = f.readlines()
-    except FileNotFoundError:
-        _die(f"--write-env target not found: {path}")
-
-    prefix = f"{key}="
-    replaced = False
-    for i, line in enumerate(lines):
-        if line.lstrip().startswith(prefix):
-            lines[i] = f"{key}={value}\n"
-            replaced = True
-            break
-    if not replaced:
-        if lines and not lines[-1].endswith("\n"):
-            lines[-1] += "\n"
-        lines.append(f"{key}={value}\n")
-
-    tmp_path = f"{path}.tmp"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        f.writelines(lines)
-    os.replace(tmp_path, path)
-
-
 # ── utilities ─────────────────────────────────────────────────────────────────
 
 def _open_browser(url: str) -> None:
@@ -378,7 +191,7 @@ def _open_browser(url: str) -> None:
         pass
 
 
-def _raise_for_status(resp: requests.Response, context: str) -> None:
+def _raise_for_status(resp, context: str) -> None:
     if not resp.ok:
         print(f"\n  ❌  API error during: {context}")
         print(f"      Status: {resp.status_code}")
@@ -398,43 +211,23 @@ def _die(message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Meta / Threads token helper for Lorescape social publisher",
+        description="Meta token helper for Lorescape social publisher",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""
         Examples:
           python scripts/meta_token_helper.py --platform instagram
-          python scripts/meta_token_helper.py --platform threads
-          python scripts/meta_token_helper.py --platform threads --refresh
         """),
     )
     parser.add_argument(
         "--platform",
-        choices=["instagram", "threads"],
+        choices=["instagram"],
         required=True,
         help="Which platform to set up",
-    )
-    parser.add_argument(
-        "--refresh",
-        action="store_true",
-        help="Refresh an existing long-lived Threads token (threads only)",
-    )
-    parser.add_argument(
-        "--write-env",
-        metavar="PATH",
-        help=(
-            "Path to a .env file to update in place with the new "
-            "THREADS_ACCESS_TOKEN (use with --refresh for cron mode)."
-        ),
     )
     args = parser.parse_args()
 
     if args.platform == "instagram":
         instagram_flow()
-    elif args.platform == "threads":
-        if args.refresh:
-            refresh_threads_token(write_env=args.write_env)
-        else:
-            threads_flow()
 
 
 if __name__ == "__main__":

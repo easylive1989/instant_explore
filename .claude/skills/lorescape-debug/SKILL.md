@@ -1,6 +1,6 @@
 ---
 name: lorescape-debug
-description: Use when debugging the Lorescape daily-story pipeline — diagnosing today's review/publish state, why a Threads/IG post didn't go out, scheduler or timezone drift, what commit is deployed on the VPS, mismatches between Supabase rows and the Discord review message, or inspecting sync tables (journey_entries / quick_guide_entries / trips / saved_locations). Strictly read-only.
+description: Use when debugging the Lorescape daily-story pipeline — diagnosing today's review/publish state, why an IG post didn't go out, scheduler or timezone drift, what commit is deployed on the VPS, mismatches between Supabase rows and the Discord review message, or inspecting sync tables (journey_entries / quick_guide_entries / trips / saved_locations). Strictly read-only.
 ---
 
 # Lorescape Debug (production)

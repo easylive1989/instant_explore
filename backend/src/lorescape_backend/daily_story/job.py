@@ -79,7 +79,6 @@ def run_once(config: Config, target_date: date) -> None:
                 story=story_text,
                 image_url=summary.image_url,
                 wikipedia_url=wiki_url,
-                threads_summary=story.threads_summary,
                 hashtags=story.hashtags,
                 paragraphs=story.paragraphs,
                 card_title=story.card_title,
