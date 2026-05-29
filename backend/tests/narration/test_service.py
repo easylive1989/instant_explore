@@ -2,21 +2,49 @@ from unittest.mock import patch
 
 import pytest
 
-from lorescape_backend.narration import service
+from lorescape_backend.narration import service as narration_service
 from lorescape_backend.narration.models import (
     HookItem,
     HooksRequest,
     NarrationRequest,
 )
+from lorescape_backend.sources.models import SourceBundle, SourceExtract
 
 
 _INTRO_EXTRACT = "Roman colony; Van Gogh painted here in 1888."
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _sufficient_bundle() -> SourceBundle:
+    extract_text = "马卡龙公园是位于桃园市的主题公园，建于2020年。" * 10
+    return SourceBundle(
+        wikidata_id="Q108234567", place_name="馬卡龍公園",
+        extracts=[SourceExtract(
+            provider="wikipedia_zh", title="馬卡龍公園", text=extract_text,
+            char_count=len(extract_text), has_named_entity=True,
+        )],
+        total_chars=len(extract_text), is_sufficient=True,
+    )
+
+
+def _insufficient_bundle() -> SourceBundle:
+    return SourceBundle(
+        wikidata_id="Q1", place_name="x", extracts=[],
+        total_chars=0, is_sufficient=False,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Pre-existing tests (updated to stub legacy_single_source_bundle)
+# ---------------------------------------------------------------------------
+
+@patch("lorescape_backend.narration.service.legacy_single_source_bundle")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
-def test_generate_hooks_returns_parsed_hooks(gen_mock, fetch_mock):
-    fetch_mock.return_value = _INTRO_EXTRACT
+def test_generate_hooks_returns_parsed_hooks(gen_mock, bundle_mock):
+    bundle_mock.return_value = _sufficient_bundle()
     gen_mock.return_value = {
         "hooks": [
             {"id": "h1", "title": "T1", "teaser": "Te1"},
@@ -25,7 +53,7 @@ def test_generate_hooks_returns_parsed_hooks(gen_mock, fetch_mock):
         "insufficient_source": False,
     }
 
-    result = service.generate_hooks(
+    result = narration_service.generate_hooks(
         api_key="K",
         request=HooksRequest(
             place_name="Arles",
@@ -38,16 +66,16 @@ def test_generate_hooks_returns_parsed_hooks(gen_mock, fetch_mock):
     assert len(result.hooks) == 2
     assert result.hooks[0].id == "h1"
     assert result.insufficient_source is False
-    fetch_mock.assert_called_once_with("Arles")
+    bundle_mock.assert_called_once_with(title="Arles")
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.narration.service.legacy_single_source_bundle")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
-def test_generate_hooks_handles_insufficient_source(gen_mock, fetch_mock):
-    fetch_mock.return_value = _INTRO_EXTRACT
+def test_generate_hooks_handles_insufficient_source(gen_mock, bundle_mock):
+    bundle_mock.return_value = _insufficient_bundle()
     gen_mock.return_value = {"hooks": [], "insufficient_source": True}
 
-    result = service.generate_hooks(
+    result = narration_service.generate_hooks(
         api_key="K",
         request=HooksRequest(
             place_name="x", wikipedia_title="x", language="en",
@@ -59,8 +87,8 @@ def test_generate_hooks_handles_insufficient_source(gen_mock, fetch_mock):
 
 
 def test_generate_hooks_rejects_unsupported_language():
-    with pytest.raises(service.UnsupportedLanguageError):
-        service.generate_hooks(
+    with pytest.raises(narration_service.UnsupportedLanguageError):
+        narration_service.generate_hooks(
             api_key="K",
             request=HooksRequest(
                 place_name="x", wikipedia_title="x", language="ja",
@@ -68,10 +96,10 @@ def test_generate_hooks_rejects_unsupported_language():
         )
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.narration.service.legacy_single_source_bundle")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
-def test_generate_narration_returns_parsed_response(gen_mock, fetch_mock):
-    fetch_mock.return_value = _INTRO_EXTRACT
+def test_generate_narration_returns_parsed_response(gen_mock, bundle_mock):
+    bundle_mock.return_value = _sufficient_bundle()
     gen_mock.return_value = {
         "place_name": "亞爾",
         "place_location": "法國普羅旺斯",
@@ -81,7 +109,7 @@ def test_generate_narration_returns_parsed_response(gen_mock, fetch_mock):
         "insufficient_source": False,
     }
 
-    result = service.generate_narration(
+    result = narration_service.generate_narration(
         api_key="K",
         request=NarrationRequest(
             place_name="Arles",
@@ -97,17 +125,17 @@ def test_generate_narration_returns_parsed_response(gen_mock, fetch_mock):
     assert result.paragraphs == ["一", "二", "三"]
     assert result.pull_quote == "「我看見麥田」"
     assert result.insufficient_source is False
-    fetch_mock.assert_called_once_with("Arles")
+    bundle_mock.assert_called_once_with(title="Arles")
     # Hook content should reach the LLM via the user prompt
     call_kwargs = gen_mock.call_args.kwargs
     assert "梵谷的黃色小屋" in call_kwargs["user_prompt"]
     assert "444 天的悲劇" in call_kwargs["user_prompt"]
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.narration.service.legacy_single_source_bundle")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
-def test_generate_narration_without_hook_invites_self_pick(gen_mock, fetch_mock):
-    fetch_mock.return_value = _INTRO_EXTRACT
+def test_generate_narration_without_hook_invites_self_pick(gen_mock, bundle_mock):
+    bundle_mock.return_value = _sufficient_bundle()
     gen_mock.return_value = {
         "place_name": "Arles",
         "place_location": "Provence",
@@ -117,7 +145,7 @@ def test_generate_narration_without_hook_invites_self_pick(gen_mock, fetch_mock)
         "insufficient_source": False,
     }
 
-    service.generate_narration(
+    narration_service.generate_narration(
         api_key="K",
         request=NarrationRequest(
             place_name="Arles", wikipedia_title="Arles", language="en",
@@ -125,18 +153,19 @@ def test_generate_narration_without_hook_invites_self_pick(gen_mock, fetch_mock)
     )
 
     call_kwargs = gen_mock.call_args.kwargs
-    assert "No specific narrative anchor" in call_kwargs["user_prompt"]
+    # When no hook is provided, the prompt must NOT include a hook section.
+    assert "HOOK to expand" not in call_kwargs["user_prompt"]
 
 
-@patch("lorescape_backend.narration.service.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.narration.service.legacy_single_source_bundle")
 @patch("lorescape_backend.narration.service.gemini_client.generate_structured")
 def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
-    gen_mock, fetch_mock,
+    gen_mock, bundle_mock,
 ):
     """If the model flags insufficient_source, the service MUST discard
     whatever it put in `paragraphs` and `pull_quote` — observed failure
     mode: model regurgitates the in-prompt positive example."""
-    fetch_mock.return_value = ""
+    bundle_mock.return_value = _sufficient_bundle()
     gen_mock.return_value = {
         "place_name": "Fake Place",
         "place_location": "",
@@ -151,7 +180,7 @@ def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
         "insufficient_source": True,
     }
 
-    result = service.generate_narration(
+    result = narration_service.generate_narration(
         api_key="K",
         request=NarrationRequest(
             place_name="Fake", wikipedia_title="Fake", language="zh-TW",
@@ -164,10 +193,126 @@ def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
 
 
 def test_generate_narration_rejects_unsupported_language():
-    with pytest.raises(service.UnsupportedLanguageError):
-        service.generate_narration(
+    with pytest.raises(narration_service.UnsupportedLanguageError):
+        narration_service.generate_narration(
             api_key="K",
             request=NarrationRequest(
                 place_name="x", wikipedia_title="x", language="ja",
             ),
         )
+
+
+# ---------------------------------------------------------------------------
+# New tests: wikidata_id path, pre-Gemini gate, legacy logging
+# ---------------------------------------------------------------------------
+
+def test_generate_narration_with_wikidata_id_invokes_pipeline_and_gemini(monkeypatch):
+    gemini_calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _sufficient_bundle(),
+    )
+
+    def fake_generate_structured(**kwargs):
+        gemini_calls.append(kwargs)
+        return {
+            "place_name": "馬卡龍公園", "place_location": "桃園", "era": "modern",
+            "paragraphs": ["a", "b", "c"], "pull_quote": "「q」",
+            "insufficient_source": False,
+        }
+
+    monkeypatch.setattr(narration_service.gemini_client, "generate_structured", fake_generate_structured)
+
+    req = NarrationRequest(
+        wikidata_id="Q108234567", place_name="馬卡龍公園",
+        location="桃園", language="zh-TW",
+    )
+    res = narration_service.generate_narration(api_key="k", request=req)
+
+    assert len(gemini_calls) == 1
+    assert res.insufficient_source is False
+    assert res.paragraphs == ["a", "b", "c"]
+
+
+def test_generate_narration_pre_gemini_gate_short_circuits(monkeypatch):
+    gemini_calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _insufficient_bundle(),
+    )
+
+    def fake_generate_structured(**kwargs):
+        gemini_calls.append(kwargs)
+        return {}
+
+    monkeypatch.setattr(narration_service.gemini_client, "generate_structured", fake_generate_structured)
+
+    req = NarrationRequest(
+        wikidata_id="Q1", place_name="x", location="y", language="en",
+    )
+    res = narration_service.generate_narration(api_key="k", request=req)
+
+    assert gemini_calls == []  # critical: Gemini NOT called
+    assert res.insufficient_source is True
+    assert res.paragraphs == []
+
+
+def test_generate_narration_legacy_title_path_uses_single_source_bundle(monkeypatch, caplog):
+    monkeypatch.setattr(
+        narration_service, "legacy_single_source_bundle",
+        lambda *, title: _sufficient_bundle(),
+    )
+    monkeypatch.setattr(
+        narration_service.gemini_client, "generate_structured",
+        lambda **kw: {
+            "place_name": "Macaron Park", "place_location": "Taoyuan", "era": "modern",
+            "paragraphs": ["a", "b", "c"], "pull_quote": "q",
+            "insufficient_source": False,
+        },
+    )
+
+    req = NarrationRequest(
+        wikipedia_title="Macaron Park", place_name="Macaron Park",
+        location="Taoyuan", language="en",
+    )
+    with caplog.at_level("WARNING"):
+        narration_service.generate_narration(api_key="k", request=req)
+
+    assert any("narration.legacy_title_path" in rec.message for rec in caplog.records)
+
+
+def test_generate_hooks_with_wikidata_id_uses_pipeline(monkeypatch):
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _sufficient_bundle(),
+    )
+
+    def fake_generate_structured(**kw):
+        return {
+            "hooks": [{"id": "a", "title": "T", "teaser": "tz"}],
+            "insufficient_source": False,
+        }
+    monkeypatch.setattr(narration_service.gemini_client, "generate_structured", fake_generate_structured)
+
+    req = HooksRequest(
+        wikidata_id="Q1", place_name="x", location="y", language="en",
+    )
+    res = narration_service.generate_hooks(api_key="k", request=req)
+    assert len(res.hooks) == 1
+
+
+def test_generate_hooks_pre_gemini_gate_short_circuits(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _insufficient_bundle(),
+    )
+    monkeypatch.setattr(narration_service.gemini_client, "generate_structured",
+                        lambda **kw: calls.append(kw) or {})
+
+    req = HooksRequest(wikidata_id="Q1", place_name="x", location="y", language="en")
+    res = narration_service.generate_hooks(api_key="k", request=req)
+
+    assert calls == []
+    assert res.hooks == []
+    assert res.insufficient_source is True

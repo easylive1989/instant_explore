@@ -1,9 +1,8 @@
-"""Orchestrate on-demand narration: wiki fetch → Gemini → response model."""
+"""Orchestrate on-demand narration: source pipeline → Gemini → response model."""
 from __future__ import annotations
 
 import logging
 
-from lorescape_backend.daily_story import wikipedia
 from lorescape_backend.narration import gemini_client, prompts
 from lorescape_backend.narration.models import (
     HookItem,
@@ -14,6 +13,11 @@ from lorescape_backend.narration.models import (
     SUPPORTED_LANGUAGES,
 )
 from lorescape_backend.shared.story_prompt import StoryHook
+from lorescape_backend.sources.models import SourceBundle
+from lorescape_backend.sources.pipeline import (
+    build_source_bundle,
+    legacy_single_source_bundle,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +33,41 @@ def _validate_language(language: str) -> None:
         )
 
 
+def _resolve_bundle(request) -> SourceBundle:
+    """Build SourceBundle from either the new wikidata_id or legacy title."""
+    if request.wikidata_id:
+        return build_source_bundle(
+            wikidata_id=request.wikidata_id,
+            language=request.language,
+            place_name=request.place_name,
+        )
+    logger.warning(
+        "narration.legacy_title_path",
+        extra={
+            "title": request.wikipedia_title,
+            "deprecated_remove_after": "2026-XX-XX",
+        },
+    )
+    return legacy_single_source_bundle(title=request.wikipedia_title)
+
+
 def generate_hooks(*, api_key: str, request: HooksRequest) -> HooksResponse:
-    """Surface 2-3 narrative angles for `request.wikipedia_title`."""
+    """Surface 2-3 narrative angles for the request's place."""
     _validate_language(request.language)
-    extract = wikipedia.fetch_intro_extract(request.wikipedia_title)
+    bundle = _resolve_bundle(request)
+    if not bundle.is_sufficient:
+        logger.info(
+            "narration.pre_gemini_gate", extra={"wikidata_id": bundle.wikidata_id},
+        )
+        return HooksResponse(hooks=[], insufficient_source=True)
+
     payload = gemini_client.generate_structured(
         api_key=api_key,
         system_instruction=prompts.hooks_system_instruction(request.language),
         user_prompt=prompts.build_hooks_user_prompt(
             place_name=request.place_name,
             location=request.location,
-            wikipedia_title=request.wikipedia_title,
-            wikipedia_extract=extract,
+            source_bundle=bundle,
         ),
         response_schema=prompts.hooks_response_schema(request.language),
     )
@@ -56,7 +83,20 @@ def generate_narration(
 ) -> NarrationResponse:
     """Generate the long-form 3-paragraph story for `request`."""
     _validate_language(request.language)
-    extract = wikipedia.fetch_intro_extract(request.wikipedia_title)
+    bundle = _resolve_bundle(request)
+    if not bundle.is_sufficient:
+        logger.info(
+            "narration.pre_gemini_gate", extra={"wikidata_id": bundle.wikidata_id},
+        )
+        return NarrationResponse(
+            place_name=request.place_name,
+            location=request.location,
+            era="",
+            paragraphs=[],
+            pull_quote="",
+            insufficient_source=True,
+        )
+
     hook = (
         StoryHook(title=request.hook.title, teaser=request.hook.teaser)
         if request.hook is not None
@@ -68,19 +108,16 @@ def generate_narration(
         user_prompt=prompts.build_narration_user_prompt(
             place_name=request.place_name,
             location=request.location,
-            wikipedia_title=request.wikipedia_title,
-            wikipedia_extract=extract,
+            source_bundle=bundle,
             language=request.language,
             hook=hook,
         ),
         response_schema=prompts.narration_response_schema(request.language),
     )
     insufficient = bool(payload.get("insufficient_source", False))
-    # Defence-in-depth: when the model flagged insufficient_source, we do
-    # NOT trust whatever it put in `paragraphs`. Observed failure mode:
-    # the model regurgitates the in-prompt positive example when it has
-    # no real source material. Always return empty paragraphs in that
-    # case so the App never renders stale/wrong story content.
+    # Defence-in-depth: when the model flagged insufficient_source, ignore
+    # whatever it placed in `paragraphs` (observed: model regurgitates the
+    # in-prompt example).
     raw_paragraphs = payload.get("paragraphs", []) if not insufficient else []
     return NarrationResponse(
         place_name=payload["place_name"],
