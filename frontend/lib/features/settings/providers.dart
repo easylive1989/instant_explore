@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:context_app/features/settings/data/local_appearance_preferences_repository.dart';
 import 'package:context_app/features/settings/data/local_settings_preferences_repository.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
+import 'package:context_app/features/settings/domain/repositories/appearance_preferences_repository.dart';
 import 'package:context_app/features/settings/domain/repositories/settings_preferences_repository.dart';
+import 'package:context_app/features/settings/presentation/controllers/appearance_notifier.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
 import 'package:context_app/features/settings/presentation/controllers/theme_mode_notifier.dart';
@@ -61,3 +64,19 @@ final settingsControllerProvider =
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
   ThemeModeNotifier.new,
 );
+
+// ============================================================================
+// Appearance Providers (Field Journal theme)
+// ============================================================================
+
+/// Persistence for appearance choices. Override in tests with a fake.
+final appearancePreferencesRepositoryProvider =
+    Provider<AppearancePreferencesRepository>((ref) {
+      return LocalAppearancePreferencesRepository();
+    });
+
+/// Field Journal appearance state (accent / reading / headline font).
+final appearanceNotifierProvider =
+    NotifierProvider<AppearanceNotifier, AppearanceState>(
+      AppearanceNotifier.new,
+    );
