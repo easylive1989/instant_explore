@@ -1,3 +1,6 @@
+import 'package:context_app/app/config/appearance_options.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
+import 'package:context_app/app/config/theme_config.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/daily_story/presentation/screens/story_list_screen.dart';
@@ -12,6 +15,7 @@ import 'package:context_app/features/settings/presentation/screens/settings_scre
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/trip/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -75,6 +79,32 @@ void main() {
         await _whenUserSelectsBottomNavItem(tester, 'bottom_nav.settings');
 
         _thenSettingsTabIsActive();
+      },
+    );
+
+    testWidgets(
+      'given the field-journal theme, when the shell is shown, '
+      'then the bottom nav has 4 tabs with the clay selected colour',
+      (tester) async {
+        final theme = buildLorescapeTheme(
+          tokens: LorescapeTokens.forAppearance(
+            accent: BrandAccent.terracotta,
+            reading: ReadingSurface.paper,
+          ),
+          headlineFont: HeadlineFont.serif,
+        );
+        await pumpScreen(
+          tester,
+          child: const MainScreen(),
+          overrides: _mainScreenOverrides(),
+          theme: theme,
+        );
+
+        final nav = tester.widget<BottomNavigationBar>(
+          find.byType(BottomNavigationBar),
+        );
+        expect(nav.items.length, 4);
+        expect(nav.selectedItemColor, theme.colorScheme.primary);
       },
     );
   });

@@ -34,11 +34,13 @@ const _kEmptyAssetLoader = _EmptyAssetLoader();
 /// [ProviderScope] and a [MaterialApp] wrapper.
 ///
 /// Use this for screens that do not rely on GoRouter navigation.
+/// Pass an optional [theme] to override the default Material theme.
 Future<void> pumpScreen(
   WidgetTester tester, {
   required Widget child,
   List<Override> overrides = const [],
   Locale locale = const Locale('zh', 'TW'),
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     EasyLocalization(
@@ -55,6 +57,7 @@ Future<void> pumpScreen(
             locale: context.locale,
             supportedLocales: context.supportedLocales,
             localizationsDelegates: context.localizationDelegates,
+            theme: theme,
             home: child,
           ),
         ),

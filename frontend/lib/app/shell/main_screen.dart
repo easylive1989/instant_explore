@@ -1,4 +1,3 @@
-import 'package:context_app/app/config/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:context_app/features/daily_story/presentation/screens/story_list_screen.dart';
@@ -52,31 +51,45 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.auto_stories),
-            label: 'bottom_nav.stories'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.explore),
-            label: 'bottom_nav.explore'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.book),
-            label: 'bottom_nav.journey'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: 'bottom_nav.settings'.tr(),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.primary,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: colorScheme.onSurfaceVariant,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.auto_stories_outlined),
+              activeIcon: const Icon(Icons.auto_stories),
+              label: 'bottom_nav.stories'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
+              label: 'bottom_nav.explore'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.menu_book_outlined),
+              activeIcon: const Icon(Icons.menu_book),
+              label: 'bottom_nav.journey'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.settings_outlined),
+              activeIcon: const Icon(Icons.settings),
+              label: 'bottom_nav.settings'.tr(),
+            ),
+          ],
+        ),
       ),
     );
   }
