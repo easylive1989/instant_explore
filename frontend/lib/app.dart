@@ -1,18 +1,29 @@
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:context_app/app/config/theme_config.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/app/config/router_config.dart';
+import 'package:context_app/app/config/theme_config.dart';
 import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
+import 'package:context_app/features/settings/presentation/controllers/appearance_notifier.dart';
+import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
 import 'package:context_app/features/sync/domain/services/sync_session.dart';
 import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
-import 'package:context_app/shared/widgets/midnight/midnight.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+/// Builds the Field Journal [ThemeData] for the given appearance [state].
+ThemeData lorescapeThemeFor(AppearanceState state) {
+  final tokens = LorescapeTokens.forAppearance(
+    accent: state.accent,
+    reading: state.reading,
+  );
+  return buildLorescapeTheme(tokens: tokens, headlineFont: state.headlineFont);
+}
 
 /// Main application widget using go_router for navigation.
 ///
@@ -93,26 +104,25 @@ class LorescapeApp extends ConsumerWidget {
     });
 
     final pendingShare = ref.watch(shareIntentControllerProvider);
+    final appearance = ref.watch(appearanceNotifierProvider);
+    final theme = lorescapeThemeFor(appearance);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => 'name'.tr(),
       debugShowCheckedModeBanner: false,
-      theme: ThemeConfig.darkTheme,
-      darkTheme: ThemeConfig.darkTheme,
-      themeMode: ThemeMode.dark,
+      theme: theme,
+      themeMode: ThemeMode.light,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       routerConfig: router,
       builder: (context, child) {
-        return AmbientBackdrop(
-          child: Stack(
-            children: [
-              child!,
-              if (pendingShare != null && pendingShare.isLoading)
-                const _ShareLoadingOverlay(),
-            ],
-          ),
+        return Stack(
+          children: [
+            child!,
+            if (pendingShare != null && pendingShare.isLoading)
+              const _ShareLoadingOverlay(),
+          ],
         );
       },
     );

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:context_app/features/settings/data/local_appearance_preferences_repository.dart';
@@ -9,7 +8,6 @@ import 'package:context_app/features/settings/domain/repositories/settings_prefe
 import 'package:context_app/features/settings/presentation/controllers/appearance_notifier.dart';
 import 'package:context_app/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:context_app/features/settings/presentation/controllers/language_provider.dart';
-import 'package:context_app/features/settings/presentation/controllers/theme_mode_notifier.dart';
 
 // ============================================================================
 // Repositories
@@ -55,15 +53,6 @@ final settingsControllerProvider =
     NotifierProvider<SettingsController, AsyncValue<void>>(
       SettingsController.new,
     );
-
-// ============================================================================
-// Theme Providers
-// ============================================================================
-
-/// 應用的 ThemeMode Provider（持久化到 SharedPreferences）
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
-  ThemeModeNotifier.new,
-);
 
 // ============================================================================
 // Appearance Providers (Field Journal theme)
