@@ -33,7 +33,11 @@ html, body {
   background: var(--paper);
   overflow: hidden;
   display: grid;
-  grid-template-rows: 760px 1fr;
+  /* `minmax(0, 1fr)` removes the implicit `min-content` floor of a bare
+     `1fr` track, so a long text plate can NOT grow past its 590px slot and
+     push the quote/footer off the bottom edge. Overflow is instead absorbed
+     by the `--fit` auto-shrink the renderer applies. */
+  grid-template-rows: 760px minmax(0, 1fr);
   isolation: isolate;
 }
 
@@ -172,8 +176,15 @@ html, body {
    Text plate (lower half) — single Chinese column only
    ============================================================ */
 .ls-text {
+  /* `--fit` (1 = natural) is dialed down by the renderer when the body is
+     long, scaling the vertical rhythm + type so every paragraph, the quote
+     and the footer fit the fixed slot without clipping. Horizontal padding
+     stays fixed so the measure (line width) never changes. */
+  --fit: 1;
   position: relative;
-  padding: 52px 110px 40px;
+  min-height: 0;
+  overflow: hidden;
+  padding: calc(52px * var(--fit)) 110px calc(40px * var(--fit));
   display: grid;
   grid-template-columns: 1fr;
   row-gap: 0;
@@ -214,11 +225,11 @@ html, body {
   display: contents;
 }
 .ls-verse__ch {
-  padding-bottom: 22px;
+  padding-bottom: calc(22px * var(--fit));
 }
 .ls-verse:not(:last-child) .ls-verse__ch {
   border-bottom: 1px solid var(--rule-soft);
-  margin-bottom: 18px;
+  margin-bottom: calc(18px * var(--fit));
 }
 
 /* Drop-cap for the first Chinese verse */
@@ -230,7 +241,7 @@ html, body {
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
   color: var(--vermilion);
-  font-size: 78px;
+  font-size: calc(78px * var(--fit));
   line-height: 0.85;
   padding: 6px 12px 0 0;
   margin-top: 4px;
@@ -240,7 +251,7 @@ html, body {
 .ls-body-ch {
   font-family: "Noto Serif TC", serif;
   font-weight: 400;
-  font-size: 19.5px;
+  font-size: calc(19.5px * var(--fit));
   line-height: 1.85;
   color: var(--ink);
   letter-spacing: 0.02em;
@@ -252,8 +263,8 @@ html, body {
 /* Pull-quote */
 .ls-quote {
   grid-column: 1 / -1;
-  margin-top: 8px;
-  padding: 22px 0 0 0;
+  margin-top: calc(8px * var(--fit));
+  padding: calc(22px * var(--fit)) 0 0 0;
   border-top: 1px solid var(--rule-soft);
   text-align: center;
   position: relative;
@@ -272,15 +283,15 @@ html, body {
 .ls-quote__ch {
   font-family: "Noto Serif TC", serif;
   font-weight: 500;
-  font-size: 22px;
+  font-size: calc(22px * var(--fit));
   line-height: 1.6;
   color: var(--vermilion-dk);
   letter-spacing: 0.06em;
-  margin: 0 0 8px 0;
+  margin: 0 0 calc(8px * var(--fit)) 0;
 }
 .ls-quote__attrib {
   font-family: "EB Garamond", serif;
-  font-size: 12px;
+  font-size: calc(12px * var(--fit));
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -290,21 +301,21 @@ html, body {
 /* Footer marginalia — grid-flow so it never overlaps body */
 .ls-foot {
   grid-column: 1 / -1;
-  margin-top: 28px;
-  padding-top: 16px;
+  margin-top: calc(28px * var(--fit));
+  padding-top: calc(16px * var(--fit));
   border-top: 1px solid var(--rule-soft);
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-family: "EB Garamond", serif;
-  font-size: 11px;
+  font-size: calc(11px * var(--fit));
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: var(--ink-muted);
 }
 .ls-foot__brand {
   font-style: italic;
-  font-size: 14px;
+  font-size: calc(14px * var(--fit));
   letter-spacing: 0.12em;
   text-transform: none;
 }
