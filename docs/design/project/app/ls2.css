@@ -269,6 +269,9 @@ html,body{ margin:0; padding:0; }
 .reader__quote .q{ font-family:var(--serif); font-style:italic; font-size:21px; line-height:1.5; }
 .reader__quote .by{ font-size:13px; color:var(--read-dim); margin-top:12px; letter-spacing:.04em; }
 .reader__footer{ margin-top:34px; padding-top:18px; border-top:1px solid var(--read-line); font-size:13px; color:var(--read-dim); letter-spacing:.06em; }
+.reader__more{ margin-top:28px; }
+.reader__more-eyebrow{ color:var(--read-cap); margin-bottom:12px; }
+.reader__more-btn{ display:flex; align-items:center; justify-content:center; gap:9px; font-family:var(--sans); }
 
 /* audio mini-player (secondary) */
 .audiobar{

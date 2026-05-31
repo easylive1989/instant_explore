@@ -69,7 +69,7 @@
         case "history":   return <HistoryScreen go={go}/>;
         case "settings":  return <SettingsScreen go={go}/>;
         case "place":     return <PlaceScreen params={route.params} back={back}/>;
-        case "reader":    return <ReaderScreen params={route.params} back={back}/>;
+        case "reader":    return <ReaderScreen params={route.params} back={back} go={go}/>;
         case "trip":      return <TripDetailScreen params={route.params} back={back}/>;
         case "createTrip":return <CreateTripScreen back={back} openSheet={openSheet} draft={draft}/>;
         case "paywall":   return <PaywallScreen back={back}/>;

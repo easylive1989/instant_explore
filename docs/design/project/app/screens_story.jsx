@@ -6,7 +6,7 @@
   const { PLACES, STORY_OPTIONS, STPETERS_STORY, CAT, genStory } = window.LS_DATA;
 
   // ---------- Editorial reader (shared) ----------
-  function ReaderView({ story, onBack }){
+  function ReaderView({ story, onBack, onExplore }){
     const [playing, setPlaying] = useState(false);
     const c = CAT[story.cat] || CAT.urban;
     const heroStyle = story.glyph
@@ -43,6 +43,15 @@
                 <div className="by">{story.quote.by}</div>
               </div>
               <div className="reader__footer">{story.footer} · {story.date}</div>
+              {onExplore && (
+                <div className="reader__more">
+                  <div className="reader__more-eyebrow overline">想知道更多嗎?</div>
+                  <button className="btn btn--primary reader__more-btn" onClick={onExplore}>
+                    <Icon name="sparkle" size={20}/>
+                    探索更多故事
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -63,11 +72,18 @@
     );
   }
 
-  function ReaderScreen({ params, back }){ return <ReaderView story={params.story} onBack={back}/>; }
+  function ReaderScreen({ params, back, go }){
+    const s = params.story;
+    const explore = go ? () => go("place", { place:{
+      id:"gen-"+(s.id||"loc"), name:s.place, cat:s.cat||"heritage",
+      img:s.img, glyph:s.glyph, latin:s.latin, state:"loading",
+    } }) : null;
+    return <ReaderView story={s} onBack={back} onExplore={explore}/>;
+  }
 
   // ---------- Place flow ----------
   function PlaceScreen({ params, back }){
-    const place = PLACES.find(p=>p.id===params.id);
+    const place = params.place || PLACES.find(p=>p.id===params.id);
     const c = CAT[place.cat];
     const initial = place.state==="loading" ? "loading" : place.state;
     const [phase, setPhase] = useState(initial);
