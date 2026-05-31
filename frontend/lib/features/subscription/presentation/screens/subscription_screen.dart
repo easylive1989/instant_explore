@@ -1,13 +1,13 @@
-import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/app/config/legal_urls.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
+import 'package:context_app/features/subscription/presentation/widgets/paywall_palette.dart';
 import 'package:context_app/features/subscription/presentation/widgets/subscription_plan_card.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
-import 'package:context_app/shared/widgets/midnight_kyoto_backdrop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 typedef UrlLauncher = Future<bool> Function(Uri uri);
@@ -246,10 +246,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = PaywallPalette.of(context);
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      body: MidnightKyotoBackdrop(
+      backgroundColor: palette.inkBg,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -1.05),
+            radius: 1.2,
+            colors: [const Color(0xFF34291F), palette.inkBg],
+            stops: const [0, 0.72],
+          ),
+        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -258,7 +266,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: AdaptiveIconButton(
-                    icon: Icon(Icons.close, color: cs.onSurface),
+                    icon: Icon(Icons.close, color: palette.onDark),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
@@ -270,15 +278,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 8),
-                      const _PremiumIcon(),
+                      _PremiumIcon(color: palette.clay),
                       const SizedBox(height: 20),
                       Text(
                         'subscription.category_label'.tr(),
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.8,
-                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2,
+                          color: palette.clay,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -287,11 +295,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         visible: _showHeadline,
                         child: Text(
                           'subscription.headline'.tr(),
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: cs.onSurface,
+                          style: GoogleFonts.notoSerifTc(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: palette.onDark,
                             height: 1.2,
                           ),
                           textAlign: TextAlign.center,
@@ -305,7 +313,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                           style: TextStyle(
                             fontSize: 15,
                             height: 1.55,
-                            color: cs.onSurfaceVariant,
+                            color: palette.onDark2,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -316,6 +324,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       _SubscribeButton(
                         isLoading: _isPurchasing,
                         label: _subscribeLabel(_selectedPeriod),
+                        palette: palette,
                         onPressed:
                             _isPurchasing ||
                                 _plans.isEmpty ||
@@ -326,18 +335,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       const SizedBox(height: 4),
                       AdaptiveButton(
                         style: AdaptiveButtonStyle.text,
-                        foregroundColor: cs.onSurfaceVariant,
+                        foregroundColor: palette.onDark2,
                         onPressed: _isPurchasing ? null : _restore,
                         child: Text(
                           'subscription.restore'.tr(),
                           style: TextStyle(
                             fontSize: 14,
-                            color: cs.onSurfaceVariant,
+                            color: palette.onDark2,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _LegalFooter(onOpen: _openUrl),
+                      _LegalFooter(onOpen: _openUrl, palette: palette),
                     ],
                   ),
                 ),
@@ -351,16 +360,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 }
 
 class _PremiumIcon extends StatelessWidget {
-  const _PremiumIcon();
+  const _PremiumIcon({required this.color});
+
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/images/subscription/premium_badge.png',
-      width: 120,
-      height: 120,
-      fit: BoxFit.contain,
-    );
+    return Icon(Icons.diamond_outlined, size: 96, color: color);
   }
 }
 
@@ -369,32 +375,39 @@ class _SubscribeButton extends StatelessWidget {
     required this.isLoading,
     required this.onPressed,
     required this.label,
+    required this.palette,
   });
 
   final bool isLoading;
   final VoidCallback? onPressed;
   final String label;
+  final PaywallPalette palette;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return SizedBox(
       height: 56,
       child: FilledButton.icon(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          backgroundColor: palette.clay,
+          foregroundColor: const Color(0xFFFBF1E9),
+          disabledBackgroundColor: palette.clay.withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(palette.rLg),
+          ),
+          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
         icon: isLoading
             ? const SizedBox.shrink()
-            : const Icon(Icons.lock_open_rounded),
+            : const Icon(Icons.lock_outline, size: 18),
         label: isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 width: 22,
                 height: 22,
                 child: AdaptiveProgressIndicator(
                   strokeWidth: 2,
-                  color: cs.onPrimary,
+                  color: Color(0xFFFBF1E9),
                 ),
               )
             : Text(label),
@@ -404,14 +417,14 @@ class _SubscribeButton extends StatelessWidget {
 }
 
 class _LegalFooter extends StatelessWidget {
-  const _LegalFooter({required this.onOpen});
+  const _LegalFooter({required this.onOpen, required this.palette});
 
   final Future<void> Function(Uri) onOpen;
+  final PaywallPalette palette;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final muted = cs.onSurfaceVariant.withValues(alpha: 0.7);
+    final muted = palette.onDark3;
     final linkStyle = TextStyle(
       fontSize: 12,
       color: muted,

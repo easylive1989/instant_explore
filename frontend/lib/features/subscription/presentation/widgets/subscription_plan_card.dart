@@ -1,11 +1,13 @@
+import 'package:context_app/features/subscription/presentation/widgets/paywall_palette.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Paywall plan card in the Midnight Kyoto brand language.
+/// Paywall plan card in the Field Journal brand language.
 ///
-/// Renders a single subscription plan inside a glass-style container.
-/// The billed price is the most visually dominant element on the card
-/// to satisfy App Store Guideline 3.1.2(c).
+/// Renders a single subscription plan on the immersive dark paywall. The
+/// billed price is the most visually dominant element on the card to satisfy
+/// App Store Guideline 3.1.2(c).
 class SubscriptionPlanCard extends StatelessWidget {
   const SubscriptionPlanCard({super.key, required this.state, this.onRetry});
 
@@ -20,16 +22,18 @@ class SubscriptionPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = PaywallPalette.of(context);
     return switch (state) {
       SubscriptionPlanCardStateLoading() => _cardShell(
-        context,
-        borderColor: cs.outlineVariant,
+        palette,
+        borderColor: palette.lineDark,
+        fillColor: Colors.transparent,
         child: const _Loading(),
       ),
       SubscriptionPlanCardStateError(:final message) => _cardShell(
-        context,
-        borderColor: cs.outlineVariant,
+        palette,
+        borderColor: palette.lineDark,
+        fillColor: Colors.transparent,
         child: _Error(message: message, onRetry: onRetry),
       ),
       SubscriptionPlanCardStateReady(
@@ -44,10 +48,11 @@ class SubscriptionPlanCard extends StatelessWidget {
       ) =>
         InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(palette.rLg),
           child: _cardShell(
-            context,
-            borderColor: selected ? cs.primary : cs.outlineVariant,
+            palette,
+            borderColor: selected ? palette.clay : palette.lineDark,
+            fillColor: selected ? palette.claySelected : Colors.transparent,
             child: _Ready(
               planLabel: planLabel,
               priceString: priceString,
@@ -63,31 +68,18 @@ class SubscriptionPlanCard extends StatelessWidget {
   }
 
   Widget _cardShell(
-    BuildContext context, {
+    PaywallPalette palette, {
     required Color borderColor,
+    required Color fillColor,
     required Widget child,
   }) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.surfaceContainerHigh,
-            Theme.of(context).colorScheme.surfaceContainer,
-          ],
-        ),
-        border: Border.all(color: borderColor, width: 2),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14137FEC),
-            blurRadius: 40,
-            offset: Offset(0, 12),
-          ),
-        ],
+        color: fillColor,
+        border: Border.all(color: borderColor, width: 1.5),
+        borderRadius: BorderRadius.circular(palette.rLg),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       child: child,
     );
   }
@@ -186,7 +178,7 @@ class _SkeletonBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outlineVariant,
+        color: PaywallPalette.of(context).lineDark,
         borderRadius: BorderRadius.circular(height / 2),
       ),
       child: SizedBox(width: width, height: height),
@@ -202,14 +194,11 @@ class _Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = PaywallPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          message,
-          style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
-        ),
+        Text(message, style: TextStyle(fontSize: 14, color: palette.onDark2)),
         const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerLeft,
@@ -217,7 +206,7 @@ class _Error extends StatelessWidget {
             key: const ValueKey('planCard.retry'),
             onPressed: onRetry,
             style: TextButton.styleFrom(
-              foregroundColor: cs.primary,
+              foregroundColor: palette.clay,
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 32),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -254,15 +243,15 @@ class _Ready extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = PaywallPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             if (selected) ...[
-              Icon(Icons.check_circle, size: 16, color: cs.primary),
-              const SizedBox(width: 6),
+              Icon(Icons.check_circle, size: 18, color: palette.clay),
+              const SizedBox(width: 8),
             ],
             Expanded(
               child: Text(
@@ -271,7 +260,7 @@ class _Ready extends StatelessWidget {
                   fontSize: SubscriptionPlanCard._planLabelFontSize,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.2,
-                  color: cs.onSurfaceVariant,
+                  color: palette.onDark2,
                 ),
               ),
             ),
@@ -285,10 +274,10 @@ class _Ready extends StatelessWidget {
           children: [
             Text(
               priceString,
-              style: TextStyle(
+              style: GoogleFonts.notoSerifTc(
                 fontSize: SubscriptionPlanCard._priceFontSize,
-                fontWeight: FontWeight.w900,
-                color: cs.onSurface,
+                fontWeight: FontWeight.w700,
+                color: palette.onDark,
                 height: 1,
               ),
             ),
@@ -298,24 +287,24 @@ class _Ready extends StatelessWidget {
               style: TextStyle(
                 fontSize: SubscriptionPlanCard._periodFontSize,
                 fontWeight: FontWeight.w500,
-                color: cs.onSurfaceVariant,
+                color: palette.onDark2,
               ),
             ),
           ],
         ),
         if (selected) ...[
           const SizedBox(height: 16),
-          const _Divider(),
+          _Divider(palette: palette),
           const SizedBox(height: 16),
-          ...bullets.map((b) => _bulletRow(b, cs)),
+          ...bullets.map((b) => _bulletRow(b, palette)),
           const SizedBox(height: 16),
-          const _Divider(),
+          _Divider(palette: palette),
           const SizedBox(height: 12),
           Text(
             autoRenewNotice,
             style: TextStyle(
               fontSize: SubscriptionPlanCard._noticeFontSize,
-              color: cs.onSurfaceVariant,
+              color: palette.onDark3,
               height: 1.4,
             ),
           ),
@@ -324,23 +313,20 @@ class _Ready extends StatelessWidget {
     );
   }
 
-  Widget _bulletRow(String text, ColorScheme cs) {
+  Widget _bulletRow(String text, PaywallPalette palette) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '✦',
-            style: TextStyle(fontSize: 14, color: cs.primary, height: 1.4),
-          ),
+          Icon(Icons.auto_awesome, size: 16, color: palette.clay),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
                 fontSize: SubscriptionPlanCard._bulletFontSize,
-                color: cs.onSurface,
+                color: palette.onDark,
                 height: 1.4,
               ),
             ),
@@ -356,11 +342,11 @@ class _BestValueBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = PaywallPalette.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
       decoration: BoxDecoration(
-        color: cs.primaryContainer,
+        color: palette.badgeSurface,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -368,7 +354,7 @@ class _BestValueBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: cs.onPrimaryContainer,
+          color: palette.onDark,
           letterSpacing: 0.8,
         ),
       ),
@@ -377,14 +363,14 @@ class _BestValueBadge extends StatelessWidget {
 }
 
 class _Divider extends StatelessWidget {
-  const _Divider();
+  const _Divider({required this.palette});
+
+  final PaywallPalette palette;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outlineVariant,
-      ),
+      decoration: BoxDecoration(color: palette.lineDark),
       child: const SizedBox(height: 1),
     );
   }
