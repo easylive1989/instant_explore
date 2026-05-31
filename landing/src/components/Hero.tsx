@@ -1,35 +1,48 @@
+const APP_STORE_URL =
+  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW";
+
 export default function Hero() {
   return (
-    <header className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-      {/* Background Image */}
+    <header
+      id="top"
+      className="relative flex min-h-screen items-center overflow-hidden"
+    >
+      {/* Immersive photo */}
       <div className="absolute inset-0 z-0">
         <img
-          className="w-full h-full object-cover opacity-40 grayscale-[20%] mix-blend-overlay"
+          className="h-full w-full object-cover"
           src="/images/hero-bg.jpg"
-          alt="Cinematic night shot of a historic shrine with glowing lanterns and electric blue highlights"
+          alt="燈火映照的歷史聖殿夜景"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent" />
+        {/* Warm scrim fading into the paper page below */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0f0b07]/55 via-[#0f0b07]/25 to-[#0f0b07]/92" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-paper" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-8 text-center">
-        <div className="inline-block mb-6 px-4 py-1.5 glass-card rounded-full text-[10px] uppercase tracking-[0.2em] font-bold text-primary">
-          The Future of Exploration
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-24 md:px-8">
+        <div className="eyebrow mb-6 flex items-center gap-3 text-white/85">
+          <span className="h-px w-7 bg-white/50" />
+          LORESCAPE · 田野誌
         </div>
-        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
-          Experience History, <br />
-          <span className="text-primary text-neon">Not Just Sights.</span>
+        <h1 className="max-w-3xl font-serif text-4xl font-bold leading-[1.2] tracking-wide text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] md:text-6xl">
+          讓每一處風景，
+          <br />
+          開口說它的故事
         </h1>
-        <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 font-medium">
-          Your personal AI historian for immersive, eyes-up exploration. Hear
-          the stories behind the stones.
+        <p className="mt-7 max-w-xl text-base leading-relaxed text-[#f7f1e6]/85 md:text-lg">
+          AI 隨行的旅行說書人。走到哪，就把那裡的來歷、傳說與歷史，
+          說給你聽——還能化作語音，邊走邊聽。
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
+
+        <div className="mt-10 flex flex-wrap gap-4">
           <a
-            href="https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060"
+            href={APP_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-primary text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-primary-fixed-dim hover:scale-105 active:scale-95"
+            className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
           >
             <span
               className="material-symbols-outlined"
@@ -40,10 +53,10 @@ export default function Hero() {
             App Store
           </a>
           <a
-            href="https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW"
+            href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="glass-card text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+            className="flex items-center gap-2.5 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
           >
             <span
               className="material-symbols-outlined"
@@ -54,13 +67,11 @@ export default function Hero() {
             Play Store
           </a>
         </div>
-      </div>
 
-      {/* Decorative bounce arrow */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
-        <span className="material-symbols-outlined text-4xl">
-          keyboard_double_arrow_down
-        </span>
+        <div className="mt-12 flex items-center gap-2 text-xs tracking-[0.08em] text-[#f7f1e6]/60">
+          <span className="material-symbols-outlined text-[15px]">place</span>
+          聖伯多祿大殿 · VATICAN
+        </div>
       </div>
     </header>
   );

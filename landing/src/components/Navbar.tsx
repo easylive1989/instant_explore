@@ -1,37 +1,43 @@
+const APP_STORE_URL =
+  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
+
+const navLinks = [
+  { label: "故事", href: "#story" },
+  { label: "探索", href: "#explore" },
+  { label: "風景", href: "#categories" },
+  { label: "旅誌", href: "#journey" },
+];
+
 export default function Navbar() {
   return (
-    <nav className="bg-slate-950/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-lg shadow-black/20">
-      <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
-        <div className="text-xl font-black text-white tracking-tighter">
-          Lorescape
-        </div>
-        <div className="hidden md:flex gap-10 items-center">
-          <a
-            className="text-blue-500 font-bold border-b-2 border-blue-500 pb-1 tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95"
-            href="#discovery"
-          >
-            Discovery
-          </a>
-          <a
-            className="text-white/60 font-medium tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95"
-            href="#narration"
-          >
-            AI Narration
-          </a>
-          <a
-            className="text-white/60 font-medium tracking-tight text-lg hover:text-white transition-colors duration-300 active:scale-95"
-            href="#journey"
-          >
-            Journey
-          </a>
-        </div>
+    <nav className="fixed top-0 z-50 w-full border-b border-line bg-paper/85 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-8">
         <a
-          href="https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060"
+          href="#top"
+          className="font-serif text-xl font-bold tracking-wide text-ink"
+        >
+          Lorescape
+        </a>
+
+        <div className="hidden items-center gap-9 md:flex">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-[15px] font-medium text-ink-2 transition-colors hover:text-clay"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <a
+          href={APP_STORE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold transition-all active:scale-95 shadow-lg shadow-primary/20"
+          className="btn-clay rounded-full px-5 py-2 text-sm font-semibold"
         >
-          Download
+          下載 App
         </a>
       </div>
     </nav>

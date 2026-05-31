@@ -1,7 +1,7 @@
 const links = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Use", href: "/terms" },
-  { label: "Support", href: "/support" },
+  { label: "隱私權政策", href: "/privacy" },
+  { label: "使用條款", href: "/terms" },
+  { label: "支援", href: "/support" },
   { label: "Instagram", href: "#" },
   {
     label: "App Store",
@@ -15,16 +15,18 @@ const links = [
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 w-full py-12 border-t border-white/10">
-      <div className="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6">
-        <div className="text-lg font-black text-white">Lorescape</div>
-        <div className="flex flex-wrap justify-center gap-8 text-[10px] uppercase tracking-widest text-white/40">
+    <footer className="w-full border-t border-line bg-paper-sunk py-12">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-8 md:flex-row">
+        <div className="font-serif text-lg font-bold tracking-wide text-ink">
+          Lorescape
+        </div>
+        <div className="flex flex-wrap justify-center gap-7 text-xs text-ink-3">
           {links.map((link) => {
             const isExternal = link.href.startsWith("http");
             return (
               <a
                 key={link.label}
-                className="hover:text-blue-400 transition-colors"
+                className="transition-colors hover:text-clay"
                 href={link.href}
                 target={isExternal ? "_blank" : undefined}
                 rel={isExternal ? "noopener noreferrer" : undefined}
@@ -34,8 +36,8 @@ export default function Footer() {
             );
           })}
         </div>
-        <div className="text-[10px] uppercase tracking-widest text-white/40">
-          &copy; {new Date().getFullYear()} Lorescape. All rights reserved.
+        <div className="text-xs text-ink-3">
+          &copy; {new Date().getFullYear()} Lorescape
         </div>
       </div>
     </footer>

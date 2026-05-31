@@ -12,18 +12,18 @@ export default function SupportPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-surface pt-32 pb-24 px-6">
+      <main className="bg-paper pt-32 pb-24 px-6">
         <article
           className="
-            max-w-3xl mx-auto text-white/75 leading-relaxed
-            [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:tracking-tight [&_h2]:mb-4
+            max-w-3xl mx-auto text-ink-2 leading-relaxed
+            [&_h2]:text-2xl [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-ink [&_h2]:tracking-wide [&_h2]:mb-4
             [&_p]:mb-4
-            [&_strong]:text-white [&_strong]:font-semibold
-            [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-400
+            [&_strong]:text-ink [&_strong]:font-semibold
+            [&_a]:text-clay [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-clay-deep
           "
         >
           <header className="mb-10">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-wide text-ink mb-3">
               👋 Welcome to Lorescape Support
             </h1>
           </header>
@@ -36,7 +36,7 @@ export default function SupportPage() {
           </p>
 
           {/* Contact callout */}
-          <div className="glass-card rounded-2xl p-6 my-8 border-l-4 border-emerald-400/60">
+          <div className="paper-card rounded-2xl p-6 my-8 border-l-4 border-clay/60">
             <div className="flex items-start gap-3">
               <span className="text-2xl leading-none" aria-hidden="true">
                 📧
@@ -60,7 +60,7 @@ export default function SupportPage() {
           </div>
 
           {/* FAQ callout */}
-          <div className="glass-card rounded-2xl p-6 my-8 border-l-4 border-amber-400/60">
+          <div className="paper-card rounded-2xl p-6 my-8 border-l-4 border-clay-deep/60">
             <div className="flex items-start gap-3">
               <span className="text-2xl leading-none" aria-hidden="true">
                 ❓

@@ -1,31 +1,42 @@
+const APP_STORE_URL =
+  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW";
+
 export default function FinalCTA() {
   return (
-    <section className="relative py-32 rounded-[3rem] overflow-hidden text-center">
+    <section className="relative overflow-hidden rounded-xl text-center shadow-e3">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           src="/images/cta-bokeh.jpg"
-          alt="Blurred glowing city lights creating a dreamy bokeh with deep blue and gold tones"
+          alt=""
         />
-        <div className="absolute inset-0 bg-surface/80 backdrop-blur-md" />
+        <div className="absolute inset-0 bg-gradient-to-br from-ink-bg-2/95 to-ink-bg/95" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto px-8">
-        <h2 className="text-5xl font-black mb-8 tracking-tighter leading-[0.9]">
-          The city is a book. <br />
-          Start reading.
+      <div className="relative z-10 mx-auto max-w-2xl px-8 py-28">
+        <div className="mb-6 flex justify-center text-clay">
+          <span className="material-symbols-outlined text-5xl">
+            menu_book
+          </span>
+        </div>
+        <h2 className="font-serif text-3xl font-bold leading-tight tracking-wide text-on-dark md:text-5xl">
+          城市是一本書，
+          <br />
+          翻開它的下一頁
         </h2>
-        <p className="text-on-surface-variant mb-12 font-medium">
-          Join 50,000+ explorers uncovering the hidden narratives of our world.
+        <p className="mx-auto mt-6 max-w-md leading-relaxed text-on-dark-2">
+          帶上你的隨行說書人，讓每一處風景，都為你開口說它的故事。
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
           <a
-            href="https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060"
+            href={APP_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-primary text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-primary-fixed-dim hover:scale-105 active:scale-95 shadow-2xl shadow-primary/40"
+            className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
           >
             <span
               className="material-symbols-outlined"
@@ -36,10 +47,10 @@ export default function FinalCTA() {
             App Store
           </a>
           <a
-            href="https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW"
+            href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="glass-card text-white px-8 py-4 rounded-full font-black flex items-center gap-3 transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+            className="flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-base font-semibold text-on-dark backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
           >
             <span
               className="material-symbols-outlined"

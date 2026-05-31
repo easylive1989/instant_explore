@@ -1,59 +1,52 @@
 export default function EyesUpDiscovery() {
   return (
     <section
-      id="discovery"
-      className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch"
+      id="explore"
+      className="grid scroll-mt-24 grid-cols-1 items-stretch gap-6 lg:grid-cols-12"
     >
       {/* Large image card */}
-      <div className="lg:col-span-7 glass-card rounded-xl overflow-hidden relative group min-h-[400px]">
+      <div className="group relative min-h-[400px] overflow-hidden rounded-lg border border-line shadow-e2 lg:col-span-7">
         <img
-          className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           src="/images/discovery-gate.jpg"
-          alt="Ancient weathered wooden gate with soft bokeh of temple gardens behind"
+          alt="古老的木造山門，後方是寺院庭園的柔焦"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/60 to-transparent p-12 flex flex-col justify-end">
-          <div className="mb-4 text-primary font-black tracking-widest text-xs uppercase">
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[#0f0b07]/90 via-[#0f0b07]/30 to-transparent p-10">
+          <div className="eyebrow mb-3 text-[11px] text-white/75">
             Feature 01
           </div>
-          <h2 className="text-4xl font-black mb-4 tracking-tighter leading-none">
-            Eyes-Up Discovery
+          <h2 className="font-serif text-3xl font-bold leading-tight text-white md:text-4xl">
+            探索身邊的風景
           </h2>
-          <p className="text-on-surface-variant max-w-md">
-            Our &apos;Free Roam&apos; mode uses spatial audio to narrate
-            history as you walk. Put your phone away and let the city speak to
-            you.
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-[#f7f1e6]/85">
+            依距離與主題，發現方圓之內值得停留的每一個角落。
+            把地圖收起來，讓城市自己開口。
           </p>
         </div>
       </div>
 
       {/* Two stacked feature cards */}
-      <div className="lg:col-span-5 flex flex-col gap-8">
-        <div className="glass-card p-10 rounded-xl flex-1 flex flex-col justify-center">
-          <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-6">
-            <span className="material-symbols-outlined text-primary text-3xl">
-              spatial_audio_off
-            </span>
+      <div className="flex flex-col gap-6 lg:col-span-5">
+        <div className="paper-card flex flex-1 flex-col justify-center p-9">
+          <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-clay-tint text-clay-deep">
+            <span className="material-symbols-outlined text-3xl">explore</span>
           </div>
-          <h3 className="text-2xl font-bold mb-3 tracking-tight">
-            Immersive Spatial Flow
+          <h3 className="font-serif text-xl font-bold text-ink">
+            就近發現
           </h3>
-          <p className="text-on-surface-variant text-sm leading-relaxed">
-            Audio cues adapt to your walking speed and orientation, creating a
-            seamless narrative that feels part of the environment.
+          <p className="mt-2 text-sm leading-relaxed text-ink-2">
+            自動帶出你身邊值得一聽的地點，距離、類型一目了然，隨走隨探。
           </p>
         </div>
-        <div className="glass-card p-10 rounded-xl flex-1 flex flex-col justify-center border-primary/20">
-          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined text-white text-3xl">
-              visibility_off
-            </span>
+        <div className="paper-card flex flex-1 flex-col justify-center p-9">
+          <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-clay text-white shadow-e1">
+            <span className="material-symbols-outlined text-3xl">tune</span>
           </div>
-          <h3 className="text-2xl font-bold mb-3 tracking-tight">
-            Zero-Screen Interaction
+          <h3 className="font-serif text-xl font-bold text-ink">
+            依你而選
           </h3>
-          <p className="text-on-surface-variant text-sm leading-relaxed">
-            Stop looking at maps. Our AI directs you using historical landmarks
-            as waypoints.
+          <p className="mt-2 text-sm leading-relaxed text-ink-2">
+            設定想走的距離與想看的主題，只留下真正會讓你停下腳步的風景。
           </p>
         </div>
       </div>

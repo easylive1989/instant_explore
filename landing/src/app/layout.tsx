@@ -1,39 +1,46 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Serif_TC, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const notoSerifTc = Noto_Serif_TC({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "600", "700"],
+  variable: "--font-noto-serif-tc",
+  display: "swap",
+});
+
+const notoSansTc = Noto_Sans_TC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-sans-tc",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Lorescape — Experience History, Not Just Sights",
+  title: "Lorescape — 讓每一處風景，開口說它的故事",
   description:
-    "Your personal AI historian for immersive, eyes-up exploration. Hear the stories behind the stones with spatial audio narration.",
+    "AI 隨行的旅行說書人。走到哪，就把那裡的來歷、傳說與歷史，為你即時編寫成值得細讀的故事，還能化作語音邊走邊聽。",
   keywords: [
-    "AI tour guide",
-    "historical narration",
-    "travel app",
-    "spatial audio",
-    "photo identify",
-    "cultural exploration",
+    "AI 導覽",
+    "旅行說書人",
+    "在地故事",
+    "語音導覽",
+    "文化旅遊",
+    "田野誌",
     "Lorescape",
+    "讀景",
   ],
   openGraph: {
-    title: "Lorescape — Experience History, Not Just Sights",
-    description:
-      "Your personal AI historian for immersive, eyes-up exploration.",
+    title: "Lorescape — 讓每一處風景，開口說它的故事",
+    description: "AI 隨行的旅行說書人，為每一處風景備好屬於它的故事。",
     type: "website",
-    locale: "en_US",
+    locale: "zh_TW",
     siteName: "Lorescape",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lorescape — Experience History, Not Just Sights",
-    description:
-      "Your personal AI historian for immersive, eyes-up exploration.",
+    title: "Lorescape — 讓每一處風景，開口說它的故事",
+    description: "AI 隨行的旅行說書人，為每一處風景備好屬於它的故事。",
   },
   robots: {
     index: true,
@@ -48,7 +55,7 @@ const jsonLd = {
   applicationCategory: "TravelApplication",
   operatingSystem: "iOS, Android",
   description:
-    "AI-powered historical tour guide with spatial audio narration and photo identification.",
+    "AI 隨行的旅行說書人，為眼前的地標、古蹟與山林即時編寫在地故事，還能化作語音邊走邊聽。",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -62,7 +69,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html
+      lang="zh-Hant"
+      className={`${notoSerifTc.variable} ${notoSansTc.variable}`}
+    >
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -73,7 +83,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-surface text-on-surface font-sans antialiased selection:bg-primary/30">
+      <body className="bg-paper text-ink font-sans antialiased selection:bg-clay/20">
         {children}
       </body>
     </html>

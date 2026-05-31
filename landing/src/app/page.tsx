@@ -1,8 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import VideoShowcase from "@/components/VideoShowcase";
-import EyesUpDiscovery from "@/components/EyesUpDiscovery";
 import AINarration from "@/components/AINarration";
+import EyesUpDiscovery from "@/components/EyesUpDiscovery";
 import PhotoIdentify from "@/components/PhotoIdentify";
 import KnowledgeJourney from "@/components/KnowledgeJourney";
 import FinalCTA from "@/components/FinalCTA";
@@ -13,10 +13,10 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <main className="max-w-7xl mx-auto px-8 py-24 space-y-32">
+      <main className="mx-auto max-w-7xl space-y-28 px-6 py-24 md:px-8 md:space-y-36">
         <VideoShowcase />
-        <EyesUpDiscovery />
         <AINarration />
+        <EyesUpDiscovery />
         <PhotoIdentify />
         <KnowledgeJourney />
         <FinalCTA />

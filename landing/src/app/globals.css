@@ -2,15 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    /* Subtle warm paper texture */
+    background-color: #f7f1e6;
+    background-image: radial-gradient(
+      rgba(40, 30, 18, 0.022) 1px,
+      transparent 1px
+    );
+    background-size: 4px 4px;
+  }
+}
+
 @layer components {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Raised paper card */
+  .paper-card {
+    background: #fdfaf3;
+    border: 1px solid #e4dac8;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(40, 30, 18, 0.09);
   }
 
-  .text-neon {
-    text-shadow: 0 0 15px rgba(19, 127, 236, 0.4);
+  /* Eyebrow / kicker label */
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Pill button — clay primary */
+  .btn-clay {
+    background: #bc5e3e;
+    color: #fbf1e9;
+    box-shadow: 0 6px 18px rgba(40, 30, 18, 0.09);
+    transition:
+      transform 0.12s ease,
+      background 0.15s ease;
+  }
+  .btn-clay:hover {
+    background: #97442a;
+    transform: scale(1.04);
+  }
+  .btn-clay:active {
+    transform: scale(0.97);
+  }
+
+  /* Pill button — ghost on paper */
+  .btn-ghost {
+    background: #fdfaf3;
+    color: #221c14;
+    border: 1px solid #e4dac8;
+    transition:
+      transform 0.12s ease,
+      background 0.15s ease;
+  }
+  .btn-ghost:hover {
+    background: #ece3d3;
+    transform: scale(1.04);
+  }
+  .btn-ghost:active {
+    transform: scale(0.97);
   }
 }

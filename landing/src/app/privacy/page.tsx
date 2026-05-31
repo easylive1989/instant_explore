@@ -12,25 +12,25 @@ export default function PrivacyPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-surface pt-32 pb-24 px-6">
+      <main className="bg-paper pt-32 pb-24 px-6">
         <article
           className="
-            max-w-3xl mx-auto text-white/75 leading-relaxed
-            [&_h2]:text-2xl [&_h2]:md:text-3xl [&_h2]:font-bold [&_h2]:text-white
-            [&_h2]:tracking-tight [&_h2]:mt-12 [&_h2]:mb-4
+            max-w-3xl mx-auto text-ink-2 leading-relaxed
+            [&_h2]:text-2xl [&_h2]:md:text-3xl [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-ink
+            [&_h2]:tracking-wide [&_h2]:mt-12 [&_h2]:mb-4
             [&_p]:mb-4
             [&_ul]:mb-4 [&_ul]:space-y-2
             [&_ul>li]:list-disc [&_ul>li]:ml-6
             [&_ul>li>ul]:mt-2 [&_ul>li>ul]:mb-0
-            [&_strong]:text-white [&_strong]:font-semibold
-            [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-blue-400
+            [&_strong]:text-ink [&_strong]:font-semibold
+            [&_a]:text-clay [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-clay-deep
           "
         >
           <header className="mb-10">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-wide text-ink mb-3">
               Privacy Policy
             </h1>
-            <p className="text-sm uppercase tracking-widest text-white/40">
+            <p className="text-sm uppercase tracking-widest text-ink-3">
               Last Updated: 2026-04-23
             </p>
           </header>

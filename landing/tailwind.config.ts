@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// Lorescape "Field Journal" design tokens (see docs/design/project/app/ls2.css).
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,64 +10,69 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        surface: {
-          DEFAULT: "#101922",
-          dim: "#0d141b",
-          bright: "#222d39",
-          container: {
-            DEFAULT: "#1c2630",
-            low: "#151e27",
-            high: "#27313c",
-            highest: "#323c48",
-            lowest: "#0b1117",
-          },
-          variant: "rgba(255, 255, 255, 0.08)",
-          tint: "#137fec",
+        // Paper (light surfaces)
+        paper: {
+          DEFAULT: "#F7F1E6",
+          raised: "#FDFAF3",
+          sunk: "#ECE3D3",
         },
-        primary: {
-          DEFAULT: "#137fec",
-          fixed: "#d5e3ff",
-          "fixed-dim": "#a8c8ff",
-          container: "rgba(19, 127, 236, 0.2)",
+        line: {
+          DEFAULT: "#E4DAC8",
+          strong: "#CDBFA6",
         },
-        secondary: {
-          DEFAULT: "#adc8f7",
-          fixed: "#d5e3ff",
-          "fixed-dim": "#adc8f7",
-          container: "#2c4770",
+        // Ink (text on paper)
+        ink: {
+          DEFAULT: "#221C14",
+          2: "#5E5341",
+          3: "#918471",
         },
-        tertiary: {
-          DEFAULT: "#ffb68c",
-          container: "#e47019",
+        // Clay (brand / terracotta)
+        clay: {
+          DEFAULT: "#BC5E3E",
+          deep: "#97442A",
+          soft: "#F1DDCE",
+          tint: "#F7E8DD",
         },
-        error: {
-          DEFAULT: "#ffb4ab",
-          container: "#93000a",
+        // Dark surfaces (immersive sections)
+        "ink-bg": {
+          DEFAULT: "#1B1611",
+          2: "#251E17",
+          3: "#312820",
         },
-        "on-surface": {
-          DEFAULT: "#ffffff",
-          variant: "#c1c6d5",
+        "on-dark": {
+          DEFAULT: "#F7F1E6",
+          2: "#C3B7A4",
+          3: "#8C8170",
         },
-        "on-primary": "#ffffff",
-        "on-secondary": "#123158",
-        "on-error": "#690005",
-        outline: {
-          DEFAULT: "#8b919f",
-          variant: "rgba(255, 255, 255, 0.1)",
-        },
-        "inverse-surface": "#e0e2ec",
-        "inverse-on-surface": "#2d3038",
-        "inverse-primary": "#005eb4",
-        background: "#101922",
+        // Category palette
+        "cat-nature": { ink: "#4E6138", bg: "#E6E8D5" },
+        "cat-heritage": { ink: "#8A6320", bg: "#F0E5CC" },
+        "cat-urban": { ink: "#44597A", bg: "#DFE4EC" },
+        "cat-sacred": { ink: "#6E4A63", bg: "#ECDCE6" },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "sans-serif"],
+        serif: ["var(--font-noto-serif-tc)", "Songti TC", "serif"],
+        sans: [
+          "var(--font-noto-sans-tc)",
+          "-apple-system",
+          "Helvetica Neue",
+          "sans-serif",
+        ],
       },
       borderRadius: {
-        DEFAULT: "0.25rem",
-        lg: "0.5rem",
-        xl: "0.75rem",
-        full: "9999px",
+        sm: "8px",
+        md: "12px",
+        lg: "16px",
+        xl: "22px",
+        img: "10px",
+      },
+      boxShadow: {
+        e1: "0 1px 2px rgba(40,30,18,.06)",
+        e2: "0 6px 18px rgba(40,30,18,.09)",
+        e3: "0 18px 44px rgba(28,20,10,.20)",
+      },
+      letterSpacing: {
+        eyebrow: "0.2em",
       },
     },
   },
