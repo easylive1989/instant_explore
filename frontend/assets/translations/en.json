@@ -141,6 +141,11 @@
       "reset": "Reset to default"
     }
   },
+  "date_picker": {
+    "title": "Select date",
+    "cancel": "Cancel",
+    "confirm": "Done"
+  },
   "common": {
     "language_english": "English",
     "language_chinese_traditional": "繁體中文",

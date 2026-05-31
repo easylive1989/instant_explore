@@ -1,6 +1,7 @@
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/providers.dart';
+import 'package:context_app/shared/widgets/journal/lorescape_date_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,7 +104,7 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
     final initial = isStart
         ? (_startDate ?? DateTime.now())
         : (_endDate ?? _startDate ?? DateTime.now());
-    final picked = await showDatePicker(
+    final picked = await showLorescapeDatePicker(
       context: context,
       initialDate: initial,
       firstDate: DateTime(2000),

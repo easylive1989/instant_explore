@@ -141,6 +141,11 @@
       "reset": "重設為預設值"
     }
   },
+  "date_picker": {
+    "title": "選取日期",
+    "cancel": "取消",
+    "confirm": "確定"
+  },
   "common": {
     "language_english": "English",
     "language_chinese_traditional": "繁體中文",
