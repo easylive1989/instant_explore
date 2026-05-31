@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:context_app/app/config/app_colors.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
@@ -13,12 +13,18 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
+import 'package:context_app/shared/widgets/journal/category_tag.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
-import 'package:context_app/shared/widgets/midnight/midnight.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+/// Fallback warm card shadow (design token `e1`).
+const List<BoxShadow> _kCardShadow = [
+  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
+];
 
 /// 「挑一段歷史故事」選擇頁。
 ///
@@ -148,9 +154,9 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
               leading: isGenerating
                   ? null
                   : AdaptiveIconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.arrow_back_ios_new,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: Colors.white,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -185,10 +191,19 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
                   children: [
                     Text(
                       widget.place.name,
-                      style: Theme.of(context).textTheme.displayMedium,
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(color: Color(0x66000000), blurRadius: 16),
+                            ],
+                          ),
                     ),
-                    const SizedBox(height: 8),
-                    _CategoryBadge(place: widget.place),
+                    const SizedBox(height: 10),
+                    CategoryTag(
+                      category: widget.place.category.journalCategory,
+                      onPhoto: true,
+                    ),
                     const SizedBox(height: 24),
                     if (isGenerating)
                       const _GeneratingIndicator()
@@ -243,22 +258,62 @@ class _HookLoadingState extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          AdaptiveProgressIndicator(color: cs.primary),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              'story_hook.loading'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-            ),
+          Row(
+            children: [
+              SizedBox(
+                width: 22,
+                height: 22,
+                child: AdaptiveProgressIndicator(
+                  color: cs.primary,
+                  strokeWidth: 2.4,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  'story_hook.loading'.tr(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 18),
+          const _SkeletonLine(widthFactor: 0.92),
+          const SizedBox(height: 12),
+          const _SkeletonLine(widthFactor: 0.78),
+          const SizedBox(height: 12),
+          const _SkeletonLine(widthFactor: 0.85),
         ],
+      ),
+    );
+  }
+}
+
+class _SkeletonLine extends StatelessWidget {
+  const _SkeletonLine({required this.widthFactor});
+
+  final double widthFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: widthFactor,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const SizedBox(height: 14),
+        ),
       ),
     );
   }
@@ -278,23 +333,23 @@ class _HookListState extends StatelessWidget {
       children: [
         Text(
           'story_hook.title'.tr(),
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 16),
         Flexible(
           child: SingleChildScrollView(
             child: Column(
-              children: hooks
-                  .map(
-                    (hook) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: StoryHookCard(
-                        hook: hook,
-                        onTap: () => onTap(hook),
-                      ),
+              children: [
+                for (var i = 0; i < hooks.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: StoryHookCard(
+                      hook: hooks[i],
+                      index: i + 1,
+                      onTap: () => onTap(hooks[i]),
                     ),
-                  )
-                  .toList(),
+                  ),
+              ],
             ),
           ),
         ),
@@ -367,11 +422,13 @@ class _HookFallbackState extends StatelessWidget {
           ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
-        PillButton(
-          label: 'story_hook.listen_default_button'.tr(),
-          icon: Icons.play_arrow,
-          fullWidth: true,
-          onPressed: onListen,
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: onListen,
+            icon: const Icon(Icons.play_arrow, size: 20),
+            label: Text('story_hook.listen_default_button'.tr()),
+          ),
         ),
         const SizedBox(height: 20),
       ],
@@ -381,43 +438,52 @@ class _HookFallbackState extends StatelessWidget {
 
 class StoryHookCard extends StatelessWidget {
   final StoryHook hook;
+  final int index;
   final VoidCallback onTap;
 
-  const StoryHookCard({super.key, required this.hook, required this.onTap});
+  const StoryHookCard({
+    super.key,
+    required this.hook,
+    required this.index,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final ink3 = tokens?.ink3 ?? cs.onSurfaceVariant;
 
     return PressScale(
       onTap: onTap,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: cs.outlineVariant),
-            ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          border: Border.fromBorderSide(BorderSide(color: cs.outlineVariant)),
+          boxShadow: tokens?.e1 ?? _kCardShadow,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.auto_stories,
-                      color: cs.primary,
-                      size: 22,
+                  SizedBox(
+                    width: 26,
+                    child: Text(
+                      index.toString().padLeft(2, '0'),
+                      style: GoogleFonts.notoSerifTc(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: cs.primary,
+                        height: 1,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -427,7 +493,12 @@ class StoryHookCard extends StatelessWidget {
                       children: [
                         Text(
                           hook.title,
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: GoogleFonts.notoSerifTc(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                            height: 1.3,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -435,13 +506,17 @@ class StoryHookCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: cs.onSurfaceVariant,
-                                height: 1.4,
+                                height: 1.55,
                               ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Icon(Icons.chevron_right, color: ink3, size: 20),
+                  ),
                 ],
               ),
             ),
@@ -527,41 +602,6 @@ class _BackgroundImage extends StatelessWidget {
 
     return ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainerLowest,
-    );
-  }
-}
-
-class _CategoryBadge extends StatelessWidget {
-  const _CategoryBadge({required this.place});
-  final Place place;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = place.category.color;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(place.category.icon, size: 12, color: color),
-            const SizedBox(width: 4),
-            Text(
-              place.category.translationKey.tr().toUpperCase(),
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
