@@ -1,3 +1,4 @@
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -137,19 +138,28 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
 
   Widget _buildForm() {
     final df = DateFormat.yMd();
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
+        children: [
+          _FieldBox(
+            label: 'trip.name_label'.tr(),
+            child: TextFormField(
               controller: _nameController,
+              style: TextStyle(
+                fontSize: 17,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               decoration: InputDecoration(
-                labelText: 'trip.name_label'.tr(),
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
                 hintText: 'trip.name_hint'.tr(),
-                border: const OutlineInputBorder(),
+                hintStyle: TextStyle(
+                  fontSize: 17,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -158,45 +168,96 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            _DatePickerTile(
-              label: 'trip.start_date'.tr(),
-              value: _startDate,
-              formatter: df,
-              onTap: () => _pickDate(isStart: true),
-              onClear: _startDate == null
-                  ? null
-                  : () => setState(() => _startDate = null),
-            ),
-            const SizedBox(height: 8),
-            _DatePickerTile(
-              label: 'trip.end_date'.tr(),
-              value: _endDate,
-              formatter: df,
-              onTap: () => _pickDate(isStart: false),
-              onClear: _endDate == null
-                  ? null
-                  : () => setState(() => _endDate = null),
-            ),
-            const SizedBox(height: 32),
-            AdaptiveButton(
-              expanded: true,
-              onPressed: _saving ? null : _save,
-              child: _saving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: AdaptiveProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      _isEditMode
-                          ? 'trip.save_changes'.tr()
-                          : 'trip.create_action'.tr(),
-                    ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          _DatePickerTile(
+            label: 'trip.start_date'.tr(),
+            value: _startDate,
+            formatter: df,
+            onTap: () => _pickDate(isStart: true),
+            onClear: _startDate == null
+                ? null
+                : () => setState(() => _startDate = null),
+          ),
+          const SizedBox(height: 16),
+          _DatePickerTile(
+            label: 'trip.end_date'.tr(),
+            value: _endDate,
+            formatter: df,
+            onTap: () => _pickDate(isStart: false),
+            onClear: _endDate == null
+                ? null
+                : () => setState(() => _endDate = null),
+          ),
+          const SizedBox(height: 32),
+          AdaptiveButton(
+            expanded: true,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            onPressed: _saving ? null : _save,
+            child: _saving
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: AdaptiveProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    _isEditMode
+                        ? 'trip.save_changes'.tr()
+                        : 'trip.create_action'.tr(),
+                  ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+/// A Field Journal `.field` box: a paper-raised container with a small top
+/// label and arbitrary content below.
+class _FieldBox extends StatelessWidget {
+  const _FieldBox({required this.label, required this.child, this.onTap});
+
+  final String label;
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final ink3 = tokens?.ink3 ?? cs.onSurfaceVariant;
+    final radius = tokens?.rMd ?? 12;
+
+    final content = Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.fromBorderSide(BorderSide(color: cs.outlineVariant)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+              color: ink3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          child,
+        ],
+      ),
+    );
+
+    if (onTap == null) return content;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(radius),
+      child: content,
     );
   }
 }
@@ -218,23 +279,34 @@ class _DatePickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final ink3 = tokens?.ink3 ?? cs.onSurfaceVariant;
+    return _FieldBox(
+      label: label,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          suffixIcon: onClear == null
-              ? const Icon(Icons.calendar_today)
-              : AdaptiveIconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: onClear,
-                ),
-        ),
-        child: Text(
-          value == null ? 'trip.date_not_set'.tr() : formatter.format(value!),
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              value == null
+                  ? 'trip.date_not_set'.tr()
+                  : formatter.format(value!),
+              style: TextStyle(
+                fontSize: 17,
+                color: value == null ? ink3 : cs.onSurface,
+              ),
+            ),
+          ),
+          if (onClear == null)
+            Icon(Icons.calendar_today_outlined, size: 20, color: ink3)
+          else
+            GestureDetector(
+              onTap: onClear,
+              behavior: HitTestBehavior.opaque,
+              child: Icon(Icons.clear, size: 20, color: ink3),
+            ),
+        ],
       ),
     );
   }
