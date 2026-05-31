@@ -43,8 +43,9 @@ class StoryListScreen extends ConsumerWidget {
     AsyncValue<DailyStory?> latest,
     AsyncValue<List<DailyStory>> history,
   ) {
+    final cs = Theme.of(context).colorScheme;
     if (latest.isLoading || history.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: cs.primary));
     }
     if (latest.hasError) {
       return Center(child: Text(latest.error.toString()));
@@ -62,9 +63,13 @@ class StoryListScreen extends ConsumerWidget {
       return Center(child: Text('story.list_empty'.tr()));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(22, 8, 22, 24),
       itemCount: stories.length,
+      separatorBuilder: (_, __) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 13),
+        child: Divider(height: 1, thickness: 1, color: cs.outlineVariant),
+      ),
       itemBuilder: (context, index) {
         final story = stories[index];
         return StoryCard(
