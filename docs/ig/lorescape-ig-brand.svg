@@ -1,0 +1,50 @@
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" role="img" width="1080" height="1080">
+  <title>Lorescape — 旅行不該只是走馬看花</title>
+  <desc>Lorescape 品牌介紹卡：讓每一處風景，開口說它的故事。持續更新景點小故事。</desc>
+
+  <rect width="1080" height="1080" fill="#F7F1E6"/>
+  <rect x="60" y="60" width="960" height="960" fill="none" stroke="#E4DAC8" stroke-width="2"/>
+
+  <text x="540" y="150" text-anchor="middle"
+        font-family="'Noto Sans TC', 'PingFang TC', 'Droid Sans Fallback', sans-serif"
+        font-size="22" letter-spacing="6"
+        fill="#BC5E3E" font-weight="500">旅行不該只是走馬看花</text>
+  <line x1="484" y1="178" x2="596" y2="178" stroke="#BC5E3E" stroke-width="1"/>
+
+  <text x="540" y="370" text-anchor="middle"
+        font-family="'Noto Serif TC', 'Songti TC', 'Liberation Serif', 'Times New Roman', serif"
+        font-size="160" font-weight="700"
+        fill="#221C14" letter-spacing="-2">Lorescape</text>
+
+  <line x1="492" y1="470" x2="588" y2="470" stroke="#BC5E3E" stroke-width="3"/>
+
+  <text x="540" y="548" text-anchor="middle"
+        font-family="'Noto Serif TC', 'Songti TC', 'Droid Sans Fallback', serif"
+        font-size="56" font-weight="600"
+        fill="#221C14" letter-spacing="10">讓每一處風景</text>
+  <text x="540" y="640" text-anchor="middle"
+        font-family="'Noto Serif TC', 'Songti TC', 'Droid Sans Fallback', serif"
+        font-size="56" font-weight="600"
+        fill="#221C14" letter-spacing="10">開口說它的故事</text>
+
+  <text x="540" y="738" text-anchor="middle"
+        font-family="'Noto Sans TC', 'PingFang TC', 'Droid Sans Fallback', sans-serif"
+        font-size="28"
+        fill="#5E5341" letter-spacing="3">AI 隨行的旅行說書人</text>
+  <text x="540" y="776" text-anchor="middle"
+        font-family="'Noto Sans TC', 'PingFang TC', 'Droid Sans Fallback', sans-serif"
+        font-size="22"
+        fill="#918471">走到哪，就把那裡的故事說給你聽</text>
+
+  <line x1="380" y1="820" x2="700" y2="820" stroke="#CDBFA6" stroke-width="1"/>
+
+  <text x="540" y="870" text-anchor="middle"
+        font-family="'Noto Serif TC', 'Songti TC', 'Droid Sans Fallback', serif"
+        font-size="30" font-weight="600"
+        fill="#BC5E3E" letter-spacing="3">持續更新景點小故事</text>
+
+  <text x="540" y="935" text-anchor="middle"
+        font-family="'Noto Sans TC', 'Helvetica Neue', sans-serif"
+        font-size="18" letter-spacing="4"
+        fill="#918471">Follow @love.lorescape</text>
+</svg>
