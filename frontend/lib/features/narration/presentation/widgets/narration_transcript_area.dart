@@ -1,4 +1,5 @@
 import 'package:context_app/features/narration/providers.dart';
+import 'package:context_app/features/narration/presentation/widgets/reading_palette.dart';
 import 'package:context_app/features/narration/presentation/widgets/transcript_segment_item.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:easy_localization/easy_localization.dart' as easy;
@@ -15,20 +16,20 @@ class NarrationTranscriptArea extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
-    final cs = Theme.of(context).colorScheme;
+    final palette = ReadingPalette.of(context);
 
     if (playerState.isLoading && playerState.content == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AdaptiveProgressIndicator(color: cs.primary),
+            AdaptiveProgressIndicator(color: palette.clay),
             const SizedBox(height: 16),
             Text(
               'player_screen.loading'.tr(),
               style: Theme.of(
                 context,
-              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
+              ).textTheme.bodyLarge?.copyWith(color: palette.readDim),
             ),
           ],
         ),
@@ -44,11 +45,13 @@ class NarrationTranscriptArea extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: cs.error, size: 48),
+              Icon(Icons.error_outline, color: palette.clay, size: 48),
               const SizedBox(height: 16),
               Text(
                 errorMessage,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: palette.readInk),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -97,7 +100,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [cs.surface, cs.surface.withValues(alpha: 0)],
+                  colors: [palette.readBg, palette.readBg.withValues(alpha: 0)],
                 ),
               ),
             ),
@@ -114,7 +117,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [cs.surface, cs.surface.withValues(alpha: 0)],
+                  colors: [palette.readBg, palette.readBg.withValues(alpha: 0)],
                 ),
               ),
             ),

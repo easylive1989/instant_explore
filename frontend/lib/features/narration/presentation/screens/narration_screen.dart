@@ -3,13 +3,14 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
+import 'package:context_app/features/narration/presentation/widgets/reading_palette.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
-import 'package:context_app/shared/widgets/midnight/midnight.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 /// 導覽播放頁面
@@ -85,14 +86,19 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
       }
     });
 
+    final palette = ReadingPalette.of(context);
     return Scaffold(
+      backgroundColor: palette.readBg,
       body: Column(
         children: [
           Expanded(
             child: SafeArea(
               child: Column(
                 children: [
-                  _NarrationHeader(placeName: widget.place.name),
+                  _NarrationHeader(
+                    placeName: widget.place.name,
+                    palette: palette,
+                  ),
                   Expanded(
                     child: Stack(
                       children: [
@@ -103,10 +109,8 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                           Positioned(
                             right: 12,
                             bottom: 12,
-                            child: PillIconButton(
-                              icon: Icons.info_outline,
-                              size: 40,
-                              variant: PillIconButtonVariant.ghost,
+                            child: _InfoButton(
+                              palette: palette,
                               tooltip: 'narration.grounding_info_tooltip'.tr(),
                               onPressed: () => showGroundingInfoSheet(
                                 context,
@@ -130,25 +134,67 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
 class _NarrationHeader extends StatelessWidget {
   final String placeName;
-  const _NarrationHeader({required this.placeName});
+  final ReadingPalette palette;
+  const _NarrationHeader({required this.placeName, required this.palette});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Row(
         children: [
           AdaptiveIconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new, size: 20, color: palette.clay),
             onPressed: () => context.go('/'),
           ),
+          const SizedBox(width: 4),
           Expanded(
             child: Text(
               placeName,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: GoogleFonts.notoSerifTc(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: palette.readInk,
+                letterSpacing: 0.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Circular ghost info button sitting on the reading surface.
+class _InfoButton extends StatelessWidget {
+  const _InfoButton({
+    required this.palette,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final ReadingPalette palette;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: palette.readBg,
+        shape: CircleBorder(side: BorderSide(color: palette.readLine)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(Icons.info_outline, size: 20, color: palette.readDim),
+          ),
+        ),
       ),
     );
   }
