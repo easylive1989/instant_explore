@@ -1,4 +1,3 @@
-import 'package:context_app/app/config/app_colors.dart';
 import 'package:context_app/features/export/presentation/default_pdf_export_pipeline.dart';
 import 'package:context_app/features/export/domain/models/pdf_export_result.dart';
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
@@ -97,7 +96,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${'common.error_prefix'.tr()}: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -272,7 +271,7 @@ class _TripMenuButton extends ConsumerWidget {
           value: _TripMenuAction.delete,
           child: Text(
             'trip.delete_action'.tr(),
-            style: const TextStyle(color: AppColors.error),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
       ],
@@ -473,7 +472,7 @@ class _ItemsList extends StatelessWidget {
       error: (e, _) => Center(
         child: Text(
           '${'trip.load_error'.tr()}: $e',
-          style: const TextStyle(color: AppColors.error),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),
     );
@@ -505,11 +504,11 @@ class _SelectableEntry extends StatelessWidget {
               margin: TimelineEntry.contentPadding,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.08)
+                    ? colorScheme.primary.withValues(alpha: 0.10)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: AppColors.primary, width: 2)
+                    ? Border.all(color: colorScheme.primary, width: 2)
                     : null,
               ),
               child: Align(
@@ -522,11 +521,11 @@ class _SelectableEntry extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isSelected
-                          ? AppColors.primary
+                          ? colorScheme.primary
                           : colorScheme.surface,
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.primary
+                            ? colorScheme.primary
                             : colorScheme.outline,
                         width: 2,
                       ),
