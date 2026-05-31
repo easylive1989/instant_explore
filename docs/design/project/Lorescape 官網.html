@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lorescape — 體驗歷史，而不只是風景</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700;900&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --paper:#F7F1E6; --paper-raised:#FDFAF3; --paper-sunk:#ECE3D3; --line:#E4DAC8; --line-strong:#CDBFA6;
+  --ink:#221C14; --ink-2:#5E5341; --ink-3:#918471;
+  --clay:#BC5E3E; --clay-deep:#97442A; --clay-soft:#F1DDCE; --clay-tint:#F7E8DD;
+  --ink-bg:#1B1611; --ink-bg-2:#251E17; --on-dark:#F7F1E6; --on-dark-2:#C3B7A4;
+  --serif:"Noto Serif TC","Songti TC",serif; --sans:"Noto Sans TC",-apple-system,sans-serif;
+  --e1:0 1px 2px rgba(40,30,18,.06); --e2:0 6px 18px rgba(40,30,18,.09); --e3:0 18px 44px rgba(28,20,10,.20);
+  --gut:clamp(22px,5vw,72px);
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; line-height:1.6;
+  background-image:radial-gradient(circle at 1px 1px, rgba(120,100,70,.05) 1px, transparent 0);
+  background-size:22px 22px;
+}
+img{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+.wrap{ max-width:1200px; margin:0 auto; padding:0 var(--gut); }
+.over{ font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--clay); }
+.serif{ font-family:var(--serif); }
+
+/* ============ NAV ============ */
+.nav{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; gap:18px;
+  padding:16px var(--gut); border-bottom:1px solid transparent;
+  transition:background .3s, border-color .3s, backdrop-filter .3s;
+}
+.nav.scrolled{ background:rgba(247,241,230,.82); backdrop-filter:blur(14px); border-bottom-color:var(--line); }
+.brand{ font-family:var(--serif); font-weight:700; font-size:23px; letter-spacing:.02em; display:flex; align-items:center; gap:11px; }
+.brand .seal{ width:30px; height:30px; border-radius:50%; background:var(--clay); display:grid; place-items:center; flex:none; box-shadow:var(--e1); }
+.brand .seal svg{ width:18px; height:18px; }
+.nav__links{ display:flex; gap:30px; margin-left:42px; }
+.nav__links a{ font-size:15px; color:var(--ink-2); font-weight:500; transition:color .2s; white-space:nowrap; }
+.nav__links a:hover{ color:var(--ink); }
+.nav__spacer{ margin-left:auto; }
+.btn{
+  font-family:var(--sans); font-weight:600; font-size:15px; border:none; cursor:pointer;
+  border-radius:14px; padding:0 20px; height:46px; display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  transition:transform .15s ease, box-shadow .2s ease, background .2s;
+}
+.btn:active{ transform:translateY(1px); }
+.btn{ white-space:nowrap; }
+.btn svg{ width:18px; height:18px; }
+.btn--primary{ background:var(--clay); color:#FBF1E9; box-shadow:var(--e2); }
+.btn--primary:hover{ background:var(--clay-deep); }
+.btn--ghost{ background:var(--paper-raised); color:var(--ink); border:1px solid var(--line-strong); }
+.btn--ghost:hover{ border-color:var(--ink-3); }
+.btn--dark{ background:var(--on-dark); color:var(--ink); box-shadow:0 6px 20px rgba(0,0,0,.35); }
+.btn--dark:hover{ background:#fff; }
+.btn--outline-dark{ background:transparent; color:var(--on-dark); border:1px solid rgba(247,241,230,.32); }
+.btn--outline-dark:hover{ border-color:var(--on-dark); }
+.btn .sm{ font-size:11px; font-weight:500; opacity:.85; display:block; line-height:1.1; letter-spacing:.02em; }
+.btn .lg{ font-size:15px; font-weight:600; display:block; line-height:1.15; }
+.btn--store{ height:54px; padding:0 22px; text-align:left; }
+@media(max-width:880px){ .nav__links{ display:none; } }
+
+/* ============ HERO ============ */
+.hero{ position:relative; padding:clamp(56px,9vw,108px) 0 0; text-align:center; }
+.hero .pill{
+  display:inline-flex; align-items:center; gap:9px; height:34px; padding:0 16px; border-radius:999px;
+  background:var(--clay-tint); border:1px solid var(--clay-soft); color:var(--clay-deep);
+  font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap;
+}
+.hero .pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--clay); }
+.hero h1{
+  font-family:var(--serif); font-weight:900; letter-spacing:.01em;
+  font-size:clamp(46px,8.4vw,104px); line-height:1.02; margin:26px auto 0; max-width:14ch;
+}
+.hero h1 .clay{ color:var(--clay); }
+.hero .lede{
+  font-family:var(--serif); font-size:clamp(18px,2.3vw,23px); line-height:1.85; color:var(--ink-2);
+  max-width:30ch; margin:26px auto 0; text-wrap:balance;
+}
+.hero__cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:38px; }
+.hero__scroll{ margin:46px auto 0; color:var(--ink-3); font-size:11px; letter-spacing:.2em; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.hero__scroll svg{ width:18px; height:18px; animation:bob 2s ease-in-out infinite; }
+@keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(5px); } }
+
+/* hero plate */
+.plate{ position:relative; margin-top:clamp(44px,6vw,76px); }
+.plate__frame{
+  position:relative; border-radius:24px; overflow:hidden; aspect-ratio:16/8;
+  border:1px solid var(--line-strong); box-shadow:var(--e3);
+}
+.plate__frame img{ width:100%; height:100%; object-fit:cover; }
+.plate__frame::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,14,8,.05), rgba(20,14,8,.42)); }
+.plate__cap{
+  position:absolute; left:24px; bottom:22px; z-index:2; color:var(--on-dark); text-align:left;
+  display:flex; align-items:flex-end; gap:14px;
+}
+.plate__cap .ln{ width:42px; height:1px; background:rgba(247,241,230,.6); margin-bottom:9px; }
+.plate__cap .t{ font-family:var(--serif); font-size:clamp(19px,2.4vw,26px); font-weight:700; }
+.plate__cap .o{ font-size:11px; letter-spacing:.18em; text-transform:uppercase; opacity:.82; margin-top:5px; }
+.plate__tag{
+  position:absolute; right:22px; top:22px; z-index:2;
+  display:inline-flex; align-items:center; gap:8px; height:34px; padding:0 14px; border-radius:999px;
+  background:rgba(247,241,230,.92); color:var(--clay-deep); font-size:13px; font-weight:600;
+  box-shadow:var(--e2);
+}
+.plate__tag svg{ width:16px; height:16px; }
+
+/* ============ MANIFESTO ============ */
+.manifesto{ padding:clamp(80px,12vw,150px) 0; text-align:center; }
+.manifesto .rule{ width:60px; height:2px; background:var(--clay); margin:0 auto 34px; }
+.manifesto blockquote{
+  font-family:var(--serif); font-weight:600; font-size:clamp(28px,5vw,52px); line-height:1.32;
+  margin:0 auto; max-width:18ch; letter-spacing:.01em; text-wrap:balance;
+}
+.manifesto blockquote .q{ color:var(--clay); }
+.manifesto cite{ display:block; font-style:normal; margin-top:30px; font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); }
+
+/* ============ SECTION SCAFFOLD ============ */
+.section{ padding:clamp(56px,8vw,104px) 0; }
+.section--sunk{ background:linear-gradient(180deg,var(--paper),var(--paper-sunk)); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.sec-label{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.sec-label .no{ font-family:var(--serif); font-size:14px; color:var(--clay); font-weight:700; }
+.sec-label .bar{ width:30px; height:1px; background:var(--line-strong); }
+.h2{ font-family:var(--serif); font-weight:700; font-size:clamp(32px,4.6vw,52px); line-height:1.12; margin:0; letter-spacing:.01em; text-wrap:balance; }
+.sec-lede{ font-family:var(--serif); font-size:clamp(17px,1.9vw,20px); line-height:1.85; color:var(--ink-2); max-width:46ch; margin:20px 0 0; }
+
+/* split feature */
+.split{ display:grid; grid-template-columns:1.05fr 1fr; gap:clamp(36px,5vw,72px); align-items:center; }
+.split--rev .split__media{ order:-1; }
+.split__media{ border-radius:22px; overflow:hidden; border:1px solid var(--line-strong); box-shadow:var(--e3); position:relative; aspect-ratio:4/5; }
+.split__media img{ width:100%; height:100%; object-fit:cover; }
+.media-cap{ position:absolute; left:18px; bottom:16px; color:var(--on-dark); z-index:2; }
+.media-cap::before{ content:""; position:absolute; inset:0; }
+.split__media::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%, rgba(20,14,8,.5)); }
+.media-cap{ font-family:var(--serif); font-weight:600; font-size:18px; }
+.media-cap .o{ font-family:var(--sans); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; opacity:.85; margin-top:4px; font-weight:500; }
+
+/* feature subcards */
+.subgrid{ display:grid; gap:16px; margin-top:34px; }
+.subcard{ display:flex; gap:16px; padding:20px; border:1px solid var(--line); border-radius:16px; background:var(--paper-raised); box-shadow:var(--e1); }
+.subcard .ic{ width:46px; height:46px; border-radius:12px; background:var(--clay-tint); color:var(--clay-deep); display:grid; place-items:center; flex:none; }
+.subcard .ic svg{ width:24px; height:24px; }
+.subcard h3{ font-family:var(--serif); font-size:19px; font-weight:600; margin:2px 0 6px; }
+.subcard p{ margin:0; font-size:14.5px; color:var(--ink-2); line-height:1.65; }
+
+/* ============ AI DARK SECTION ============ */
+.dark{ background:var(--ink-bg); color:var(--on-dark); position:relative; overflow:hidden; }
+.dark::before{ content:""; position:absolute; inset:0; background:radial-gradient(120% 80% at 80% 0%, rgba(188,94,62,.16), transparent 55%); pointer-events:none; }
+.dark .over{ color:#E2A98D; }
+.dark .h2{ color:var(--on-dark); }
+.dark .sec-lede{ color:var(--on-dark-2); }
+.dark .sec-label .bar{ background:rgba(247,241,230,.22); }
+.dark .sec-label .no{ color:#E2A98D; }
+.depth-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(40px,6vw,80px); align-items:center; position:relative; z-index:1; }
+.depth-mode{ padding:26px 0; border-top:1px solid rgba(247,241,230,.14); display:flex; gap:20px; }
+.depth-mode:last-child{ border-bottom:1px solid rgba(247,241,230,.14); }
+.depth-mode .num{ font-family:var(--serif); font-size:15px; color:#E2A98D; font-weight:700; padding-top:4px; flex:none; }
+.depth-mode h3{ font-family:var(--serif); font-size:clamp(22px,2.6vw,28px); font-weight:700; margin:0 0 8px; }
+.depth-mode h3 .tt{ font-size:13px; font-family:var(--sans); color:var(--on-dark-2); font-weight:500; letter-spacing:.04em; margin-left:10px; }
+.depth-mode p{ margin:0; color:var(--on-dark-2); font-size:15px; line-height:1.7; max-width:42ch; }
+
+/* phone */
+.phone{ width:300px; max-width:78vw; margin:0 auto; position:relative; }
+.phone__frame{
+  border-radius:46px; padding:13px; background:linear-gradient(160deg,#2c2620,#15110c);
+  box-shadow:0 30px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(247,241,230,.06);
+}
+.phone__screen{ border-radius:34px; overflow:hidden; background:#0e0b08; position:relative; aspect-ratio:9/19.3; }
+.phone__notch{ position:absolute; top:11px; left:50%; transform:translateX(-50%); width:96px; height:26px; background:#0a0805; border-radius:999px; z-index:5; }
+.ph-img{ position:absolute; inset:0; }
+.ph-img img{ width:100%; height:100%; object-fit:cover; }
+.ph-img::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(14,11,8,.55) 0%, rgba(14,11,8,.05) 32%, rgba(14,11,8,.25) 60%, rgba(14,11,8,.92) 100%); }
+.ph-top{ position:absolute; top:0; left:0; right:0; z-index:4; padding:48px 22px 0; display:flex; justify-content:space-between; align-items:center; color:var(--on-dark); }
+.ph-top .nm{ font-size:11px; letter-spacing:.22em; text-transform:uppercase; opacity:.85; }
+.ph-mid{ position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); z-index:4; text-align:center; color:var(--on-dark); padding:0 26px; }
+.ph-mid .badge{ display:inline-flex; height:26px; align-items:center; padding:0 11px; border:1px solid rgba(247,241,230,.45); border-radius:6px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
+.ph-mid .ti{ font-family:var(--serif); font-size:25px; font-weight:700; margin-top:14px; line-height:1.25; }
+.ph-mid .su{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; opacity:.78; margin-top:8px; }
+.ph-bot{ position:absolute; left:0; right:0; bottom:0; z-index:4; padding:0 22px 34px; color:var(--on-dark); }
+.ph-bar{ height:3px; border-radius:3px; background:rgba(247,241,230,.22); position:relative; margin-bottom:8px; }
+.ph-bar i{ position:absolute; left:0; top:0; bottom:0; width:38%; border-radius:3px; background:var(--clay); }
+.ph-time{ display:flex; justify-content:space-between; font-size:10px; opacity:.7; letter-spacing:.05em; margin-bottom:18px; }
+.ph-ctrl{ display:flex; align-items:center; justify-content:center; gap:30px; }
+.ph-ctrl svg{ width:24px; height:24px; opacity:.92; }
+.ph-ctrl .play{ width:60px; height:60px; border-radius:50%; background:var(--clay); display:grid; place-items:center; box-shadow:0 10px 26px rgba(188,94,62,.5); }
+.ph-ctrl .play svg{ width:26px; height:26px; opacity:1; }
+
+/* ============ PHOTO IDENTIFY full-bleed ============ */
+.bleed{ position:relative; min-height:clamp(520px,72vw,720px); display:flex; align-items:flex-end; overflow:hidden; }
+.bleed__bg{ position:absolute; inset:0; }
+.bleed__bg img{ width:100%; height:100%; object-fit:cover; }
+.bleed__bg::after{ content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,14,8,.82) 0%, rgba(20,14,8,.5) 46%, rgba(20,14,8,.18) 100%); }
+.bleed__in{ position:relative; z-index:2; color:var(--on-dark); padding:clamp(44px,7vw,90px) 0; max-width:540px; }
+.bleed__in .over{ color:#E9B79B; }
+.bleed__in h2{ font-family:var(--serif); font-weight:700; font-size:clamp(32px,4.6vw,52px); line-height:1.12; margin:18px 0 0; }
+.bleed__in p{ font-family:var(--serif); font-size:clamp(16px,1.9vw,19px); line-height:1.8; color:rgba(247,241,230,.86); margin:20px 0 0; }
+.checks{ display:flex; flex-direction:column; gap:13px; margin-top:30px; }
+.check{ display:flex; align-items:center; gap:13px; font-size:15.5px; }
+.check .tick{ width:26px; height:26px; border-radius:50%; background:var(--clay); display:grid; place-items:center; flex:none; }
+.check .tick svg{ width:15px; height:15px; }
+
+/* ============ STATS ============ */
+.stats-head{ text-align:center; max-width:36ch; margin:0 auto; }
+.stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(18px,2.5vw,28px); margin-top:clamp(40px,6vw,64px); }
+.stat{ text-align:center; padding:clamp(28px,3.5vw,42px) 22px; border:1px solid var(--line); border-radius:20px; background:var(--paper-raised); box-shadow:var(--e1); }
+.stat .num{ font-family:var(--serif); font-weight:700; font-size:clamp(46px,6vw,72px); line-height:1; color:var(--clay); letter-spacing:-.01em; }
+.stat .lab{ font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-3); margin-top:16px; }
+.stat .cn{ font-family:var(--serif); font-size:17px; font-weight:600; color:var(--ink); margin-top:7px; }
+.stat p{ font-size:14px; color:var(--ink-2); line-height:1.65; margin:12px auto 0; max-width:24ch; }
+
+/* ============ FINAL CTA ============ */
+.final{ position:relative; overflow:hidden; }
+.final__bg{ position:absolute; inset:0; }
+.final__bg img{ width:100%; height:100%; object-fit:cover; }
+.final__bg::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(15,11,8,.78), rgba(15,11,8,.92)); }
+.final__in{ position:relative; z-index:2; text-align:center; color:var(--on-dark); padding:clamp(80px,12vw,150px) 0; }
+.final__in h2{ font-family:var(--serif); font-weight:900; font-size:clamp(38px,6.4vw,80px); line-height:1.08; margin:20px auto 0; max-width:14ch; }
+.final__in p{ font-family:var(--serif); font-size:clamp(17px,2vw,21px); color:rgba(247,241,230,.82); margin:24px auto 0; max-width:34ch; line-height:1.7; }
+.final__cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:40px; }
+
+/* ============ FOOTER ============ */
+.foot{ background:var(--ink-bg-2); color:var(--on-dark-2); }
+.foot__top{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding:clamp(48px,6vw,72px) 0 40px; }
+.foot__brand{ font-family:var(--serif); font-weight:700; font-size:22px; color:var(--on-dark); display:flex; align-items:center; gap:11px; }
+.foot__brand .seal{ width:30px; height:30px; border-radius:50%; background:var(--clay); display:grid; place-items:center; }
+.foot__brand .seal svg{ width:18px; height:18px; }
+.foot__tag{ font-family:var(--serif); font-size:15px; color:var(--on-dark-2); margin-top:14px; max-width:30ch; line-height:1.7; }
+.foot__cols{ display:flex; gap:clamp(36px,6vw,84px); flex-wrap:wrap; }
+.foot__col h4{ font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--on-dark-2); opacity:.7; margin:0 0 16px; font-weight:700; }
+.foot__col a{ display:block; font-size:14.5px; color:var(--on-dark); margin-bottom:11px; opacity:.85; transition:opacity .2s, color .2s; }
+.foot__col a:hover{ opacity:1; color:#E9B79B; }
+.foot__bar{ border-top:1px solid rgba(247,241,230,.1); padding:24px 0 40px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; letter-spacing:.03em; }
+
+@media(max-width:880px){
+  .split, .depth-grid{ grid-template-columns:1fr; }
+  .split--rev .split__media{ order:0; }
+  .split__media{ aspect-ratio:16/11; }
+  .depth-phone{ margin-top:40px; }
+  .stats{ grid-template-columns:1fr; max-width:420px; margin-left:auto; margin-right:auto; }
+  .plate__frame{ aspect-ratio:16/11; }
+  .bleed__bg::after{ background:linear-gradient(180deg, rgba(20,14,8,.45) 0%, rgba(20,14,8,.4) 38%, rgba(20,14,8,.9) 100%); }
+}
+
+/* ---- phones ---- */
+@media(max-width:560px){
+  .nav{ padding:13px var(--gut); gap:12px; }
+  .brand{ font-size:20px; }
+  .brand .seal{ width:27px; height:27px; }
+  .btn--primary svg{ display:none; }              /* download button: text only on small screens */
+  .hero{ padding:40px 0 0; }
+  .hero h1{ font-size:clamp(40px,12.5vw,60px); margin-top:22px; }
+  .hero .lede{ font-size:17px; max-width:26ch; }
+  .hero__cta{ gap:11px; }
+  .hero__cta .btn--store{ width:100%; }           /* full-width store buttons, easy tap targets */
+  .plate__frame{ aspect-ratio:4/3; border-radius:18px; }
+  .plate__cap{ left:16px; bottom:16px; }
+  .plate__cap .ln{ display:none; }
+  .plate__tag{ right:14px; top:14px; height:30px; font-size:12px; }
+  .manifesto blockquote{ font-size:clamp(26px,8vw,34px); max-width:16ch; }
+  .subcard{ padding:16px; }
+  .depth-mode{ padding:22px 0; gap:14px; }
+  .bleed{ min-height:auto; }
+  .bleed__in{ max-width:none; }
+  .final__cta .btn--store{ width:100%; max-width:300px; }
+  .foot__top{ gap:32px; }
+  .foot__cols{ gap:32px 40px; }
+}
+@media(max-width:360px){
+  .hero h1{ font-size:38px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a class="brand" href="#top">
+    <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="#FBF1E9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 10.5 10.5 8.5 15.5 13.5 13.5" fill="#FBF1E9" stroke="none"/></svg></span>
+    Lorescape
+  </a>
+  <nav class="nav__links">
+    <a href="#discover">免持探索</a>
+    <a href="#narration">AI 導覽</a>
+    <a href="#journey">知識旅程</a>
+  </nav>
+  <span class="nav__spacer"></span>
+  <a class="btn btn--primary" href="#download">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v12"/><path d="M7 12l5 5 5-5"/><path d="M5 20h14"/></svg>
+    下載 App
+  </a>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="pill"><span class="dot"></span>AI 沉浸式歷史導覽</span>
+      <h1>體驗歷史，<br/><span class="clay">而不只是風景。</span></h1>
+      <p class="lede">你的隨身 AI 歷史學家。免持探索，讓城市的每一塊石頭，向你訴說它的故事。</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary btn--store" href="#download">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8zM14.2 6.2c.6-.8 1.1-1.9.9-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.9-1.3z"/></svg>
+          <span><span class="sm">Download on the</span><span class="lg">App Store</span></span>
+        </a>
+        <a class="btn btn--ghost btn--store" href="#download">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 2.4c-.3.3-.5.8-.5 1.4v16.4c0 .6.2 1.1.5 1.4l.1.1 9.2-9.2v-.2L3.6 2.4z"/><path d="M16 15.3l-3.1-3.1v-.2L16 8.9l.1.1 3.7 2.1c1 .6 1 1.6 0 2.2L16 15.3z" fill="currentColor" opacity=".75"/><path d="M16.1 15.2L12.9 12l-9.3 9.3c.4.4 1 .4 1.7 0l10.8-6.1" opacity=".55"/><path d="M16.1 8.8L5.3 2.7c-.7-.4-1.3-.4-1.7 0L12.9 12l3.2-3.2z" opacity=".9"/></svg>
+          <span><span class="sm">GET IT ON</span><span class="lg">Google Play</span></span>
+        </a>
+      </div>
+      <div class="hero__scroll">
+        向下捲動
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="plate">
+        <div class="plate__frame">
+          <img src="site/img/stpeters.jpg" alt="聖伯多祿大殿"/>
+          <span class="plate__tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="7 4 20 12 7 20" fill="currentColor" stroke="none"/></svg>
+            正在導覽
+          </span>
+          <div class="plate__cap">
+            <span class="ln"></span>
+            <span>
+              <span class="t">摧毀與重生的百年豪賭</span>
+              <span class="o">St. Peter's Basilica · Vatican</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MANIFESTO ============ -->
+  <section class="manifesto">
+    <div class="wrap">
+      <div class="rule"></div>
+      <blockquote>別再低頭盯著螢幕。<br/>抬起眼睛，<span class="q">世界本身就是展品。</span></blockquote>
+      <cite>Lorescape · 地誌手記</cite>
+    </div>
+  </section>
+
+  <!-- ============ 免持探索 ============ -->
+  <section class="section section--sunk" id="discover">
+    <div class="wrap">
+      <div class="split">
+        <div class="split__copy">
+          <div class="sec-label"><span class="bar"></span><span class="no">特徵 01</span></div>
+          <h2 class="h2">免持探索，<br/>抬起你的眼睛</h2>
+          <p class="sec-lede">「漫遊」模式以空間音訊娓娓道來眼前的歷史。把手機收進口袋，讓整座城市親口向你訴說。</p>
+          <div class="subgrid">
+            <div class="subcard">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 10v4"/></svg></div>
+              <div>
+                <h3>沉浸式空間音場</h3>
+                <p>音訊隨你的步伐與朝向流動，交織成彷彿來自環境本身的敘事。</p>
+              </div>
+            </div>
+            <div class="subcard">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M4 5l16 12" stroke-width="1.9"/><path d="M8 21h8M12 17v4"/></svg></div>
+              <div>
+                <h3>零螢幕互動</h3>
+                <p>不必盯著地圖。AI 以歷史地標為航點，溫柔地引領你前行。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="split__media">
+          <img src="site/img/park.jpg" alt="漫步於公園步道"/>
+          <div class="media-cap">坪林森林公園<span class="o">Pinglin Forest Park</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AI 導覽 (dark) ============ -->
+  <section class="section dark" id="narration">
+    <div class="wrap">
+      <div class="depth-grid">
+        <div class="depth-copy">
+          <div class="sec-label"><span class="bar"></span><span class="no">特徵 02</span></div>
+          <span class="over">Dynamic Intelligence</span>
+          <h2 class="h2" style="margin-top:14px">AI 導覽：<br/>由你決定深度</h2>
+          <p class="sec-lede">從一句話的精華，到一整段失落的史詩——同一座地標，兩種閱讀方式，隨你心情切換。</p>
+          <div class="depth-modes" style="margin-top:36px">
+            <div class="depth-mode">
+              <span class="num">01</span>
+              <div>
+                <h3>簡述模式<span class="tt">Brief Mode</span></h3>
+                <p>趕時間？三十秒掌握你經過的每座建築最關鍵的歷史精華。</p>
+              </div>
+            </div>
+            <div class="depth-mode">
+              <span class="num">02</span>
+              <div>
+                <h3>深度導覽<span class="tt">Deep Dive</span></h3>
+                <p>給真正的求知者。十五分鐘沉浸式長篇，細說政治權謀、建築祕辛與失落的傳說。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="depth-phone">
+          <div class="phone">
+            <div class="phone__frame">
+              <div class="phone__screen">
+                <span class="phone__notch"></span>
+                <div class="ph-img"><img src="site/img/stpeters.jpg" alt="聖伯多祿大殿導覽"/></div>
+                <div class="ph-top">
+                  <span class="nm">正在播放</span>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                </div>
+                <div class="ph-mid">
+                  <span class="badge">Anno · I</span>
+                  <div class="ti">摧毀與重生的<br/>百年豪賭</div>
+                  <div class="su">St. Peter's Basilica</div>
+                </div>
+                <div class="ph-bot">
+                  <div class="ph-bar"><i></i></div>
+                  <div class="ph-time"><span>02:31</span><span>06:38</span></div>
+                  <div class="ph-ctrl">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="19 5 9 12 19 19"/><rect x="5" y="5" width="2.4" height="14" rx="1"/></svg>
+                    <span class="play"><svg viewBox="0 0 24 24" fill="#fff"><polygon points="7 4 20 12 7 20"/></svg></span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 5 15 12 5 19"/><rect x="16.6" y="5" width="2.4" height="14" rx="1"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 拍照辨識 full-bleed ============ -->
+  <section class="bleed">
+    <div class="bleed__bg"><img src="site/img/temple.jpg" alt="廟宇屋脊"/></div>
+    <div class="wrap">
+      <div class="bleed__in">
+        <span class="over">特徵 03 · Photo Identify</span>
+        <h2>拍照辨識，<br/>讓謎題自己說話</h2>
+        <p>遇見了神祕的事物？拍張照。先進的電腦視覺立即辨識它的年代、建築師與歷史意義，為你開啟一段量身打造的導覽。</p>
+        <div class="checks">
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>文物與建築辨識</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>碑文與銘刻即時翻譯</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>風格與年代推斷</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 知識旅程 ============ -->
+  <section class="section" id="journey">
+    <div class="wrap">
+      <div class="stats-head">
+        <div class="sec-label" style="justify-content:center"><span class="bar"></span><span class="no">特徵 04</span><span class="bar"></span></div>
+        <h2 class="h2">你的知識旅程</h2>
+        <p class="sec-lede" style="margin-left:auto;margin-right:auto;text-align:center">每一次駐足，都被自動寫進一本屬於你的旅行手記。</p>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="num">120<span style="font-size:.5em">+</span></div>
+          <div class="lab">Historical Logs</div>
+          <div class="cn">歷史足跡</div>
+          <p>自動為你撰寫一本走訪世界的旅行手記。</p>
+        </div>
+        <div class="stat">
+          <div class="num">500<span style="font-size:.5em">+</span></div>
+          <div class="lab">Stories Unlocked</div>
+          <div class="cn">解鎖故事</div>
+          <p>深入鑽研你所拍下的每一處罕見歷史照片。</p>
+        </div>
+        <div class="stat">
+          <div class="num">84</div>
+          <div class="lab">Cultural Badges</div>
+          <div class="cn">文化徽章</div>
+          <p>辨識你的探索成果，獎勵鑽研特定主題與地區的你。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final" id="download">
+    <div class="final__bg"><img src="site/img/agra.jpg" alt="阿格拉紅堡"/></div>
+    <div class="wrap">
+      <div class="final__in">
+        <span class="over" style="color:#E9B79B">開始你的第一段故事</span>
+        <h2>城市是一本書。<br/>開始閱讀吧。</h2>
+        <p>加入五萬名探索者，一同揭開世界各地隱藏的篇章。</p>
+        <div class="final__cta">
+          <a class="btn btn--dark btn--store" href="#">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8zM14.2 6.2c.6-.8 1.1-1.9.9-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.9-1.3z"/></svg>
+            <span><span class="sm">Download on the</span><span class="lg">App Store</span></span>
+          </a>
+          <a class="btn btn--outline-dark btn--store" href="#">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 2.4c-.3.3-.5.8-.5 1.4v16.4c0 .6.2 1.1.5 1.4l.1.1 9.2-9.2v-.2L3.6 2.4z"/><path d="M16 15.3l-3.1-3.1v-.2L16 8.9l.1.1 3.7 2.1c1 .6 1 1.6 0 2.2L16 15.3z" opacity=".75"/><path d="M16.1 15.2L12.9 12l-9.3 9.3c.4.4 1 .4 1.7 0l10.8-6.1" opacity=".55"/><path d="M16.1 8.8L5.3 2.7c-.7-.4-1.3-.4-1.7 0L12.9 12l3.2-3.2z" opacity=".9"/></svg>
+            <span><span class="sm">GET IT ON</span><span class="lg">Google Play</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div>
+        <div class="foot__brand">
+          <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="#FBF1E9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 10.5 10.5 8.5 15.5 13.5 13.5" fill="#FBF1E9" stroke="none"/></svg></span>
+          Lorescape
+        </div>
+        <p class="foot__tag">溫潤紙感 × 文學宋體 × 陶土點綴——為旅途中的每一段故事而設計。</p>
+      </div>
+      <div class="foot__cols">
+        <div class="foot__col">
+          <h4>產品</h4>
+          <a href="#discover">免持探索</a>
+          <a href="#narration">AI 導覽</a>
+          <a href="#journey">知識旅程</a>
+          <a href="#download">下載 App</a>
+        </div>
+        <div class="foot__col">
+          <h4>公司</h4>
+          <a href="#">關於我們</a>
+          <a href="#">部落格</a>
+          <a href="#">聯絡我們</a>
+        </div>
+        <div class="foot__col">
+          <h4>法律</h4>
+          <a href="#">隱私政策</a>
+          <a href="#">使用條款</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot__bar">
+      <span>© 2026 Lorescape. 版權所有。</span>
+      <span>地誌手記 · v1.0</span>
+    </div>
+  </div>
+</footer>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#BC5E3E"/>
+    <g fill="none" stroke="#F7F1E6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="50" cy="50" r="20"/>
+      <polygon points="58 42 47 47 42 58 53 53" fill="#F7F1E6" stroke="none"/>
+    </g>
+  </svg>
+</template>
+
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive:true });
+</script>
+</body>
+</html>
