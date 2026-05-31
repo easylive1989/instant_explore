@@ -302,7 +302,7 @@ Future<void> _givenExploreScreenWithRouter(
 }
 
 void _thenEmptyStateIsVisible() {
-  expect(find.text('No places found'), findsOneWidget);
+  expect(find.text('explore.empty'), findsOneWidget);
 }
 
 void _thenPlaceNamesAreVisible(List<String> names) {

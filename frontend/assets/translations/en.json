@@ -130,6 +130,8 @@
   "explore": {
     "title": "Explore",
     "refresh": "Refresh",
+    "search_hint": "Search for places, cities, or landmarks…",
+    "empty": "No places found",
     "filter": {
       "title": "Filters",
       "max_distance": "Maximum distance",

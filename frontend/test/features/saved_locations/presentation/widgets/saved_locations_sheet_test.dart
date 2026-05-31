@@ -1,7 +1,7 @@
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
-import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_dialog.dart';
+import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_sheet.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,12 +14,12 @@ void main() {
     await initTestEnvironment();
   });
 
-  group('SavedLocationsDialog', () {
+  group('SavedLocationsSheet', () {
     testWidgets(
-      'given no saved locations, when the dialog is opened, '
+      'given no saved locations, when the sheet is opened, '
       'then the empty state icon and helper text are shown',
       (tester) async {
-        await _openDialog(tester, repo: InMemorySavedLocationsRepository());
+        await _openSheet(tester, repo: InMemorySavedLocationsRepository());
 
         expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
         expect(find.text('saved_locations.empty'), findsOneWidget);
@@ -28,35 +28,33 @@ void main() {
     );
 
     testWidgets(
-      'given two saved locations, when the dialog is opened, '
-      'then each tile shows name, address and a chevron',
+      'given two saved locations, when the sheet is opened, '
+      'then each tile shows the name and a chevron',
       (tester) async {
         final repo = InMemorySavedLocationsRepository();
-        await repo.save(_entry(id: 'p1', name: 'Senso-ji', address: 'Asakusa'));
-        await repo.save(_entry(id: 'p2', name: 'Meiji', address: 'Shibuya'));
+        await repo.save(_entry(id: 'p1', name: 'Senso-ji'));
+        await repo.save(_entry(id: 'p2', name: 'Meiji'));
 
-        await _openDialog(tester, repo: repo);
+        await _openSheet(tester, repo: repo);
 
         expect(find.text('Senso-ji'), findsOneWidget);
-        expect(find.text('Asakusa'), findsOneWidget);
         expect(find.text('Meiji'), findsOneWidget);
-        expect(find.text('Shibuya'), findsOneWidget);
         expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
       },
     );
 
     testWidgets(
-      'given the dialog is open, when the user taps the close icon, '
-      'then the dialog is dismissed',
+      'given the sheet is open, when the user taps the close icon, '
+      'then the sheet is dismissed',
       (tester) async {
-        await _openDialog(tester, repo: InMemorySavedLocationsRepository());
+        await _openSheet(tester, repo: InMemorySavedLocationsRepository());
 
-        expect(find.byType(SavedLocationsDialog), findsOneWidget);
+        expect(find.byType(SavedLocationsSheet), findsOneWidget);
 
         await tester.tap(find.byIcon(Icons.close));
         await tester.pumpAndSettle();
 
-        expect(find.byType(SavedLocationsDialog), findsNothing);
+        expect(find.byType(SavedLocationsSheet), findsNothing);
       },
     );
 
@@ -65,9 +63,9 @@ void main() {
       'then a delete-confirmation dialog is shown',
       (tester) async {
         final repo = InMemorySavedLocationsRepository();
-        await repo.save(_entry(id: 'p1', name: 'Senso-ji', address: 'Asakusa'));
+        await repo.save(_entry(id: 'p1', name: 'Senso-ji'));
 
-        await _openDialog(tester, repo: repo);
+        await _openSheet(tester, repo: repo);
 
         await tester.drag(find.text('Senso-ji'), const Offset(-500, 0));
         await tester.pumpAndSettle();
@@ -78,10 +76,10 @@ void main() {
     );
 
     testWidgets(
-      'given the dialog header, when the dialog is rendered, '
+      'given the sheet header, when the sheet is rendered, '
       'then the title and bookmark icon are visible',
       (tester) async {
-        await _openDialog(tester, repo: InMemorySavedLocationsRepository());
+        await _openSheet(tester, repo: InMemorySavedLocationsRepository());
 
         expect(find.text('saved_locations.title'), findsOneWidget);
         expect(find.byIcon(Icons.bookmark), findsOneWidget);
@@ -93,32 +91,30 @@ void main() {
 SavedLocationEntry _entry({
   required String id,
   required String name,
-  required String address,
   PlaceCategory category = PlaceCategory.modernUrban,
-  DateTime? savedAt,
 }) {
   return SavedLocationEntry(
     placeId: id,
     name: name,
-    address: address,
+    address: 'Addr $id',
     latitude: 25.0,
     longitude: 121.0,
     tags: const [],
     photosJson: const [],
     categoryKey: category.name,
-    savedAt: savedAt ?? DateTime(2024, 1, 1),
-    updatedAt: savedAt ?? DateTime(2024, 1, 1),
+    savedAt: DateTime(2024, 1, 1),
+    updatedAt: DateTime(2024, 1, 1),
   );
 }
 
-Future<void> _openDialog(
+Future<void> _openSheet(
   WidgetTester tester, {
   required SavedLocationsRepository repo,
 }) async {
   await pumpScreen(
     tester,
     overrides: [savedLocationsRepositoryProvider.overrideWithValue(repo)],
-    child: _HostPage(),
+    child: const _HostPage(),
   );
 
   await tester.tap(find.text('open'));
@@ -126,22 +122,15 @@ Future<void> _openDialog(
 }
 
 class _HostPage extends StatelessWidget {
+  const _HostPage();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Builder(
           builder: (context) => ElevatedButton(
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => const Dialog(
-                child: SizedBox(
-                  width: 400,
-                  height: 500,
-                  child: SavedLocationsDialog(),
-                ),
-              ),
-            ),
+            onPressed: () => showSavedLocationsSheet(context),
             child: const Text('open'),
           ),
         ),

@@ -130,6 +130,8 @@
   "explore": {
     "title": "探索",
     "refresh": "重新整理",
+    "search_hint": "搜尋地點、城市或地標……",
+    "empty": "找不到符合的地點",
     "filter": {
       "title": "篩選條件",
       "max_distance": "最大距離",

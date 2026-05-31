@@ -1,8 +1,8 @@
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
-import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_dialog.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
+import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_sheet.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,31 +46,31 @@ void main() {
 
     testWidgets(
       'given the FAB is on screen, when the user taps it, '
-      'then the saved locations dialog is pushed onto the navigator',
+      'then the saved locations bottom sheet is shown',
       (tester) async {
         await _pumpFab(tester, repo: InMemorySavedLocationsRepository());
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
 
-        expect(find.byType(SavedLocationsDialog), findsOneWidget);
+        expect(find.byType(SavedLocationsSheet), findsOneWidget);
       },
     );
 
     testWidgets(
-      'given the morph dialog is open, when it is dismissed, '
-      'then the FAB becomes visible again',
+      'given the sheet is open, when the user taps the close icon, '
+      'then the sheet is dismissed and the FAB stays on screen',
       (tester) async {
         await _pumpFab(tester, repo: InMemorySavedLocationsRepository());
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
 
-        // Close via the dialog's close icon.
+        // Close via the sheet's close icon.
         await tester.tap(find.byIcon(Icons.close));
         await tester.pumpAndSettle();
 
-        expect(find.byType(SavedLocationsDialog), findsNothing);
+        expect(find.byType(SavedLocationsSheet), findsNothing);
         expect(find.byType(FloatingActionButton), findsOneWidget);
       },
     );
