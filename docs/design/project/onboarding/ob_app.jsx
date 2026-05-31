@@ -54,6 +54,18 @@
       else finish();
     };
     const goBack = ()=> setStep(s=> Math.max(0, s-1));
+
+    // swipe nav: left → next, right → back
+    const sw = React.useRef(null);
+    const onTouchStart = e=>{ const t0=e.touches[0]; sw.current={x:t0.clientX,y:t0.clientY}; };
+    const onTouchEnd = e=>{
+      if(!sw.current) return;
+      const t1=e.changedTouches[0];
+      const dx=t1.clientX-sw.current.x, dy=t1.clientY-sw.current.y;
+      sw.current=null;
+      if(Math.abs(dx)<50 || Math.abs(dx)<Math.abs(dy)) return;
+      if(dx<0) goNext(); else goBack();
+    };
     const finish = ()=>{
       setFinishing(true);
       localStorage.removeItem("ob_step");
@@ -71,7 +83,7 @@
 
     return (
       <div className="stage">
-        <div className="phone" style={vars}>
+        <div className="phone" style={vars} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="phone__notch"/>
 
           {/* animated screen body (re-keyed per step so entrance replays) */}
@@ -86,13 +98,6 @@
             </div>
             {step<STEPS-1 && <button className="ob-skip" onClick={finish}>略過</button>}
           </div>
-
-          {/* back */}
-          {step>0 && (
-            <button className={"ob-back "+(dark?"on-photo":"on-paper")} onClick={goBack} aria-label="返回">
-              <Icon name="chevron-left" size={24}/>
-            </button>
-          )}
 
           {/* action dock */}
           <div className={"ob-dock "+(dark?"is-dark":"is-paper")}>
