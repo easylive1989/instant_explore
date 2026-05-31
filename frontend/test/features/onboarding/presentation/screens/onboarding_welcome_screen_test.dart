@@ -56,20 +56,19 @@ Future<void> _givenWelcomeScreen(
         path: '/onboarding',
         builder: (context, state) => const OnboardingWelcomeScreen(),
       ),
-      GoRoute(
-        path: '/player',
-        builder: (context, state) => const _PlayerStub(),
-      ),
     ],
     overrides: [onboardingRepositoryProvider.overrideWithValue(repo)],
   );
-  // Let IntroductionScreen build and controller async load settle.
+  // Let the controller async load settle.
   await tester.pump(const Duration(milliseconds: 50));
 }
 
 Future<void> _whenUserTapsSkip(WidgetTester tester) async {
   await tester.tap(find.text('onboarding.skip'));
-  await tester.pump(const Duration(milliseconds: 50));
+  // Pump past the closing animation delay so completeWelcome() runs.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1700));
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 void _thenWelcomeTitleIsVisible() {
@@ -83,12 +82,4 @@ class _HomeStub extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Scaffold(body: Center(child: Text('home-stub')));
-}
-
-class _PlayerStub extends StatelessWidget {
-  const _PlayerStub();
-
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('player-stub')));
 }

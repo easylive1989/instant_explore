@@ -333,26 +333,43 @@
   },
   "onboarding": {
     "skip": "Skip",
-    "get_started": "Get Started",
-    "try_sample": "Try a sample guide",
-    "try_sample_hint": "A full voice tour of Fushimi Inari Taisha — works offline.",
+    "eyebrow": "LORESCAPE · FIELD JOURNAL",
+    "next_welcome": "Begin the journey",
+    "next_value": "Continue",
+    "next_categories": "Enter Lorescape",
     "welcome": {
-      "title": "Welcome to Lorescape",
-      "body": "Your AI pocket historian — giving every stop along the way real meaning."
+      "title": "Let every place\ntell its own story",
+      "tagline": "An AI travelling storyteller. Wherever you go, it tells you the history, legends and lore of that very place.",
+      "location": "ST. PETER'S BASILICA · VATICAN"
     },
-    "explore": {
-      "title": "Find hidden history nearby",
-      "body": "Open the map, discover historical places around you, and start a voice tour with a single tap."
+    "value": {
+      "kicker": "Your travel companion",
+      "title": "A storyteller in your pocket",
+      "subtitle": "Lorescape gathers guiding, exploring and journaling in one place, so every journey comes with a story.",
+      "pillar1_title": "AI-written local stories",
+      "pillar1_body": "Instantly composes stories worth reading for the landmarks, monuments and landscapes in front of you — and reads them aloud as you walk.",
+      "pillar2_title": "Explore the places around you",
+      "pillar2_body": "Discover every corner worth a pause within reach, by distance and by theme.",
+      "pillar3_title": "Collect your travel journey",
+      "pillar3_body": "The places you visit are bound into a book automatically, woven into a timeline of your own."
     },
-    "journey": {
-      "title": "A cultural journey, written for you",
-      "body": "Every tour and question becomes part of your own personal knowledge journey."
+    "categories": {
+      "kicker": "The map to explore",
+      "title": "Four landscapes, waiting to be read",
+      "subtitle": "From wild mountains to sacred sites, Lorescape has a story ready for every kind of place.",
+      "nature": "Nature & Wild",
+      "nature_latin": "NATURE & WILD",
+      "heritage": "Heritage",
+      "heritage_latin": "HERITAGE",
+      "sacred": "Sacred Places",
+      "sacred_latin": "SACRED PLACES",
+      "urban": "Landmarks",
+      "urban_latin": "LANDMARKS"
     },
-    "chip": {
-      "discovery": "DISCOVERY",
-      "ai_guide": "AI GUIDE",
-      "explore": "NEARBY",
-      "journey": "JOURNEY"
+    "finish": {
+      "title": "The journey begins",
+      "body": "Your own compass of stories is ready — turn to the first page of Lorescape.",
+      "loading": "Composing your stories…"
     }
   },
   "settings_onboarding": {

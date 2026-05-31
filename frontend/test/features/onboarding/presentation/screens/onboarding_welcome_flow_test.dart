@@ -1,14 +1,10 @@
 // Sequence-level tests for the onboarding welcome flow.
 //
-// The pre-existing onboarding_welcome_screen_test exercises the loaded
-// state and the skip-tap-records-call path; this file pins down the
-// remaining wires:
-//
-// - The shared `_finish()` path used by both skip and done buttons
-//   actually navigates the router to `/` after completeWelcome.
-// - The Try Sample CTA on the final page pushes /player with a
-//   non-null narration content (the demo factory wire-up).
-// - The resetAll controller method drops welcomeDone.
+// Pins down the wires that the loaded-state screen test does not:
+// - tapping the dock "next" button advances the PageView between steps
+// - the shared `_finish()` path (used by both skip and the final button)
+//   plays the closing animation, persists welcomeDone and lands on `/`
+// - the resetAll controller method drops welcomeDone
 
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/screens/onboarding_welcome_screen.dart';
@@ -27,48 +23,36 @@ void main() {
 
   group('Onboarding welcome flow', () {
     testWidgets(
-      'given the welcome screen is visible, when the user taps Skip, '
-      'then welcomeDone is persisted and the router lands on /',
+      'given the welcome step, when the user taps next, '
+      'then the PageView advances to the value step',
       (tester) async {
-        // Skip and Done both call `_finish()` — testing skip exercises
-        // the same code path without having to drive the
-        // IntroductionScreen carousel through three page transitions,
-        // which is brittle in widget tests.
-        final repo = InMemoryOnboardingRepository();
-        await _pumpOnboardingFlow(tester, repo: repo);
+        await _pumpOnboardingFlow(tester);
 
-        await tester.tap(find.text('onboarding.skip'));
-        await _settle(tester);
+        expect(find.text('onboarding.welcome.title'), findsOneWidget);
 
-        expect(repo.markWelcomeDoneCalls, 1);
-        expect(find.text('home-stub'), findsOneWidget);
+        await tester.tap(find.text('onboarding.next_welcome'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('onboarding.value.title'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'given the user reaches the final page, when the user taps Try Sample, '
-      'then the player route is pushed with a non-null narration content',
+      'given the welcome screen is visible, when the user taps Skip, '
+      'then the closing animation runs, welcomeDone is persisted '
+      'and the router lands on /',
       (tester) async {
-        final extras = <Object?>[];
-        await _pumpOnboardingFlow(tester, onPlayerPush: extras.add);
+        // Skip and the final button share the `_finish()` path, so tapping
+        // Skip exercises the same completion wiring without driving the
+        // PageView through every step.
+        final repo = InMemoryOnboardingRepository();
+        await _pumpOnboardingFlow(tester, repo: repo);
 
-        // Drive the carousel by swiping the PageView directly — the
-        // `next` arrow tap is unreliable across IntroductionScreen's
-        // animation timing in widget tests.
-        await _swipeToFinalPage(tester);
+        await tester.tap(find.text('onboarding.skip'));
+        await _settleFinish(tester);
 
-        expect(
-          find.text('onboarding.try_sample'),
-          findsOneWidget,
-          reason: 'should be on page 4 with the Try Sample CTA',
-        );
-        await tester.tap(find.text('onboarding.try_sample'));
-        await _settle(tester);
-
-        expect(extras, hasLength(1));
-        final extra = extras.single as Map<String, dynamic>;
-        expect(extra['narrationContent'], isNotNull);
-        expect(extra['autoPlay'], isTrue);
+        expect(repo.markWelcomeDoneCalls, 1);
+        expect(find.text('home-stub'), findsOneWidget);
       },
     );
 
@@ -81,16 +65,11 @@ void main() {
 
         final element = tester.element(find.byType(OnboardingWelcomeScreen));
         final scope = ProviderScope.containerOf(element, listen: false);
-        await scope
-            .read(onboardingControllerProvider.notifier)
-            .resetAll();
-        await _settle(tester);
+        await scope.read(onboardingControllerProvider.notifier).resetAll();
+        await tester.pump();
 
         expect(repo.resetCalls, 1);
-        expect(
-          scope.read(onboardingControllerProvider).welcomeDone,
-          isFalse,
-        );
+        expect(scope.read(onboardingControllerProvider).welcomeDone, isFalse);
       },
     );
   });
@@ -99,7 +78,6 @@ void main() {
 Future<void> _pumpOnboardingFlow(
   WidgetTester tester, {
   InMemoryOnboardingRepository? repo,
-  void Function(Object? extra)? onPlayerPush,
 }) async {
   final resolved = repo ?? InMemoryOnboardingRepository();
   await pumpRouterApp(
@@ -111,40 +89,18 @@ Future<void> _pumpOnboardingFlow(
         path: '/onboarding',
         builder: (_, __) => const OnboardingWelcomeScreen(),
       ),
-      GoRoute(
-        path: '/player',
-        builder: (_, state) {
-          onPlayerPush?.call(state.extra);
-          return const _PlayerStub();
-        },
-      ),
     ],
     overrides: [onboardingRepositoryProvider.overrideWithValue(resolved)],
   );
   await tester.pump(const Duration(milliseconds: 50));
 }
 
-/// Drives the IntroductionScreen's PageView from page 1 to page 4
-/// using horizontal swipes — more reliable than tapping the next arrow
-/// because the carousel honours fling gestures synchronously.
-Future<void> _swipeToFinalPage(WidgetTester tester) async {
-  for (var i = 0; i < 3; i += 1) {
-    await tester.fling(
-      find.byType(PageView),
-      const Offset(-500, 0),
-      2000,
-    );
-    await _settle(tester);
-  }
-}
-
-/// Replaces pumpAndSettle because the screen's PulsingGlow animation
-/// never quiesces. A handful of finite pumps cover the page transition
-/// and any post-tap async work without hanging the test.
-Future<void> _settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i += 1) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
+/// Pumps past the closing animation delay and the subsequent navigation
+/// without using pumpAndSettle (the finish overlay's spinner never settles).
+Future<void> _settleFinish(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1700));
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 class _HomeStub extends StatelessWidget {
@@ -153,12 +109,4 @@ class _HomeStub extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Scaffold(body: Center(child: Text('home-stub')));
-}
-
-class _PlayerStub extends StatelessWidget {
-  const _PlayerStub();
-
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text('player-stub')));
 }

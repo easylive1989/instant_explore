@@ -333,26 +333,43 @@
   },
   "onboarding": {
     "skip": "略過",
-    "get_started": "開始使用",
-    "try_sample": "試聽範例導覽",
-    "try_sample_hint": "以「伏見稻荷大社」示範完整語音導覽，免網路也能試用",
+    "eyebrow": "LORESCAPE · 田野誌",
+    "next_welcome": "開始旅程",
+    "next_value": "繼續",
+    "next_categories": "進入 Lorescape",
     "welcome": {
-      "title": "歡迎來到 Lorescape",
-      "body": "您的 AI 口袋歷史學家，讓每一次的駐足都充滿意義。"
+      "title": "讓每一處風景\n開口說它的故事",
+      "tagline": "AI 隨行的旅行說書人。走到哪，就把那裡的來歷、傳說與歷史，說給你聽。",
+      "location": "聖伯多祿大殿 · VATICAN"
     },
-    "explore": {
-      "title": "自由探索身邊的寶藏",
-      "body": "打開地圖，發現附近隱藏的歷史景點，點一下就開始語音導覽。"
+    "value": {
+      "kicker": "你的隨行旅伴",
+      "title": "口袋裡的旅行說書人",
+      "subtitle": "Lorescape 把導覽、探索與旅誌收進一處，讓每段旅程都有故事相伴。",
+      "pillar1_title": "AI 生成的在地故事",
+      "pillar1_body": "為眼前的地標、古蹟與山林，即時編寫值得細讀的故事，還能化作語音邊走邊聽。",
+      "pillar2_title": "探索身邊的風景",
+      "pillar2_body": "依距離與主題，發現方圓之內值得停留的每一個角落。",
+      "pillar3_title": "收藏你的旅行歷程",
+      "pillar3_body": "走過的地方自動成冊，串成一條屬於你的旅程時間軸。"
     },
-    "journey": {
-      "title": "自動累積文化足跡",
-      "body": "聽過的故事、問過的問題，都會變成你專屬的知識歷程。"
+    "categories": {
+      "kicker": "探索版圖",
+      "title": "四種風景，等你細讀",
+      "subtitle": "從山林到信仰聖地，Lorescape 為每一種風景，備好屬於它的故事。",
+      "nature": "自然景觀",
+      "nature_latin": "NATURE & WILD",
+      "heritage": "人文古蹟",
+      "heritage_latin": "HERITAGE",
+      "sacred": "信仰聖地",
+      "sacred_latin": "SACRED PLACES",
+      "urban": "城市地標",
+      "urban_latin": "LANDMARKS"
     },
-    "chip": {
-      "discovery": "DISCOVERY",
-      "ai_guide": "AI GUIDE",
-      "explore": "NEARBY",
-      "journey": "JOURNEY"
+    "finish": {
+      "title": "旅程，啟程",
+      "body": "已為你備好專屬的故事羅盤，翻開 Lorescape 的第一頁。",
+      "loading": "正在為你編纂…"
     }
   },
   "settings_onboarding": {
