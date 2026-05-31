@@ -4,7 +4,9 @@
   "current_location": "目前位置",
   "daily_story": {
     "detail_era_label": "年代",
-    "detail_location_label": "地點"
+    "detail_location_label": "地點",
+    "more_eyebrow": "想知道更多嗎？",
+    "explore_more": "探索更多故事"
   },
   "explore_nearby": "探索周邊",
   "tap_to_start": "點擊以開始 AI 語音導覽",

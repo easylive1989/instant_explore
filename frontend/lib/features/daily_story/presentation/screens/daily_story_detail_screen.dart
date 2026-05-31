@@ -2,27 +2,40 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/more_stories_cta.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DailyStoryDetailScreen extends StatelessWidget {
   final DailyStory story;
   const DailyStoryDetailScreen({super.key, required this.story});
+
+  /// Takes the reader to the Explore tab to discover places and generate
+  /// more stories.
+  void _exploreMore(BuildContext context) => context.go('/?tab=explore');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(story.placeName)),
       body: story.hasCardLayout
-          ? CardLayoutBody(story: story)
-          : _LegacyLayoutBody(story: story),
+          ? CardLayoutBody(
+              story: story,
+              onExploreMore: () => _exploreMore(context),
+            )
+          : _LegacyLayoutBody(
+              story: story,
+              onExploreMore: () => _exploreMore(context),
+            ),
     );
   }
 }
 
 class _LegacyLayoutBody extends StatelessWidget {
   final DailyStory story;
-  const _LegacyLayoutBody({required this.story});
+  final VoidCallback? onExploreMore;
+  const _LegacyLayoutBody({required this.story, this.onExploreMore});
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +71,14 @@ class _LegacyLayoutBody extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _StoryBody(text: story.story, style: theme.textTheme.bodyLarge),
+          if (onExploreMore != null) ...[
+            const SizedBox(height: 28),
+            MoreStoriesCta(
+              onTap: onExploreMore!,
+              accentColor: theme.colorScheme.primary,
+              onAccentColor: theme.colorScheme.onPrimary,
+            ),
+          ],
         ],
       ),
     );

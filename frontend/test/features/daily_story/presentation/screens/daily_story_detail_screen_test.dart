@@ -122,5 +122,43 @@ void main() {
         expect(find.text('daily_story.detail_location_label'), findsNothing);
       },
     );
+
+    testWidgets(
+      'given the story reader, when the user taps 探索更多故事, '
+      'then it navigates to the explore tab (/?tab=explore)',
+      (tester) async {
+        String? homeLocation;
+        await pumpRouterApp(
+          tester,
+          initialLocation: '/daily-story/detail',
+          initialExtra: _cardStory(),
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, state) {
+                homeLocation = state.uri.toString();
+                return const Scaffold(body: Center(child: Text('home-stub')));
+              },
+            ),
+            GoRoute(
+              path: '/daily-story/detail',
+              builder: (_, state) =>
+                  DailyStoryDetailScreen(story: state.extra as DailyStory),
+            ),
+          ],
+        );
+
+        final cta = find.text('daily_story.explore_more');
+        expect(cta, findsOneWidget);
+
+        await tester.ensureVisible(cta);
+        await tester.pumpAndSettle();
+        await tester.tap(cta);
+        await tester.pumpAndSettle();
+
+        expect(find.text('home-stub'), findsOneWidget);
+        expect(homeLocation, equals('/?tab=explore'));
+      },
+    );
   });
 }

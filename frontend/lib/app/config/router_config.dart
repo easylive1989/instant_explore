@@ -55,7 +55,11 @@ class RouterConfig {
           name: 'home',
           builder: (context, state) {
             final tab = state.uri.queryParameters['tab'];
-            final index = tab == 'journey' ? 2 : 0;
+            final index = switch (tab) {
+              'explore' => 1,
+              'journey' => 2,
+              _ => 0,
+            };
             return MainScreen(initialIndex: index);
           },
         ),

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/more_stories_cta.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,7 +14,11 @@ import 'package:google_fonts/google_fonts.dart';
 /// Caller must guarantee `story.hasCardLayout == true`.
 class CardLayoutBody extends StatelessWidget {
   final DailyStory story;
-  const CardLayoutBody({super.key, required this.story});
+
+  /// When set, a "探索更多故事" CTA is rendered at the bottom of the story.
+  final VoidCallback? onExploreMore;
+
+  const CardLayoutBody({super.key, required this.story, this.onExploreMore});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +27,7 @@ class CardLayoutBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _PhotoPlate(story: story),
-          _TextPlate(story: story),
+          _TextPlate(story: story, onExploreMore: onExploreMore),
         ],
       ),
     );
@@ -147,7 +152,8 @@ class _AnnoBadge extends StatelessWidget {
 
 class _TextPlate extends StatelessWidget {
   final DailyStory story;
-  const _TextPlate({required this.story});
+  final VoidCallback? onExploreMore;
+  const _TextPlate({required this.story, this.onExploreMore});
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +180,15 @@ class _TextPlate extends StatelessWidget {
           ],
           const SizedBox(height: 32),
           _Footer(story: story),
+          if (onExploreMore != null) ...[
+            const SizedBox(height: 28),
+            MoreStoriesCta(
+              onTap: onExploreMore!,
+              accentColor: const Color(0xFFBC5E3E),
+              onAccentColor: const Color(0xFFFBEFE7),
+              eyebrowColor: const Color(0xFF97442A),
+            ),
+          ],
         ],
       ),
     );
