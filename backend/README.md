@@ -1,12 +1,19 @@
 # Lorescape Backend
 
-VPS backend for Lorescape:
+VPS backend for Lorescape. Generates Wikipedia-grounded place stories with
+Gemini and serves them to the app, plus runs the daily-story / social pipeline.
+
+- **Narration API** — the FastAPI app exposes the on-demand story endpoints the
+  mobile app calls:
+  - `POST /narration/hooks` — return 2–3 story angles (title + teaser) for a place
+  - `POST /narration` — expand a chosen angle into a full 3-paragraph story,
+    grounded on Wikipedia, for TTS playback
+  - `GET /health` — health check
 - **Daily story scheduler** — APScheduler inside the FastAPI container fires
   two jobs every day, both in Asia/Taipei:
   - `09:00` — generate the day's story and post it to Discord for review
   - `21:00` — read the Discord ✅/❌ reactions and publish to IG
   No host-side cron.
-- **FastAPI app** — currently exposes `/health`; placeholder for future APIs.
 
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
 
