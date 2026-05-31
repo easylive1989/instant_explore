@@ -1,11 +1,18 @@
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:context_app/shared/widgets/journal/category_tag.dart';
+import 'package:context_app/shared/widgets/journal/glyph_thumb.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// 分析結果卡片
+const List<BoxShadow> _kCardShadow = [
+  BoxShadow(color: Color(0x17281E12), offset: Offset(0, 6), blurRadius: 18),
+];
+
+/// 分析結果卡片（Field Journal）
 ///
-/// 顯示 AI 分析後的景點/食物資訊（不含按鈕）
+/// 顯示 AI 分析後的景點資訊（不含按鈕）。
 class AnalysisResultCard extends StatelessWidget {
   final Place place;
 
@@ -13,121 +20,101 @@ class AnalysisResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final radius = tokens?.rLg ?? 16;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: place.category.color.withValues(alpha: 0.5),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: place.category.color.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.fromBorderSide(BorderSide(color: cs.outlineVariant)),
+        boxShadow: tokens?.e2 ?? _kCardShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 標題區
           Row(
             children: [
-              // 使用類別圖片（與 PlaceCard 相同）
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  place.category.getImageAssetPath(context),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 16),
+              _Thumb(place: place),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       place.name,
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.notoSerifTc(
+                        color: cs.onSurface,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // 類別標籤（與 PlaceCard 相同樣式）
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: place.category.color.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: place.category.color.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            place.category.icon,
-                            size: 14,
-                            color: place.category.color,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            place.category.translationKey.tr(),
-                            style: TextStyle(
-                              color: place.category.color,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    CategoryTag(category: place.category.journalCategory),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // 地址
-          if (place.address.isNotEmpty)
+          if (place.address.isNotEmpty) ...[
+            const SizedBox(height: 16),
             Row(
               children: [
                 Icon(
                   Icons.location_on_outlined,
-                  color: colorScheme.onSurfaceVariant,
+                  color: cs.onSurfaceVariant,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     place.address,
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _Thumb extends StatelessWidget {
+  const _Thumb({required this.place});
+
+  final Place place;
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = place.primaryPhoto?.url;
+    if (photoUrl == null) {
+      return GlyphThumb(
+        category: place.category.journalCategory,
+        size: 64,
+        borderRadius: 12,
+      );
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        photoUrl,
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => GlyphThumb(
+          category: place.category.journalCategory,
+          size: 64,
+          borderRadius: 12,
+        ),
       ),
     );
   }
