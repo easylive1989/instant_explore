@@ -41,8 +41,8 @@ USER_AGENT = (
 OUTPUT_PATH = Path(__file__).parent / "output" / "raw.csv"
 
 
-def parse_sparql_response(data: dict) -> list[tuple[str, str, str]]:
-    """Extract (name, wikipedia_title_en, country) from SPARQL JSON.
+def parse_sparql_response(data: dict) -> list[tuple[str, str, str, str]]:
+    """Extract (wikidata_id, name, wikipedia_title_en, country) from SPARQL JSON.
 
     Skips rows without enwiki sitelink or country (incomplete entries).
     Returns title with spaces (URL-decoded, underscores normalised to spaces)
@@ -54,12 +54,13 @@ def parse_sparql_response(data: dict) -> list[tuple[str, str, str]]:
             continue
         if "itemLabel" not in binding:
             continue
+        qid = binding["item"]["value"].rsplit("/", 1)[-1]
         name = binding["itemLabel"]["value"]
         country = binding["countryLabel"]["value"]
         wiki_url = binding["enwiki"]["value"]
         # https://en.wikipedia.org/wiki/<title> → <title>, URL-decoded with spaces
         title = unquote(wiki_url.rsplit("/", 1)[-1]).replace("_", " ")
-        rows.append((name, title, country))
+        rows.append((qid, name, title, country))
     return rows
 
 
@@ -74,12 +75,12 @@ def fetch_sparql() -> dict:
     return response.json()
 
 
-def write_csv(rows: Iterable[tuple[str, str, str]], path: Path) -> int:
+def write_csv(rows: Iterable[tuple[str, str, str, str]], path: Path) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     count = 0
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["name", "wikipedia_title_en", "country"])
+        writer.writerow(["wikidata_id", "name", "wikipedia_title_en", "country"])
         for row in rows:
             writer.writerow(row)
             count += 1
