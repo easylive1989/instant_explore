@@ -11,7 +11,6 @@
         <div className="screen__scroll">
           <div className="lg-header" style={{paddingTop:8,paddingBottom:10}}>
             <h1>故事</h1>
-            <div className="actions"><button className="iconbtn" style={{background:"var(--paper-sunk)"}}><Icon name="search" size={21}/></button></div>
           </div>
           <div className="story-feed">
             {STORIES.map((s,i)=>(
