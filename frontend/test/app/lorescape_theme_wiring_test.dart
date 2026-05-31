@@ -1,7 +1,7 @@
 import 'package:context_app/app.dart';
 import 'package:context_app/app/config/appearance_options.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
-import 'package:context_app/features/settings/presentation/controllers/appearance_notifier.dart';
+import 'package:context_app/features/settings/domain/models/appearance_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

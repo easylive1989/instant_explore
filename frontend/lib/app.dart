@@ -5,7 +5,7 @@ import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
-import 'package:context_app/features/settings/presentation/controllers/appearance_notifier.dart';
+import 'package:context_app/features/settings/domain/models/appearance_state.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
 import 'package:context_app/features/sync/domain/services/sync_session.dart';
@@ -104,7 +104,7 @@ class LorescapeApp extends ConsumerWidget {
     });
 
     final pendingShare = ref.watch(shareIntentControllerProvider);
-    final appearance = ref.watch(appearanceNotifierProvider);
+    final appearance = ref.watch(appearanceProvider);
     final theme = lorescapeThemeFor(appearance);
 
     return MaterialApp.router(

@@ -7,7 +7,6 @@ import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/services/auth_service.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
-import 'package:context_app/features/settings/presentation/widgets/appearance_section.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/sync/providers.dart';
@@ -30,10 +29,6 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _SectionHeader(title: 'settings.theme'.tr()),
-          const SizedBox(height: 8),
-          const AppearanceSection(),
-          const SizedBox(height: 32),
           _SectionHeader(title: 'settings.preferences'.tr()),
           const SizedBox(height: 8),
           _SectionContainer(children: [_LanguageTile(controller: controller)]),
