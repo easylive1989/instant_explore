@@ -16,7 +16,7 @@ class TripGrid extends StatelessWidget {
     required this.trips,
     required this.counts,
     required this.currentTripId,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.fromLTRB(20, 8, 20, 16),
   });
 
   @override
@@ -47,9 +47,9 @@ class TripGrid extends StatelessWidget {
     return GridView.count(
       padding: padding,
       crossAxisCount: 2,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 0.95,
+      mainAxisSpacing: 14,
+      crossAxisSpacing: 14,
+      childAspectRatio: 1 / 1.05,
       children: cards,
     );
   }

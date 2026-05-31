@@ -1,11 +1,14 @@
-import 'package:context_app/app/config/app_colors.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// 顯示單一 Trip 的卡片。
-///
-/// Phase 1 不含封面圖，改用漸層背景 + 旅程名稱呈現。
+const List<BoxShadow> _kTileShadow = [
+  BoxShadow(color: Color(0x17281E12), offset: Offset(0, 6), blurRadius: 18),
+];
+
+/// 顯示單一 Trip 的卡片（Field Journal clay 磚）。
 class TripCard extends StatelessWidget {
   final Trip trip;
   final int itemCount;
@@ -25,67 +28,77 @@ class TripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final clay = tokens?.clay ?? colorScheme.primary;
+    final clayDeep = tokens?.clayDeep ?? const Color(0xFF97442A);
+    const onClay = Color(0xFFFBEFE7);
+    final radius = tokens?.rXl ?? 22;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(radius),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(radius),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary.withValues(alpha: 0.85),
-                AppColors.primary.withValues(alpha: 0.6),
-              ],
+              colors: [clay, clayDeep],
             ),
             border: isCurrent
-                ? Border.all(color: colorScheme.tertiary, width: 2)
+                ? Border.all(color: onClay.withValues(alpha: 0.7), width: 2)
                 : null,
+            boxShadow: tokens?.e2 ?? _kTileShadow,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (isCurrent)
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.tertiary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'trip.current_badge'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.auto_stories_outlined,
+                      color: onClay.withValues(alpha: 0.85),
+                      size: 26,
+                    ),
+                    const Spacer(),
+                    if (isCurrent)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: onClay.withValues(alpha: 0.22),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'trip.current_badge'.tr(),
+                          style: const TextStyle(
+                            color: onClay,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                else
-                  const SizedBox.shrink(),
+                  ],
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       trip.name,
-                      style: TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.notoSerifTc(
+                        color: onClay,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -95,17 +108,16 @@ class TripCard extends StatelessWidget {
                       Text(
                         _formatDateRange(trip.startDate, trip.endDate),
                         style: TextStyle(
-                          color: colorScheme.onPrimary.withValues(alpha: 0.85),
-                          fontSize: 12,
+                          color: onClay.withValues(alpha: 0.85),
+                          fontSize: 12.5,
                         ),
                       ),
                     const SizedBox(height: 4),
                     Text(
                       'trip.item_count'.tr(args: ['$itemCount']),
                       style: TextStyle(
-                        color: colorScheme.onPrimary.withValues(alpha: 0.9),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        color: onClay.withValues(alpha: 0.85),
+                        fontSize: 12.5,
                       ),
                     ),
                   ],
@@ -127,7 +139,7 @@ class TripCard extends StatelessWidget {
   }
 }
 
-/// 代表「未分類」群組的卡片（tripId = null 的條目集合）。
+/// 代表「未分類」群組的卡片（tripId = null 的條目集合）— 紙感磚。
 class UncategorizedTripCard extends StatelessWidget {
   final int itemCount;
   final VoidCallback onTap;
@@ -141,35 +153,41 @@ class UncategorizedTripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final radius = tokens?.rXl ?? 22;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(radius),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: colorScheme.surfaceContainerHighest,
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-            ),
+            borderRadius: BorderRadius.circular(radius),
+            color: colorScheme.surfaceContainerLow,
+            border: Border.all(color: colorScheme.outlineVariant),
+            boxShadow: tokens?.e1 ?? _kTileShadow,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.inbox_outlined, color: colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.inbox_outlined,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 26,
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'trip.uncategorized'.tr(),
-                      style: TextStyle(
+                      style: GoogleFonts.notoSerifTc(
                         color: colorScheme.onSurface,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -177,8 +195,7 @@ class UncategorizedTripCard extends StatelessWidget {
                       'trip.item_count'.tr(args: ['$itemCount']),
                       style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 12.5,
                       ),
                     ),
                   ],
