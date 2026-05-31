@@ -277,15 +277,14 @@ html,body{ margin:0; padding:0; }
 .audiobar{
   position:absolute; left:14px; right:14px; bottom:calc(var(--safe-bot) + 6px); z-index:30;
   height:62px; border-radius:var(--r-pill); background:var(--ink-bg-2); color:var(--on-dark);
-  display:flex; align-items:center; gap:12px; padding:0 8px 0 16px; box-shadow:var(--e3);
+  display:flex; align-items:center; gap:12px; padding:0 18px 0 8px; box-shadow:var(--e3);
 }
-.audiobar__txt{ flex:1; min-width:0; }
-.audiobar__t{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.audiobar__s{ font-size:12px; color:var(--on-dark-3); margin-top:1px; }
+.audiobar__track{ flex:1; min-width:0; height:5px; border-radius:var(--r-pill); background:rgba(255,255,255,.16); overflow:hidden; margin-left:6px; }
+.audiobar__fill{ height:100%; background:var(--clay); border-radius:var(--r-pill); transition:width .4s ease; }
+.audiobar__pct{ flex:none; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--on-dark-2); min-width:34px; text-align:right; }
 .audiobar__ctrls{ display:flex; align-items:center; gap:4px; }
 .audiobar__play{ width:46px; height:46px; border-radius:50%; background:var(--clay); color:#fff; border:none; display:grid; place-items:center; cursor:pointer; flex:none; }
 .audiobar__sk{ width:38px; height:38px; border-radius:50%; background:transparent; color:var(--on-dark-2); border:none; display:grid; place-items:center; cursor:pointer; }
-.audiobar__prog{ position:absolute; left:0; bottom:0; height:3px; background:var(--clay); border-radius:var(--r-pill); width:34%; }
 
 /* ================= SEGMENTED ================= */
 .seg{ display:flex; background:var(--paper-sunk); border-radius:var(--r-md); padding:4px; margin:6px 22px 8px; }

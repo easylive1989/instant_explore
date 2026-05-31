@@ -6,7 +6,6 @@
 
   function SettingsScreen({ go }){
     const [sync,setSync] = useState(true);
-    const [stats,setStats] = useState(true);
     return (
       <div className="screen has-tabbar fade-enter">
         <StatusBar dark time="8:00"/>
@@ -54,18 +53,6 @@
                   <div className="set-row__b"><div className="set-row__t">同步到雲端</div>
                     <div className="set-row__d">您的地點與旅程會在裝置間保持同步。</div></div>
                   <Toggle on={sync} onClick={()=>setSync(s=>!s)}/>
-                </div>
-              </div>
-            </div>
-
-            <div className="set-group">
-              <div className="set-group__lab">隱私</div>
-              <div className="set-card">
-                <div className="set-row">
-                  <div className="set-ic"><Icon name="bar-chart" size={20}/></div>
-                  <div className="set-row__b"><div className="set-row__t">分享使用統計</div>
-                    <div className="set-row__d">協助我們改善 Lorescape 的故事與功能,可隨時關閉。</div></div>
-                  <Toggle on={stats} onClick={()=>setStats(s=>!s)}/>
                 </div>
               </div>
             </div>

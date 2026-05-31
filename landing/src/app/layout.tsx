@@ -29,7 +29,6 @@ export const metadata: Metadata = {
     "在地故事",
     "語音導覽",
     "文化旅遊",
-    "田野誌",
     "Lorescape",
     "讀景",
   ],

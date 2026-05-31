@@ -61,11 +61,10 @@
             <button className="audiobar__play" onClick={()=>setPlaying(p=>!p)}>
               <Icon name={playing?"pause":"play"} size={22}/></button>
             <button className="audiobar__sk"><Icon name="skip-fwd" size={20}/></button>
-            <div className="audiobar__txt">
-              <div className="audiobar__t">{story.title}</div>
-              <div className="audiobar__s">{playing?"朗讀中 · 02:14 / 06:38":"AI 語音導覽 · 06:38"}</div>
+            <div className="audiobar__track">
+              <div className="audiobar__fill" style={{width:(playing?34:4)+"%"}}/>
             </div>
-            <div className="audiobar__prog" style={{width:playing?"34%":"4%"}}/>
+            <div className="audiobar__pct">{playing?34:4}%</div>
           </div>
         )}
       </div>

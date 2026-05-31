@@ -3,7 +3,7 @@ const entries = [
     no: "I",
     icon: "menu_book",
     title: "走過即成冊",
-    description: "每到一個地方，都自動收進你的田野誌，串成一條屬於你的旅程時間軸。",
+    description: "每到一個地方，都自動收進你的旅程，串成一條屬於你的時間軸。",
   },
   {
     no: "II",

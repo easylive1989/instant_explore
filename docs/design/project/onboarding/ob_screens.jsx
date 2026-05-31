@@ -48,7 +48,7 @@
           </div>
           <div className="ob-welcome on-photo">
             <div className="ob-eyebrow ob-rise" style={{animationDelay:".05s"}}>
-              <span className="ob-rule"/>LORESCAPE · 田野誌
+              <span className="ob-rule"/>LORESCAPE
             </div>
             <h1 className="ob-welcome__title ob-rise" style={{animationDelay:".14s"}}>{W_TITLE}</h1>
             <p className="ob-welcome__tag ob-rise" style={{animationDelay:".26s"}}>{W_TAG}</p>
@@ -65,7 +65,7 @@
         <StatusBar dark time="8:08"/>
         <div className="ob-welcome--paper">
           <div className="ob-eyebrow ob-rise" style={{animationDelay:".05s",marginBottom:18}}>
-            <span className="ob-rule"/>LORESCAPE · 田野誌
+            <span className="ob-rule"/>LORESCAPE
           </div>
           <div className="ob-postcard ob-rise" style={{animationDelay:".12s"}}>
             <div className="ob-stamp"><b>Anno<br/>I</b></div>

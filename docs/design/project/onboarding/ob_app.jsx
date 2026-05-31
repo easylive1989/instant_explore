@@ -16,7 +16,7 @@
   // flow variant → tone per step (welcome / value / personalize)
   const FLOWS = {
     immersive:["dark","dark","dark"],   // 沉浸：整段深色攝影
-    paper:    ["paper","paper","paper"], // 紙感：田野誌淺色
+    paper:    ["paper","paper","paper"], // 紙感：淺色版面
     hybrid:   ["dark","paper","paper"],  // 混合：深色開場 → 紙感操作
   };
 

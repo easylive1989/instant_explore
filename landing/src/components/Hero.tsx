@@ -22,7 +22,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-24 md:px-8">
         <div className="eyebrow mb-6 flex items-center gap-3 text-white/85">
           <span className="h-px w-7 bg-white/50" />
-          LORESCAPE · 田野誌
+          LORESCAPE
         </div>
         <h1 className="max-w-3xl font-serif text-4xl font-bold leading-[1.2] tracking-wide text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] md:text-6xl">
           讓每一處風景，
