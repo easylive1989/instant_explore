@@ -1,7 +1,4 @@
-const APP_STORE_URL =
-  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
-const PLAY_STORE_URL =
-  "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW";
+import DownloadLink from "./DownloadLink";
 
 export default function Hero() {
   return (
@@ -38,10 +35,9 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <a
-            href={APP_STORE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <DownloadLink
+            platform="ios"
+            location="hero"
             className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
           >
             <span
@@ -51,11 +47,10 @@ export default function Hero() {
               ios
             </span>
             App Store
-          </a>
-          <a
-            href={PLAY_STORE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          </DownloadLink>
+          <DownloadLink
+            platform="android"
+            location="hero"
             className="flex items-center gap-2.5 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
           >
             <span
@@ -65,7 +60,7 @@ export default function Hero() {
               android
             </span>
             Play Store
-          </a>
+          </DownloadLink>
         </div>
 
         <div className="mt-12 flex items-center gap-2 text-xs tracking-[0.08em] text-[#f7f1e6]/60">

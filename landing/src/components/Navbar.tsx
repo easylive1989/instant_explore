@@ -1,5 +1,4 @@
-const APP_STORE_URL =
-  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
+import DownloadLink from "./DownloadLink";
 
 const navLinks = [
   { label: "故事", href: "#story" },
@@ -31,14 +30,13 @@ export default function Navbar() {
           ))}
         </div>
 
-        <a
-          href={APP_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <DownloadLink
+          platform="ios"
+          location="navbar"
           className="btn-clay rounded-full px-5 py-2 text-sm font-semibold"
         >
           下載 App
-        </a>
+        </DownloadLink>
       </div>
     </nav>
   );

@@ -1,16 +1,18 @@
-const links = [
-  { label: "隱私權政策", href: "/privacy" },
-  { label: "使用條款", href: "/terms" },
-  { label: "支援", href: "/support" },
-  { label: "Instagram", href: "#" },
-  {
-    label: "App Store",
-    href: "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060",
-  },
-  {
-    label: "Play Store",
-    href: "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW",
-  },
+import DownloadLink from "./DownloadLink";
+import type { DownloadPlatform } from "@/lib/downloadLinks";
+
+type FooterLink =
+  | { kind: "internal"; label: string; href: string }
+  | { kind: "external"; label: string; href: string }
+  | { kind: "download"; label: string; platform: DownloadPlatform };
+
+const links: FooterLink[] = [
+  { kind: "internal", label: "隱私權政策", href: "/privacy" },
+  { kind: "internal", label: "使用條款", href: "/terms" },
+  { kind: "internal", label: "支援", href: "/support" },
+  { kind: "external", label: "Instagram", href: "#" },
+  { kind: "download", label: "App Store", platform: "ios" },
+  { kind: "download", label: "Play Store", platform: "android" },
 ];
 
 export default function Footer() {
@@ -22,14 +24,26 @@ export default function Footer() {
         </div>
         <div className="flex flex-wrap justify-center gap-7 text-xs text-ink-3">
           {links.map((link) => {
-            const isExternal = link.href.startsWith("http");
+            const className = "transition-colors hover:text-clay";
+            if (link.kind === "download") {
+              return (
+                <DownloadLink
+                  key={link.label}
+                  platform={link.platform}
+                  location="footer"
+                  className={className}
+                >
+                  {link.label}
+                </DownloadLink>
+              );
+            }
             return (
               <a
                 key={link.label}
-                className="transition-colors hover:text-clay"
+                className={className}
                 href={link.href}
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noopener noreferrer" : undefined}
+                target={link.kind === "external" ? "_blank" : undefined}
+                rel={link.kind === "external" ? "noopener noreferrer" : undefined}
               >
                 {link.label}
               </a>

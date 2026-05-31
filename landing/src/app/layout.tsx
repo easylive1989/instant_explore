@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Serif_TC, Noto_Sans_TC } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 const notoSerifTc = Noto_Serif_TC({
   subsets: ["latin"],
@@ -86,6 +89,7 @@ export default function RootLayout({
       <body className="bg-paper text-ink font-sans antialiased selection:bg-clay/20">
         {children}
       </body>
+      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
   );
 }

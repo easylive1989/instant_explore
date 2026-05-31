@@ -1,7 +1,4 @@
-const APP_STORE_URL =
-  "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
-const PLAY_STORE_URL =
-  "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW";
+import DownloadLink from "./DownloadLink";
 
 export default function FinalCTA() {
   return (
@@ -32,10 +29,9 @@ export default function FinalCTA() {
           帶上你的隨行說書人，讓每一處風景，都為你開口說它的故事。
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <a
-            href={APP_STORE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <DownloadLink
+            platform="ios"
+            location="final_cta"
             className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
           >
             <span
@@ -45,11 +41,10 @@ export default function FinalCTA() {
               ios
             </span>
             App Store
-          </a>
-          <a
-            href={PLAY_STORE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          </DownloadLink>
+          <DownloadLink
+            platform="android"
+            location="final_cta"
             className="flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-base font-semibold text-on-dark backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
           >
             <span
@@ -59,7 +54,7 @@ export default function FinalCTA() {
               android
             </span>
             Play Store
-          </a>
+          </DownloadLink>
         </div>
       </div>
     </section>
