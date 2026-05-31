@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/journey/domain/services/journey_sharing_service.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
@@ -167,6 +169,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
     final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final clayTint = tokens?.clayTint ?? const Color(0xFFF7E8DD);
 
     return GestureDetector(
       onTap: _navigateToPlayer,
@@ -179,39 +183,23 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
             // Connector Line
             if (!widget.isLast)
               Positioned(
-                left: -21,
-                top: 32,
+                left: -27,
+                top: 26,
                 bottom: -40,
-                child: Container(width: 2, color: colorScheme.outlineVariant),
+                child: Container(width: 2, color: colorScheme.outline),
               ),
 
-            // Timeline Node
+            // Timeline Node — clay dot with a clay-tint halo
             Positioned(
-              left: -32,
+              left: -34,
               top: 4,
               child: Container(
-                width: 24,
-                height: 24,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                   color: colorScheme.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: colorScheme.surface, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: colorScheme.onPrimary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  boxShadow: [BoxShadow(color: clayTint, spreadRadius: 4)],
                 ),
               ),
             ),
@@ -253,14 +241,14 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                           const SizedBox(height: 4),
                           Text(
                             widget.entry.place.name,
-                            style: TextStyle(
+                            style: GoogleFonts.notoSerifTc(
                               color: colorScheme.onSurface,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              height: 1.25,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             widget.entry.place.address,
                             style: TextStyle(
@@ -305,18 +293,20 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
 
                 // Content Card
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    color: colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
                     border: Border.all(color: colorScheme.outlineVariant),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow:
+                        tokens?.e1 ??
+                        const [
+                          BoxShadow(
+                            color: Color(0x0F281E12),
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,11 +315,10 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                         widget.entry.narrationContent.text,
                         maxLines: 4,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 15,
-                          height: 1.6,
-                          letterSpacing: 0.2,
+                        style: GoogleFonts.notoSerifTc(
+                          color: colorScheme.onSurface,
+                          fontSize: 16,
+                          height: 1.7,
                         ),
                       ),
                       const SizedBox(height: 16),
