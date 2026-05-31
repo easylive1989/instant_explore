@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/analytics/domain/models/consent_state.dart';
 import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/services/auth_service.dart';
@@ -12,343 +9,188 @@ import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
-import 'package:context_app/shared/widgets/midnight/midnight.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+/// Fallback warm shadows / dark-surface colours for contexts where the
+/// [LorescapeTokens] theme extension is not installed (e.g. widget tests).
+const List<BoxShadow> _kCardShadow = [
+  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
+];
+const List<BoxShadow> _kBannerShadow = [
+  BoxShadow(color: Color(0x17281E12), offset: Offset(0, 6), blurRadius: 18),
+];
+const Color _kInkBg = Color(0xFF1B1611);
+const Color _kInkBg2 = Color(0xFF251E17);
+const Color _kOnDark = Color(0xFFF7F1E6);
+const Color _kOnDark2 = Color(0xFFC3B7A4);
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(settingsControllerProvider.notifier);
-    final appVersionAsync = ref.watch(appVersionStringProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
-      appBar: MidnightAppBar(title: Text('settings.title'.tr())),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          _SectionHeader(title: 'settings.preferences'.tr()),
-          const SizedBox(height: 8),
-          _SectionContainer(children: [_LanguageTile(controller: controller)]),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'settings.account_section'.tr()),
-          const SizedBox(height: 8),
-          const _AccountSection(),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'settings.sync_section'.tr()),
-          const SizedBox(height: 8),
-          const _SyncSection(),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'settings.privacy_section'.tr()),
-          const SizedBox(height: 8),
-          const _PrivacySection(),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'settings.daily_usage'.tr()),
-          const SizedBox(height: 8),
-          _UsageSection(ref: ref),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'settings_onboarding.section'.tr()),
-          const SizedBox(height: 8),
-          const _OnboardingSection(),
-          const SizedBox(height: 32),
-          _SectionHeader(title: 'subscription.title'.tr()),
-          const SizedBox(height: 8),
-          _SubscriptionSection(context: context, ref: ref),
-          const SizedBox(height: 48),
-          Center(
-            child: Column(
-              children: [
-                appVersionAsync.when(
-                  data: (version) => Text(
-                    version,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  loading: () => const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: AdaptiveProgressIndicator(strokeWidth: 1),
-                  ),
-                  error: (_, __) => Text(
-                    'settings.app_version'.tr(),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'settings.copyright'.tr(),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 14),
+              child: Text(
+                'settings.title'.tr(),
+                style: Theme.of(context).textTheme.displayLarge,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================================
-// Section widgets
-// ============================================================================
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(letterSpacing: 1.0),
-      ),
-    );
-  }
-}
-
-class _SectionContainer extends StatelessWidget {
-  const _SectionContainer({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.fromBorderSide(
-          BorderSide(color: colorScheme.outlineVariant),
+            const _UpgradeBanner(),
+            const SizedBox(height: 26),
+            const _PreferencesGroup(),
+            const SizedBox(height: 26),
+            const _AccountGroup(),
+            const SizedBox(height: 26),
+            const _SyncGroup(),
+            const SizedBox(height: 26),
+            const _PrivacyGroup(),
+            const SizedBox(height: 26),
+            const _UsageGroup(),
+            const SizedBox(height: 26),
+            const _OnboardingGroup(),
+            const SizedBox(height: 36),
+            const _Footer(),
+          ],
         ),
       ),
-      child: Column(children: children),
     );
   }
 }
 
 // ============================================================================
-// Tile widgets
+// Upgrade banner (dark gradient card at the top)
 // ============================================================================
 
-class _LanguageTile extends StatelessWidget {
-  const _LanguageTile({required this.controller});
-
-  final dynamic controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return _SettingsTile(
-      icon: Icons.language,
-      iconColor: colorScheme.primary,
-      iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-      title: 'settings.change_language'.tr(),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            context.locale.languageCode == 'en' ? 'English' : '繁體中文',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: 14,
-          ),
-        ],
-      ),
-      onTap: () => controller.changeLanguage(context),
-    );
-  }
-}
-
-class _OnboardingSection extends ConsumerWidget {
-  const _OnboardingSection();
-
-  Future<void> _confirmReplay(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('settings_onboarding.confirm_replay_title'.tr()),
-        content: Text('settings_onboarding.confirm_replay_body'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('journey.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('settings_onboarding.confirm_replay_action'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    await ref.read(onboardingControllerProvider.notifier).resetAll();
-    if (!context.mounted) return;
-    context.go('/onboarding');
-  }
+class _UpgradeBanner extends ConsumerWidget {
+  const _UpgradeBanner();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return _SectionContainer(
-      children: [
-        _SettingsTile(
-          icon: Icons.school_outlined,
-          iconColor: colorScheme.primary,
-          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-          title: 'settings_onboarding.replay'.tr(),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            color: colorScheme.onSurfaceVariant,
-            size: 14,
-          ),
-          onTap: () => _confirmReplay(context, ref),
-        ),
-      ],
-    );
-  }
-}
-
-class _SubscriptionSection extends StatelessWidget {
-  const _SubscriptionSection({required this.context, required this.ref});
-
-  final BuildContext context;
-  final WidgetRef ref;
-
-  @override
-  Widget build(BuildContext outerContext) {
     final isPremium = ref.watch(isPremiumProvider);
     final statusAsync = ref.watch(subscriptionStatusProvider);
-    final colorScheme = Theme.of(outerContext).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final radius = tokens?.rLg ?? 16;
+    final onDark = tokens?.onDark ?? _kOnDark;
+    final onDark2 = tokens?.onDark2 ?? _kOnDark2;
 
+    String title;
+    String subtitle;
+    VoidCallback? onTap;
     if (isPremium) {
       final expirationDate = statusAsync.valueOrNull?.expirationDate;
-      final formattedDate = expirationDate != null
-          ? DateFormat.yMMMd().format(expirationDate)
-          : '';
-      return _SectionContainer(
-        children: [
-          _SettingsTile(
-            icon: Icons.workspace_premium,
-            iconColor: colorScheme.tertiary,
-            iconBgColor: colorScheme.tertiary.withValues(alpha: 0.2),
-            title: 'subscription.premium_active'.tr(),
-            trailing: formattedDate.isNotEmpty
-                ? Text(
-                    'subscription.expires'.tr(
-                      namedArgs: {'date': formattedDate},
-                    ),
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
-                  )
-                : null,
-          ),
-        ],
-      );
+      title = 'subscription.premium_banner_title'.tr();
+      subtitle = expirationDate != null
+          ? 'subscription.expires'.tr(
+              namedArgs: {'date': DateFormat.yMMMd().format(expirationDate)},
+            )
+          : 'subscription.unlimited_access'.tr();
+    } else {
+      title = 'subscription.upgrade_banner_title'.tr();
+      subtitle = 'subscription.upgrade_banner_subtitle'.tr();
+      onTap = () => context.pushNamed('subscription');
     }
 
-    return _SectionContainer(
-      children: [
-        _SettingsTile(
-          icon: Icons.workspace_premium,
-          iconColor: colorScheme.primary,
-          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-          title: 'subscription.upgrade_cta'.tr(),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            color: colorScheme.onSurfaceVariant,
-            size: 14,
-          ),
-          onTap: () => outerContext.pushNamed('subscription'),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [tokens?.inkBg2 ?? _kInkBg2, tokens?.inkBg ?? _kInkBg],
         ),
-      ],
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: tokens?.e2 ?? _kBannerShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(radius),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.diamond_outlined,
+                  size: 30,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: onDark,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: onDark2),
+                      ),
+                    ],
+                  ),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right, color: onDark2, size: 22),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class _UsageSection extends StatelessWidget {
-  const _UsageSection({required this.ref});
+// ============================================================================
+// Setting groups
+// ============================================================================
 
-  final WidgetRef ref;
+class _PreferencesGroup extends ConsumerWidget {
+  const _PreferencesGroup();
 
   @override
-  Widget build(BuildContext context) {
-    final usageAsync = ref.watch(usageStatusProvider);
-    final isPremium = ref.watch(isPremiumProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return _SectionContainer(
-      children: [
-        usageAsync.when(
-          data: (status) => _SettingsTile(
-            icon: Icons.bar_chart,
-            iconColor: colorScheme.primary,
-            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-            title: 'settings.daily_usage'.tr(),
-            trailing: Text(
-              isPremium
-                  ? 'subscription.unlimited_access'.tr()
-                  : 'settings.remaining_today'.tr(
-                      namedArgs: {'remaining': status.remaining.toString()},
-                    ),
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
-              ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(settingsControllerProvider.notifier);
+    return _SettingsGroup(
+      label: 'settings.preferences'.tr(),
+      child: _SettingsCard(
+        children: [
+          _SettingsRow(
+            icon: Icons.language,
+            title: 'settings.change_language'.tr(),
+            trailing: _TrailingValue(
+              context.locale.languageCode == 'en' ? 'English' : '繁體中文',
+              chevron: true,
             ),
+            onTap: () => controller.changeLanguage(context),
           ),
-          loading: () => const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: AdaptiveProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          ),
-          error: (_, __) => _SettingsTile(
-            icon: Icons.bar_chart,
-            iconColor: colorScheme.primary,
-            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-            title: 'settings.daily_usage'.tr(),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// ============================================================================
-// Account & Sync sections
-// ============================================================================
-
-class _AccountSection extends ConsumerWidget {
-  const _AccountSection();
+class _AccountGroup extends ConsumerWidget {
+  const _AccountGroup();
 
   Future<void> _handleSignIn(
     BuildContext context,
@@ -400,63 +242,70 @@ class _AccountSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     if (user != null) {
-      return _SectionContainer(
-        children: [
-          _SettingsTile(
-            icon: Icons.person,
-            iconColor: colorScheme.primary,
-            iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-            title: 'settings.account_signed_in_as'.tr(
-              namedArgs: {'name': user.displayName ?? user.email ?? user.id},
+      return _SettingsGroup(
+        label: 'settings.account_section'.tr(),
+        child: _SettingsCard(
+          children: [
+            _SettingsRow(
+              icon: Icons.person_outline,
+              title: 'settings.account_signed_in_as'.tr(
+                namedArgs: {'name': user.displayName ?? user.email ?? user.id},
+              ),
+              subtitle: user.email,
+              trailing: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () => _handleSignOut(context, ref),
+                child: Text('settings.sign_out'.tr()),
+              ),
             ),
-            trailing: TextButton(
-              onPressed: () => _handleSignOut(context, ref),
-              child: Text('settings.sign_out'.tr()),
-            ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
-    return _SectionContainer(
-      children: [
-        _SettingsTile(
-          icon: Icons.person_outline,
-          iconColor: colorScheme.primary,
-          iconBgColor: colorScheme.primary.withValues(alpha: 0.2),
-          title: 'settings.account_not_signed_in'.tr(),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FilledButton.icon(
-                key: const ValueKey('sign_in_google'),
-                icon: const Icon(Icons.login),
-                label: Text('settings.sign_in_google'.tr()),
-                onPressed: () => _handleSignIn(context, ref, useApple: false),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const ValueKey('sign_in_apple'),
-                icon: const Icon(Icons.apple),
-                label: Text('settings.sign_in_apple'.tr()),
-                onPressed: () => _handleSignIn(context, ref, useApple: true),
-              ),
-            ],
+    return _SettingsGroup(
+      label: 'settings.account_section'.tr(),
+      child: _SettingsCard(
+        children: [
+          _SettingsRow(
+            icon: Icons.person_outline,
+            title: 'settings.account_not_signed_in'.tr(),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton.icon(
+                  key: const ValueKey('sign_in_google'),
+                  icon: const Icon(Icons.login),
+                  label: Text('settings.sign_in_google'.tr()),
+                  onPressed: () => _handleSignIn(context, ref, useApple: false),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('sign_in_apple'),
+                  icon: const Icon(Icons.apple),
+                  label: Text('settings.sign_in_apple'.tr()),
+                  onPressed: () => _handleSignIn(context, ref, useApple: true),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _SyncSection extends ConsumerWidget {
-  const _SyncSection();
+class _SyncGroup extends ConsumerWidget {
+  const _SyncGroup();
 
   Future<void> _handleToggle(WidgetRef ref, bool value) async {
     await ref.read(syncSettingsProvider.notifier).setEnabled(value);
@@ -466,7 +315,6 @@ class _SyncSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final enabled = ref.watch(syncSettingsProvider);
-    final colorScheme = Theme.of(context).colorScheme;
     final isSignedIn = user != null;
 
     final subtitle = !isSignedIn
@@ -475,65 +323,25 @@ class _SyncSection extends ConsumerWidget {
               ? 'settings.sync_toggle_subtitle_on'.tr()
               : 'settings.sync_toggle_subtitle_off'.tr());
 
-    return _SectionContainer(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.cloud_sync,
-                  color: colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'settings.sync_toggle'.tr(),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                key: const ValueKey('sync_toggle_switch'),
-                value: enabled && isSignedIn,
-                onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
-              ),
-            ],
+    return _SettingsGroup(
+      label: 'settings.sync_section'.tr(),
+      child: _SettingsCard(
+        children: [
+          _SettingsRow(
+            icon: Icons.cloud_sync,
+            title: 'settings.sync_toggle'.tr(),
+            subtitle: subtitle,
+            trailing: Switch(
+              key: const ValueKey('sync_toggle_switch'),
+              value: enabled && isSignedIn,
+              onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
-
-// ============================================================================
-// Privacy section
-// ============================================================================
 
 /// Stream that emits the current analytics consent state and any updates
 /// written via [ConsentRepository.write]. Exposed as a provider so the
@@ -542,8 +350,8 @@ final analyticsConsentStreamProvider = StreamProvider<ConsentState>((ref) {
   return ref.watch(consentRepositoryProvider).watch();
 });
 
-class _PrivacySection extends ConsumerWidget {
-  const _PrivacySection();
+class _PrivacyGroup extends ConsumerWidget {
+  const _PrivacyGroup();
 
   Future<void> _handleToggle(WidgetRef ref, bool value) async {
     await ref
@@ -554,122 +362,344 @@ class _PrivacySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final consentAsync = ref.watch(analyticsConsentStreamProvider);
-    final colorScheme = Theme.of(context).colorScheme;
     // Default to opted-in while the first stream value is loading so the
     // switch never flashes off for users who haven't toggled it.
     final enabled = consentAsync.valueOrNull?.enabled ?? true;
 
-    return _SectionContainer(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.insights_outlined,
-                  color: colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'settings.analytics_consent.title'.tr(),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'settings.analytics_consent.subtitle'.tr(),
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              AdaptiveSwitch(
-                key: const ValueKey('analytics_consent_switch'),
-                value: enabled,
-                onChanged: (v) => _handleToggle(ref, v),
-              ),
-            ],
+    return _SettingsGroup(
+      label: 'settings.privacy_section'.tr(),
+      child: _SettingsCard(
+        children: [
+          _SettingsRow(
+            icon: Icons.bar_chart,
+            title: 'settings.analytics_consent.title'.tr(),
+            subtitle: 'settings.analytics_consent.subtitle'.tr(),
+            trailing: AdaptiveSwitch(
+              key: const ValueKey('analytics_consent_switch'),
+              value: enabled,
+              onChanged: (v) => _handleToggle(ref, v),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+class _UsageGroup extends ConsumerWidget {
+  const _UsageGroup();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usageAsync = ref.watch(usageStatusProvider);
+    final isPremium = ref.watch(isPremiumProvider);
+
+    return _SettingsGroup(
+      label: 'settings.daily_usage'.tr(),
+      child: _SettingsCard(
+        children: [
+          usageAsync.when(
+            data: (status) => _SettingsRow(
+              icon: Icons.bar_chart,
+              title: 'settings.daily_usage'.tr(),
+              trailing: _TrailingValue(
+                isPremium
+                    ? 'subscription.unlimited_access'.tr()
+                    : 'settings.remaining_today'.tr(
+                        namedArgs: {'remaining': status.remaining.toString()},
+                      ),
+              ),
+            ),
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: AdaptiveProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
+            error: (_, __) => _SettingsRow(
+              icon: Icons.bar_chart,
+              title: 'settings.daily_usage'.tr(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingGroup extends ConsumerWidget {
+  const _OnboardingGroup();
+
+  Future<void> _confirmReplay(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('settings_onboarding.confirm_replay_title'.tr()),
+        content: Text('settings_onboarding.confirm_replay_body'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('journey.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('settings_onboarding.confirm_replay_action'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(onboardingControllerProvider.notifier).resetAll();
+    if (!context.mounted) return;
+    context.go('/onboarding');
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ink3 =
+        Theme.of(context).extension<LorescapeTokens>()?.ink3 ??
+        Theme.of(context).colorScheme.onSurfaceVariant;
+    return _SettingsGroup(
+      label: 'settings_onboarding.section'.tr(),
+      child: _SettingsCard(
+        children: [
+          _SettingsRow(
+            icon: Icons.school_outlined,
+            title: 'settings_onboarding.replay'.tr(),
+            trailing: Icon(Icons.chevron_right, color: ink3, size: 18),
+            onTap: () => _confirmReplay(context, ref),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Footer extends ConsumerWidget {
+  const _Footer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appVersionAsync = ref.watch(appVersionStringProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Center(
+      child: Column(
+        children: [
+          appVersionAsync.when(
+            data: (version) => Text(
+              version,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            loading: () => const SizedBox(
+              width: 12,
+              height: 12,
+              child: AdaptiveProgressIndicator(strokeWidth: 1),
+            ),
+            error: (_, __) => Text(
+              'settings.app_version'.tr(),
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'settings.copyright'.tr(),
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 // ============================================================================
-// Base tile
+// Reusable building blocks (Field Journal style)
 // ============================================================================
 
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
+/// A labelled group: an uppercase section label above a [_SettingsCard].
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ink3 =
+        Theme.of(context).extension<LorescapeTokens>()?.ink3 ??
+        colorScheme.onSurfaceVariant;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            label.toUpperCase(),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: ink3,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+/// A raised paper card holding one or more [_SettingsRow]s, separated by hair
+/// dividers.
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final radius = tokens?.rLg ?? 16;
+
+    final rows = <Widget>[];
+    for (var i = 0; i < children.length; i++) {
+      if (i > 0) {
+        rows.add(
+          Divider(height: 1, thickness: 1, color: colorScheme.outlineVariant),
+        );
+      }
+      rows.add(children[i]);
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.fromBorderSide(
+          BorderSide(color: colorScheme.outlineVariant),
+        ),
+        boxShadow: tokens?.e1 ?? _kCardShadow,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(radius),
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: rows),
+      ),
+    );
+  }
+}
+
+/// A single settings row: a rounded-square leading icon, a title with an
+/// optional subtitle, and an optional trailing widget.
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
     required this.icon,
-    required this.iconColor,
-    required this.iconBgColor,
     required this.title,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
 
   final IconData icon;
-  final Color iconColor;
-  final Color iconBgColor;
   final String title;
+  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
+    final textTheme = Theme.of(context).textTheme;
+    final content = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          _LeadingIcon(icon: icon),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: textTheme.titleMedium),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle!,
+                    style: textTheme.bodySmall?.copyWith(height: 1.45),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (trailing != null) trailing!,
-          ],
-        ),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+        ],
       ),
+    );
+
+    if (onTap == null) return content;
+    return InkWell(onTap: onTap, child: content);
+  }
+}
+
+/// 38×38 rounded-square icon badge tinted with the clay accent.
+class _LeadingIcon extends StatelessWidget {
+  const _LeadingIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Icon(icon, color: colorScheme.onPrimaryContainer, size: 20),
+    );
+  }
+}
+
+/// A muted trailing value, optionally followed by a chevron.
+class _TrailingValue extends StatelessWidget {
+  const _TrailingValue(this.text, {this.chevron = false});
+
+  final String text;
+  final bool chevron;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ink3 =
+        Theme.of(context).extension<LorescapeTokens>()?.ink3 ??
+        colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink3),
+        ),
+        if (chevron) ...[
+          const SizedBox(width: 6),
+          Icon(Icons.chevron_right, color: ink3, size: 18),
+        ],
+      ],
     );
   }
 }

@@ -193,15 +193,15 @@ void _thenUsageSectionIsVisible() {
 }
 
 void _thenUpgradeCtaIsVisible() {
-  expect(find.text('subscription.upgrade_cta'), findsOneWidget);
+  expect(find.text('subscription.upgrade_banner_title'), findsOneWidget);
 }
 
 void _thenPremiumTileIsVisible() {
-  expect(find.text('subscription.premium_active'), findsOneWidget);
+  expect(find.text('subscription.premium_banner_title'), findsOneWidget);
 }
 
 void _thenUpgradeCtaIsHidden() {
-  expect(find.text('subscription.upgrade_cta'), findsNothing);
+  expect(find.text('subscription.upgrade_banner_title'), findsNothing);
 }
 
 void _thenVersionLabelIsVisible() {
