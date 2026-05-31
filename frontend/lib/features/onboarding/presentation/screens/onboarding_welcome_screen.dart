@@ -52,13 +52,6 @@ class _OnboardingWelcomeScreenState
     }
   }
 
-  void _goBack() {
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
   Future<void> _finish() async {
     if (_finishing) return;
     setState(() => _finishing = true);
@@ -92,7 +85,6 @@ class _OnboardingWelcomeScreenState
             dark: dark,
             onSkip: _finish,
           ),
-          if (_step > 0) _ObBackButton(dark: dark, onTap: _goBack),
           _ObDock(step: _step, dark: dark, onNext: _goNext),
           if (_finishing) const _FinishOverlay(),
         ],
@@ -590,7 +582,7 @@ class _CategoryTile extends StatelessWidget {
 }
 
 // ============================================================================
-// Chrome — progress / skip / back / dock
+// Chrome — progress / skip / dock
 // ============================================================================
 
 class _ObTopBar extends StatelessWidget {
@@ -661,45 +653,6 @@ class _ObTopBar extends StatelessWidget {
                   ),
                 ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ObBackButton extends StatelessWidget {
-  const _ObBackButton({required this.dark, required this.onTap});
-
-  final bool dark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
-    return Positioned(
-      top: 0,
-      left: 0,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 38, left: 12),
-          child: Material(
-            color: dark ? const Color(0x66140C08) : palette.paperSunk,
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onTap,
-              child: SizedBox(
-                width: 42,
-                height: 42,
-                child: Icon(
-                  Icons.chevron_left,
-                  size: 24,
-                  color: dark ? Colors.white : palette.ink,
-                ),
-              ),
-            ),
           ),
         ),
       ),
