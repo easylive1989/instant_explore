@@ -1,3 +1,4 @@
 requests>=2.32,<3
+supabase>=2.10,<3
 pytest>=8,<9
 requests-mock>=1.12,<2

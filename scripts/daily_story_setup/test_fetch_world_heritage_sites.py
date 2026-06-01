@@ -34,11 +34,20 @@ def test_parse_skips_rows_without_enwiki_or_country():
                     "itemLabel": {"value": "No Country"},
                     "enwiki": {"value": "https://en.wikipedia.org/wiki/No_Country"},
                 },
+                {
+                    "itemLabel": {"value": "No Item"},
+                    "countryLabel": {"value": "Somewhere"},
+                    "enwiki": {"value": "https://en.wikipedia.org/wiki/No_Item"},
+                },
             ]
         }
     }
 
     assert parse_sparql_response(data) == []
+
+
+def test_parse_returns_empty_for_no_bindings():
+    assert parse_sparql_response({"results": {"bindings": []}}) == []
 
 
 def test_parse_url_decodes_wiki_title():
