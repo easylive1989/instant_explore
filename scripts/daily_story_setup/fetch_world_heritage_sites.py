@@ -50,7 +50,11 @@ def parse_sparql_response(data: dict) -> list[tuple[str, str, str, str]]:
     """
     rows = []
     for binding in data.get("results", {}).get("bindings", []):
-        if "enwiki" not in binding or "countryLabel" not in binding:
+        if (
+            "enwiki" not in binding
+            or "countryLabel" not in binding
+            or "item" not in binding
+        ):
             continue
         if "itemLabel" not in binding:
             continue

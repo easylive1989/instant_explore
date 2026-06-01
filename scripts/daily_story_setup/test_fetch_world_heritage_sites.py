@@ -39,3 +39,23 @@ def test_parse_skips_rows_without_enwiki_or_country():
     }
 
     assert parse_sparql_response(data) == []
+
+
+def test_parse_url_decodes_wiki_title():
+    data = {
+        "results": {
+            "bindings": [
+                {
+                    "item": {"value": "http://www.wikidata.org/entity/Q191"},
+                    "itemLabel": {"value": "Mont-Saint-Michel"},
+                    "countryLabel": {"value": "France"},
+                    "enwiki": {
+                        "value": "https://en.wikipedia.org/wiki/Mont-Saint-Michel%20and%20its%20Bay"
+                    },
+                }
+            ]
+        }
+    }
+    assert parse_sparql_response(data) == [
+        ("Q191", "Mont-Saint-Michel", "Mont-Saint-Michel and its Bay", "France"),
+    ]
