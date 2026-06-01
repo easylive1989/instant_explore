@@ -1,30 +1,43 @@
 import React from "react";
+import { colors, fonts } from "../theme";
+import { BrandSeal } from "./BrandSeal";
 
 type Props = {
   size?: number;
   opacity?: number;
-  letterSpacing?: number;
+  color?: string;
+  withSeal?: boolean;
 };
 
+// Serif "Lorescape" wordmark, optionally paired with the compass seal.
 export const Wordmark: React.FC<Props> = ({
   size = 72,
   opacity = 1,
-  letterSpacing = -1.5,
+  color = colors.ink,
+  withSeal = true,
 }) => {
   return (
     <div
       style={{
-        fontFamily:
-          '"Inter","Noto Sans",-apple-system,BlinkMacSystemFont,sans-serif',
-        fontWeight: 600,
-        fontSize: size,
-        letterSpacing,
-        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        gap: size * 0.28,
         opacity,
-        lineHeight: 1,
       }}
     >
-      Lorescape
+      {withSeal ? <BrandSeal size={size * 0.92} /> : null}
+      <div
+        style={{
+          fontFamily: fonts.serif,
+          fontWeight: 700,
+          fontSize: size,
+          letterSpacing: size * 0.01,
+          color,
+          lineHeight: 1,
+        }}
+      >
+        Lorescape
+      </div>
     </div>
   );
 };
