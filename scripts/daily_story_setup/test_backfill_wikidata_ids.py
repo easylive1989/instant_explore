@@ -25,6 +25,8 @@ def test_resolve_returns_qid_from_pageprops():
     assert qid == "Q10285"
     assert sent["action"] == ["query"]
     assert sent["prop"] == ["pageprops"]
+    assert sent["ppprop"] == ["wikibase_item"]
+    assert sent["redirects"] == ["1"]
     assert sent["titles"] == ["colosseum"]
 
 
