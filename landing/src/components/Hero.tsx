@@ -1,4 +1,5 @@
 import DownloadLink from "./DownloadLink";
+import { showDownloadLinks } from "@/lib/downloadLinks";
 
 export default function Hero() {
   return (
@@ -34,34 +35,36 @@ export default function Hero() {
           說給你聽——還能化作語音，邊走邊聽。
         </p>
 
-        <div className="mt-10 flex flex-wrap gap-4">
-          <DownloadLink
-            platform="ios"
-            location="hero"
-            className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+        {showDownloadLinks && (
+          <div className="mt-10 flex flex-wrap gap-4">
+            <DownloadLink
+              platform="ios"
+              location="hero"
+              className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
             >
-              ios
-            </span>
-            App Store
-          </DownloadLink>
-          <DownloadLink
-            platform="android"
-            location="hero"
-            className="flex items-center gap-2.5 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                ios
+              </span>
+              App Store
+            </DownloadLink>
+            <DownloadLink
+              platform="android"
+              location="hero"
+              className="flex items-center gap-2.5 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
             >
-              android
-            </span>
-            Play Store
-          </DownloadLink>
-        </div>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                android
+              </span>
+              Play Store
+            </DownloadLink>
+          </div>
+        )}
 
         <div className="mt-12 flex items-center gap-2 text-xs tracking-[0.08em] text-[#f7f1e6]/60">
           <span className="material-symbols-outlined text-[15px]">place</span>

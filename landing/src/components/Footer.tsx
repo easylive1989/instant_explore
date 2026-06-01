@@ -1,5 +1,5 @@
 import DownloadLink from "./DownloadLink";
-import type { DownloadPlatform } from "@/lib/downloadLinks";
+import { showDownloadLinks, type DownloadPlatform } from "@/lib/downloadLinks";
 
 type FooterLink =
   | { kind: "internal"; label: string; href: string }
@@ -23,7 +23,9 @@ export default function Footer() {
           Lorescape
         </div>
         <div className="flex flex-wrap justify-center gap-7 text-xs text-ink-3">
-          {links.map((link) => {
+          {links
+            .filter((link) => showDownloadLinks || link.kind !== "download")
+            .map((link) => {
             const className = "transition-colors hover:text-clay";
             if (link.kind === "download") {
               return (

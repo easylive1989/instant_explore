@@ -1,4 +1,5 @@
 import DownloadLink from "./DownloadLink";
+import { showDownloadLinks } from "@/lib/downloadLinks";
 
 export default function FinalCTA() {
   return (
@@ -28,34 +29,36 @@ export default function FinalCTA() {
         <p className="mx-auto mt-6 max-w-md leading-relaxed text-on-dark-2">
           帶上你的隨行說書人，讓每一處風景，都為你開口說它的故事。
         </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <DownloadLink
-            platform="ios"
-            location="final_cta"
-            className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+        {showDownloadLinks && (
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <DownloadLink
+              platform="ios"
+              location="final_cta"
+              className="btn-clay flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
             >
-              ios
-            </span>
-            App Store
-          </DownloadLink>
-          <DownloadLink
-            platform="android"
-            location="final_cta"
-            className="flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-base font-semibold text-on-dark backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                ios
+              </span>
+              App Store
+            </DownloadLink>
+            <DownloadLink
+              platform="android"
+              location="final_cta"
+              className="flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-base font-semibold text-on-dark backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
             >
-              android
-            </span>
-            Play Store
-          </DownloadLink>
-        </div>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                android
+              </span>
+              Play Store
+            </DownloadLink>
+          </div>
+        )}
       </div>
     </section>
   );

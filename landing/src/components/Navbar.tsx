@@ -1,4 +1,5 @@
 import DownloadLink from "./DownloadLink";
+import { showDownloadLinks } from "@/lib/downloadLinks";
 
 const navLinks = [
   { label: "故事", href: "#story" },
@@ -30,13 +31,15 @@ export default function Navbar() {
           ))}
         </div>
 
-        <DownloadLink
-          platform="ios"
-          location="navbar"
-          className="btn-clay rounded-full px-5 py-2 text-sm font-semibold"
-        >
-          下載 App
-        </DownloadLink>
+        {showDownloadLinks && (
+          <DownloadLink
+            platform="ios"
+            location="navbar"
+            className="btn-clay rounded-full px-5 py-2 text-sm font-semibold"
+          >
+            下載 App
+          </DownloadLink>
+        )}
       </div>
     </nav>
   );
