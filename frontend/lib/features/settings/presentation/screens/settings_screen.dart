@@ -1,6 +1,4 @@
 import 'package:context_app/app/config/lorescape_tokens.dart';
-import 'package:context_app/features/analytics/domain/models/consent_state.dart';
-import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/services/auth_service.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
@@ -51,8 +49,6 @@ class SettingsScreen extends ConsumerWidget {
             const _AccountGroup(),
             const SizedBox(height: 26),
             const _SyncGroup(),
-            const SizedBox(height: 26),
-            const _PrivacyGroup(),
             const SizedBox(height: 26),
             const _UsageGroup(),
             const SizedBox(height: 26),
@@ -335,49 +331,6 @@ class _SyncGroup extends ConsumerWidget {
               key: const ValueKey('sync_toggle_switch'),
               value: enabled && isSignedIn,
               onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Stream that emits the current analytics consent state and any updates
-/// written via [ConsentRepository.write]. Exposed as a provider so the
-/// Settings toggle can rebuild without holding a `StreamBuilder`.
-final analyticsConsentStreamProvider = StreamProvider<ConsentState>((ref) {
-  return ref.watch(consentRepositoryProvider).watch();
-});
-
-class _PrivacyGroup extends ConsumerWidget {
-  const _PrivacyGroup();
-
-  Future<void> _handleToggle(WidgetRef ref, bool value) async {
-    await ref
-        .read(consentRepositoryProvider)
-        .write(ConsentState(enabled: value, updatedAt: DateTime.now()));
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final consentAsync = ref.watch(analyticsConsentStreamProvider);
-    // Default to opted-in while the first stream value is loading so the
-    // switch never flashes off for users who haven't toggled it.
-    final enabled = consentAsync.valueOrNull?.enabled ?? true;
-
-    return _SettingsGroup(
-      label: 'settings.privacy_section'.tr(),
-      child: _SettingsCard(
-        children: [
-          _SettingsRow(
-            icon: Icons.bar_chart,
-            title: 'settings.analytics_consent.title'.tr(),
-            subtitle: 'settings.analytics_consent.subtitle'.tr(),
-            trailing: AdaptiveSwitch(
-              key: const ValueKey('analytics_consent_switch'),
-              value: enabled,
-              onChanged: (v) => _handleToggle(ref, v),
             ),
           ),
         ],

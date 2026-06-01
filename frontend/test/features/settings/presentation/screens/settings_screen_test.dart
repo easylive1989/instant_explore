@@ -1,4 +1,3 @@
-import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/auth/domain/models/auth_user.dart';
 import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../fakes/fake_auth_service.dart';
-import '../../../../fakes/in_memory_consent_repository.dart';
 import '../../../../fakes/in_memory_onboarding_repository.dart';
 import '../../../../fakes/in_memory_usage_repository.dart';
 import '../../../../helpers/pump_app.dart';
@@ -41,19 +39,18 @@ void main() {
       },
     );
 
-    testWidgets(
-      'given a premium user, when the screen loads, '
-      'then the premium-active tile is shown instead of the upgrade CTA',
-      (tester) async {
-        await _givenSettingsScreen(
-          tester,
-          status: const SubscriptionStatus(isPremium: true),
-        );
+    testWidgets('given a premium user, when the screen loads, '
+        'then the premium-active tile is shown instead of the upgrade CTA', (
+      tester,
+    ) async {
+      await _givenSettingsScreen(
+        tester,
+        status: const SubscriptionStatus(isPremium: true),
+      );
 
-        _thenPremiumTileIsVisible();
-        _thenUpgradeCtaIsHidden();
-      },
-    );
+      _thenPremiumTileIsVisible();
+      _thenUpgradeCtaIsHidden();
+    });
 
     testWidgets(
       'given the app version future resolves, when the screen settles, '
@@ -67,73 +64,68 @@ void main() {
       },
     );
 
-    testWidgets(
-      'given no user is signed in, '
-      'then sign-in buttons are visible and sync toggle is disabled',
-      (tester) async {
-        final auth = FakeAuthService();
-        addTearDown(auth.dispose);
+    testWidgets('given no user is signed in, '
+        'then sign-in buttons are visible and sync toggle is disabled', (
+      tester,
+    ) async {
+      final auth = FakeAuthService();
+      addTearDown(auth.dispose);
 
-        await _givenSettingsScreen(tester, authService: auth);
-        await tester.pump(const Duration(milliseconds: 50));
+      await _givenSettingsScreen(tester, authService: auth);
+      await tester.pump(const Duration(milliseconds: 50));
 
-        expect(find.byKey(const ValueKey('sign_in_google')), findsOneWidget);
-        expect(find.byKey(const ValueKey('sign_in_apple')), findsOneWidget);
-        final switchFinder = find.byKey(const ValueKey('sync_toggle_switch'));
-        expect(switchFinder, findsOneWidget);
-        final Switch toggle = tester.widget(switchFinder);
-        expect(toggle.onChanged, isNull);
-        expect(toggle.value, isFalse);
-      },
-    );
+      expect(find.byKey(const ValueKey('sign_in_google')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sign_in_apple')), findsOneWidget);
+      final switchFinder = find.byKey(const ValueKey('sync_toggle_switch'));
+      expect(switchFinder, findsOneWidget);
+      final Switch toggle = tester.widget(switchFinder);
+      expect(toggle.onChanged, isNull);
+      expect(toggle.value, isFalse);
+    });
 
-    testWidgets(
-      'given the user taps the Google sign-in button, '
-      'then signInWithGoogle is invoked and the user appears as signed in',
-      (tester) async {
-        final auth = FakeAuthService();
-        addTearDown(auth.dispose);
+    testWidgets('given the user taps the Google sign-in button, '
+        'then signInWithGoogle is invoked and the user appears as signed in', (
+      tester,
+    ) async {
+      final auth = FakeAuthService();
+      addTearDown(auth.dispose);
 
-        await _givenSettingsScreen(tester, authService: auth);
-        await tester.pump(const Duration(milliseconds: 50));
+      await _givenSettingsScreen(tester, authService: auth);
+      await tester.pump(const Duration(milliseconds: 50));
 
-        await tester.tap(find.byKey(const ValueKey('sign_in_google')));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.byKey(const ValueKey('sign_in_google')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-        expect(auth.googleSignInCount, 1);
-        // After sign-in, the sign-out button replaces the sign-in buttons.
-        expect(find.text('settings.sign_out'), findsOneWidget);
-        expect(find.byKey(const ValueKey('sign_in_google')), findsNothing);
-      },
-    );
+      expect(auth.googleSignInCount, 1);
+      // After sign-in, the sign-out button replaces the sign-in buttons.
+      expect(find.text('settings.sign_out'), findsOneWidget);
+      expect(find.byKey(const ValueKey('sign_in_google')), findsNothing);
+    });
 
-    testWidgets(
-      'given a signed-in user, '
-      'when the sync toggle is flipped on, '
-      'then the sync preference is persisted as true',
-      (tester) async {
-        final auth = FakeAuthService(
-          initialUser: const AuthUser(
-            id: 'u1',
-            email: 'a@b.com',
-            displayName: 'A',
-          ),
-        );
-        addTearDown(auth.dispose);
+    testWidgets('given a signed-in user, '
+        'when the sync toggle is flipped on, '
+        'then the sync preference is persisted as true', (tester) async {
+      final auth = FakeAuthService(
+        initialUser: const AuthUser(
+          id: 'u1',
+          email: 'a@b.com',
+          displayName: 'A',
+        ),
+      );
+      addTearDown(auth.dispose);
 
-        await _givenSettingsScreen(tester, authService: auth);
-        await tester.pump(const Duration(milliseconds: 50));
+      await _givenSettingsScreen(tester, authService: auth);
+      await tester.pump(const Duration(milliseconds: 50));
 
-        final switchFinder = find.byKey(const ValueKey('sync_toggle_switch'));
-        await tester.tap(switchFinder);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
+      final switchFinder = find.byKey(const ValueKey('sync_toggle_switch'));
+      await tester.tap(switchFinder);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-        final prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('sync_enabled'), isTrue);
-      },
-    );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('sync_enabled'), isTrue);
+    });
   });
 }
 
@@ -142,12 +134,9 @@ Future<void> _givenSettingsScreen(
   InMemoryUsageRepository? usage,
   SubscriptionStatus status = SubscriptionStatus.free,
   FakeAuthService? authService,
-  InMemoryConsentRepository? consentRepository,
 }) async {
   final usageRepo = usage ?? InMemoryUsageRepository(usedToday: 0);
   final auth = authService ?? FakeAuthService();
-  final consent = consentRepository ?? InMemoryConsentRepository();
-  addTearDown(consent.dispose);
 
   // The settings screen is taller than the default 800x600 test surface
   // after the onboarding section was added. Enlarging the surface lets
@@ -171,7 +160,6 @@ Future<void> _givenSettingsScreen(
       onboardingRepositoryProvider.overrideWithValue(
         InMemoryOnboardingRepository(welcomeDone: true),
       ),
-      consentRepositoryProvider.overrideWithValue(consent),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));
