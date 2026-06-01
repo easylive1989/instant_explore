@@ -1,124 +1,71 @@
 import React from "react";
-import {
-  AbsoluteFill,
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  spring,
-} from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { PaperBackdrop } from "../components/PaperBackdrop";
 import { Wordmark } from "../components/Wordmark";
 import { StoreBadges } from "../components/StoreBadges";
-import { easeOutExpo } from "../utils/animations";
+import { colors, fonts } from "../theme";
+import { fadeIn, slideUp } from "../utils/animations";
 
+// Beat 6 (0–4s local): closing call-to-action on warm paper.
 export const CtaScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  const wordSpring = spring({
-    frame: frame - 4,
-    fps,
-    config: { damping: 16, stiffness: 110 },
-  });
-  const wordOp = interpolate(frame, [0, 24], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  const sloganOp = interpolate(frame, [28, 58], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const sloganY = interpolate(frame, [28, 58], [20, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: easeOutExpo,
-  });
-
-  const badgesOp = interpolate(frame, [58, 88], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const badgesY = interpolate(frame, [58, 94], [40, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: easeOutExpo,
-  });
-
-  // Fade to black at end
-  const sceneOut = interpolate(frame, [130, 150], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Golden halo behind wordmark
-  const halo = interpolate(frame, [0, 60], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: easeOutExpo,
-  });
 
   return (
-    <AbsoluteFill style={{ opacity: sceneOut }}>
+    <PaperBackdrop>
       <AbsoluteFill
         style={{
-          background:
-            "radial-gradient(circle at 50% 55%, #13203a 0%, #0B111A 55%, #05090f 100%)",
-        }}
-      />
-      {/* Golden glow halo */}
-      <AbsoluteFill
-        style={{
-          background: `radial-gradient(circle at 50% 42%, rgba(255,178,92,${0.3 * halo}) 0%, transparent 35%)`,
-          mixBlendMode: "screen",
-        }}
-      />
-
-      <AbsoluteFill
-        style={{
-          display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           gap: 30,
+          padding: 100,
         }}
       >
-        <div
-          style={{
-            transform: `scale(${0.85 + 0.15 * wordSpring})`,
-            opacity: wordOp,
-          }}
-        >
-          <Wordmark size={144} />
+        <div style={{ opacity: fadeIn(frame, 4, 16), transform: `translateY(${slideUp(frame, 4, 20, 30)}px)` }}>
+          <Wordmark size={66} />
         </div>
-
-        <div
+        <span
           style={{
-            opacity: sloganOp,
-            transform: `translateY(${sloganY}px)`,
-            fontFamily:
-              '"Inter","Noto Sans",-apple-system,BlinkMacSystemFont,sans-serif',
-            fontSize: 34,
-            fontWeight: 300,
-            letterSpacing: -0.3,
-            background:
-              "linear-gradient(135deg,#FFE4AF 0%,#FFA93D 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            fontFamily: fonts.sans,
+            fontSize: 18,
+            fontWeight: 700,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: colors.clay,
+            opacity: fadeIn(frame, 16, 16),
           }}
         >
-          Read the world.
+          開始你的第一段故事
+        </span>
+        <div
+          style={{
+            fontFamily: fonts.serif,
+            fontWeight: 700,
+            fontSize: 72,
+            lineHeight: 1.25,
+            textAlign: "center",
+            color: colors.ink,
+            opacity: fadeIn(frame, 22, 18),
+            transform: `translateY(${slideUp(frame, 22, 24, 34)}px)`,
+          }}
+        >
+          城市是一本書。
+          <br />
+          開始閱讀吧。
         </div>
-
-        <div
+        <p
           style={{
-            opacity: badgesOp,
-            transform: `translateY(${badgesY}px)`,
-            marginTop: 20,
+            fontFamily: fonts.sans,
+            fontSize: 24,
+            color: colors.ink2,
+            opacity: fadeIn(frame, 40, 18),
           }}
         >
+          加入五萬名探索者，一同揭開世界各地隱藏的篇章。
+        </p>
+        <div style={{ marginTop: 18, opacity: fadeIn(frame, 52, 20) }}>
           <StoreBadges />
         </div>
       </AbsoluteFill>
-    </AbsoluteFill>
+    </PaperBackdrop>
   );
 };
