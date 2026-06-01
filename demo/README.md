@@ -4,20 +4,21 @@
 
 ## 影片規格
 
-- **Composition id**：`LorescapeIntro`
+- **Composition id**：`LorescapeIntro`（16:9, 1920×1080）、`LorescapeIntroVertical`（9:16, 1080×1920）
 - **解析度**：1920 × 1080 (16:9)
 - **FPS**：30
 - **長度**：900 frames (30s)
 
 ### 分鏡
 
-| Scene        | 時間     | 內容                                                             |
-| ------------ | -------- | ---------------------------------------------------------------- |
-| Hook         | 0–5s     | 石紋 + 裂縫金光，"Stones don't speak—until now."                  |
-| Intro        | 5–10s    | iPhone + Home 畫面，Lorescape wordmark + tagline                  |
-| Narration    | 10–18s   | iPhone + Immersive Player，"Real-time AI narration"               |
-| Passport     | 18–25s   | iPhone + Knowledge Passport，"Every journey, remembered."         |
-| CTA          | 25–30s   | Wordmark + "Read the world." + App Store / Google Play 徽章      |
+| Scene   | 時間     | 內容                                              |
+| ------- | -------- | ------------------------------------------------- |
+| Hook    | 0–5s     | 紙感手記開場，「抬起眼睛，世界本身就是展品。」     |
+| Story   | 5–11s    | 功能01 即時寫故事，聖伯多祿實景 + 打字故事         |
+| Angles  | 11–17s   | 功能02 同一地標多角度，深底播放器                 |
+| Explore | 17–22s   | 功能03 探索身邊，附近地點 + 主題 chips            |
+| Journal | 22–26s   | 功能04 旅程成冊，手記自動成篇                      |
+| CTA     | 26–30s   | 「城市是一本書。開始閱讀吧。」+ 商店徽章           |
 
 ## 常用指令
 
@@ -31,6 +32,7 @@ npm run dev
 
 # 輸出 MP4
 npx remotion render LorescapeIntro out/lorescape-intro.mp4
+npx remotion render LorescapeIntroVertical out/lorescape-intro-vertical.mp4
 
 # 單幀 PNG（用來快速驗證某一幀）
 npx remotion still LorescapeIntro out/frame.png --frame=90 --scale=0.5
@@ -87,11 +89,11 @@ src/
 
 ## 設計參考
 
-視覺語言對齊專案的 `docs/DESIGN_SYSTEM.md`：
-- 深色背景 `#0B111A` / `#101922`
-- 品牌主色 `#137fec`
-- 黃金強調色 `#FFC36A` → `#FFA93D`（僅 Hook / CTA）
-- 玻璃擬態：`rgba(255,255,255,0.08)` + `backdrop-filter: blur(16px)`
+視覺語言對齊 landing（`landing/src/app/globals.css`）：
+- 紙白背景 `#f7f1e6`、凸紙 `#fdfaf3`、凹紙 `#ece3d3`
+- 品牌陶土色 `#bc5e3e` → 深陶 `#97442a`
+- 墨色文字 `#221c14`、襯線中文標題 Noto Serif TC
+- 功能02 深底區 `#1b1611`
 
 ## 授權
 
