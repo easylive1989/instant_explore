@@ -3,9 +3,12 @@ import 'package:context_app/app/utils/daily_story_config_launcher.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/card_reader_theme.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/more_stories_cta.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DailyStoryDetailScreen extends StatelessWidget {
   final DailyStory story;
@@ -18,11 +21,48 @@ class DailyStoryDetailScreen extends StatelessWidget {
     final onExploreMore = story.wikidataId != null
         ? () => launchSamePlaceStories(context, story)
         : null;
+    final isCard = story.hasCardLayout;
     return Scaffold(
-      appBar: AppBar(title: Text(story.placeName)),
-      body: story.hasCardLayout
+      backgroundColor: isCard ? CardReaderTheme.readBg : null,
+      appBar: isCard
+          ? _buildDarkAppBar(context)
+          : AppBar(title: Text(story.placeName)),
+      body: isCard
           ? CardLayoutBody(story: story, onExploreMore: onExploreMore)
           : _LegacyLayoutBody(story: story, onExploreMore: onExploreMore),
+    );
+  }
+
+  /// Dark "topbar" that blends into the hero photo, per the editorial reader
+  /// design: ink-bg background, clay back chevron, cream serif title.
+  PreferredSizeWidget _buildDarkAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: CardReaderTheme.inkBg,
+      foregroundColor: CardReaderTheme.onDark,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
+      leadingWidth: 44,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new,
+          size: 20,
+          color: CardReaderTheme.clay,
+        ),
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      titleSpacing: 0,
+      title: Text(
+        story.placeName,
+        style: GoogleFonts.notoSerifTc(
+          color: CardReaderTheme.onDark,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
