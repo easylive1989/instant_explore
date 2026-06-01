@@ -1,15 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
+import 'package:context_app/features/daily_story/presentation/widgets/card_reader_theme.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/more_stories_cta.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// IG-card-style detail body for a daily story.
+/// Editorial reader body for a daily story.
 ///
-/// Mirrors the visual structure of the Instagram card (photo plate +
-/// text plate) without being a pixel-perfect clone. Decorative fields
-/// (spine, Anno year, pull quote, city footer extras) gracefully omit
-/// when null; the layout never collapses to a broken state.
+/// Mirrors the design's `ReaderView` (`screens_story.jsx` + `ls2.css`): a
+/// 300px dark photo hero with a chapter badge, latin overline, title and
+/// italic sub, followed by a warm "paper" article body with a clay drop cap,
+/// optional pull quote, a divided footer and an optional "explore more" CTA.
+/// Decorative fields (latin, Anno, pull quote, city footer) omit gracefully
+/// when null.
 ///
 /// Caller must guarantee `story.hasCardLayout == true`.
 class CardLayoutBody extends StatelessWidget {
@@ -41,8 +44,9 @@ class _PhotoPlate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = story.imageUrl;
-    return AspectRatio(
-      aspectRatio: 3 / 4,
+    final latin = story.cardLocationEn;
+    return SizedBox(
+      height: 300,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -54,51 +58,70 @@ class _PhotoPlate extends StatelessWidget {
             )
           else
             Container(color: Colors.black87),
-          // Tint overlay so light photos still show white text.
-          Container(
-            decoration: const BoxDecoration(
+          // Editorial scrim: subtle top vignette deepening to the caption.
+          const DecoratedBox(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0x33000000), Color(0x99000000)],
+                colors: [
+                  Color.fromRGBO(15, 11, 7, 0.28),
+                  Color.fromRGBO(15, 11, 7, 0.0),
+                  Color.fromRGBO(15, 11, 7, 0.55),
+                  Color.fromRGBO(15, 11, 7, 0.92),
+                ],
+                stops: [0.0, 0.28, 0.78, 1.0],
               ),
             ),
           ),
-          if (story.cardLocationEn != null)
-            Positioned(
-              left: 20,
-              bottom: 160,
-              child: _SpineLabel(text: story.cardLocationEn!),
-            ),
           if (story.cardAnnoRoman != null)
             Positioned(
-              top: 20,
-              right: 20,
+              top: 16,
+              right: 16,
               child: _AnnoBadge(roman: story.cardAnnoRoman!),
             ),
           Positioned(
-            left: 20,
-            right: 20,
-            bottom: 24,
+            left: 22,
+            right: 22,
+            bottom: 22,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (latin != null) ...[
+                  Text(
+                    latin.toUpperCase(),
+                    style: const TextStyle(
+                      color: Color(0xD1FFFFFF),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 Text(
                   story.cardTitle!,
                   style: GoogleFonts.notoSerifTc(
                     color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    height: 1.2,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    height: 1.12,
+                    shadows: const [
+                      Shadow(
+                        color: Color(0x66000000),
+                        offset: Offset(0, 2),
+                        blurRadius: 18,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Text(
                   story.cardTitleSub!,
                   style: GoogleFonts.notoSerifTc(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
+                    color: const Color(0xE6FFFFFF),
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
                     height: 1.35,
                   ),
                 ),
@@ -111,39 +134,26 @@ class _PhotoPlate extends StatelessWidget {
   }
 }
 
-class _SpineLabel extends StatelessWidget {
-  final String text;
-  const _SpineLabel({required this.text});
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 10,
-        letterSpacing: 3,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-}
-
 class _AnnoBadge extends StatelessWidget {
   final String roman;
   const _AnnoBadge({required this.roman});
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      height: 30,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 13),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white70, width: 0.8),
+        border: Border.all(color: const Color(0x8CFFFFFF)),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         'Anno · $roman',
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 11,
-          letterSpacing: 1.2,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.9,
         ),
       ),
     );
@@ -159,34 +169,34 @@ class _TextPlate extends StatelessWidget {
   Widget build(BuildContext context) {
     final paragraphs = story.cardParagraphs!;
     return Container(
-      color: const Color(0xFFFAF7F1),
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
+      color: CardReaderTheme.readBg,
+      padding: const EdgeInsets.fromLTRB(26, 30, 26, 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < paragraphs.length; i++) ...[
-            if (i > 0) const SizedBox(height: 18),
+            if (i > 0) const SizedBox(height: 20),
             if (i == 0)
               _DropCapParagraph(text: paragraphs[i])
             else
               _BodyParagraph(text: paragraphs[i]),
           ],
           if (story.cardPullQuote != null) ...[
-            const SizedBox(height: 28),
+            const SizedBox(height: 30),
             _PullQuote(
               quote: story.cardPullQuote!,
               attrib: story.cardPullQuoteAttrib,
             ),
           ],
-          const SizedBox(height: 32),
+          const SizedBox(height: 34),
           _Footer(story: story),
           if (onExploreMore != null) ...[
             const SizedBox(height: 28),
             MoreStoriesCta(
               onTap: onExploreMore!,
-              accentColor: const Color(0xFFBC5E3E),
+              accentColor: CardReaderTheme.clay,
               onAccentColor: const Color(0xFFFBEFE7),
-              eyebrowColor: const Color(0xFF97442A),
+              eyebrowColor: CardReaderTheme.readCap,
             ),
           ],
         ],
@@ -194,6 +204,13 @@ class _TextPlate extends StatelessWidget {
     );
   }
 }
+
+/// Body text style shared by the lede and following paragraphs.
+TextStyle _bodyStyle() => GoogleFonts.notoSerifTc(
+  color: CardReaderTheme.readInk,
+  fontSize: 18.5,
+  height: 1.92,
+);
 
 class _DropCapParagraph extends StatelessWidget {
   final String text;
@@ -206,22 +223,18 @@ class _DropCapParagraph extends StatelessWidget {
     final rest = text.characters.skip(1).toString();
     return RichText(
       text: TextSpan(
-        style: GoogleFonts.notoSerifTc(
-          color: const Color(0xFF1B1B1B),
-          fontSize: 16,
-          height: 1.8,
-        ),
+        style: _bodyStyle(),
         children: [
           WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
+            alignment: PlaceholderAlignment.top,
             child: Padding(
-              padding: const EdgeInsets.only(right: 4),
+              padding: const EdgeInsets.only(right: 12, top: 4),
               child: Text(
                 first,
                 style: GoogleFonts.notoSerifTc(
-                  color: const Color(0xFF1B1B1B),
-                  fontSize: 44,
-                  fontWeight: FontWeight.w900,
+                  color: CardReaderTheme.readCap,
+                  fontSize: 64,
+                  fontWeight: FontWeight.w700,
                   height: 1,
                 ),
               ),
@@ -240,14 +253,7 @@ class _BodyParagraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: GoogleFonts.notoSerifTc(
-        color: const Color(0xFF1B1B1B),
-        fontSize: 16,
-        height: 1.8,
-      ),
-    );
+    return Text(text, style: _bodyStyle());
   }
 }
 
@@ -259,36 +265,34 @@ class _PullQuote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(left: BorderSide(color: Color(0xFF8B6F3E), width: 2)),
+        border: Border(left: BorderSide(color: CardReaderTheme.clay, width: 3)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      padding: const EdgeInsets.fromLTRB(20, 4, 0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            quote,
+            style: GoogleFonts.notoSerifTc(
+              color: CardReaderTheme.readInk,
+              fontSize: 21,
+              fontStyle: FontStyle.italic,
+              height: 1.5,
+            ),
+          ),
+          if (attrib != null) ...[
+            const SizedBox(height: 12),
             Text(
-              quote,
+              attrib!,
               style: GoogleFonts.notoSerifTc(
-                color: const Color(0xFF1B1B1B),
-                fontSize: 16,
-                fontStyle: FontStyle.italic,
-                height: 1.6,
+                color: CardReaderTheme.readDim,
+                fontSize: 13,
+                letterSpacing: 0.5,
               ),
             ),
-            if (attrib != null) ...[
-              const SizedBox(height: 6),
-              Text(
-                attrib!,
-                style: GoogleFonts.notoSerifTc(
-                  color: const Color(0xFF6B5C42),
-                  fontSize: 12,
-                ),
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
@@ -309,12 +313,19 @@ class _Footer extends StatelessWidget {
     final text = cityPart.isEmpty
         ? story.placeLocation
         : '${story.placeLocation} · $cityPart';
-    return Text(
-      text,
-      style: GoogleFonts.notoSerifTc(
-        color: const Color(0xFF6B5C42),
-        fontSize: 12,
-        letterSpacing: 0.6,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 18),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: CardReaderTheme.readLine)),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.notoSerifTc(
+          color: CardReaderTheme.readDim,
+          fontSize: 13,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }
