@@ -1,3 +1,5 @@
+import 'package:context_app/app/config/appearance_options.dart';
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
@@ -8,10 +10,30 @@ import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+
+/// Dark "night" reading colours for the immersive player, regardless of the
+/// user's reading-surface preference. Values come from
+/// [ReadingSurface.night] in [LorescapeTokens]; the brand accent (clay) still
+/// follows the active appearance.
+LorescapeTokens _nightReadingTokens(BuildContext context) {
+  final base =
+      Theme.of(context).extension<LorescapeTokens>() ??
+      LorescapeTokens.forAppearance(
+        accent: BrandAccent.terracotta,
+        reading: ReadingSurface.night,
+      );
+  return base.copyWith(
+    readBg: const Color(0xFF1B1611),
+    readInk: const Color(0xFFE9E1D2),
+    readDim: const Color(0xFF9A8E7B),
+    readLine: const Color.fromRGBO(247, 241, 230, 0.14),
+  );
+}
 
 /// 導覽播放頁面
 ///
@@ -86,47 +108,64 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
       }
     });
 
-    final palette = ReadingPalette.of(context);
-    return Scaffold(
-      backgroundColor: palette.readBg,
-      body: Column(
-        children: [
-          Expanded(
-            child: SafeArea(
-              child: Column(
+    final theme = Theme.of(context);
+    final nightTokens = _nightReadingTokens(context);
+    return Theme(
+      data: theme.copyWith(extensions: <ThemeExtension<dynamic>>[nightTokens]),
+      child: Builder(
+        builder: (context) {
+          final palette = ReadingPalette.of(context);
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle.light.copyWith(
+              statusBarColor: Colors.transparent,
+            ),
+            child: Scaffold(
+              backgroundColor: palette.readBg,
+              body: Column(
                 children: [
-                  _NarrationHeader(
-                    placeName: widget.place.name,
-                    palette: palette,
-                  ),
                   Expanded(
-                    child: Stack(
-                      children: [
-                        NarrationTranscriptArea(
-                          scrollController: _scrollController,
-                        ),
-                        if (widget.narrationContent.grounding != null)
-                          Positioned(
-                            right: 12,
-                            bottom: 12,
-                            child: _InfoButton(
-                              palette: palette,
-                              tooltip: 'narration.grounding_info_tooltip'.tr(),
-                              onPressed: () => showGroundingInfoSheet(
-                                context,
-                                grounding: widget.narrationContent.grounding!,
-                              ),
+                    child: SafeArea(
+                      child: Column(
+                        children: [
+                          _NarrationHeader(
+                            placeName: widget.place.name,
+                            palette: palette,
+                          ),
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                NarrationTranscriptArea(
+                                  scrollController: _scrollController,
+                                ),
+                                if (widget.narrationContent.grounding != null)
+                                  Positioned(
+                                    right: 12,
+                                    bottom: 12,
+                                    child: _InfoButton(
+                                      palette: palette,
+                                      tooltip:
+                                          'narration.grounding_info_tooltip'
+                                              .tr(),
+                                      onPressed: () => showGroundingInfoSheet(
+                                        context,
+                                        grounding:
+                                            widget.narrationContent.grounding!,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
+                  NarrationControlPanel(place: widget.place),
                 ],
               ),
             ),
-          ),
-          NarrationControlPanel(place: widget.place),
-        ],
+          );
+        },
       ),
     );
   }

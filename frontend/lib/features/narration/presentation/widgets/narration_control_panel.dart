@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 導覽播放控制面板（Field Journal 深色音訊列）
+///
+/// 單列佈局：上一首 / 播放 / 下一首 控制鈕，接著進度條與播放百分比。
 class NarrationControlPanel extends ConsumerWidget {
   final Place place;
 
@@ -24,7 +26,7 @@ class NarrationControlPanel extends ConsumerWidget {
         child: Container(
           decoration: BoxDecoration(
             color: palette.inkBg2,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x59140C08),
@@ -33,27 +35,98 @@ class NarrationControlPanel extends ConsumerWidget {
               ),
             ],
           ),
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ProgressBar(progress: playerState.progress, palette: palette),
-              const SizedBox(height: 12),
-              _ControlsRow(
-                playerState: playerState,
-                palette: palette,
-                onPlayPause: () => playerController.playPause(),
-                onSkipPrev: playerState.canSkipPrevious
-                    ? playerController.skipToPreviousSegment
-                    : null,
-                onSkipNext: playerState.canSkipNext
-                    ? playerController.skipToNextSegment
-                    : null,
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(12, 10, 18, 10),
+          child: _ControlsRow(
+            playerState: playerState,
+            palette: palette,
+            onPlayPause: () => playerController.playPause(),
+            onSkipPrev: playerState.canSkipPrevious
+                ? playerController.skipToPreviousSegment
+                : null,
+            onSkipNext: playerState.canSkipNext
+                ? playerController.skipToNextSegment
+                : null,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ControlsRow extends StatelessWidget {
+  final NarrationState playerState;
+  final ReadingPalette palette;
+  final VoidCallback onPlayPause;
+  final VoidCallback? onSkipPrev;
+  final VoidCallback? onSkipNext;
+
+  const _ControlsRow({
+    required this.playerState,
+    required this.palette,
+    required this.onPlayPause,
+    required this.onSkipPrev,
+    required this.onSkipNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (playerState.progress.clamp(0.0, 1.0) * 100).round();
+    return Row(
+      children: [
+        if (playerState.shouldShowSkipButtons) ...[
+          Opacity(
+            opacity: playerState.canSkipPrevious ? 1.0 : 0.3,
+            child: _CircleControl(
+              icon: Icons.skip_previous,
+              size: 40,
+              filled: false,
+              palette: palette,
+              onPressed: onSkipPrev,
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
+        _CircleControl(
+          icon: playerState.isPlaying ? Icons.pause : Icons.play_arrow,
+          size: 54,
+          filled: true,
+          palette: palette,
+          onPressed: playerState.isLoading || playerState.hasError
+              ? null
+              : onPlayPause,
+        ),
+        if (playerState.shouldShowSkipButtons) ...[
+          const SizedBox(width: 4),
+          Opacity(
+            opacity: playerState.canSkipNext ? 1.0 : 0.3,
+            child: _CircleControl(
+              icon: Icons.skip_next,
+              size: 40,
+              filled: false,
+              palette: palette,
+              onPressed: onSkipNext,
+            ),
+          ),
+        ],
+        const SizedBox(width: 14),
+        Expanded(
+          child: _ProgressBar(progress: playerState.progress, palette: palette),
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 42,
+          child: Text(
+            '$percent%',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: palette.onDark2,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -86,76 +159,6 @@ class _ProgressBar extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ControlsRow extends StatelessWidget {
-  final NarrationState playerState;
-  final ReadingPalette palette;
-  final VoidCallback onPlayPause;
-  final VoidCallback? onSkipPrev;
-  final VoidCallback? onSkipNext;
-
-  const _ControlsRow({
-    required this.playerState,
-    required this.palette,
-    required this.onPlayPause,
-    required this.onSkipPrev,
-    required this.onSkipNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 60,
-          child: playerState.shouldShowSkipButtons
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Opacity(
-                    opacity: playerState.canSkipPrevious ? 1.0 : 0.0,
-                    child: _CircleControl(
-                      icon: Icons.skip_previous,
-                      size: 40,
-                      filled: false,
-                      palette: palette,
-                      onPressed: onSkipPrev,
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-        _CircleControl(
-          icon: playerState.isPlaying ? Icons.pause : Icons.play_arrow,
-          size: 52,
-          filled: true,
-          palette: palette,
-          onPressed: playerState.isLoading || playerState.hasError
-              ? null
-              : onPlayPause,
-        ),
-        SizedBox(
-          width: 60,
-          child: playerState.shouldShowSkipButtons
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Opacity(
-                    opacity: playerState.canSkipNext ? 1.0 : 0.0,
-                    child: _CircleControl(
-                      icon: Icons.skip_next,
-                      size: 40,
-                      filled: false,
-                      palette: palette,
-                      onPressed: onSkipNext,
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
     );
   }
 }
@@ -194,7 +197,7 @@ class _CircleControl extends StatelessWidget {
           child: Icon(
             icon,
             size: size * 0.5,
-            color: filled ? const Color(0xFFFBF1E9) : palette.onDark2,
+            color: filled ? const Color(0xFFFBF1E9) : palette.onDark,
           ),
         ),
       ),
