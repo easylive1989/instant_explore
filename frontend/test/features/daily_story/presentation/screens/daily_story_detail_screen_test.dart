@@ -1,5 +1,6 @@
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/presentation/screens/daily_story_detail_screen.dart';
+import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,21 @@ DailyStory _cardStory() => DailyStory(
   cardTitle: '血腥的盛宴',
   cardTitleSub: '從石灰岩堆砌的命運舞台',
   cardParagraphs: const ['p1...', 'p2...', 'p3...'],
+);
+
+DailyStory _cardStoryWithWikidata() => DailyStory(
+  publishDate: DateTime(2026, 5, 11),
+  language: 'zh-TW',
+  placeName: '羅馬競技場',
+  placeLocation: '義大利羅馬',
+  era: '公元 70-80 年',
+  story: 'p1\n\np2\n\np3',
+  imageUrl: null,
+  wikipediaUrl: 'https://zh.wikipedia.org/wiki/Colosseum',
+  cardTitle: '血腥的盛宴',
+  cardTitleSub: '從石灰岩堆砌的命運舞台',
+  cardParagraphs: const ['p1...', 'p2...', 'p3...'],
+  wikidataId: 'Q10285',
 );
 
 Future<void> _pumpDetail(
@@ -124,40 +140,50 @@ void main() {
     );
 
     testWidgets(
-      'given the story reader, when the user taps 探索更多故事, '
-      'then it navigates to the explore tab (/?tab=explore)',
+      'given a story with wikidataId, when the user taps 探索更多故事, '
+      'then it navigates to /config with a wikidata-prefixed Place',
       (tester) async {
-        String? homeLocation;
+        Object? configExtra;
         await pumpRouterApp(
           tester,
           initialLocation: '/daily-story/detail',
-          initialExtra: _cardStory(),
+          initialExtra: _cardStoryWithWikidata(),
           routes: [
-            GoRoute(
-              path: '/',
-              builder: (_, state) {
-                homeLocation = state.uri.toString();
-                return const Scaffold(body: Center(child: Text('home-stub')));
-              },
-            ),
             GoRoute(
               path: '/daily-story/detail',
               builder: (_, state) =>
                   DailyStoryDetailScreen(story: state.extra as DailyStory),
+            ),
+            GoRoute(
+              path: '/config',
+              builder: (_, state) {
+                configExtra = state.extra;
+                return const Scaffold(body: Center(child: Text('config-stub')));
+              },
             ),
           ],
         );
 
         final cta = find.text('daily_story.explore_more');
         expect(cta, findsOneWidget);
-
         await tester.ensureVisible(cta);
         await tester.pumpAndSettle();
         await tester.tap(cta);
         await tester.pumpAndSettle();
 
-        expect(find.text('home-stub'), findsOneWidget);
-        expect(homeLocation, equals('/?tab=explore'));
+        expect(find.text('config-stub'), findsOneWidget);
+        expect(configExtra, isA<Place>());
+        expect((configExtra! as Place).id, 'wikidata:Q10285');
+      },
+    );
+
+    testWidgets(
+      'given a story without wikidataId, when the screen renders, '
+      'then the 探索更多故事 CTA is hidden',
+      (tester) async {
+        await _pumpDetail(tester, story: _cardStory());
+
+        expect(find.text('daily_story.explore_more'), findsNothing);
       },
     );
   });

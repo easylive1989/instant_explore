@@ -1,33 +1,28 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:context_app/app/utils/daily_story_config_launcher.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/more_stories_cta.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class DailyStoryDetailScreen extends StatelessWidget {
   final DailyStory story;
   const DailyStoryDetailScreen({super.key, required this.story});
 
-  /// Takes the reader to the Explore tab to discover places and generate
-  /// more stories.
-  void _exploreMore(BuildContext context) => context.go('/?tab=explore');
-
   @override
   Widget build(BuildContext context) {
+    // Only offer "explore more stories" when the place can be resolved to a
+    // wikidata-prefixed Place; generation needs it. Otherwise hide the CTA.
+    final onExploreMore = story.wikidataId != null
+        ? () => launchSamePlaceStories(context, story)
+        : null;
     return Scaffold(
       appBar: AppBar(title: Text(story.placeName)),
       body: story.hasCardLayout
-          ? CardLayoutBody(
-              story: story,
-              onExploreMore: () => _exploreMore(context),
-            )
-          : _LegacyLayoutBody(
-              story: story,
-              onExploreMore: () => _exploreMore(context),
-            ),
+          ? CardLayoutBody(story: story, onExploreMore: onExploreMore)
+          : _LegacyLayoutBody(story: story, onExploreMore: onExploreMore),
     );
   }
 }
