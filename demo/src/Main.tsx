@@ -31,7 +31,7 @@ export const Main: React.FC = () => {
         <Audio src={staticFile("bgm.mp3")} volume={0.8} />
       ) : null}
 
-      <Sequence from={0} durationInFrames={150}>
+      <Sequence durationInFrames={150}>
         <HookScene />
       </Sequence>
       <Sequence from={150} durationInFrames={150}>
