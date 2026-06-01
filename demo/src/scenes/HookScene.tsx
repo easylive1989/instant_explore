@@ -67,7 +67,7 @@ export const HookScene: React.FC = () => {
             opacity: fadeIn(frame, 78, 24),
           }}
         >
-          Lorescape · 地誌手記
+          Lorescape
         </div>
       </AbsoluteFill>
     </PaperBackdrop>
