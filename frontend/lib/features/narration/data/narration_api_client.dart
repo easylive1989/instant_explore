@@ -45,11 +45,18 @@ class NarrationApiClient {
   final http.Client _httpClient;
   final Duration timeout;
 
+  /// Supplies the current access token attached as `Authorization: Bearer`.
+  ///
+  /// Returns `null` when there is no session; the header is then omitted.
+  final Future<String?> Function()? _accessToken;
+
   NarrationApiClient({
     required this.baseUrl,
     http.Client? httpClient,
     this.timeout = const Duration(seconds: 60),
-  }) : _httpClient = httpClient ?? http.Client();
+    Future<String?> Function()? accessToken,
+  }) : _httpClient = httpClient ?? http.Client(),
+       _accessToken = accessToken;
 
   Future<HooksApiResult> fetchHooks({
     required String placeName,
@@ -118,13 +125,14 @@ class NarrationApiClient {
       );
     }
     final uri = Uri.parse('$baseUrl$path');
+    final token = await _accessToken?.call();
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
     try {
       final response = await _httpClient
-          .post(
-            uri,
-            headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode(body),
-          )
+          .post(uri, headers: headers, body: jsonEncode(body))
           .timeout(timeout);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {

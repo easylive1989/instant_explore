@@ -5,7 +5,9 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from lorescape_backend.auth import AuthedUser, require_user
 from lorescape_backend.config import Config
+from lorescape_backend.dependencies import get_config
 from lorescape_backend.narration import service
 from lorescape_backend.narration.models import (
     HooksRequest,
@@ -16,18 +18,14 @@ from lorescape_backend.narration.models import (
 
 logger = logging.getLogger(__name__)
 
-
-def get_config() -> Config:
-    """FastAPI dependency — overridden in tests."""
-    return Config.from_env()
-
-
 router = APIRouter(prefix="/narration", tags=["narration"])
 
 
 @router.post("/hooks", response_model=HooksResponse)
 def post_hooks(
-    request: HooksRequest, config: Config = Depends(get_config)
+    request: HooksRequest,
+    config: Config = Depends(get_config),
+    user: AuthedUser = Depends(require_user),
 ) -> HooksResponse:
     """Return 2-3 narrative angles for the given place."""
     try:
@@ -40,7 +38,9 @@ def post_hooks(
 
 @router.post("", response_model=NarrationResponse)
 def post_narration(
-    request: NarrationRequest, config: Config = Depends(get_config)
+    request: NarrationRequest,
+    config: Config = Depends(get_config),
+    user: AuthedUser = Depends(require_user),
 ) -> NarrationResponse:
     """Return the long-form 3-paragraph story for the given place."""
     try:

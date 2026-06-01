@@ -196,6 +196,59 @@ void main() {
       }
     });
 
+    test('提供 accessToken 時帶上 Authorization Bearer 標頭', () async {
+      String? seenAuth;
+      final mockClient = MockClient((request) async {
+        seenAuth = request.headers['Authorization'];
+        return http.Response(
+          jsonEncode({'hooks': [], 'insufficient_source': false}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+        accessToken: () async => 'jwt-token-123',
+      );
+
+      await client.fetchHooks(
+        placeName: 'x',
+        location: '',
+        wikidataId: 'Q1',
+        language: 'en',
+      );
+
+      expect(seenAuth, 'Bearer jwt-token-123');
+    });
+
+    test('未提供 accessToken 時不帶 Authorization 標頭', () async {
+      var hasAuth = true;
+      final mockClient = MockClient((request) async {
+        hasAuth = request.headers.containsKey('Authorization');
+        return http.Response(
+          jsonEncode({'hooks': [], 'insufficient_source': false}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      await client.fetchHooks(
+        placeName: 'x',
+        location: '',
+        wikidataId: 'Q1',
+        language: 'en',
+      );
+
+      expect(hasAuth, isFalse);
+    });
+
     test('未設定 baseUrl 時拋出可辨識的 AppError', () async {
       final client = NarrationApiClient(baseUrl: '');
 

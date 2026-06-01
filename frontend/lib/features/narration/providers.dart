@@ -16,11 +16,19 @@ import 'package:context_app/features/narration/presentation/controllers/story_ho
 import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// 共享的 narration HTTP client。讀取 BACKEND_BASE_URL 設定。
+///
+/// 每次請求附上目前 Supabase session 的 access token，後端據此辨識使用者
+/// （含匿名使用者）。尚未建立 session 時 token 為 null，header 會省略。
 final narrationApiClientProvider = Provider<NarrationApiClient>((ref) {
   final config = ref.watch(apiConfigProvider);
-  return NarrationApiClient(baseUrl: config.backendBaseUrl);
+  return NarrationApiClient(
+    baseUrl: config.backendBaseUrl,
+    accessToken: () async =>
+        Supabase.instance.client.auth.currentSession?.accessToken,
+  );
 });
 
 final narrationServiceProvider = Provider<NarrationService>((ref) {

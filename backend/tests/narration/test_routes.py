@@ -3,6 +3,7 @@ from unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from lorescape_backend.auth import AuthedUser, get_token_verifier, require_user
 from lorescape_backend.config import Config
 from lorescape_backend.narration.models import (
     HookItem,
@@ -32,6 +33,9 @@ def _make_app() -> FastAPI:
     app = FastAPI()
     app.include_router(router)
     app.dependency_overrides[get_config] = _fake_config
+    app.dependency_overrides[require_user] = lambda: AuthedUser(
+        user_id="user-1", is_anonymous=False
+    )
     return app
 
 
@@ -176,3 +180,32 @@ def test_narration_route_400_when_no_identity_provided():
         },
     )
     assert res.status_code in (400, 422)
+
+
+class _NeverVerifier:
+    """Token verifier that fails the test if ever consulted."""
+
+    def verify(self, token: str):  # pragma: no cover - must not run
+        raise AssertionError("verifier should not run without a token")
+
+
+def test_narration_route_401_without_bearer_token():
+    # An app WITHOUT a require_user override behaves like production: a
+    # request carrying no Authorization header is rejected up front, before
+    # the token verifier (which would hit Supabase) is ever consulted.
+    app = FastAPI()
+    app.include_router(router)
+    app.dependency_overrides[get_config] = _fake_config
+    app.dependency_overrides[get_token_verifier] = lambda: _NeverVerifier()
+    client = TestClient(app)
+
+    res = client.post(
+        "/narration",
+        json={
+            "place_name": "x",
+            "location": "y",
+            "wikidata_id": "Q1",
+            "language": "en",
+        },
+    )
+    assert res.status_code == 401

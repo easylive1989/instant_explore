@@ -9,12 +9,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/app/config/api_config.dart';
 import 'package:context_app/features/analytics/providers.dart';
+import 'package:context_app/features/auth/data/supabase_auth_service.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/firebase_options.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
+import 'package:logging/logging.dart';
 
 /// 全域 ApiConfig 實例
 late final ApiConfig apiConfig;
+
+final _log = Logger('bootstrap');
 
 void main() async {
   runApp(await init());
@@ -37,6 +41,12 @@ Future<Widget> init() async {
 
   // Initialize Supabase
   await _initializeSupabase();
+
+  // Ensure an (anonymous) session so authenticated backend APIs are
+  // reachable before the user signs in. Requires "Anonymous sign-ins" to
+  // be enabled in Supabase Auth; a failure here is non-fatal — the app
+  // still launches and backend calls will surface a 401 instead.
+  await _ensureSignedIn();
 
   // Initialize RevenueCat SDK (global, one-time)
   final revenueCatApiKey = Platform.isIOS
@@ -74,4 +84,16 @@ Future<void> _initializeSupabase() async {
     url: apiConfig.supabaseUrl,
     anonKey: apiConfig.supabaseAnonKey,
   );
+}
+
+/// Ensure an anonymous session exists so backend calls are authenticated.
+///
+/// Best-effort: a failure (e.g. anonymous sign-ins disabled) is logged but
+/// does not block startup.
+Future<void> _ensureSignedIn() async {
+  try {
+    await SupabaseAuthService(apiConfig: apiConfig).ensureSignedIn();
+  } catch (e, stack) {
+    _log.warning('Anonymous sign-in failed at startup', e, stack);
+  }
 }
