@@ -1,4 +1,5 @@
 import React from "react";
+import { colors } from "../theme";
 
 type Props = {
   children: React.ReactNode;
@@ -6,7 +7,7 @@ type Props = {
   height?: number;
 };
 
-// Lightweight iPhone mockup with a notch and rounded bezel.
+// Light-theme iPhone mockup: warm bezel, white screen, dynamic island.
 // Pure CSS/SVG — no external assets.
 export const PhoneFrame: React.FC<Props> = ({
   children,
@@ -23,10 +24,9 @@ export const PhoneFrame: React.FC<Props> = ({
         height,
         borderRadius: radius,
         padding: bezel,
-        background:
-          "linear-gradient(160deg, #1b2330 0%, #0c1119 55%, #1a2230 100%)",
+        background: `linear-gradient(160deg, #2c241c 0%, #15110c 55%, #2c241c 100%)`,
         boxShadow:
-          "0 40px 120px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.06)",
+          "0 40px 110px rgba(28,20,10,0.45), 0 0 0 1px rgba(255,255,255,0.04)",
         position: "relative",
       }}
     >
@@ -37,11 +37,10 @@ export const PhoneFrame: React.FC<Props> = ({
           borderRadius: radius - bezel,
           overflow: "hidden",
           position: "relative",
-          background: "#0B111A",
+          background: colors.paperRaised,
         }}
       >
         {children}
-        {/* Dynamic island */}
         <div
           style={{
             position: "absolute",
