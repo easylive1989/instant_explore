@@ -192,7 +192,7 @@ a{ color:inherit; text-decoration:none; }
 .ph-ctrl .play{ width:60px; height:60px; border-radius:50%; background:var(--clay); display:grid; place-items:center; box-shadow:0 10px 26px rgba(188,94,62,.5); }
 .ph-ctrl .play svg{ width:26px; height:26px; opacity:1; }
 
-/* ============ PHOTO IDENTIFY full-bleed ============ */
+/* ============ EXPLORE NEARBY full-bleed ============ */
 .bleed{ position:relative; min-height:clamp(520px,72vw,720px); display:flex; align-items:flex-end; overflow:hidden; }
 .bleed__bg{ position:absolute; inset:0; }
 .bleed__bg img{ width:100%; height:100%; object-fit:cover; }
@@ -205,6 +205,9 @@ a{ color:inherit; text-decoration:none; }
 .check{ display:flex; align-items:center; gap:13px; font-size:15.5px; }
 .check .tick{ width:26px; height:26px; border-radius:50%; background:var(--clay); display:grid; place-items:center; flex:none; }
 .check .tick svg{ width:15px; height:15px; }
+.cat-chips{ display:flex; flex-wrap:wrap; gap:10px; margin-top:30px; }
+.cat-chip{ display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 15px; border-radius:999px; background:rgba(247,241,230,.1); border:1px solid rgba(247,241,230,.26); color:var(--on-dark); font-size:14px; font-weight:600; }
+.cat-chip svg{ width:16px; height:16px; opacity:.92; }
 
 /* ============ STATS ============ */
 .stats-head{ text-align:center; max-width:36ch; margin:0 auto; }
@@ -286,9 +289,10 @@ a{ color:inherit; text-decoration:none; }
     Lorescape
   </a>
   <nav class="nav__links">
-    <a href="#discover">免持探索</a>
-    <a href="#narration">AI 導覽</a>
-    <a href="#journey">知識旅程</a>
+    <a href="#stories">在地故事</a>
+    <a href="#angles">多種角度</a>
+    <a href="#explore">探索附近</a>
+    <a href="#journey">旅程手記</a>
   </nav>
   <span class="nav__spacer"></span>
   <a class="btn btn--primary" href="#download">
@@ -302,9 +306,9 @@ a{ color:inherit; text-decoration:none; }
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="wrap">
-      <span class="pill"><span class="dot"></span>AI 沉浸式歷史導覽</span>
+      <span class="pill"><span class="dot"></span>AI 隨行的旅行說書人</span>
       <h1>體驗歷史，<br/><span class="clay">而不只是風景。</span></h1>
-      <p class="lede">你的隨身 AI 歷史學家。免持探索，讓城市的每一塊石頭，向你訴說它的故事。</p>
+      <p class="lede">你的隨身 AI 旅行說書人。走到哪，就把那裡的來歷、傳說與歷史，說給你聽。</p>
       <div class="hero__cta">
         <a class="btn btn--primary btn--store" href="#download">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8zM14.2 6.2c.6-.8 1.1-1.9.9-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.9-1.3z"/></svg>
@@ -350,61 +354,68 @@ a{ color:inherit; text-decoration:none; }
     </div>
   </section>
 
-  <!-- ============ 免持探索 ============ -->
-  <section class="section section--sunk" id="discover">
+  <!-- ============ AI 生成的在地故事 ============ -->
+  <section class="section section--sunk" id="stories">
     <div class="wrap">
       <div class="split">
         <div class="split__copy">
-          <div class="sec-label"><span class="bar"></span><span class="no">特徵 01</span></div>
-          <h2 class="h2">免持探索，<br/>抬起你的眼睛</h2>
-          <p class="sec-lede">「漫遊」模式以空間音訊娓娓道來眼前的歷史。把手機收進口袋，讓整座城市親口向你訴說。</p>
+          <div class="sec-label"><span class="bar"></span><span class="no">功能 01</span></div>
+          <h2 class="h2">為眼前的風景，<br/>即時寫一篇故事</h2>
+          <p class="sec-lede">不是條列式的百科資料。Lorescape 為你經過的每座地標、古蹟與山林，當場編寫一篇有人物、有轉折、值得細讀的故事。</p>
           <div class="subgrid">
             <div class="subcard">
-              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 10v4"/></svg></div>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M8 8h8M8 11.5h8M8 15h5"/></svg></div>
               <div>
-                <h3>沉浸式空間音場</h3>
-                <p>音訊隨你的步伐與朝向流動，交織成彷彿來自環境本身的敘事。</p>
+                <h3>值得細讀的歷史長文</h3>
+                <p>有起承轉合、有人物與懸念的敘事，而不是冰冷的年份與條目。</p>
               </div>
             </div>
             <div class="subcard">
-              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M4 5l16 12" stroke-width="1.9"/><path d="M8 21h8M12 17v4"/></svg></div>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 10v4"/></svg></div>
               <div>
-                <h3>零螢幕互動</h3>
-                <p>不必盯著地圖。AI 以歷史地標為航點，溫柔地引領你前行。</p>
+                <h3>一鍵化為語音</h3>
+                <p>把手機收進口袋，邊走邊聽它把這裡的來歷娓娓道來。</p>
               </div>
             </div>
           </div>
         </div>
         <div class="split__media">
-          <img src="site/img/park.jpg" alt="漫步於公園步道"/>
-          <div class="media-cap">坪林森林公園<span class="o">Pinglin Forest Park</span></div>
+          <img src="site/img/temple.jpg" alt="台中朝聖宮"/>
+          <div class="media-cap">台中朝聖宮<span class="o">Chaosheng Temple · Taichung</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ AI 導覽 (dark) ============ -->
-  <section class="section dark" id="narration">
+  <!-- ============ 多種角度 (dark) ============ -->
+  <section class="section dark" id="angles">
     <div class="wrap">
       <div class="depth-grid">
         <div class="depth-copy">
-          <div class="sec-label"><span class="bar"></span><span class="no">特徵 02</span></div>
-          <span class="over">Dynamic Intelligence</span>
-          <h2 class="h2" style="margin-top:14px">AI 導覽：<br/>由你決定深度</h2>
-          <p class="sec-lede">從一句話的精華，到一整段失落的史詩——同一座地標，兩種閱讀方式，隨你心情切換。</p>
+          <div class="sec-label"><span class="bar"></span><span class="no">功能 02</span></div>
+          <span class="over">Many Angles, One Place</span>
+          <h2 class="h2" style="margin-top:14px">同一座地標，<br/>不只一個故事</h2>
+          <p class="sec-lede">權謀、傳說、建築祕辛——AI 在每個地點為你備好幾種切入角度。挑一個最吸引你的，開始聆聽。</p>
           <div class="depth-modes" style="margin-top:36px">
             <div class="depth-mode">
               <span class="num">01</span>
               <div>
-                <h3>簡述模式<span class="tt">Brief Mode</span></h3>
-                <p>趕時間？三十秒掌握你經過的每座建築最關鍵的歷史精華。</p>
+                <h3>摧毀與重生的百年豪賭</h3>
+                <p>儒略二世決定拆毀君士坦丁大帝的千年古教堂，這場瘋狂重建竟耗時百餘年。</p>
               </div>
             </div>
             <div class="depth-mode">
               <span class="num">02</span>
               <div>
-                <h3>深度導覽<span class="tt">Deep Dive</span></h3>
-                <p>給真正的求知者。十五分鐘沉浸式長篇，細說政治權謀、建築祕辛與失落的傳說。</p>
+                <h3>祭壇之下的神聖祕密</h3>
+                <p>世界上最大的教堂並非教宗的主教座堂，因為它底下埋藏著更神聖的祕密。</p>
+              </div>
+            </div>
+            <div class="depth-mode">
+              <span class="num">03</span>
+              <div>
+                <h3>文藝復興巨匠的接力賽</h3>
+                <p>米開朗基羅與拉斐爾輪番上陣，在同一座教堂留下各自的瘋狂印記。</p>
               </div>
             </div>
           </div>
@@ -441,49 +452,55 @@ a{ color:inherit; text-decoration:none; }
     </div>
   </section>
 
-  <!-- ============ 拍照辨識 full-bleed ============ -->
-  <section class="bleed">
-    <div class="bleed__bg"><img src="site/img/temple.jpg" alt="廟宇屋脊"/></div>
+  <!-- ============ 探索身邊的風景 full-bleed ============ -->
+  <section class="bleed" id="explore">
+    <div class="bleed__bg"><img src="site/img/park.jpg" alt="公園步道"/></div>
     <div class="wrap">
       <div class="bleed__in">
-        <span class="over">特徵 03 · Photo Identify</span>
-        <h2>拍照辨識，<br/>讓謎題自己說話</h2>
-        <p>遇見了神祕的事物？拍張照。先進的電腦視覺立即辨識它的年代、建築師與歷史意義，為你開啟一段量身打造的導覽。</p>
+        <span class="over">功能 03 · Explore Nearby</span>
+        <h2>探索身邊的風景</h2>
+        <p>翻開地圖之前，先看看方圓之內。Lorescape 依距離與主題，為你列出附近值得停留的每一個角落——每一種風景，都有屬於它的故事。</p>
         <div class="checks">
-          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>文物與建築辨識</div>
-          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>碑文與銘刻即時翻譯</div>
-          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>風格與年代推斷</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>依距離篩選，只看走得到的地方</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>多種主題分類，各有專屬故事</div>
+          <div class="check"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"/></svg></span>收藏想去的地點，隨時回來</div>
+        </div>
+        <div class="cat-chips">
+          <span class="cat-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-9 4 5 3-4 5 8z"/></svg>自然景觀</span>
+          <span class="cat-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16M5 9v9M9 9v9M15 9v9M19 9v9M3 20h18M4 9l8-5 8 5"/></svg>人文古蹟</span>
+          <span class="cat-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v16l-6-3-6 3z"/><path d="M12 4v6M9.5 7h5"/></svg>信仰聖地</span>
+          <span class="cat-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>城市地標</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 知識旅程 ============ -->
+  <!-- ============ 旅程手記 ============ -->
   <section class="section" id="journey">
     <div class="wrap">
       <div class="stats-head">
-        <div class="sec-label" style="justify-content:center"><span class="bar"></span><span class="no">特徵 04</span><span class="bar"></span></div>
-        <h2 class="h2">你的知識旅程</h2>
-        <p class="sec-lede" style="margin-left:auto;margin-right:auto;text-align:center">每一次駐足，都被自動寫進一本屬於你的旅行手記。</p>
+        <div class="sec-label" style="justify-content:center"><span class="bar"></span><span class="no">功能 04</span><span class="bar"></span></div>
+        <h2 class="h2">你的旅程，自動成冊</h2>
+        <p class="sec-lede" style="margin-left:auto;margin-right:auto;text-align:center">每一次駐足，都被悄悄寫進一本屬於你的旅行手記。</p>
       </div>
       <div class="stats">
         <div class="stat">
-          <div class="num">120<span style="font-size:.5em">+</span></div>
-          <div class="lab">Historical Logs</div>
-          <div class="cn">歷史足跡</div>
-          <p>自動為你撰寫一本走訪世界的旅行手記。</p>
+          <div class="num serif" style="font-size:clamp(40px,5vw,58px)">I</div>
+          <div class="lab">Auto Journal</div>
+          <div class="cn">自動成篇</div>
+          <p>每聽完一段故事，就自動留下一篇可回味的手記。</p>
         </div>
         <div class="stat">
-          <div class="num">500<span style="font-size:.5em">+</span></div>
-          <div class="lab">Stories Unlocked</div>
-          <div class="cn">解鎖故事</div>
-          <p>深入鑽研你所拍下的每一處罕見歷史照片。</p>
+          <div class="num serif" style="font-size:clamp(40px,5vw,58px)">II</div>
+          <div class="lab">Trips</div>
+          <div class="cn">依旅程歸檔</div>
+          <p>把沿途的記錄整理成一趟趟旅程，井然有序。</p>
         </div>
         <div class="stat">
-          <div class="num">84</div>
-          <div class="lab">Cultural Badges</div>
-          <div class="cn">文化徽章</div>
-          <p>辨識你的探索成果，獎勵鑽研特定主題與地區的你。</p>
+          <div class="num serif" style="font-size:clamp(40px,5vw,58px)">III</div>
+          <div class="lab">Timeline</div>
+          <div class="cn">沿時間軸重溫</div>
+          <p>順著時間軸回看，隨時重返走過的任何一個角落。</p>
         </div>
       </div>
     </div>
@@ -527,9 +544,10 @@ a{ color:inherit; text-decoration:none; }
       <div class="foot__cols">
         <div class="foot__col">
           <h4>產品</h4>
-          <a href="#discover">免持探索</a>
-          <a href="#narration">AI 導覽</a>
-          <a href="#journey">知識旅程</a>
+          <a href="#stories">在地故事</a>
+          <a href="#angles">多種角度</a>
+          <a href="#explore">探索附近</a>
+          <a href="#journey">旅程手記</a>
           <a href="#download">下載 App</a>
         </div>
         <div class="foot__col">
