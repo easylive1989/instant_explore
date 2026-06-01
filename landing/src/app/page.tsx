@@ -1,10 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import VideoShowcase from "@/components/VideoShowcase";
-import AINarration from "@/components/AINarration";
-import EyesUpDiscovery from "@/components/EyesUpDiscovery";
-import PhotoIdentify from "@/components/PhotoIdentify";
-import KnowledgeJourney from "@/components/KnowledgeJourney";
+import Manifesto from "@/components/Manifesto";
+import LocalStories from "@/components/LocalStories";
+import ManyAngles from "@/components/ManyAngles";
+import ExploreNearby from "@/components/ExploreNearby";
+import JourneyJournal from "@/components/JourneyJournal";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
@@ -12,13 +12,13 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Hero />
-      <main className="mx-auto max-w-7xl space-y-28 px-6 py-24 md:px-8 md:space-y-36">
-        <VideoShowcase />
-        <AINarration />
-        <EyesUpDiscovery />
-        <PhotoIdentify />
-        <KnowledgeJourney />
+      <main>
+        <Hero />
+        <Manifesto />
+        <LocalStories />
+        <ManyAngles />
+        <ExploreNearby />
+        <JourneyJournal />
         <FinalCTA />
       </main>
       <Footer />

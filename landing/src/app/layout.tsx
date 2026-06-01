@@ -7,7 +7,7 @@ const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 const notoSerifTc = Noto_Serif_TC({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700", "900"],
   variable: "--font-noto-serif-tc",
   display: "swap",
 });

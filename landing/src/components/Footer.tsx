@@ -1,59 +1,51 @@
 import DownloadLink from "./DownloadLink";
-import { showDownloadLinks, type DownloadPlatform } from "@/lib/downloadLinks";
+import { showDownloadLinks } from "@/lib/downloadLinks";
+import BrandSeal from "./BrandSeal";
 
-type FooterLink =
-  | { kind: "internal"; label: string; href: string }
-  | { kind: "external"; label: string; href: string }
-  | { kind: "download"; label: string; platform: DownloadPlatform };
-
-const links: FooterLink[] = [
-  { kind: "internal", label: "隱私權政策", href: "/privacy" },
-  { kind: "internal", label: "使用條款", href: "/terms" },
-  { kind: "internal", label: "支援", href: "/support" },
-  { kind: "external", label: "Instagram", href: "#" },
-  { kind: "download", label: "App Store", platform: "ios" },
-  { kind: "download", label: "Play Store", platform: "android" },
-];
-
+/// Site footer: brand blurb plus product / company / legal link columns.
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-line bg-paper-sunk py-12">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-8 md:flex-row">
-        <div className="font-serif text-lg font-bold tracking-wide text-ink">
-          Lorescape
-        </div>
-        <div className="flex flex-wrap justify-center gap-7 text-xs text-ink-3">
-          {links
-            .filter((link) => showDownloadLinks || link.kind !== "download")
-            .map((link) => {
-            const className = "transition-colors hover:text-clay";
-            if (link.kind === "download") {
-              return (
-                <DownloadLink
-                  key={link.label}
-                  platform={link.platform}
-                  location="footer"
-                  className={className}
-                >
-                  {link.label}
+    <footer className="foot">
+      <div className="wrap">
+        <div className="foot__top">
+          <div>
+            <div className="foot__brand">
+              <span className="seal">
+                <BrandSeal />
+              </span>
+              Lorescape
+            </div>
+            <p className="foot__tag">
+              溫潤紙感 × 文學宋體 × 陶土點綴——為旅途中的每一段故事而設計。
+            </p>
+          </div>
+          <div className="foot__cols">
+            <div className="foot__col">
+              <h4>產品</h4>
+              <a href="#stories">在地故事</a>
+              <a href="#angles">多種角度</a>
+              <a href="#explore">探索附近</a>
+              <a href="#journey">旅程手記</a>
+              {showDownloadLinks && (
+                <DownloadLink platform="ios" location="footer">
+                  下載 App
                 </DownloadLink>
-              );
-            }
-            return (
-              <a
-                key={link.label}
-                className={className}
-                href={link.href}
-                target={link.kind === "external" ? "_blank" : undefined}
-                rel={link.kind === "external" ? "noopener noreferrer" : undefined}
-              >
-                {link.label}
-              </a>
-            );
-          })}
+              )}
+            </div>
+            <div className="foot__col">
+              <h4>公司</h4>
+              <a href="/support">聯絡我們</a>
+            </div>
+            <div className="foot__col">
+              <h4>法律</h4>
+              <a href="/privacy">隱私政策</a>
+              <a href="/terms">使用條款</a>
+            </div>
+          </div>
         </div>
-        <div className="text-xs text-ink-3">
-          &copy; {new Date().getFullYear()} Lorescape
+        <div className="foot__bar">
+          <span>© 2026 Lorescape. 版權所有。</span>
+          <span>地誌手記 · v1.0</span>
         </div>
       </div>
     </footer>
