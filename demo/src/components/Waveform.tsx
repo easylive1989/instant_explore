@@ -14,7 +14,7 @@ export const Waveform: React.FC<Props> = ({
   width = 320,
   height = 64,
   barCount = 48,
-  color = "#137fec",
+  color = "#bc5e3e",
 }) => {
   const frame = useCurrentFrame();
 
