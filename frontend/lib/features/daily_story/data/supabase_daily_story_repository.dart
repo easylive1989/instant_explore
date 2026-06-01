@@ -11,8 +11,9 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
   // Pull the daily_story_places row alongside each story so the App can
   // render card spine / footer fields without a second round-trip.
   // `!left` so we still get the story row even if the place join is empty.
+  // ignore: lines_longer_than_80_chars
   static const _select =
-      '*, daily_story_places!left(card_location_en, card_city_ch, card_city_en)';
+      '*, daily_story_places!left(card_location_en, card_city_ch, card_city_en, wikidata_id)';
 
   @override
   Future<DailyStory?> fetchLatest({required String language}) async {
@@ -67,6 +68,7 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
       cardLocationEn: place?['card_location_en'] as String?,
       cardCityCh: place?['card_city_ch'] as String?,
       cardCityEn: place?['card_city_en'] as String?,
+      wikidataId: place?['wikidata_id'] as String?,
     );
   }
 

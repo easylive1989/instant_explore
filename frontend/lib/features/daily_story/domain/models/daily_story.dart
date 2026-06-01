@@ -48,6 +48,11 @@ class DailyStory extends Equatable {
   final String? cardCityCh;
   final String? cardCityEn;
 
+  /// Wikidata Q-id of the place (e.g. "Q10285"), joined from
+  /// `daily_story_places`. Null when the place hasn't been resolved yet;
+  /// the App hides the "explore more stories" CTA in that case.
+  final String? wikidataId;
+
   const DailyStory({
     required this.publishDate,
     required this.language,
@@ -66,6 +71,7 @@ class DailyStory extends Equatable {
     this.cardLocationEn,
     this.cardCityCh,
     this.cardCityEn,
+    this.wikidataId,
   });
 
   @override
@@ -87,5 +93,6 @@ class DailyStory extends Equatable {
     cardLocationEn,
     cardCityCh,
     cardCityEn,
+    wikidataId,
   ];
 }

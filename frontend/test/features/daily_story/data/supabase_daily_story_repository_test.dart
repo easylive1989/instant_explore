@@ -91,5 +91,51 @@ void main() {
         expect(story.cardCityEn, isNull);
       },
     );
+
+    test(
+      'given a place join with wikidata_id, '
+      'when parsed, '
+      'then DailyStory.wikidataId carries it',
+      () {
+        final row = <String, dynamic>{
+          'publish_date': '2026-05-25',
+          'language': 'zh-TW',
+          'place_name': '羅馬競技場',
+          'place_location': '義大利羅馬',
+          'era': '公元 70-80 年',
+          'story': 'x',
+          'image_url': null,
+          'wikipedia_url': 'https://zh.wikipedia.org/wiki/Colosseum',
+          'daily_story_places': {
+            'card_location_en': 'COLOSSEUM',
+            'card_city_ch': '羅馬',
+            'card_city_en': 'Rome',
+            'wikidata_id': 'Q10285',
+          },
+        };
+        final story = SupabaseDailyStoryRepository.rowToStory(row);
+        expect(story.wikidataId, 'Q10285');
+      },
+    );
+
+    test(
+      'given a row without place join, '
+      'when parsed, '
+      'then DailyStory.wikidataId is null',
+      () {
+        final row = <String, dynamic>{
+          'publish_date': '2026-05-25',
+          'language': 'en',
+          'place_name': 'Colosseum',
+          'place_location': 'Rome, Italy',
+          'era': '70-80 CE',
+          'story': 'x',
+          'image_url': null,
+          'wikipedia_url': 'https://en.wikipedia.org/wiki/Colosseum',
+        };
+        final story = SupabaseDailyStoryRepository.rowToStory(row);
+        expect(story.wikidataId, isNull);
+      },
+    );
   });
 }

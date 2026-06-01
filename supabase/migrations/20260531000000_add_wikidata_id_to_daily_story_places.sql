@@ -7,3 +7,8 @@
 
 alter table public.daily_story_places
   add column wikidata_id text;
+
+-- Expose wikidata_id to App clients so the PostgREST join in
+-- SupabaseDailyStoryRepository._select can read it without a 42501 error.
+grant select (wikidata_id)
+  on table public.daily_story_places to anon, authenticated;
