@@ -200,7 +200,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       periodLabel: _periodLabelKey(plan.period).tr(),
       bullets: [
         'subscription.benefit_unlimited'.tr(),
-        'subscription.benefit_no_ads'.tr(),
         'subscription.benefit_route'.tr(),
       ],
       autoRenewNotice: 'subscription.auto_renew_notice'.tr(),

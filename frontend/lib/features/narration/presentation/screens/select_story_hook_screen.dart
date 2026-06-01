@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
-import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
@@ -57,13 +56,8 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
     final status = await usageRepo.getUsageStatus();
     if (!status.canUseNarration) {
       if (!mounted) return;
-      final result = await showWatchAdDialog(context, ref);
-      if (result == 'subscribe') {
-        if (!mounted) return;
-        context.pushNamed('subscription');
-        return;
-      }
-      if (result != true || !mounted) return;
+      context.pushNamed('subscription');
+      return;
     }
 
     if (!mounted) return;

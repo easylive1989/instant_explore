@@ -1,7 +1,6 @@
 /// 訂閱狀態
 ///
 /// 表示使用者的訂閱狀態，isPremium 為 true 時享有：
-/// - 無廣告
 /// - 無限使用次數
 /// - 路線規劃功能
 class SubscriptionStatus {

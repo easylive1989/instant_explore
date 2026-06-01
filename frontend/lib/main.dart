@@ -12,7 +12,6 @@ import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/firebase_options.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 全域 ApiConfig 實例
 late final ApiConfig apiConfig;
@@ -38,9 +37,6 @@ Future<Widget> init() async {
 
   // Initialize Supabase
   await _initializeSupabase();
-
-  // Initialize Google Mobile Ads
-  await MobileAds.instance.initialize();
 
   // Initialize RevenueCat SDK (global, one-time)
   final revenueCatApiKey = Platform.isIOS

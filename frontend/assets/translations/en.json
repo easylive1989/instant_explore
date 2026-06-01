@@ -281,7 +281,6 @@
     "continue_free": "Continue with Free",
     "already_has_pass": "You already have an active pass, no need to purchase again",
     "title": "Upgrade to Premium",
-    "benefit_no_ads": "Ad-free experience",
     "benefit_unlimited": "Unlimited narration usage",
     "benefit_route": "Route planning feature",
     "restore": "Restore Purchases",
@@ -310,12 +309,6 @@
     "expires": "Expires: {date}",
     "no_purchases_found": "No previous purchases found",
     "login_required": "Please sign in to subscribe"
-  },
-  "ads": {
-    "quota_exceeded_title": "Daily free limit reached",
-    "watch_ad_subtitle": "Watch a short video to get 1 extra narration",
-    "watch_video": "Watch Video",
-    "ad_reward_success": "Earned 1 extra narration!"
   },
   "shared_place": {
     "loading": "Loading shared place...",

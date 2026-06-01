@@ -156,27 +156,4 @@ void main() {
       ),
     );
   });
-
-  test('看廣告後有 bonus 可用時成功生成', () async {
-    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async =>
-          const UsageStatus(usedToday: 1, dailyFreeLimit: 1, bonusFromAds: 1),
-    );
-    when(
-      () => mockNarrationService.generateNarration(
-        place: testPlace,
-        language: any(named: 'language'),
-        hook: any(named: 'hook'),
-      ),
-    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
-
-    final narrationContent = await useCase.execute(
-      place: testPlace,
-      language: Language.traditionalChinese,
-      hook: _hook,
-    );
-
-    expect(narrationContent, isNotNull);
-    verify(() => mockUsageRepository.consumeUsage()).called(1);
-  });
 }

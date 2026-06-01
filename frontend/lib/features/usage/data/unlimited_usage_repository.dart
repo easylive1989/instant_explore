@@ -14,9 +14,4 @@ class UnlimitedUsageRepository implements UsageRepository {
   Future<void> consumeUsage() async {
     // Premium 用戶不消耗額度
   }
-
-  @override
-  Future<void> addBonusFromAd() async {
-    // Premium 用戶不需要廣告獎勵
-  }
 }

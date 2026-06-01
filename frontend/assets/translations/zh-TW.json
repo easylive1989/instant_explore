@@ -281,7 +281,6 @@
     "continue_free": "繼續使用免費版",
     "already_has_pass": "您已有有效的通行證，無需重複購買",
     "title": "升級 Premium",
-    "benefit_no_ads": "無廣告體驗",
     "benefit_unlimited": "無限次數使用導覽",
     "benefit_route": "路線規劃功能",
     "restore": "恢復購買",
@@ -310,12 +309,6 @@
     "expires": "到期日：{date}",
     "no_purchases_found": "找不到先前的購買紀錄",
     "login_required": "請先登入以訂閱"
-  },
-  "ads": {
-    "quota_exceeded_title": "今日免費次數已用完",
-    "watch_ad_subtitle": "觀看一段短影片即可獲得 1 次額外導覽",
-    "watch_video": "觀看影片",
-    "ad_reward_success": "獲得 1 次額外導覽！"
   },
   "shared_place": {
     "loading": "正在載入分享的地點...",
