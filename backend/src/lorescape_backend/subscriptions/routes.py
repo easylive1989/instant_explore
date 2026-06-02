@@ -4,25 +4,18 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, status
-from supabase import create_client
 
 from lorescape_backend.config import Config
 from lorescape_backend.dependencies import get_config
+from lorescape_backend.subscriptions.dependencies import (
+    get_subscription_repository,
+)
 from lorescape_backend.subscriptions.models import parse_webhook
 from lorescape_backend.subscriptions.repository import SubscriptionRepository
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
-
-
-def get_subscription_repository(
-    config: Config = Depends(get_config),
-) -> SubscriptionRepository:
-    """FastAPI dependency providing the repository — overridden in tests."""
-    return SubscriptionRepository(
-        create_client(config.supabase_url, config.supabase_service_role_key)
-    )
 
 
 @router.post("/revenuecat")
