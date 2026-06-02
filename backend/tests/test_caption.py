@@ -53,3 +53,24 @@ def test_full_caption_under_ig_limit_when_story_is_huge():
         cta_text="Explore more.",
     )
     assert len(out) <= 2200
+
+
+def test_full_caption_includes_photo_credit_when_present():
+    story = _story(
+        image_attribution="Jane Doe / CC BY-SA 4.0 (via Wikimedia Commons)"
+    )
+    out = build_full_caption(
+        story=story,
+        brand_handle="@instant_explore",
+        cta_text="Explore more.",
+    )
+    assert "📷 Jane Doe / CC BY-SA 4.0 (via Wikimedia Commons)" in out
+
+
+def test_full_caption_omits_photo_credit_when_absent():
+    out = build_full_caption(
+        story=_story(image_attribution=None),
+        brand_handle="@instant_explore",
+        cta_text="Explore more.",
+    )
+    assert "📷" not in out

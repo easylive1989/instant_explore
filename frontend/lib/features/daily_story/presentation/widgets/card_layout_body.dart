@@ -190,6 +190,10 @@ class _TextPlate extends StatelessWidget {
           ],
           const SizedBox(height: 34),
           _Footer(story: story),
+          if (story.imageAttribution != null) ...[
+            const SizedBox(height: 10),
+            _PhotoCredit(text: story.imageAttribution!),
+          ],
           if (onExploreMore != null) ...[
             const SizedBox(height: 28),
             MoreStoriesCta(
@@ -326,6 +330,25 @@ class _Footer extends StatelessWidget {
           fontSize: 13,
           letterSpacing: 0.8,
         ),
+      ),
+    );
+  }
+}
+
+/// Small image credit line (author / licence / source) shown under the
+/// article so commercially-licensed photos are attributed.
+class _PhotoCredit extends StatelessWidget {
+  final String text;
+  const _PhotoCredit({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '📷 $text',
+      style: GoogleFonts.notoSerifTc(
+        color: CardReaderTheme.readDim,
+        fontSize: 12,
+        height: 1.4,
       ),
     );
   }

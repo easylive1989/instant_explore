@@ -29,6 +29,10 @@ class DailyStory extends Equatable {
   /// Optional image URL (Wikipedia thumbnail). May be null.
   final String? imageUrl;
 
+  /// Credit for [imageUrl] (author / licence / source). Null when there is no
+  /// commercially usable image. Shown as a small caption in the reader.
+  final String? imageAttribution;
+
   /// Wikipedia article URL in the matching language; falls back to en.
   final String wikipediaUrl;
 
@@ -61,6 +65,7 @@ class DailyStory extends Equatable {
     required this.era,
     required this.story,
     required this.imageUrl,
+    this.imageAttribution,
     required this.wikipediaUrl,
     this.cardTitle,
     this.cardTitleSub,
@@ -83,6 +88,7 @@ class DailyStory extends Equatable {
     era,
     story,
     imageUrl,
+    imageAttribution,
     wikipediaUrl,
     cardTitle,
     cardTitleSub,

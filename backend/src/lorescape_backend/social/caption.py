@@ -29,25 +29,37 @@ class StoryCopy:
     era: str
     story: str
     hashtags: tuple[str, ...]
+    # Lead-image credit (author / licence / source). None when there is no
+    # commercially usable image; omitted from the caption when absent.
+    image_attribution: str | None = None
 
 
 def build_full_caption(
     *, story: StoryCopy, brand_handle: str, cta_text: str
 ) -> str:
-    """Build the full IG caption (header + body + hashtags + CTA).
+    """Build the full IG caption (header + body + hashtags + CTA + credit).
 
     Truncates only the body to keep the result under IG's 2200-char limit.
+    A photo credit line is appended when the story has an image attribution.
     """
     header = _header(story)
     tags = _format_tags(BRAND_TAGS + story.hashtags)
     footer = _footer(cta_text=cta_text, brand_handle=brand_handle)
+    credit = _photo_credit(story.image_attribution)
 
-    fixed = "\n\n".join(p for p in (header, "", tags, footer) if p)
+    fixed = "\n\n".join(p for p in (header, "", tags, footer, credit) if p)
     body_budget = _IG_HARD_LIMIT - len(fixed) - 2  # account for separators
     body = story.story if len(story.story) <= body_budget else _truncate(
         story.story, body_budget
     )
-    return "\n\n".join(p for p in (header, body, tags, footer) if p)
+    return "\n\n".join(p for p in (header, body, tags, footer, credit) if p)
+
+
+def _photo_credit(attribution: str | None) -> str:
+    """Render the image credit line, or empty string when absent."""
+    if not attribution:
+        return ""
+    return f"📷 {attribution}"
 
 
 def _header(story: StoryCopy) -> str:

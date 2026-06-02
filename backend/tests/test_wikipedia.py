@@ -1,9 +1,13 @@
+import copy
+
 import pytest
 import requests_mock
 
 from lorescape_backend.daily_story.wikipedia import (
+    LeadImage,
     WikipediaSummary,
     fetch_intro_extract,
+    fetch_lead_image,
     fetch_summary,
     fetch_langlink_url,
 )
@@ -143,3 +147,125 @@ def test_fetch_langlink_url_returns_none_when_no_langlink():
     with requests_mock.Mocker() as m:
         m.get("https://en.wikipedia.org/w/api.php", json=response)
         assert fetch_langlink_url("X", "zh") is None
+
+
+# ---- fetch_lead_image (licence-aware) ----------------------------------
+
+PAGEIMAGE_RESP = {
+    "query": {
+        "pages": {
+            "123": {
+                "pageid": 123,
+                "title": "Colosseum",
+                "pageimage": "Colosseum_2020.jpg",
+            }
+        }
+    }
+}
+
+
+def _imageinfo_resp(*, license_code, license_short, artist="<a href='#'>Jane Doe</a>", non_free=None):
+    extmeta = {
+        "License": {"value": license_code},
+        "LicenseShortName": {"value": license_short},
+    }
+    if artist is not None:
+        extmeta["Artist"] = {"value": artist}
+    if non_free is not None:
+        extmeta["NonFree"] = {"value": non_free}
+    return {
+        "query": {
+            "pages": {
+                "-1": {
+                    "title": "File:Colosseum_2020.jpg",
+                    "imageinfo": [
+                        {
+                            "url": "https://upload.wikimedia.org/Colosseum_2020.jpg",
+                            "extmetadata": extmeta,
+                        }
+                    ],
+                }
+            }
+        }
+    }
+
+
+def _mock_lead_image(m, imageinfo):
+    """Register the two sequential api.php calls fetch_lead_image makes."""
+    m.get(
+        "https://en.wikipedia.org/w/api.php",
+        [{"json": PAGEIMAGE_RESP}, {"json": imageinfo}],
+    )
+
+
+def test_fetch_lead_image_accepts_cc_by_sa_with_attribution():
+    with requests_mock.Mocker() as m:
+        _mock_lead_image(
+            m,
+            _imageinfo_resp(license_code="cc-by-sa-4.0", license_short="CC BY-SA 4.0"),
+        )
+        img = fetch_lead_image("Colosseum")
+    assert isinstance(img, LeadImage)
+    assert img.is_commercial_ok is True
+    assert img.url == "https://upload.wikimedia.org/Colosseum_2020.jpg"
+    assert img.attribution is not None
+    assert "Jane Doe" in img.attribution
+    assert "CC BY-SA 4.0" in img.attribution
+
+
+def test_fetch_lead_image_accepts_public_domain_without_artist():
+    with requests_mock.Mocker() as m:
+        _mock_lead_image(
+            m,
+            _imageinfo_resp(
+                license_code="pd", license_short="Public domain", artist=None
+            ),
+        )
+        img = fetch_lead_image("Colosseum")
+    assert img.is_commercial_ok is True
+    assert img.attribution is not None
+    assert "Public domain" in img.attribution
+
+
+def test_fetch_lead_image_rejects_non_commercial():
+    with requests_mock.Mocker() as m:
+        _mock_lead_image(
+            m,
+            _imageinfo_resp(license_code="cc-by-nc-4.0", license_short="CC BY-NC 4.0"),
+        )
+        img = fetch_lead_image("Colosseum")
+    assert img is not None
+    assert img.is_commercial_ok is False
+    assert img.attribution is None
+
+
+def test_fetch_lead_image_rejects_no_derivatives():
+    with requests_mock.Mocker() as m:
+        _mock_lead_image(
+            m,
+            _imageinfo_resp(license_code="cc-by-nd-4.0", license_short="CC BY-ND 4.0"),
+        )
+        img = fetch_lead_image("Colosseum")
+    assert img.is_commercial_ok is False
+
+
+def test_fetch_lead_image_rejects_non_free_fair_use():
+    with requests_mock.Mocker() as m:
+        _mock_lead_image(
+            m,
+            _imageinfo_resp(
+                license_code="Fair use",
+                license_short="Fair use",
+                non_free="1",
+            ),
+        )
+        img = fetch_lead_image("Colosseum")
+    assert img.is_commercial_ok is False
+
+
+def test_fetch_lead_image_returns_none_when_no_pageimage():
+    no_image = copy.deepcopy(PAGEIMAGE_RESP)
+    del no_image["query"]["pages"]["123"]["pageimage"]
+    with requests_mock.Mocker() as m:
+        m.get("https://en.wikipedia.org/w/api.php", json=no_image)
+        assert fetch_lead_image("Colosseum") is None

@@ -16,6 +16,9 @@ class StoryRow:
     story: str
     image_url: str | None
     wikipedia_url: str
+    # Credit string for the lead image (author / licence / source). None when
+    # there is no commercially usable image.
+    image_attribution: str | None = None
     hashtags: tuple[str, ...] = field(default_factory=tuple)
     # Long-form 3-paragraph narration used by App story view & TTS.
     paragraphs: tuple[str, ...] = field(default_factory=tuple)

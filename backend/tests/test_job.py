@@ -6,7 +6,7 @@ import pytest
 from lorescape_backend.daily_story.job import LANGUAGES, run_once, run_with_retry
 from lorescape_backend.daily_story.gemini_client import GeneratedStory
 from lorescape_backend.daily_story.place_picker import PickedPlace
-from lorescape_backend.daily_story.wikipedia import WikipediaSummary
+from lorescape_backend.daily_story.wikipedia import LeadImage, WikipediaSummary
 
 
 def _make_story(
@@ -42,6 +42,7 @@ def _make_story(
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_lead_image")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
@@ -53,6 +54,7 @@ def test_run_once_happy_path_calls_each_step(
     generate_story,
     fetch_langlink,
     fetch_intro_extract,
+    fetch_lead_image,
     fetch_summary,
     pick_next,
     create_client,
@@ -65,6 +67,14 @@ def test_run_once_happy_path_calls_each_step(
         extract="Built 70-80 CE.",
         image_url="https://upload.wikimedia.org/x.jpg",
         en_url="https://en.wikipedia.org/wiki/Colosseum",
+    )
+    fetch_lead_image.return_value = LeadImage(
+        url="https://upload.wikimedia.org/x.jpg",
+        license_short="CC BY-SA 4.0",
+        license_code="cc-by-sa-4.0",
+        artist="Jane Doe",
+        attribution="Jane Doe / CC BY-SA 4.0 (via Wikimedia Commons)",
+        is_commercial_ok=True,
     )
     fetch_langlink.side_effect = lambda title, lang: (
         f"https://{lang}.wikipedia.org/wiki/{title}"
@@ -96,6 +106,14 @@ def test_run_once_happy_path_calls_each_step(
     mark_used.assert_called_once()
     args, _ = mark_used.call_args
     assert args[1] == "p1"
+    # Each row carries the commercially-licensed image and its attribution.
+    for c in insert_story.call_args_list:
+        row = c.args[1]
+        assert row.image_url == "https://upload.wikimedia.org/x.jpg"
+        assert (
+            row.image_attribution
+            == "Jane Doe / CC BY-SA 4.0 (via Wikimedia Commons)"
+        )
 
 
 @patch("lorescape_backend.daily_story.job.create_client")
@@ -109,6 +127,7 @@ def test_run_once_raises_when_no_place(pick_next, create_client, fake_config):
 @patch("lorescape_backend.daily_story.job.create_client")
 @patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_lead_image")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
 @patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
 @patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
@@ -120,6 +139,7 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
     generate_story,
     fetch_langlink,
     fetch_intro_extract,
+    fetch_lead_image,
     fetch_summary,
     pick_next,
     create_client,
@@ -133,6 +153,7 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
         image_url=None,
         en_url="https://en.wikipedia.org/wiki/Colosseum",
     )
+    fetch_lead_image.return_value = None
     # Simulate: zh has no langlink, en is just the same article
     fetch_langlink.return_value = None
     generate_story.return_value = _make_story()
@@ -143,6 +164,55 @@ def test_run_once_falls_back_to_en_url_when_no_langlink(
     for c in insert_story.call_args_list:
         row = c.args[1]
         assert row.wikipedia_url == "https://en.wikipedia.org/wiki/Colosseum"
+
+
+@patch("lorescape_backend.daily_story.job.create_client")
+@patch("lorescape_backend.daily_story.job.place_picker.pick_next_place")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_summary")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_lead_image")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_intro_extract")
+@patch("lorescape_backend.daily_story.job.wikipedia.fetch_langlink_url")
+@patch("lorescape_backend.daily_story.job.gemini_client.generate_story")
+@patch("lorescape_backend.daily_story.job.story_writer.insert_story")
+@patch("lorescape_backend.daily_story.job.place_picker.mark_place_used")
+def test_run_once_drops_image_when_not_commercially_licensed(
+    mark_used,
+    insert_story,
+    generate_story,
+    fetch_langlink,
+    fetch_intro_extract,
+    fetch_lead_image,
+    fetch_summary,
+    pick_next,
+    create_client,
+    fake_config,
+):
+    pick_next.return_value = PickedPlace(id="p1", wikipedia_title_en="Colosseum")
+    fetch_intro_extract.return_value = "Long intro extract text for tests."
+    fetch_summary.return_value = WikipediaSummary(
+        title="Colosseum",
+        extract="Built 70-80 CE.",
+        image_url="https://upload.wikimedia.org/x.jpg",
+        en_url="https://en.wikipedia.org/wiki/Colosseum",
+    )
+    # A fair-use / non-commercial lead image must NOT be used.
+    fetch_lead_image.return_value = LeadImage(
+        url="https://upload.wikimedia.org/x.jpg",
+        license_short="Fair use",
+        license_code="fair use",
+        artist=None,
+        attribution=None,
+        is_commercial_ok=False,
+    )
+    fetch_langlink.return_value = None
+    generate_story.return_value = _make_story()
+
+    run_once(fake_config, date(2026, 5, 11))
+
+    for c in insert_story.call_args_list:
+        row = c.args[1]
+        assert row.image_url is None
+        assert row.image_attribution is None
 
 
 @patch("lorescape_backend.daily_story.job.time.sleep")  # speed up retry
