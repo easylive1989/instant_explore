@@ -56,6 +56,7 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
       era: row['era'] as String,
       story: row['story'] as String,
       imageUrl: row['image_url'] as String?,
+      imageAttribution: row['image_attribution'] as String?,
       wikipediaUrl: row['wikipedia_url'] as String,
       cardTitle: row['card_title'] as String?,
       cardTitleSub: row['card_title_sub'] as String?,

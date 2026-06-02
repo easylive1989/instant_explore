@@ -115,6 +115,7 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
         era=row["era"],
         story=row["story"],
         hashtags=tuple(row.get("hashtags") or ()),
+        image_attribution=row.get("image_attribution"),
     )
 
     place_row = _load_place_row(supabase, row["place_id"])

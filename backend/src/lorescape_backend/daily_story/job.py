@@ -47,6 +47,24 @@ def run_once(config: Config, target_date: date) -> None:
         or summary.extract
     )
 
+    # Resolve the lead image together with its Wikimedia licence and only use
+    # it when it is commercially reusable (public domain / CC0 / CC BY /
+    # CC BY-SA). Fair-use and NC/ND images are dropped so we never post art we
+    # are not licensed to use commercially; usable images carry an attribution
+    # credit that we store and display.
+    lead_image = wikipedia.fetch_lead_image(place.wikipedia_title_en)
+    if lead_image and lead_image.is_commercial_ok and summary.image_url:
+        image_url = summary.image_url
+        image_attribution = lead_image.attribution
+    else:
+        image_url = None
+        image_attribution = None
+        if summary.image_url:
+            logger.info(
+                "Lead image for %s is not commercially usable; dropping it",
+                place.wikipedia_title_en,
+            )
+
     for language in LANGUAGES:
         target_lang = language.split("-")[0]  # 'zh-TW' → 'zh', 'en' → 'en'
         wiki_url = (
@@ -77,7 +95,8 @@ def run_once(config: Config, target_date: date) -> None:
                 place_location=story.place_location,
                 era=story.era,
                 story=story_text,
-                image_url=summary.image_url,
+                image_url=image_url,
+                image_attribution=image_attribution,
                 wikipedia_url=wiki_url,
                 hashtags=story.hashtags,
                 paragraphs=story.paragraphs,

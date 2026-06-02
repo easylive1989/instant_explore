@@ -39,6 +39,7 @@ def test_insert_story_upserts_with_publish_date_language_conflict_key():
         "story": "...",
         "image_url": "https://upload.wikimedia.org/x.jpg",
         "wikipedia_url": "https://zh.wikipedia.org/wiki/...",
+        "image_attribution": None,
         "hashtags": ["rome", "colosseum"],
         "paragraphs": [],
         "card_title": "",
