@@ -2,12 +2,15 @@ import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/app/config/router_config.dart';
 import 'package:context_app/app/config/theme_config.dart';
 import 'package:context_app/features/analytics/providers.dart';
+import 'package:context_app/features/auth/domain/models/auth_user.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/domain/models/appearance_state.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/share/providers.dart';
+import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/sync/domain/services/sync_session.dart';
 import 'package:context_app/features/sync/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
@@ -60,6 +63,17 @@ class LorescapeApp extends ConsumerWidget {
     ref.listen<SyncSession>(syncSessionProvider, (prev, next) {
       if (next.isActive && !(prev?.isActive ?? false)) {
         ref.read(syncCoordinatorProvider).runFullSync();
+      }
+    });
+
+    // Keep RevenueCat identified with the current user. When an anonymous
+    // user signs in (id changes anonymous → permanent), this re-points the
+    // RevenueCat App User ID so purchases and entitlement status attribute
+    // to the permanent account.
+    ref.listen<AuthUser?>(currentUserProvider, (prev, next) {
+      final id = next?.id;
+      if (id != null && id != prev?.id) {
+        ref.read(subscriptionServiceProvider).logIn(id);
       }
     });
 

@@ -1,4 +1,6 @@
 import 'package:context_app/app/config/legal_urls.dart';
+import 'package:context_app/features/auth/domain/models/auth_user.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_status.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
@@ -78,6 +80,27 @@ void main() {
 
         expect(service.purchaseCalls, [SubscriptionPeriod.yearly]);
         expect(find.byType(SubscriptionScreen), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'given an anonymous user taps subscribe, '
+      'then a sign-in prompt is shown and no purchase is made',
+      (tester) async {
+        final service = _serviceWith(_kAllPlans)
+          ..stubPurchase(status: const SubscriptionStatus(isPremium: true));
+
+        await _givenScreenOnRoute(tester, service, user: _anonUser);
+
+        await tester.scrollUntilVisible(
+          find.text('subscription.subscribe_yearly'),
+          100,
+        );
+        await tester.tap(find.text('subscription.subscribe_yearly'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('subscription.login_required'), findsOneWidget);
+        expect(service.purchaseCalls, isEmpty);
       },
     );
 
@@ -185,6 +208,13 @@ void main() {
   });
 }
 
+/// A signed-in permanent account (the default for paywall tests — the user
+/// has already passed the sign-in gate).
+const _permanentUser = AuthUser(id: 'perm-user', isAnonymous: false);
+
+/// An anonymous user, who must sign in before purchasing.
+const _anonUser = AuthUser(id: 'anon-user', isAnonymous: true);
+
 FakeSubscriptionService _serviceWith(List<SubscriptionPlan> plans) {
   return FakeSubscriptionService()..stubGetAvailablePlans(plans: plans);
 }
@@ -193,19 +223,24 @@ Future<void> _givenScreen(
   WidgetTester tester,
   FakeSubscriptionService service, {
   Future<bool> Function(Uri)? launcher,
+  AuthUser? user = _permanentUser,
 }) async {
   await pumpScreen(
     tester,
     child: SubscriptionScreen(launchUrl: launcher),
-    overrides: [subscriptionServiceProvider.overrideWithValue(service)],
+    overrides: [
+      subscriptionServiceProvider.overrideWithValue(service),
+      currentUserProvider.overrideWithValue(user),
+    ],
   );
   await tester.pumpAndSettle();
 }
 
 Future<void> _givenScreenOnRoute(
   WidgetTester tester,
-  FakeSubscriptionService service,
-) async {
+  FakeSubscriptionService service, {
+  AuthUser? user = _permanentUser,
+}) async {
   await pumpRouterApp(
     tester,
     routes: [
@@ -215,7 +250,10 @@ Future<void> _givenScreenOnRoute(
         builder: (_, __) => const SubscriptionScreen(),
       ),
     ],
-    overrides: [subscriptionServiceProvider.overrideWithValue(service)],
+    overrides: [
+      subscriptionServiceProvider.overrideWithValue(service),
+      currentUserProvider.overrideWithValue(user),
+    ],
   );
   final context = tester.element(find.byType(_Host));
   GoRouter.of(context).push('/subscription');

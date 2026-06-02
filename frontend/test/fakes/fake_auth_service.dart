@@ -27,7 +27,7 @@ class FakeAuthService implements AuthService {
   Future<void> ensureSignedIn() async {
     ensureSignedInCount += 1;
     if (_user != null) return;
-    const user = AuthUser(id: 'fake-anon-user');
+    const user = AuthUser(id: 'fake-anon-user', isAnonymous: true);
     _user = user;
     _controller.add(user);
   }

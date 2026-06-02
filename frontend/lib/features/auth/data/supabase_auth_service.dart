@@ -143,7 +143,12 @@ class SupabaseAuthService implements AuthService {
         metadata['full_name'] as String? ??
         metadata['name'] as String? ??
         user.email;
-    return AuthUser(id: user.id, email: user.email, displayName: displayName);
+    return AuthUser(
+      id: user.id,
+      email: user.email,
+      displayName: displayName,
+      isAnonymous: user.isAnonymous,
+    );
   }
 
   static String _generateNonce([int length = 32]) {
