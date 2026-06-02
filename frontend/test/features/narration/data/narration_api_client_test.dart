@@ -150,6 +150,32 @@ void main() {
       );
     });
 
+    test('402 回應映射為 freeQuotaExceeded', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({'detail': 'Daily free quota exhausted'}),
+          402,
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      try {
+        await client.fetchNarration(
+          placeName: 'x',
+          location: '',
+          wikidataId: 'Q1',
+          language: 'en',
+        );
+        fail('expected AppError');
+      } on AppError catch (e) {
+        expect(e.type, NarrationError.freeQuotaExceeded);
+      }
+    });
+
     test('500 回應映射為 serverError', () async {
       final mockClient = MockClient((request) async {
         return http.Response('boom', 500);
@@ -194,6 +220,59 @@ void main() {
       } on AppError catch (e) {
         expect(e.type, NarrationError.networkError);
       }
+    });
+
+    test('提供 accessToken 時帶上 Authorization Bearer 標頭', () async {
+      String? seenAuth;
+      final mockClient = MockClient((request) async {
+        seenAuth = request.headers['Authorization'];
+        return http.Response(
+          jsonEncode({'hooks': [], 'insufficient_source': false}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+        accessToken: () async => 'jwt-token-123',
+      );
+
+      await client.fetchHooks(
+        placeName: 'x',
+        location: '',
+        wikidataId: 'Q1',
+        language: 'en',
+      );
+
+      expect(seenAuth, 'Bearer jwt-token-123');
+    });
+
+    test('未提供 accessToken 時不帶 Authorization 標頭', () async {
+      var hasAuth = true;
+      final mockClient = MockClient((request) async {
+        hasAuth = request.headers.containsKey('Authorization');
+        return http.Response(
+          jsonEncode({'hooks': [], 'insufficient_source': false}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      await client.fetchHooks(
+        placeName: 'x',
+        location: '',
+        wikidataId: 'Q1',
+        language: 'en',
+      );
+
+      expect(hasAuth, isFalse);
     });
 
     test('未設定 baseUrl 時拋出可辨識的 AppError', () async {

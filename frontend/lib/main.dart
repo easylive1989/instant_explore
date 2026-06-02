@@ -9,13 +9,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/app/config/api_config.dart';
 import 'package:context_app/features/analytics/providers.dart';
+import 'package:context_app/features/auth/data/supabase_auth_service.dart';
 import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/firebase_options.dart';
 import 'package:context_app/features/subscription/data/revenuecat_subscription_service.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:logging/logging.dart';
 
 /// 全域 ApiConfig 實例
 late final ApiConfig apiConfig;
+
+final _log = Logger('bootstrap');
 
 void main() async {
   runApp(await init());
@@ -39,15 +42,21 @@ Future<Widget> init() async {
   // Initialize Supabase
   await _initializeSupabase();
 
-  // Initialize Google Mobile Ads
-  await MobileAds.instance.initialize();
+  // Ensure an (anonymous) session so authenticated backend APIs are
+  // reachable before the user signs in. Requires "Anonymous sign-ins" to
+  // be enabled in Supabase Auth; a failure here is non-fatal — the app
+  // still launches and backend calls will surface a 401 instead.
+  await _ensureSignedIn();
 
-  // Initialize RevenueCat SDK (global, one-time)
+  // Initialize RevenueCat SDK (global, one-time) and identify it with the
+  // Supabase user id so server-side webhooks/reconcile attribute purchases
+  // to the right backend user.
   final revenueCatApiKey = Platform.isIOS
       ? apiConfig.revenueCatApiKeyIos
       : apiConfig.revenueCatApiKeyAndroid;
   if (revenueCatApiKey.isNotEmpty) {
     await RevenueCatSubscriptionService.configureSDK(apiKey: revenueCatApiKey);
+    await _identifyRevenueCat();
   }
 
   // Eagerly resolve SharedPreferences so analytics providers
@@ -78,4 +87,29 @@ Future<void> _initializeSupabase() async {
     url: apiConfig.supabaseUrl,
     anonKey: apiConfig.supabaseAnonKey,
   );
+}
+
+/// Ensure an anonymous session exists so backend calls are authenticated.
+///
+/// Best-effort: a failure (e.g. anonymous sign-ins disabled) is logged but
+/// does not block startup.
+Future<void> _ensureSignedIn() async {
+  try {
+    await SupabaseAuthService(apiConfig: apiConfig).ensureSignedIn();
+  } catch (e, stack) {
+    _log.warning('Anonymous sign-in failed at startup', e, stack);
+  }
+}
+
+/// Tie the RevenueCat app user id to the current Supabase user id.
+///
+/// Best-effort: a failure is logged but does not block startup.
+Future<void> _identifyRevenueCat() async {
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return;
+  try {
+    await RevenueCatSubscriptionService.identify(userId);
+  } catch (e, stack) {
+    _log.warning('RevenueCat identify failed at startup', e, stack);
+  }
 }

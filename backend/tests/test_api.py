@@ -6,11 +6,15 @@ from unittest.mock import MagicMock, patch
 
 from apscheduler.triggers.cron import CronTrigger
 
+import dataclasses
+
 from lorescape_backend.api import (
     GENERATE_HOUR,
     GENERATE_JOB_ID,
     PUBLISH_HOUR,
     PUBLISH_JOB_ID,
+    RECONCILE_HOUR,
+    RECONCILE_JOB_ID,
     _register_jobs,
     health,
 )
@@ -24,7 +28,6 @@ def test_register_jobs_schedules_generate_and_publish(fake_config):
     scheduler = MagicMock()
     _register_jobs(scheduler, fake_config)
 
-    assert scheduler.add_job.call_count == 2
     calls_by_id = {
         call.kwargs["id"]: call for call in scheduler.add_job.call_args_list
     }
@@ -44,6 +47,29 @@ def test_register_jobs_schedules_generate_and_publish(fake_config):
     assert pub_fields["hour"] == str(PUBLISH_HOUR)
     assert pub_fields["minute"] == "0"
     assert pub_call.kwargs["replace_existing"] is True
+
+
+def test_register_jobs_schedules_reconcile_when_revenuecat_enabled(fake_config):
+    # fake_config carries a REVENUECAT_API_KEY, so reconcile is scheduled.
+    scheduler = MagicMock()
+    _register_jobs(scheduler, fake_config)
+
+    calls_by_id = {
+        call.kwargs["id"]: call for call in scheduler.add_job.call_args_list
+    }
+    assert RECONCILE_JOB_ID in calls_by_id
+    trigger = calls_by_id[RECONCILE_JOB_ID].kwargs["trigger"]
+    fields = {field.name: str(field) for field in trigger.fields}
+    assert fields["hour"] == str(RECONCILE_HOUR)
+
+
+def test_register_jobs_skips_reconcile_when_revenuecat_disabled(fake_config):
+    config = dataclasses.replace(fake_config, revenuecat_api_key=None)
+    scheduler = MagicMock()
+    _register_jobs(scheduler, config)
+
+    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
+    assert ids == {GENERATE_JOB_ID, PUBLISH_JOB_ID}
 
 
 @patch("lorescape_backend.api.run_generate_and_review")

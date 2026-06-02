@@ -7,7 +7,4 @@ abstract class UsageRepository {
 
   /// 消耗一次使用額度
   Future<void> consumeUsage();
-
-  /// 觀看廣告後新增一次額外額度
-  Future<void> addBonusFromAd();
 }

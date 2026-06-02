@@ -17,10 +17,20 @@ class FakeAuthService implements AuthService {
   int googleSignInCount = 0;
   int appleSignInCount = 0;
   int signOutCount = 0;
+  int ensureSignedInCount = 0;
   bool shouldFailSignIn = false;
 
   @override
   AuthUser? get currentUser => _user;
+
+  @override
+  Future<void> ensureSignedIn() async {
+    ensureSignedInCount += 1;
+    if (_user != null) return;
+    const user = AuthUser(id: 'fake-anon-user', isAnonymous: true);
+    _user = user;
+    _controller.add(user);
+  }
 
   @override
   Stream<AuthUser?> authStateChanges() => _controller.stream;

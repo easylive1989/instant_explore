@@ -1,6 +1,5 @@
 import 'package:context_app/core/errors/app_error.dart';
-import 'package:context_app/features/usage/domain/errors/usage_error.dart';
-import 'package:context_app/features/usage/domain/models/usage_status.dart';
+import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/usage/domain/repositories/usage_repository.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
@@ -45,9 +44,6 @@ void main() {
     mockUsageRepository = MockUsageRepository();
     useCase = CreateNarrationUseCase(mockNarrationService, mockUsageRepository);
 
-    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async => const UsageStatus(usedToday: 0, dailyFreeLimit: 1),
-    );
     when(() => mockUsageRepository.consumeUsage()).thenAnswer((_) async {});
   });
 
@@ -128,55 +124,24 @@ void main() {
     verify(() => mockUsageRepository.consumeUsage()).called(1);
   });
 
-  test('額度用完時拋出 UsageError.dailyQuotaExceeded', () async {
-    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async => const UsageStatus(usedToday: 1, dailyFreeLimit: 1),
-    );
-
-    expect(
-      () => useCase.execute(
-        place: testPlace,
-        language: Language.traditionalChinese,
-        hook: _hook,
-      ),
-      throwsA(
-        isA<AppError>().having(
-          (e) => e.type,
-          'error type',
-          UsageError.dailyQuotaExceeded,
-        ),
-      ),
-    );
-
-    verifyNever(
+  test('生成失敗時不消耗額度', () async {
+    when(
       () => mockNarrationService.generateNarration(
         place: any(named: 'place'),
         language: any(named: 'language'),
         hook: any(named: 'hook'),
       ),
-    );
-  });
+    ).thenThrow(const AppError(type: NarrationError.serverError));
 
-  test('看廣告後有 bonus 可用時成功生成', () async {
-    when(() => mockUsageRepository.getUsageStatus()).thenAnswer(
-      (_) async =>
-          const UsageStatus(usedToday: 1, dailyFreeLimit: 1, bonusFromAds: 1),
-    );
-    when(
-      () => mockNarrationService.generateNarration(
+    await expectLater(
+      useCase.execute(
         place: testPlace,
-        language: any(named: 'language'),
-        hook: any(named: 'hook'),
+        language: Language.traditionalChinese,
+        hook: _hook,
       ),
-    ).thenAnswer((_) async => (text: testGeneratedText, grounding: null));
-
-    final narrationContent = await useCase.execute(
-      place: testPlace,
-      language: Language.traditionalChinese,
-      hook: _hook,
+      throwsA(isA<AppError>()),
     );
 
-    expect(narrationContent, isNotNull);
-    verify(() => mockUsageRepository.consumeUsage()).called(1);
+    verifyNever(() => mockUsageRepository.consumeUsage());
   });
 }

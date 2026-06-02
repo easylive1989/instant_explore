@@ -23,22 +23,29 @@ from lorescape_backend.config import Config
 from lorescape_backend.daily_story.job import run_generate_and_review
 from lorescape_backend.narration.routes import router as narration_router
 from lorescape_backend.social.publisher import run_publish_job
+from lorescape_backend.subscriptions.reconcile import run_reconcile_job
+from lorescape_backend.subscriptions.routes import router as subscriptions_router
 
 GENERATE_JOB_ID = "daily_story_generate"
 PUBLISH_JOB_ID = "daily_story_publish"
+RECONCILE_JOB_ID = "subscription_reconcile"
 SCHEDULER_TIMEZONE = "Asia/Taipei"
 GENERATE_HOUR = 9
 PUBLISH_HOUR = 21
+RECONCILE_HOUR = 3
 
 
 def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
-    """Register the generate and publish jobs on the scheduler."""
+    """Register the generate, publish, and reconcile jobs on the scheduler."""
 
     def _generate() -> None:
         run_generate_and_review(config, date.today())
 
     def _publish() -> None:
         run_publish_job(config, date.today())
+
+    def _reconcile() -> None:
+        run_reconcile_job(config)
 
     scheduler.add_job(
         _generate,
@@ -52,6 +59,13 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
         id=PUBLISH_JOB_ID,
         replace_existing=True,
     )
+    if config.revenuecat_reconcile_enabled:
+        scheduler.add_job(
+            _reconcile,
+            trigger=CronTrigger(hour=RECONCILE_HOUR, minute=0),
+            id=RECONCILE_JOB_ID,
+            replace_existing=True,
+        )
 
 
 @asynccontextmanager
@@ -68,6 +82,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Lorescape Backend", version="0.1.0", lifespan=lifespan)
 app.include_router(narration_router)
+app.include_router(subscriptions_router)
 
 
 @app.get("/health")

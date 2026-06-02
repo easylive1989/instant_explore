@@ -59,6 +59,10 @@ enum NarrationGenerationErrorType {
   /// Backend reported insufficient_source — the place genuinely has no
   /// historical content to tell a story about. Not retryable.
   insufficientSource,
+
+  /// Backend returned 402 — the free daily quota is exhausted. The UI routes
+  /// the user to the paywall rather than showing a retry dialog.
+  quotaExceeded,
   unknown;
 
   bool get isRetryable => switch (this) {
@@ -123,14 +127,14 @@ class NarrationGenerationController
           NarrationGenerationErrorType.contentGenerationFailed,
         NarrationError.insufficientSource =>
           NarrationGenerationErrorType.insufficientSource,
+        NarrationError.freeQuotaExceeded =>
+          NarrationGenerationErrorType.quotaExceeded,
         _ => NarrationGenerationErrorType.unknown,
       };
     }
 
     if (type is UsageError) {
-      // Quota exceeded should not reach here because it's checked
-      // before calling generate, but handle defensively.
-      return NarrationGenerationErrorType.unknown;
+      return NarrationGenerationErrorType.quotaExceeded;
     }
 
     return NarrationGenerationErrorType.unknown;

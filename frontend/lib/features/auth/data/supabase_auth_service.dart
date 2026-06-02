@@ -40,6 +40,12 @@ class SupabaseAuthService implements AuthService {
   AuthUser? get currentUser => _toAuthUser(_client.auth.currentUser);
 
   @override
+  Future<void> ensureSignedIn() async {
+    if (_client.auth.currentSession != null) return;
+    await _client.auth.signInAnonymously();
+  }
+
+  @override
   Stream<AuthUser?> authStateChanges() {
     return _client.auth.onAuthStateChange.map(
       (state) => _toAuthUser(state.session?.user),
@@ -137,7 +143,12 @@ class SupabaseAuthService implements AuthService {
         metadata['full_name'] as String? ??
         metadata['name'] as String? ??
         user.email;
-    return AuthUser(id: user.id, email: user.email, displayName: displayName);
+    return AuthUser(
+      id: user.id,
+      email: user.email,
+      displayName: displayName,
+      isAnonymous: user.isAnonymous,
+    );
   }
 
   static String _generateNonce([int length = 32]) {

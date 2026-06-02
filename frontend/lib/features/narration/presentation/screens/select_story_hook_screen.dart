@@ -3,14 +3,12 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/core/services/place_image_cache_manager.dart';
-import 'package:context_app/features/ads/presentation/widgets/watch_ad_dialog.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/story_hook_controller.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/journal/category_tag.dart';
@@ -52,22 +50,10 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
     return Language(locale ?? 'zh-TW');
   }
 
-  Future<void> _onHookSelected(StoryHook? hook) async {
-    final usageRepo = ref.read(usageRepositoryProvider);
-    final status = await usageRepo.getUsageStatus();
-    if (!status.canUseNarration) {
-      if (!mounted) return;
-      final result = await showWatchAdDialog(context, ref);
-      if (result == 'subscribe') {
-        if (!mounted) return;
-        context.pushNamed('subscription');
-        return;
-      }
-      if (result != true || !mounted) return;
-    }
-
-    if (!mounted) return;
-
+  void _onHookSelected(StoryHook? hook) {
+    // The backend is the source of truth for quota: just generate, and route
+    // to the paywall if it responds with a quota-exhausted error (handled in
+    // the generation-state listener below).
     ref
         .read(narrationGenerationControllerProvider.notifier)
         .generate(
@@ -75,6 +61,11 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
           language: _currentLanguage(),
           hook: hook,
         );
+  }
+
+  void _navigateToPaywall() {
+    ref.read(narrationGenerationControllerProvider.notifier).reset();
+    context.pushNamed('subscription');
   }
 
   void _navigateToPlayer(NarrationGenerationState genState) {
@@ -127,7 +118,11 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
           _navigateToPlayer(current);
         }
         if (previous?.hasError != true && current.hasError) {
-          _showErrorDialog(current);
+          if (current.errorType == NarrationGenerationErrorType.quotaExceeded) {
+            _navigateToPaywall();
+          } else {
+            _showErrorDialog(current);
+          }
         }
       },
     );

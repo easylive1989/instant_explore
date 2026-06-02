@@ -59,8 +59,6 @@
 	<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Lorescape 需要存取您的相片庫，以分析地點提供導覽。</string>
-	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-9031377620197189~3040449773</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>

@@ -34,7 +34,9 @@ final syncSettingsProvider = NotifierProvider<SyncSettingsNotifier, bool>(
 final syncSessionProvider = Provider<SyncSession>((ref) {
   final enabled = ref.watch(syncSettingsProvider);
   final user = ref.watch(currentUserProvider);
-  return SyncSession(enabled: enabled, userId: user?.id);
+  // Cloud sync requires a permanent account; anonymous users are local-only.
+  final syncUserId = (user != null && !user.isAnonymous) ? user.id : null;
+  return SyncSession(enabled: enabled, userId: syncUserId);
 });
 
 // ---------------------------------------------------------------------------

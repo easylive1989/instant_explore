@@ -7,6 +7,13 @@ abstract class AuthService {
   /// Returns the currently authenticated user, or `null` when signed out.
   AuthUser? get currentUser;
 
+  /// Ensures a session exists, creating an anonymous one when there is none.
+  ///
+  /// Called at startup so the app can reach authenticated backend APIs
+  /// before the user chooses to sign in. An anonymous user is later
+  /// upgraded in place (keeping the same id) when they link a real identity.
+  Future<void> ensureSignedIn();
+
   /// Emits the latest [AuthUser] whenever the session changes.
   Stream<AuthUser?> authStateChanges();
 

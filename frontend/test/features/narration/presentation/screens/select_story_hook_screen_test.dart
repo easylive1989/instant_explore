@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:context_app/core/errors/app_error.dart';
-import 'package:context_app/features/ads/providers.dart';
 import 'package:context_app/features/narration/domain/errors/narration_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/journey/providers.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../fakes/fake_narration_service.dart';
-import '../../../../fakes/fake_rewarded_ad_service.dart';
 import '../../../../fakes/in_memory_journey_repository.dart';
 import '../../../../fakes/in_memory_usage_repository.dart';
 import '../../../../helpers/pump_app.dart';
@@ -205,19 +203,38 @@ void main() {
     );
 
     testWidgets(
-      'given quota is exhausted, when a hook is tapped, '
-      'then the watch-ad dialog is shown',
+      'given the backend reports quota exhausted (402), when a hook is '
+      'tapped, then the subscription screen is shown',
       (tester) async {
-        await _pumpScreen(
+        await pumpRouterApp(
           tester,
-          hookService: _FakeStoryHookService(hooks: const [_hook1]),
-          usageRepo: InMemoryUsageRepository(usedToday: 1),
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, __) => SelectStoryHookScreen(place: buildPlace()),
+            ),
+            GoRoute(
+              name: 'subscription',
+              path: '/subscription',
+              builder: (_, __) => const Scaffold(
+                key: Key('subscription-screen'),
+                body: SizedBox.shrink(),
+              ),
+            ),
+          ],
+          overrides: _overrides(
+            hookService: _FakeStoryHookService(hooks: const [_hook1]),
+            narrationService: FakeNarrationService(
+              error: const AppError(type: NarrationError.freeQuotaExceeded),
+            ),
+          ),
         );
+        await tester.pumpAndSettle();
 
         await tester.tap(find.text(_hook1.title));
         await tester.pumpAndSettle();
 
-        expect(find.text('ads.quota_exceeded_title'), findsOneWidget);
+        expect(find.byKey(const Key('subscription-screen')), findsOneWidget);
       },
     );
 
@@ -274,7 +291,6 @@ void main() {
             ),
             journeyRepositoryProvider.overrideWithValue(journeyRepo),
             usageRepositoryProvider.overrideWithValue(InMemoryUsageRepository()),
-            rewardedAdServiceProvider.overrideWithValue(FakeRewardedAdService()),
           ],
         );
         await tester.pumpAndSettle();
@@ -373,7 +389,6 @@ List<Override> _overrides({
     usageRepositoryProvider.overrideWithValue(
       usageRepo ?? InMemoryUsageRepository(),
     ),
-    rewardedAdServiceProvider.overrideWithValue(FakeRewardedAdService()),
   ];
 }
 

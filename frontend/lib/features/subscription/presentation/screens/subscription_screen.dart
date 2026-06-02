@@ -1,4 +1,6 @@
 import 'package:context_app/app/config/legal_urls.dart';
+import 'package:context_app/features/auth/domain/services/auth_service.dart';
+import 'package:context_app/features/auth/providers.dart';
 import 'package:context_app/features/subscription/domain/models/subscription_plan.dart';
 import 'package:context_app/features/subscription/presentation/widgets/paywall_palette.dart';
 import 'package:context_app/features/subscription/presentation/widgets/subscription_plan_card.dart';
@@ -112,6 +114,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Future<void> _purchase() async {
     final period = _selectedPeriod;
     if (period == null) return;
+
+    // Approach A: a purchase must be attributed to a permanent account so the
+    // backend (keyed by user id) keeps the entitlement across future sign-ins
+    // and devices. Anonymous users sign in first.
+    final user = ref.read(currentUserProvider);
+    if (user == null || user.isAnonymous) {
+      final signedIn = await _promptSignIn();
+      if (!signedIn) return;
+    }
+
     setState(() => _isPurchasing = true);
     try {
       final service = ref.read(subscriptionServiceProvider);
@@ -131,6 +143,39 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       }
     } finally {
       if (mounted) setState(() => _isPurchasing = false);
+    }
+  }
+
+  /// Prompts the user to sign in with Google or Apple before purchasing.
+  ///
+  /// Returns true once a permanent account is signed in (and RevenueCat is
+  /// re-identified to it), or false if the user dismisses or cancels.
+  Future<bool> _promptSignIn() async {
+    final provider = await showAdaptiveModalBottomSheet<_SignInProvider>(
+      context: context,
+      builder: (_) => const _SignInPrompt(),
+    );
+    if (provider == null || !mounted) return false;
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      final user = switch (provider) {
+        _SignInProvider.google => await authService.signInWithGoogle(),
+        _SignInProvider.apple => await authService.signInWithApple(),
+      };
+      // Identify RevenueCat with the permanent account before the purchase so
+      // the purchase event's app_user_id matches this backend user.
+      await ref.read(subscriptionServiceProvider).logIn(user.id);
+      return true;
+    } on AuthCancelledException {
+      return false;
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings.sign_in_failed'.tr())));
+      }
+      return false;
     }
   }
 
@@ -200,7 +245,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       periodLabel: _periodLabelKey(plan.period).tr(),
       bullets: [
         'subscription.benefit_unlimited'.tr(),
-        'subscription.benefit_no_ads'.tr(),
         'subscription.benefit_route'.tr(),
       ],
       autoRenewNotice: 'subscription.auto_renew_notice'.tr(),
@@ -448,6 +492,62 @@ class _LegalFooter extends StatelessWidget {
           child: Text('subscription.privacy'.tr(), style: linkStyle),
         ),
       ],
+    );
+  }
+}
+
+/// The identity provider chosen in the [_SignInPrompt].
+enum _SignInProvider { google, apple }
+
+/// Bottom sheet asking the user to sign in (Google or Apple) before they can
+/// purchase. Pops with the chosen [_SignInProvider], or null when dismissed.
+class _SignInPrompt extends StatelessWidget {
+  const _SignInPrompt();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'subscription.login_required'.tr(),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 24),
+          AdaptiveButton(
+            expanded: true,
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => Navigator.of(context).pop(_SignInProvider.google),
+            child: Text('settings.sign_in_google'.tr()),
+          ),
+          const SizedBox(height: 12),
+          AdaptiveButton(
+            expanded: true,
+            style: AdaptiveButtonStyle.outlined,
+            icon: const Icon(Icons.apple),
+            onPressed: () => Navigator.of(context).pop(_SignInProvider.apple),
+            child: Text('settings.sign_in_apple'.tr()),
+          ),
+          const SizedBox(height: 12),
+          AdaptiveButton(
+            style: AdaptiveButtonStyle.text,
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('settings.cancel'.tr()),
+          ),
+        ],
+      ),
     );
   }
 }
