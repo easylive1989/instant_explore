@@ -44,12 +44,15 @@ class SelectStoryHookScreen extends ConsumerStatefulWidget {
 }
 
 class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
+  String? _selectedStoryTitle;
+
   Language _currentLanguage() {
     final locale = EasyLocalization.of(context)?.locale.toLanguageTag();
     return Language(locale ?? 'zh-TW');
   }
 
   void _onHookSelected(StoryHook? hook) {
+    _selectedStoryTitle = hook?.title;
     // The backend is the source of truth for quota: just generate, and route
     // to the paywall if it responds with a quota-exhausted error (handled in
     // the generation-state listener below).
@@ -74,6 +77,7 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
       extra: {
         'place': widget.place,
         'narrationContent': genState.content,
+        'storyTitle': _selectedStoryTitle,
         'autoPlay': true,
       },
     );

@@ -303,6 +303,7 @@ void main() {
         expect(extra['place'], isNotNull);
         expect(extra['narrationContent'], isNotNull);
         expect(extra['autoPlay'], isTrue);
+        expect(extra['storyTitle'], equals(_hook1.title));
 
         final saved = await journeyRepo.getAll();
         expect(saved, hasLength(1));

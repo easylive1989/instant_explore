@@ -111,9 +111,11 @@ class RouterConfig {
             final narrationContent =
                 params['narrationContent'] as NarrationContent;
             final autoPlay = params['autoPlay'] as bool? ?? false;
+            final storyTitle = params['storyTitle'] as String?;
             return NarrationScreen(
               place: place,
               narrationContent: narrationContent,
+              storyTitle: storyTitle,
               autoPlay: autoPlay,
             );
           },

@@ -43,6 +43,10 @@ class NarrationScreen extends ConsumerStatefulWidget {
   final Place place;
   final NarrationContent narrationContent;
 
+  /// 使用者所選故事鉤子的標題；用作 hero 主標題。
+  /// 為 null（例如「聽預設」或從旅程時間軸進入）時，hero 改用地點名稱。
+  final String? storyTitle;
+
   /// Whether to start playback automatically after initialisation.
   final bool autoPlay;
 
@@ -50,6 +54,7 @@ class NarrationScreen extends ConsumerStatefulWidget {
     super.key,
     required this.place,
     required this.narrationContent,
+    this.storyTitle,
     this.autoPlay = false,
   });
 
