@@ -26,6 +26,8 @@ def _fake_config() -> Config:
         meta_page_access_token=None,
         brand_handle_ig="",
         cta_text="",
+        revenuecat_webhook_auth_token=None,
+        revenuecat_api_key=None,
     )
 
 

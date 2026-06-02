@@ -25,6 +25,16 @@ class RevenueCatSubscriptionService implements SubscriptionService {
     await Purchases.configure(PurchasesConfiguration(apiKey));
   }
 
+  /// Identify the SDK with a stable app user id (the Supabase user id).
+  ///
+  /// This makes RevenueCat's "App User ID" equal our backend user id, so
+  /// server-side webhooks and reconcile attribute entitlements to the right
+  /// user. Safe to call before any purchase; RevenueCat aliases the prior
+  /// anonymous id so existing purchases are preserved.
+  static Future<void> identify(String userId) async {
+    await Purchases.logIn(userId);
+  }
+
   @override
   Future<void> initialize({required String apiKey}) async {
     Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);

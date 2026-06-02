@@ -48,12 +48,15 @@ Future<Widget> init() async {
   // still launches and backend calls will surface a 401 instead.
   await _ensureSignedIn();
 
-  // Initialize RevenueCat SDK (global, one-time)
+  // Initialize RevenueCat SDK (global, one-time) and identify it with the
+  // Supabase user id so server-side webhooks/reconcile attribute purchases
+  // to the right backend user.
   final revenueCatApiKey = Platform.isIOS
       ? apiConfig.revenueCatApiKeyIos
       : apiConfig.revenueCatApiKeyAndroid;
   if (revenueCatApiKey.isNotEmpty) {
     await RevenueCatSubscriptionService.configureSDK(apiKey: revenueCatApiKey);
+    await _identifyRevenueCat();
   }
 
   // Eagerly resolve SharedPreferences so analytics providers
@@ -95,5 +98,18 @@ Future<void> _ensureSignedIn() async {
     await SupabaseAuthService(apiConfig: apiConfig).ensureSignedIn();
   } catch (e, stack) {
     _log.warning('Anonymous sign-in failed at startup', e, stack);
+  }
+}
+
+/// Tie the RevenueCat app user id to the current Supabase user id.
+///
+/// Best-effort: a failure is logged but does not block startup.
+Future<void> _identifyRevenueCat() async {
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return;
+  try {
+    await RevenueCatSubscriptionService.identify(userId);
+  } catch (e, stack) {
+    _log.warning('RevenueCat identify failed at startup', e, stack);
   }
 }

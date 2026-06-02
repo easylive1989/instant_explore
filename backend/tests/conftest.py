@@ -21,4 +21,6 @@ def fake_config() -> Config:
         meta_page_access_token="meta_page_token",
         brand_handle_ig="@instant_explore",
         cta_text="Explore more places with Instant Explore.",
+        revenuecat_webhook_auth_token="test_webhook_token",
+        revenuecat_api_key="test_rc_api_key",
     )

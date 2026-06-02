@@ -32,6 +32,9 @@ def test_from_env_optionals_default_to_none_or_empty(monkeypatch):
     monkeypatch.delenv("META_PAGE_ACCESS_TOKEN", raising=False)
     monkeypatch.delenv("BRAND_HANDLE_IG", raising=False)
 
+    monkeypatch.delenv("REVENUECAT_WEBHOOK_AUTH_TOKEN", raising=False)
+    monkeypatch.delenv("REVENUECAT_API_KEY", raising=False)
+
     config = Config.from_env()
     assert config.discord_webhook_url is None
     assert config.discord_bot_token is None
@@ -42,6 +45,22 @@ def test_from_env_optionals_default_to_none_or_empty(monkeypatch):
     assert config.brand_handle_ig == ""
     # CTA defaults to a non-empty branded sentence.
     assert config.cta_text
+    assert config.revenuecat_webhook_auth_token is None
+    assert config.revenuecat_api_key is None
+    assert config.revenuecat_webhook_enabled is False
+    assert config.revenuecat_reconcile_enabled is False
+
+
+def test_revenuecat_flags_enabled_when_set(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.setenv("REVENUECAT_WEBHOOK_AUTH_TOKEN", "whtok")
+    monkeypatch.setenv("REVENUECAT_API_KEY", "rckey")
+
+    config = Config.from_env()
+    assert config.revenuecat_webhook_auth_token == "whtok"
+    assert config.revenuecat_api_key == "rckey"
+    assert config.revenuecat_webhook_enabled is True
+    assert config.revenuecat_reconcile_enabled is True
 
 
 def test_from_env_parses_approver_ids_as_tuple(monkeypatch):

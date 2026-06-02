@@ -31,6 +31,13 @@ class Config:
     brand_handle_ig: str
     cta_text: str
 
+    # RevenueCat. Webhook auth token guards the /webhooks/revenuecat endpoint
+    # (must match the "Authorization" header configured in the RevenueCat
+    # dashboard). The secret API key is used by the reconcile job to re-read
+    # subscriber status. Either being absent disables that half of the flow.
+    revenuecat_webhook_auth_token: str | None = None
+    revenuecat_api_key: str | None = None
+
     @classmethod
     def from_env(cls) -> "Config":
         def required(name: str) -> str:
@@ -59,6 +66,10 @@ class Config:
             meta_page_access_token=optional("META_PAGE_ACCESS_TOKEN"),
             brand_handle_ig=os.environ.get("BRAND_HANDLE_IG", ""),
             cta_text=os.environ.get("CTA_TEXT", _DEFAULT_CTA_TEXT),
+            revenuecat_webhook_auth_token=optional(
+                "REVENUECAT_WEBHOOK_AUTH_TOKEN"
+            ),
+            revenuecat_api_key=optional("REVENUECAT_API_KEY"),
         )
 
     @property
@@ -73,3 +84,13 @@ class Config:
     @property
     def instagram_enabled(self) -> bool:
         return bool(self.ig_user_id and self.meta_page_access_token)
+
+    @property
+    def revenuecat_webhook_enabled(self) -> bool:
+        """True if the RevenueCat webhook endpoint is configured."""
+        return bool(self.revenuecat_webhook_auth_token)
+
+    @property
+    def revenuecat_reconcile_enabled(self) -> bool:
+        """True if the reconcile job can call the RevenueCat REST API."""
+        return bool(self.revenuecat_api_key)
