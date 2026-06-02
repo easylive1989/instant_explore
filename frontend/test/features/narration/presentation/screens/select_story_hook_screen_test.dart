@@ -203,8 +203,8 @@ void main() {
     );
 
     testWidgets(
-      'given quota is exhausted, when a hook is tapped, '
-      'then the subscription screen is shown',
+      'given the backend reports quota exhausted (402), when a hook is '
+      'tapped, then the subscription screen is shown',
       (tester) async {
         await pumpRouterApp(
           tester,
@@ -224,7 +224,9 @@ void main() {
           ],
           overrides: _overrides(
             hookService: _FakeStoryHookService(hooks: const [_hook1]),
-            usageRepo: InMemoryUsageRepository(usedToday: 1),
+            narrationService: FakeNarrationService(
+              error: const AppError(type: NarrationError.freeQuotaExceeded),
+            ),
           ),
         );
         await tester.pumpAndSettle();

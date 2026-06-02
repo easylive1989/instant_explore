@@ -150,6 +150,32 @@ void main() {
       );
     });
 
+    test('402 回應映射為 freeQuotaExceeded', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({'detail': 'Daily free quota exhausted'}),
+          402,
+        );
+      });
+
+      final client = NarrationApiClient(
+        baseUrl: 'https://api.test',
+        httpClient: mockClient,
+      );
+
+      try {
+        await client.fetchNarration(
+          placeName: 'x',
+          location: '',
+          wikidataId: 'Q1',
+          language: 'en',
+        );
+        fail('expected AppError');
+      } on AppError catch (e) {
+        expect(e.type, NarrationError.freeQuotaExceeded);
+      }
+    });
+
     test('500 回應映射為 serverError', () async {
       final mockClient = MockClient((request) async {
         return http.Response('boom', 500);

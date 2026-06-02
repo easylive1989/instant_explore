@@ -140,9 +140,7 @@ class NarrationApiClient {
             as Map<String, dynamic>;
       }
       throw AppError(
-        type: response.statusCode == 400
-            ? NarrationError.unknown
-            : NarrationError.serverError,
+        type: _errorTypeForStatus(response.statusCode),
         message: '後端故事服務回應錯誤 (${response.statusCode})',
         context: {
           'status_code': response.statusCode,
@@ -182,3 +180,13 @@ class NarrationApiClient {
     }
   }
 }
+
+/// Maps a non-2xx backend status to a domain error type.
+///
+/// 402 is the backend's "daily free quota exhausted" signal, surfaced so the
+/// UI can route the user to the paywall instead of showing a generic error.
+NarrationError _errorTypeForStatus(int statusCode) => switch (statusCode) {
+  400 => NarrationError.unknown,
+  402 => NarrationError.freeQuotaExceeded,
+  _ => NarrationError.serverError,
+};
