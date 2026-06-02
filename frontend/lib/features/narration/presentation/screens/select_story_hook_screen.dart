@@ -12,6 +12,7 @@ import 'package:context_app/features/settings/domain/models/language.dart';
 import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/journal/category_tag.dart';
+import 'package:context_app/shared/widgets/journal/journal_category.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -127,93 +128,206 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
       },
     );
 
-    final photoUrl = widget.place.primaryPhoto?.url;
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
     final isGenerating = generationState.isGenerating;
 
+    // Editorial layout (design: `PlaceScreen` in screens_story.jsx): a
+    // bounded hero on top, with the generation copy flowing below it on the
+    // warm paper surface — not a full-bleed photo with overlaid content.
     return Scaffold(
+      backgroundColor: tokens?.paper ?? Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
           Positioned.fill(
-            child: _BackgroundImage(
-              photoUrl: photoUrl,
-              capturedImageBytes: widget.capturedImageBytes,
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: isGenerating
-                  ? null
-                  : AdaptiveIconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => context.pop(),
-                    ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HeroSection(
+                    place: widget.place,
+                    capturedImageBytes: widget.capturedImageBytes,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: isGenerating
+                        ? _GenState(message: 'config_screen.generating'.tr())
+                        : _HookContent(
+                            state: hookState,
+                            onHookTap: _onHookSelected,
+                            onListenDefault: () => _onHookSelected(null),
+                          ),
+                  ),
+                ],
               ),
-              child: Container(
-                padding: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(
-                        context,
-                      ).colorScheme.surface.withValues(alpha: 0.8),
-                      Colors.transparent,
+            ),
+          ),
+          if (!isGenerating)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 6,
+              left: 14,
+              child: _OnPhotoBackButton(onPressed: () => context.pop()),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bounded editorial hero: a place photo (or a category-tinted gradient with
+/// a glyph when no photo is available), darkened by a scrim, captioned with
+/// the place name and category tag.
+class _HeroSection extends StatelessWidget {
+  final Place place;
+  final Uint8List? capturedImageBytes;
+
+  const _HeroSection({required this.place, this.capturedImageBytes});
+
+  @override
+  Widget build(BuildContext context) {
+    final height = (MediaQuery.of(context).size.height * 0.5).clamp(
+      320.0,
+      440.0,
+    );
+    return SizedBox(
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _HeroBackground(place: place, capturedImageBytes: capturedImageBytes),
+          const DecoratedBox(decoration: BoxDecoration(gradient: _kHeroScrim)),
+          Positioned(
+            left: 22,
+            right: 22,
+            bottom: 22,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  place.name,
+                  style: GoogleFonts.notoSerifTc(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.12,
+                    shadows: const [
+                      Shadow(
+                        color: Color(0x66000000),
+                        blurRadius: 18,
+                        offset: Offset(0, 2),
+                      ),
                     ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      widget.place.name,
-                      style: Theme.of(context).textTheme.displayMedium
-                          ?.copyWith(
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(color: Color(0x66000000), blurRadius: 16),
-                            ],
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    CategoryTag(
-                      category: widget.place.category.journalCategory,
-                      onPhoto: true,
-                    ),
-                    const SizedBox(height: 24),
-                    if (isGenerating)
-                      const _GeneratingIndicator()
-                    else
-                      _HookContent(
-                        state: hookState,
-                        onHookTap: _onHookSelected,
-                        onListenDefault: () => _onHookSelected(null),
-                      ),
-                  ],
+                const SizedBox(height: 10),
+                CategoryTag(
+                  category: place.category.journalCategory,
+                  onPhoto: true,
                 ),
-              ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Hero scrim (design token `.hero__scrim`): a top-and-bottom darkening so the
+/// back button and caption stay legible over any photo.
+const _kHeroScrim = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [
+    Color(0x470F0B07),
+    Color(0x000F0B07),
+    Color(0x8C0F0B07),
+    Color(0xEB0F0B07),
+  ],
+  stops: [0.0, 0.28, 0.78, 1.0],
+);
+
+class _HeroBackground extends StatelessWidget {
+  final Place place;
+  final Uint8List? capturedImageBytes;
+
+  const _HeroBackground({required this.place, this.capturedImageBytes});
+
+  @override
+  Widget build(BuildContext context) {
+    if (capturedImageBytes != null) {
+      return Image.memory(capturedImageBytes!, fit: BoxFit.cover);
+    }
+
+    final photoUrl = place.primaryPhoto?.url;
+    final glyph = _GlyphBackground(category: place.category.journalCategory);
+    if (photoUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: photoUrl,
+        fit: BoxFit.cover,
+        cacheManager: PlaceImageCacheManager.instance,
+        placeholder: (context, url) => glyph,
+        errorWidget: (context, url, error) => glyph,
+      );
+    }
+
+    return glyph;
+  }
+}
+
+/// Photo-less hero fill: a category-tinted dark gradient with a centered glyph
+/// (design: `linear-gradient(160deg, var(--cat-*-ink), var(--ink-bg))`).
+class _GlyphBackground extends StatelessWidget {
+  final JournalCategory category;
+
+  const _GlyphBackground({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [category.ink, tokens?.inkBg ?? const Color(0xFF1B1611)],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          category.icon,
+          size: 34,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+/// Circular translucent back button for use over the hero (design token
+/// `.iconbtn.on-photo`).
+class _OnPhotoBackButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _OnPhotoBackButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipOval(
+      child: Material(
+        color: const Color(0x6B14100C),
+        child: InkWell(
+          onTap: onPressed,
+          child: const SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -233,7 +347,7 @@ class _HookContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (state.status) {
-      StoryHookStatus.loading => const _HookLoadingState(),
+      StoryHookStatus.loading => _GenState(message: 'story_hook.loading'.tr()),
       StoryHookStatus.success => _HookListState(
         hooks: state.hooks,
         onTap: onHookTap,
@@ -246,65 +360,74 @@ class _HookContent extends StatelessWidget {
   }
 }
 
-class _HookLoadingState extends StatelessWidget {
-  const _HookLoadingState();
+/// The "digging up history" loading state (design: `.gen-state`): a clay
+/// spinner with a status line, followed by shimmer placeholder lines on the
+/// warm paper surface.
+class _GenState extends StatelessWidget {
+  const _GenState({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 22,
-                height: 22,
-                child: AdaptiveProgressIndicator(
-                  color: cs.primary,
-                  strokeWidth: 2.4,
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.4,
+                color: tokens?.clay ?? cs.primary,
+                backgroundColor: tokens?.claySoft ?? cs.primaryContainer,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.4,
+                  color: tokens?.ink2 ?? cs.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  'story_hook.loading'.tr(),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          const _SkeletonLine(widthFactor: 0.92),
-          const SizedBox(height: 12),
-          const _SkeletonLine(widthFactor: 0.78),
-          const SizedBox(height: 12),
-          const _SkeletonLine(widthFactor: 0.85),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        const _ShimmerLine(widthFactor: 0.92),
+        const SizedBox(height: 18),
+        const _ShimmerLine(widthFactor: 0.78),
+        const SizedBox(height: 18),
+        const _ShimmerLine(widthFactor: 0.85),
+      ],
     );
   }
 }
 
-class _SkeletonLine extends StatelessWidget {
-  const _SkeletonLine({required this.widthFactor});
+class _ShimmerLine extends StatelessWidget {
+  const _ShimmerLine({required this.widthFactor});
 
   final double widthFactor;
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
     return Align(
       alignment: Alignment.centerLeft,
       child: FractionallySizedBox(
         widthFactor: widthFactor,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color:
+                tokens?.paperSunk ??
+                Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(6),
           ),
           child: const SizedBox(height: 14),
@@ -331,24 +454,15 @@ class _HookListState extends StatelessWidget {
           style: Theme.of(context).textTheme.displaySmall,
         ),
         const SizedBox(height: 16),
-        Flexible(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                for (var i = 0; i < hooks.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: StoryHookCard(
-                      hook: hooks[i],
-                      index: i + 1,
-                      onTap: () => onTap(hooks[i]),
-                    ),
-                  ),
-              ],
+        for (var i = 0; i < hooks.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: StoryHookCard(
+              hook: hooks[i],
+              index: i + 1,
+              onTap: () => onTap(hooks[i]),
             ),
           ),
-        ),
-        const SizedBox(height: 20),
       ],
     );
   }
@@ -518,85 +632,6 @@ class StoryHookCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _GeneratingIndicator extends StatelessWidget {
-  const _GeneratingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AdaptiveProgressIndicator(color: cs.primary),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              'config_screen.generating'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BackgroundImage extends StatelessWidget {
-  final String? photoUrl;
-  final Uint8List? capturedImageBytes;
-
-  const _BackgroundImage({this.photoUrl, this.capturedImageBytes});
-
-  @override
-  Widget build(BuildContext context) {
-    if (capturedImageBytes != null) {
-      return ColorFiltered(
-        colorFilter: const ColorFilter.mode(
-          Color(0x66000000),
-          BlendMode.darken,
-        ),
-        child: Image.memory(
-          capturedImageBytes!,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-      );
-    }
-
-    if (photoUrl != null) {
-      return CachedNetworkImage(
-        imageUrl: photoUrl!,
-        fit: BoxFit.cover,
-        color: const Color(0x66000000),
-        colorBlendMode: BlendMode.darken,
-        cacheManager: PlaceImageCacheManager.instance,
-        placeholder: (context, url) => ColoredBox(
-          color: Theme.of(context).colorScheme.surfaceContainerLowest,
-          child: const Center(child: AdaptiveProgressIndicator()),
-        ),
-        errorWidget: (context, url, error) => ColoredBox(
-          color: Theme.of(context).colorScheme.surfaceContainerLowest,
-          child: const Icon(
-            Icons.image_not_supported,
-            size: 48,
-            color: Colors.white54,
-          ),
-        ),
-      );
-    }
-
-    return ColoredBox(
-      color: Theme.of(context).colorScheme.surfaceContainerLowest,
     );
   }
 }
