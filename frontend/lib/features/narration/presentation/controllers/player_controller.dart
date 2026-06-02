@@ -158,6 +158,23 @@ class PlayerController extends AutoDisposeNotifier<NarrationState> {
     state = state.paused();
   }
 
+  /// 停止播放並重置為就緒狀態。
+  ///
+  /// 供離開播放頁面時呼叫。不能只依賴 provider 的 autoDispose 來停止
+  /// 播放：全 app 存活的 `NarrationAnalyticsObserver` 會持續 listen
+  /// [playerControllerProvider]，使其永不 autoDispose（[_cleanup] 因此
+  /// 不會執行），所以離開頁面時必須明確停止 TTS。
+  Future<void> stop() async {
+    _isSkipping = false;
+    _charPositionOffset = 0;
+    await _ttsService.stop();
+    final place = state.place;
+    final content = state.content;
+    if (place != null && content != null) {
+      state = state.ready(place, content);
+    }
+  }
+
   /// 跳到指定段落並開始播放
   ///
   /// [segmentIndex] 目標段落索引

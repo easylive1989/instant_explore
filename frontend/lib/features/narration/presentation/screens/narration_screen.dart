@@ -5,6 +5,7 @@ import 'package:context_app/features/narration/domain/models/narration_content.d
 import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
+import 'package:context_app/features/narration/presentation/controllers/player_controller.dart';
 import 'package:context_app/features/narration/presentation/widgets/reading_palette.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
@@ -60,23 +61,33 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
   final AutoScrollController _scrollController = AutoScrollController();
   int? _lastSegmentIndex;
 
+  /// Cached in [initState] so [dispose] can stop playback without `ref`,
+  /// which is no longer usable once the widget has been disposed.
+  late final PlayerController _playerController;
+
   @override
   void initState() {
     super.initState();
+    _playerController = ref.read(playerControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(playerControllerProvider.notifier)
+      _playerController
           .initializeWithContent(widget.place, widget.narrationContent)
           .then((_) {
             if (!mounted || !widget.autoPlay) return;
-            ref.read(playerControllerProvider.notifier).play();
+            _playerController.play();
           });
     });
   }
 
   @override
   void dispose() {
+    // Explicitly stop TTS when leaving the player. playerControllerProvider
+    // is autoDispose and originally relied on autoDispose firing _cleanup()
+    // (which stops TTS). But the app-wide NarrationAnalyticsObserver keeps a
+    // permanent ref.listen on this provider, so it never auto-disposes; we
+    // must stop playback here instead.
+    _playerController.stop();
     _scrollController.dispose();
     super.dispose();
   }
