@@ -1,18 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
-import 'package:context_app/core/services/place_image_cache_manager.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/story_hook_controller.dart';
+import 'package:context_app/features/narration/presentation/widgets/editorial_hero.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:context_app/features/settings/domain/models/language.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:context_app/shared/widgets/journal/category_tag.dart';
-import 'package:context_app/shared/widgets/journal/journal_category.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -193,8 +191,13 @@ class _HeroSection extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _HeroBackground(place: place, capturedImageBytes: capturedImageBytes),
-          const DecoratedBox(decoration: BoxDecoration(gradient: _kHeroScrim)),
+          EditorialHeroBackground(
+            place: place,
+            capturedImageBytes: capturedImageBytes,
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: kEditorialHeroScrim),
+          ),
           Positioned(
             left: 22,
             right: 22,
@@ -228,77 +231,6 @@ class _HeroSection extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Hero scrim (design token `.hero__scrim`): a top-and-bottom darkening so the
-/// back button and caption stay legible over any photo.
-const _kHeroScrim = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0x470F0B07),
-    Color(0x000F0B07),
-    Color(0x8C0F0B07),
-    Color(0xEB0F0B07),
-  ],
-  stops: [0.0, 0.28, 0.78, 1.0],
-);
-
-class _HeroBackground extends StatelessWidget {
-  final Place place;
-  final Uint8List? capturedImageBytes;
-
-  const _HeroBackground({required this.place, this.capturedImageBytes});
-
-  @override
-  Widget build(BuildContext context) {
-    if (capturedImageBytes != null) {
-      return Image.memory(capturedImageBytes!, fit: BoxFit.cover);
-    }
-
-    final photoUrl = place.primaryPhoto?.url;
-    final glyph = _GlyphBackground(category: place.category.journalCategory);
-    if (photoUrl != null) {
-      return CachedNetworkImage(
-        imageUrl: photoUrl,
-        fit: BoxFit.cover,
-        cacheManager: PlaceImageCacheManager.instance,
-        placeholder: (context, url) => glyph,
-        errorWidget: (context, url, error) => glyph,
-      );
-    }
-
-    return glyph;
-  }
-}
-
-/// Photo-less hero fill: a category-tinted dark gradient with a centered glyph
-/// (design: `linear-gradient(160deg, var(--cat-*-ink), var(--ink-bg))`).
-class _GlyphBackground extends StatelessWidget {
-  final JournalCategory category;
-
-  const _GlyphBackground({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [category.ink, tokens?.inkBg ?? const Color(0xFF1B1611)],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          category.icon,
-          size: 34,
-          color: Colors.white.withValues(alpha: 0.5),
-        ),
       ),
     );
   }
