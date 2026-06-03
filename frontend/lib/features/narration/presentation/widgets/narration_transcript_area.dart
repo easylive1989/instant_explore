@@ -100,6 +100,7 @@ class NarrationTranscriptArea extends ConsumerWidget {
                 isActive: isActive,
                 scrollController: scrollController,
                 index: index,
+                isLede: segmentIndex == 0,
               ),
             );
           },
