@@ -73,19 +73,17 @@ class _ControlsRow extends StatelessWidget {
     final percent = (playerState.progress.clamp(0.0, 1.0) * 100).round();
     return Row(
       children: [
-        if (playerState.shouldShowSkipButtons) ...[
-          Opacity(
-            opacity: playerState.canSkipPrevious ? 1.0 : 0.3,
-            child: _CircleControl(
-              icon: Icons.skip_previous,
-              size: 40,
-              filled: false,
-              palette: palette,
-              onPressed: onSkipPrev,
-            ),
+        Opacity(
+          opacity: playerState.canSkipPrevious ? 1.0 : 0.3,
+          child: _CircleControl(
+            icon: Icons.skip_previous,
+            size: 40,
+            filled: false,
+            palette: palette,
+            onPressed: onSkipPrev,
           ),
-          const SizedBox(width: 4),
-        ],
+        ),
+        const SizedBox(width: 4),
         _CircleControl(
           icon: playerState.isPlaying ? Icons.pause : Icons.play_arrow,
           size: 54,
@@ -95,19 +93,17 @@ class _ControlsRow extends StatelessWidget {
               ? null
               : onPlayPause,
         ),
-        if (playerState.shouldShowSkipButtons) ...[
-          const SizedBox(width: 4),
-          Opacity(
-            opacity: playerState.canSkipNext ? 1.0 : 0.3,
-            child: _CircleControl(
-              icon: Icons.skip_next,
-              size: 40,
-              filled: false,
-              palette: palette,
-              onPressed: onSkipNext,
-            ),
+        const SizedBox(width: 4),
+        Opacity(
+          opacity: playerState.canSkipNext ? 1.0 : 0.3,
+          child: _CircleControl(
+            icon: Icons.skip_next,
+            size: 40,
+            filled: false,
+            palette: palette,
+            onPressed: onSkipNext,
           ),
-        ],
+        ),
         const SizedBox(width: 14),
         Expanded(
           child: _ProgressBar(progress: playerState.progress, palette: palette),
@@ -144,7 +140,7 @@ class _ProgressBar extends StatelessWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: palette.onDark.withValues(alpha: 0.15),
+              color: palette.onDark.withValues(alpha: 0.24),
               borderRadius: BorderRadius.circular(2),
             ),
           ),

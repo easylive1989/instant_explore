@@ -106,50 +106,38 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
 
     final palette = ReadingPalette.of(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: palette.readBg,
         body: Column(
           children: [
+            _NarrationHeader(placeName: widget.place.name, palette: palette),
             Expanded(
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    _NarrationHeader(
-                      placeName: widget.place.name,
-                      palette: palette,
+              child: Stack(
+                children: [
+                  NarrationTranscriptArea(
+                    scrollController: _scrollController,
+                    header: _ReaderHero(
+                      place: widget.place,
+                      storyTitle: widget.storyTitle,
                     ),
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          NarrationTranscriptArea(
-                            scrollController: _scrollController,
-                            header: _ReaderHero(
-                              place: widget.place,
-                              storyTitle: widget.storyTitle,
-                            ),
-                          ),
-                          if (widget.narrationContent.grounding != null)
-                            Positioned(
-                              right: 12,
-                              bottom: 12,
-                              child: _InfoButton(
-                                palette: palette,
-                                tooltip: 'narration.grounding_info_tooltip'
-                                    .tr(),
-                                onPressed: () => showGroundingInfoSheet(
-                                  context,
-                                  grounding: widget.narrationContent.grounding!,
-                                ),
-                              ),
-                            ),
-                        ],
+                  ),
+                  if (widget.narrationContent.grounding != null)
+                    Positioned(
+                      right: 12,
+                      bottom: 12,
+                      child: _InfoButton(
+                        palette: palette,
+                        tooltip: 'narration.grounding_info_tooltip'.tr(),
+                        onPressed: () => showGroundingInfoSheet(
+                          context,
+                          grounding: widget.narrationContent.grounding!,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
             NarrationControlPanel(place: widget.place),
@@ -167,29 +155,39 @@ class _NarrationHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        children: [
-          AdaptiveIconButton(
-            icon: Icon(Icons.arrow_back_ios_new, size: 20, color: palette.clay),
-            onPressed: () => context.go('/'),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Text(
-              placeName,
-              style: GoogleFonts.notoSerifTc(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: palette.readInk,
-                letterSpacing: 0.5,
+    return ColoredBox(
+      color: palette.inkBg,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              AdaptiveIconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 20,
+                  color: palette.clay,
+                ),
+                onPressed: () => context.go('/'),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  placeName,
+                  style: GoogleFonts.notoSerifTc(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: palette.onDark,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -14,6 +14,7 @@ import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
+import 'package:context_app/features/explore/domain/models/place_photo.dart';
 import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
@@ -130,14 +131,25 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   void _navigateToPlayer() {
     if (_isDeleting) return;
 
-    // Construct a partial Place object
+    // Construct a partial Place object. Carry the saved image forward so the
+    // reader hero shows the photo instead of a category glyph on replay.
+    final imageUrl = widget.entry.place.imageUrl;
     final place = Place(
       id: widget.entry.place.id,
       name: widget.entry.place.name,
       address: widget.entry.place.address,
       location: const PlaceLocation(latitude: 0, longitude: 0),
       tags: const [],
-      photos: const [],
+      photos: imageUrl != null
+          ? [
+              PlacePhoto(
+                url: imageUrl,
+                width: 0,
+                height: 0,
+                attributions: const [],
+              ),
+            ]
+          : const [],
       category: PlaceCategory.modernUrban,
     );
 

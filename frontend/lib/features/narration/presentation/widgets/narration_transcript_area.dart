@@ -94,7 +94,11 @@ class NarrationTranscriptArea extends ConsumerWidget {
             final segment = content.segments[segmentIndex];
             final isActive = currentSegmentIndex == segmentIndex;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: segmentIndex == 0 ? 28 : 0,
+              ),
               child: TranscriptSegmentItem(
                 segment: segment,
                 isActive: isActive,

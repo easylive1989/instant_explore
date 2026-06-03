@@ -146,8 +146,6 @@ class NarrationState extends Equatable {
     );
   }
 
-  bool get shouldShowSkipButtons => isPlaying || isPaused;
-
   bool get canSkipNext {
     if (content == null) return false;
     final currentIndex = currentSegmentIndex ?? 0;
