@@ -5,6 +5,8 @@ description: Use when debugging the Lorescape daily-story pipeline — diagnosin
 
 # Lorescape Debug (production)
 
+> **回覆語言：除技術名詞外，一律用繁體中文回覆使用者。**
+
 Diagnose production state for the daily-story pipeline and sync tables by reading Supabase (PostgREST) + Discord (Bot REST) + GitHub Actions. **Strictly read-only.**
 
 ## Read-only contract

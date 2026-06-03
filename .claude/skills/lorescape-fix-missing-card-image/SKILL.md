@@ -5,6 +5,8 @@ description: Use when the Lorescape daily_story_job failed for a date with "miss
 
 # Lorescape — Fix a daily story missing its card image
 
+> **回覆語言：除技術名詞外，一律用繁體中文回覆使用者。**
+
 ## Overview
 
 A daily story rendered no IG card and posted no Discord review because the
