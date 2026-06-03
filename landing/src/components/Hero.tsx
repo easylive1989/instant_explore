@@ -12,9 +12,9 @@ export default function Hero() {
           AI 隨行的旅行說書人
         </span>
         <h1>
-          體驗歷史，
+          體驗歷史
           <br />
-          <span className="clay">而不只是風景。</span>
+          <span className="clay">而不只是風景</span>
         </h1>
         <p className="lede">
           你的隨身 AI 旅行說書人。走到哪，就把那裡的來歷、傳說與歷史，說給你聽。
