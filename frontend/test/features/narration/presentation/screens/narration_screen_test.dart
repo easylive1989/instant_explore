@@ -4,6 +4,7 @@ import 'package:context_app/features/narration/presentation/screens/narration_sc
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/providers.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../fakes/fake_tts_service.dart';
@@ -48,6 +49,22 @@ void main() {
         await _whenInitializationCompletes(tester);
 
         _thenTtsReceivedSpeakCommand(tts);
+      },
+    );
+
+    testWidgets(
+      'given the player loads, when rendered, '
+      'then the reading surface is warm paper, not night black',
+      (tester) async {
+        await _givenNarrationScreen(
+          tester,
+          place: buildPlace(name: 'Kinkaku-ji'),
+          content: buildNarrationContent(),
+        );
+
+        final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+        expect(scaffold.backgroundColor, equals(const Color(0xFFEFE2CB)));
+        expect(scaffold.backgroundColor, isNot(const Color(0xFF1B1611)));
       },
     );
 
