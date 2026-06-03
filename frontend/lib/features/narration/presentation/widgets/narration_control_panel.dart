@@ -134,27 +134,50 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 4,
-      child: Stack(
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: palette.onDark.withValues(alpha: 0.24),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          FractionallySizedBox(
-            widthFactor: progress.clamp(0.0, 1.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: palette.clay,
-                borderRadius: BorderRadius.circular(2),
+    final value = progress.clamp(0.0, 1.0);
+    const thumbSize = 10.0;
+    const trackHeight = 3.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return SizedBox(
+          height: thumbSize,
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                height: trackHeight,
+                decoration: BoxDecoration(
+                  color: palette.onDark.withValues(alpha: 0.24),
+                  borderRadius: BorderRadius.circular(trackHeight / 2),
+                ),
               ),
-            ),
+              Container(
+                height: trackHeight,
+                width: (width * value).clamp(0.0, width),
+                decoration: BoxDecoration(
+                  color: palette.clay,
+                  borderRadius: BorderRadius.circular(trackHeight / 2),
+                ),
+              ),
+              Positioned(
+                left: (width * value - thumbSize / 2).clamp(
+                  0.0,
+                  width - thumbSize,
+                ),
+                child: Container(
+                  width: thumbSize,
+                  height: thumbSize,
+                  decoration: BoxDecoration(
+                    color: palette.clay,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
