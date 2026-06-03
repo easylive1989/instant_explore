@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 2,
+  "appName": "Lorescape",
+  "themeId": "warm-editorial",
+  "connectedCanvas": false,
+  "locales": [
+    "zh-Hant",
+    "en"
+  ],
+  "locale": "zh-Hant",
+  "device": "feature-graphic",
+  "orientation": "portrait",
+  "appIcon": "/app-icon.png",
+  "slidesByDevice": {
+    "iphone": [
+      {
+        "id": "ls_hero",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "讓每一處風景",
+          "en": "Every place\nhas"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "開口說故事",
+          "en": "a story"
+        },
+        "screenshot": "/screenshots/lorescape/stories.png",
+        "bgColor": "#F4E6CC",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "92,58,30,0.30",
+        "mascot": {
+          "color": "#F2BB46",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      },
+      {
+        "id": "ls_explore_more",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "解鎖之後",
+          "en": "Unlock and"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "探索更多故事",
+          "en": "explore more"
+        },
+        "screenshot": "/screenshots/lorescape/settings.png",
+        "bgColor": "#F2BB46",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 2,
+        "shadowRgba": "120,80,20,0.28",
+        "mascot": {
+          "color": "#F2B07A",
+          "x": 0.7,
+          "y": 0.56,
+          "size": 0.3,
+          "flip": true
+        }
+      },
+      {
+        "id": "ls_reader",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "聽 AI 為你",
+          "en": "Hear the AI"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "娓娓道來",
+          "en": "tell the tale"
+        },
+        "screenshot": "/screenshots/lorescape/reader.png",
+        "bgColor": "#F3A6B7",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "120,40,60,0.28",
+        "mascot": {
+          "color": "#E08767",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      },
+      {
+        "id": "ls_explore",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "發現方圓內",
+          "en": "Discover what's"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "身邊的風景",
+          "en": "around you"
+        },
+        "screenshot": "/screenshots/lorescape/explore.png",
+        "bgColor": "#BFD9B6",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": -2,
+        "shadowRgba": "60,90,50,0.28",
+        "mascot": {
+          "color": "#F2BB46",
+          "x": 0.7,
+          "y": 0.56,
+          "size": 0.3,
+          "flip": true
+        }
+      },
+      {
+        "id": "ls_history",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "走過的地方",
+          "en": "Every place"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "自動成冊",
+          "en": "becomes a journal"
+        },
+        "screenshot": "/screenshots/lorescape/history.png",
+        "bgColor": "#F4E6CC",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "92,58,30,0.30",
+        "mascot": {
+          "color": "#F2B07A",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      }
+    ],
+    "android": [
+      {
+        "id": "ls_a_hero",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "讓每一處風景",
+          "en": "Every place\nhas"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "開口說故事",
+          "en": "a story"
+        },
+        "screenshot": "/screenshots/lorescape/stories.png",
+        "bgColor": "#F4E6CC",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "92,58,30,0.30",
+        "mascot": {
+          "color": "#F2BB46",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      },
+      {
+        "id": "ls_a_explore_more",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "解鎖之後",
+          "en": "Unlock and"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "探索更多故事",
+          "en": "explore more"
+        },
+        "screenshot": "/screenshots/lorescape/settings.png",
+        "bgColor": "#F2BB46",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 2,
+        "shadowRgba": "120,80,20,0.28",
+        "mascot": {
+          "color": "#F2B07A",
+          "x": 0.7,
+          "y": 0.56,
+          "size": 0.3,
+          "flip": true
+        }
+      },
+      {
+        "id": "ls_a_reader",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "聽 AI 為你",
+          "en": "Hear the AI"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "娓娓道來",
+          "en": "tell the tale"
+        },
+        "screenshot": "/screenshots/lorescape/reader.png",
+        "bgColor": "#F3A6B7",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "120,40,60,0.28",
+        "mascot": {
+          "color": "#E08767",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      },
+      {
+        "id": "ls_a_explore",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "發現方圓內",
+          "en": "Discover what's"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "身邊的風景",
+          "en": "around you"
+        },
+        "screenshot": "/screenshots/lorescape/explore.png",
+        "bgColor": "#BFD9B6",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": -2,
+        "shadowRgba": "60,90,50,0.28",
+        "mascot": {
+          "color": "#F2BB46",
+          "x": 0.7,
+          "y": 0.56,
+          "size": 0.3,
+          "flip": true
+        }
+      },
+      {
+        "id": "ls_a_history",
+        "style": "retro",
+        "layout": "device-bottom",
+        "label": {},
+        "headline": {
+          "zh-Hant": "走過的地方",
+          "en": "Every place"
+        },
+        "scriptPhrase": {
+          "zh-Hant": "自動成冊",
+          "en": "becomes a journal"
+        },
+        "screenshot": "/screenshots/lorescape/history.png",
+        "bgColor": "#F4E6CC",
+        "onDark": false,
+        "scriptColor": "#E45A4A",
+        "tilt": 0,
+        "shadowRgba": "92,58,30,0.30",
+        "mascot": {
+          "color": "#F2B07A",
+          "x": 0,
+          "y": 0.58,
+          "size": 0.3
+        }
+      }
+    ],
+    "ipad": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": [
+      {
+        "id": "ls_feature_graphic",
+        "layout": "feature-graphic",
+        "label": {},
+        "headline": {
+          "zh-Hant": "讓每一處風景，開口說它的故事",
+          "en": "Every place has a story to tell."
+        },
+        "screenshot": ""
+      }
+    ]
+  },
+  "crossScreenMockupsByDevice": {
+    "iphone": [],
+    "ipad": [],
+    "android": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": []
+  }
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+<title>Lorescape — Screenshot Capture Harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700;900&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="app/ls2.css"/>
+<style>
+  html, body { background: #000; height: 100%; }
+  .stage { position: static; width: 390px; height: 844px; background: none; display: block; overflow: visible; }
+  .phone.capture { width: 390px; height: 844px; border-radius: 0; box-shadow: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="app/icons.jsx"></script>
+<script type="text/babel" src="app/data.jsx"></script>
+<script type="text/babel" src="app/ui.jsx"></script>
+<script type="text/babel" src="app/screens_explore.jsx"></script>
+<script type="text/babel" src="app/screens_story.jsx"></script>
+<script type="text/babel" src="app/screens_stories2.jsx"></script>
+<script type="text/babel" src="app/screens_history.jsx"></script>
+<script type="text/babel" src="app/screens_settings.jsx"></script>
+<script type="text/babel" src="app/screens_paywall.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  const Icon = window.Icon;
+  const { STPETERS_STORY } = window.LS_DATA;
+  const {
+    StoriesScreen, ExploreScreen, HistoryScreen, SettingsScreen,
+    PaywallScreen, ReaderView,
+  } = window;
+  const noop = () => {};
+
+  const TABS = [
+    { id: "stories",  label: "故事", icon: "book-open" },
+    { id: "explore",  label: "探索", icon: "compass" },
+    { id: "history",  label: "歷程", icon: "book" },
+    { id: "settings", label: "設定", icon: "settings" },
+  ];
+
+  function TabBar({ active }) {
+    return (
+      <div className="tabbar">
+        {TABS.map((tb) => {
+          const on = tb.id === active;
+          return (
+            <button key={tb.id} className={"tab" + (on ? " is-on" : "")}>
+              <Icon name={tb.icon} size={24} stroke={on ? 2 : 1.7} />
+              <span>{tb.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function screenFor(name) {
+    switch (name) {
+      case "stories":  return { node: <StoriesScreen go={noop} />, tab: "stories" };
+      case "explore":  return { node: <ExploreScreen go={noop} openSheet={noop} saved={["temple"]} toggleSaved={noop} />, tab: "explore" };
+      case "history":  return { node: <HistoryScreen go={noop} />, tab: "history" };
+      case "settings": return { node: <SettingsScreen go={noop} />, tab: "settings" };
+      case "reader":   return { node: <ReaderView story={STPETERS_STORY} onBack={noop} onExplore={null} /> };
+      case "paywall":  return { node: <PaywallScreen back={noop} /> };
+      default:         return { node: <StoriesScreen go={noop} />, tab: "stories" };
+    }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const { node, tab } = screenFor(params.get("screen") || "stories");
+
+  function Harness() {
+    return (
+      <div className="stage">
+        <div className="phone capture">
+          {node}
+          {tab && <TabBar active={tab} />}
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Harness />);
+</script>
+</body>
+</html>
