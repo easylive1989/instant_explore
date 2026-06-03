@@ -1,6 +1,7 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
+import 'package:context_app/features/narration/presentation/widgets/editorial_hero.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
 import 'package:context_app/features/narration/providers.dart';
@@ -85,6 +86,39 @@ void main() {
         _thenTtsDidNotSpeak(tts);
       },
     );
+
+    testWidgets(
+      'given a story title, when the player loads, '
+      'then the hero shows the story title plus the place name overline',
+      (tester) async {
+        await _givenNarrationScreen(
+          tester,
+          place: buildPlace(name: 'St Peters'),
+          content: buildNarrationContent(),
+          storyTitle: 'The Hundred-Year Gamble',
+        );
+
+        expect(find.byType(EditorialHeroBackground), findsOneWidget);
+        expect(find.text('The Hundred-Year Gamble'), findsOneWidget);
+        // Place name appears in the fixed top bar AND in the hero overline.
+        expect(find.text('St Peters'), findsNWidgets(2));
+      },
+    );
+
+    testWidgets(
+      'given no story title, when the player loads, '
+      'then the hero main title falls back to the place name',
+      (tester) async {
+        await _givenNarrationScreen(
+          tester,
+          place: buildPlace(name: 'St Peters'),
+          content: buildNarrationContent(),
+        );
+
+        // Place name appears in the top bar AND as the hero main title.
+        expect(find.text('St Peters'), findsNWidgets(2));
+      },
+    );
   });
 }
 
@@ -93,6 +127,7 @@ Future<void> _givenNarrationScreen(
   required Place place,
   required NarrationContent content,
   bool autoPlay = false,
+  String? storyTitle,
   FakeTtsService? tts,
 }) async {
   final resolvedTts = tts ?? FakeTtsService();
@@ -101,6 +136,7 @@ Future<void> _givenNarrationScreen(
     child: NarrationScreen(
       place: place,
       narrationContent: content,
+      storyTitle: storyTitle,
       autoPlay: autoPlay,
     ),
     overrides: [
@@ -120,7 +156,7 @@ Future<void> _whenInitializationCompletes(WidgetTester tester) async {
 }
 
 void _thenPlaceNameIsVisible(String name) {
-  expect(find.text(name), findsOneWidget);
+  expect(find.text(name), findsAtLeastNWidgets(1));
 }
 
 void _thenTranscriptAreaIsVisible() {

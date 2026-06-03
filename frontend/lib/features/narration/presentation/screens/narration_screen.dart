@@ -1,5 +1,6 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
+import 'package:context_app/features/narration/presentation/widgets/editorial_hero.dart';
 import 'package:context_app/features/narration/presentation/widgets/grounding_info_sheet.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_control_panel.dart';
 import 'package:context_app/features/narration/presentation/widgets/narration_transcript_area.dart';
@@ -125,6 +126,10 @@ class _NarrationScreenState extends ConsumerState<NarrationScreen> {
                         children: [
                           NarrationTranscriptArea(
                             scrollController: _scrollController,
+                            header: _ReaderHero(
+                              place: widget.place,
+                              storyTitle: widget.storyTitle,
+                            ),
                           ),
                           if (widget.narrationContent.grounding != null)
                             Positioned(
@@ -182,6 +187,78 @@ class _NarrationHeader extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bounded editorial hero shown as the first item of the reader's scroll view.
+///
+/// Shows the place photo (or a category glyph fallback) under a scrim,
+/// captioned with the story title; the place name sits above it as an
+/// overline. When no story title is available the place name becomes the main
+/// title and the overline is omitted.
+class _ReaderHero extends StatelessWidget {
+  final Place place;
+  final String? storyTitle;
+
+  const _ReaderHero({required this.place, this.storyTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasStoryTitle = storyTitle != null && storyTitle!.trim().isNotEmpty;
+    final title = hasStoryTitle ? storyTitle!.trim() : place.name;
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          EditorialHeroBackground(place: place),
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: kEditorialHeroScrim),
+          ),
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 22,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasStoryTitle) ...[
+                  Text(
+                    place.name,
+                    style: GoogleFonts.notoSerifTc(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.6,
+                      color: Colors.white.withValues(alpha: 0.82),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Text(
+                  title,
+                  style: GoogleFonts.notoSerifTc(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    height: 1.16,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(
+                        color: Color(0x66000000),
+                        blurRadius: 18,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

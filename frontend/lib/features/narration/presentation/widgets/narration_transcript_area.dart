@@ -11,7 +11,17 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class NarrationTranscriptArea extends ConsumerWidget {
   final AutoScrollController scrollController;
 
-  const NarrationTranscriptArea({super.key, required this.scrollController});
+  /// Optional widget rendered as the first item of the scroll list (index 0).
+  ///
+  /// Typically an editorial hero that scrolls away as the user reads.
+  /// Falls back to a `SizedBox(height: 60)` spacer when null.
+  final Widget? header;
+
+  const NarrationTranscriptArea({
+    super.key,
+    required this.scrollController,
+    this.header,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,40 +81,28 @@ class NarrationTranscriptArea extends ConsumerWidget {
         ListView.builder(
           physics: const ClampingScrollPhysics(),
           controller: scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.zero,
           itemCount: content.segments.length + 2,
           itemBuilder: (context, index) {
-            if (index == 0) return const SizedBox(height: 60);
+            if (index == 0) {
+              return header ?? const SizedBox(height: 60);
+            }
             if (index == content.segments.length + 1) {
               return const SizedBox(height: 200);
             }
             final segmentIndex = index - 1;
             final segment = content.segments[segmentIndex];
             final isActive = currentSegmentIndex == segmentIndex;
-            return TranscriptSegmentItem(
-              segment: segment,
-              isActive: isActive,
-              scrollController: scrollController,
-              index: index,
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TranscriptSegmentItem(
+                segment: segment,
+                isActive: isActive,
+                scrollController: scrollController,
+                index: index,
+              ),
             );
           },
-        ),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 100,
-          child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [palette.readBg, palette.readBg.withValues(alpha: 0)],
-                ),
-              ),
-            ),
-          ),
         ),
         Positioned(
           bottom: 0,
