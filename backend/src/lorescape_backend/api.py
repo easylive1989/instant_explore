@@ -3,7 +3,7 @@
 Hosts:
 - `/health` endpoint (placeholder for monitoring)
 - An APScheduler with two daily jobs at Asia/Taipei:
-    09:00 — generate today's story and post it to Discord for review
+    08:00 — generate today's story and post it to Discord for review
     21:00 — read review reactions and publish to Instagram
 
 Manual CLIs (preserved for back-fill / debugging):
@@ -30,7 +30,7 @@ GENERATE_JOB_ID = "daily_story_generate"
 PUBLISH_JOB_ID = "daily_story_publish"
 RECONCILE_JOB_ID = "subscription_reconcile"
 SCHEDULER_TIMEZONE = "Asia/Taipei"
-GENERATE_HOUR = 9
+GENERATE_HOUR = 8
 PUBLISH_HOUR = 21
 RECONCILE_HOUR = 3
 
