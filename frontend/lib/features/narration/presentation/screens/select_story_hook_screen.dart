@@ -157,6 +157,7 @@ class _SelectStoryHookScreenState extends ConsumerState<SelectStoryHookScreen> {
                             state: hookState,
                             onHookTap: _onHookSelected,
                             onListenDefault: () => _onHookSelected(null),
+                            onExplore: () => context.pop(),
                           ),
                   ),
                 ],
@@ -273,11 +274,13 @@ class _HookContent extends StatelessWidget {
   final StoryHookState state;
   final void Function(StoryHook hook) onHookTap;
   final VoidCallback onListenDefault;
+  final VoidCallback onExplore;
 
   const _HookContent({
     required this.state,
     required this.onHookTap,
     required this.onListenDefault,
+    required this.onExplore,
   });
 
   @override
@@ -288,8 +291,9 @@ class _HookContent extends StatelessWidget {
         hooks: state.hooks,
         onTap: onHookTap,
       ),
-      StoryHookStatus.insufficientSource =>
-        const _HookInsufficientSourceState(),
+      StoryHookStatus.insufficientSource => _HookInsufficientSourceState(
+        onExplore: onExplore,
+      ),
       StoryHookStatus.empty ||
       StoryHookStatus.error => _HookFallbackState(onListen: onListenDefault),
     };
@@ -410,36 +414,74 @@ class _HookListState extends StatelessWidget {
 /// /narration call would just hit the same dead-end. The user should
 /// pick a different place via the back button.
 class _HookInsufficientSourceState extends StatelessWidget {
-  const _HookInsufficientSourceState();
+  final VoidCallback onExplore;
+
+  const _HookInsufficientSourceState({required this.onExplore});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.menu_book_outlined, color: cs.onSurfaceVariant),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'story_hook.insufficient_source_title'.tr(),
-                style: Theme.of(context).textTheme.headlineMedium,
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final clay = tokens?.clay ?? cs.primary;
+    final ink = tokens?.ink ?? cs.onSurface;
+    final ink2 = tokens?.ink2 ?? cs.onSurfaceVariant;
+    final line = tokens?.line ?? cs.outlineVariant;
+    final paperRaised = tokens?.paperRaised ?? cs.surface;
+    final radius = BorderRadius.circular(tokens?.rLg ?? 16);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: paperRaised,
+        border: Border.fromBorderSide(BorderSide(color: line)),
+        borderRadius: radius,
+      ),
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.menu_book_outlined, color: clay, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'story_hook.insufficient_source_title'.tr(),
+                  style: GoogleFonts.notoSerifTc(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                  ),
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'story_hook.insufficient_source_body'.tr(),
+            style: TextStyle(fontSize: 15, height: 1.65, color: ink2),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: onExplore,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: paperRaised,
+                foregroundColor: ink,
+                side: BorderSide(color: line),
+                shape: RoundedRectangleBorder(borderRadius: radius),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: Text('story_hook.insufficient_source_explore_button'.tr()),
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'story_hook.insufficient_source_body'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-        ),
-        const SizedBox(height: 20),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

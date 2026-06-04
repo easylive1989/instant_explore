@@ -32,8 +32,9 @@
     "fallback_title": "歷史故事",
     "fallback_body": "暫時找不到特定的故事線索，仍然可以直接聽一段這個地方的歷史。",
     "listen_default_button": "直接聽故事",
-    "insufficient_source_title": "這裡沒有故事可講",
-    "insufficient_source_body": "我們在維基百科上找不到這個景點的歷史人物或事件記錄。請挑選其他景點試試。"
+    "insufficient_source_title": "這裡還沒有故事可講",
+    "insufficient_source_body": "我們暫時找不到這個景點的歷史人物或事件記錄。換個附近的地標，也許會有意想不到的發現。",
+    "insufficient_source_explore_button": "探索其他地點"
   },
   "narration_style": {
     "brief": "摘要版",
