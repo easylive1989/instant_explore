@@ -20,15 +20,17 @@ Future<T?> showAdaptiveModalBottomSheet<T>({
       context: context,
       builder: (ctx) {
         final colorScheme = Theme.of(context).colorScheme;
-        return SafeArea(
-          top: false,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-            ),
+        // Keep the bottom safe-area padding INSIDE the coloured container so
+        // the surface fills down to the screen edge (under the home
+        // indicator). Wrapping the container in SafeArea instead leaves a
+        // gap there that shows the dimmed page behind as a grey block.
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            top: false,
             child: Material(color: Colors.transparent, child: builder(ctx)),
           ),
         );
@@ -38,6 +40,7 @@ Future<T?> showAdaptiveModalBottomSheet<T>({
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
