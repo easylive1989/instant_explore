@@ -299,7 +299,16 @@ class _SearchField extends StatelessWidget {
               textInputAction: TextInputAction.search,
               style: Theme.of(context).textTheme.bodyLarge,
               cursorColor: colorScheme.primary,
-              decoration: InputDecoration.collapsed(
+              // The field carries its own pill container, so it must fully
+              // opt out of the global outlined+filled inputDecorationTheme —
+              // `collapsed` still inherits enabledBorder/focusedBorder/fill.
+              decoration: InputDecoration(
+                isCollapsed: true,
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
                 hintText: 'explore.search_hint'.tr(),
                 hintStyle: Theme.of(
                   context,

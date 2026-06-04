@@ -152,9 +152,19 @@ class _TripEditScreenState extends ConsumerState<TripEditScreen> {
                 fontSize: 17,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
+              // The field sits inside _FieldBox, so it must fully opt out of
+              // the global outlined+filled inputDecorationTheme. Clearing only
+              // `border` leaves enabledBorder/focusedBorder (and the fill)
+              // drawing a nested box.
               decoration: InputDecoration(
                 isDense: true,
+                filled: false,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 hintText: 'trip.name_hint'.tr(),
                 hintStyle: TextStyle(
