@@ -161,6 +161,28 @@ export function Inspector({
           />
         </div>
 
+        {!isFeatureGraphic && (
+          <div className="space-y-1.5">
+            <div className="flex items-baseline justify-between">
+              <Label className="text-xs">Headline size</Label>
+              <span className="text-[10px] text-muted-foreground">
+                {Math.round((slide.headlineScale ?? 1) * 100)}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0.8}
+              max={1.5}
+              step={0.02}
+              value={slide.headlineScale ?? 1}
+              onChange={(e) =>
+                onChange({ headlineScale: Number(e.target.value) })
+              }
+              className="w-full accent-foreground"
+            />
+          </div>
+        )}
+
         {!isFeatureGraphic && !isNoDevice && (
           <div className="space-y-1.5">
             <Label className="text-xs">

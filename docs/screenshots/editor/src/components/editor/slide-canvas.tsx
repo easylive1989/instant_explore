@@ -260,8 +260,29 @@ function Caption({
   // colorized in coral on its own line, underlined by a hand-drawn squiggle.
   if (slide.style === "retro") {
     const scriptText = pickText(slide.scriptPhrase, locale);
+    const labelText = pickText(slide.label, locale);
+    const hScale = slide.headlineScale ?? 1;
     return (
       <div style={{ textAlign: "left", position: "relative", width: "100%" }}>
+        {labelText || editable ? (
+          <EditableText
+            value={labelText}
+            editable={editable}
+            onChange={edit?.onLabelChange}
+            onFocus={onFocus}
+            placeholder="LABEL"
+            style={{
+              fontFamily: COOPER_FONT,
+              fontSize: unit * 0.03,
+              fontWeight: 400,
+              letterSpacing: unit * 0.002,
+              color: slide.scriptColor || RETRO_CORAL,
+              textTransform: "uppercase",
+              marginBottom: unit * 0.012,
+              minHeight: unit * 0.032,
+            }}
+          />
+        ) : null}
         <EditableText
           value={pickText(slide.headline, locale)}
           editable={editable}
@@ -271,7 +292,7 @@ function Caption({
           placeholder="Headline goes here"
           style={{
             fontFamily: COOPER_FONT,
-            fontSize: unit * 0.092,
+            fontSize: unit * 0.092 * hScale,
             fontWeight: 400,
             lineHeight: 1.05,
             letterSpacing: "-0.01em",
@@ -282,7 +303,7 @@ function Caption({
           <ScriptAccent
             text={scriptText}
             color={slide.scriptColor || RETRO_CORAL}
-            fontSize={unit * 0.098}
+            fontSize={unit * 0.098 * hScale}
             rotation={0}
             fontFamily={COOPER_FONT}
           />
@@ -930,6 +951,162 @@ function FeatureGraphicCanvas({
   editable?: boolean;
   edit?: EditHandlers;
 }) {
+  // Warm retro variant: cream paper banner with Cooper wordmark, coral tagline
+  // and the rubberhose mascot — matches the retro screenshot deck.
+  if (slide.style === "retro") {
+    const cH = cW * (500 / 1024);
+    const tagline = pickText(slide.headline, locale);
+    const phones = (slide.featureScreenshots || []).filter(Boolean);
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          overflow: "hidden",
+          background: slide.bgColor || "#F4E6CC",
+          display: "flex",
+          alignItems: "center",
+          padding: `0 ${cW * 0.07}px`,
+          color: BROWN,
+        }}
+      >
+        <RetroGrain opacity={0.1} />
+        {phones.length > 0 ? (
+          <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+            {phones.map((src, i) => {
+              const mid = (phones.length - 1) / 2;
+              const offset = i - mid;
+              const isCenter = Math.abs(offset) < 0.5;
+              const phoneW = cW * 0.172;
+              const left = cW * 0.71 + offset * phoneW * 0.62;
+              const top = cH * (isCenter ? 0.085 : 0.155);
+              return (
+                <div
+                  key={`${src}-${i}`}
+                  style={{
+                    position: "absolute",
+                    left,
+                    top,
+                    width: phoneW,
+                    transform: `rotate(${offset * 8}deg) scale(${isCenter ? 1 : 0.92})`,
+                    transformOrigin: "center",
+                    zIndex: isCenter ? 3 : 2,
+                    filter: "drop-shadow(0 10px 22px rgba(92,58,30,0.30))",
+                  }}
+                >
+                  <RetroPhone src={src} />
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            zIndex: 4,
+            maxWidth: phones.length > 0 ? "46%" : "72%",
+          }}
+        >
+          {/* 上標：Icon + eyebrow */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: cW * 0.016,
+              marginBottom: cW * 0.02,
+            }}
+          >
+            {appIcon && img(appIcon) ? (
+              <img
+                src={img(appIcon)}
+                alt=""
+                style={{
+                  width: cW * 0.062,
+                  height: cW * 0.062,
+                  borderRadius: cW * 0.014,
+                  boxShadow: "0 4px 12px rgba(92,58,30,0.30)",
+                  flexShrink: 0,
+                }}
+                draggable={false}
+              />
+            ) : null}
+            {pickText(slide.label, locale) ? (
+              <div
+                style={{
+                  fontFamily: COOPER_FONT,
+                  fontSize: cW * 0.02,
+                  letterSpacing: cW * 0.0025,
+                  textTransform: "uppercase",
+                  whiteSpace: "nowrap",
+                  color: slide.scriptColor || RETRO_CORAL,
+                }}
+              >
+                {pickText(slide.label, locale)}
+              </div>
+            ) : null}
+          </div>
+          {/* 主標：粗體 Lorescape */}
+          <div
+            style={{
+              fontFamily: COOPER_FONT,
+              fontSize: cW * 0.082,
+              fontWeight: 900,
+              lineHeight: 0.96,
+              letterSpacing: "-0.015em",
+              color: BROWN,
+            }}
+          >
+            {appName || "App"}
+          </div>
+          <svg
+            aria-hidden
+            viewBox="0 0 200 12"
+            width={cW * 0.22}
+            height={cW * 0.0132}
+            style={{ display: "block", marginTop: cW * 0.005 }}
+          >
+            <path
+              d="M2 8 Q 27 1, 52 7 T 102 7 T 152 6 T 198 6"
+              fill="none"
+              stroke={slide.scriptColor || RETRO_CORAL}
+              strokeWidth="3.4"
+              strokeLinecap="round"
+            />
+          </svg>
+          {/* 下標：tagline */}
+          <EditableText
+            value={tagline}
+            editable={editable}
+            multiline
+            onChange={edit?.onHeadlineChange}
+            placeholder="Your tagline."
+            style={{
+              fontFamily: COOPER_FONT,
+              fontSize: cW * 0.03,
+              color: BROWN,
+              opacity: 0.82,
+              marginTop: cW * 0.018,
+              lineHeight: 1.25,
+            }}
+          />
+        </div>
+        {slide.mascot ? (
+          <Mascot
+            cW={cW}
+            cH={cH}
+            x={slide.mascot.x ?? 0.72}
+            y={slide.mascot.y ?? 0.16}
+            size={slide.mascot.size ?? 0.28}
+            color={slide.mascot.color}
+            flip={slide.mascot.flip}
+          />
+        ) : null}
+      </div>
+    );
+  }
   return (
     <div
       style={{

@@ -76,6 +76,8 @@ export type Slide = {
   onDark?: boolean;           // true → light text/wordmark
   scriptPhrase?: LocalizedText; // the one brush-script accent phrase
   scriptColor?: string;       // accent color (defaults to coral)
+  headlineScale?: number;     // per-slide multiplier on the headline font size (1 = default)
+  featureScreenshots?: string[]; // feature-graphic only: phones shown beside the wordmark
   doodleColor?: string;       // doodle ink (defaults from onDark)
   tilt?: number;              // phone rotation in degrees (e.g. -12, 15)
   shadowRgba?: string;        // warm phone drop-shadow rgba, e.g. "8,12,30,0.5"
