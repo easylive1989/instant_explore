@@ -30,7 +30,7 @@
               <div className="hero__place-latin overline" style={{color:"rgba(255,255,255,.8)"}}>{story.latin}</div>
               <div className="hero__cap">
                 <h2>{story.title}</h2>
-                <div className="serif" style={{fontSize:16,opacity:.9,fontStyle:"italic"}}>{story.sub}</div>
+                {!story.audio && <div className="serif" style={{fontSize:16,opacity:.9,fontStyle:"italic"}}>{story.sub}</div>}
               </div>
             </div>
             <div className="reader__body" style={{paddingBottom: story.audio?120:48}}>
