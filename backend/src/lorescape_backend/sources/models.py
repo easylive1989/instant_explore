@@ -4,7 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-Provider = Literal["wikipedia_zh", "wikipedia_en", "wikidata_facts"]
+Provider = Literal[
+    "wikipedia_zh",
+    "wikipedia_en",
+    "wikidata_facts",
+    "perplexica_web",
+]
 
 
 @dataclass(frozen=True)
