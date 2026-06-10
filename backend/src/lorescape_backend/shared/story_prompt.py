@@ -81,12 +81,20 @@ _EXAMPLE_EN = (
 )
 
 
-def build_story_system_instruction(language: str) -> str:
+def build_story_system_instruction(
+    language: str, *, web_search: bool = False
+) -> str:
     """System instruction enforcing the story-spine + fact constraint.
 
     The instruction is bilingual-aware: while the rule text is in
     English (so the model parses it reliably), it explicitly names the
     output language and embeds a language-appropriate positive example.
+
+    With `web_search=True` the fact boundary widens to include the
+    model's own Google Search results, with the supplied
+    Wikipedia/Wikidata materials kept as the authoritative anchor.
+    The default output is byte-identical to the pre-web-search prompt
+    (daily_story depends on that).
     """
     language_name = LANGUAGE_NAMES[language]  # KeyError on unknown — intentional
     if language == "zh-TW":
@@ -106,14 +114,39 @@ def build_story_system_instruction(language: str) -> str:
             "- Em-dash uses the standard em-dash —."
         )
 
+    if web_search:
+        grounding_clause = (
+            "grounded STRICTLY in the source materials supplied by the "
+            "user and in the results of your own web search."
+        )
+        web_block = (
+            "\n"
+            "WEB SEARCH:\n"
+            "- Use the google_search tool to research this place (its "
+            "history, named people, recorded events) BEFORE writing.\n"
+            "- The supplied Wikipedia/Wikidata materials are "
+            "authoritative anchors; when web results conflict with "
+            "them, prefer the supplied materials.\n"
+            "- Only use web facts attributable to a credible page; omit "
+            "anything that appears on a single dubious source.\n"
+        )
+        fact_source = "the source materials or your web search results"
+    else:
+        grounding_clause = (
+            "grounded STRICTLY in the Wikipedia extract supplied by the "
+            "user."
+        )
+        web_block = ""
+        fact_source = "the source material"
+
     return (
         "You are a historian and a storyteller. Your task is to write a "
-        "true short story about a real landmark, grounded STRICTLY in "
-        "the Wikipedia extract supplied by the user.\n"
+        f"true short story about a real landmark, {grounding_clause}\n"
+        f"{web_block}"
         "\n"
         "FACT BOUNDARY (absolute):\n"
         "- Do NOT introduce any person, event, date, or quote that is not "
-        "in the source material. If the source is silent on a detail, "
+        f"in {fact_source}. If the source is silent on a detail, "
         "omit it rather than invent.\n"
         "- If the source is too thin to support a 3-paragraph story "
         "with a real protagonist or event, return the structured field "
@@ -176,6 +209,7 @@ def build_story_user_prompt(
     zh = _find_extract(source_bundle, "wikipedia_zh")
     en = _find_extract(source_bundle, "wikipedia_en")
     facts = _find_extract(source_bundle, "wikidata_facts")
+    web = _find_extract(source_bundle, "perplexica_web")
 
     if zh is not None:
         lines += [
@@ -199,6 +233,16 @@ def build_story_user_prompt(
             "[3] Structured facts (Wikidata)",
             facts.text,
         ]
+    if web is not None:
+        lines += [
+            "",
+            "[4] Web research (Perplexica — supplementary, LOWER authority "
+            "than Wikipedia/Wikidata; web-sourced and may be unreliable, "
+            "cross-check before relying on it)",
+            "<<<",
+            web.text,
+            ">>>",
+        ]
 
     lines += [
         "",
@@ -206,6 +250,7 @@ def build_story_user_prompt(
         "- Prefer concrete facts (years, named entities, events) from the sources above.",
         "- If sources are in a different language than the output, translate facts; do NOT invent.",
         "- Treat structured facts as ground truth even if Wiki extracts are short.",
+        "- Wikipedia/Wikidata are authoritative; treat [4] web research as supplementary only — do NOT introduce a person/event/date that appears ONLY in [4] unless it is clearly corroborated.",
         "- If you cannot find at least one named entity (person/year/event) to ground the story, return insufficient_source=true.",
     ]
 

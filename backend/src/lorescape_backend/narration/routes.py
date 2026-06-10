@@ -37,7 +37,9 @@ def post_hooks(
     """Return 2-3 narrative angles for the given place."""
     try:
         return service.generate_hooks(
-            api_key=config.gemini_api_key, request=request
+            api_key=config.gemini_api_key,
+            request=request,
+            web_search=config.narration_web_search_enabled,
         )
     except service.UnsupportedLanguageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -66,7 +68,9 @@ def post_narration(
 
     try:
         result = service.generate_narration(
-            api_key=config.gemini_api_key, request=request
+            api_key=config.gemini_api_key,
+            request=request,
+            web_search=config.narration_web_search_enabled,
         )
     except service.UnsupportedLanguageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

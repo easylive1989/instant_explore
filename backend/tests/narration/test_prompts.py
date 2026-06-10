@@ -145,3 +145,51 @@ def test_hooks_user_prompt_carries_extract():
     )
     assert "艾菲爾鐵塔" in prompt
     assert "Built in 1889..." in prompt
+
+
+# ---------- web_search (grounded) variants ----------
+
+
+def test_web_search_system_instruction_mentions_google_search_tool():
+    base = prompts.narration_system_instruction("en")
+    grounded = prompts.narration_system_instruction("en", web_search=True)
+    assert "google_search" not in base
+    assert "google_search" in grounded
+    assert "authoritative anchors" in grounded
+
+
+def test_web_search_default_system_instruction_unchanged():
+    assert prompts.narration_system_instruction(
+        "zh-TW"
+    ) == prompts.narration_system_instruction("zh-TW", web_search=False)
+
+
+def test_web_search_narration_prompt_appends_json_shape():
+    bundle = _bundle_en("Some extract about the park.")
+    base = prompts.build_narration_user_prompt(
+        place_name="Macaron Park", location="Taoyuan",
+        source_bundle=bundle, language="en",
+    )
+    grounded = prompts.build_narration_user_prompt(
+        place_name="Macaron Park", location="Taoyuan",
+        source_bundle=bundle, language="en", web_search=True,
+    )
+    assert '"insufficient_source": false' not in base
+    assert grounded.startswith(base)
+    assert '"paragraphs": ["...", "...", "..."]' in grounded
+    assert "no markdown fence" in grounded
+
+
+def test_web_search_hooks_instruction_and_prompt():
+    bundle = _bundle_en("Some extract about the park.")
+    grounded_sys = prompts.hooks_system_instruction("en", web_search=True)
+    assert "google_search" in grounded_sys
+    base = prompts.build_hooks_user_prompt(
+        place_name="Macaron Park", location="Taoyuan", source_bundle=bundle,
+    )
+    grounded = prompts.build_hooks_user_prompt(
+        place_name="Macaron Park", location="Taoyuan",
+        source_bundle=bundle, web_search=True,
+    )
+    assert grounded.startswith(base)
+    assert '"hooks": [{"id": "...", "title": "...", "teaser": "..."}]' in grounded

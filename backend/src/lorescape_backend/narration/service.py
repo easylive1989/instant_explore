@@ -51,23 +51,45 @@ def _resolve_bundle(request) -> SourceBundle:
     return legacy_single_source_bundle(title=request.wikipedia_title)
 
 
-def generate_hooks(*, api_key: str, request: HooksRequest) -> HooksResponse:
-    """Surface 2-3 narrative angles for the request's place."""
+def generate_hooks(
+    *, api_key: str, request: HooksRequest, web_search: bool = True
+) -> HooksResponse:
+    """Surface 2-3 narrative angles for the request's place.
+
+    With `web_search=True` (default) Gemini researches the place via
+    Google Search grounding, so a thin Wikipedia bundle no longer
+    short-circuits — the web can rescue it, and the model's own
+    `insufficient_source` remains the final defence. `web_search=False`
+    restores the legacy behaviour entirely (kill-switch).
+    """
     _validate_language(request.language)
     bundle = _resolve_bundle(request)
     if not bundle.is_sufficient:
         logger.info(
-            "narration.pre_gemini_gate", extra={"wikidata_id": bundle.wikidata_id},
+            "narration.pre_gemini_gate",
+            extra={
+                "wikidata_id": bundle.wikidata_id,
+                "web_search": web_search,
+            },
         )
-        return HooksResponse(hooks=[], insufficient_source=True)
+        if not web_search:
+            return HooksResponse(hooks=[], insufficient_source=True)
 
-    payload = gemini_client.generate_structured(
+    generate = (
+        gemini_client.generate_grounded
+        if web_search
+        else gemini_client.generate_structured
+    )
+    payload = generate(
         api_key=api_key,
-        system_instruction=prompts.hooks_system_instruction(request.language),
+        system_instruction=prompts.hooks_system_instruction(
+            request.language, web_search=web_search
+        ),
         user_prompt=prompts.build_hooks_user_prompt(
             place_name=request.place_name,
             location=request.location,
             source_bundle=bundle,
+            web_search=web_search,
         ),
         response_schema=prompts.hooks_response_schema(request.language),
     )
@@ -79,38 +101,55 @@ def generate_hooks(*, api_key: str, request: HooksRequest) -> HooksResponse:
 
 
 def generate_narration(
-    *, api_key: str, request: NarrationRequest
+    *, api_key: str, request: NarrationRequest, web_search: bool = True
 ) -> NarrationResponse:
-    """Generate the long-form 3-paragraph story for `request`."""
+    """Generate the long-form 3-paragraph story for `request`.
+
+    See `generate_hooks` for the `web_search` semantics (grounded by
+    default; False restores the legacy gate + structured-only path).
+    """
     _validate_language(request.language)
     bundle = _resolve_bundle(request)
     if not bundle.is_sufficient:
         logger.info(
-            "narration.pre_gemini_gate", extra={"wikidata_id": bundle.wikidata_id},
+            "narration.pre_gemini_gate",
+            extra={
+                "wikidata_id": bundle.wikidata_id,
+                "web_search": web_search,
+            },
         )
-        return NarrationResponse(
-            place_name=request.place_name,
-            location=request.location,
-            era="",
-            paragraphs=[],
-            pull_quote="",
-            insufficient_source=True,
-        )
+        if not web_search:
+            return NarrationResponse(
+                place_name=request.place_name,
+                location=request.location,
+                era="",
+                paragraphs=[],
+                pull_quote="",
+                insufficient_source=True,
+            )
 
     hook = (
         StoryHook(title=request.hook.title, teaser=request.hook.teaser)
         if request.hook is not None
         else None
     )
-    payload = gemini_client.generate_structured(
+    generate = (
+        gemini_client.generate_grounded
+        if web_search
+        else gemini_client.generate_structured
+    )
+    payload = generate(
         api_key=api_key,
-        system_instruction=prompts.narration_system_instruction(request.language),
+        system_instruction=prompts.narration_system_instruction(
+            request.language, web_search=web_search
+        ),
         user_prompt=prompts.build_narration_user_prompt(
             place_name=request.place_name,
             location=request.location,
             source_bundle=bundle,
             language=request.language,
             hook=hook,
+            web_search=web_search,
         ),
         response_schema=prompts.narration_response_schema(request.language),
     )
@@ -120,9 +159,9 @@ def generate_narration(
     # in-prompt example).
     raw_paragraphs = payload.get("paragraphs", []) if not insufficient else []
     return NarrationResponse(
-        place_name=payload["place_name"],
-        location=payload["place_location"],
-        era=payload["era"],
+        place_name=payload.get("place_name") or request.place_name,
+        location=payload.get("place_location") or request.location,
+        era=payload.get("era", ""),
         paragraphs=list(raw_paragraphs),
         pull_quote=payload.get("pull_quote", "") if not insufficient else "",
         insufficient_source=insufficient,
