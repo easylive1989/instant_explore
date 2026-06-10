@@ -5,10 +5,10 @@
 
 /// Master switch for the app download CTAs across the landing page.
 ///
-/// Temporarily set to `false` to hide every "下載 App" / store button while
-/// the apps are not yet publicly available. Flip back to `true` to restore
-/// all download links at once.
-export const showDownloadLinks = false;
+/// `true` shows every "下載 App" / store button (Navbar, Hero, FinalCTA,
+/// Footer). Set to `false` to hide them all at once, e.g. while a release
+/// is pulled from the stores.
+export const showDownloadLinks = true;
 
 export type DownloadPlatform = "ios" | "android";
 
