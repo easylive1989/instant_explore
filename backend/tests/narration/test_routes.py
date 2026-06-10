@@ -272,8 +272,18 @@ def test_narration_consumes_quota_for_free_user_on_success(gen_narration):
     assert usage.consume_count == 1
 
 
-def test_narration_returns_402_when_free_quota_exhausted():
-    usage = _FakeUsage(used=1)  # DAILY_FREE_LIMIT is 1
+@patch("lorescape_backend.narration.routes.service.generate_narration")
+def test_narration_unlimited_for_free_users(gen_narration):
+    """The daily free quota was removed: heavy past usage must not 402."""
+    gen_narration.return_value = NarrationResponse(
+        place_name="P",
+        location="L",
+        era="modern",
+        paragraphs=["a", "b", "c"],
+        pull_quote="q",
+        insufficient_source=False,
+    )
+    usage = _FakeUsage(used=99)  # way past the old DAILY_FREE_LIMIT of 1
     client = TestClient(_make_app(usage=usage))
 
     res = client.post(
@@ -281,8 +291,8 @@ def test_narration_returns_402_when_free_quota_exhausted():
         json={"wikidata_id": "Q1", "place_name": "P", "language": "en"},
     )
 
-    assert res.status_code == 402
-    assert usage.consume_count == 0
+    assert res.status_code == 200
+    assert usage.consume_count == 1  # usage is still recorded
 
 
 @patch("lorescape_backend.narration.routes.service.generate_narration")

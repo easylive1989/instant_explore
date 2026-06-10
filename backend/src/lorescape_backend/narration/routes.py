@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 
 from lorescape_backend.auth import AuthedUser, require_user
 from lorescape_backend.config import Config
@@ -20,7 +20,6 @@ from lorescape_backend.subscriptions.dependencies import (
 )
 from lorescape_backend.subscriptions.repository import SubscriptionRepository
 from lorescape_backend.usage.dependencies import get_usage_repository
-from lorescape_backend.usage.policy import has_free_quota
 from lorescape_backend.usage.repository import UsageRepository
 
 logger = logging.getLogger(__name__)
@@ -55,16 +54,12 @@ def post_narration(
 ) -> NarrationResponse:
     """Return the long-form 3-paragraph story for the given place.
 
-    Premium users are unlimited. Free users must have remaining daily quota;
-    the quota is only consumed on a successful generation, so a failed call
-    does not cost the user a narration.
+    Generation is unlimited for everyone — the daily free quota was
+    removed. Non-premium usage is still recorded on success so we keep
+    the data to reason about a future limit, and the app's 402 handling
+    stays dormant should one ever return.
     """
     is_premium = subscriptions.is_subscribed(user.user_id)
-    if not is_premium and not has_free_quota(usage.used_today(user.user_id)):
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED,
-            detail="Daily free quota exhausted",
-        )
 
     try:
         result = service.generate_narration(
