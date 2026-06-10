@@ -38,7 +38,8 @@ def _insufficient_bundle() -> SourceBundle:
 
 
 # ---------------------------------------------------------------------------
-# Pre-existing tests (updated to stub legacy_single_source_bundle)
+# Legacy (web_search=False, kill-switch) path — behaviour must stay identical
+# to the pre-grounding implementation.
 # ---------------------------------------------------------------------------
 
 @patch("lorescape_backend.narration.service.legacy_single_source_bundle")
@@ -55,6 +56,7 @@ def test_generate_hooks_returns_parsed_hooks(gen_mock, bundle_mock):
 
     result = narration_service.generate_hooks(
         api_key="K",
+        web_search=False,
         request=HooksRequest(
             place_name="Arles",
             location="Provence",
@@ -77,6 +79,7 @@ def test_generate_hooks_handles_insufficient_source(gen_mock, bundle_mock):
 
     result = narration_service.generate_hooks(
         api_key="K",
+        web_search=False,
         request=HooksRequest(
             place_name="x", wikipedia_title="x", language="en",
         ),
@@ -111,6 +114,7 @@ def test_generate_narration_returns_parsed_response(gen_mock, bundle_mock):
 
     result = narration_service.generate_narration(
         api_key="K",
+        web_search=False,
         request=NarrationRequest(
             place_name="Arles",
             location="Provence",
@@ -147,6 +151,7 @@ def test_generate_narration_without_hook_invites_self_pick(gen_mock, bundle_mock
 
     narration_service.generate_narration(
         api_key="K",
+        web_search=False,
         request=NarrationRequest(
             place_name="Arles", wikipedia_title="Arles", language="en",
         ),
@@ -182,6 +187,7 @@ def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
 
     result = narration_service.generate_narration(
         api_key="K",
+        web_search=False,
         request=NarrationRequest(
             place_name="Fake", wikipedia_title="Fake", language="zh-TW",
         ),
@@ -227,7 +233,9 @@ def test_generate_narration_with_wikidata_id_invokes_pipeline_and_gemini(monkeyp
         wikidata_id="Q108234567", place_name="馬卡龍公園",
         location="桃園", language="zh-TW",
     )
-    res = narration_service.generate_narration(api_key="k", request=req)
+    res = narration_service.generate_narration(
+        api_key="k", request=req, web_search=False,
+    )
 
     assert len(gemini_calls) == 1
     assert res.insufficient_source is False
@@ -250,7 +258,9 @@ def test_generate_narration_pre_gemini_gate_short_circuits(monkeypatch):
     req = NarrationRequest(
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
-    res = narration_service.generate_narration(api_key="k", request=req)
+    res = narration_service.generate_narration(
+        api_key="k", request=req, web_search=False,
+    )
 
     assert gemini_calls == []  # critical: Gemini NOT called
     assert res.insufficient_source is True
@@ -276,7 +286,9 @@ def test_generate_narration_legacy_title_path_uses_single_source_bundle(monkeypa
         location="Taoyuan", language="en",
     )
     with caplog.at_level("WARNING"):
-        narration_service.generate_narration(api_key="k", request=req)
+        narration_service.generate_narration(
+            api_key="k", request=req, web_search=False,
+        )
 
     assert any("narration.legacy_title_path" in rec.message for rec in caplog.records)
 
@@ -297,7 +309,9 @@ def test_generate_hooks_with_wikidata_id_uses_pipeline(monkeypatch):
     req = HooksRequest(
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
-    res = narration_service.generate_hooks(api_key="k", request=req)
+    res = narration_service.generate_hooks(
+        api_key="k", request=req, web_search=False,
+    )
     assert len(res.hooks) == 1
 
 
@@ -311,8 +325,92 @@ def test_generate_hooks_pre_gemini_gate_short_circuits(monkeypatch):
                         lambda **kw: calls.append(kw) or {})
 
     req = HooksRequest(wikidata_id="Q1", place_name="x", location="y", language="en")
-    res = narration_service.generate_hooks(api_key="k", request=req)
+    res = narration_service.generate_hooks(
+        api_key="k", request=req, web_search=False,
+    )
 
     assert calls == []
     assert res.hooks == []
     assert res.insufficient_source is True
+
+
+# ---------------------------------------------------------------------------
+# Grounded (web_search=True, default) path
+# ---------------------------------------------------------------------------
+
+_NARRATION_PAYLOAD = {
+    "place_name": "Arles", "place_location": "Provence", "era": "1888",
+    "paragraphs": ["a", "b", "c"], "pull_quote": "q",
+    "insufficient_source": False,
+}
+
+
+def test_narration_default_uses_grounded_with_web_prompts(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _sufficient_bundle(),
+    )
+    monkeypatch.setattr(
+        narration_service.gemini_client, "generate_grounded",
+        lambda **kw: calls.append(kw) or _NARRATION_PAYLOAD,
+    )
+
+    req = NarrationRequest(
+        wikidata_id="Q1", place_name="Arles", location="Provence",
+        language="en",
+    )
+    res = narration_service.generate_narration(api_key="k", request=req)
+
+    assert len(calls) == 1
+    assert "google_search" in calls[0]["system_instruction"]
+    assert "OUTPUT FORMAT (STRICT)" in calls[0]["user_prompt"]
+    assert calls[0]["response_schema"] is not None
+    assert res.paragraphs == ["a", "b", "c"]
+
+
+def test_narration_thin_bundle_no_longer_short_circuits(monkeypatch):
+    """Web search can rescue thin-Wikipedia places: the gate must NOT
+    short-circuit when web_search is on (the default)."""
+    calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _insufficient_bundle(),
+    )
+    monkeypatch.setattr(
+        narration_service.gemini_client, "generate_grounded",
+        lambda **kw: calls.append(kw) or _NARRATION_PAYLOAD,
+    )
+
+    req = NarrationRequest(
+        wikidata_id="Q1", place_name="x", location="y", language="en",
+    )
+    res = narration_service.generate_narration(api_key="k", request=req)
+
+    assert len(calls) == 1  # grounded Gemini WAS called despite thin wiki
+    assert res.insufficient_source is False
+    assert res.paragraphs == ["a", "b", "c"]
+
+
+def test_hooks_default_uses_grounded_and_thin_bundle_proceeds(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        narration_service, "build_source_bundle",
+        lambda *, wikidata_id, language, place_name: _insufficient_bundle(),
+    )
+    monkeypatch.setattr(
+        narration_service.gemini_client, "generate_grounded",
+        lambda **kw: calls.append(kw) or {
+            "hooks": [{"id": "a", "title": "T", "teaser": "tz"}],
+            "insufficient_source": False,
+        },
+    )
+
+    req = HooksRequest(
+        wikidata_id="Q1", place_name="x", location="y", language="en",
+    )
+    res = narration_service.generate_hooks(api_key="k", request=req)
+
+    assert len(calls) == 1
+    assert "google_search" in calls[0]["system_instruction"]
+    assert len(res.hooks) == 1

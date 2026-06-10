@@ -98,3 +98,16 @@ def test_from_env_raises_when_required_missing(monkeypatch):
 
     with pytest.raises(RuntimeError, match="SUPABASE_URL"):
         Config.from_env()
+
+
+def test_narration_web_search_defaults_on_and_kill_switch(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.delenv("NARRATION_WEB_SEARCH", raising=False)
+    assert Config.from_env().narration_web_search_enabled is True
+
+    for off in ("0", "false", "off", "FALSE"):
+        monkeypatch.setenv("NARRATION_WEB_SEARCH", off)
+        assert Config.from_env().narration_web_search_enabled is False
+
+    monkeypatch.setenv("NARRATION_WEB_SEARCH", "1")
+    assert Config.from_env().narration_web_search_enabled is True

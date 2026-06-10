@@ -38,6 +38,11 @@ class Config:
     revenuecat_webhook_auth_token: str | None = None
     revenuecat_api_key: str | None = None
 
+    # Narration Google-Search grounding. Disabling restores the legacy
+    # Wikipedia-only behaviour (kill-switch for grounding-quota
+    # emergencies). Env: NARRATION_WEB_SEARCH=0/false to disable.
+    narration_web_search_enabled: bool = True
+
     @classmethod
     def from_env(cls) -> "Config":
         def required(name: str) -> str:
@@ -70,6 +75,12 @@ class Config:
                 "REVENUECAT_WEBHOOK_AUTH_TOKEN"
             ),
             revenuecat_api_key=optional("REVENUECAT_API_KEY"),
+            narration_web_search_enabled=(
+                (os.environ.get("NARRATION_WEB_SEARCH") or "1")
+                .strip()
+                .lower()
+                not in ("0", "false", "off")
+            ),
         )
 
     @property

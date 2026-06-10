@@ -46,9 +46,11 @@ _NARRATION_REQUIRED = [
 ]
 
 
-def narration_system_instruction(language: str) -> str:
+def narration_system_instruction(
+    language: str, *, web_search: bool = False
+) -> str:
     """The shared story-spine skeleton (reused verbatim)."""
-    return build_story_system_instruction(language)
+    return build_story_system_instruction(language, web_search=web_search)
 
 
 def narration_response_schema(language: str) -> dict:
@@ -61,6 +63,24 @@ def narration_response_schema(language: str) -> dict:
     }
 
 
+# Grounded calls cannot use response_schema (API rejects tools + schema
+# together), so the exact JSON shape must be spelled out in the prompt.
+_NARRATION_JSON_SHAPE = (
+    "OUTPUT FORMAT (STRICT): your entire reply MUST be exactly one JSON "
+    "object — no markdown fence, no text before or after it:\n"
+    '{"place_name": "...", "place_location": "...", "era": "...", '
+    '"paragraphs": ["...", "...", "..."], "pull_quote": "...", '
+    '"insufficient_source": false}'
+)
+
+_HOOKS_JSON_SHAPE = (
+    "OUTPUT FORMAT (STRICT): your entire reply MUST be exactly one JSON "
+    "object — no markdown fence, no text before or after it:\n"
+    '{"hooks": [{"id": "...", "title": "...", "teaser": "..."}], '
+    '"insufficient_source": false}'
+)
+
+
 def build_narration_user_prompt(
     *,
     place_name: str,
@@ -68,6 +88,7 @@ def build_narration_user_prompt(
     source_bundle: "SourceBundle",
     language: str,
     hook: StoryHook | None = None,
+    web_search: bool = False,
 ) -> str:
     """Story user prompt + narration-specific output spec tail."""
     if language not in LANGUAGE_NAMES:
@@ -77,7 +98,10 @@ def build_narration_user_prompt(
         source_bundle=source_bundle, hook=hook,
     )
     tail = _zh_tw_output_spec() if language == "zh-TW" else _en_output_spec()
-    return base + "\n\n" + tail
+    prompt = base + "\n\n" + tail
+    if web_search:
+        prompt += "\n\n" + _NARRATION_JSON_SHAPE
+    return prompt
 
 
 def _en_output_spec() -> str:
@@ -141,12 +165,16 @@ _HOOKS_PROPERTIES: dict = {
 _HOOKS_REQUIRED = ["hooks", "insufficient_source"]
 
 
-def hooks_system_instruction(language: str) -> str:
+def hooks_system_instruction(
+    language: str, *, web_search: bool = False
+) -> str:
     """A standalone system instruction for the hook-discovery call.
 
     The hook task is more like research than storytelling, so we don't
     reuse the full story-spine prompt. We DO inherit the fact-boundary
     rule so the LLM doesn't invent angles unsupported by the source.
+    With `web_search=True` angles may also be grounded in the model's
+    own Google Search results.
     """
     language_name = LANGUAGE_NAMES[language]
     if language == "zh-TW":
@@ -174,16 +202,41 @@ def hooks_system_instruction(language: str) -> str:
             "- teaser is a one-sentence cliffhanger, max 60 chars."
         )
 
+    if web_search:
+        research_clause = (
+            "Given the source materials below AND your own research "
+            "with the google_search tool, surface 2-3 DISTINCT "
+            "narrative angles a storyteller could develop — each "
+            "grounded in a real named person or recorded event found "
+            "in the materials or in credible search results.\n"
+        )
+        boundary_clause = (
+            "FACT BOUNDARY (absolute): every angle must be grounded in "
+            "the supplied materials or your web search results from "
+            "credible pages; do NOT invent. The supplied "
+            "Wikipedia/Wikidata materials are authoritative anchors. "
+            "If you cannot ground 2 distinct angles, return an empty "
+            "`hooks` array and set `insufficient_source` to true.\n"
+        )
+    else:
+        research_clause = (
+            "Given the Wikipedia extract below, surface 2-3 DISTINCT "
+            "narrative angles a storyteller could develop — each "
+            "grounded in a real named person or recorded event in the "
+            "source.\n"
+        )
+        boundary_clause = (
+            "FACT BOUNDARY (absolute): do NOT propose angles that "
+            "require facts outside the source. If the source supports "
+            "fewer than 2 distinct angles, return an empty `hooks` "
+            "array and set `insufficient_source` to true.\n"
+        )
+
     return (
-        "You are a historical researcher. Given the Wikipedia extract "
-        "below, surface 2-3 DISTINCT narrative angles a storyteller "
-        "could develop — each grounded in a real named person or "
-        "recorded event in the source.\n"
+        "You are a historical researcher. "
+        f"{research_clause}"
         "\n"
-        "FACT BOUNDARY (absolute): do NOT propose angles that require "
-        "facts outside the source. If the source supports fewer than 2 "
-        "distinct angles, return an empty `hooks` array and set "
-        "`insufficient_source` to true.\n"
+        f"{boundary_clause}"
         "\n"
         f"OUTPUT LANGUAGE: {language_name}.\n"
         f"{constraint_hint}\n"
@@ -210,8 +263,12 @@ def build_hooks_user_prompt(
     place_name: str,
     location: str,
     source_bundle: "SourceBundle",
+    web_search: bool = False,
 ) -> str:
-    return build_story_user_prompt(
+    prompt = build_story_user_prompt(
         place_name=place_name, location=location,
         source_bundle=source_bundle, hook=None,
     )
+    if web_search:
+        prompt += "\n\n" + _HOOKS_JSON_SHAPE
+    return prompt
