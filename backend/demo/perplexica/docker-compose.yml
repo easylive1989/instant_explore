@@ -1,0 +1,50 @@
+# Local-only stack for the Perplexica narration-augmentation spike.
+# NOT part of the production deployment (backend/docker-compose.yml).
+#
+#   cd backend/demo/perplexica
+#   cp .env.example .env   # then fill ENCRYPTION_KEY (see README)
+#   docker compose up -d
+#
+# Then do the one-time manual setup in README.md (freellmapi dashboard +
+# Perplexica custom-OpenAI provider) before running scripts/perplexica_demo.py.
+
+services:
+  freellmapi:
+    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    container_name: freellmapi
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      # Generate once with: openssl rand -hex 32
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
+      PORT: "3001"
+    volumes:
+      - freellmapi-data:/app/data
+
+  perplexica:
+    image: itzcrazykns1337/vane:latest
+    container_name: perplexica
+    restart: unless-stopped
+    depends_on:
+      - freellmapi
+    # Next.js standalone binds to $HOSTNAME, which Docker auto-sets to the
+    # container ID — that makes the app unreachable through the published
+    # port. Force 0.0.0.0 so `ports:` forwarding actually reaches it.
+    environment:
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "3000:3000"
+      # Bundled SearXNG, exposed for the direct SearXNG→Gemini comparison
+      # (scripts/source_quality_compare.py approach C).
+      - "8081:8080"
+    # Lets the Perplexica container reach freellmapi on the host at
+    # http://host.docker.internal:3001/v1 (configured via the UI).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - perplexica-data:/home/vane/data
+
+volumes:
+  freellmapi-data:
+  perplexica-data:
