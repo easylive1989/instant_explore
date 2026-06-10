@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from lorescape_backend.auth import AuthedUser, require_user
 from lorescape_backend.config import Config
@@ -19,8 +19,6 @@ from lorescape_backend.subscriptions.dependencies import (
     get_subscription_repository,
 )
 from lorescape_backend.subscriptions.repository import SubscriptionRepository
-from lorescape_backend.usage.dependencies import get_usage_repository
-from lorescape_backend.usage.repository import UsageRepository
 
 logger = logging.getLogger(__name__)
 
@@ -50,26 +48,24 @@ def post_narration(
     config: Config = Depends(get_config),
     user: AuthedUser = Depends(require_user),
     subscriptions: SubscriptionRepository = Depends(get_subscription_repository),
-    usage: UsageRepository = Depends(get_usage_repository),
 ) -> NarrationResponse:
     """Return the long-form 3-paragraph story for the given place.
 
-    Generation is unlimited for everyone — the daily free quota was
-    removed. Non-premium usage is still recorded on success so we keep
-    the data to reason about a future limit, and the app's 402 handling
-    stays dormant should one ever return.
+    Subscribers only. Hooks stay free for everyone (the upsell funnel:
+    browse angles freely, subscribe to read the full story). 402 is the
+    signal the App already routes to the paywall.
     """
-    is_premium = subscriptions.is_subscribed(user.user_id)
+    if not subscriptions.is_subscribed(user.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Subscription required",
+        )
 
     try:
-        result = service.generate_narration(
+        return service.generate_narration(
             api_key=config.gemini_api_key,
             request=request,
             web_search=config.narration_web_search_enabled,
         )
     except service.UnsupportedLanguageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    if not is_premium:
-        usage.consume(user.user_id)
-    return result

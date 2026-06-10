@@ -14,7 +14,6 @@ from lorescape_backend.narration.routes import get_config, router
 from lorescape_backend.subscriptions.dependencies import (
     get_subscription_repository,
 )
-from lorescape_backend.usage.dependencies import get_usage_repository
 
 
 def _fake_config() -> Config:
@@ -43,23 +42,8 @@ class _FakeSubscriptions:
         return self._subscribed
 
 
-class _FakeUsage:
-    def __init__(self, used: int = 0) -> None:
-        self.used = used
-        self.consume_count = 0
-
-    def used_today(self, _user_id: str) -> int:
-        return self.used
-
-    def consume(self, _user_id: str) -> int:
-        self.consume_count += 1
-        self.used += 1
-        return self.used
-
-
 def _make_app(
     subscriptions: _FakeSubscriptions | None = None,
-    usage: _FakeUsage | None = None,
 ) -> FastAPI:
     app = FastAPI()
     app.include_router(router)
@@ -70,10 +54,12 @@ def _make_app(
     app.dependency_overrides[get_subscription_repository] = (
         lambda: subscriptions or _FakeSubscriptions()
     )
-    app.dependency_overrides[get_usage_repository] = (
-        lambda: usage or _FakeUsage()
-    )
     return app
+
+
+def _subscriber_app() -> FastAPI:
+    """App where the authed user has an active subscription."""
+    return _make_app(subscriptions=_FakeSubscriptions(subscribed=True))
 
 
 @patch("lorescape_backend.narration.routes.service.generate_hooks")
@@ -112,7 +98,7 @@ def test_post_narration_returns_payload(gen_narration):
         pull_quote="",
         insufficient_source=False,
     )
-    client = TestClient(_make_app())
+    client = TestClient(_subscriber_app())
 
     response = client.post(
         "/narration",
@@ -146,7 +132,7 @@ def test_post_hooks_rejects_unsupported_language():
 
 
 def test_post_narration_rejects_unsupported_language():
-    client = TestClient(_make_app())
+    client = TestClient(_subscriber_app())
     response = client.post(
         "/narration",
         json={
@@ -168,7 +154,7 @@ def test_narration_route_accepts_wikidata_id(gen_narration):
         pull_quote="x",
         insufficient_source=False,
     )
-    client = TestClient(_make_app())
+    client = TestClient(_subscriber_app())
 
     res = client.post(
         "/narration",
@@ -192,7 +178,7 @@ def test_narration_route_accepts_legacy_wikipedia_title(gen_narration):
         pull_quote="x",
         insufficient_source=False,
     )
-    client = TestClient(_make_app())
+    client = TestClient(_subscriber_app())
 
     res = client.post(
         "/narration",
@@ -235,7 +221,6 @@ def test_narration_route_401_without_bearer_token():
     app.dependency_overrides[get_config] = _fake_config
     app.dependency_overrides[get_token_verifier] = lambda: _NeverVerifier()
     app.dependency_overrides[get_subscription_repository] = _FakeSubscriptions
-    app.dependency_overrides[get_usage_repository] = _FakeUsage
     client = TestClient(app)
 
     res = client.post(
@@ -251,30 +236,22 @@ def test_narration_route_401_without_bearer_token():
 
 
 @patch("lorescape_backend.narration.routes.service.generate_narration")
-def test_narration_consumes_quota_for_free_user_on_success(gen_narration):
-    gen_narration.return_value = NarrationResponse(
-        place_name="P",
-        location="L",
-        era="modern",
-        paragraphs=["a", "b", "c"],
-        pull_quote="q",
-        insufficient_source=False,
-    )
-    usage = _FakeUsage(used=0)
-    client = TestClient(_make_app(usage=usage))
+def test_narration_returns_402_for_free_user(gen_narration):
+    """/narration is subscribers-only: free users get 402 (paywall signal)
+    and Gemini must NOT be called."""
+    client = TestClient(_make_app())  # default: not subscribed
 
     res = client.post(
         "/narration",
         json={"wikidata_id": "Q1", "place_name": "P", "language": "en"},
     )
 
-    assert res.status_code == 200
-    assert usage.consume_count == 1
+    assert res.status_code == 402
+    gen_narration.assert_not_called()
 
 
 @patch("lorescape_backend.narration.routes.service.generate_narration")
-def test_narration_unlimited_for_free_users(gen_narration):
-    """The daily free quota was removed: heavy past usage must not 402."""
+def test_premium_user_can_generate(gen_narration):
     gen_narration.return_value = NarrationResponse(
         place_name="P",
         location="L",
@@ -283,8 +260,7 @@ def test_narration_unlimited_for_free_users(gen_narration):
         pull_quote="q",
         insufficient_source=False,
     )
-    usage = _FakeUsage(used=99)  # way past the old DAILY_FREE_LIMIT of 1
-    client = TestClient(_make_app(usage=usage))
+    client = TestClient(_subscriber_app())
 
     res = client.post(
         "/narration",
@@ -292,42 +268,20 @@ def test_narration_unlimited_for_free_users(gen_narration):
     )
 
     assert res.status_code == 200
-    assert usage.consume_count == 1  # usage is still recorded
 
 
-@patch("lorescape_backend.narration.routes.service.generate_narration")
-def test_premium_user_bypasses_quota_without_consuming(gen_narration):
-    gen_narration.return_value = NarrationResponse(
-        place_name="P",
-        location="L",
-        era="modern",
-        paragraphs=["a", "b", "c"],
-        pull_quote="q",
+@patch("lorescape_backend.narration.routes.service.generate_hooks")
+def test_hooks_stay_free_for_unsubscribed_users(gen_hooks):
+    """/narration/hooks has no subscription gate — the upsell funnel."""
+    gen_hooks.return_value = HooksResponse(
+        hooks=[HookItem(id="h1", title="T", teaser="t")],
         insufficient_source=False,
     )
-    usage = _FakeUsage(used=99)  # well over the limit
-    client = TestClient(
-        _make_app(subscriptions=_FakeSubscriptions(subscribed=True), usage=usage)
-    )
+    client = TestClient(_make_app())  # not subscribed
 
     res = client.post(
-        "/narration",
+        "/narration/hooks",
         json={"wikidata_id": "Q1", "place_name": "P", "language": "en"},
     )
 
     assert res.status_code == 200
-    assert usage.consume_count == 0
-
-
-def test_failed_generation_does_not_consume_quota():
-    usage = _FakeUsage(used=0)
-    client = TestClient(_make_app(usage=usage))
-
-    # Unsupported language makes the service raise → 400, before consume.
-    res = client.post(
-        "/narration",
-        json={"wikidata_id": "Q1", "place_name": "P", "language": "ja"},
-    )
-
-    assert res.status_code == 400
-    assert usage.consume_count == 0
