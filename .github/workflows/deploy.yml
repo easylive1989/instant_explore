@@ -287,8 +287,26 @@ jobs:
         with:
           ref: master
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: landing/package-lock.json
+
+      - name: Install dependencies
+        working-directory: landing
+        # Retry transient registry failures (ECONNRESET / network aborted)
+        # instead of failing the whole deploy on a single flaky download.
+        run: >-
+          npm ci --no-audit --no-fund
+          --fetch-retries=5
+          --fetch-retry-mintimeout=20000
+          --fetch-retry-maxtimeout=120000
+
       - name: Build landing
-        run: cd landing && npm ci && npm run build
+        working-directory: landing
+        run: npm run build
 
       - name: Deploy to Firebase Hosting (live)
         uses: FirebaseExtended/action-hosting-deploy@v0
