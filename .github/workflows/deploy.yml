@@ -277,50 +277,13 @@ jobs:
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore.mobileprovision
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore_ShareExtension.mobileprovision
 
-  # 部署 Landing 到 Firebase Hosting（正式站）
-  deploy-landing:
-    name: Deploy Landing to Firebase Hosting
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: master
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: landing/package-lock.json
-
-      - name: Install dependencies
-        working-directory: landing
-        # Retry transient registry failures (ECONNRESET / network aborted)
-        # instead of failing the whole deploy on a single flaky download.
-        run: >-
-          npm ci --no-audit --no-fund
-          --fetch-retries=5
-          --fetch-retry-mintimeout=20000
-          --fetch-retry-maxtimeout=120000
-
-      - name: Build landing
-        working-directory: landing
-        run: npm run build
-
-      - name: Deploy to Firebase Hosting (live)
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_INSTANT_EXPLORE_7B442 }}
-          channelId: live
-          projectId: instant-explore-7b442
+  # Landing 部署已拆到獨立的 deploy-landing.yml（手動觸發）。
 
   # 建置狀態報告
   deploy-status:
     name: Deploy Status Report
     runs-on: ubuntu-latest
-    needs: [push-supabase-db, deploy-backend, build-android, build-ios, deploy-landing]
+    needs: [push-supabase-db, deploy-backend, build-android, build-ios]
     if: always()
 
     steps:
@@ -331,13 +294,11 @@ jobs:
           echo "- Backend 部署: ${{ needs.deploy-backend.result }}"
           echo "- Android 建置: ${{ needs.build-android.result }}"
           echo "- iOS 建置: ${{ needs.build-ios.result }}"
-          echo "- Landing 部署: ${{ needs.deploy-landing.result }}"
 
           if [ "${{ needs.push-supabase-db.result }}" = "success" ] && \
              [ "${{ needs.deploy-backend.result }}" = "success" ] && \
              [ "${{ needs.build-android.result }}" = "success" ] && \
-             [ "${{ needs.build-ios.result }}" = "success" ] && \
-             [ "${{ needs.deploy-landing.result }}" = "success" ]; then
+             [ "${{ needs.build-ios.result }}" = "success" ]; then
             echo "✅ 所有部署成功完成！"
           else
             echo "❌ 部分部署失敗，請檢查日誌"
