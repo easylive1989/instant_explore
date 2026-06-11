@@ -9,6 +9,13 @@ from lorescape_backend.auth import AuthedUser, require_user
 from lorescape_backend.config import Config
 from lorescape_backend.dependencies import get_config
 from lorescape_backend.narration import service
+from lorescape_backend.narration.cache import (
+    HooksCacheRepository,
+    place_key_for,
+)
+from lorescape_backend.narration.dependencies import (
+    get_hooks_cache_repository,
+)
 from lorescape_backend.narration.models import (
     HooksRequest,
     HooksResponse,
@@ -30,16 +37,31 @@ def post_hooks(
     request: HooksRequest,
     config: Config = Depends(get_config),
     user: AuthedUser = Depends(require_user),
+    cache: HooksCacheRepository = Depends(get_hooks_cache_repository),
 ) -> HooksResponse:
-    """Return 2-3 narrative angles for the given place."""
+    """Return 2-3 narrative angles for the given place.
+
+    Results are cached per (place, language): the first asker pays the
+    Gemini call, everyone after gets the stored hooks. Cache failures
+    never break the endpoint — they just fall back to a fresh
+    generation.
+    """
+    place_key = place_key_for(request)
+    cached = cache.get(place_key, request.language)
+    if cached is not None:
+        return cached
+
     try:
-        return service.generate_hooks(
+        result = service.generate_hooks(
             api_key=config.gemini_api_key,
             request=request,
             web_search=config.narration_web_search_enabled,
         )
     except service.UnsupportedLanguageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    cache.put(place_key, request.language, result)
+    return result
 
 
 @router.post("", response_model=NarrationResponse)
