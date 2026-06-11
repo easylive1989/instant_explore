@@ -10,6 +10,9 @@ from lorescape_backend.narration.models import (
     HooksResponse,
     NarrationResponse,
 )
+from lorescape_backend.narration.dependencies import (
+    get_hooks_cache_repository,
+)
 from lorescape_backend.narration.routes import get_config, router
 from lorescape_backend.subscriptions.dependencies import (
     get_subscription_repository,
@@ -42,8 +45,26 @@ class _FakeSubscriptions:
         return self._subscribed
 
 
+class _FakeHooksCache:
+    """In-memory stand-in for HooksCacheRepository."""
+
+    def __init__(self) -> None:
+        self.store: dict[tuple[str, str], HooksResponse] = {}
+        self.put_calls: int = 0
+
+    def get(self, place_key: str, language: str) -> HooksResponse | None:
+        return self.store.get((place_key, language))
+
+    def put(self, place_key: str, language: str, result: HooksResponse) -> None:
+        self.put_calls += 1
+        if result.insufficient_source or not result.hooks:
+            return
+        self.store[(place_key, language)] = result
+
+
 def _make_app(
     subscriptions: _FakeSubscriptions | None = None,
+    hooks_cache: _FakeHooksCache | None = None,
 ) -> FastAPI:
     app = FastAPI()
     app.include_router(router)
@@ -53,6 +74,9 @@ def _make_app(
     )
     app.dependency_overrides[get_subscription_repository] = (
         lambda: subscriptions or _FakeSubscriptions()
+    )
+    app.dependency_overrides[get_hooks_cache_repository] = (
+        lambda: hooks_cache if hooks_cache is not None else _FakeHooksCache()
     )
     return app
 
@@ -285,3 +309,69 @@ def test_hooks_stay_free_for_unsubscribed_users(gen_hooks):
     )
 
     assert res.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Hooks cache behaviour
+# ---------------------------------------------------------------------------
+
+@patch("lorescape_backend.narration.routes.service.generate_hooks")
+def test_hooks_cache_miss_generates_then_stores(gen_hooks):
+    gen_hooks.return_value = HooksResponse(
+        hooks=[HookItem(id="h1", title="T", teaser="t")],
+        insufficient_source=False,
+    )
+    cache = _FakeHooksCache()
+    client = TestClient(_make_app(hooks_cache=cache))
+
+    res = client.post(
+        "/narration/hooks",
+        json={"wikidata_id": "Q48292", "place_name": "Arles", "language": "en"},
+    )
+
+    assert res.status_code == 200
+    gen_hooks.assert_called_once()
+    assert ("Q48292", "en") in cache.store
+
+
+@patch("lorescape_backend.narration.routes.service.generate_hooks")
+def test_hooks_cache_hit_skips_generation(gen_hooks):
+    cache = _FakeHooksCache()
+    cache.store[("Q48292", "en")] = HooksResponse(
+        hooks=[HookItem(id="cached", title="Cached", teaser="c")],
+        insufficient_source=False,
+    )
+    client = TestClient(_make_app(hooks_cache=cache))
+
+    res = client.post(
+        "/narration/hooks",
+        json={"wikidata_id": "Q48292", "place_name": "Arles", "language": "en"},
+    )
+
+    assert res.status_code == 200
+    assert res.json()["hooks"][0]["id"] == "cached"
+    gen_hooks.assert_not_called()
+
+
+@patch("lorescape_backend.narration.routes.service.generate_hooks")
+def test_hooks_cache_is_language_scoped(gen_hooks):
+    gen_hooks.return_value = HooksResponse(
+        hooks=[HookItem(id="fresh", title="T", teaser="t")],
+        insufficient_source=False,
+    )
+    cache = _FakeHooksCache()
+    cache.store[("Q48292", "en")] = HooksResponse(
+        hooks=[HookItem(id="cached-en", title="C", teaser="c")],
+        insufficient_source=False,
+    )
+    client = TestClient(_make_app(hooks_cache=cache))
+
+    res = client.post(
+        "/narration/hooks",
+        json={
+            "wikidata_id": "Q48292", "place_name": "亞爾", "language": "zh-TW",
+        },
+    )
+
+    assert res.json()["hooks"][0]["id"] == "fresh"  # en cache not reused
+    gen_hooks.assert_called_once()
