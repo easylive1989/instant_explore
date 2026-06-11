@@ -12,6 +12,7 @@ Manual CLIs (preserved for back-fill / debugging):
 """
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from datetime import date
 
@@ -25,6 +26,8 @@ from lorescape_backend.narration.routes import router as narration_router
 from lorescape_backend.social.publisher import run_publish_job
 from lorescape_backend.subscriptions.reconcile import run_reconcile_job
 from lorescape_backend.subscriptions.routes import router as subscriptions_router
+
+logger = logging.getLogger(__name__)
 
 GENERATE_JOB_ID = "daily_story_generate"
 PUBLISH_JOB_ID = "daily_story_publish"
@@ -47,18 +50,24 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
     def _reconcile() -> None:
         run_reconcile_job(config)
 
-    scheduler.add_job(
-        _generate,
-        trigger=CronTrigger(hour=GENERATE_HOUR, minute=0),
-        id=GENERATE_JOB_ID,
-        replace_existing=True,
-    )
-    scheduler.add_job(
-        _publish,
-        trigger=CronTrigger(hour=PUBLISH_HOUR, minute=0),
-        id=PUBLISH_JOB_ID,
-        replace_existing=True,
-    )
+    if config.daily_story_enabled:
+        scheduler.add_job(
+            _generate,
+            trigger=CronTrigger(hour=GENERATE_HOUR, minute=0),
+            id=GENERATE_JOB_ID,
+            replace_existing=True,
+        )
+        scheduler.add_job(
+            _publish,
+            trigger=CronTrigger(hour=PUBLISH_HOUR, minute=0),
+            id=PUBLISH_JOB_ID,
+            replace_existing=True,
+        )
+    else:
+        logger.warning(
+            "daily_story.paused — generate/publish jobs not scheduled "
+            "(DAILY_STORY_ENABLED is off)"
+        )
     if config.revenuecat_reconcile_enabled:
         scheduler.add_job(
             _reconcile,

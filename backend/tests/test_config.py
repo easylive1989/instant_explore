@@ -111,3 +111,15 @@ def test_narration_web_search_defaults_on_and_kill_switch(monkeypatch):
 
     monkeypatch.setenv("NARRATION_WEB_SEARCH", "1")
     assert Config.from_env().narration_web_search_enabled is True
+
+
+def test_daily_story_defaults_on_and_kill_switch(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.delenv("DAILY_STORY_ENABLED", raising=False)
+    assert Config.from_env().daily_story_enabled is True
+
+    monkeypatch.setenv("DAILY_STORY_ENABLED", "0")
+    assert Config.from_env().daily_story_enabled is False
+
+    monkeypatch.setenv("DAILY_STORY_ENABLED", "1")
+    assert Config.from_env().daily_story_enabled is True
