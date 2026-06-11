@@ -104,3 +104,14 @@ def test_publish_job_runs_for_today(mock_run, fake_config):
     args = mock_run.call_args.args
     assert args[0] is fake_config
     assert args[1] == date.today()
+
+
+def test_register_jobs_skips_story_jobs_when_daily_story_disabled(fake_config):
+    config = dataclasses.replace(fake_config, daily_story_enabled=False)
+    scheduler = MagicMock()
+    _register_jobs(scheduler, config)
+
+    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
+    assert GENERATE_JOB_ID not in ids
+    assert PUBLISH_JOB_ID not in ids
+    assert ids == {RECONCILE_JOB_ID}  # reconcile unaffected

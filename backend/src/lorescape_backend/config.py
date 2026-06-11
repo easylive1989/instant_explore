@@ -43,6 +43,11 @@ class Config:
     # emergencies). Env: NARRATION_WEB_SEARCH=0/false to disable.
     narration_web_search_enabled: bool = True
 
+    # Daily story pipeline (08:00 generate + 21:00 publish cron jobs).
+    # Env: DAILY_STORY_ENABLED=0/false to pause both jobs; the 03:00
+    # subscription reconcile and all HTTP APIs are unaffected.
+    daily_story_enabled: bool = True
+
     @classmethod
     def from_env(cls) -> "Config":
         def required(name: str) -> str:
@@ -77,6 +82,12 @@ class Config:
             revenuecat_api_key=optional("REVENUECAT_API_KEY"),
             narration_web_search_enabled=(
                 (os.environ.get("NARRATION_WEB_SEARCH") or "1")
+                .strip()
+                .lower()
+                not in ("0", "false", "off")
+            ),
+            daily_story_enabled=(
+                (os.environ.get("DAILY_STORY_ENABLED") or "1")
                 .strip()
                 .lower()
                 not in ("0", "false", "off")
