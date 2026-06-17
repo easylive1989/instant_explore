@@ -56,3 +56,6 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# Local outputs (generated assets, not tracked)
+outputs/
