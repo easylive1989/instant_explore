@@ -15,7 +15,10 @@ Claude Code session (see .claude/skills/lorescape-manual-daily-story):
        daily_stories (idempotent on publish_date+language) and marks the
        place used. The App shows the newest publish_date immediately —
        there is no review_state gate on the App side — which is why
-       review MUST happen before this step.
+       content review MUST happen before this step. publish then renders
+       the IG card and posts it to Discord for review (same hand-off as the
+       cron), so the 21:00 publish job auto-posts it to Instagram once an
+       approver reacts ✅. Requires DAILY_STORY_PUBLISH_ENABLED on the VPS.
 
 Run from backend/:
 
@@ -35,17 +38,12 @@ import sys
 from datetime import date
 
 from dotenv import load_dotenv
-
-load_dotenv()
-# The google-genai SDK prefers GOOGLE_API_KEY over GEMINI_API_KEY when both
-# are set; on this machine GOOGLE_API_KEY is a non-Gemini key, so drop it.
-os.environ.pop("GOOGLE_API_KEY", None)
-
 from supabase import create_client
 
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story import (
     gemini_client,
+    job,
     place_picker,
     prompts,
     story_writer,
@@ -210,6 +208,8 @@ def cmd_publish(args: argparse.Namespace) -> int:
     place_picker.mark_place_used(supabase, draft["place_id"])
     print(f"Marked place used: {draft['wikipedia_title_en']}")
 
+    _send_for_ig_review(config, supabase, publish_date)
+
     rows = (
         supabase.table("daily_stories")
         .select("language, place_name, review_state")
@@ -220,7 +220,67 @@ def cmd_publish(args: argparse.Namespace) -> int:
     return 0
 
 
+def _send_for_ig_review(config: Config, supabase, publish_date: date) -> None:
+    """Hand the published story off to the Instagram review flow.
+
+    Reuses the cron's review step (``job.send_today_for_review``): it renders
+    the IG card, posts it to Discord, and stores ``discord_message_id`` on the
+    zh-TW row. That id is what the 21:00 publish cron requires before it will
+    post a row to Instagram, so without this step a manually-written story
+    would never reach the auto-publish flow.
+
+    Idempotent (skips if the card was already posted) and best-effort: a
+    failure leaves the story live in the App but not queued for Instagram.
+    """
+    if not config.review_enabled:
+        print(
+            "Discord review not configured (DISCORD_BOT_TOKEN / "
+            "DISCORD_REVIEW_CHANNEL_ID / DISCORD_APPROVER_IDS) — skipping IG "
+            "review hand-off. Story is live in the App but won't auto-post to "
+            "Instagram."
+        )
+        return
+
+    try:
+        job.send_today_for_review(config, publish_date)
+    except Exception as exc:  # noqa: BLE001 — review send is best-effort
+        print(
+            f"WARNING: IG review hand-off failed: {exc}\n"
+            "Story is live in the App. Re-run publish to retry the Discord "
+            "post, or use the manual IG publish skill."
+        )
+        return
+
+    row = (
+        supabase.table("daily_stories")
+        .select("discord_message_id")
+        .eq("publish_date", publish_date.isoformat())
+        .eq("language", job.REVIEW_LANGUAGE)
+        .limit(1)
+        .execute()
+    ).data
+    message_id = row[0]["discord_message_id"] if row else None
+    if message_id:
+        print(
+            f"Sent IG card to Discord for review (message_id={message_id}). "
+            "Approve with ✅ and the 21:00 publish job posts it to Instagram."
+        )
+    else:
+        print(
+            "IG review hand-off posted nothing — likely a missing card "
+            "image/content (see lorescape-fix-missing-card-image). Story is "
+            "live in the App but not queued for Instagram."
+        )
+
+
 def main(argv: list[str]) -> int:
+    load_dotenv()
+    # The google-genai SDK prefers GOOGLE_API_KEY over GEMINI_API_KEY when
+    # both are set; on this machine GOOGLE_API_KEY is a non-Gemini key, so
+    # drop it. Done here (not at import) to keep importing this module for
+    # tests free of environment side effects.
+    os.environ.pop("GOOGLE_API_KEY", None)
+
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 

@@ -123,3 +123,31 @@ def test_daily_story_defaults_on_and_kill_switch(monkeypatch):
 
     monkeypatch.setenv("DAILY_STORY_ENABLED", "1")
     assert Config.from_env().daily_story_enabled is True
+
+
+def test_per_job_flags_fall_back_to_master_switch(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.delenv("DAILY_STORY_GENERATE_ENABLED", raising=False)
+    monkeypatch.delenv("DAILY_STORY_PUBLISH_ENABLED", raising=False)
+
+    monkeypatch.delenv("DAILY_STORY_ENABLED", raising=False)
+    config = Config.from_env()
+    assert config.daily_story_generate_enabled is True
+    assert config.daily_story_publish_enabled is True
+
+    monkeypatch.setenv("DAILY_STORY_ENABLED", "0")
+    config = Config.from_env()
+    assert config.daily_story_generate_enabled is False
+    assert config.daily_story_publish_enabled is False
+
+
+def test_per_job_flags_override_master_switch(monkeypatch):
+    """Generate stays off (Claude writes), publish runs for manual stories."""
+    _baseline_env(monkeypatch)
+    monkeypatch.setenv("DAILY_STORY_ENABLED", "0")
+    monkeypatch.setenv("DAILY_STORY_PUBLISH_ENABLED", "1")
+
+    config = Config.from_env()
+    assert config.daily_story_enabled is False
+    assert config.daily_story_generate_enabled is False
+    assert config.daily_story_publish_enabled is True

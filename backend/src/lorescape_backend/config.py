@@ -43,10 +43,17 @@ class Config:
     # emergencies). Env: NARRATION_WEB_SEARCH=0/false to disable.
     narration_web_search_enabled: bool = True
 
-    # Daily story pipeline (08:00 generate + 21:00 publish cron jobs).
-    # Env: DAILY_STORY_ENABLED=0/false to pause both jobs; the 03:00
+    # Daily story pipeline (09:00 generate + 21:00 publish cron jobs).
+    # DAILY_STORY_ENABLED is the legacy master switch; the two per-job flags
+    # below default to it but can be overridden independently. This lets the
+    # 21:00 IG-publish job keep running for manually-written (Claude) stories
+    # while the 09:00 Gemini generate job stays paused.
+    # Env: DAILY_STORY_ENABLED / DAILY_STORY_GENERATE_ENABLED /
+    # DAILY_STORY_PUBLISH_ENABLED = 0/false/off to pause. The 03:00
     # subscription reconcile and all HTTP APIs are unaffected.
     daily_story_enabled: bool = True
+    daily_story_generate_enabled: bool = True
+    daily_story_publish_enabled: bool = True
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -59,10 +66,22 @@ class Config:
         def optional(name: str) -> str | None:
             return os.environ.get(name) or None
 
+        def is_on(name: str, default: str) -> bool:
+            return (
+                (os.environ.get(name) or default).strip().lower()
+                not in ("0", "false", "off")
+            )
+
         approver_raw = os.environ.get("DISCORD_APPROVER_IDS", "")
         approver_ids = tuple(
             part.strip() for part in approver_raw.split(",") if part.strip()
         )
+
+        # The per-job flags fall back to the master switch when unset, so an
+        # operator who only sets DAILY_STORY_ENABLED keeps the old all-or-
+        # nothing behaviour; setting a per-job flag overrides just that job.
+        daily_story_enabled = is_on("DAILY_STORY_ENABLED", "1")
+        master_default = "1" if daily_story_enabled else "0"
 
         return cls(
             supabase_url=required("SUPABASE_URL"),
@@ -80,17 +99,13 @@ class Config:
                 "REVENUECAT_WEBHOOK_AUTH_TOKEN"
             ),
             revenuecat_api_key=optional("REVENUECAT_API_KEY"),
-            narration_web_search_enabled=(
-                (os.environ.get("NARRATION_WEB_SEARCH") or "1")
-                .strip()
-                .lower()
-                not in ("0", "false", "off")
+            narration_web_search_enabled=is_on("NARRATION_WEB_SEARCH", "1"),
+            daily_story_enabled=daily_story_enabled,
+            daily_story_generate_enabled=is_on(
+                "DAILY_STORY_GENERATE_ENABLED", master_default
             ),
-            daily_story_enabled=(
-                (os.environ.get("DAILY_STORY_ENABLED") or "1")
-                .strip()
-                .lower()
-                not in ("0", "false", "off")
+            daily_story_publish_enabled=is_on(
+                "DAILY_STORY_PUBLISH_ENABLED", master_default
             ),
         )
 

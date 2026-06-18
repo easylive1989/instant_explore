@@ -50,13 +50,19 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
     def _reconcile() -> None:
         run_reconcile_job(config)
 
-    if config.daily_story_enabled:
+    if config.daily_story_generate_enabled:
         scheduler.add_job(
             _generate,
             trigger=CronTrigger(hour=GENERATE_HOUR, minute=0),
             id=GENERATE_JOB_ID,
             replace_existing=True,
         )
+    else:
+        logger.warning(
+            "daily_story.generate paused — 09:00 generate job not scheduled "
+            "(DAILY_STORY_GENERATE_ENABLED is off)"
+        )
+    if config.daily_story_publish_enabled:
         scheduler.add_job(
             _publish,
             trigger=CronTrigger(hour=PUBLISH_HOUR, minute=0),
@@ -65,8 +71,8 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
         )
     else:
         logger.warning(
-            "daily_story.paused — generate/publish jobs not scheduled "
-            "(DAILY_STORY_ENABLED is off)"
+            "daily_story.publish paused — 21:00 publish job not scheduled "
+            "(DAILY_STORY_PUBLISH_ENABLED is off)"
         )
     if config.revenuecat_reconcile_enabled:
         scheduler.add_job(
