@@ -106,8 +106,14 @@ def test_publish_job_runs_for_today(mock_run, fake_config):
     assert args[1] == date.today()
 
 
-def test_register_jobs_skips_story_jobs_when_daily_story_disabled(fake_config):
-    config = dataclasses.replace(fake_config, daily_story_enabled=False)
+def test_register_jobs_skips_story_jobs_when_both_per_job_flags_disabled(
+    fake_config,
+):
+    config = dataclasses.replace(
+        fake_config,
+        daily_story_generate_enabled=False,
+        daily_story_publish_enabled=False,
+    )
     scheduler = MagicMock()
     _register_jobs(scheduler, config)
 
@@ -115,3 +121,18 @@ def test_register_jobs_skips_story_jobs_when_daily_story_disabled(fake_config):
     assert GENERATE_JOB_ID not in ids
     assert PUBLISH_JOB_ID not in ids
     assert ids == {RECONCILE_JOB_ID}  # reconcile unaffected
+
+
+def test_register_jobs_publish_only_when_generate_disabled(fake_config):
+    """Manual-story mode: 21:00 publish runs, 09:00 Gemini generate does not."""
+    config = dataclasses.replace(
+        fake_config,
+        daily_story_generate_enabled=False,
+        daily_story_publish_enabled=True,
+    )
+    scheduler = MagicMock()
+    _register_jobs(scheduler, config)
+
+    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
+    assert GENERATE_JOB_ID not in ids
+    assert PUBLISH_JOB_ID in ids

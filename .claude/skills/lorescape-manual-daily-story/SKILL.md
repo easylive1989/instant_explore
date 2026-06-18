@@ -18,9 +18,17 @@ Claude-driven workflow below to produce the draft JSON manually, then
 use `publish` to write it to Supabase.
 
 **Core principle: the App has NO review gate.** It shows whatever row
-has the newest `publish_date` for the language — `review_state` is only
-used by the (paused) Instagram flow. The moment `publish` runs, users
-can see the story. Review must finish BEFORE publish, never after.
+has the newest `publish_date` for the language. The moment `publish`
+runs, users can see the story in the App. Content review must finish
+BEFORE publish, never after.
+
+**`publish` also hands the story off to the Instagram flow.** After
+writing the rows it renders the IG card and posts it to Discord for
+review (same step the cron does), setting `discord_message_id`. With
+`DAILY_STORY_PUBLISH_ENABLED` on, the 21:00 cron then auto-posts to
+Instagram once an approver reacts ✅ in Discord. So `review_state` /
+Discord review now gates **Instagram**, not the App. If Discord isn't
+configured the hand-off is skipped (story still goes live in the App).
 
 ## The Tool
 
@@ -32,8 +40,10 @@ uv run python -m scripts.manual_daily_story publish --date 2026-06-12
 ```
 
 `publish` reads `/tmp/lorescape_daily_story_draft.json`, upserts both
-language rows (idempotent on publish_date+language), and marks the
-place used.
+language rows (idempotent on publish_date+language), marks the place
+used, and posts the IG card to Discord for review (best-effort — a
+Discord failure leaves the story live in the App and can be retried by
+re-running `publish`).
 
 ## Workflow
 
@@ -126,7 +136,10 @@ Only run `publish` after the user says 可以 / 通過 / 發布 / yes / ok:
 uv run python -m scripts.manual_daily_story publish
 ```
 
-Relay the verification output (row count + place_name per language).
+Relay the verification output (row count + place_name per language) and
+the IG review hand-off result (the printed `message_id=…` line, or the
+"skipping IG review hand-off" / "posted nothing" note). If it posted to
+Discord, tell the user to approve with ✅ for the 21:00 IG publish.
 
 ## Quick Reference
 
@@ -137,7 +150,9 @@ Relay the verification output (row count + place_name per language).
 | `story` column | Joined `card_paragraphs` (short), NOT the long `paragraphs` — matches the cron job |
 | Cover image | Only commercially licensed Wikipedia lead images (CC0/CC BY/CC BY-SA); otherwise NULL — see lorescape-fix-missing-card-image skill |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
-| `review_state` | Left at default `pending`; harmless while the IG publish job is paused |
+| `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
+| IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
+| Env flags | `DAILY_STORY_GENERATE_ENABLED` (09:00 Gemini, keep OFF) and `DAILY_STORY_PUBLISH_ENABLED` (21:00 IG, ON) — both fall back to legacy `DAILY_STORY_ENABLED` |
 | Languages | Always both `zh-TW` and `en` (App queries per language) |
 
 ## Gotchas
@@ -158,5 +173,7 @@ Relay the verification output (row count + place_name per language).
   lorescape-debug skill (read-only) first.
 - A published story missing only its cover image → use
   lorescape-fix-missing-card-image.
-- Re-enabling the automatic pipeline → set `DAILY_STORY_ENABLED=1` on
-  the VPS and restart the container instead.
+- Re-enabling the automatic Gemini generation → set
+  `DAILY_STORY_GENERATE_ENABLED=1` on the VPS and restart (keep this OFF
+  while Claude writes the content). To let manual stories auto-post to
+  Instagram, set `DAILY_STORY_PUBLISH_ENABLED=1` instead.
