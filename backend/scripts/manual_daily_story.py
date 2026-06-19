@@ -268,8 +268,10 @@ def _send_for_ig_review(config: Config, supabase, publish_date: date) -> None:
     else:
         print(
             "IG review hand-off posted nothing — likely a missing card "
-            "image/content (see lorescape-fix-missing-card-image). Story is "
-            "live in the App but not queued for Instagram."
+            "image/content. Re-check the draft's image_url before publish "
+            "(the lorescape-manual-daily-story skill resolves the cover via "
+            "Wikipedia → Unsplash → switch place). Story is live in the App "
+            "but not queued for Instagram."
         )
 
 

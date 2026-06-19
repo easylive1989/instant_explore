@@ -1,8 +1,12 @@
-"""Search Unsplash for perspective-diverse images of the current daily story place.
+"""Search Unsplash for direct photos of the current daily story place.
 
-Reads /tmp/lorescape_daily_story_draft.json, runs 5 angle-targeted queries
-against the Unsplash API, and writes results to:
-  backend/outputs/daily_image/{date}/unsplash_results.json
+Reads /tmp/lorescape_daily_story_draft.json, runs 5 place-anchored queries
+against the Unsplash API (every query contains the place name, so results
+depict the place itself — not loosely related themes), and writes them to:
+  outputs/daily_image/{date}/unsplash_results.json  (repo root)
+
+The caller still visually filters the downloads to keep only genuine
+place shots; these feed the cover image and the Google Flow video prompt.
 
 Usage (from backend/):
     uv run python -m scripts.unsplash_images [--date YYYY-MM-DD]
@@ -31,8 +35,9 @@ except ImportError:
 DRAFT_PATH = "/tmp/lorescape_daily_story_draft.json"
 RESULTS_PER_QUERY = 5
 
-# Five angle templates — each targets a different visual perspective.
-# {place}, {location}, {era} are substituted from the draft JSON.
+# Five place-anchored templates — every query contains the place name so
+# results depict the place ITSELF, not loosely related themes. {place},
+# {location}, {era} are substituted from the draft JSON.
 ANGLE_TEMPLATES: list[tuple[str, str, str]] = [
     (
         "direct",
@@ -40,24 +45,24 @@ ANGLE_TEMPLATES: list[tuple[str, str, str]] = [
         "{place}",
     ),
     (
+        "disambiguated",
+        "景點＋地點",
+        "{place} {location}",
+    ),
+    (
+        "view",
+        "景點全景",
+        "{place} view",
+    ),
+    (
         "landscape",
-        "自然環境",
-        "{location} landscape",
+        "景點景觀",
+        "{place} landscape",
     ),
     (
-        "cultural",
-        "文化主題",
-        "{place} {era}",
-    ),
-    (
-        "atmosphere",
-        "氛圍情境",
-        "{place} dramatic atmospheric",
-    ),
-    (
-        "region",
-        "區域地標",
-        "{location}",
+        "panorama",
+        "景點全貌",
+        "{place} panorama",
     ),
 ]
 
