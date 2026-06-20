@@ -10,6 +10,12 @@ services:
     ports:
       - "127.0.0.1:8001:8000"
     env_file: .env
+    # Vertex AI service-account key, mounted read-only. Only used when
+    # GEMINI_BACKEND=vertex; the .env must point GOOGLE_APPLICATION_CREDENTIALS
+    # at the CONTAINER path (/app/service-account.json), not the host path.
+    # The file itself lives on the VPS (gitignored); provide it out-of-band.
+    volumes:
+      - ./service-account.json:/app/service-account.json:ro
     # Healthcheck via the /health endpoint (runs inside the container).
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
