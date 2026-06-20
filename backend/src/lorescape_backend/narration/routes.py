@@ -53,7 +53,7 @@ def post_hooks(
 
     try:
         result = service.generate_hooks(
-            api_key=config.gemini_api_key,
+            settings=config.genai_settings,
             request=request,
             web_search=config.narration_web_search_enabled,
         )
@@ -85,7 +85,7 @@ def post_narration(
 
     try:
         return service.generate_narration(
-            api_key=config.gemini_api_key,
+            settings=config.genai_settings,
             request=request,
             web_search=config.narration_web_search_enabled,
         )

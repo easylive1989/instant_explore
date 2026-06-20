@@ -7,8 +7,10 @@ from unittest.mock import patch
 import pytest
 
 from lorescape_backend.narration import gemini_client
+from lorescape_backend.shared.genai import BACKEND_AI_STUDIO, GenaiSettings
 
 _SCHEMA = {"type": "OBJECT", "properties": {"era": {"type": "STRING"}}}
+_SETTINGS = GenaiSettings(backend=BACKEND_AI_STUDIO, api_key="k")
 
 
 def _response(text: str) -> SimpleNamespace:
@@ -18,14 +20,14 @@ def _response(text: str) -> SimpleNamespace:
 
 def _call_grounded() -> dict:
     return gemini_client.generate_grounded(
-        api_key="k",
+        settings=_SETTINGS,
         system_instruction="sys",
         user_prompt="prompt",
         response_schema=_SCHEMA,
     )
 
 
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_returns_parsed_json(client_cls):
     client_cls.return_value.models.generate_content.return_value = _response(
         '{"era": "1888"}'
@@ -34,7 +36,7 @@ def test_grounded_returns_parsed_json(client_cls):
     assert _call_grounded() == {"era": "1888"}
 
 
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_strips_markdown_code_fence(client_cls):
     client_cls.return_value.models.generate_content.return_value = _response(
         '```json\n{"era": "1888"}\n```'
@@ -43,7 +45,7 @@ def test_grounded_strips_markdown_code_fence(client_cls):
     assert _call_grounded() == {"era": "1888"}
 
 
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_call_uses_search_tool_without_schema(client_cls):
     client_cls.return_value.models.generate_content.return_value = _response(
         '{"era": "x"}'
@@ -60,7 +62,7 @@ def test_grounded_call_uses_search_tool_without_schema(client_cls):
 
 
 @patch("lorescape_backend.narration.gemini_client.generate_structured")
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_repairs_broken_json_via_structured_call(client_cls, repair):
     client_cls.return_value.models.generate_content.return_value = _response(
         "Here are three stories about Arles..."
@@ -74,7 +76,7 @@ def test_grounded_repairs_broken_json_via_structured_call(client_cls, repair):
 
 
 @patch("lorescape_backend.narration.gemini_client.generate_structured")
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_repairs_non_object_json(client_cls, repair):
     client_cls.return_value.models.generate_content.return_value = _response(
         '["a", "list", "not", "object"]'
@@ -84,7 +86,7 @@ def test_grounded_repairs_non_object_json(client_cls, repair):
     assert _call_grounded() == {"era": "repaired"}
 
 
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_raises_on_empty_response(client_cls):
     client_cls.return_value.models.generate_content.return_value = _response("")
 
@@ -93,7 +95,7 @@ def test_grounded_raises_on_empty_response(client_cls):
 
 
 @patch("lorescape_backend.narration.gemini_client.time.sleep")
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_retries_on_503_then_succeeds(client_cls, sleep_mock):
     from google.genai import errors as genai_errors
 
@@ -110,7 +112,7 @@ def test_grounded_retries_on_503_then_succeeds(client_cls, sleep_mock):
 
 
 @patch("lorescape_backend.narration.gemini_client.time.sleep")
-@patch("lorescape_backend.narration.gemini_client.genai.Client")
+@patch("lorescape_backend.narration.gemini_client.build_client")
 def test_grounded_raises_after_exhausting_503_retries(client_cls, sleep_mock):
     from google.genai import errors as genai_errors
 

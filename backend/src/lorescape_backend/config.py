@@ -4,6 +4,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from lorescape_backend.shared.genai import (
+    BACKEND_AI_STUDIO,
+    BACKEND_VERTEX,
+    GenaiSettings,
+)
+
 _DEFAULT_CTA_TEXT = "Explore more places with Instant Explore."
 
 
@@ -11,7 +17,9 @@ _DEFAULT_CTA_TEXT = "Explore more places with Instant Explore."
 class Config:
     supabase_url: str
     supabase_service_role_key: str
-    gemini_api_key: str
+    # Present (required) only when gemini_backend == "ai-studio"; on the
+    # Vertex backend it is None because auth comes from GCP credentials.
+    gemini_api_key: str | None
 
     # Failure-alert webhook (existing, sends to a 'noisy' channel).
     discord_webhook_url: str | None
@@ -37,6 +45,16 @@ class Config:
     # subscriber status. Either being absent disables that half of the flow.
     revenuecat_webhook_auth_token: str | None = None
     revenuecat_api_key: str | None = None
+
+    # Which Gemini backend to use. "ai-studio" authenticates with
+    # GEMINI_API_KEY; "vertex" routes through a GCP project so the bound
+    # billing account / AI Pro credit applies (auth via GCP Application
+    # Default Credentials, no key in code). Env: GEMINI_BACKEND.
+    gemini_backend: str = BACKEND_AI_STUDIO
+    # GCP project + region, used only by the Vertex backend.
+    # Env: GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION.
+    gcp_project: str | None = None
+    gcp_location: str = "us-central1"
 
     # Narration Google-Search grounding. Disabling restores the legacy
     # Wikipedia-only behaviour (kill-switch for grounding-quota
@@ -83,10 +101,29 @@ class Config:
         daily_story_enabled = is_on("DAILY_STORY_ENABLED", "1")
         master_default = "1" if daily_story_enabled else "0"
 
+        # On the Vertex backend the API key is unused (auth comes from GCP
+        # credentials) and a project is required instead.
+        gemini_backend = (
+            os.environ.get("GEMINI_BACKEND") or BACKEND_AI_STUDIO
+        ).strip().lower()
+        gcp_project = optional("GOOGLE_CLOUD_PROJECT")
+        if gemini_backend == BACKEND_VERTEX:
+            if not gcp_project:
+                raise RuntimeError(
+                    "GEMINI_BACKEND=vertex requires GOOGLE_CLOUD_PROJECT"
+                )
+            gemini_api_key = optional("GEMINI_API_KEY")
+        else:
+            gemini_api_key = required("GEMINI_API_KEY")
+
         return cls(
             supabase_url=required("SUPABASE_URL"),
             supabase_service_role_key=required("SUPABASE_SERVICE_ROLE_KEY"),
-            gemini_api_key=required("GEMINI_API_KEY"),
+            gemini_api_key=gemini_api_key,
+            gemini_backend=gemini_backend,
+            gcp_project=gcp_project,
+            gcp_location=os.environ.get("GOOGLE_CLOUD_LOCATION")
+            or "us-central1",
             discord_webhook_url=optional("DISCORD_WEBHOOK_URL"),
             discord_bot_token=optional("DISCORD_BOT_TOKEN"),
             discord_review_channel_id=optional("DISCORD_REVIEW_CHANNEL_ID"),
@@ -107,6 +144,16 @@ class Config:
             daily_story_publish_enabled=is_on(
                 "DAILY_STORY_PUBLISH_ENABLED", master_default
             ),
+        )
+
+    @property
+    def genai_settings(self) -> GenaiSettings:
+        """Backend selection passed to the shared genai client factory."""
+        return GenaiSettings(
+            backend=self.gemini_backend,
+            api_key=self.gemini_api_key,
+            project=self.gcp_project,
+            location=self.gcp_location,
         )
 
     @property

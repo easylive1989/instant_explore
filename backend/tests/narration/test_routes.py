@@ -108,8 +108,8 @@ def test_post_hooks_returns_payload(gen_hooks):
     body = response.json()
     assert body["hooks"][0]["id"] == "h1"
     assert body["insufficient_source"] is False
-    # The route MUST pass the gemini key from config to the service.
-    assert gen_hooks.call_args.kwargs["api_key"] == "test-key"
+    # The route MUST pass the backend settings from config to the service.
+    assert gen_hooks.call_args.kwargs["settings"] == _fake_config().genai_settings
 
 
 @patch("lorescape_backend.narration.routes.service.generate_narration")

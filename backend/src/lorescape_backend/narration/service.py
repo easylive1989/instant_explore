@@ -12,6 +12,7 @@ from lorescape_backend.narration.models import (
     NarrationResponse,
     SUPPORTED_LANGUAGES,
 )
+from lorescape_backend.shared.genai import GenaiSettings
 from lorescape_backend.shared.story_prompt import StoryHook
 from lorescape_backend.sources.models import SourceBundle
 from lorescape_backend.sources.pipeline import (
@@ -52,7 +53,7 @@ def _resolve_bundle(request) -> SourceBundle:
 
 
 def generate_hooks(
-    *, api_key: str, request: HooksRequest, web_search: bool = True
+    *, settings: GenaiSettings, request: HooksRequest, web_search: bool = True
 ) -> HooksResponse:
     """Surface 2-3 narrative angles for the request's place.
 
@@ -81,7 +82,7 @@ def generate_hooks(
         else gemini_client.generate_structured
     )
     payload = generate(
-        api_key=api_key,
+        settings=settings,
         system_instruction=prompts.hooks_system_instruction(
             request.language, web_search=web_search
         ),
@@ -101,7 +102,10 @@ def generate_hooks(
 
 
 def generate_narration(
-    *, api_key: str, request: NarrationRequest, web_search: bool = True
+    *,
+    settings: GenaiSettings,
+    request: NarrationRequest,
+    web_search: bool = True,
 ) -> NarrationResponse:
     """Generate the long-form 3-paragraph story for `request`.
 
@@ -139,7 +143,7 @@ def generate_narration(
         else gemini_client.generate_structured
     )
     payload = generate(
-        api_key=api_key,
+        settings=settings,
         system_instruction=prompts.narration_system_instruction(
             request.language, web_search=web_search
         ),

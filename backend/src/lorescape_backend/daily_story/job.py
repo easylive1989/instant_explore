@@ -73,7 +73,7 @@ def run_once(config: Config, target_date: date) -> None:
         )
 
         story = gemini_client.generate_story(
-            api_key=config.gemini_api_key,
+            settings=config.genai_settings,
             system_instruction=prompts.SYSTEM_INSTRUCTION_FOR(language),
             user_prompt=prompts.build_user_prompt(
                 wikipedia_title=place.wikipedia_title_en,

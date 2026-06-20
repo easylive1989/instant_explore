@@ -4,8 +4,9 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from google import genai
 from google.genai import types
+
+from lorescape_backend.shared.genai import GenaiSettings, build_client
 
 GEMINI_MODEL = "gemini-2.5-flash"
 GEMINI_TEMPERATURE = 0.3
@@ -36,7 +37,7 @@ class GeneratedStory:
 
 def generate_story(
     *,
-    api_key: str,
+    settings: GenaiSettings,
     system_instruction: str,
     user_prompt: str,
     response_schema: dict,
@@ -46,7 +47,7 @@ def generate_story(
     Uses structured JSON output mode so the response is always valid JSON
     matching the provided schema.
     """
-    client = genai.Client(api_key=api_key)
+    client = build_client(settings)
 
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,

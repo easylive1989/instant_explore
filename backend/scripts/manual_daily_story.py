@@ -125,7 +125,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
             )
         print(f"Generating {language} story...")
         story = gemini_client.generate_story(
-            api_key=config.gemini_api_key,
+            settings=config.genai_settings,
             system_instruction=prompts.SYSTEM_INSTRUCTION_FOR(language),
             user_prompt=user_prompt,
             response_schema=prompts.build_response_schema(language),

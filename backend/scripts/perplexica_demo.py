@@ -34,6 +34,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 
 from lorescape_backend.narration import gemini_client, prompts
+from lorescape_backend.shared.genai import BACKEND_AI_STUDIO, GenaiSettings
 from lorescape_backend.sources import perplexica
 from lorescape_backend.sources.models import SourceBundle, SourceExtract
 from lorescape_backend.sources.pipeline import build_source_bundle
@@ -101,7 +102,9 @@ def _run_narration(
     for attempt in range(4):
         try:
             return gemini_client.generate_structured(
-                api_key=api_key,
+                settings=GenaiSettings(
+                    backend=BACKEND_AI_STUDIO, api_key=api_key
+                ),
                 system_instruction=prompts.narration_system_instruction(language),
                 user_prompt=prompts.build_narration_user_prompt(
                     place_name=place.place_name,

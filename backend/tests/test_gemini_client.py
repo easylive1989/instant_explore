@@ -6,10 +6,13 @@ from lorescape_backend.daily_story.gemini_client import (
     GeneratedStory,
     generate_story,
 )
+from lorescape_backend.shared.genai import BACKEND_AI_STUDIO, GenaiSettings
+
+_SETTINGS = GenaiSettings(backend=BACKEND_AI_STUDIO, api_key="key")
 
 
-@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
-def test_generate_story_parses_json_response(mock_client_cls):
+@patch("lorescape_backend.daily_story.gemini_client.build_client")
+def test_generate_story_parses_json_response(mock_build):
     mock_response = MagicMock()
     mock_response.text = json.dumps(
         {
@@ -28,10 +31,10 @@ def test_generate_story_parses_json_response(mock_client_cls):
     )
     mock_client = MagicMock()
     mock_client.models.generate_content.return_value = mock_response
-    mock_client_cls.return_value = mock_client
+    mock_build.return_value = mock_client
 
     result = generate_story(
-        api_key="key",
+        settings=_SETTINGS,
         system_instruction="sys",
         user_prompt="user",
         response_schema={"type": "OBJECT"},
@@ -50,13 +53,13 @@ def test_generate_story_parses_json_response(mock_client_cls):
         card_pull_quote_attrib="── 蘇埃托尼烏斯",
         card_anno_roman="LXXX",
     )
-    mock_client_cls.assert_called_once_with(api_key="key")
+    mock_build.assert_called_once_with(_SETTINGS)
     call_kwargs = mock_client.models.generate_content.call_args.kwargs
     assert call_kwargs["model"] == GEMINI_MODEL
 
 
-@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
-def test_generate_story_passes_system_instruction_and_temperature(mock_client_cls):
+@patch("lorescape_backend.daily_story.gemini_client.build_client")
+def test_generate_story_passes_system_instruction_and_temperature(mock_build):
     mock_response = MagicMock()
     mock_response.text = json.dumps(
         {
@@ -75,10 +78,10 @@ def test_generate_story_passes_system_instruction_and_temperature(mock_client_cl
     )
     mock_client = MagicMock()
     mock_client.models.generate_content.return_value = mock_response
-    mock_client_cls.return_value = mock_client
+    mock_build.return_value = mock_client
 
     generate_story(
-        api_key="key",
+        settings=_SETTINGS,
         system_instruction="my-system",
         user_prompt="my-user",
         response_schema={"type": "OBJECT", "required": ["card_title"]},
@@ -101,8 +104,8 @@ def test_generate_story_passes_system_instruction_and_temperature(mock_client_cl
         assert config.response_schema["required"] == ["card_title"]
 
 
-@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
-def test_generate_story_parses_card_fields(mock_client_cls):
+@patch("lorescape_backend.daily_story.gemini_client.build_client")
+def test_generate_story_parses_card_fields(mock_build):
     mock_response = MagicMock()
     mock_response.text = json.dumps(
         {
@@ -121,10 +124,10 @@ def test_generate_story_parses_card_fields(mock_client_cls):
     )
     mock_client = MagicMock()
     mock_client.models.generate_content.return_value = mock_response
-    mock_client_cls.return_value = mock_client
+    mock_build.return_value = mock_client
 
     result = generate_story(
-        api_key="key",
+        settings=_SETTINGS,
         system_instruction="sys",
         user_prompt="user",
         response_schema={"type": "OBJECT"},
@@ -140,8 +143,8 @@ def test_generate_story_parses_card_fields(mock_client_cls):
     assert not hasattr(result, "story")
 
 
-@patch("lorescape_backend.daily_story.gemini_client.genai.Client")
-def test_generate_story_raises_when_card_field_missing(mock_client_cls):
+@patch("lorescape_backend.daily_story.gemini_client.build_client")
+def test_generate_story_raises_when_card_field_missing(mock_build):
     """All card fields are required now — missing keys must fail fast."""
     mock_response = MagicMock()
     mock_response.text = json.dumps(
@@ -155,11 +158,11 @@ def test_generate_story_raises_when_card_field_missing(mock_client_cls):
     )
     mock_client = MagicMock()
     mock_client.models.generate_content.return_value = mock_response
-    mock_client_cls.return_value = mock_client
+    mock_build.return_value = mock_client
 
     try:
         generate_story(
-            api_key="key",
+            settings=_SETTINGS,
             system_instruction="sys",
             user_prompt="user",
             response_schema={"type": "OBJECT"},

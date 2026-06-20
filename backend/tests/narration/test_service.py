@@ -9,9 +9,11 @@ from lorescape_backend.narration.models import (
     NarrationRequest,
 )
 from lorescape_backend.sources.models import SourceBundle, SourceExtract
+from lorescape_backend.shared.genai import BACKEND_AI_STUDIO, GenaiSettings
 
 
 _INTRO_EXTRACT = "Roman colony; Van Gogh painted here in 1888."
+_SETTINGS = GenaiSettings(backend=BACKEND_AI_STUDIO, api_key="k")
 
 
 # ---------------------------------------------------------------------------
@@ -55,7 +57,7 @@ def test_generate_hooks_returns_parsed_hooks(gen_mock, bundle_mock):
     }
 
     result = narration_service.generate_hooks(
-        api_key="K",
+        settings=_SETTINGS,
         web_search=False,
         request=HooksRequest(
             place_name="Arles",
@@ -78,7 +80,7 @@ def test_generate_hooks_handles_insufficient_source(gen_mock, bundle_mock):
     gen_mock.return_value = {"hooks": [], "insufficient_source": True}
 
     result = narration_service.generate_hooks(
-        api_key="K",
+        settings=_SETTINGS,
         web_search=False,
         request=HooksRequest(
             place_name="x", wikipedia_title="x", language="en",
@@ -92,7 +94,7 @@ def test_generate_hooks_handles_insufficient_source(gen_mock, bundle_mock):
 def test_generate_hooks_rejects_unsupported_language():
     with pytest.raises(narration_service.UnsupportedLanguageError):
         narration_service.generate_hooks(
-            api_key="K",
+            settings=_SETTINGS,
             request=HooksRequest(
                 place_name="x", wikipedia_title="x", language="ja",
             ),
@@ -113,7 +115,7 @@ def test_generate_narration_returns_parsed_response(gen_mock, bundle_mock):
     }
 
     result = narration_service.generate_narration(
-        api_key="K",
+        settings=_SETTINGS,
         web_search=False,
         request=NarrationRequest(
             place_name="Arles",
@@ -150,7 +152,7 @@ def test_generate_narration_without_hook_invites_self_pick(gen_mock, bundle_mock
     }
 
     narration_service.generate_narration(
-        api_key="K",
+        settings=_SETTINGS,
         web_search=False,
         request=NarrationRequest(
             place_name="Arles", wikipedia_title="Arles", language="en",
@@ -186,7 +188,7 @@ def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
     }
 
     result = narration_service.generate_narration(
-        api_key="K",
+        settings=_SETTINGS,
         web_search=False,
         request=NarrationRequest(
             place_name="Fake", wikipedia_title="Fake", language="zh-TW",
@@ -201,7 +203,7 @@ def test_generate_narration_forces_empty_paragraphs_when_insufficient_source(
 def test_generate_narration_rejects_unsupported_language():
     with pytest.raises(narration_service.UnsupportedLanguageError):
         narration_service.generate_narration(
-            api_key="K",
+            settings=_SETTINGS,
             request=NarrationRequest(
                 place_name="x", wikipedia_title="x", language="ja",
             ),
@@ -234,7 +236,7 @@ def test_generate_narration_with_wikidata_id_invokes_pipeline_and_gemini(monkeyp
         location="桃園", language="zh-TW",
     )
     res = narration_service.generate_narration(
-        api_key="k", request=req, web_search=False,
+        settings=_SETTINGS, request=req, web_search=False,
     )
 
     assert len(gemini_calls) == 1
@@ -259,7 +261,7 @@ def test_generate_narration_pre_gemini_gate_short_circuits(monkeypatch):
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
     res = narration_service.generate_narration(
-        api_key="k", request=req, web_search=False,
+        settings=_SETTINGS, request=req, web_search=False,
     )
 
     assert gemini_calls == []  # critical: Gemini NOT called
@@ -287,7 +289,7 @@ def test_generate_narration_legacy_title_path_uses_single_source_bundle(monkeypa
     )
     with caplog.at_level("WARNING"):
         narration_service.generate_narration(
-            api_key="k", request=req, web_search=False,
+            settings=_SETTINGS, request=req, web_search=False,
         )
 
     assert any("narration.legacy_title_path" in rec.message for rec in caplog.records)
@@ -310,7 +312,7 @@ def test_generate_hooks_with_wikidata_id_uses_pipeline(monkeypatch):
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
     res = narration_service.generate_hooks(
-        api_key="k", request=req, web_search=False,
+        settings=_SETTINGS, request=req, web_search=False,
     )
     assert len(res.hooks) == 1
 
@@ -326,7 +328,7 @@ def test_generate_hooks_pre_gemini_gate_short_circuits(monkeypatch):
 
     req = HooksRequest(wikidata_id="Q1", place_name="x", location="y", language="en")
     res = narration_service.generate_hooks(
-        api_key="k", request=req, web_search=False,
+        settings=_SETTINGS, request=req, web_search=False,
     )
 
     assert calls == []
@@ -360,7 +362,7 @@ def test_narration_default_uses_grounded_with_web_prompts(monkeypatch):
         wikidata_id="Q1", place_name="Arles", location="Provence",
         language="en",
     )
-    res = narration_service.generate_narration(api_key="k", request=req)
+    res = narration_service.generate_narration(settings=_SETTINGS, request=req)
 
     assert len(calls) == 1
     assert "google_search" in calls[0]["system_instruction"]
@@ -385,7 +387,7 @@ def test_narration_thin_bundle_no_longer_short_circuits(monkeypatch):
     req = NarrationRequest(
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
-    res = narration_service.generate_narration(api_key="k", request=req)
+    res = narration_service.generate_narration(settings=_SETTINGS, request=req)
 
     assert len(calls) == 1  # grounded Gemini WAS called despite thin wiki
     assert res.insufficient_source is False
@@ -409,7 +411,7 @@ def test_hooks_default_uses_grounded_and_thin_bundle_proceeds(monkeypatch):
     req = HooksRequest(
         wikidata_id="Q1", place_name="x", location="y", language="en",
     )
-    res = narration_service.generate_hooks(api_key="k", request=req)
+    res = narration_service.generate_hooks(settings=_SETTINGS, request=req)
 
     assert len(calls) == 1
     assert "google_search" in calls[0]["system_instruction"]

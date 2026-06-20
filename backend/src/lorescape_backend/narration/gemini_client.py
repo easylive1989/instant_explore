@@ -20,9 +20,10 @@ import re
 import time
 from typing import Any
 
-from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
+
+from lorescape_backend.shared.genai import GenaiSettings, build_client
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +40,13 @@ _GROUNDED_RETRY_DELAYS = (3, 8)
 
 def generate_structured(
     *,
-    api_key: str,
+    settings: GenaiSettings,
     system_instruction: str,
     user_prompt: str,
     response_schema: dict,
 ) -> dict[str, Any]:
     """Call Gemini in structured-JSON mode and return the parsed payload."""
-    client = genai.Client(api_key=api_key)
+    client = build_client(settings)
 
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
@@ -63,7 +64,7 @@ def generate_structured(
 
 def generate_grounded(
     *,
-    api_key: str,
+    settings: GenaiSettings,
     system_instruction: str,
     user_prompt: str,
     response_schema: dict,
@@ -75,7 +76,7 @@ def generate_grounded(
     prompt-constrained JSON fails to parse. The user prompt must therefore
     describe the expected JSON shape explicitly.
     """
-    client = genai.Client(api_key=api_key)
+    client = build_client(settings)
 
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
@@ -100,7 +101,7 @@ def generate_grounded(
         "narration.grounded_json_repair", extra={"raw_chars": len(raw)},
     )
     return generate_structured(
-        api_key=api_key,
+        settings=settings,
         system_instruction=(
             "Convert the user's content into JSON matching the response "
             "schema. Preserve the content exactly; do NOT add, remove, or "

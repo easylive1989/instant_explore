@@ -1,6 +1,7 @@
 import pytest
 
 from lorescape_backend.config import Config
+from lorescape_backend.shared.genai import BACKEND_AI_STUDIO, BACKEND_VERTEX
 
 
 def _baseline_env(monkeypatch):
@@ -8,6 +9,11 @@ def _baseline_env(monkeypatch):
     monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "key1")
     monkeypatch.setenv("GEMINI_API_KEY", "key2")
+    # Default to the AI Studio backend unless a test opts into Vertex, so an
+    # operator's GEMINI_BACKEND=vertex shell env can't leak into these tests.
+    monkeypatch.delenv("GEMINI_BACKEND", raising=False)
+    monkeypatch.delenv("GOOGLE_CLOUD_PROJECT", raising=False)
+    monkeypatch.delenv("GOOGLE_CLOUD_LOCATION", raising=False)
 
 
 def test_from_env_loads_all_required(monkeypatch):
@@ -151,3 +157,48 @@ def test_per_job_flags_override_master_switch(monkeypatch):
     assert config.daily_story_enabled is False
     assert config.daily_story_generate_enabled is False
     assert config.daily_story_publish_enabled is True
+
+
+def test_gemini_backend_defaults_to_ai_studio(monkeypatch):
+    _baseline_env(monkeypatch)
+    config = Config.from_env()
+
+    assert config.gemini_backend == BACKEND_AI_STUDIO
+    assert config.gemini_api_key == "key2"
+    settings = config.genai_settings
+    assert settings.backend == BACKEND_AI_STUDIO
+    assert settings.api_key == "key2"
+
+
+def test_gemini_backend_vertex_requires_project_not_key(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_BACKEND", "vertex")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "instant-explore-7b442")
+    monkeypatch.setenv("GOOGLE_CLOUD_LOCATION", "asia-east1")
+
+    config = Config.from_env()
+
+    assert config.gemini_backend == BACKEND_VERTEX
+    assert config.gemini_api_key is None
+    settings = config.genai_settings
+    assert settings.backend == BACKEND_VERTEX
+    assert settings.project == "instant-explore-7b442"
+    assert settings.location == "asia-east1"
+
+
+def test_gemini_backend_vertex_defaults_location(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_BACKEND", "vertex")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "p")
+
+    assert Config.from_env().genai_settings.location == "us-central1"
+
+
+def test_gemini_backend_vertex_missing_project_raises(monkeypatch):
+    _baseline_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_BACKEND", "vertex")
+    monkeypatch.delenv("GOOGLE_CLOUD_PROJECT", raising=False)
+
+    with pytest.raises(RuntimeError, match="GOOGLE_CLOUD_PROJECT"):
+        Config.from_env()

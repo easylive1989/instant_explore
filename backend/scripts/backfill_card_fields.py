@@ -34,7 +34,9 @@ from dataclasses import dataclass
 
 from supabase import create_client
 
+from lorescape_backend.config import Config
 from lorescape_backend.daily_story import gemini_client, prompts, wikipedia
+from lorescape_backend.shared.genai import GenaiSettings
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,9 @@ def _fetch_summary(title: str):
     return wikipedia.fetch_summary(title)
 
 
-def run(supabase, *, dry_run: bool, gemini_api_key: str = "") -> BackfillResult:
+def run(
+    supabase, *, dry_run: bool, settings: GenaiSettings | None = None
+) -> BackfillResult:
     """Run the backfill once. Returns a result summary; never raises mid-run."""
     null_rows = (
         supabase.table("daily_stories")
@@ -92,7 +96,7 @@ def run(supabase, *, dry_run: bool, gemini_api_key: str = "") -> BackfillResult:
 
             summary = _fetch_summary(wiki_title)
             story = _generate_story(
-                api_key=gemini_api_key,
+                settings=settings,
                 system_instruction=prompts.SYSTEM_INSTRUCTION,
                 user_prompt=prompts.build_user_prompt(
                     wikipedia_title=wiki_title,
@@ -140,10 +144,11 @@ def _main() -> int:
 
     url = os.environ["SUPABASE_URL"]
     service_key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-    gemini_key = "" if args.dry_run else os.environ["GEMINI_API_KEY"]
+    # A dry run never calls Gemini, so it needs no backend credentials.
+    settings = None if args.dry_run else Config.from_env().genai_settings
 
     supabase = create_client(url, service_key)
-    result = run(supabase, dry_run=args.dry_run, gemini_api_key=gemini_key)
+    result = run(supabase, dry_run=args.dry_run, settings=settings)
 
     logger.info(
         "summary: processed=%d failed=%d", result.processed, result.failed
