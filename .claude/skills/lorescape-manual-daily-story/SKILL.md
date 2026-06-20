@@ -280,7 +280,9 @@ live UI.
   Knowledgeable, intimate documentary feel — matches Lorescape's "voice
   tour guide" brand. (For a face-less variant, use the lone-traveler /
   from-behind framing with `actor_5`.)
-- **Flow settings** — Omni Flash · 視頻 · 素材 (Ingredients) · 16:9 · 10s · 1x.
+- **Flow settings** — Omni Flash · 視頻 · 素材 (Ingredients) · **9:16** · 10s · 1x.
+  IG Reels are vertical, so always generate **9:16** (Flow defaults to
+  16:9 — switch it in the settings panel before sending).
 - **Audio** — ambient diegetic only (footsteps, wind); a single warm
   cello note works well. No narration, no on-screen text.
 - **Prompt** — Ingredients mode means the visuals come from the
@@ -290,7 +292,7 @@ live UI.
   `outputs/daily_image/{date}/video_prompt.md`.
 
 **⛔ Paid checkpoint** — Flow generation spends the user's Flow credits
-(Omni Flash 16:9 10s ≈ 15 credits ×1). Stage everything, then get an
+(Omni Flash 9:16 10s ≈ 15 credits ×1). Stage everything, then get an
 explicit "go" before clicking send. Never log in for the user — the
 Google OAuth login is theirs.
 
@@ -326,7 +328,7 @@ needs explicit permission) / regenerate a variant.
 | Cover chain | Wikipedia commercial lead → best Unsplash place shot → ask user → switch place (never NULL at publish) |
 | Unsplash key | `UNSPLASH_ACCESS_KEY` in `backend/.env` (free demo, 50 req/hr) |
 | Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
-| Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 16:9 · 10s; paid (~15 cr), confirm before send |
+| Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
 | Reel prompt output | `outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |

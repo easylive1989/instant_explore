@@ -336,7 +336,7 @@ volumetric mist under streetlamp, 16:9 widescreen.
 下次操作時補進來：
 
 - ✅ ~~生成完成後的 UI (下載路徑、擴展功能)~~ — Phase 6 已補
-- ⏳ `Ingredients to Video` (多素材合成) 流程
+- ✅ ~~`Ingredients to Video` (多素材合成) 流程~~ — 2026-06-20 Omni Flash 完整驗證（見下方 §11）
 - ⏳ `Extend` 實測 (有按鈕但沒跑完整流程)
 - ⏳ `Insert / Remove / 攝像頭` 四工具實測
 - ⏳ `Scene-to-scene` (3.1+ 多場景拼接)
@@ -415,3 +415,38 @@ volumetric mist under streetlamp, 16:9 widescreen.
 **內容長度：** Veo 3.1 prompt 標準 ~80 字 (Subject + Action + Camera + Lighting + Audio)，超過反而模糊。
 
 **預期效能：** 5 片 < 4 分鐘 + < 1.2k token
+
+---
+
+## 11. ✅ Ingredients-to-Video 完整實測（2026-06-20，Omni Flash · 素材模式）
+
+Lorescape 每日故事 reel（嚮導角色 + 景點實照鎖一致）跑通的完整 SOP：
+
+```
+1. 首頁 click「New project」卡（座標視 grid 而定，~785,650）→ 進 /project/{uuid}
+2. 點右下設定 chip「視頻·10s·1x」→ 設定面板。Omni Flash 通常預設已選，確認：
+   視頻 + 素材 + 比例 + 1x + Omni Flash + 10s → 底部顯示「生成將消耗 15 個點數」
+   （Omni Flash 10s x1 = 15 點數實測確認；x2 = 30。點數與比例無關）
+   ⚠️ 比例：Flow 預設 16:9，但 IG Reels / 直式短影音要點左側「9:16」切直式
+   （選對後底部 chip 出現直式手機圖示）。設定面板內 9:16 ≈ (812,517)、16:9 ≈ (945,517)。
+3. Esc 關面板
+4. prompt 框左下「+」→ 開媒體選擇器（全部/圖片/視頻/語音/角色/虛擬形象/上傳的內容）
+5. 上傳：別點「上傳媒體」（會開系統原生對話框，MCP 控不到）。
+   改 JS 注入隱藏 file input（頁面已有一個 accept=image/*, multiple=true 的 input）：
+   起本機 CORS server（Python SimpleHTTPRequestHandler + ACAO:*），sips 縮到 640px，
+   再 fetch 進 DataTransfer → input.files = dt.files → dispatchEvent change。
+   一次塞多張 OK（input multiple=true）。上傳後資產庫即出現縮圖（需數秒處理）。
+6. 選擇器是單選：點一張資產 → 右側預覽 + 底部「添加到提示」按鈕亮 → 點它加入。
+   重複「+」→ 選下一張 → 添加到提示（一次一張）。已加入的會以縮圖留在 prompt 框左上。
+   Ingredients 最多 3 個。
+7. prompt 注入：用 §0 的 Slate 聚焦序列（focusin + focus + selectNodeContents + collapse）
+   + beforeinput insertFromPaste + 補 input event。Ingredients 模式 prompt 走 camera-first
+   + action（視覺交給參考圖，~60-90 字）。驗 domLen == prompt 長度。
+8. 送出前驗送出鈕 aria-disabled=false（box 右下、width 20-80 的 button）。
+9. 真實 click 送出箭頭（~1031,715）。送出後截圖確認 gallery 出現新生成 tile
+   （灰 shimmer + 播放圖示）才算成功；prompt 框清空 + 素材縮圖消失也是訊號。
+   別只看框清空就盲目重送（會疊扣點）。Omni Flash 10s 生成約 1-3 分鐘。
+```
+
+**踩點：** New project 後設定面板的「素材/16:9/Omni Flash/10s」常已是預設，省去逐項點選；
+但仍要開面板目視確認點數 = 15（誤入 x2 或 Quality 會翻倍燒點）。
