@@ -361,14 +361,33 @@ becomes one on-screen caption shown only while that line is spoken.
 **3. Render the IG cut.**
 
 ```bash
+# Gemini TTS (natural voice; default voice Kore) — preferred for IG:
+cd backend && uv run python -m scripts.daily_video_post --date {date} \
+    --engine gemini
+# Offline fallback (macOS say, voice Meijia) — no daily quota:
 cd backend && uv run python -m scripts.daily_video_post --date {date}
 ```
 
-Standing choices baked into the defaults: zh-TW, macOS `say` voice
-`Meijia` (美佳), full burned-in captions (white text + black outline, bottom
-third), and the master's ambient audio kept but ducked to ~28% under the
-voiceover. Overridable flags: `--voice`, `--rate`, `--bg-volume`, `--font`,
-`--input`, `--text`/`--line`.
+Standing choices baked into the defaults: zh-TW, full burned-in captions
+(white text + black outline, bottom third), and the master's ambient audio
+kept but ducked to ~28% under the voiceover. Two TTS engines:
+
+- **`--engine gemini`** (preferred) — Gemini TTS via the backend's
+  `GEMINI_API_KEY` / GenaiSettings; default voice `Kore` (warm female).
+  Other warm voices: `Aoede`, `Callirrhoe`, `Leda`, `Vindemiatrix` (set
+  with `--voice`). Pacing is steered by `--style` (default asks for a
+  warm, slightly-faster documentary tone). ⚠️ **Free tier = 10 TTS
+  requests/day** per model and each line is one request, so a 2-line reel
+  costs 2 — fine for the daily run but it leaves little room for re-rolls;
+  heavy iteration hits `429 RESOURCE_EXHAUSTED` (switch to the Vertex
+  backend, ~$0.004/reel, or use `say`). Duration is non-deterministic
+  (~±1s run to run).
+- **`--engine say`** (default, offline) — macOS `say` voice `Meijia`
+  (美佳); no quota, tighter length control, more robotic. `--rate` sets
+  speaking rate (say only).
+
+Other overridable flags: `--bg-volume`, `--font`, `--input`,
+`--text`/`--line`.
 
 The script speaks each line separately to measure its duration (so captions
 stay in sync), keeps the original ambient bed low under the narration, and
@@ -402,7 +421,7 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 | Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
 | Reel prompt output | `outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
-| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4`; `uv run python -m scripts.daily_video_post --date X` adds zh-TW `say` voiceover + burned-in captions from `narration.txt` → `final.mp4` |
+| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4`; `uv run python -m scripts.daily_video_post --date X [--engine gemini]` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Kore) preferred; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |

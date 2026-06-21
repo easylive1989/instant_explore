@@ -44,7 +44,11 @@ logger = logging.getLogger("daily_video_post")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-DEFAULT_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
+DEFAULT_SAY_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
+DEFAULT_GEMINI_VOICE = "Kore"  # Warm female prebuilt Gemini TTS voice.
+GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+# Natural-language style steer prepended to each line for Gemini TTS.
+DEFAULT_GEMINI_STYLE = "用溫暖、沉穩、語速稍快的紀錄片旁白語氣說："
 DEFAULT_FONT = "/System/Library/Fonts/STHeiti Medium.ttc"  # CJK font file.
 DEFAULT_BG_VOLUME = 0.28  # Ambient kept audible but well under the voiceover.
 LEAD_IN_SECONDS = 0.3  # Small silence before the first line starts.
@@ -66,8 +70,11 @@ def _run(cmd: list[str], *, cwd: Path | None = None) -> None:
         )
 
 
-def _require_tools() -> None:
-    for tool in ("say", "ffmpeg", "ffprobe"):
+def _require_tools(engine: str) -> None:
+    tools = ["ffmpeg", "ffprobe"]
+    if engine == "say":
+        tools.append("say")
+    for tool in tools:
         if shutil.which(tool) is None:
             raise PostProductionError(
                 f"required tool {tool!r} not found on PATH"
@@ -131,7 +138,8 @@ def _make_silence(path: Path, seconds: float) -> None:
     ])
 
 
-def _speak_line(text: str, voice: str, rate: int | None, dest: Path) -> None:
+def _say_to_wav(text: str, voice: str, rate: int | None, dest: Path) -> None:
+    """Synthesize one line with macOS `say` into a 44.1k mono wav."""
     aiff = dest.with_suffix(".aiff")
     cmd = ["say", "-v", voice]
     if rate:
@@ -145,9 +153,48 @@ def _speak_line(text: str, voice: str, rate: int | None, dest: Path) -> None:
     aiff.unlink(missing_ok=True)
 
 
+def _gemini_to_wav(
+    client, voice: str, style: str, text: str, dest: Path
+) -> None:
+    """Synthesize one line with Gemini TTS into a 44.1k mono wav.
+
+    Gemini returns raw little-endian 16-bit PCM whose sample rate is in the
+    inline-data mime type (e.g. ``audio/L16;rate=24000``); ffmpeg reads it
+    raw and resamples to the pipeline's 44.1k mono.
+    """
+    from google.genai import types
+
+    response = client.models.generate_content(
+        model=GEMINI_TTS_MODEL,
+        contents=f"{style}{text}",
+        config=types.GenerateContentConfig(
+            response_modalities=["AUDIO"],
+            speech_config=types.SpeechConfig(
+                voice_config=types.VoiceConfig(
+                    prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                        voice_name=voice
+                    )
+                )
+            ),
+        ),
+    )
+    inline = response.candidates[0].content.parts[0].inline_data
+    rate = "24000"
+    for token in (inline.mime_type or "").split(";"):
+        if token.strip().startswith("rate="):
+            rate = token.split("=", 1)[1].strip()
+    pcm = dest.with_suffix(".pcm")
+    pcm.write_bytes(inline.data)
+    _run([
+        "ffmpeg", "-y", "-f", "s16le", "-ar", rate, "-ac", "1",
+        "-i", str(pcm),
+        "-ar", str(AUDIO_RATE), "-ac", "1", "-c:a", "pcm_s16le", str(dest),
+    ])
+    pcm.unlink(missing_ok=True)
+
+
 def _build_voice_track(
-    lines: list[str], voice: str, rate: int | None,
-    work_dir: Path, voice_path: Path,
+    lines: list[str], synth, work_dir: Path, voice_path: Path,
 ) -> list[tuple[float, float, str]]:
     """Speak each line, concat with pauses; return (start, end, text) rows."""
     pause_path = work_dir / "pause.wav"
@@ -160,7 +207,7 @@ def _build_voice_track(
     cursor = LEAD_IN_SECONDS
     for index, text in enumerate(lines, start=1):
         chunk = work_dir / f"chunk_{index}.wav"
-        _speak_line(text, voice, rate, chunk)
+        synth(text, chunk)
         duration = _ffprobe_duration(chunk)
         timings.append((cursor, cursor + duration, text))
         cursor += duration + PAUSE_SECONDS
@@ -291,8 +338,41 @@ def _render(
     return padded
 
 
+def _build_gemini_client():
+    """Build a google-genai client from the backend's .env / config.
+
+    Reuses the project's GenaiSettings (AI Studio key or Vertex) so the
+    backend switch stays in one place. GOOGLE_API_KEY is popped first: the
+    SDK prefers it over GEMINI_API_KEY, but on this machine it is a
+    non-Gemini key.
+    """
+    import os
+
+    from dotenv import load_dotenv
+
+    load_dotenv(REPO_ROOT / "backend" / ".env")
+    os.environ.pop("GOOGLE_API_KEY", None)
+    from lorescape_backend.config import Config
+    from lorescape_backend.shared.genai import build_client
+
+    return build_client(Config.from_env().genai_settings)
+
+
+def _make_synth(engine: str, voice: str, rate: int | None, style: str):
+    """Return a ``synth(text, dest)`` callable for the chosen TTS engine."""
+    if engine == "gemini":
+        client = _build_gemini_client()
+        return lambda text, dest: _gemini_to_wav(
+            client, voice, style, text, dest
+        )
+    return lambda text, dest: _say_to_wav(text, voice, rate, dest)
+
+
 def cmd_build(args: argparse.Namespace) -> int:
-    _require_tools()
+    _require_tools(args.engine)
+    voice = args.voice or (
+        DEFAULT_GEMINI_VOICE if args.engine == "gemini" else DEFAULT_SAY_VOICE
+    )
 
     out_dir = REPO_ROOT / "outputs" / "daily_video" / args.date
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -323,9 +403,9 @@ def cmd_build(args: argparse.Namespace) -> int:
     work_dir.mkdir()
 
     voice_path = out_dir / "voice.wav"
-    timings = _build_voice_track(
-        lines, args.voice, args.rate, work_dir, voice_path
-    )
+    synth = _make_synth(args.engine, voice, args.rate, args.style)
+    logger.info("tts: engine=%s voice=%s", args.engine, voice)
+    timings = _build_voice_track(lines, synth, work_dir, voice_path)
     voice_dur = _ffprobe_duration(voice_path)
     logger.info("voiceover: %.2fs", voice_dur)
 
@@ -374,11 +454,21 @@ def main(argv: list[str]) -> int:
         "--text)"
     )
     parser.add_argument(
-        "--voice", default=DEFAULT_VOICE,
-        help=f"macOS say voice (default: {DEFAULT_VOICE})"
+        "--engine", choices=("say", "gemini"), default="say",
+        help="TTS engine (default: say). 'gemini' uses the backend's "
+        "GEMINI_API_KEY / GenaiSettings."
     )
     parser.add_argument(
-        "--rate", type=int, help="say speaking rate (default: system default)"
+        "--voice", default=None,
+        help=f"Voice name. Default: {DEFAULT_SAY_VOICE} (say) / "
+        f"{DEFAULT_GEMINI_VOICE} (gemini)."
+    )
+    parser.add_argument(
+        "--rate", type=int, help="say speaking rate (say engine only)"
+    )
+    parser.add_argument(
+        "--style", default=DEFAULT_GEMINI_STYLE,
+        help="Gemini TTS style steer prepended to each line"
     )
     parser.add_argument(
         "--font", default=DEFAULT_FONT,
