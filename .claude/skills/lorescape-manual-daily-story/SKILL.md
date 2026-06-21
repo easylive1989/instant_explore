@@ -389,6 +389,30 @@ kept but ducked to ~28% under the voiceover. Two TTS engines:
 Other overridable flags: `--bg-volume`, `--font`, `--input`,
 `--text`/`--line`.
 
+**Watermark removal + brand lockup (`--delogo` + `--badge`).** Flow/Veo
+clips carry a visible Gemini diamond watermark. Erase it with
+`--delogo x,y,w,h` (an ffmpeg delogo region) and cover the spot with the
+Lorescape brand lockup via `--badge docs/ig/lorescape-lockup.png
+--badge-x X --badge-y Y` (the lockup = logo + "Lorescape", on transparent
+bg). The badge defaults to the bottom-right corner if `--badge-x/y` are
+omitted.
+
+⚠️ **Google moves the watermark per video**, so the coordinates are NOT
+fixed — measure them each run before setting `--delogo`/`--badge-*`:
+extract ~20 frames and average them (`fps=2` → mean), which blurs the
+moving background and leaves the static watermark crisp; read its bounding
+box off the averaged frame. (An opaque badge can cover the mark without
+`--delogo`; the current transparent lockup needs `--delogo` underneath.)
+
+Example (this is a per-video measurement, not a reusable constant):
+
+```bash
+cd backend && uv run python -m scripts.daily_video_post --date {date} \
+    --engine gemini \
+    --delogo 852,1694,88,84 \
+    --badge docs/ig/lorescape-lockup.png --badge-x 772 --badge-y 1669
+```
+
 The script speaks each line separately to measure its duration (so captions
 stay in sync), keeps the original ambient bed low under the narration, and
 if the voiceover runs past the clip it holds the last frame so nothing is

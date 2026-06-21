@@ -289,52 +289,95 @@ def _render_caption_pngs(
 
 
 def _render(
-    source: Path, voice_path: Path,
-    captions: list[tuple[Path, float, float]], out_dir: Path,
+    source: Path, voice_path: Path | None,
+    captions: list[tuple[Path, float, float]],
+    badge: tuple[Path, int, int] | None,
+    delogo: tuple[int, int, int, int] | None, out_dir: Path,
     final_path: Path, bg_volume: float, voice_dur: float, video_dur: float,
     has_audio: bool,
 ) -> bool:
-    """Composite captions + audio into final.mp4; return whether padded."""
-    inputs = ["-i", str(source), "-i", str(voice_path)]
+    """Composite delogo + badge + captions + audio; return if padded.
+
+    ``voice_path`` None means no narration: original audio is kept and no
+    captions are burned (caption timing comes from the voiceover). ``badge``
+    is an optional ``(path, x, y)`` brand mark overlaid full-duration on top.
+    ``delogo`` is an optional ``(x, y, w, h)`` region blurred away first (to
+    erase the Flow/Veo watermark before the brand mark covers it).
+    """
+    inputs = ["-i", str(source)]
+    index = 1
+    voice_idx = None
+    if voice_path is not None:
+        inputs += ["-i", str(voice_path)]
+        voice_idx = index
+        index += 1
+    caption_idx0 = index
     for png, _start, _end in captions:
         inputs += ["-i", str(png)]
+        index += 1
+    badge_idx = None
+    if badge is not None:
+        inputs += ["-i", str(badge[0])]
+        badge_idx = index
+        index += 1
 
-    parts: list[str] = []
-    padded = voice_dur > video_dur + 0.05
+    vparts: list[str] = []
+    padded = voice_path is not None and voice_dur > video_dur + 0.05
+    current = "[0:v]"
+    if delogo is not None:
+        dx, dy, dw, dh = delogo
+        vparts.append(f"{current}delogo=x={dx}:y={dy}:w={dw}:h={dh}[vdl]")
+        current = "[vdl]"
     if padded:
-        parts.append(
-            f"[0:v]tpad=stop_mode=clone:"
+        vparts.append(
+            f"{current}tpad=stop_mode=clone:"
             f"stop_duration={voice_dur - video_dur:.3f}[vbase]"
         )
         current = "[vbase]"
-    else:
-        current = "[0:v]"
-    for index, (_png, start, end) in enumerate(captions):
-        overlay_in = f"[{2 + index}:v]"
-        label = "[v]" if index == len(captions) - 1 else f"[vo{index}]"
-        parts.append(
-            f"{current}{overlay_in}overlay=eof_action=repeat:"
-            f"enable='between(t,{start:.3f},{end:.3f})'{label}"
-        )
+
+    overlays = [
+        (f"[{caption_idx0 + i}:v]",
+         f"overlay=eof_action=repeat:enable='between(t,{s:.3f},{e:.3f})'")
+        for i, (_png, s, e) in enumerate(captions)
+    ]
+    if badge_idx is not None:
+        bx, by = badge[1], badge[2]
+        overlays.append((f"[{badge_idx}:v]", f"overlay={bx}:{by}"))
+    for pos, (overlay_in, op) in enumerate(overlays):
+        label = "[v]" if pos == len(overlays) - 1 else f"[vo{pos}]"
+        vparts.append(f"{current}{overlay_in}{op}{label}")
         current = label
+    video_map = current if vparts else "0:v"
 
-    if has_audio:
-        parts.append(
-            f"[0:a]volume={bg_volume}[bg];[1:a]volume=1.0[vo];"
-            "[bg][vo]amix=inputs=2:duration=longest:dropout_transition=0:"
-            "normalize=0[a]"
-        )
+    aparts: list[str] = []
+    if voice_path is not None:
+        if has_audio:
+            aparts.append(
+                f"[0:a]volume={bg_volume}[bg];[{voice_idx}:a]volume=1.0[vo];"
+                "[bg][vo]amix=inputs=2:duration=longest:dropout_transition=0:"
+                "normalize=0[a]"
+            )
+        else:
+            aparts.append(
+                f"[{voice_idx}:a]volume=1.0,aresample={AUDIO_RATE}[a]"
+            )
+        audio_map = "[a]"
     else:
-        parts.append(f"[1:a]volume=1.0,aresample={AUDIO_RATE}[a]")
+        audio_map = "0:a" if has_audio else None
 
-    _run([
-        "ffmpeg", "-y", *inputs,
-        "-filter_complex", ";".join(parts),
-        "-map", "[v]", "-map", "[a]",
+    filter_complex = ";".join(vparts + aparts)
+    cmd = ["ffmpeg", "-y", *inputs]
+    if filter_complex:
+        cmd += ["-filter_complex", filter_complex]
+    cmd += ["-map", video_map]
+    if audio_map:
+        cmd += ["-map", audio_map]
+    cmd += [
         "-c:v", "libx264", "-preset", "medium", "-crf", "20",
         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
         "-movflags", "+faststart", str(final_path),
-    ], cwd=out_dir)
+    ]
+    _run(cmd, cwd=out_dir)
     return padded
 
 
@@ -368,6 +411,41 @@ def _make_synth(engine: str, voice: str, rate: int | None, style: str):
     return lambda text, dest: _say_to_wav(text, voice, rate, dest)
 
 
+def _resolve_badge(
+    args: argparse.Namespace, width: int, height: int
+) -> tuple[Path, int, int] | None:
+    """Resolve the optional brand badge to ``(path, x, y)`` top-left.
+
+    Position is fixed/configurable: ``--badge-x``/``--badge-y`` override,
+    otherwise the badge sits in the bottom-right corner with a margin.
+    """
+    if not args.badge:
+        return None
+    path = Path(args.badge)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if not path.exists():
+        raise PostProductionError(f"badge image not found: {path}")
+    bw, bh = Image.open(path).size
+    margin = 44
+    x = args.badge_x if args.badge_x is not None else width - bw - margin
+    y = args.badge_y if args.badge_y is not None else height - bh - margin
+    return (path, x, y)
+
+
+def _parse_delogo(spec: str | None) -> tuple[int, int, int, int] | None:
+    """Parse a ``"x,y,w,h"`` delogo region string into a tuple."""
+    if not spec:
+        return None
+    try:
+        x, y, w, h = (int(v) for v in spec.split(","))
+    except ValueError as exc:
+        raise PostProductionError(
+            f"--delogo must be 'x,y,w,h' integers, got {spec!r}"
+        ) from exc
+    return (x, y, w, h)
+
+
 def cmd_build(args: argparse.Namespace) -> int:
     _require_tools(args.engine)
     voice = args.voice or (
@@ -387,15 +465,28 @@ def cmd_build(args: argparse.Namespace) -> int:
             f"outputs/daily_video/{args.date}/source.mp4 (or pass --input)."
         )
 
-    lines = _read_lines(args, out_dir)
-    logger.info("narration: %d line(s)", len(lines))
-
     width, height = _ffprobe_dimensions(source)
     video_dur = _ffprobe_duration(source)
     has_audio = _has_audio_stream(source)
+    badge = _resolve_badge(args, width, height)
+    delogo = _parse_delogo(args.delogo)
     logger.info(
-        "source %dx%d, %.2fs, audio=%s", width, height, video_dur, has_audio
+        "source %dx%d, %.2fs, audio=%s, badge=%s, delogo=%s",
+        width, height, video_dur, has_audio, bool(badge), bool(delogo),
     )
+    final_path = out_dir / "final.mp4"
+
+    if args.no_voice:
+        logger.info("no-voice: branding + original audio only")
+        _render(
+            source, None, [], badge, delogo, out_dir, final_path,
+            args.bg_volume, 0.0, video_dur, has_audio,
+        )
+        logger.info("done: %s (%.2fs)", final_path, video_dur)
+        return 0
+
+    lines = _read_lines(args, out_dir)
+    logger.info("narration: %d line(s)", len(lines))
 
     work_dir = out_dir / ".work"
     if work_dir.exists():
@@ -413,9 +504,8 @@ def cmd_build(args: argparse.Namespace) -> int:
         timings, width, height, args.font, work_dir
     )
 
-    final_path = out_dir / "final.mp4"
     padded = _render(
-        source, voice_path, captions, out_dir, final_path,
+        source, voice_path, captions, badge, delogo, out_dir, final_path,
         args.bg_volume, voice_dur, video_dur, has_audio,
     )
 
@@ -477,6 +567,26 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--bg-volume", type=float, default=DEFAULT_BG_VOLUME,
         help=f"Ambient volume under narration (default: {DEFAULT_BG_VOLUME})"
+    )
+    parser.add_argument(
+        "--badge", help="Brand badge PNG overlaid on the video (e.g. to "
+        "cover the Flow/Veo watermark)"
+    )
+    parser.add_argument(
+        "--badge-x", type=int, help="Badge top-left x (default: bottom-right "
+        "corner)"
+    )
+    parser.add_argument(
+        "--badge-y", type=int, help="Badge top-left y (default: bottom-right "
+        "corner)"
+    )
+    parser.add_argument(
+        "--no-voice", action="store_true", help="Skip narration + captions; "
+        "keep original audio (brand-only preview)"
+    )
+    parser.add_argument(
+        "--delogo", help="Watermark region 'x,y,w,h' to erase before the "
+        "badge covers it (Google moves it per video — measure per run)"
     )
 
     args = parser.parse_args(argv)
