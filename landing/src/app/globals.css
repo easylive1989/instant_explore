@@ -225,6 +225,58 @@
     padding: 0 22px;
     text-align: left;
   }
+  .btn--store-custom {
+    background: #221c14 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 16px !important;
+    height: 54px !important;
+    padding: 0 22px !important;
+    min-width: 170px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: none !important;
+    transition:
+      background-color 0.2s ease,
+      transform 0.15s ease !important;
+  }
+  .btn--store-custom:hover {
+    background: #352d24 !important;
+  }
+  .btn--store-custom:active {
+    transform: translateY(1px) !important;
+  }
+  .btn--store-custom svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+  .btn--store-custom .icon-apple {
+    width: 30px !important;
+    height: 30px !important;
+    margin-right: -2px;
+  }
+  .btn--store-custom .icon-googleplay {
+    width: 21px !important;
+    height: 21px !important;
+  }
+  .btn--store-custom .sm {
+    font-size: 10px !important;
+    font-weight: 500;
+    opacity: 0.9;
+    display: block;
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+    color: #ffffff !important;
+  }
+  .btn--store-custom .lg {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    display: block;
+    line-height: 1.2;
+    color: #ffffff !important;
+  }
 
   /* Legacy pill buttons kept for non-home pages */
   .btn-clay {
