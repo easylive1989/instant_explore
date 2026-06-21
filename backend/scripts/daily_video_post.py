@@ -180,14 +180,24 @@ def _build_voice_track(
     return timings
 
 
+# CJK closing punctuation that must not start a line (避頭尾 / kinsoku rule).
+_NO_LINE_START = set("。，、；：！？）〕】」』》〉”’%")
+
+
 def _wrap(
     text: str, font: ImageFont.FreeTypeFont, max_width: float
 ) -> list[str]:
-    """Greedily wrap text to max_width; breaks between characters (CJK-safe)."""
+    """Greedily wrap text to max_width; breaks between characters (CJK-safe).
+
+    Trailing closing punctuation is kept on the current line rather than
+    orphaned onto the next one, even if it slightly overflows the width.
+    """
     lines: list[str] = []
     current = ""
     for char in text:
-        if font.getlength(current + char) <= max_width:
+        fits = font.getlength(current + char) <= max_width
+        keep_punct = char in _NO_LINE_START and current
+        if fits or keep_punct:
             current += char
         else:
             if current:
