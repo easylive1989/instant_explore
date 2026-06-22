@@ -77,3 +77,47 @@ def test_build_caption_raises_when_nothing_available(mocker):
             date_str="2026-06-22",
             override=None,
         )
+
+
+def test_main_returns_1_and_prints_error_on_publish_failure(
+    tmp_path, mocker
+):
+    day_dir = tmp_path / "2026-06-22"
+    day_dir.mkdir()
+    (day_dir / "final.mp4").write_bytes(b"v")
+    mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch.object(
+        publish_reel,
+        "_build_caption",
+        return_value="some caption",
+    )
+
+    config = SimpleNamespace(
+        instagram_enabled=True,
+        ig_user_id="ig1",
+        meta_page_access_token="tok",
+        supabase_url="https://x.supabase.co",
+        supabase_service_role_key="key",
+        brand_handle_ig="@lorescape",
+        cta_text="Explore.",
+    )
+    mocker.patch(
+        "scripts.publish_reel.Config.from_env", return_value=config
+    )
+    mocker.patch(
+        "scripts.publish_reel.create_client", return_value=object()
+    )
+    mocker.patch(
+        "scripts.publish_reel.instagram.publish_reel",
+        side_effect=RuntimeError("Reel container c1 failed: ERROR detail"),
+    )
+
+    import io
+    stderr_capture = io.StringIO()
+    mocker.patch("sys.stderr", stderr_capture)
+
+    result = publish_reel.main(["2026-06-22"])
+
+    assert result == 1
+    assert "Reel container c1 failed" in stderr_capture.getvalue()

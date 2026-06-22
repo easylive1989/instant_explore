@@ -110,11 +110,35 @@ def test_publish_reel_raises_when_container_errors(requests_mock, tmp_path):
     )
     requests_mock.get(
         "https://graph.facebook.com/v21.0/reel-container-2",
-        json={"status_code": "ERROR"},
+        json={"status_code": "ERROR", "status": "Video aspect ratio invalid"},
     )
 
     with patch("lorescape_backend.social.instagram.time.sleep"):
-        with pytest.raises(RuntimeError):
+        with pytest.raises(RuntimeError) as exc_info:
+            publish_reel(
+                ig_user_id="ig1",
+                access_token="tok",
+                video_path=str(video),
+                caption="c",
+            )
+    assert "Video aspect ratio invalid" in str(exc_info.value)
+
+
+def test_publish_reel_raises_when_upload_rejected(requests_mock, tmp_path):
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"x")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "reel-container-3"},
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-container-3",
+        json={"success": False, "error": "rejected"},
+    )
+
+    with patch("lorescape_backend.social.instagram.time.sleep"):
+        with pytest.raises(RuntimeError, match="not accepted"):
             publish_reel(
                 ig_user_id="ig1",
                 access_token="tok",

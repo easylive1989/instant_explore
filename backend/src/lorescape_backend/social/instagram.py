@@ -143,6 +143,7 @@ def _upload_reel_bytes(
         f"{RUPLOAD_API}/{container_id}",
         headers={
             "Authorization": f"OAuth {access_token}",
+            "Content-Type": "application/octet-stream",
             "offset": "0",
             "file_size": str(file_size),
         },
@@ -150,22 +151,31 @@ def _upload_reel_bytes(
         timeout=_UPLOAD_TIMEOUT,
     )
     response.raise_for_status()
+    body = response.json()
+    if not body.get("success", True):
+        raise RuntimeError(f"Reel upload was not accepted: {body}")
 
 
 def _wait_until_finished(*, container_id: str, access_token: str) -> None:
     for _ in range(_REEL_POLL_MAX_ATTEMPTS):
         response = requests.get(
             f"{META_GRAPH_API}/{container_id}",
-            params={"fields": "status_code", "access_token": access_token},
+            params={
+                "fields": "status_code,status",
+                "access_token": access_token,
+            },
             timeout=_REQUEST_TIMEOUT,
         )
         response.raise_for_status()
-        status = response.json().get("status_code")
+        payload = response.json()
+        status = payload.get("status_code")
         if status == "FINISHED":
             return
         if status in ("ERROR", "EXPIRED"):
+            detail = payload.get("status", "")
             raise RuntimeError(
-                f"Reel container {container_id} failed: {status}"
+                f"Reel container {container_id} failed: "
+                f"{status} {detail}".strip()
             )
         time.sleep(_REEL_POLL_INTERVAL_SECONDS)
     raise TimeoutError(

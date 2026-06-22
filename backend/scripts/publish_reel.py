@@ -137,12 +137,16 @@ def main(argv: list[str]) -> int:
         )
         return 1
 
-    post_id = instagram.publish_reel(
-        ig_user_id=config.ig_user_id,
-        access_token=config.meta_page_access_token,
-        video_path=str(video),
-        caption=ig_caption,
-    )
+    try:
+        post_id = instagram.publish_reel(
+            ig_user_id=config.ig_user_id,
+            access_token=config.meta_page_access_token,
+            video_path=str(video),
+            caption=ig_caption,
+        )
+    except Exception as exc:
+        print(f"Publish failed: {exc}", file=sys.stderr)
+        return 1
     print(f"Published reel: {post_id}")
     return 0
 
