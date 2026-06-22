@@ -14,7 +14,7 @@ BRAND_TAGS: tuple[str, ...] = (
     "Travel",
     "History",
     "Culture",
-    "InstantExplore",
+    "Lorescape",
 )
 
 # Hard platform limit for IG captions.
