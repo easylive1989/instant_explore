@@ -15,7 +15,7 @@ from lorescape_backend.narration.dependencies import (
 )
 from lorescape_backend.narration.routes import get_config, router
 from lorescape_backend.subscriptions.dependencies import (
-    get_subscription_repository,
+    get_subscription_checker,
 )
 
 
@@ -38,6 +38,8 @@ def _fake_config() -> Config:
 
 
 class _FakeSubscriptions:
+    """Stand-in for the SubscriptionChecker gate the route depends on."""
+
     def __init__(self, subscribed: bool = False) -> None:
         self._subscribed = subscribed
 
@@ -72,7 +74,7 @@ def _make_app(
     app.dependency_overrides[require_user] = lambda: AuthedUser(
         user_id="user-1", is_anonymous=False
     )
-    app.dependency_overrides[get_subscription_repository] = (
+    app.dependency_overrides[get_subscription_checker] = (
         lambda: subscriptions or _FakeSubscriptions()
     )
     app.dependency_overrides[get_hooks_cache_repository] = (
@@ -244,7 +246,7 @@ def test_narration_route_401_without_bearer_token():
     app.include_router(router)
     app.dependency_overrides[get_config] = _fake_config
     app.dependency_overrides[get_token_verifier] = lambda: _NeverVerifier()
-    app.dependency_overrides[get_subscription_repository] = _FakeSubscriptions
+    app.dependency_overrides[get_subscription_checker] = _FakeSubscriptions
     client = TestClient(app)
 
     res = client.post(

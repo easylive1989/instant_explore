@@ -43,9 +43,14 @@ class FakeSupabaseClient:
 class FakeSubscriptionRepository:
     """Captures applied events and serves canned subscriber lists."""
 
-    def __init__(self, user_ids: list[str] | None = None) -> None:
+    def __init__(self, user_ids: list[str] | None = None,
+                 subscribed: bool = False) -> None:
         self.applied: list[SubscriptionEvent] = []
         self._user_ids = user_ids or []
+        self._subscribed = subscribed
+
+    def is_subscribed(self, _user_id: str) -> bool:
+        return self._subscribed
 
     def apply_event(self, event: SubscriptionEvent) -> None:
         self.applied.append(event)

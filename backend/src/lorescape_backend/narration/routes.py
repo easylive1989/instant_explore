@@ -23,9 +23,9 @@ from lorescape_backend.narration.models import (
     NarrationResponse,
 )
 from lorescape_backend.subscriptions.dependencies import (
-    get_subscription_repository,
+    get_subscription_checker,
 )
-from lorescape_backend.subscriptions.repository import SubscriptionRepository
+from lorescape_backend.subscriptions.service import SubscriptionChecker
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ def post_narration(
     request: NarrationRequest,
     config: Config = Depends(get_config),
     user: AuthedUser = Depends(require_user),
-    subscriptions: SubscriptionRepository = Depends(get_subscription_repository),
+    subscriptions: SubscriptionChecker = Depends(get_subscription_checker),
 ) -> NarrationResponse:
     """Return the long-form 3-paragraph story for the given place.
 
