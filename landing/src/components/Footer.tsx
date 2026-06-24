@@ -40,6 +40,7 @@ export default function Footer() {
               <h4>法律</h4>
               <a href="/privacy">隱私政策</a>
               <a href="/terms">使用條款</a>
+              <a href="/credits">圖片來源</a>
             </div>
           </div>
         </div>
