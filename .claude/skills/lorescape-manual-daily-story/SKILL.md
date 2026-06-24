@@ -287,8 +287,17 @@ live UI.
 - **Concept** — the guide walks the place and warmly presents it: a
   knowing smile, gesturing at the architecture as if telling its story.
   Knowledgeable, intimate documentary feel — matches Lorescape's "voice
-  tour guide" brand. (For a face-less variant, use the lone-traveler /
-  from-behind framing with `actor_5`.)
+  tour guide" brand. Three standing variants (the user picks; each is a
+  separate paid generation):
+  - **Guide-led** (default) — `actor_2.png` + place photo as Ingredients;
+    the guide steps into frame and presents the place. Front face visible.
+  - **From-behind / faceless** — `actor_5.png` (back view) + place photo;
+    a lone figure gazes out at the place. Still a person, no face.
+  - **Place-only / no-guide** ("無導覽員版本") — **drop the actor
+    Ingredient entirely**, keep ONLY the place photo, and rewrite the
+    prompt as a pure camera move with **no person** (drone-style glide /
+    push-in / shoreline drift) ending with an explicit `No people, no
+    on-screen text.` Quiet, immersive, POV-traveler feel.
 - **Flow settings** — Omni Flash · 視頻 · 素材 (Ingredients) · **9:16** · 10s · 1x.
   IG Reels are vertical, so always generate **9:16** (Flow defaults to
   16:9 — switch it in the settings panel before sending).
@@ -323,6 +332,24 @@ Google OAuth login is theirs.
   `aria-disabled="false"` before clicking; the first send is sometimes a
   no-op, so confirm a new generating tile appears in the gallery before
   re-sending (a blind re-send double-charges credits).
+- **Dropping an Ingredient for the place-only variant** — each thumbnail
+  already in the prompt box carries its own remove button (find the
+  `img`'s nearest `button` ancestor, labelled `cancel`, and `.click()`
+  it). The picker re-filters so an already-added asset disappears from the
+  list; a removed one reappears.
+- **Re-editing the prompt after a JS delete breaks Slate (2026-06)** —
+  once you `execCommand('delete')` / clear the box via JS, the Slate
+  selection model goes stale and **every** `beforeinput` insert
+  (`insertText` *and* `insertFromPaste`) silently no-ops — `textContent`
+  stays length 0 even though `focusedOk` reads true. Recover with a **real
+  `computer.left_click` into the box** (a trusted pointer event rebuilds
+  Slate's selection), confirm `document.activeElement` is the
+  `contenteditable`, then `computer.type` the new prompt. Map the click
+  coord by the screenshot↔CSS scale: `screenshot_xy = css_xy ×
+  (screenshot_innerW / window.innerWidth)` (≈ 0.80 at 1542-wide
+  screenshots / 1920 CSS). The fresh-editor first injection still works
+  with the §0 `beforeinput` sequence; this gotcha is **only** on re-edits
+  after a delete.
 
 Then present the Flow result in chat. Offer preview / download (download
 needs explicit permission) / regenerate a variant — then continue to
