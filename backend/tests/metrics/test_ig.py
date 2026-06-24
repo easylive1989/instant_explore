@@ -1,0 +1,34 @@
+# backend/tests/metrics/test_ig.py
+from __future__ import annotations
+
+from scripts.metrics import ig
+from scripts.metrics._common import MetricsConfig
+
+
+INSIGHTS = {
+    "data": [
+        {"name": "reach", "values": [{"value": 1500}]},
+        {"name": "profile_views", "values": [{"value": 90}]},
+    ]
+}
+PROFILE = {"followers_count": 320, "media_count": 48}
+
+
+def test_parse_account_insights_rows():
+    rows = ig.parse_account_insights(INSIGHTS)
+    assert ["reach", "1500"] in rows
+    assert ["profile_views", "90"] in rows
+
+
+def test_parse_profile_lines():
+    lines = ig.parse_profile(PROFILE)
+    assert any("320" in ln for ln in lines)
+    assert any("48" in ln for ln in lines)
+
+
+def test_fetch_ig_skips_without_credentials():
+    r = ig.fetch_ig(MetricsConfig(ig_user_id=None,
+                                  meta_page_access_token=None),
+                    "2026-06-17", "2026-06-23")
+    assert r.ok is False
+    assert "IG" in (r.skipped_reason or "").upper()
