@@ -22,6 +22,10 @@ Source = Callable[[MetricsConfig, str, str], SourceResult]
 # Later tasks register "gsc", "ga4", "ig" here.
 SOURCES: dict[str, Source] = {}
 
+from scripts.metrics.gsc import fetch_gsc  # noqa: E402
+
+SOURCES["gsc"] = fetch_gsc
+
 # Minimum config each source needs to even attempt a fetch.
 _REQUIRED: dict[str, tuple[str, ...]] = {
     "gsc": ("gsc_site_url",),
