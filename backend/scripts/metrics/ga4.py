@@ -50,10 +50,12 @@ def fetch_ga4(cfg: MetricsConfig, start: str, end: str) -> SourceResult:
 
     rows: list[list[str]] = []
     summary: list[str] = []
+    errors = 0
     for label, pid in configured:
         try:
             resp = _run_report(pid, start, end)
         except Exception as exc:
+            errors += 1
             summary.append(f"{label}: API error: {exc}")
             continue
         prop_rows = parse_run_report(resp, label)
@@ -61,7 +63,7 @@ def fetch_ga4(cfg: MetricsConfig, start: str, end: str) -> SourceResult:
         users = sum(int(r[2]) for r in prop_rows if r[2].isdigit())
         summary.append(f"{label} active users {users}（{len(prop_rows)} 來源）")
 
-    if not rows and summary:
+    if errors == len(configured):
         return SourceResult.skipped("ga4", "; ".join(summary))
     return SourceResult(
         name="ga4", ok=True, summary_lines=summary,
