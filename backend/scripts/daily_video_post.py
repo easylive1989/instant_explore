@@ -335,14 +335,15 @@ def _render(
         )
         current = "[vbase]"
 
-    overlays = [
+    overlays = []
+    if badge_idx is not None:
+        bx, by = badge[1], badge[2]
+        overlays.append((f"[{badge_idx}:v]", f"overlay={bx}:{by}"))
+    overlays += [
         (f"[{caption_idx0 + i}:v]",
          f"overlay=eof_action=repeat:enable='between(t,{s:.3f},{e:.3f})'")
         for i, (_png, s, e) in enumerate(captions)
     ]
-    if badge_idx is not None:
-        bx, by = badge[1], badge[2]
-        overlays.append((f"[{badge_idx}:v]", f"overlay={bx}:{by}"))
     for pos, (overlay_in, op) in enumerate(overlays):
         label = "[v]" if pos == len(overlays) - 1 else f"[vo{pos}]"
         vparts.append(f"{current}{overlay_in}{op}{label}")
