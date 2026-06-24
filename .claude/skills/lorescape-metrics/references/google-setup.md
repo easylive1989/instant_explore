@@ -22,6 +22,6 @@ GSC 與 GA4 都用 Application Default Credentials (ADC)，由使用者本機一
 ## 3. 找出 GA4 numeric property ID
 
 - GA4 後台 → 管理 → 資源設定 → 「資源 ID」（純數字）。
-- 或讓 skill 用 GA4 Admin API 自動列出（見 ga4.py 的 `--list-properties`）。
+- 自動探測（GA4 Admin API）為未來功能，目前請從 GA4 後台手動讀 ID。
 - `GSC_SITE_URL` 必須與 Search Console 顯示的 property 完全一致（含 `https://`、
   結尾斜線，或 `sc-domain:` 前綴）。

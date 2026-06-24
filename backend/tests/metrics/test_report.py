@@ -46,3 +46,17 @@ def test_main_check_does_not_write(tmp_path, monkeypatch, capsys):
     assert rc == 0
     assert not (tmp_path / "docs" / "metrics").exists()
     assert "gsc" in capsys.readouterr().out
+
+
+def test_check_lines_ga4_ready_with_only_app():
+    cfg = MetricsConfig(ga4_property_id_web=None, ga4_property_id_app="123")
+    lines = report.check_lines(cfg, ["ga4"])
+    assert "ga4: ready" in "\n".join(lines)
+
+
+def test_check_lines_ga4_missing_when_neither():
+    cfg = MetricsConfig(ga4_property_id_web=None, ga4_property_id_app=None)
+    lines = report.check_lines(cfg, ["ga4"])
+    joined = "\n".join(lines)
+    assert "missing" in joined.lower()
+    assert "GA4_PROPERTY_ID_WEB or GA4_PROPERTY_ID_APP" in joined

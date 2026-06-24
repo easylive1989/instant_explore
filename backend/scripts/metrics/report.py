@@ -37,7 +37,6 @@ SOURCES["ig"] = fetch_ig
 # Minimum config each source needs to even attempt a fetch.
 _REQUIRED: dict[str, tuple[str, ...]] = {
     "gsc": ("gsc_site_url",),
-    "ga4": ("ga4_property_id_web",),
     "ig": ("ig_user_id", "meta_page_access_token"),
 }
 
@@ -50,6 +49,16 @@ def check_lines(cfg: MetricsConfig, names: list[str]) -> list[str]:
     """One readiness line per source; pure, no network."""
     lines: list[str] = []
     for name in names:
+        if name == "ga4":
+            ready = bool(cfg.ga4_property_id_web or cfg.ga4_property_id_app)
+            if ready:
+                lines.append("- ga4: ready")
+            else:
+                lines.append(
+                    "- ga4: missing config → "
+                    "GA4_PROPERTY_ID_WEB or GA4_PROPERTY_ID_APP"
+                )
+            continue
         required = _REQUIRED.get(name, ())
         missing = [f for f in required if not getattr(cfg, f)]
         if missing:
@@ -124,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
 
     cfg = MetricsConfig.from_env()
     all_names = list(SOURCES.keys()) or ["gsc", "ga4", "ig"]
-    names = args.only.split(",") if args.only else all_names
+    names = [s.strip() for s in args.only.split(",")] if args.only else all_names
     start, end = date_range(
         days=args.days, start=args.start, end=args.end
     )
