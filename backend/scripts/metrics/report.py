@@ -26,6 +26,10 @@ from scripts.metrics.gsc import fetch_gsc  # noqa: E402
 
 SOURCES["gsc"] = fetch_gsc
 
+from scripts.metrics.ga4 import fetch_ga4  # noqa: E402
+
+SOURCES["ga4"] = fetch_ga4
+
 # Minimum config each source needs to even attempt a fetch.
 _REQUIRED: dict[str, tuple[str, ...]] = {
     "gsc": ("gsc_site_url",),
