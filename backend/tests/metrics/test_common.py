@@ -47,3 +47,11 @@ def test_source_result_skipped_factory():
     assert r.ok is False
     assert r.skipped_reason == "no creds"
     assert r.csv_rows == []
+
+
+def test_metrics_config_from_env_normalizes_empty_string(monkeypatch):
+    monkeypatch.setenv("GA4_PROPERTY_ID_WEB", "")
+    monkeypatch.setenv("GA4_PROPERTY_ID_APP", "123")
+    cfg = c.MetricsConfig.from_env()
+    assert cfg.ga4_property_id_web is None   # empty string → None
+    assert cfg.ga4_property_id_app == "123"  # non-empty preserved
