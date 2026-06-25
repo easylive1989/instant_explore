@@ -1,16 +1,18 @@
+import type { Dict } from "@/i18n/dictionaries";
+
 /// Centered editorial manifesto quote that bridges the hero and the feature
 /// sections.
-export default function Manifesto() {
+export default function Manifesto({ d }: { d: Dict["manifesto"] }) {
   return (
     <section className="manifesto">
       <div className="wrap">
         <div className="rule" />
         <blockquote>
-          別再低頭盯著螢幕。
+          {d.line1}
           <br />
-          抬起眼睛，<span className="q">世界本身就是展品。</span>
+          {d.line2Lead}<span className="q">{d.line2Quote}</span>
         </blockquote>
-        <cite>Lorescape · 地誌手記</cite>
+        <cite>{d.cite}</cite>
       </div>
     </section>
   );

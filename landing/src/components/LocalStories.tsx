@@ -1,6 +1,8 @@
+import type { Dict } from "@/i18n/dictionaries";
+
 /// Feature 01 — AI writes a story for the place in front of you. A split
 /// layout with copy + subcards on one side and a portrait photo on the other.
-export default function LocalStories() {
+export default function LocalStories({ d }: { d: Dict["localStories"] }) {
   return (
     <section className="section section--sunk" id="stories">
       <div className="wrap">
@@ -8,17 +10,14 @@ export default function LocalStories() {
           <div className="split__copy">
             <div className="sec-label">
               <span className="bar" />
-              <span className="no">功能 01</span>
+              <span className="no">{d.no}</span>
             </div>
             <h2 className="h2">
-              為眼前的風景，
+              {d.h2Top}
               <br />
-              即時寫一篇故事
+              {d.h2Bottom}
             </h2>
-            <p className="sec-lede">
-              不是條列式的百科資料。Lorescape
-              為你經過的每座地標、古蹟與山林，當場編寫一篇有人物、有轉折、值得細讀的故事。
-            </p>
+            <p className="sec-lede">{d.lede}</p>
             <div className="subgrid">
               <div className="subcard">
                 <div className="ic">
@@ -35,8 +34,8 @@ export default function LocalStories() {
                   </svg>
                 </div>
                 <div>
-                  <h3>值得細讀的歷史長文</h3>
-                  <p>有起承轉合、有人物與懸念的敘事，而不是冰冷的年份與條目。</p>
+                  <h3>{d.card1Title}</h3>
+                  <p>{d.card1Body}</p>
                 </div>
               </div>
               <div className="subcard">
@@ -53,17 +52,17 @@ export default function LocalStories() {
                   </svg>
                 </div>
                 <div>
-                  <h3>一鍵化為語音</h3>
-                  <p>把手機收進口袋，邊走邊聽它把這裡的來歷娓娓道來。</p>
+                  <h3>{d.card2Title}</h3>
+                  <p>{d.card2Body}</p>
                 </div>
               </div>
             </div>
           </div>
           <div className="split__media">
-            <img src="/images/temple.jpg" alt="台中朝聖宮" />
+            <img src="/images/temple.jpg" alt={d.mediaAlt} />
             <div className="media-cap">
-              台中朝聖宮
-              <span className="o">Chaosheng Temple · Taichung</span>
+              {d.mediaCap}
+              <span className="o">{d.mediaOrigin}</span>
             </div>
           </div>
         </div>
