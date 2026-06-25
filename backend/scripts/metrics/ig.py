@@ -11,11 +11,18 @@ _HEADERS = ["metric", "value"]
 
 
 def parse_account_insights(resp: dict) -> list[list[str]]:
-    """Map an IG account insights response into [metric, value] rows."""
+    """Map an IG account insights response into [metric, value] rows.
+
+    Handles both the time-series shape (``values``) and the newer
+    ``total_value`` shape returned when ``metric_type=total_value``.
+    """
     rows: list[list[str]] = []
     for item in resp.get("data", []):
-        values = item.get("values", [])
-        value = values[0].get("value", "") if values else ""
+        if "total_value" in item:
+            value = item["total_value"].get("value", "")
+        else:
+            values = item.get("values", [])
+            value = values[0].get("value", "") if values else ""
         rows.append([item.get("name", ""), str(value)])
     return rows
 
@@ -46,6 +53,7 @@ def fetch_ig(cfg: MetricsConfig, start: str, end: str) -> SourceResult:
         insights = requests.get(
             f"{_GRAPH}/{uid}/insights",
             params={"metric": "reach,profile_views", "period": "day",
+                    "metric_type": "total_value",
                     "since": start, "until": end, "access_token": token},
             timeout=30,
         ).json()

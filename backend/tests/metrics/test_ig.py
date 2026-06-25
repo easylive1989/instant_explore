@@ -14,8 +14,22 @@ INSIGHTS = {
 PROFILE = {"followers_count": 320, "media_count": 48}
 
 
+TOTAL_VALUE_INSIGHTS = {
+    "data": [
+        {"name": "reach", "total_value": {"value": 1500}},
+        {"name": "profile_views", "total_value": {"value": 90}},
+    ]
+}
+
+
 def test_parse_account_insights_rows():
     rows = ig.parse_account_insights(INSIGHTS)
+    assert ["reach", "1500"] in rows
+    assert ["profile_views", "90"] in rows
+
+
+def test_parse_account_insights_total_value_shape():
+    rows = ig.parse_account_insights(TOTAL_VALUE_INSIGHTS)
     assert ["reach", "1500"] in rows
     assert ["profile_views", "90"] in rows
 
