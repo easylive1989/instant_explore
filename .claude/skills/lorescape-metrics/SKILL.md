@@ -11,10 +11,14 @@ API 為主（GSC / GA4 / IG），App Store / Play 用瀏覽器抓。
 
 ## 前置條件
 
-- **Google（GSC + GA4）**：見 `references/google-setup.md`（一次性 ADC 登入 +
-  在 `backend/.env` 填 `GSC_SITE_URL` / `GA4_PROPERTY_ID_WEB` /
-  `GA4_PROPERTY_ID_APP`）。
-- **IG**：沿用 `backend/.env` 既有的 `IG_USER_ID` / `META_PAGE_ACCESS_TOKEN`。
+完整一次性設定（service account、IG token、API 啟用、踩雷排解）見
+**`docs/metrics-setup.md`**。摘要：
+
+- **Google（GSC + GA4）**：用 **service account**（非 ADC，ADC 會被 Google
+  擋），`backend/.env` 設 `GOOGLE_APPLICATION_CREDENTIALS` +
+  `GA4_PROPERTY_ID_WEB` + `GSC_SITE_URL`。
+- **IG**：`backend/.env` 的 `META_PAGE_ACCESS_TOKEN` 須帶
+  `instagram_manage_insights` 權限（用 `scripts/meta_token_helper.py` 產）。
 - **App Store / Play**：使用者已在 Chrome 登入 App Store Connect 與 Play
   Console，見 `references/stores-browser.md`。
 
