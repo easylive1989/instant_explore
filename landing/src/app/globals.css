@@ -146,6 +146,18 @@
   .nav__spacer {
     margin-left: auto;
   }
+  .nav__lang {
+    font-size: 15px;
+    color: var(--ink-2);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-right: 18px;
+    transition: color 0.2s;
+  }
+  .nav__lang:hover {
+    color: var(--ink);
+  }
 
   /* ============ BUTTONS ============ */
   .btn {
