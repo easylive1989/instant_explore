@@ -1,29 +1,13 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Manifesto from "@/components/Manifesto";
-import LocalStories from "@/components/LocalStories";
-import ManyAngles from "@/components/ManyAngles";
-import ExploreNearby from "@/components/ExploreNearby";
-import JourneyJournal from "@/components/JourneyJournal";
-import FinalCTA from "@/components/FinalCTA";
-import Footer from "@/components/Footer";
-import { getDictionary } from "@/i18n/dictionaries";
+const detect = `(function(){try{var s=localStorage.getItem('lorescape_locale');if(s==='zh'||s==='en'){location.replace('/'+s);return;}}catch(e){}var l=(navigator.language||'').toLowerCase();location.replace(l.indexOf('zh')===0?'/zh':'/en');})();`;
 
-export default function Home() {
-  const d = getDictionary("zh");
+export default function RootRedirect() {
   return (
-    <>
-      <Navbar />
-      <main>
-        <Hero d={d.hero} />
-        <Manifesto d={d.manifesto} />
-        <LocalStories d={d.localStories} />
-        <ManyAngles d={d.manyAngles} />
-        <ExploreNearby d={d.exploreNearby} />
-        <JourneyJournal d={d.journeyJournal} />
-        <FinalCTA d={d.finalCTA} />
-      </main>
-      <Footer />
-    </>
+    <html lang="zh-Hant">
+      <head>
+        <meta httpEquiv="refresh" content="0;url=/zh" />
+        <script dangerouslySetInnerHTML={{ __html: detect }} />
+      </head>
+      <body />
+    </html>
   );
 }
