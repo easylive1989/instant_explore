@@ -365,13 +365,18 @@ re-runs Flow.
 
 **1. Get the master onto disk (user action).** Downloading is the user's
 job — the ai-media-generator skill never auto-downloads. Ask the user to
-download the finished reel from the Flow gallery and drop it at:
+download the finished reel from the Flow gallery. Once it lands in
+`~/Downloads`, point them at the helper that renames + files it for you:
 
-```
-outputs/daily_video/{date}/source.mp4
+```bash
+scripts/import_source_video.sh            # date = today
+scripts/import_source_video.sh {date}     # specific date
 ```
 
-(or anywhere — pass the path with `--input`).
+It moves the mp4 from `~/Downloads` to
+`outputs/daily_video/{date}/source.mp4` (renaming it), prompting which to
+pick when several mp4s are present. They can also drop it there manually,
+or put it anywhere and pass the path with `--input`.
 
 **2. Write the narration (Claude, grounded in the published story).** Write
 a **short zh-TW intro** that fits inside the 10s clip — 1–2 sentences, ~8–10
@@ -472,7 +477,7 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 | Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
 | Reel prompt output | `outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
-| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4`; `uv run python -m scripts.daily_video_post --date X [--engine gemini]` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Kore) preferred; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback |
+| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m scripts.daily_video_post --date X [--engine gemini]` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Kore) preferred; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
