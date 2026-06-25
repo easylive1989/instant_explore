@@ -4,7 +4,7 @@ import { showDownloadLinks } from "@/lib/downloadLinks";
 
 /// Centered hero: pill kicker, headline, lede, store CTAs and a wide "plate"
 /// showcase image with a now-playing tag and caption.
-export default function Hero({ d }: { d: Dict["hero"] }) {
+export default function Hero({ d, store }: { d: Dict["hero"]; store: Dict["storeButtons"] }) {
   return (
     <section className="hero" id="top">
       <div className="wrap">
@@ -20,7 +20,7 @@ export default function Hero({ d }: { d: Dict["hero"] }) {
         <p className="lede">{d.lede}</p>
         {showDownloadLinks && (
           <div className="hero__cta">
-            <StoreButtons location="hero" variant="light" />
+            <StoreButtons location="hero" variant="light" labels={store} />
           </div>
         )}
         <div className="hero__scroll">

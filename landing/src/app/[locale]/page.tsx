@@ -18,13 +18,13 @@ export default function Home({ params }: { params: { locale: string } }) {
     <>
       <Navbar d={d} homeHref="" />
       <main>
-        <Hero d={d.hero} />
+        <Hero d={d.hero} store={d.storeButtons} />
         <Manifesto d={d.manifesto} />
         <LocalStories d={d.localStories} />
         <ManyAngles d={d.manyAngles} />
         <ExploreNearby d={d.exploreNearby} />
         <JourneyJournal d={d.journeyJournal} />
-        <FinalCTA d={d.finalCTA} />
+        <FinalCTA d={d.finalCTA} store={d.storeButtons} />
       </main>
       <Footer d={d} homeHref="" />
     </>

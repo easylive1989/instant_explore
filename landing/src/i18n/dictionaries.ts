@@ -6,6 +6,7 @@ export interface Dict {
     downloadApp: string;
     switchTo: string; // 切換鈕顯示文字（指向另一語言）
   };
+  storeButtons: { ios: string; android: string };
   hero: {
     pill: string;
     headlineTop: string;
@@ -97,6 +98,7 @@ const zh: Dict = {
     downloadApp: "下載 App",
     switchTo: "EN",
   },
+  storeButtons: { ios: "即刻取得", android: "立即下載" },
   hero: {
     pill: "AI 隨行的旅行說書人",
     headlineTop: "體驗歷史",
@@ -217,6 +219,7 @@ const en: Dict = {
     downloadApp: "Download App",
     switchTo: "中文",
   },
+  storeButtons: { ios: "Download on the", android: "GET IT ON" },
   hero: {
     pill: "Your AI travel storyteller",
     headlineTop: "Experience history,",

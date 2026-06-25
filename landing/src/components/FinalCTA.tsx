@@ -3,7 +3,7 @@ import StoreButtons from "./StoreButtons";
 import { showDownloadLinks } from "@/lib/downloadLinks";
 
 /// Closing call-to-action over a full-bleed photo, with the store buttons.
-export default function FinalCTA({ d }: { d: Dict["finalCTA"] }) {
+export default function FinalCTA({ d, store }: { d: Dict["finalCTA"]; store: Dict["storeButtons"] }) {
   return (
     <section className="final" id="download">
       <div className="final__bg">
@@ -22,7 +22,7 @@ export default function FinalCTA({ d }: { d: Dict["finalCTA"] }) {
           <p>{d.body}</p>
           {showDownloadLinks && (
             <div className="final__cta">
-              <StoreButtons location="final_cta" variant="dark" />
+              <StoreButtons location="final_cta" variant="dark" labels={store} />
             </div>
           )}
         </div>
