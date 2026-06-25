@@ -130,23 +130,44 @@ def instagram_flow() -> None:
     )
     _raise_for_status(resp, "fetch /me/accounts")
     pages = resp.json().get("data", [])
-    if not pages:
-        _die("No Facebook Pages found. Create a Page first and re-run.")
+    if pages:
+        print("\n  Your Facebook Pages:")
+        for i, page in enumerate(pages):
+            print(f"    [{i}] {page['name']}  (id: {page['id']})")
 
-    print("\n  Your Facebook Pages:")
-    for i, page in enumerate(pages):
-        print(f"    [{i}] {page['name']}  (id: {page['id']})")
+        page_index = 0
+        if len(pages) > 1:
+            while True:
+                raw = input("  Select page number [0]: ").strip() or "0"
+                if raw.isdigit() and int(raw) < len(pages):
+                    page_index = int(raw)
+                    break
+                print("  [!] Invalid selection.")
+        chosen_page = pages[page_index]
+    else:
+        # New Pages Experience / Business-Portfolio pages do not appear in
+        # /me/accounts even with pages_show_list granted. Fetch the Page
+        # access token directly by its ID instead — still derived from the
+        # long-lived user token, so the Page token does not expire.
+        print(
+            "\n  /me/accounts returned no Pages (normal for New Pages Experience\n"
+            "  or Business-Portfolio pages). Fetching the Page token by ID instead.\n"
+            "  Find the Page ID via Graph API Explorer: GET <page-id>?fields=name"
+        )
+        page_id_input = _prompt("Facebook Page ID")
+        resp = requests.get(
+            f"{GRAPH_API}/{page_id_input}",
+            params={"fields": "name,access_token", "access_token": long_user_token},
+            timeout=30,
+        )
+        _raise_for_status(resp, "fetch Page token by ID")
+        chosen_page = resp.json()
+        if "access_token" not in chosen_page:
+            _die(
+                "That Page returned no access_token. Make sure you are an admin of\n"
+                "  the Page and pages_show_list / pages_read_engagement are granted."
+            )
 
-    page_index = 0
-    if len(pages) > 1:
-        while True:
-            raw = input("  Select page number [0]: ").strip() or "0"
-            if raw.isdigit() and int(raw) < len(pages):
-                page_index = int(raw)
-                break
-            print("  [!] Invalid selection.")
-
-    chosen_page = pages[page_index]
     page_id = chosen_page["id"]
     page_access_token = chosen_page["access_token"]
     _success(f"Selected page: {chosen_page['name']}", f"Page ID: {page_id}")
