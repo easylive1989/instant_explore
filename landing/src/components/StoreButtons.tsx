@@ -8,6 +8,9 @@ interface StoreButtonsProps {
   /// Visual variant. "light" sits on paper (hero); "dark" sits on a dark
   /// photo (final CTA).
   variant: "light" | "dark";
+
+  /// Localized small sub-labels above each store name.
+  labels: { ios: string; android: string };
 }
 
 function AppleIcon({ className }: { className?: string }) {
@@ -28,7 +31,7 @@ function GooglePlayIcon({ className }: { className?: string }) {
 
 /// The paired App Store / Google Play store-style download buttons used in the
 /// hero and final CTA. Hidden entirely while `showDownloadLinks` is false.
-export default function StoreButtons({ location }: StoreButtonsProps) {
+export default function StoreButtons({ location, labels }: StoreButtonsProps) {
   if (!showDownloadLinks) return null;
 
   const iosClass = "btn btn--store-custom btn--store";
@@ -39,7 +42,7 @@ export default function StoreButtons({ location }: StoreButtonsProps) {
       <DownloadLink platform="ios" location={location} className={iosClass}>
         <AppleIcon className="icon-apple" />
         <span>
-          <span className="sm">即刻取得</span>
+          <span className="sm">{labels.ios}</span>
           <span className="lg">App Store</span>
         </span>
       </DownloadLink>
@@ -50,7 +53,7 @@ export default function StoreButtons({ location }: StoreButtonsProps) {
       >
         <GooglePlayIcon className="icon-googleplay" />
         <span>
-          <span className="sm">立即下載</span>
+          <span className="sm">{labels.android}</span>
           <span className="lg">Google Play</span>
         </span>
       </DownloadLink>

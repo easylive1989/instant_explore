@@ -1,36 +1,13 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const base = "https://lorescape.app";
   return [
-    {
-      url: "https://lorescape.app",
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-    {
-      url: "https://lorescape.app/privacy",
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: "https://lorescape.app/terms",
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: "https://lorescape.app/support",
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: "https://lorescape.app/credits",
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
+    { url: `${base}/zh`, changeFrequency: "monthly", priority: 1 },
+    { url: `${base}/en`, changeFrequency: "monthly", priority: 1 },
+    { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.5 },
+    { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.5 },
+    { url: `${base}/support`, changeFrequency: "yearly", priority: 0.5 },
+    { url: `${base}/credits`, changeFrequency: "yearly", priority: 0.3 },
   ];
 }

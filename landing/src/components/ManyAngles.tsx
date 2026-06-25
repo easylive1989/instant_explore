@@ -1,24 +1,8 @@
-const modes = [
-  {
-    num: "01",
-    title: "摧毀與重生的百年豪賭",
-    body: "儒略二世決定拆毀君士坦丁大帝的千年古教堂，這場瘋狂重建竟耗時百餘年。",
-  },
-  {
-    num: "02",
-    title: "祭壇之下的神聖祕密",
-    body: "世界上最大的教堂並非教宗的主教座堂，因為它底下埋藏著更神聖的祕密。",
-  },
-  {
-    num: "03",
-    title: "文藝復興巨匠的接力賽",
-    body: "米開朗基羅與拉斐爾輪番上陣，在同一座教堂留下各自的瘋狂印記。",
-  },
-];
+import type { Dict } from "@/i18n/dictionaries";
 
 /// Feature 02 — the same landmark, many stories. Dark section pairing the list
 /// of angles with a phone mockup of the player.
-export default function ManyAngles() {
+export default function ManyAngles({ d }: { d: Dict["manyAngles"] }) {
   return (
     <section className="section dark" id="angles">
       <div className="wrap">
@@ -26,20 +10,17 @@ export default function ManyAngles() {
           <div className="depth-copy">
             <div className="sec-label">
               <span className="bar" />
-              <span className="no">功能 02</span>
+              <span className="no">{d.no}</span>
             </div>
-            <span className="over">Many Angles, One Place</span>
+            <span className="over">{d.over}</span>
             <h2 className="h2" style={{ marginTop: 14 }}>
-              同一座地標，
+              {d.h2Top}
               <br />
-              不只一個故事
+              {d.h2Bottom}
             </h2>
-            <p className="sec-lede">
-              權謀、傳說、建築祕辛——AI
-              在每個地點為你備好幾種切入角度。挑一個最吸引你的，開始聆聽。
-            </p>
+            <p className="sec-lede">{d.lede}</p>
             <div className="depth-modes" style={{ marginTop: 36 }}>
-              {modes.map((mode) => (
+              {d.modes.map((mode) => (
                 <div className="depth-mode" key={mode.num}>
                   <span className="num">{mode.num}</span>
                   <div>
@@ -56,10 +37,10 @@ export default function ManyAngles() {
                 <div className="phone__screen">
                   <span className="phone__notch" />
                   <div className="ph-img">
-                    <img src="/images/stpeters.jpg" alt="聖伯多祿大殿導覽" />
+                    <img src="/images/stpeters.jpg" alt={d.phoneImageAlt} />
                   </div>
                   <div className="ph-top">
-                    <span className="nm">正在播放</span>
+                    <span className="nm">{d.nowPlaying}</span>
                     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                       <circle cx="5" cy="12" r="2" />
                       <circle cx="12" cy="12" r="2" />
@@ -69,11 +50,11 @@ export default function ManyAngles() {
                   <div className="ph-mid">
                     <span className="badge">Anno · I</span>
                     <div className="ti">
-                      摧毀與重生的
+                      {d.phoneTitleTop}
                       <br />
-                      百年豪賭
+                      {d.phoneTitleBottom}
                     </div>
-                    <div className="su">St. Peter&apos;s Basilica</div>
+                    <div className="su">{d.phoneSubtitle}</div>
                   </div>
                   <div className="ph-bot">
                     <div className="ph-bar">

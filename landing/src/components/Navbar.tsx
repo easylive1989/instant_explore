@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import DownloadLink from "./DownloadLink";
 import { showDownloadLinks } from "@/lib/downloadLinks";
 import BrandSeal from "./BrandSeal";
-
-const navLinks = [
-  { label: "在地故事", href: "#stories" },
-  { label: "多種角度", href: "#angles" },
-  { label: "探索附近", href: "#explore" },
-  { label: "旅程手記", href: "#journey" },
-];
+import LocaleSwitch from "./LocaleSwitch";
+import type { Dict } from "@/i18n/dictionaries";
 
 /// Sticky top navigation that gains a translucent backdrop once the page is
 /// scrolled past the hero, matching the approved design.
-export default function Navbar() {
+export default function Navbar({
+  d,
+  homeHref,
+}: {
+  d: Dict;
+  homeHref: string;
+}) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -33,15 +34,20 @@ export default function Navbar() {
         Lorescape
       </a>
       <nav className="nav__links">
-        {navLinks.map((link) => (
-          <a key={link.href} href={link.href}>
+        {d.nav.links.map((link) => (
+          <a key={link.anchor} href={`${homeHref}${link.anchor}`}>
             {link.label}
           </a>
         ))}
       </nav>
       <span className="nav__spacer" />
+      <LocaleSwitch label={d.nav.switchTo} />
       {showDownloadLinks && (
-        <DownloadLink platform="ios" location="navbar" className="btn btn--primary">
+        <DownloadLink
+          platform="ios"
+          location="navbar"
+          className="btn btn--primary"
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -54,7 +60,7 @@ export default function Navbar() {
             <path d="M7 12l5 5 5-5" />
             <path d="M5 20h14" />
           </svg>
-          下載 App
+          {d.nav.downloadApp}
         </DownloadLink>
       )}
     </header>

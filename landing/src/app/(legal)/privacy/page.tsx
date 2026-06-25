@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getDictionary } from "@/i18n/dictionaries";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Lorescape",
@@ -9,9 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  const d = getDictionary("en");
   return (
     <>
-      <Navbar />
+      <Navbar d={d} homeHref="/en" />
       <main className="bg-paper pt-32 pb-24 px-6">
         <article
           className="
@@ -188,7 +190,7 @@ export default function PrivacyPage() {
           </ul>
         </article>
       </main>
-      <Footer />
+      <Footer d={d} homeHref="/en" />
     </>
   );
 }

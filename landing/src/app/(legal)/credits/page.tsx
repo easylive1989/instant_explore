@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getDictionary } from "@/i18n/dictionaries";
 
 export const metadata: Metadata = {
   title: "Image Credits — Lorescape",
@@ -50,9 +51,10 @@ const credits: Credit[] = [
 ];
 
 export default function CreditsPage() {
+  const d = getDictionary("en");
   return (
     <>
-      <Navbar />
+      <Navbar d={d} homeHref="/en" />
       <main className="bg-paper pt-32 pb-24 px-6">
         <article
           className="
@@ -100,7 +102,7 @@ export default function CreditsPage() {
           </ul>
         </article>
       </main>
-      <Footer />
+      <Footer d={d} homeHref="/en" />
     </>
   );
 }
