@@ -32,10 +32,14 @@ times. With neither, the script reads ``narration.txt`` from the date dir.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
+import os
 import shutil
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -47,6 +51,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SAY_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
 DEFAULT_GEMINI_VOICE = "Kore"  # Warm female prebuilt Gemini TTS voice.
 GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+# ElevenLabs: Sarah — mature, reassuring female; multilingual model speaks zh.
+DEFAULT_ELEVEN_VOICE = "EXAVITQu4vr4xnSDxMaL"
+ELEVEN_MODEL = "eleven_multilingual_v2"
+ELEVEN_KEY_FILE = Path.home() / ".elevenlabs" / "api_key"
 # Natural-language style steer prepended to each line for Gemini TTS.
 DEFAULT_GEMINI_STYLE = "用溫暖、沉穩、語速稍快的紀錄片旁白語氣說："
 DEFAULT_FONT = "/System/Library/Fonts/STHeiti Medium.ttc"  # CJK font file.
@@ -191,6 +199,61 @@ def _gemini_to_wav(
         "-ar", str(AUDIO_RATE), "-ac", "1", "-c:a", "pcm_s16le", str(dest),
     ])
     pcm.unlink(missing_ok=True)
+
+
+def _elevenlabs_api_key() -> str:
+    """Read the ElevenLabs API key from env or the CLI's stored credential."""
+    key = os.environ.get("ELEVENLABS_API_KEY")
+    if not key and ELEVEN_KEY_FILE.is_file():
+        key = ELEVEN_KEY_FILE.read_text(encoding="utf-8").strip()
+    if not key:
+        raise PostProductionError(
+            "ElevenLabs API key not found (set ELEVENLABS_API_KEY or run "
+            "`elevenlabs auth login`)"
+        )
+    return key
+
+
+def _elevenlabs_to_wav(
+    api_key: str, voice_id: str, model: str, text: str, dest: Path
+) -> None:
+    """Synthesize one line with ElevenLabs TTS into a 44.1k mono wav.
+
+    Calls the REST endpoint (no SDK dependency), receives mp3, and lets
+    ffmpeg resample it to the pipeline's 44.1k mono. The multilingual model
+    reads zh-TW with the chosen voice's timbre.
+    """
+    url = (
+        f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        "?output_format=mp3_44100_128"
+    )
+    body = json.dumps({"text": text, "model_id": model}).encode("utf-8")
+    req = urllib.request.Request(
+        url, data=body, method="POST",
+        headers={"xi-api-key": api_key, "content-type": "application/json"},
+    )
+    try:
+        import ssl
+
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        ctx = None
+    try:
+        with urllib.request.urlopen(req, timeout=60, context=ctx) as resp:
+            audio = resp.read()
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")[:300]
+        raise PostProductionError(
+            f"ElevenLabs TTS failed ({exc.code}): {detail}"
+        ) from exc
+    mp3 = dest.with_suffix(".mp3")
+    mp3.write_bytes(audio)
+    _run([
+        "ffmpeg", "-y", "-i", str(mp3),
+        "-ar", str(AUDIO_RATE), "-ac", "1", "-c:a", "pcm_s16le", str(dest),
+    ])
+    mp3.unlink(missing_ok=True)
 
 
 def _build_voice_track(
@@ -409,6 +472,11 @@ def _make_synth(engine: str, voice: str, rate: int | None, style: str):
         return lambda text, dest: _gemini_to_wav(
             client, voice, style, text, dest
         )
+    if engine == "elevenlabs":
+        api_key = _elevenlabs_api_key()
+        return lambda text, dest: _elevenlabs_to_wav(
+            api_key, voice, ELEVEN_MODEL, text, dest
+        )
     return lambda text, dest: _say_to_wav(text, voice, rate, dest)
 
 
@@ -449,9 +517,12 @@ def _parse_delogo(spec: str | None) -> tuple[int, int, int, int] | None:
 
 def cmd_build(args: argparse.Namespace) -> int:
     _require_tools(args.engine)
-    voice = args.voice or (
-        DEFAULT_GEMINI_VOICE if args.engine == "gemini" else DEFAULT_SAY_VOICE
-    )
+    _engine_default_voice = {
+        "gemini": DEFAULT_GEMINI_VOICE,
+        "elevenlabs": DEFAULT_ELEVEN_VOICE,
+        "say": DEFAULT_SAY_VOICE,
+    }
+    voice = args.voice or _engine_default_voice[args.engine]
 
     out_dir = REPO_ROOT / "outputs" / "daily_video" / args.date
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -545,14 +616,15 @@ def main(argv: list[str]) -> int:
         "--text)"
     )
     parser.add_argument(
-        "--engine", choices=("say", "gemini"), default="say",
+        "--engine", choices=("say", "gemini", "elevenlabs"), default="say",
         help="TTS engine (default: say). 'gemini' uses the backend's "
-        "GEMINI_API_KEY / GenaiSettings."
+        "GEMINI_API_KEY / GenaiSettings; 'elevenlabs' uses ELEVENLABS_API_KEY "
+        "or the `elevenlabs auth login` credential."
     )
     parser.add_argument(
         "--voice", default=None,
-        help=f"Voice name. Default: {DEFAULT_SAY_VOICE} (say) / "
-        f"{DEFAULT_GEMINI_VOICE} (gemini)."
+        help=f"Voice name/id. Default: {DEFAULT_SAY_VOICE} (say) / "
+        f"{DEFAULT_GEMINI_VOICE} (gemini) / Sarah (elevenlabs)."
     )
     parser.add_argument(
         "--rate", type=int, help="say speaking rate (say engine only)"
