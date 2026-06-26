@@ -485,6 +485,38 @@
     height: 16px;
   }
 
+  /* ============ VIDEO DEMO ============ */
+  .vdemo {
+    padding: clamp(48px, 7vw, 88px) 0 clamp(32px, 5vw, 60px);
+    background: var(--paper-sunk);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .vdemo__frame {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+    max-width: 860px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    background: var(--ink);
+  }
+  .vdemo__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .vdemo__cap {
+    text-align: center;
+    margin: 20px auto 0;
+    max-width: 48ch;
+    font-size: 14px;
+    color: var(--ink-3);
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+
   /* ============ MANIFESTO ============ */
   .manifesto {
     padding: clamp(80px, 12vw, 150px) 0;

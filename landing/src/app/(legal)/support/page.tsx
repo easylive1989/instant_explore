@@ -48,8 +48,8 @@ export default function SupportPage() {
                 <ul className="space-y-2 list-disc ml-6">
                   <li>
                     <strong>Support Email</strong>:{" "}
-                    <a href="mailto:easylive1989@gmail.com">
-                      easylive1989@gmail.com
+                    <a href="mailto:support@lorescape.app">
+                      support@lorescape.app
                     </a>
                   </li>
                   <li>

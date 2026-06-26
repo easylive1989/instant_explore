@@ -1,0 +1,63 @@
+# Lorescape — Marketing Config
+
+## Product
+- **Name:** Lorescape
+- **Type:** Mobile app (iOS + Android), freemium with subscription
+- **One-liner:** AI 隨行的旅行說書人 — 走到任何景點，即時生成一段以史實為本的真實故事，再以語音娓娓道來。
+- **URL:** https://lorescape.app
+- **App Store:** [TODO — add iOS App Store URL]
+- **Google Play:** https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore
+
+## Audience
+- **ICP:** 25–45 歲的深度知性旅人。自由行為主，不滿足於走馬看花，渴望了解城市靈魂與景點背後的文化脈絡。以台灣用戶為核心，兼顧全球華語與英語旅人。
+- **Pain:** 站在古蹟或景點前，查 Google 只有條目式資訊，找導覽團又受限於路線和時間，無法自由深入探索。
+- **Alternative:** Google 搜索 + Wikipedia 自行查閱、傳統語音導覽（景點附設）、Rick Steves 或 Google Maps 語音導覽。
+
+## Value Proposition
+- **Primary:** 任何景點，一鍵生成有溫度的真實故事，並以純淨語音朗讀——讓你抬頭看世界，耳邊有故事。
+- **Differentiators:**
+  - 故事以 Wikipedia 為事實依據（grounding），不是 AI 杜撰
+  - 提供 2–3 個故事角度讓用戶自選，而非單一制式內容
+  - 語音逐句同步高亮，邊聽邊看
+  - 每日故事推播，養成每天閱讀世界的習慣
+  - 文化足跡日誌自動整理旅行知識，可匯出 PDF
+- **Proof points:** [TODO — 用戶數、下載量、故事生成次數、訂閱轉換率]
+- **Source notes:** 所有功能描述來自 README.md 與 landing page copy（landing/src/i18n/）
+
+## Revenue Model
+- **Pricing:** Freemium + 訂閱制
+- **Key plans:**
+  - Free：基本探索功能
+  - Premium Weekly：每週訂閱（`$rc_weekly`）— 價格 [TODO]
+  - Premium Monthly：每月訂閱（`$rc_monthly`）— 價格 [TODO]
+  - Premium Yearly：每年訂閱（`$rc_annual`）— 價格 [TODO]
+- **Platform:** RevenueCat（統一管理 App Store + Google Play 訂閱）
+
+## Brand Voice
+- **Tone:** 沉靜、知性、有溫度。像一位博學的旅伴在耳邊輕聲講故事，不像觀光手冊，也不像教科書。
+- **Do:**
+  1. 用第二人稱「你」直接對話，製造親近感
+  2. 以情境開場（「當你站在宏偉的古蹟前…」），觸發情感共鳴
+  3. 強調「史實為本」與「有來源」，建立信任感
+- **Don't:**
+  1. 不堆砌條目式資訊或功能清單
+  2. 不用誇張行銷語氣（「最強！最好！革命性！」）
+  3. 不過度使用 emoji，保持克制感（每篇最多 3 個）
+
+## Current Channels
+- **Active:**
+  - 官網（lorescape.app）— Next.js 雙語（zh/en）落地頁，含 App Store / Google Play 按鈕
+  - Instagram — 已發佈品牌啟動貼文，規劃每週一則景點故事系列
+  - App Store（iOS）
+  - Google Play（Android）
+- **Planned:** [TODO — 填入計畫開拓的渠道，例如：YouTube Shorts、SEO 部落格、TikTok、KOL 合作、旅遊社群]
+
+## Competitive Landscape
+- **Direct competitors:**
+  - Google Maps 語音導覽（功能整合在地圖 App，但故事深度不足）
+  - Rick Steves Audio Tours（高品質但僅限特定歐洲城市，無 AI 即時生成）
+  - 景點附設語音導覽（受限景點範圍，無自由探索）
+- **Indirect competitors:**
+  - Wikipedia / Google 搜尋（文字為主，無故事化敘事與語音）
+  - Podcast 旅遊節目（非即時、非定位觸發）
+- **Positioning:** Lorescape 是唯一能在「任何地點、任何時間」即時生成 Wikipedia 事實驗證故事並語音朗讀的 AI 旅行說書人，填補「深度知性旅人在現場的知識空白」。

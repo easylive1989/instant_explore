@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import VideoDemo from "@/components/VideoDemo";
 import Manifesto from "@/components/Manifesto";
 import LocalStories from "@/components/LocalStories";
 import ManyAngles from "@/components/ManyAngles";
@@ -19,6 +20,7 @@ export default function Home({ params }: { params: { locale: string } }) {
       <Navbar d={d} homeHref="" />
       <main>
         <Hero d={d.hero} store={d.storeButtons} />
+        <VideoDemo d={d.videoDemo} />
         <Manifesto d={d.manifesto} />
         <LocalStories d={d.localStories} />
         <ManyAngles d={d.manyAngles} />

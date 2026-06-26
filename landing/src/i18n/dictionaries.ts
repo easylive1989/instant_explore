@@ -59,6 +59,10 @@ export interface Dict {
     lede: string;
     stats: { num: string; lab: string; caption: string; body: string }[];
   };
+  videoDemo: {
+    caption: string;
+    ariaLabel: string;
+  };
   finalCTA: {
     over: string;
     h2Top: string;
@@ -180,11 +184,15 @@ const zh: Dict = {
       { num: "III", lab: "Timeline", caption: "沿時間軸重溫", body: "順著時間軸回看，隨時重返走過的任何一個角落。" },
     ],
   },
+  videoDemo: {
+    caption: "看看 Lorescape 如何把眼前的風景，變成一段值得細聽的故事。",
+    ariaLabel: "Lorescape App 示範影片",
+  },
   finalCTA: {
     over: "開始你的第一段故事",
     h2Top: "城市是一本書。",
     h2Bottom: "開始閱讀吧。",
-    body: "加入五萬名探索者，一同揭開世界各地隱藏的篇章。",
+    body: "一路聽，一路讀，讓每一次駐足都留下故事。",
     imageAlt: "阿格拉紅堡",
   },
   footer: {
@@ -301,11 +309,15 @@ const en: Dict = {
       { num: "III", lab: "Timeline", caption: "Along a timeline", body: "Look back along a timeline and revisit any corner you've walked, anytime." },
     ],
   },
+  videoDemo: {
+    caption: "See how Lorescape turns the view in front of you into a story worth hearing.",
+    ariaLabel: "Lorescape app demo video",
+  },
   finalCTA: {
     over: "Begin your first story",
     h2Top: "The city is a book.",
     h2Bottom: "Start reading.",
-    body: "Join fifty thousand explorers uncovering the hidden chapters of places around the world.",
+    body: "Listen as you walk. Every stop becomes a story worth keeping.",
     imageAlt: "Agra Fort",
   },
   footer: {
