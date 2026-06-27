@@ -6,6 +6,7 @@ import os
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -154,6 +155,31 @@ class MetricsConfig:
             ig_user_id=get("IG_USER_ID") or None,
             meta_page_access_token=get("META_PAGE_ACCESS_TOKEN") or None,
         )
+
+
+@dataclass(frozen=True)
+class DailySource:
+    """Descriptor for one source accumulated into a fixed daily dataset.
+
+    The backfill engine reads `filename`, finds the gap up to yesterday, and
+    calls `fetch(cfg, start, end)` once for the whole window — date-keyed
+    sources return one row per day, while media-keyed sources (`keyed_by_date`
+    is False) return one row per post and are always re-fetched over a recent
+    window to refresh insights.
+    """
+
+    name: str
+    filename: str
+    headers: list[str]
+    required: tuple[str, ...]
+    fetch: Callable[["MetricsConfig", str, str], list[list[str]]]
+    key_index: int = 0
+    keyed_by_date: bool = True
+
+    def missing_config(self, cfg: "MetricsConfig") -> list[str]:
+        """Return the names of required config fields that are unset."""
+        return [field_name for field_name in self.required
+                if not getattr(cfg, field_name)]
 
 
 @dataclass
