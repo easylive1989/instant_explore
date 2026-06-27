@@ -16,7 +16,7 @@ API 來源四個，輸出到 `docs/metrics/daily/`：
 | 來源 | 檔案 | key | 內容 |
 | --- | --- | --- | --- |
 | `gsc` | `gsc.csv` | date | 站台每日 clicks / impressions / ctr / position |
-| `ga4` | `ga4.csv` | date | 每日 web/app active / new users |
+| `ga4` | `ga4.csv` | date | 每日 web / iOS / Android active / new users（App = iOS + Android） |
 | `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（+ 最新日 followers/media 快照） |
 | `ig_posts` | `ig_posts.csv` | media_id | 逐則貼文核心互動 + Reels 影片指標 |
 
@@ -81,8 +81,10 @@ gcloud services enable searchconsole.googleapis.com analyticsdata.googleapis.com
 - GA4 後台 → 管理 → 資源設定 → 資源 → 右上「資源 ID」（純數字，如 `514854947`）。
   注意：資料串流畫面上的大數字是**串流 ID**，不是資源 ID。
 - 本專案 web + iOS + Android 三個串流**共用同一資源** → 只填
-  `GA4_PROPERTY_ID_WEB`、`GA4_PROPERTY_ID_APP` 留空。單次查詢回傳三平台合計
-  （報告標籤雖寫 `web`）。若要拆平台，需在 `ga4.py` 加 `platform` 維度。
+  `GA4_PROPERTY_ID_WEB`、`GA4_PROPERTY_ID_APP` 留空（填兩個會重複計算）。
+- `ga4.py` 查詢帶 `platform` 維度，把這個單一資源**拆成 web / iOS / Android**
+  三組欄位（App = iOS + Android），不再是三平台合計。`fetch_daily` 取
+  `GA4_PROPERTY_ID_WEB or GA4_PROPERTY_ID_APP` 當作那個單一資源來查。
 
 ### A5. 建立 + 驗證 Search Console 資源
 新帳號可能完全沒有資源（開到「歡迎使用」新增頁）。建議**網域類型**：

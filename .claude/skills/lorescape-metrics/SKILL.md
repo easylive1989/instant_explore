@@ -17,7 +17,7 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文），App Store / Play 用瀏覽器
 | 來源 | 檔案 | key | 內容 |
 | --- | --- | --- | --- |
 | `gsc` | `gsc.csv` | date | 站台每日 clicks / impressions / ctr / position |
-| `ga4` | `ga4.csv` | date | 每日 web/app 的 active / new users |
+| `ga4` | `ga4.csv` | date | 每日 web / iOS / Android 各自的 active / new users（App = iOS + Android） |
 | `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（+ 最新一天 followers/media 快照） |
 | `ig_posts` | `ig_posts.csv` | media_id | 逐則貼文：reach、likes、comments、saved、shares、total_interactions，Reels 另含 plays、avg_watch_time |
 
