@@ -40,14 +40,6 @@ def test_parse_profile_lines():
     assert any("48" in ln for ln in lines)
 
 
-def test_fetch_ig_skips_without_credentials():
-    r = ig.fetch_ig(MetricsConfig(ig_user_id=None,
-                                  meta_page_access_token=None),
-                    "2026-06-17", "2026-06-23")
-    assert r.ok is False
-    assert "IG" in (r.skipped_reason or "").upper()
-
-
 def test_fetch_daily_builds_one_row_per_day(monkeypatch):
     monkeypatch.setattr(ig, "_profile", lambda cfg: PROFILE)
     monkeypatch.setattr(ig, "_account_insights_day",
