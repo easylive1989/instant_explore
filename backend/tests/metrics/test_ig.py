@@ -46,3 +46,22 @@ def test_fetch_ig_skips_without_credentials():
                     "2026-06-17", "2026-06-23")
     assert r.ok is False
     assert "IG" in (r.skipped_reason or "").upper()
+
+
+def test_fetch_daily_builds_one_row_per_day(monkeypatch):
+    monkeypatch.setattr(ig, "_profile", lambda cfg: PROFILE)
+    monkeypatch.setattr(ig, "_account_insights_day",
+                        lambda cfg, day: TOTAL_VALUE_INSIGHTS)
+    cfg = MetricsConfig(ig_user_id="1", meta_page_access_token="t")
+    rows = ig.fetch_daily(cfg, "2026-06-22", "2026-06-23")
+    assert len(rows) == 2
+    assert rows[0] == ["2026-06-22", "1500", "90", "", ""]
+    # Snapshot followers/media only on the latest day.
+    assert rows[1] == ["2026-06-23", "1500", "90", "320", "48"]
+
+
+def test_source_descriptor_requires_credentials():
+    assert ig.SOURCE.filename == "ig.csv"
+    assert ig.SOURCE.missing_config(
+        MetricsConfig(ig_user_id=None, meta_page_access_token=None)
+    ) == ["ig_user_id", "meta_page_access_token"]
