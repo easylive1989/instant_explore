@@ -10,14 +10,15 @@ _GRAPH = "https://graph.facebook.com/v21.0"
 _HEADERS = [
     "media_id", "date", "type", "permalink", "caption",
     "reach", "likes", "comments", "saved", "shares", "total_interactions",
-    "plays", "avg_watch_time",
+    "views", "avg_watch_time",
 ]
 _MEDIA_FIELDS = (
     "id,permalink,timestamp,media_type,media_product_type,"
     "caption,like_count,comments_count"
 )
 _CORE_METRICS = "reach,saved,shares,total_interactions"
-_VIDEO_METRICS = "plays,ig_reels_avg_watch_time"
+# Graph API v21 dropped `plays`; `views` is the reel play count.
+_VIDEO_METRICS = "views,ig_reels_avg_watch_time"
 _CAPTION_LIMIT = 80
 
 
@@ -70,7 +71,7 @@ def build_row(media: dict, core: dict[str, str],
         core.get("saved", ""),
         core.get("shares", ""),
         core.get("total_interactions", ""),
-        video.get("plays", "") if video_post else "",
+        video.get("views", "") if video_post else "",
         video.get("ig_reels_avg_watch_time", "") if video_post else "",
     ]
 

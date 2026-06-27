@@ -35,7 +35,7 @@ CORE = {
 }
 VIDEO = {
     "data": [
-        {"name": "plays", "values": [{"value": 1200}]},
+        {"name": "views", "values": [{"value": 1200}]},
         {"name": "ig_reels_avg_watch_time", "values": [{"value": 5400}]},
     ]
 }
@@ -75,14 +75,14 @@ def test_build_row_for_reel_includes_video_metrics():
     assert row[4] == "line one line two"  # newlines collapsed
     assert row[5] == "900"   # reach
     assert row[6] == "30"    # likes from media field
-    assert row[11] == "1200"  # plays
+    assert row[11] == "1200"  # views
     assert row[12] == "5400"  # avg_watch_time
 
 
 def test_build_row_for_image_blanks_video_metrics():
     row = ig_posts.build_row(IMAGE, ig_posts.insights_map(CORE), {})
     assert row[2] == "IMAGE"
-    assert row[11] == ""  # plays blank for non-video
+    assert row[11] == ""  # views blank for non-video
     assert row[12] == ""
 
 

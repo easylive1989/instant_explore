@@ -153,9 +153,9 @@ parameter metric_type=total_value`。`ig.py` 已處理：逐日以
 翻頁到貼文早於區間就停）取近 30 天貼文，再逐則 `GET /<media-id>/insights`
 抓 `reach,saved,shares,total_interactions`；likes/comments 直接取自 media
 欄位（`like_count`/`comments_count`，較穩）；Reels/影片再加
-`plays,ig_reels_avg_watch_time`。單則 insights 失敗時該列指標留空、不影響其他
-貼文。若某指標在你的 API 版本不可用，調整 `ig_posts.py` 的
-`_CORE_METRICS` / `_VIDEO_METRICS` 即可。
+`views,ig_reels_avg_watch_time`（v21 已無 `plays`，play 數改用 `views`）。
+單則 insights 失敗時該列指標留空、不影響其他貼文。若某指標在你的 API 版本不
+可用，調整 `ig_posts.py` 的 `_CORE_METRICS` / `_VIDEO_METRICS` 即可。
 
 ---
 
