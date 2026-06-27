@@ -175,11 +175,23 @@ class DailySource:
     fetch: Callable[["MetricsConfig", str, str], list[list[str]]]
     key_index: int = 0
     keyed_by_date: bool = True
+    ready: Callable[["MetricsConfig"], bool] | None = None
 
     def missing_config(self, cfg: "MetricsConfig") -> list[str]:
         """Return the names of required config fields that are unset."""
         return [field_name for field_name in self.required
                 if not getattr(cfg, field_name)]
+
+    def is_ready(self, cfg: "MetricsConfig") -> bool:
+        """Whether the source has enough config to attempt a fetch.
+
+        Defaults to "every required field set"; sources where any one of
+        several fields suffices (e.g. GA4's web/app properties) supply a
+        custom `ready` predicate.
+        """
+        if self.ready is not None:
+            return self.ready(cfg)
+        return not self.missing_config(cfg)
 
 
 @dataclass

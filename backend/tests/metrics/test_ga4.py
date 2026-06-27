@@ -49,3 +49,44 @@ def test_fetch_ga4_ok_with_zero_rows(monkeypatch):
     r = ga4.fetch_ga4(cfg, "2026-06-17", "2026-06-23")
     assert r.ok is True
     assert r.csv_rows == []
+
+
+DAILY_PROPERTY = {
+    "rows": [
+        {"dimensionValues": [{"value": "20260622"}],
+         "metricValues": [{"value": "120"}, {"value": "45"}]},
+        {"dimensionValues": [{"value": "20260623"}],
+         "metricValues": [{"value": "130"}, {"value": "40"}]},
+    ]
+}
+
+
+def test_parse_daily_property_normalizes_date():
+    out = ga4.parse_daily_property(DAILY_PROPERTY)
+    assert out["2026-06-22"] == ("120", "45")
+    assert out["2026-06-23"] == ("130", "40")
+
+
+def test_merge_daily_aligns_web_and_app_by_date():
+    web = {"2026-06-22": ("120", "45")}
+    app = {"2026-06-22": ("10", "3"), "2026-06-23": ("12", "4")}
+    rows = ga4.merge_daily(web, app)
+    assert rows[0] == ["2026-06-22", "120", "45", "10", "3"]
+    assert rows[1] == ["2026-06-23", "", "", "12", "4"]
+
+
+def test_fetch_daily_merges_configured_properties(monkeypatch):
+    monkeypatch.setattr(ga4, "_run_report_daily",
+                        lambda pid, s, e: DAILY_PROPERTY)
+    cfg = MetricsConfig(ga4_property_id_web="123", ga4_property_id_app=None)
+    rows = ga4.fetch_daily(cfg, "2026-06-22", "2026-06-23")
+    assert rows[0] == ["2026-06-22", "120", "45", "", ""]
+
+
+def test_source_descriptor_ready_with_any_property():
+    assert ga4.SOURCE.is_ready(
+        MetricsConfig(ga4_property_id_web="123", ga4_property_id_app=None)
+    )
+    assert not ga4.SOURCE.is_ready(
+        MetricsConfig(ga4_property_id_web=None, ga4_property_id_app=None)
+    )
