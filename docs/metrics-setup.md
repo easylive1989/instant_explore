@@ -1,15 +1,27 @@
 # Lorescape 數據抓取（lorescape-metrics）設定指南
 
-`lorescape-metrics` skill 在本機手動抓取產品數據，輸出報告到
-`docs/metrics/<結束日>/`（`summary.md` + 各來源 `.csv`）。
+`lorescape-metrics` skill 在本機手動抓取產品數據，**累積**到
+`docs/metrics/daily/`（每來源一個 CSV，逐日一列、跨次累積）。
 
 - 程式位置：`backend/scripts/metrics/`
-- 執行：`cd backend && uv run python -m scripts.metrics.report`
-- 驗證設定（不抓資料）：`... report --check`
-- 實際抓取：`... report --days 7`（或 `--start/--end`、`--only gsc,ga4,ig`）
+- 執行：`cd backend && uv run python -m scripts.metrics.report`（預設抓昨天，
+  自動補「最後紀錄日 → 昨天」的缺口；檔案空時回溯 30 天建立基線）
+- 驗證設定 / 看待補進度（不抓資料、不連網）：`... report --check`
+- 手動補特定區間：`... report --start 2026-06-01 --end 2026-06-20`
+- 調整首次回溯天數 / 貼文刷新視窗：`... report --days 30`
+- 子集：`... report --only gsc,ga4,ig,ig_posts`
 
-四個來源：GSC、GA4（web+app）、IG 走官方 API；App Store / Play 用瀏覽器抓
-（見 skill 的 `references/stores-browser.md`，本文件不涵蓋）。
+API 來源四個，輸出到 `docs/metrics/daily/`：
+
+| 來源 | 檔案 | key | 內容 |
+| --- | --- | --- | --- |
+| `gsc` | `gsc.csv` | date | 站台每日 clicks / impressions / ctr / position |
+| `ga4` | `ga4.csv` | date | 每日 web/app active / new users |
+| `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（+ 最新日 followers/media 快照） |
+| `ig_posts` | `ig_posts.csv` | media_id | 逐則貼文核心互動 + Reels 影片指標 |
+
+App Store / Play 用瀏覽器抓（見 skill 的 `references/stores-browser.md`，
+本文件不涵蓋）。
 
 本專案實際使用的識別碼（方便對照）：
 
@@ -132,8 +144,18 @@ META_PAGE_ACCESS_TOKEN=<永久粉專 token>
 ### B4. profile_views 的 API 變更
 Graph API v21+ 的帳號 insights，`profile_views` 必須帶
 `metric_type=total_value`，否則回 `(#100) ... should be specified with
-parameter metric_type=total_value`。`ig.py` 已處理（commit d917abd）：呼叫帶
-`metric_type=total_value`，並同時解析 `total_value` 與舊版 `values[]` 兩種回傳。
+parameter metric_type=total_value`。`ig.py` 已處理：逐日以
+`metric_type=total_value`、`since=當天&until=隔天` 查單日總量（避開時間序列
+`end_time` 的時區 off-by-one），並同時解析 `total_value` 與 `values[]` 兩種回傳。
+
+### B5. 逐則貼文（`ig_posts`）
+`ig_posts.py` 用同一組 token：先 `GET /<IG_USER_ID>/media`（newest-first，
+翻頁到貼文早於區間就停）取近 30 天貼文，再逐則 `GET /<media-id>/insights`
+抓 `reach,saved,shares,total_interactions`；likes/comments 直接取自 media
+欄位（`like_count`/`comments_count`，較穩）；Reels/影片再加
+`plays,ig_reels_avg_watch_time`。單則 insights 失敗時該列指標留空、不影響其他
+貼文。若某指標在你的 API 版本不可用，調整 `ig_posts.py` 的
+`_CORE_METRICS` / `_VIDEO_METRICS` 即可。
 
 ---
 
@@ -141,10 +163,12 @@ parameter metric_type=total_value`。`ig.py` 已處理（commit d917abd）：呼
 
 ```
 cd backend
-uv run python -m scripts.metrics.report --check     # 三個來源都應顯示 ready
-uv run python -m scripts.metrics.report --days 7    # 實際抓取
+uv run python -m scripts.metrics.report --check   # 四來源 ready + 待補進度
+uv run python -m scripts.metrics.report           # 抓昨天 + 自動補缺口
 ```
-報告在 `docs/metrics/<結束日>/summary.md`。
+`--check` 會顯示每來源「最後紀錄日、待補幾天 → 昨天」（`ig_posts` 顯示要刷新
+的貼文區間）。實際抓取後，資料累積在 `docs/metrics/daily/<來源>.csv`，stdout
+列出每來源 `+N row(s)` / `up to date` / `skipped`。
 
 ---
 
@@ -162,7 +186,8 @@ uv run python -m scripts.metrics.report --days 7    # 實際抓取
 | meta_token_helper `No Facebook Pages found` | 新版/商業粉專不出現在 /me/accounts | helper 已改問 Page ID（§B3） |
 
 ## 相關檔案
-- `backend/scripts/metrics/`（`report.py` 總管、`gsc.py`/`ga4.py`/`ig.py` 來源）
+- `backend/scripts/metrics/`（`report.py` 補抓引擎、`gsc.py`/`ga4.py`/`ig.py`/
+  `ig_posts.py` 來源；累積與 upsert 工具在 `_common.py`）
 - `.claude/skills/lorescape-metrics/`（SKILL.md + references）
 - `scripts/meta_token_helper.py`（換長期 Meta token）
 - `docs/superpowers/specs|plans/2026-06-24-lorescape-metrics*`（設計與計畫）

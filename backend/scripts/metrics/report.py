@@ -1,150 +1,228 @@
-"""Orchestrate metrics sources into a dated report under docs/metrics/."""
+"""Accumulate metrics sources into fixed daily datasets.
+
+Each source is upserted into ``docs/metrics/daily/<source>.csv`` keyed by
+date (or media id). A run targets yesterday and backfills any missing days
+since the last record, so the datasets grow one row per day over time.
+"""
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
-from typing import Callable
 
 from dotenv import load_dotenv
 
 from scripts.metrics._common import (
     REPO_ROOT,
+    DailySource,
     MetricsConfig,
-    SourceResult,
+    daily_dir,
     date_range,
-    report_dir,
-    rows_to_md_table,
-    write_csv,
+    existing_keys,
+    missing_days,
+    upsert_daily_rows,
 )
+from scripts.metrics.ga4 import SOURCE as GA4_SOURCE
+from scripts.metrics.gsc import SOURCE as GSC_SOURCE
+from scripts.metrics.ig import SOURCE as IG_SOURCE
+from scripts.metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
 
-Source = Callable[[MetricsConfig, str, str], SourceResult]
+DEFAULT_BACKFILL = 30
 
-# Later tasks register "gsc", "ga4", "ig" here.
-SOURCES: dict[str, Source] = {}
-
-from scripts.metrics.gsc import fetch_gsc  # noqa: E402
-
-SOURCES["gsc"] = fetch_gsc
-
-from scripts.metrics.ga4 import fetch_ga4  # noqa: E402
-
-SOURCES["ga4"] = fetch_ga4
-
-from scripts.metrics.ig import fetch_ig  # noqa: E402
-
-SOURCES["ig"] = fetch_ig
-
-# Minimum config each source needs to even attempt a fetch.
-_REQUIRED: dict[str, tuple[str, ...]] = {
-    "gsc": ("gsc_site_url",),
-    "ig": ("ig_user_id", "meta_page_access_token"),
+SOURCES: dict[str, DailySource] = {
+    source.name: source
+    for source in (GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE)
 }
+
+
+@dataclass
+class AccumResult:
+    """Outcome of accumulating one source for a run."""
+
+    name: str
+    ok: bool
+    written: int = 0
+    window: tuple[str, str] | None = None
+    skipped_reason: str | None = None
+    note: str | None = None
 
 
 def _repo_root() -> Path:
     return REPO_ROOT
 
 
-def check_lines(cfg: MetricsConfig, names: list[str]) -> list[str]:
-    """One readiness line per source; pure, no network."""
-    lines: list[str] = []
-    for name in names:
-        if name == "ga4":
-            ready = bool(cfg.ga4_property_id_web or cfg.ga4_property_id_app)
-            if ready:
-                lines.append("- ga4: ready")
-            else:
-                lines.append(
-                    "- ga4: missing config → "
-                    "GA4_PROPERTY_ID_WEB or GA4_PROPERTY_ID_APP"
-                )
-            continue
-        required = _REQUIRED.get(name, ())
-        missing = [f for f in required if not getattr(cfg, f)]
-        if missing:
-            lines.append(f"- {name}: missing config → {', '.join(missing)}")
-        else:
-            lines.append(f"- {name}: ready")
-    return lines
+def _default_end() -> str:
+    """Yesterday in ISO — the latest day with complete data."""
+    _, end = date_range(days=1)
+    return end
 
 
-def build_summary(
-    results: list[SourceResult], start: str, end: str
-) -> str:
-    """Render the cross-source markdown summary."""
-    out = [f"# Lorescape 數據報告 {start} → {end}", ""]
-    for r in results:
-        out.append(f"## {r.name}")
-        if not r.ok:
-            out.append(f"- skipped: {r.skipped_reason}")
-            out.append("")
-            continue
-        out.extend(f"- {line}" for line in r.summary_lines)
-        if r.csv_rows:
-            out.append("")
-            out.append(
-                rows_to_md_table(r.csv_headers, r.csv_rows[:10])
-            )
-        out.append("")
-    return "\n".join(out)
+def missing_note(source: DailySource, cfg: MetricsConfig) -> str:
+    """Human-readable reason a source can't run for lack of config."""
+    if source.name == "ga4":
+        return "missing config → GA4_PROPERTY_ID_WEB or GA4_PROPERTY_ID_APP"
+    return "missing config → " + ", ".join(source.missing_config(cfg))
+
+
+def plan_window(
+    source: DailySource,
+    path: Path,
+    end: str,
+    backfill: int,
+    explicit: tuple[str, str] | None,
+) -> tuple[str, str] | None:
+    """Return the (start, end) to fetch, or None if already up to date.
+
+    Date-keyed sources fetch only the gap up to `end`; media-keyed sources
+    always refresh the most recent `backfill` days. An explicit window
+    overrides both for manual backfills.
+    """
+    if explicit is not None:
+        return explicit
+    if source.keyed_by_date:
+        keys = existing_keys(path, source.key_index)
+        days = missing_days(keys, end, backfill)
+        return (days[0], days[-1]) if days else None
+    start = (date.fromisoformat(end) - timedelta(days=backfill - 1)).isoformat()
+    return start, end
+
+
+def accumulate(
+    source: DailySource,
+    cfg: MetricsConfig,
+    end: str,
+    root: Path,
+    backfill: int = DEFAULT_BACKFILL,
+    explicit: tuple[str, str] | None = None,
+) -> AccumResult:
+    """Fetch a source's pending window and upsert it into its daily file."""
+    if not source.is_ready(cfg):
+        return AccumResult(source.name, ok=False,
+                           skipped_reason=missing_note(source, cfg))
+    path = daily_dir(root) / source.filename
+    window = plan_window(source, path, end, backfill, explicit)
+    if window is None:
+        return AccumResult(source.name, ok=True, note="up to date")
+    rows = source.fetch(cfg, window[0], window[1])
+    upsert_daily_rows(path, source.headers, rows, source.key_index)
+    return AccumResult(source.name, ok=True, written=len(rows), window=window)
 
 
 def run(
     cfg: MetricsConfig,
     names: list[str],
-    start: str,
     end: str,
     root: Path,
-) -> Path:
-    """Fetch each named source, write summary.md + per-source CSVs."""
-    results: list[SourceResult] = []
+    backfill: int = DEFAULT_BACKFILL,
+    explicit: tuple[str, str] | None = None,
+) -> list[AccumResult]:
+    """Accumulate each named source, isolating per-source failures."""
+    results: list[AccumResult] = []
     for name in names:
-        fetch = SOURCES.get(name)
-        if fetch is None:
-            results.append(SourceResult.skipped(name, "not implemented"))
+        source = SOURCES.get(name)
+        if source is None:
+            results.append(
+                AccumResult(name, ok=False, skipped_reason="unknown source")
+            )
             continue
         try:
-            results.append(fetch(cfg, start, end))
-        except Exception as exc:  # isolate per-source failures
-            results.append(SourceResult.skipped(name, f"error: {exc}"))
-
-    out_dir = report_dir(end, root=root)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "summary.md").write_text(
-        build_summary(results, start, end), encoding="utf-8"
-    )
-    for r in results:
-        if r.ok and r.csv_rows:
-            write_csv(
-                out_dir / f"{r.name}.csv", r.csv_headers, r.csv_rows
+            results.append(
+                accumulate(source, cfg, end, root, backfill, explicit)
             )
-    return out_dir
+        except Exception as exc:  # isolate per-source failures
+            results.append(
+                AccumResult(name, ok=False, skipped_reason=f"error: {exc}")
+            )
+    return results
+
+
+def check_lines(
+    cfg: MetricsConfig,
+    names: list[str],
+    end: str,
+    root: Path,
+    backfill: int = DEFAULT_BACKFILL,
+) -> list[str]:
+    """One readiness line per source; pure, reads local files only."""
+    lines: list[str] = []
+    for name in names:
+        source = SOURCES.get(name)
+        if source is None:
+            lines.append(f"- {name}: unknown source")
+            continue
+        if not source.is_ready(cfg):
+            lines.append(f"- {name}: {missing_note(source, cfg)}")
+            continue
+        path = daily_dir(root) / source.filename
+        keys = existing_keys(path, source.key_index)
+        if source.keyed_by_date:
+            days = missing_days(keys, end, backfill)
+            latest = max(keys) if keys else "empty"
+            if not days:
+                lines.append(f"- {name}: ready, up to date (last {latest})")
+            else:
+                lines.append(
+                    f"- {name}: ready, last {latest}, "
+                    f"backfill {len(days)} day(s) → {end}"
+                )
+        else:
+            start = (date.fromisoformat(end)
+                     - timedelta(days=backfill - 1)).isoformat()
+            lines.append(
+                f"- {name}: ready, refresh posts {start} → {end} "
+                f"({len(keys)} stored)"
+            )
+    return lines
+
+
+def format_results(results: list[AccumResult]) -> str:
+    """Render run outcomes for the console."""
+    out: list[str] = []
+    for r in results:
+        if not r.ok:
+            out.append(f"- {r.name}: skipped — {r.skipped_reason}")
+        elif r.note:
+            out.append(f"- {r.name}: {r.note}")
+        elif r.window is not None:
+            start, end = r.window
+            out.append(f"- {r.name}: +{r.written} row(s) for {start} → {end}")
+        else:
+            out.append(f"- {r.name}: {r.written} row(s)")
+    return "\n".join(out)
 
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv(_repo_root() / "backend" / ".env")
-    parser = argparse.ArgumentParser(description="Fetch Lorescape metrics.")
-    parser.add_argument("--days", type=int, default=7)
-    parser.add_argument("--start")
-    parser.add_argument("--end")
+    parser = argparse.ArgumentParser(
+        description="Accumulate Lorescape metrics into daily datasets."
+    )
+    parser.add_argument(
+        "--days", type=int, default=DEFAULT_BACKFILL,
+        help="backfill horizon when seeding / posts refresh window",
+    )
+    parser.add_argument("--start", help="force an explicit backfill start")
+    parser.add_argument("--end", help="target end date (default: yesterday)")
     parser.add_argument("--only", help="comma-separated subset of sources")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
     cfg = MetricsConfig.from_env()
-    all_names = list(SOURCES.keys()) or ["gsc", "ga4", "ig"]
-    names = [s.strip() for s in args.only.split(",")] if args.only else all_names
-    start, end = date_range(
-        days=args.days, start=args.start, end=args.end
+    names = (
+        [s.strip() for s in args.only.split(",")]
+        if args.only else list(SOURCES.keys())
     )
+    end = args.end or _default_end()
+    explicit = (args.start, end) if args.start else None
 
     if args.check:
-        print(f"range: {start} → {end}")
-        print("\n".join(check_lines(cfg, names)))
+        print(f"target end: {end}")
+        print("\n".join(check_lines(cfg, names, end, _repo_root(), args.days)))
         return 0
 
-    out_dir = run(cfg, names, start, end, root=_repo_root())
-    print(f"report written: {out_dir / 'summary.md'}")
+    results = run(cfg, names, end, _repo_root(), args.days, explicit)
+    print(f"daily datasets: {daily_dir(_repo_root())}")
+    print(format_results(results))
     return 0
 
 

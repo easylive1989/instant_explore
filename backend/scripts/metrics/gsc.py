@@ -1,33 +1,9 @@
-"""Google Search Console search-analytics source."""
+"""Google Search Console search-analytics source (daily site totals)."""
 from __future__ import annotations
 
-from scripts.metrics._common import MetricsConfig, SourceResult
+from scripts.metrics._common import DailySource, MetricsConfig
 
-_HEADERS = ["query", "clicks", "impressions", "ctr", "position"]
-
-
-def parse_search_analytics(resp: dict) -> list[list[str]]:
-    """Map a searchanalytics.query response into string rows."""
-    rows: list[list[str]] = []
-    for row in resp.get("rows", []):
-        keys = row.get("keys", [""])
-        rows.append([
-            keys[0],
-            str(int(row.get("clicks", 0))),
-            str(int(row.get("impressions", 0))),
-            f"{row.get('ctr', 0.0) * 100:.2f}%",
-            f"{row.get('position', 0.0):.1f}",
-        ])
-    return rows
-
-
-def summarize(rows: list[list[str]]) -> list[str]:
-    """Total clicks and impressions across rows."""
-    clicks = sum(int(r[1]) for r in rows)
-    impressions = sum(int(r[2]) for r in rows)
-    return [
-        f"總點擊 {clicks}、總曝光 {impressions}（top {len(rows)} queries）",
-    ]
+_DAILY_HEADERS = ["date", "clicks", "impressions", "ctr", "position"]
 
 
 def _service():
@@ -42,26 +18,44 @@ def _service():
                  cache_discovery=False)
 
 
-def fetch_gsc(cfg: MetricsConfig, start: str, end: str) -> SourceResult:
-    """Fetch top queries for the configured site over [start, end]."""
-    if not cfg.gsc_site_url:
-        return SourceResult.skipped("gsc", "missing GSC_SITE_URL in .env")
-    try:
-        service = _service()
-        resp = service.searchanalytics().query(
-            siteUrl=cfg.gsc_site_url,
-            body={
-                "startDate": start,
-                "endDate": end,
-                "dimensions": ["query"],
-                "rowLimit": 25,
-            },
-        ).execute()
-    except Exception as exc:
-        return SourceResult.skipped("gsc", f"API error: {exc}")
+def parse_daily(resp: dict) -> list[list[str]]:
+    """Map a date-dimensioned searchanalytics response into daily rows.
 
-    rows = parse_search_analytics(resp)
-    return SourceResult(
-        name="gsc", ok=True, summary_lines=summarize(rows),
-        csv_headers=_HEADERS, csv_rows=rows,
-    )
+    Each row is ``[date, clicks, impressions, ctr, position]`` — the site
+    totals for that day, suitable for accumulation keyed by date.
+    """
+    rows: list[list[str]] = []
+    for row in resp.get("rows", []):
+        keys = row.get("keys", [""])
+        rows.append([
+            keys[0],
+            str(int(row.get("clicks", 0))),
+            str(int(row.get("impressions", 0))),
+            f"{row.get('ctr', 0.0) * 100:.2f}%",
+            f"{row.get('position', 0.0):.1f}",
+        ])
+    return rows
+
+
+def fetch_daily(cfg: MetricsConfig, start: str, end: str) -> list[list[str]]:
+    """Return per-day site totals over [start, end] for daily accumulation."""
+    service = _service()
+    resp = service.searchanalytics().query(
+        siteUrl=cfg.gsc_site_url,
+        body={
+            "startDate": start,
+            "endDate": end,
+            "dimensions": ["date"],
+            "rowLimit": 1000,
+        },
+    ).execute()
+    return parse_daily(resp)
+
+
+SOURCE = DailySource(
+    name="gsc",
+    filename="gsc.csv",
+    headers=_DAILY_HEADERS,
+    required=("gsc_site_url",),
+    fetch=fetch_daily,
+)
