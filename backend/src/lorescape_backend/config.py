@@ -10,7 +10,7 @@ from lorescape_backend.shared.genai import (
     GenaiSettings,
 )
 
-_DEFAULT_CTA_TEXT = "Explore more places with Instant Explore."
+_DEFAULT_CTA_TEXT = "Explore more places with Lorescape."
 
 
 @dataclass(frozen=True)
