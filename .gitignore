@@ -59,3 +59,6 @@ venv/
 
 # Local outputs (generated assets, not tracked)
 outputs/
+
+# Google service account credentials
+service-account.json
