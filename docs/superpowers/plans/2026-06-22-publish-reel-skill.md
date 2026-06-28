@@ -559,7 +559,7 @@ description: Use when the user wants to manually publish a specific day's finish
 
 - `backend/.env` 已填好 `IG_USER_ID`、`META_PAGE_ACCESS_TOKEN`、
   `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`（取得方式見
-  `docs/social_publisher_setup.md`）。
+  `docs/init/social_publisher_setup.md`）。
 - 目標日期的 `outputs/daily_video/<date>/final.mp4` 已存在。
 
 ## 步驟

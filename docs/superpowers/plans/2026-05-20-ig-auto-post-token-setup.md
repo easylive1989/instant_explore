@@ -25,7 +25,7 @@
   - `instagram_basic`
   - `instagram_content_publish`
 
-若任一條件不成立 → **停**，回到 `docs/social_publisher_setup.md` 把前置補齊再回來執行此 plan。
+若任一條件不成立 → **停**，回到 `docs/init/social_publisher_setup.md` 把前置補齊再回來執行此 plan。
 
 ---
 
@@ -38,7 +38,7 @@
   - `backend/.env.example`
   - `backend/src/lorescape_backend/config.py`
   - `scripts/meta_token_helper.py`
-  - `docs/social_publisher_setup.md`
+  - `docs/init/social_publisher_setup.md`
 
 本 plan 全程**不會產生 git commit**（spec 已於前一輪 commit 到 master）。
 
@@ -81,7 +81,7 @@ uv run --env-file=.env python -c "from lorescape_backend.config import Config; c
 
 Expected output (one of):
 - `IG enabled: False` — IG vars are empty (good, this is our baseline)
-- `RuntimeError: Missing required env var: SUPABASE_URL` or similar — required vars not yet filled. **Fix those first** by following `docs/social_publisher_setup.md`; then re-run this step until you get `IG enabled: False`.
+- `RuntimeError: Missing required env var: SUPABASE_URL` or similar — required vars not yet filled. **Fix those first** by following `docs/init/social_publisher_setup.md`; then re-run this step until you get `IG enabled: False`.
 
 Why this matters: confirms we can load `Config` and that the only thing keeping `instagram_enabled` `False` is the IG-token blanks (not other config errors).
 
@@ -123,7 +123,7 @@ At the end it prints:
 
 Copy those two lines to a temp location (clipboard / scratchpad). You'll paste them in Task 3.
 
-If the script errors out, the most common causes are listed in `docs/social_publisher_setup.md` under "Instagram Token" — handle there before retrying.
+If the script errors out, the most common causes are listed in `docs/init/social_publisher_setup.md` under "Instagram Token" — handle there before retrying.
 
 ---
 

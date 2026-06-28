@@ -27,7 +27,7 @@ insights；較舊的貼文保留既有紀錄。
 ## 前置條件
 
 完整一次性設定（service account、IG token、API 啟用、踩雷排解）見
-**`docs/metrics-setup.md`**。摘要：
+**`docs/init/metrics-setup.md`**。摘要：
 
 - **Google（GSC + GA4）**：用 **service account**（非 ADC，ADC 會被 Google
   擋），`backend/.env` 設 `GOOGLE_APPLICATION_CREDENTIALS` +

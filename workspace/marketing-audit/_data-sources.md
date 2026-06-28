@@ -17,10 +17,10 @@
 | Metadata / locale layout | user_provided | `landing/src/app/[locale]/layout.tsx` | 2026-06-25 |
 | JSON-LD structured data | user_provided | `landing/src/components/SiteHtml.tsx` | 2026-06-25 |
 | GA4 property ID | user_provided | `landing/.env.production` (G-TCYSEZX8T6, property 514854947) | 2026-06-25 |
-| Instagram auto-publisher | user_provided | `docs/social_publisher_setup.md`, `backend/src/lorescape_backend/social/` | 2026-06-25 |
+| Instagram auto-publisher | user_provided | `docs/init/social_publisher_setup.md`, `backend/src/lorescape_backend/social/` | 2026-06-25 |
 | IG launch caption | user_provided | `docs/ig/ig-launch-caption.md` | 2026-06-25 |
-| Subscription plans | user_provided | `docs/subscription-add-weekly-yearly-setup.md` | 2026-06-25 |
-| Metrics setup | user_provided | `docs/metrics-setup.md` | 2026-06-25 |
+| Subscription plans | user_provided | `docs/init/subscription-setup.md` | 2026-06-25 |
+| Metrics setup | user_provided | `docs/init/metrics-setup.md` | 2026-06-25 |
 | Google Play URL | public_observed | `landing/src/components/DownloadLink.tsx` | 2026-06-25 |
 | Support email | user_provided | `landing/src/app/(legal)/support/page.tsx` | 2026-06-25 |
 

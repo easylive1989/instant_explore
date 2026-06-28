@@ -7,7 +7,7 @@
 完整步驟（建 service account、啟用 API、授權資源、GA4 單一資源、GSC 網域
 驗證）見專案根目錄文件：
 
-**`docs/metrics-setup.md` §A（Google）與 §B（Instagram）**
+**`docs/init/metrics-setup.md` §A（Google）與 §B（Instagram）**
 
 重點：
 - `backend/.env` 設 `GOOGLE_APPLICATION_CREDENTIALS=<service account JSON 金鑰路徑>`。

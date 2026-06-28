@@ -9,7 +9,7 @@
 **Tech Stack:** Flutter, Dart 3, Riverpod, `purchases_flutter` (RevenueCat), easy_localization, flutter_test.
 
 **Spec:** [`docs/superpowers/specs/2026-05-11-weekly-subscription-design.md`](../specs/2026-05-11-weekly-subscription-design.md)
-**Backend / store setup (run in parallel with code work):** [`docs/subscription-add-weekly-yearly-setup.md`](../../subscription-add-weekly-yearly-setup.md)
+**Backend / store setup (run in parallel with code work):** [`docs/init/subscription-setup.md`](../../init/subscription-setup.md)
 
 **Verification command (run after each task that touches Dart):**
 ```bash
@@ -1969,7 +1969,7 @@ Expected: all tests pass.
 
 - [ ] **Step 3: Manual smoke checklist (do this when the RC backend is ready)**
 
-Track the RC / Store backend setup in [`docs/subscription-add-weekly-yearly-setup.md`](../../subscription-add-weekly-yearly-setup.md). After the backend has all three packages, run the app against Sandbox and confirm:
+Track the RC / Store backend setup in [`docs/init/subscription-setup.md`](../../init/subscription-setup.md). After the backend has all three packages, run the app against Sandbox and confirm:
 
 - Paywall shows three cards in order Weekly → Monthly → Yearly
 - Yearly card is selected on entry and shows the "Best value" badge

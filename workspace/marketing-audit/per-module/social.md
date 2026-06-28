@@ -22,7 +22,7 @@
 | Content mix is 1-dimensional | Daily story posts = one format. No Reels, no BTS, no UGC, no "angle reveal", no polls/questions. | P1 |
 | Reels not published yet | Actor images exist but no Reels appear in published pipeline. Video content is the #1 reach driver on IG 2026. | P1 |
 | No IG bio / profile link-in-bio strategy | No reference to Linktree, Milkshake, or smart link for multiple CTAs (App Store + Play + web) | P1 |
-| Threads publishing removed | Noted in `social_publisher_setup.md` (removed 2026-05-29). Instagram-only = single platform risk. | P2 |
+| Threads publishing removed | Noted in `docs/init/social_publisher_setup.md` (removed 2026-05-29). Instagram-only = single platform risk. | P2 |
 | No TikTok account | Target ICP is present on TikTok. Travel + history content format fits TikTok niche perfectly. | P2 |
 | No Twitter/X strategy | Minimal priority, but travel and tech press audiences are still there. | P3 |
 | No YouTube channel | Long-form story samples + "places with history" content would perform well on YouTube. | P2 |

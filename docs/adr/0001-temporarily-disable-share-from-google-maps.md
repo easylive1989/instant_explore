@@ -33,7 +33,7 @@ App 原本支援使用者從 Google Maps（與其他可分享純文字的 app）
 - `frontend/lib/features/share/` 底下所有 domain、data、provider、test 程式碼
 - `receive_sharing_intent` 套件依賴（`pubspec.yaml`）
 - iOS `ShareExtension` target 本身、`ShareViewController.swift`、App Group 設定
-- `docs/ios-share-extension-setup.md` 設定文件
+- `docs/init/ios-share-extension-setup.md` 設定文件
 
 ## 影響
 

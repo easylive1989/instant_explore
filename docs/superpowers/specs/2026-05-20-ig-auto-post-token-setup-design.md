@@ -16,7 +16,7 @@
 - `social/caption.py` — 組合 caption + hashtags + CTA
 - `config.py` — 從 env 讀取所有設定，`Config.instagram_enabled` 判斷是否啟用
 - `scripts/meta_token_helper.py --platform instagram` — 互動式 token 換發工具
-- `docs/social_publisher_setup.md` — 完整設定流程文件
+- `docs/init/social_publisher_setup.md` — 完整設定流程文件
 
 唯一卡住自動發文的，是 `backend/.env` 內 `IG_USER_ID` 與 `META_PAGE_ACCESS_TOKEN` 兩個變數還沒填值。
 
@@ -40,7 +40,7 @@
 | `backend/src/lorescape_backend/config.py` | ✅ 含 `ig_user_id`、`meta_page_access_token`、`instagram_enabled` |
 | `backend/.env.example` | ✅ 與 `config.py` 一致 |
 | `scripts/meta_token_helper.py` | ✅ `--platform instagram` 流程完整 |
-| `docs/social_publisher_setup.md` | ✅ 含 IG 設定步驟 |
+| `docs/init/social_publisher_setup.md` | ✅ 含 IG 設定步驟 |
 | `backend/.env` 內的 `IG_USER_ID` | ❌ 空白 |
 | `backend/.env` 內的 `META_PAGE_ACCESS_TOKEN` | ❌ 空白 |
 
@@ -64,7 +64,7 @@ Script 會引導完成：
 6. 解析 IG Business Account ID
 7. 印出兩行要貼到 `.env` 的內容
 
-前置條件（依 `docs/social_publisher_setup.md`）：
+前置條件（依 `docs/init/social_publisher_setup.md`）：
 - IG 帳號（`love.lorescape`）已設為 Business / Creator
 - IG 已連結到 Facebook Page
 - Meta App 已啟用 `pages_show_list`、`pages_read_engagement`、`pages_manage_posts`、`instagram_basic`、`instagram_content_publish` 權限
@@ -113,4 +113,4 @@ IG enabled: True
 - `backend/src/lorescape_backend/social/publisher.py`
 - `backend/src/lorescape_backend/social/instagram.py`
 - `scripts/meta_token_helper.py`
-- `docs/social_publisher_setup.md`
+- `docs/init/social_publisher_setup.md`

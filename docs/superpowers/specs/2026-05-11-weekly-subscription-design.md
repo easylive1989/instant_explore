@@ -9,7 +9,7 @@
 要在不影響既有月訂閱使用者的前提下，把付費牆改為「每週 / 每月 / 每年」三方案多選的版型，並讓「每年」標示為 Best value、預設選取。
 
 商店與 RevenueCat 後台尚未建立每週、每年方案；後台操作獨立成
-[`docs/subscription-add-weekly-yearly-setup.md`](../../subscription-add-weekly-yearly-setup.md)，本 spec 只描述程式變更。
+[`docs/init/subscription-setup.md`](../../init/subscription-setup.md)，本 spec 只描述程式變更。
 
 ## 目標
 
@@ -309,7 +309,7 @@ BDD 命名 + Fake service：
 
 ## 後台 / 商店設定
 
-詳見 [`docs/subscription-add-weekly-yearly-setup.md`](../../subscription-add-weekly-yearly-setup.md)。
+詳見 [`docs/init/subscription-setup.md`](../../init/subscription-setup.md)。
 
 驗收標準：
 - Dev build 安裝後，付費牆顯示三張卡片，價格為商店本地化字串
@@ -334,4 +334,4 @@ BDD 命名 + Fake service：
 | `lib/features/subscription/presentation/widgets/subscription_plan_card.dart` | `selected` / `isBestValue` / `onTap` |
 | `frontend/assets/translations/en.json` | 新增英文 keys |
 | `frontend/assets/translations/zh-TW.json` | 新增繁中 keys |
-| `docs/subscription-add-weekly-yearly-setup.md` | 後台 / 商店操作指引 |
+| `docs/init/subscription-setup.md` | 後台 / 商店操作指引 |
