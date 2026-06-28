@@ -93,8 +93,8 @@ def _supabase_multi_table(*, zh_rows, place_row=None):
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 def test_approved_row_publishes_to_ig(
     upload, render, ig_pub, check, create, fake_config
@@ -106,21 +106,26 @@ def test_approved_row_publishes_to_ig(
     )
     create.return_value = client
     check.return_value = "approved"
-    render.return_value = b"\x89PNGfake"
+    render.return_value = [b"\x89PNGcover", b"\x89PNGstory", b"\x89PNGcta"]
     upload.return_value = "https://x.supabase.co/storage/v1/object/public/ig-cards/2026-05-12/row-zh-1.png"
     ig_pub.return_value = "ig-1"
 
     run_publish_job(fake_config, date(2026, 5, 12))
 
-    # render_card called once with a CardContent derived from zh + place
+    # render_slides called once, producing one PNG per carousel slide
     render.assert_called_once()
-    # upload called with path = <date>/<zh_row_id>.png
-    upload.assert_called_once()
-    assert upload.call_args.kwargs["path"] == "2026-05-12/row-zh-1.png"
-    # IG called with the storage URL (not the wikipedia image)
+    # upload called once per slide, paths suffixed -0/-1/-2
+    assert upload.call_count == 3
+    upload_paths = [c.kwargs["path"] for c in upload.call_args_list]
+    assert upload_paths == [
+        "2026-05-12/row-zh-1-0.png",
+        "2026-05-12/row-zh-1-1.png",
+        "2026-05-12/row-zh-1-2.png",
+    ]
+    # IG carousel called with the storage URLs (not the wikipedia image)
     ig_pub.assert_called_once()
     ig_kwargs = ig_pub.call_args.kwargs
-    assert ig_kwargs["image_url"] == upload.return_value
+    assert ig_kwargs["image_urls"] == [upload.return_value] * 3
     # Caption is the zh-TW caption — contains the zh-TW place_name
     assert "羅馬競技場" in ig_kwargs["caption"]
 
@@ -133,7 +138,7 @@ def test_approved_row_publishes_to_ig(
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
 def test_rejected_row_does_not_publish(ig_pub, check, create, fake_config):
     rows = [_row()]
     client, table, _, _ = _supabase_multi_table(zh_rows=rows)
@@ -149,7 +154,7 @@ def test_rejected_row_does_not_publish(ig_pub, check, create, fake_config):
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
 def test_no_reaction_skips_row(ig_pub, check, create, fake_config):
     rows = [_row()]
     client, table, _, _ = _supabase_multi_table(zh_rows=rows)
@@ -165,8 +170,8 @@ def test_no_reaction_skips_row(ig_pub, check, create, fake_config):
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 @patch("lorescape_backend.social.publisher.discord_notify.notify_failure")
 def test_publish_exception_marks_failed_and_notifies(
@@ -177,7 +182,7 @@ def test_publish_exception_marks_failed_and_notifies(
     client, table, _, _ = _supabase_multi_table(zh_rows=rows, place_row=place)
     create.return_value = client
     check.return_value = "approved"
-    render.return_value = b"\x89PNGfake"
+    render.return_value = [b"\x89PNGcover", b"\x89PNGstory", b"\x89PNGcta"]
     upload.return_value = "https://x.supabase.co/storage/v1/object/public/ig-cards/2026-05-12/row-zh-1.png"
     ig_pub.side_effect = RuntimeError("API blew up")
 
@@ -274,8 +279,8 @@ def test_row_without_discord_message_id_stays_pending(check, create, fake_config
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 def test_approved_row_skips_ig_when_place_row_missing(
     upload, render, ig_pub, check, create, fake_config
@@ -297,8 +302,8 @@ def test_approved_row_skips_ig_when_place_row_missing(
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 def test_approved_row_skips_ig_when_card_fields_null(
     upload, render, ig_pub, check, create, fake_config
@@ -322,8 +327,8 @@ def test_approved_row_skips_ig_when_card_fields_null(
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 @patch("lorescape_backend.social.publisher.discord_notify.notify_failure")
 def test_ig_render_failure_marks_failed_and_notifies(
@@ -348,8 +353,8 @@ def test_ig_render_failure_marks_failed_and_notifies(
 
 @patch("lorescape_backend.social.publisher.create_client")
 @patch("lorescape_backend.social.publisher.discord_review.check_reaction")
-@patch("lorescape_backend.social.publisher.instagram.publish")
-@patch("lorescape_backend.social.publisher.render_card")
+@patch("lorescape_backend.social.publisher.instagram.publish_carousel")
+@patch("lorescape_backend.social.publisher.render_slides")
 @patch("lorescape_backend.social.publisher.card_storage.upload_card_png")
 @patch("lorescape_backend.social.publisher.discord_notify.notify_failure")
 def test_ig_upload_failure_marks_failed_and_notifies(
@@ -362,7 +367,7 @@ def test_ig_upload_failure_marks_failed_and_notifies(
     )
     create.return_value = client
     check.return_value = "approved"
-    render.return_value = b"\x89PNGfake"
+    render.return_value = [b"\x89PNGcover", b"\x89PNGstory", b"\x89PNGcta"]
     upload.side_effect = RuntimeError("supabase storage down")
 
     run_publish_job(fake_config, date(2026, 5, 12))

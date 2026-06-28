@@ -61,7 +61,7 @@ _FIT_OPTS = {
 
 
 @contextmanager
-def _html_file(content: CardContent) -> Iterator[Path]:
+def _html_file(content: CardContent, *, slide: str | None = None) -> Iterator[Path]:
     """Render the card HTML to a temp file inside the template dir.
 
     The file lives in the template dir so that:
@@ -71,7 +71,7 @@ def _html_file(content: CardContent) -> Iterator[Path]:
          would block them as a cross-origin security measure).
     """
     base_url = template_dir().as_uri() + "/"
-    html = render_html(content, base_url=base_url)
+    html = render_html(content, base_url=base_url, slide=slide)
     with tempfile.NamedTemporaryFile(
         mode="w",
         suffix=".html",
@@ -97,22 +97,51 @@ def _prepare_page(page: Page, tmp_path: Path) -> None:
     page.evaluate(_FIT_SCRIPT, _FIT_OPTS)
 
 
+# Carousel slides, in feed order: clean cover → readable story → CTA.
+CAROUSEL_SLIDES: tuple[str, ...] = ("cover", "story", "cta")
+
+
+def _screenshot_slide(browser, tmp_path: Path) -> bytes:
+    page = browser.new_page(
+        viewport={"width": _CARD_WIDTH, "height": _CARD_HEIGHT},
+        device_scale_factor=1.0,
+    )
+    try:
+        _prepare_page(page, tmp_path)
+        return page.screenshot(
+            type="png", full_page=False, omit_background=False
+        )
+    finally:
+        page.close()
+
+
 def render_card(content: CardContent) -> bytes:
-    """Render the E0c IG card to PNG bytes (1080×1350)."""
+    """Render the legacy combined IG card to PNG bytes (1080×1350)."""
     with _html_file(content) as tmp_path:
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             try:
-                page = browser.new_page(
-                    viewport={"width": _CARD_WIDTH, "height": _CARD_HEIGHT},
-                    device_scale_factor=1.0,
-                )
-                _prepare_page(page, tmp_path)
-                return page.screenshot(
-                    type="png", full_page=False, omit_background=False
-                )
+                return _screenshot_slide(browser, tmp_path)
             finally:
                 browser.close()
+
+
+def render_slides(content: CardContent) -> list[bytes]:
+    """Render the carousel slides to a list of PNG bytes (each 1080×1350).
+
+    Order matches `CAROUSEL_SLIDES`: cover, story, CTA. One browser is
+    launched and reused across slides.
+    """
+    slides: list[bytes] = []
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        try:
+            for slide in CAROUSEL_SLIDES:
+                with _html_file(content, slide=slide) as tmp_path:
+                    slides.append(_screenshot_slide(browser, tmp_path))
+        finally:
+            browser.close()
+    return slides
 
 
 def _cli() -> None:

@@ -9,7 +9,15 @@
 <link rel="stylesheet" href="card.css" />
 </head>
 <body>
-<div class="ls-card">
+{# `slide` selects which plate(s) to render for the carousel:
+     None     → legacy combined card (photo + text on one image)
+     'cover'  → photo plate only, full height (grid thumbnail face)
+     'story'  → text plate only, full height (readable story page)
+     'cta'    → closing call-to-action page
+   Keeping the None branch byte-for-byte preserves the existing
+   single-image tests. #}
+<div class="ls-card{% if slide %} ls-card--{{ slide }}{% endif %}">
+  {% if not slide or slide == 'cover' %}
   {# ============ PHOTO PLATE ============ #}
   <div class="ls-photo">
     <div class="ls-photo__img" style="background-image: url('{{ content.photo_url | safe }}');"></div>
@@ -23,12 +31,18 @@
       <div>{{ content.location_coord }}</div>
     </div>
 
+    {% if slide == 'cover' %}
+    <div class="ls-seal"><span>{{ content.city_ch }}</span></div>
+    {% endif %}
+
     <div class="ls-title">
       <h1 class="ls-title__ch">{{ content.title_ch }}</h1>
       <p class="ls-title__ch-sub">{{ content.title_ch_sub }}</p>
     </div>
   </div>
+  {% endif %}
 
+  {% if not slide or slide == 'story' %}
   {# ============ TEXT PLATE (ZH-only, single column) ============ #}
   <div class="ls-text ls-text--single is-ch">
     <div class="ls-folio ls-folio--seal">
@@ -55,6 +69,19 @@
       <span class="ls-foot__brand">Lorescape</span>
     </div>
   </div>
+  {% endif %}
+
+  {% if slide == 'cta' %}
+  {# ============ CTA PLATE (closing slide) ============ #}
+  <div class="ls-cta">
+    <div class="ls-cta__seal">聽</div>
+    <p class="ls-cta__lead">聽它親口說完這段故事。</p>
+    <div class="ls-cta__rule"></div>
+    <p class="ls-cta__brand">Lorescape</p>
+    <p class="ls-cta__tagline">AI 旅行說書人</p>
+    <p class="ls-cta__action">下載連結在個人簡介 ↓</p>
+  </div>
+  {% endif %}
 </div>
 </body>
 </html>
