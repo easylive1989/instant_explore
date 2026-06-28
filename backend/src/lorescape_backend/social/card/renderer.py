@@ -126,6 +126,21 @@ def render_card(content: CardContent) -> bytes:
                 browser.close()
 
 
+def render_cover(content: CardContent) -> bytes:
+    """Render just the carousel cover slide to PNG bytes (1080×1350).
+
+    Used as a Reel cover so a video post shares the same clean title face as
+    the carousel cards in the grid.
+    """
+    with _html_file(content, slide="cover") as tmp_path:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            try:
+                return _screenshot_slide(browser, tmp_path)
+            finally:
+                browser.close()
+
+
 def render_slides(content: CardContent) -> list[bytes]:
     """Render the carousel slides to a list of PNG bytes (each 1080×1350).
 

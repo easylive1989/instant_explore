@@ -79,6 +79,124 @@ def test_build_caption_raises_when_nothing_available(mocker):
         )
 
 
+def test_build_cover_url_renders_uploads_and_returns_url(mocker):
+    mocker.patch.object(
+        publish_reel, "_load_story_row", return_value={"place_id": "p1"}
+    )
+    mocker.patch.object(
+        publish_reel, "_load_place_row", return_value={"id": "p1"}
+    )
+    mocker.patch.object(
+        publish_reel.mapper, "build_card_content", return_value=object()
+    )
+    mocker.patch.object(
+        publish_reel, "render_cover", return_value=b"\x89PNGcover"
+    )
+    upload = mocker.patch.object(
+        publish_reel.card_storage,
+        "upload_card_png",
+        return_value="https://x.supabase.co/.../2026-06-22/reel-cover.png",
+    )
+
+    url = publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
+
+    assert url == "https://x.supabase.co/.../2026-06-22/reel-cover.png"
+    assert upload.call_args.kwargs["path"] == "2026-06-22/reel-cover.png"
+
+
+def test_build_cover_url_none_when_story_row_missing(mocker):
+    mocker.patch.object(publish_reel, "_load_story_row", return_value=None)
+    assert (
+        publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
+        is None
+    )
+
+
+def test_build_cover_url_none_when_card_content_missing(mocker):
+    mocker.patch.object(
+        publish_reel, "_load_story_row", return_value={"place_id": "p1"}
+    )
+    mocker.patch.object(
+        publish_reel, "_load_place_row", return_value={"id": "p1"}
+    )
+    mocker.patch.object(
+        publish_reel.mapper, "build_card_content", return_value=None
+    )
+    assert (
+        publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
+        is None
+    )
+
+
+def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
+    day_dir = tmp_path / "2026-06-22"
+    day_dir.mkdir()
+    (day_dir / "final.mp4").write_bytes(b"v")
+    mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch.object(
+        publish_reel, "_build_caption", return_value="some caption"
+    )
+    mocker.patch.object(
+        publish_reel, "_build_cover_url",
+        return_value="https://x/cover.png",
+    )
+    config = SimpleNamespace(
+        instagram_enabled=True,
+        ig_user_id="ig1",
+        meta_page_access_token="tok",
+        supabase_url="https://x.supabase.co",
+        supabase_service_role_key="key",
+        brand_handle_ig="@lorescape",
+        cta_text="Explore.",
+    )
+    mocker.patch("scripts.publish_reel.Config.from_env", return_value=config)
+    mocker.patch("scripts.publish_reel.create_client", return_value=object())
+    pub = mocker.patch(
+        "scripts.publish_reel.instagram.publish_reel", return_value="post-1"
+    )
+
+    result = publish_reel.main(["2026-06-22"])
+
+    assert result == 0
+    assert pub.call_args.kwargs["cover_url"] == "https://x/cover.png"
+
+
+def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
+    day_dir = tmp_path / "2026-06-22"
+    day_dir.mkdir()
+    (day_dir / "final.mp4").write_bytes(b"v")
+    mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch.object(
+        publish_reel, "_build_caption", return_value="some caption"
+    )
+    mocker.patch.object(
+        publish_reel, "_build_cover_url",
+        side_effect=RuntimeError("render exploded"),
+    )
+    config = SimpleNamespace(
+        instagram_enabled=True,
+        ig_user_id="ig1",
+        meta_page_access_token="tok",
+        supabase_url="https://x.supabase.co",
+        supabase_service_role_key="key",
+        brand_handle_ig="@lorescape",
+        cta_text="Explore.",
+    )
+    mocker.patch("scripts.publish_reel.Config.from_env", return_value=config)
+    mocker.patch("scripts.publish_reel.create_client", return_value=object())
+    pub = mocker.patch(
+        "scripts.publish_reel.instagram.publish_reel", return_value="post-1"
+    )
+
+    result = publish_reel.main(["2026-06-22"])
+
+    assert result == 0
+    # Cover failure must not block the publish; it falls back to no cover.
+    assert pub.call_args.kwargs["cover_url"] is None
+
+
 def test_main_returns_1_and_prints_error_on_publish_failure(
     tmp_path, mocker
 ):

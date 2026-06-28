@@ -13,6 +13,7 @@ from PIL import Image
 from lorescape_backend.social.card import (
     CAROUSEL_SLIDES,
     render_card,
+    render_cover,
     render_slides,
 )
 from lorescape_backend.social.card._demo import EIFFEL_DEMO
@@ -58,3 +59,11 @@ def test_render_slides_each_decodes_as_1080_by_1350_png(
         image.verify()
         assert image.format == "PNG"
         assert Image.open(BytesIO(png)).size == (1080, 1350)
+
+
+def test_render_cover_returns_a_1080_by_1350_png():
+    png = render_cover(EIFFEL_DEMO)
+    image = Image.open(BytesIO(png))
+    image.verify()
+    assert image.format == "PNG"
+    assert Image.open(BytesIO(png)).size == (1080, 1350)

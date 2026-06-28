@@ -23,7 +23,8 @@ from dotenv import load_dotenv
 from supabase import create_client
 
 from lorescape_backend.config import Config
-from lorescape_backend.social import caption, instagram
+from lorescape_backend.social import caption, card_storage, instagram
+from lorescape_backend.social.card import mapper, render_cover
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DAILY_VIDEO_DIR = REPO_ROOT / "outputs" / "daily_video"
@@ -63,6 +64,44 @@ def _load_story_row(supabase, date_str: str) -> dict | None:
     )
     rows = response.data or []
     return rows[0] if rows else None
+
+
+def _load_place_row(supabase, place_id: str) -> dict | None:
+    """Return the daily_story_places row for the id, or None."""
+    response = (
+        supabase.table("daily_story_places")
+        .select("*")
+        .eq("id", place_id)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return rows[0] if rows else None
+
+
+def _build_cover_url(supabase, date_str: str) -> str | None:
+    """Render the carousel cover for the date and upload it; return the public
+    URL so the Reel shares the same title face as the grid cards.
+
+    Returns None (the Reel then falls back to a video frame) whenever the
+    story/place data needed to render the cover is missing.
+    """
+    row = _load_story_row(supabase, date_str)
+    if row is None:
+        return None
+    place_id = row.get("place_id")
+    if not place_id:
+        return None
+    place_row = _load_place_row(supabase, place_id)
+    if place_row is None:
+        return None
+    content = mapper.build_card_content(row, place_row)
+    if content is None:
+        return None
+    png = render_cover(content)
+    return card_storage.upload_card_png(
+        supabase, png, path=f"{date_str}/reel-cover.png"
+    )
 
 
 def _read_narration(date_str: str) -> str | None:
@@ -110,6 +149,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--caption", help="Override the caption text")
     parser.add_argument("--video", help="Override the video file path")
     parser.add_argument(
+        "--no-cover",
+        action="store_true",
+        help="Skip the rendered carousel cover; let Meta pick a video frame",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the video and caption without publishing",
@@ -124,8 +168,20 @@ def main(argv: list[str]) -> int:
     video = _resolve_video(args.date, args.video)
     ig_caption = _build_caption(supabase, config, args.date, args.caption)
 
+    cover_url: str | None = None
+    if not args.no_cover:
+        try:
+            cover_url = _build_cover_url(supabase, args.date)
+        except Exception as exc:  # noqa: BLE001 — cover is best-effort
+            print(
+                f"Warning: could not build cover ({exc}); publishing "
+                f"without a custom cover",
+                file=sys.stderr,
+            )
+
     if args.dry_run:
         print(f"[dry-run] video:   {video}")
+        print(f"[dry-run] cover:   {cover_url or '(none — video frame)'}")
         print(f"[dry-run] caption:\n{ig_caption}")
         return 0
 
@@ -143,6 +199,7 @@ def main(argv: list[str]) -> int:
             access_token=config.meta_page_access_token,
             video_path=str(video),
             caption=ig_caption,
+            cover_url=cover_url,
         )
     except Exception as exc:
         print(f"Publish failed: {exc}", file=sys.stderr)

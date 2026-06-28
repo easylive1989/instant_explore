@@ -168,16 +168,21 @@ def publish_reel(
     access_token: str,
     video_path: str,
     caption: str,
+    cover_url: str | None = None,
 ) -> str:
     """Create + resumable-upload + publish an IG Reel. Returns the IG post id.
 
     Uploads the local video bytes directly to Meta's resumable upload
     endpoint — no public URL or intermediate storage is needed.
+
+    `cover_url`, when given, is a publicly reachable image Meta uses as the
+    Reel's cover (grid thumbnail). Omitted → Meta auto-picks a video frame.
     """
     container_id = _create_reel_container(
         ig_user_id=ig_user_id,
         access_token=access_token,
         caption=caption,
+        cover_url=cover_url,
     )
     _upload_reel_bytes(
         container_id=container_id,
@@ -193,16 +198,23 @@ def publish_reel(
 
 
 def _create_reel_container(
-    *, ig_user_id: str, access_token: str, caption: str
+    *,
+    ig_user_id: str,
+    access_token: str,
+    caption: str,
+    cover_url: str | None = None,
 ) -> str:
+    params = {
+        "media_type": "REELS",
+        "upload_type": "resumable",
+        "caption": caption,
+        "access_token": access_token,
+    }
+    if cover_url:
+        params["cover_url"] = cover_url
     response = requests.post(
         f"{META_GRAPH_API}/{ig_user_id}/media",
-        params={
-            "media_type": "REELS",
-            "upload_type": "resumable",
-            "caption": caption,
-            "access_token": access_token,
-        },
+        params=params,
         timeout=_REQUEST_TIMEOUT,
     )
     response.raise_for_status()

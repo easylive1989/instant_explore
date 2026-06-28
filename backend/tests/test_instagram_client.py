@@ -165,6 +165,69 @@ def test_publish_reel_runs_create_upload_poll_publish(requests_mock, tmp_path):
     assert publish_req.qs["creation_id"] == ["reel-container-1"]
 
 
+def test_publish_reel_passes_cover_url_when_provided(requests_mock, tmp_path):
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"v")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "reel-c"},
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-c",
+        json={"success": True},
+    )
+    requests_mock.get(
+        "https://graph.facebook.com/v21.0/reel-c",
+        json={"status_code": "FINISHED"},
+    )
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media_publish",
+        json={"id": "reel-post"},
+    )
+
+    with patch("lorescape_backend.social.instagram.time.sleep"):
+        publish_reel(
+            ig_user_id="ig1",
+            access_token="tok",
+            video_path=str(video),
+            caption="c",
+            cover_url="https://example.com/cover.png",
+        )
+
+    create_req = requests_mock.request_history[0]
+    assert create_req.qs["cover_url"] == ["https://example.com/cover.png"]
+
+
+def test_publish_reel_omits_cover_url_when_none(requests_mock, tmp_path):
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"v")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media", json={"id": "reel-c"}
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-c",
+        json={"success": True},
+    )
+    requests_mock.get(
+        "https://graph.facebook.com/v21.0/reel-c",
+        json={"status_code": "FINISHED"},
+    )
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media_publish",
+        json={"id": "reel-post"},
+    )
+
+    with patch("lorescape_backend.social.instagram.time.sleep"):
+        publish_reel(
+            ig_user_id="ig1", access_token="tok",
+            video_path=str(video), caption="c",
+        )
+
+    assert "cover_url" not in requests_mock.request_history[0].qs
+
+
 def test_publish_reel_raises_when_container_errors(requests_mock, tmp_path):
     video = tmp_path / "final.mp4"
     video.write_bytes(b"x")
