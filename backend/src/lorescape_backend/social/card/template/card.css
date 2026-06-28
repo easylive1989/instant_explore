@@ -41,6 +41,15 @@ html, body {
   isolation: isolate;
 }
 
+/* ----------- Carousel slide variants -----------
+   Each variant renders a single plate at full 1350px height. The legacy
+   combined card (no modifier) keeps the 760px + 1fr split above. */
+.ls-card--cover,
+.ls-card--story,
+.ls-card--cta {
+  grid-template-rows: 1fr;
+}
+
 /* Subtle paper grain across whole card */
 .ls-card::before {
   content: "";
@@ -318,4 +327,114 @@ html, body {
   font-size: calc(14px * var(--fit));
   letter-spacing: 0.12em;
   text-transform: none;
+}
+
+/* ============================================================
+   Carousel slide-specific styling
+   ============================================================ */
+
+/* Cover — vermilion 朱印 seal carrying the single city glyph */
+.ls-seal {
+  position: absolute;
+  top: 60px;
+  left: 56px;
+  z-index: 3;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vermilion);
+  box-shadow: 0 0 0 4px var(--paper), 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+.ls-seal span {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: 58px;
+  line-height: 1;
+  color: var(--paper);
+}
+
+/* Story page — full-height text plate. The content block is vertically
+   centered so short stories don't leave a lopsided gap at the bottom; the
+   `--fit` auto-shrink still protects against overflow when a story is long.
+   The folio band is a seam decoration for the combined card, so it is hidden
+   on the standalone story page. */
+.ls-card--story .ls-text {
+  padding-top: 130px;
+  padding-bottom: 130px;
+  align-content: center;
+}
+.ls-card--story .ls-folio {
+  display: none;
+}
+
+/* CTA — closing slide, centered on paper */
+.ls-cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px;
+  gap: 0;
+}
+.ls-cta__seal {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vermilion);
+  color: var(--paper);
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: 72px;
+  line-height: 1;
+  border-radius: 6px;
+  box-shadow: 0 0 0 5px var(--paper), 0 8px 24px rgba(0, 0, 0, 0.25);
+  margin-bottom: 56px;
+}
+.ls-cta__lead {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin: 0;
+}
+.ls-cta__rule {
+  width: 64px;
+  height: 2px;
+  background: var(--vermilion);
+  margin: 44px 0;
+}
+.ls-cta__brand {
+  font-family: "EB Garamond", serif;
+  font-style: italic;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin: 0;
+}
+.ls-cta__tagline {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.32em;
+  color: var(--ink-soft);
+  margin: 18px 0 0 0;
+  padding-left: 0.32em;
+}
+.ls-cta__action {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  color: var(--vermilion-dk);
+  margin: 64px 0 0 0;
 }

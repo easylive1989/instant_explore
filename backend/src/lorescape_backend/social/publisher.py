@@ -28,7 +28,7 @@ from lorescape_backend.config import Config
 from lorescape_backend.daily_story import discord_notify, discord_review
 from lorescape_backend.social import card_storage, caption, instagram
 from lorescape_backend.social.card import mapper
-from lorescape_backend.social.card.renderer import render_card
+from lorescape_backend.social.card.renderer import render_slides
 
 logger = logging.getLogger(__name__)
 
@@ -135,13 +135,19 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
     publish_error: str | None = None
     try:
         if config.instagram_enabled and card_content is not None:
-            png = render_card(card_content)
-            path = f"{row['publish_date']}/{row['id']}.png"
-            card_url = card_storage.upload_card_png(supabase, png, path=path)
-            ig_post_id = instagram.publish(
+            slides = render_slides(card_content)
+            card_urls = [
+                card_storage.upload_card_png(
+                    supabase,
+                    png,
+                    path=f"{row['publish_date']}/{row['id']}-{index}.png",
+                )
+                for index, png in enumerate(slides)
+            ]
+            ig_post_id = instagram.publish_carousel(
                 ig_user_id=config.ig_user_id,  # type: ignore[arg-type]
                 access_token=config.meta_page_access_token,  # type: ignore[arg-type]
-                image_url=card_url,
+                image_urls=card_urls,
                 caption=ig_caption,  # type: ignore[arg-type]
             )
         elif card_content is None:

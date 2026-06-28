@@ -5,7 +5,11 @@ from unittest.mock import patch
 
 import pytest
 
-from lorescape_backend.social.instagram import publish, publish_reel
+from lorescape_backend.social.instagram import (
+    publish,
+    publish_carousel,
+    publish_reel,
+)
 
 
 def test_publish_creates_container_then_publishes(requests_mock):
@@ -34,6 +38,71 @@ def test_publish_creates_container_then_publishes(requests_mock):
 
     publish_req = requests_mock.request_history[1]
     assert publish_req.qs["creation_id"] == ["container-1"]
+
+
+def test_publish_carousel_creates_children_then_parent_then_publishes(
+    requests_mock,
+):
+    # All /media POSTs hit the same URL; queue distinct ids in call order:
+    # three children, then the parent CAROUSEL container.
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        [
+            {"json": {"id": "child-1"}},
+            {"json": {"id": "child-2"}},
+            {"json": {"id": "child-3"}},
+            {"json": {"id": "parent-1"}},
+        ],
+    )
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media_publish",
+        json={"id": "ig-carousel-1"},
+    )
+
+    with patch("lorescape_backend.social.instagram.time.sleep"):
+        post_id = publish_carousel(
+            ig_user_id="ig1",
+            access_token="tok",
+            image_urls=[
+                "https://example.com/1.png",
+                "https://example.com/2.png",
+                "https://example.com/3.png",
+            ],
+            caption="carousel caption",
+        )
+
+    assert post_id == "ig-carousel-1"
+
+    history = requests_mock.request_history
+    # 3 children + 1 parent + 1 publish = 5 calls
+    assert len(history) == 5
+
+    # Each child container is flagged as a carousel item, carries its image,
+    # and does NOT carry the caption.
+    for i, url in enumerate(
+        ["https://example.com/1.png", "https://example.com/2.png",
+         "https://example.com/3.png"]
+    ):
+        child_req = history[i]
+        assert child_req.qs["is_carousel_item"] == ["true"]
+        assert child_req.qs["image_url"] == [url]
+        assert "caption" not in child_req.qs
+
+    parent_req = history[3]
+    assert parent_req.qs["media_type"] == ["carousel"]
+    assert parent_req.qs["children"] == ["child-1,child-2,child-3"]
+    assert parent_req.qs["caption"] == ["carousel caption"]
+
+    publish_req = history[4]
+    assert publish_req.qs["creation_id"] == ["parent-1"]
+
+
+def test_publish_carousel_rejects_empty_image_list():
+    with pytest.raises(ValueError):
+        publish_carousel(
+            ig_user_id="ig1", access_token="tok",
+            image_urls=[], caption="c",
+        )
 
 
 def test_publish_raises_on_http_error(requests_mock):

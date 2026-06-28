@@ -51,6 +51,82 @@ def publish(
     )
 
 
+def publish_carousel(
+    *,
+    ig_user_id: str,
+    access_token: str,
+    image_urls: list[str],
+    caption: str,
+) -> str:
+    """Create + publish a multi-image IG carousel post. Returns the post id.
+
+    Three-step pattern: create one child container per image
+    (`is_carousel_item=true`), then a parent `CAROUSEL` container listing the
+    children, then publish the parent. As with `publish`, Meta fetches each
+    `image_url` directly, so they must be publicly reachable.
+    """
+    if not image_urls:
+        raise ValueError("publish_carousel requires at least one image_url")
+
+    child_ids = [
+        _create_carousel_item(
+            ig_user_id=ig_user_id,
+            access_token=access_token,
+            image_url=url,
+        )
+        for url in image_urls
+    ]
+    parent_id = _create_carousel_container(
+        ig_user_id=ig_user_id,
+        access_token=access_token,
+        child_ids=child_ids,
+        caption=caption,
+    )
+    time.sleep(_CONTAINER_READY_DELAY_SECONDS)
+    return _publish_container(
+        ig_user_id=ig_user_id,
+        access_token=access_token,
+        container_id=parent_id,
+    )
+
+
+def _create_carousel_item(
+    *, ig_user_id: str, access_token: str, image_url: str
+) -> str:
+    response = requests.post(
+        f"{META_GRAPH_API}/{ig_user_id}/media",
+        params={
+            "image_url": image_url,
+            "is_carousel_item": "true",
+            "access_token": access_token,
+        },
+        timeout=_REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    return response.json()["id"]
+
+
+def _create_carousel_container(
+    *,
+    ig_user_id: str,
+    access_token: str,
+    child_ids: list[str],
+    caption: str,
+) -> str:
+    response = requests.post(
+        f"{META_GRAPH_API}/{ig_user_id}/media",
+        params={
+            "media_type": "CAROUSEL",
+            "children": ",".join(child_ids),
+            "caption": caption,
+            "access_token": access_token,
+        },
+        timeout=_REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    return response.json()["id"]
+
+
 def _create_container(
     *,
     ig_user_id: str,
