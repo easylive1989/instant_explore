@@ -33,6 +33,10 @@ class SupabaseAuthService implements AuthService {
 
   static final _log = Logger('SupabaseAuthService');
 
+  /// Supabase Auth error code returned when the OAuth identity being linked
+  /// already belongs to another account.
+  static const _identityAlreadyExistsCode = 'identity_already_exists';
+
   final SupabaseClient _client;
   final GoogleSignIn _googleSignIn;
 
@@ -65,7 +69,7 @@ class SupabaseAuthService implements AuthService {
       if (idToken == null) {
         throw const AuthFailureException('Google did not return an ID token');
       }
-      final response = await _client.auth.signInWithIdToken(
+      final response = await _linkOrSignInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
@@ -103,7 +107,7 @@ class SupabaseAuthService implements AuthService {
         throw const AuthFailureException('Apple did not return an ID token');
       }
 
-      final response = await _client.auth.signInWithIdToken(
+      final response = await _linkOrSignInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: idToken,
         nonce: rawNonce,
@@ -124,6 +128,49 @@ class SupabaseAuthService implements AuthService {
       if (e is AuthFailureException || e is AuthCancelledException) rethrow;
       throw AuthFailureException(e.toString());
     }
+  }
+
+  /// Attaches the OAuth identity to the current session, upgrading an
+  /// anonymous user in place so they keep the same id.
+  ///
+  /// When the current user is anonymous this links the identity via
+  /// `linkIdentityWithIdToken` (requires "Manual linking" to be enabled in
+  /// Supabase Auth). If that identity already belongs to another
+  /// account — a returning user signing in on a fresh install — the link
+  /// fails with the `identity_already_exists` error code; we then abandon
+  /// the throwaway anonymous user and sign into the existing account instead.
+  /// Any other linking error (e.g. manual linking disabled) is surfaced
+  /// rather than silently falling back, so a missed config doesn't quietly
+  /// revert to creating brand-new users.
+  Future<AuthResponse> _linkOrSignInWithIdToken({
+    required OAuthProvider provider,
+    required String idToken,
+    String? accessToken,
+    String? nonce,
+  }) async {
+    final current = _client.auth.currentUser;
+    if (current != null && current.isAnonymous) {
+      try {
+        return await _client.auth.linkIdentityWithIdToken(
+          provider: provider,
+          idToken: idToken,
+          accessToken: accessToken,
+          nonce: nonce,
+        );
+      } on AuthException catch (e) {
+        if (e.code != _identityAlreadyExistsCode) rethrow;
+        _log.info(
+          'Identity already linked to another account; '
+          'signing into it instead of upgrading the anonymous user',
+        );
+      }
+    }
+    return _client.auth.signInWithIdToken(
+      provider: provider,
+      idToken: idToken,
+      accessToken: accessToken,
+      nonce: nonce,
+    );
   }
 
   @override
