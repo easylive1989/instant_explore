@@ -1,10 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:context_app/app.dart';
 import 'package:context_app/app/config/api_config.dart';
@@ -38,6 +40,10 @@ Future<Widget> init() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Activate App Check before any Firebase AI call so Gemini requests carry
+  // a valid attestation token. Non-fatal on failure.
+  await _initializeAppCheck();
 
   // Initialize Supabase
   await _initializeSupabase();
@@ -79,6 +85,25 @@ Future<Widget> init() async {
       child: const LorescapeApp(),
     ),
   );
+}
+
+/// Activates Firebase App Check so only the genuine app binary can call
+/// Firebase AI. Debug builds use the debug provider so local development and
+/// simulators are not blocked. Activation failure is non-fatal: the app still
+/// launches and unverified requests are simply rejected once enforcement is on.
+Future<void> _initializeAppCheck() async {
+  try {
+    await FirebaseAppCheck.instance.activate(
+      providerAndroid: kDebugMode
+          ? const AndroidDebugProvider()
+          : const AndroidPlayIntegrityProvider(),
+      providerApple: kDebugMode
+          ? const AppleDebugProvider()
+          : const AppleAppAttestProvider(),
+    );
+  } catch (e, stack) {
+    _log.warning('Firebase App Check activation failed at startup', e, stack);
+  }
 }
 
 /// Initialize Supabase with configuration from environment variables
