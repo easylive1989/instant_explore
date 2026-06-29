@@ -1,24 +1,25 @@
 # Lorescape 數據抓取（lorescape-metrics）設定指南
 
-`lorescape-metrics` skill 在本機手動抓取產品數據，**累積**到
-`docs/metrics/daily/`（每來源一個 CSV，逐日一列、跨次累積）。
+`lorescape-metrics` skill 在本機手動抓取產品數據，**累積**到一張 Google
+Sheet（`METRICS_SHEET_ID`），每來源一個同名分頁、逐日一列、跨次累積。
+試算表即唯一資料來源（見 §D）。
 
 - 程式位置：`backend/scripts/metrics/`
 - 執行：`cd backend && uv run python -m scripts.metrics.report`（預設抓昨天，
-  自動補「最後紀錄日 → 昨天」的缺口；檔案空時回溯 30 天建立基線）
-- 驗證設定 / 看待補進度（不抓資料、不連網）：`... report --check`
+  自動補「最後紀錄日 → 昨天」的缺口；分頁空時回溯 30 天建立基線）
+- 驗證設定 / 看待補進度（讀試算表算缺口，不抓 API）：`... report --check`
 - 手動補特定區間：`... report --start 2026-06-01 --end 2026-06-20`
 - 調整首次回溯天數 / 貼文刷新視窗：`... report --days 30`
 - 子集：`... report --only gsc,ga4,ig,ig_posts`
 
-API 來源四個，輸出到 `docs/metrics/daily/`：
+API 來源四個，分別寫進同名分頁：
 
-| 來源 | 檔案 | key | 內容 |
+| 來源 | 分頁 | key | 內容 |
 | --- | --- | --- | --- |
-| `gsc` | `gsc.csv` | date | 站台每日 clicks / impressions / ctr / position |
-| `ga4` | `ga4.csv` | date | 每日 web / iOS / Android active / new users（App = iOS + Android） |
-| `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（+ 最新日 followers/media 快照） |
-| `ig_posts` | `ig_posts.csv` | media_id | 逐則貼文核心互動 + Reels 影片指標 |
+| `gsc` | `gsc` | date | 站台每日 clicks / impressions / ctr / position |
+| `ga4` | `ga4` | date | 每日 web / iOS / Android active / new users（App = iOS + Android） |
+| `ig` | `ig` | date | 帳號每日 reach / profile_views（+ 最新日 followers/media 快照） |
+| `ig_posts` | `ig_posts` | media_id | 逐則貼文核心互動 + Reels 影片指標 |
 
 App Store / Play 用瀏覽器抓（見 skill 的 `references/stores-browser.md`，
 本文件不涵蓋）。
@@ -163,24 +164,25 @@ parameter metric_type=total_value`。`ig.py` 已處理：逐日以
 
 ## C. 驗證
 
+先完成 §D（Google Sheet 目的地）後再執行：
+
 ```
 cd backend
 uv run python -m scripts.metrics.report --check   # 四來源 ready + 待補進度
 uv run python -m scripts.metrics.report           # 抓昨天 + 自動補缺口
 ```
-`--check` 會顯示每來源「最後紀錄日、待補幾天 → 昨天」（`ig_posts` 顯示要刷新
-的貼文區間）。實際抓取後，資料累積在 `docs/metrics/daily/<來源>.csv`，stdout
-列出每來源 `+N row(s)` / `up to date` / `skipped`。
+`--check` 會讀試算表算出每來源「最後紀錄日、待補幾天 → 昨天」（`ig_posts`
+顯示要刷新的貼文區間）。實際抓取後，資料**直接寫進試算表**的同名分頁
+（`gsc` / `ga4` / `ig` / `ig_posts`），stdout 列出每來源 `+N row(s)` /
+`up to date` / `skipped`。
 
 ---
 
-## D. 同步到 Google Sheet（選用）
+## D. Google Sheet 目的地（必要）
 
-把 `docs/metrics/daily/` 的四個 CSV 鏡像到一張 Google 試算表，
-分別覆寫 `gsc` / `ga4` / `ig` / `ig_posts` 四個分頁（不存在會自動建立），
-其他分頁不動。沿用 §A 的 service account，不需新增任何憑證。
-
-**一次性設定**
+數據累積在一張 Google 試算表，每來源一個同名分頁（不存在會自動建立），
+試算表即唯一資料來源——補抓缺口時直接讀回試算表判斷。沿用 §A 的 service
+account，不需新增任何憑證。
 
 1. 開試算表 → 右上「共用」→ 把 service account 的 email
    （金鑰 JSON 的 `client_email`，例如
@@ -189,20 +191,11 @@ uv run python -m scripts.metrics.report           # 抓昨天 + 自動補缺口
 2. 啟用 Sheets API：
    `gcloud services enable sheets.googleapis.com --project <PROJECT_ID>`
    （或到 Cloud Console 的 API Library 啟用）。
-3. 在 `backend/.env` 設固定試算表（免每次貼網址）：
+3. 在 `backend/.env` 設目標試算表：
    `METRICS_SHEET_ID=<試算表網址 /d/ 後面那段 id>`。
 
-**執行**
-
-```
-cd backend
-uv run python -m scripts.metrics.sheets_sync            # 讀 METRICS_SHEET_ID
-uv run python -m scripts.metrics.sheets_sync --only gsc,ga4   # 只同步部分來源
-uv run python -m scripts.metrics.sheets_sync --sheet-url '<URL>'  # 臨時指定別張
-```
-
-每次整頁覆寫（用最新全量資料，不會重複）。分析公式請另開分頁**引用**這四頁
-（如 `=gsc!A2`），不要直接在這四頁加欄位，否則下次同步會被覆蓋。
+每次同步是「讀回 → 合併去重 → 整頁覆寫」。分析公式請另開分頁**引用**這四頁
+（如 `=gsc!A2`），不要直接在這四頁加欄位或排序，否則下次同步會被覆蓋。
 
 ---
 
@@ -218,14 +211,14 @@ uv run python -m scripts.metrics.sheets_sync --sheet-url '<URL>'  # 臨時指定
 | IG `(#10) does not have permission` | token 沒帶 `instagram_manage_insights` | §B 補權限重產 token |
 | IG `(#100) profile_views ... metric_type=total_value` | API 改版 | 已於 `ig.py` 修正（§B4） |
 | meta_token_helper `No Facebook Pages found` | 新版/商業粉專不出現在 /me/accounts | helper 已改問 Page ID（§B3） |
-| Sheets 同步 403 `caller does not have permission` | 試算表沒分享給 service account | §D1 把 email 加為編輯者 |
-| Sheets 同步 403 `SERVICE_DISABLED` | 專案沒啟用 Sheets API | §D2 啟用 sheets.googleapis.com |
-| Sheets 同步 `No spreadsheet given` | 沒設 id 也沒給網址 | §D3 設 `METRICS_SHEET_ID` 或加 `--sheet-url` |
+| Sheets 403 `caller does not have permission` | 試算表沒分享給 service account | §D1 把 email 加為編輯者 |
+| Sheets 403 `SERVICE_DISABLED` | 專案沒啟用 Sheets API | §D2 啟用 sheets.googleapis.com |
+| `METRICS_SHEET_ID is not set` | 沒設目標試算表 | §D3 在 .env 設 `METRICS_SHEET_ID` |
 
 ## 相關檔案
 - `backend/scripts/metrics/`（`report.py` 補抓引擎、`gsc.py`/`ga4.py`/`ig.py`/
-  `ig_posts.py` 來源；累積與 upsert 工具在 `_common.py`；
-  `sheets_sync.py` 把 daily CSV 鏡像到 Google Sheet）
+  `ig_posts.py` 來源；合併去重在 `_common.py`；`sheets.py` Sheets API client、
+  `store.py` 讀寫試算表分頁的儲存層）
 - `.claude/skills/lorescape-metrics/`（SKILL.md + references）
 - `scripts/meta_token_helper.py`（換長期 Meta token）
 - `docs/superpowers/specs|plans/2026-06-24-lorescape-metrics*`（設計與計畫）

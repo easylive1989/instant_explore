@@ -1,7 +1,6 @@
 """Shared primitives for metrics fetchers: config, date ranges, IO helpers."""
 from __future__ import annotations
 
-import csv
 import os
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -36,56 +35,24 @@ def report_dir(end_date: str, root: Path = REPO_ROOT) -> Path:
     return root / "docs" / "metrics" / end_date
 
 
-def daily_dir(root: Path = REPO_ROOT) -> Path:
-    """Return docs/metrics/daily under `root` (not created).
-
-    Holds the fixed, append-only datasets that accumulate one row per day
-    (or per media id) across runs, unlike the dated `report_dir` snapshots.
-    """
-    return root / "docs" / "metrics" / "daily"
-
-
-def read_daily_csv(path: Path) -> tuple[list[str], list[list[str]]]:
-    """Read a daily dataset CSV, returning (headers, rows).
-
-    A missing or empty file yields two empty lists so callers can treat a
-    first run and an existing dataset uniformly.
-    """
-    if not path.exists():
-        return [], []
-    with path.open(encoding="utf-8", newline="") as fh:
-        records = [row for row in csv.reader(fh) if row]
-    if not records:
-        return [], []
-    return records[0], records[1:]
-
-
-def existing_keys(path: Path, key_index: int = 0) -> set[str]:
-    """Return the set of key-column values already stored in `path`."""
-    _, rows = read_daily_csv(path)
-    return {row[key_index] for row in rows if len(row) > key_index}
-
-
-def upsert_daily_rows(
-    path: Path,
-    headers: list[str],
+def merge_rows(
+    existing: list[list[str]],
     new_rows: list[list[str]],
     key_index: int = 0,
-) -> None:
-    """Merge `new_rows` into the daily dataset at `path`, keyed by a column.
+) -> list[list[str]]:
+    """Merge `new_rows` into `existing`, keyed by a column, sorted by key.
 
-    Existing rows are loaded, rows sharing a key with `new_rows` are
-    overwritten (re-fetching a day or post refreshes it), and the result is
-    written back sorted by key so the file stays chronologically ordered.
+    Rows sharing a key with `new_rows` are overwritten (re-fetching a day or
+    post refreshes it); the result is sorted by key so the dataset stays
+    chronologically ordered. Storage-agnostic: callers supply the existing
+    rows and persist the result however they like.
     """
-    _, existing = read_daily_csv(path)
     merged: dict[str, list[str]] = {
         row[key_index]: row for row in existing if len(row) > key_index
     }
     for row in new_rows:
         merged[row[key_index]] = row
-    ordered = [merged[key] for key in sorted(merged)]
-    write_csv(path, headers, ordered)
+    return [merged[key] for key in sorted(merged)]
 
 
 def missing_days(
@@ -124,15 +91,6 @@ def rows_to_md_table(headers: list[str], rows: list[list[str]]) -> str:
     sep = "| " + " | ".join("---" for _ in headers) + " |"
     body = "\n".join("| " + " | ".join(r) + " |" for r in rows)
     return f"{head}\n{sep}\n{body}"
-
-
-def write_csv(path: Path, headers: list[str], rows: list[list[str]]) -> None:
-    """Write a UTF-8 CSV, creating parent directories."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.writer(fh)
-        writer.writerow(headers)
-        writer.writerows(rows)
 
 
 @dataclass(frozen=True)

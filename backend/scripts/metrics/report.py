@@ -1,12 +1,15 @@
-"""Accumulate metrics sources into fixed daily datasets.
+"""Accumulate metrics sources into a Google Sheet.
 
-Each source is upserted into ``docs/metrics/daily/<source>.csv`` keyed by
+Each source is upserted into a same-named tab (``gsc`` / ``ga4`` / ``ig`` /
+``ig_posts``) of the spreadsheet named by ``METRICS_SHEET_ID``, keyed by
 date (or media id). A run targets yesterday and backfills any missing days
-since the last record, so the datasets grow one row per day over time.
+since the last record, so each tab grows one row per day over time. The
+spreadsheet is the source of truth — gap detection reads it back.
 """
 from __future__ import annotations
 
 import argparse
+import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -17,16 +20,15 @@ from scripts.metrics._common import (
     REPO_ROOT,
     DailySource,
     MetricsConfig,
-    daily_dir,
     date_range,
-    existing_keys,
     missing_days,
-    upsert_daily_rows,
 )
 from scripts.metrics.ga4 import SOURCE as GA4_SOURCE
 from scripts.metrics.gsc import SOURCE as GSC_SOURCE
 from scripts.metrics.ig import SOURCE as IG_SOURCE
 from scripts.metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
+from scripts.metrics.sheets import SheetClient
+from scripts.metrics.store import MetricsStore, SheetStore
 
 DEFAULT_BACKFILL = 30
 
@@ -67,7 +69,7 @@ def missing_note(source: DailySource, cfg: MetricsConfig) -> str:
 
 def plan_window(
     source: DailySource,
-    path: Path,
+    store: MetricsStore,
     end: str,
     backfill: int,
     explicit: tuple[str, str] | None,
@@ -81,8 +83,7 @@ def plan_window(
     if explicit is not None:
         return explicit
     if source.keyed_by_date:
-        keys = existing_keys(path, source.key_index)
-        days = missing_days(keys, end, backfill)
+        days = missing_days(store.keys(source), end, backfill)
         return (days[0], days[-1]) if days else None
     start = (date.fromisoformat(end) - timedelta(days=backfill - 1)).isoformat()
     return start, end
@@ -92,20 +93,19 @@ def accumulate(
     source: DailySource,
     cfg: MetricsConfig,
     end: str,
-    root: Path,
+    store: MetricsStore,
     backfill: int = DEFAULT_BACKFILL,
     explicit: tuple[str, str] | None = None,
 ) -> AccumResult:
-    """Fetch a source's pending window and upsert it into its daily file."""
+    """Fetch a source's pending window and upsert it into its sheet tab."""
     if not source.is_ready(cfg):
         return AccumResult(source.name, ok=False,
                            skipped_reason=missing_note(source, cfg))
-    path = daily_dir(root) / source.filename
-    window = plan_window(source, path, end, backfill, explicit)
+    window = plan_window(source, store, end, backfill, explicit)
     if window is None:
         return AccumResult(source.name, ok=True, note="up to date")
     rows = source.fetch(cfg, window[0], window[1])
-    upsert_daily_rows(path, source.headers, rows, source.key_index)
+    store.upsert(source, source.headers, rows)
     return AccumResult(source.name, ok=True, written=len(rows), window=window)
 
 
@@ -113,7 +113,7 @@ def run(
     cfg: MetricsConfig,
     names: list[str],
     end: str,
-    root: Path,
+    store: MetricsStore,
     backfill: int = DEFAULT_BACKFILL,
     explicit: tuple[str, str] | None = None,
 ) -> list[AccumResult]:
@@ -128,7 +128,7 @@ def run(
             continue
         try:
             results.append(
-                accumulate(source, cfg, end, root, backfill, explicit)
+                accumulate(source, cfg, end, store, backfill, explicit)
             )
         except Exception as exc:  # isolate per-source failures
             results.append(
@@ -141,10 +141,10 @@ def check_lines(
     cfg: MetricsConfig,
     names: list[str],
     end: str,
-    root: Path,
+    store: MetricsStore,
     backfill: int = DEFAULT_BACKFILL,
 ) -> list[str]:
-    """One readiness line per source; pure, reads local files only."""
+    """One readiness line per source; reads the store to size the gap."""
     lines: list[str] = []
     for name in names:
         source = SOURCES.get(name)
@@ -154,8 +154,7 @@ def check_lines(
         if not source.is_ready(cfg):
             lines.append(f"- {name}: {missing_note(source, cfg)}")
             continue
-        path = daily_dir(root) / source.filename
-        keys = existing_keys(path, source.key_index)
+        keys = store.keys(source)
         if source.keyed_by_date:
             days = missing_days(keys, end, backfill)
             latest = max(keys) if keys else "empty"
@@ -192,10 +191,21 @@ def format_results(results: list[AccumResult]) -> str:
     return "\n".join(out)
 
 
+def build_store() -> SheetStore:
+    """Build the Google Sheet store from ``METRICS_SHEET_ID``."""
+    sheet_id = os.environ.get("METRICS_SHEET_ID")
+    if not sheet_id:
+        raise SystemExit(
+            "METRICS_SHEET_ID is not set in backend/.env; see "
+            "docs/init/metrics-setup.md §D."
+        )
+    return SheetStore(SheetClient(sheet_id))
+
+
 def main(argv: list[str] | None = None) -> int:
     load_dotenv(_repo_root() / "backend" / ".env")
     parser = argparse.ArgumentParser(
-        description="Accumulate Lorescape metrics into daily datasets."
+        description="Accumulate Lorescape metrics into a Google Sheet."
     )
     parser.add_argument(
         "--days", type=int, default=DEFAULT_BACKFILL,
@@ -214,14 +224,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     end = args.end or _default_end()
     explicit = (args.start, end) if args.start else None
+    store = build_store()
 
     if args.check:
         print(f"target end: {end}")
-        print("\n".join(check_lines(cfg, names, end, _repo_root(), args.days)))
+        print("\n".join(check_lines(cfg, names, end, store, args.days)))
         return 0
 
-    results = run(cfg, names, end, _repo_root(), args.days, explicit)
-    print(f"daily datasets: {daily_dir(_repo_root())}")
+    results = run(cfg, names, end, store, args.days, explicit)
+    print(f"google sheet: {store.sheet_id}")
     print(format_results(results))
     return 0
 
