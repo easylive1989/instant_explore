@@ -71,6 +71,11 @@ dependencies:
   # deployment target. 4.9.0 keeps Firebase SDK 12.13.0 (iOS 15). See the
   # firebase_app_check pin below; revisit together if iOS min is raised to 16.
   firebase_core: 4.9.0
+  # Pinned to match native firebase_core 4.9.0's Pigeon protocol (14 fields,
+  # no recaptchaSiteKey). 7.1.0 decodes a 15th field that native 4.9.0 never
+  # sends, crashing Firebase.initializeApp with RangeError. Bump together with
+  # firebase_core only.
+  firebase_core_platform_interface: 7.0.1
   firebase_ai: ^3.6.1
   
   # Local caching for API optimization
