@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "78f98c1f9c4dbbd22c2bb7b7f17c4a5c06150e8b2cb791a0947979ad0d3dabd5"
+      sha256: "8f89e371e2883de35cdc78f648e725fa4da5f3b6c927269f00fa68f1ea92b598"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.73"
+    version: "1.3.71"
   adaptive_number:
     dependency: transitive
     description:
@@ -389,26 +389,26 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_app_check
-      sha256: "9d5c79d382a8b87cc0d899294a5234a9f0d15125cd1c97c45ca2faeca6c62918"
+      sha256: "8fa903236a46b2ca5be9ab2210a9b12b3a674941fa5723f77ed5bad8cfa426b6"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.5"
+    version: "0.4.4+1"
   firebase_app_check_platform_interface:
     dependency: transitive
     description:
       name: firebase_app_check_platform_interface
-      sha256: "58248ca4a6be624f17e47d1f18b3846e477cce3dc7f1c08917e3845aa973beb3"
+      sha256: b85215143f36cf622cfb4bcf79bd35f18edc376f42c3230f01137909c85866cf
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.0+1"
   firebase_app_check_web:
     dependency: transitive
     description:
       name: firebase_app_check_web
-      sha256: "6b34be4bb8aa0bc5c2bbe930dd57035e971144521ee7d52d8e293c6cb1216a66"
+      sha256: "9b1cae9c35a886d8a2e99f9b24701ab8b9929937ec82c81c7c93cb0f8072ef14"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.4+2"
   firebase_auth:
     dependency: transitive
     description:
@@ -437,10 +437,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: d2625088d8f8836a7a74a7eb94a5372d70ad88382602ba2dcc02805c294d0d16
+      sha256: "93a5bde9775fd5adcc937f39dfa04ae0bc89c4d79bea6abc49de3f7b049d9ff6"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.9.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
