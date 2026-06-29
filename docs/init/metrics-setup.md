@@ -174,6 +174,38 @@ uv run python -m scripts.metrics.report           # 抓昨天 + 自動補缺口
 
 ---
 
+## D. 同步到 Google Sheet（選用）
+
+把 `docs/metrics/daily/` 的四個 CSV 鏡像到一張 Google 試算表，
+分別覆寫 `gsc` / `ga4` / `ig` / `ig_posts` 四個分頁（不存在會自動建立），
+其他分頁不動。沿用 §A 的 service account，不需新增任何憑證。
+
+**一次性設定**
+
+1. 開試算表 → 右上「共用」→ 把 service account 的 email
+   （金鑰 JSON 的 `client_email`，例如
+   `lorescape-metrics@<project>.iam.gserviceaccount.com`）加為**編輯者**，
+   並**取消勾選「通知使用者」**（機器人帳號，寄信會退信）。
+2. 啟用 Sheets API：
+   `gcloud services enable sheets.googleapis.com --project <PROJECT_ID>`
+   （或到 Cloud Console 的 API Library 啟用）。
+3. 在 `backend/.env` 設固定試算表（免每次貼網址）：
+   `METRICS_SHEET_ID=<試算表網址 /d/ 後面那段 id>`。
+
+**執行**
+
+```
+cd backend
+uv run python -m scripts.metrics.sheets_sync            # 讀 METRICS_SHEET_ID
+uv run python -m scripts.metrics.sheets_sync --only gsc,ga4   # 只同步部分來源
+uv run python -m scripts.metrics.sheets_sync --sheet-url '<URL>'  # 臨時指定別張
+```
+
+每次整頁覆寫（用最新全量資料，不會重複）。分析公式請另開分頁**引用**這四頁
+（如 `=gsc!A2`），不要直接在這四頁加欄位，否則下次同步會被覆蓋。
+
+---
+
 ## 疑難排解對照
 
 | 症狀 | 原因 | 解法 |
@@ -186,10 +218,14 @@ uv run python -m scripts.metrics.report           # 抓昨天 + 自動補缺口
 | IG `(#10) does not have permission` | token 沒帶 `instagram_manage_insights` | §B 補權限重產 token |
 | IG `(#100) profile_views ... metric_type=total_value` | API 改版 | 已於 `ig.py` 修正（§B4） |
 | meta_token_helper `No Facebook Pages found` | 新版/商業粉專不出現在 /me/accounts | helper 已改問 Page ID（§B3） |
+| Sheets 同步 403 `caller does not have permission` | 試算表沒分享給 service account | §D1 把 email 加為編輯者 |
+| Sheets 同步 403 `SERVICE_DISABLED` | 專案沒啟用 Sheets API | §D2 啟用 sheets.googleapis.com |
+| Sheets 同步 `No spreadsheet given` | 沒設 id 也沒給網址 | §D3 設 `METRICS_SHEET_ID` 或加 `--sheet-url` |
 
 ## 相關檔案
 - `backend/scripts/metrics/`（`report.py` 補抓引擎、`gsc.py`/`ga4.py`/`ig.py`/
-  `ig_posts.py` 來源；累積與 upsert 工具在 `_common.py`）
+  `ig_posts.py` 來源；累積與 upsert 工具在 `_common.py`；
+  `sheets_sync.py` 把 daily CSV 鏡像到 Google Sheet）
 - `.claude/skills/lorescape-metrics/`（SKILL.md + references）
 - `scripts/meta_token_helper.py`（換長期 Meta token）
 - `docs/superpowers/specs|plans/2026-06-24-lorescape-metrics*`（設計與計畫）
