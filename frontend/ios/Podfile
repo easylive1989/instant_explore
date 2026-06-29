@@ -55,4 +55,18 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = "NO"
     end
   end
+
+  # Make the ShareExtension app extension read Flutter's Generated.xcconfig so
+  # its CURRENT_PROJECT_VERSION/MARKETING_VERSION ($(FLUTTER_BUILD_NUMBER) /
+  # $(FLUTTER_BUILD_NAME)) resolve like the host app's. Without this the
+  # extension's CFBundleVersion/CFBundleShortVersionString build empty and iOS
+  # simulator install fails with "Invalid placeholder attributes". CocoaPods
+  # regenerates these xcconfigs on every pod install, so re-append each time.
+  include_line = '#include "../../../Flutter/Generated.xcconfig"'
+  Dir.glob(File.join(__dir__, 'Pods', 'Target Support Files',
+                     'Pods-ShareExtension',
+                     'Pods-ShareExtension.*.xcconfig')).each do |xcconfig|
+    next if File.read(xcconfig).include?(include_line)
+    File.open(xcconfig, 'a') { |file| file.puts("\n#{include_line}") }
+  end
 end
