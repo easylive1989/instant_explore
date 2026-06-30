@@ -21,7 +21,7 @@
   - 語音逐句同步高亮，邊聽邊看
   - 每日故事推播，養成每天閱讀世界的習慣
   - 文化足跡日誌自動整理旅行知識，可匯出 PDF
-- **Proof points:** [需使用者確認:是否公開下載數/生成次數/轉換率]
+- **Proof points:** 早期階段（App 2026-06 上線），暫不公開量化數字；行銷以上述質化差異化為主，待數據有意義後再補（下載量、故事生成次數、訂閱轉換率）
 - **Source notes:** 所有功能描述來自 README.md 與 landing page copy（landing/src/i18n/）
 
 ## Revenue Model
@@ -51,7 +51,7 @@
   - Instagram — 已發佈品牌啟動貼文，規劃每週一則景點故事系列
   - App Store（iOS）
   - Google Play（Android）
-- **Planned:** YouTube Shorts、SEO 部落格（lorescape.app/blog）、TikTok 短影音、旅遊社群 KOL 合作 [草稿,待使用者確認]
+- **Planned:** YouTube Shorts、SEO 部落格（lorescape.app/blog）、TikTok 短影音、旅遊社群 KOL 合作
 
 ## Competitive Landscape
 - **Direct competitors:**
