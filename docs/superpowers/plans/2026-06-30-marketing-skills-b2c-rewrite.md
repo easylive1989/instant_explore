@@ -29,34 +29,37 @@ for d in .claude/skills/marketing-*/ ; do n=$(basename "$d"); grep -q "^name: $n
 
 ---
 
-### Task 1: 刪除 32 個不適用的 skill
+### Task 1: 刪除 34 個不適用的 skill
+
+實際 kai-cmo 目錄共 49 個:47 個 `kai-*` + `kai`(router)+ `kaicalls-design`(無 kai- 前綴的獨立目錄)。保留 15 個 → 刪除 34 個。`kai-audit`(全通路審計,與 monthly-audit 重疊且含 ads/email)與 `kai-brief`(餵給已刪的 write/email-system)亦在刪除之列。
 
 **Files:**
-- Delete: `.claude/skills/kai-{abm,ad-campaign,cold-outreach,sdr-operator,sdr-reply-triage,sales-meeting-prep,daily-ad-review,retarget,budget,webinar,podcast,growth-hacker,email-system,newsletter,product-maker,data-dashboard,html-presentation,partnership,retro,start,kaicalls-design,video,video-production,write,taste,topical-map,influencer,reddit-listen,brand-pulse,surround-sound,case-study}`
+- Delete(32 個 `kai-*`):`.claude/skills/kai-{abm,ad-campaign,audit,brand-pulse,brief,budget,case-study,cold-outreach,daily-ad-review,data-dashboard,email-system,growth-hacker,html-presentation,influencer,newsletter,partnership,podcast,product-maker,reddit-listen,retarget,retro,sales-meeting-prep,sdr-operator,sdr-reply-triage,start,surround-sound,taste,topical-map,video,video-production,webinar,write}`
 - Delete: `.claude/skills/kai`(router)
+- Delete: `.claude/skills/kaicalls-design`
 
 **Interfaces:**
-- Produces:刪除後 `.claude/skills/` 只剩 15 個 `kai-*`(待改名)與既有 `lorescape-*` 等 skill。
+- Produces:刪除後 `.claude/skills/` 只剩 15 個 `kai-*`(待改名)與既有 `lorescape-*` 等 skill;無 `kai` router、無 `kaicalls-design`。
 
-- [ ] **Step 1: 確認刪除清單與保留清單不重疊**
+- [ ] **Step 1: 確認刪除前的總數**
 
 ```bash
 cd /Users/paulwu/Documents/Github/instant_explore
-ls -d .claude/skills/kai-* .claude/skills/kai 2>/dev/null | wc -l   # 預期 47
+ls -d .claude/skills/kai-* .claude/skills/kai .claude/skills/kaicalls-design 2>/dev/null | wc -l   # 預期 49
 ```
-Expected: `47`
+Expected: `49`
 
-- [ ] **Step 2: 刪除 32 個目錄**
+- [ ] **Step 2: 刪除 34 個目錄**
 
 ```bash
 cd /Users/paulwu/Documents/Github/instant_explore/.claude/skills
-git rm -r kai-abm kai-ad-campaign kai-cold-outreach kai-sdr-operator \
-  kai-sdr-reply-triage kai-sales-meeting-prep kai-daily-ad-review kai-retarget \
-  kai-budget kai-webinar kai-podcast kai-growth-hacker kai-email-system \
-  kai-newsletter kai-product-maker kai-data-dashboard kai-html-presentation \
-  kai-partnership kai-retro kai-start kai kaicalls-design kai-video \
-  kai-video-production kai-write kai-taste kai-topical-map kai-influencer \
-  kai-reddit-listen kai-brand-pulse kai-surround-sound kai-case-study
+git rm -r kai-abm kai-ad-campaign kai-audit kai-brand-pulse kai-brief kai-budget \
+  kai-case-study kai-cold-outreach kai-daily-ad-review kai-data-dashboard \
+  kai-email-system kai-growth-hacker kai-html-presentation kai-influencer \
+  kai-newsletter kai-partnership kai-podcast kai-product-maker kai-reddit-listen \
+  kai-retarget kai-retro kai-sales-meeting-prep kai-sdr-operator kai-sdr-reply-triage \
+  kai-start kai-surround-sound kai-taste kai-topical-map kai-video kai-video-production \
+  kai-webinar kai-write kai kaicalls-design
 ```
 
 - [ ] **Step 3: 驗證只剩 15 個保留項**
@@ -64,14 +67,15 @@ git rm -r kai-abm kai-ad-campaign kai-cold-outreach kai-sdr-operator \
 ```bash
 cd /Users/paulwu/Documents/Github/instant_explore
 ls -d .claude/skills/kai-* | sort
-ls -d .claude/skills/kai-* | wc -l   # 預期 15
+ls -d .claude/skills/kai-* | wc -l                                   # 預期 15
+ls -d .claude/skills/kai .claude/skills/kaicalls-design 2>/dev/null | wc -l   # 預期 0
 ```
-Expected: 15 個,正好是 brand · competitors · content-calendar · cro · gate · growth-plan · launch · landing-page · monthly-audit · analytics · repurpose · retention · seo-audit · social · weekly-audit
+Expected: 15 個,正好是 brand · competitors · content-calendar · cro · gate · growth-plan · launch · landing-page · monthly-audit · analytics · repurpose · retention · seo-audit · social · weekly-audit;且 router/kaicalls-design 為 0
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git commit -q -m "chore(skills): delete 32 non-B2C kai marketing skills
+git commit -q -m "chore(skills): delete 34 non-B2C kai marketing skills
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
