@@ -28,10 +28,11 @@
 - **Pricing:** Freemium + 訂閱制
 - **Key plans:**
   - Free：基本探索功能
-  - Premium Weekly：每週訂閱（`$rc_weekly`）— 價格 [需使用者確認]
-  - Premium Monthly：每月訂閱（`$rc_monthly`）— 價格 [需使用者確認]
-  - Premium Yearly：每年訂閱（`$rc_annual`）— 價格 [需使用者確認]
+  - Premium Weekly：每週訂閱（`$rc_weekly`）— NT$33／週
+  - Premium Monthly：每月訂閱（`$rc_monthly`）— NT$150／月（≈ USD 4.99）
+  - Premium Yearly：每年訂閱（`$rc_annual`）— NT$660／年
 - **Platform:** RevenueCat（統一管理 App Store + Google Play 訂閱）
+- **Price source:** Google Play Console（台灣定價，2026-06-30 查）；iOS 平行定價，實際金額由各商店本地化決定
 
 ## Brand Voice
 - **Tone:** 沉靜、知性、有溫度。像一位博學的旅伴在耳邊輕聲講故事，不像觀光手冊，也不像教科書。
