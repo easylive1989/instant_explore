@@ -1,8 +1,8 @@
 # backend/tests/metrics/test_ga4.py
 from __future__ import annotations
 
-from scripts.metrics import ga4
-from scripts.metrics._common import MetricsConfig
+from metrics import ga4
+from metrics._common import MetricsConfig
 
 
 DAILY_PLATFORM = {

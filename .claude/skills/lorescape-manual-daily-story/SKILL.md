@@ -52,8 +52,8 @@ still goes live in the App).
 Publish (writes the reviewed draft to Supabase + Discord hand-off):
 
 ```bash
-uv run python -m scripts.manual_daily_story publish              # today
-uv run python -m scripts.manual_daily_story publish --date 2026-06-12
+cd scripts && uv run python -m manual_daily_story publish              # today
+cd scripts && uv run python -m manual_daily_story publish --date 2026-06-12
 ```
 
 `publish` reads `/tmp/lorescape_daily_story_draft.json`, upserts both
@@ -66,14 +66,14 @@ Unsplash search (always run — folded in from the former
 `lorescape-unsplash-images` skill):
 
 ```bash
-cd backend && uv run python -m scripts.unsplash_images        # today
-cd backend && uv run python -m scripts.unsplash_images --date 2026-06-16
+cd scripts && uv run python -m unsplash_images        # today
+cd scripts && uv run python -m unsplash_images --date 2026-06-16
 ```
 
 It reads the draft, runs 5 **place-anchored** landscape queries (every
 query contains the place name), and saves results + downloaded jpgs to
 `outputs/daily_image/{date}/unsplash_results.json` (repo root). Needs
-`UNSPLASH_ACCESS_KEY` in `backend/.env` (free demo key, 50 req/hr, from
+`UNSPLASH_ACCESS_KEY` in `scripts/.env` (free demo key, 50 req/hr, from
 https://unsplash.com/developers).
 
 ## Workflow
@@ -176,7 +176,7 @@ relevant section.
 Only run `publish` after the user says 可以 / 通過 / 發布 / yes / ok:
 
 ```bash
-uv run python -m scripts.manual_daily_story publish
+cd scripts && uv run python -m manual_daily_story publish
 ```
 
 Relay the verification output (row count + place_name per language) and
@@ -217,7 +217,7 @@ Run regardless of 5a (the place photos are also needed for the video
 prompt):
 
 ```bash
-cd backend && uv run python -m scripts.unsplash_images
+cd scripts && uv run python -m unsplash_images
 ```
 
 This reads the draft, runs 5 place-anchored queries, and downloads
@@ -360,7 +360,7 @@ Step 10 to produce the IG Reels cut.
 The Flow reel is the clean master. For Instagram — which autoplays muted —
 add a short zh-TW voiceover plus full burned-in captions so a viewer knows
 the place at a glance. This is a **local post-production** step driven by
-`backend/scripts/daily_video_post.py` (macOS `say` + `ffmpeg`); it never
+`scripts/daily_video_post.py` (macOS `say` + `ffmpeg`); it never
 re-runs Flow.
 
 **1. Get the master onto disk (user action).** Downloading is the user's
@@ -394,10 +394,10 @@ becomes one on-screen caption shown only while that line is spoken.
 
 ```bash
 # Gemini TTS (natural voice; default voice Kore) — preferred for IG:
-cd backend && uv run python -m scripts.daily_video_post --date {date} \
+cd scripts && uv run python -m daily_video_post --date {date} \
     --engine gemini
 # Offline fallback (macOS say, voice Meijia) — no daily quota:
-cd backend && uv run python -m scripts.daily_video_post --date {date}
+cd scripts && uv run python -m daily_video_post --date {date}
 ```
 
 Standing choices baked into the defaults: zh-TW, full burned-in captions
@@ -439,7 +439,7 @@ box off the averaged frame. (An opaque badge can cover the mark without
 Example (this is a per-video measurement, not a reusable constant):
 
 ```bash
-cd backend && uv run python -m scripts.daily_video_post --date {date} \
+cd scripts && uv run python -m daily_video_post --date {date} \
     --engine gemini \
     --delogo 852,1694,88,84 \
     --badge docs/ig/lorescape-lockup.png --badge-x 772 --badge-y 1669
@@ -477,7 +477,7 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 | Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
 | Reel prompt output | `outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
-| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m scripts.daily_video_post --date X [--engine gemini]` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Kore) preferred; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback |
+| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X [--engine gemini]` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Kore) preferred; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |

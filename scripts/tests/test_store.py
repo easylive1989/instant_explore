@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from scripts.metrics._common import DailySource
-from scripts.metrics.store import SheetStore
+from metrics._common import DailySource
+from metrics.store import SheetStore
 
 
 def _source(name="demo", key_index=0):

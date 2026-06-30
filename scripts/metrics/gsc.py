@@ -1,7 +1,7 @@
 """Google Search Console search-analytics source (daily site totals)."""
 from __future__ import annotations
 
-from scripts.metrics._common import DailySource, MetricsConfig
+from metrics._common import DailySource, MetricsConfig
 
 _DAILY_HEADERS = ["date", "clicks", "impressions", "ctr", "position"]
 

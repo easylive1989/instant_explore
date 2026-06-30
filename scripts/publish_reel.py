@@ -6,12 +6,12 @@ as an IG Reel using the local IG credentials in backend/.env. This is fully
 local and independent of the server's scheduled publish job — nothing is
 written back to Supabase.
 
-Run from backend/:
+Run from scripts/:
 
-    uv run python -m scripts.publish_reel 2026-06-22
-    uv run python -m scripts.publish_reel 2026-06-22 --dry-run
-    uv run python -m scripts.publish_reel 2026-06-22 --caption "自訂文案"
-    uv run python -m scripts.publish_reel 2026-06-22 --video /path/to/clip.mp4
+    uv run python -m publish_reel 2026-06-22
+    uv run python -m publish_reel 2026-06-22 --dry-run
+    uv run python -m publish_reel 2026-06-22 --caption "自訂文案"
+    uv run python -m publish_reel 2026-06-22 --video /path/to/clip.mp4
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ from lorescape_backend.config import Config
 from lorescape_backend.social import caption, card_storage, instagram
 from lorescape_backend.social.card import mapper, render_cover
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_VIDEO_DIR = REPO_ROOT / "outputs" / "daily_video"
 PUBLISH_LANGUAGE = "zh-TW"
 
@@ -143,7 +143,7 @@ def _build_caption(
 
 def main(argv: list[str]) -> int:
     """CLI entrypoint."""
-    load_dotenv()
+    load_dotenv(REPO_ROOT / "backend" / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("date", help="Publish date, YYYY-MM-DD")
     parser.add_argument("--caption", help="Override the caption text")

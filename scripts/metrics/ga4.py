@@ -1,4 +1,4 @@
-# backend/scripts/metrics/ga4.py
+# scripts/metrics/ga4.py
 """GA4 Data API source split by platform (web / iOS / Android), daily.
 
 Lorescape's web, iOS and Android streams live in one GA4 property, so the
@@ -7,7 +7,7 @@ break active/new users out per platform (App = iOS + Android).
 """
 from __future__ import annotations
 
-from scripts.metrics._common import DailySource, MetricsConfig
+from metrics._common import DailySource, MetricsConfig
 
 _PLATFORMS = ("web", "ios", "android")
 _DAILY_HEADERS = [

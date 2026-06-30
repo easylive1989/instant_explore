@@ -1,8 +1,8 @@
 # backend/tests/metrics/test_ig_posts.py
 from __future__ import annotations
 
-from scripts.metrics import ig_posts
-from scripts.metrics._common import MetricsConfig
+from metrics import ig_posts
+from metrics._common import MetricsConfig
 
 
 REEL = {

@@ -6,7 +6,7 @@ description: Use when the user wants to update Lorescape's accumulating daily me
 # Lorescape 數據抓取報告
 
 把 Lorescape 各來源的產品數據**累積**到一張 **Google Sheet**
-（`backend/.env` 的 `METRICS_SHEET_ID`），每來源一個分頁、逐日一列、
+（`scripts/.env` 的 `METRICS_SHEET_ID`），每來源一個分頁、逐日一列、
 跨次累積。試算表是唯一資料來源，補抓缺口時直接讀回試算表判斷。
 API 為主（GSC / GA4 / IG / IG 逐則貼文），App Store / Play 用瀏覽器抓。
 
@@ -34,12 +34,12 @@ insights；較舊的貼文保留既有紀錄。
 **`docs/init/metrics-setup.md`**。摘要：
 
 - **Google（GSC + GA4）**：用 **service account**（非 ADC，ADC 會被 Google
-  擋），`backend/.env` 設 `GOOGLE_APPLICATION_CREDENTIALS` +
+  擋），`scripts/.env` 設 `GOOGLE_APPLICATION_CREDENTIALS` +
   `GA4_PROPERTY_ID_WEB` + `GSC_SITE_URL`。
-- **IG（含逐則貼文）**：`backend/.env` 的 `META_PAGE_ACCESS_TOKEN` 須帶
+- **IG（含逐則貼文）**：`scripts/.env` 的 `META_PAGE_ACCESS_TOKEN` 須帶
   `instagram_manage_insights` 權限（用 `scripts/meta_token_helper.py` 產），
   並設 `IG_USER_ID`。逐則貼文用同一組憑證。
-- **Google Sheet 目的地**：`backend/.env` 設 `METRICS_SHEET_ID`，並把試算表
+- **Google Sheet 目的地**：`scripts/.env` 設 `METRICS_SHEET_ID`，並把試算表
   分享給 service account（編輯者）、啟用 Sheets API。詳見
   `docs/init/metrics-setup.md` §D。
 - **App Store / Play**：使用者已在 Chrome 登入 App Store Connect 與 Play
@@ -53,14 +53,14 @@ insights；較舊的貼文保留既有紀錄。
 
 2. **先 dry-run** 檢查設定與待補進度（讀試算表算缺口，不抓 API）：
 
-       cd backend && uv run python -m scripts.metrics.report --check
+       cd scripts && uv run python -m metrics.report --check
 
    每個來源會顯示 ready / 缺設定，以及「最後紀錄日、待補幾天 → 昨天」
    （`ig_posts` 顯示要刷新的貼文區間）。缺設定的先補。
 
 3. 抓 API 來源並寫進試算表：
 
-       cd backend && uv run python -m scripts.metrics.report
+       cd scripts && uv run python -m metrics.report
 
    只抓單一來源時用 `--only`，例如 `--only ig_posts` 或 `--only gsc,ga4`。
    完成後把 stdout 的每來源結果（`+N row(s) for <區間>` / `up to date` /

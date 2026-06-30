@@ -20,13 +20,13 @@ Claude Code session (see .claude/skills/lorescape-manual-daily-story):
        cron), so the 21:00 publish job auto-posts it to Instagram once an
        approver reacts ✅. Requires DAILY_STORY_PUBLISH_ENABLED on the VPS.
 
-Run from backend/:
+Run from scripts/:
 
-    uv run python -m scripts.manual_daily_story generate
-    uv run python -m scripts.manual_daily_story generate --place-title "Alhambra"
-    uv run python -m scripts.manual_daily_story generate --feedback "第二段太乾"
-    uv run python -m scripts.manual_daily_story publish
-    uv run python -m scripts.manual_daily_story publish --date 2026-06-12
+    uv run python -m manual_daily_story generate
+    uv run python -m manual_daily_story generate --place-title "Alhambra"
+    uv run python -m manual_daily_story generate --feedback "第二段太乾"
+    uv run python -m manual_daily_story publish
+    uv run python -m manual_daily_story publish --date 2026-06-12
 """
 from __future__ import annotations
 
@@ -36,6 +36,7 @@ import json
 import os
 import sys
 from datetime import date
+from pathlib import Path
 
 from dotenv import load_dotenv
 from supabase import create_client
@@ -276,7 +277,7 @@ def _send_for_ig_review(config: Config, supabase, publish_date: date) -> None:
 
 
 def main(argv: list[str]) -> int:
-    load_dotenv()
+    load_dotenv(Path(__file__).resolve().parents[1] / "backend" / ".env")
     # The google-genai SDK prefers GOOGLE_API_KEY over GEMINI_API_KEY when
     # both are set; on this machine GOOGLE_API_KEY is a non-Gemini key, so
     # drop it. Done here (not at import) to keep importing this module for

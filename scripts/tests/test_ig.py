@@ -1,8 +1,8 @@
 # backend/tests/metrics/test_ig.py
 from __future__ import annotations
 
-from scripts.metrics import ig
-from scripts.metrics._common import MetricsConfig
+from metrics import ig
+from metrics._common import MetricsConfig
 
 
 INSIGHTS = {

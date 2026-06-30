@@ -1,10 +1,10 @@
-# backend/scripts/metrics/ig_posts.py
+# scripts/metrics/ig_posts.py
 """Instagram per-post (media) metrics: core interactions + Reels video."""
 from __future__ import annotations
 
 import requests
 
-from scripts.metrics._common import DailySource, MetricsConfig
+from metrics._common import DailySource, MetricsConfig
 
 _GRAPH = "https://graph.facebook.com/v21.0"
 _HEADERS = [

@@ -1,0 +1,33 @@
+[project]
+name = "lorescape-scripts"
+version = "0.1.0"
+description = "Host-only operational scripts for Lorescape (metrics, daily-story content ops). Not part of the deployed backend."
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32,<3",
+    "python-dotenv>=1,<2",
+    "google-auth>=2,<3",
+    "google-api-python-client>=2,<3",
+    "pillow>=10,<12",
+    "certifi>=2024",
+    # publish_reel + manual_daily_story (and daily_video_post's gemini engine)
+    # import the backend package and reuse its Config / social / daily_story code.
+    "lorescape-backend",
+]
+
+[tool.uv.sources]
+lorescape-backend = { path = "../backend", editable = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+    "pytest-mock>=3.14,<4",
+    "requests-mock>=1.12,<2",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -5,7 +5,7 @@ import dataclasses
 from datetime import date
 from unittest.mock import MagicMock, patch
 
-from scripts.manual_daily_story import _send_for_ig_review
+from manual_daily_story import _send_for_ig_review
 
 _DATE = date(2026, 6, 18)
 
@@ -23,7 +23,7 @@ def test_skips_hand_off_when_review_not_configured(fake_config, capsys):
     config = dataclasses.replace(fake_config, discord_bot_token=None)
     supabase = MagicMock()
 
-    with patch("scripts.manual_daily_story.job.send_today_for_review") as send:
+    with patch("manual_daily_story.job.send_today_for_review") as send:
         _send_for_ig_review(config, supabase, _DATE)
 
     send.assert_not_called()
@@ -33,7 +33,7 @@ def test_skips_hand_off_when_review_not_configured(fake_config, capsys):
 def test_posts_card_and_reports_message_id(fake_config, capsys):
     supabase = _supabase_returning("msg-123")
 
-    with patch("scripts.manual_daily_story.job.send_today_for_review") as send:
+    with patch("manual_daily_story.job.send_today_for_review") as send:
         _send_for_ig_review(fake_config, supabase, _DATE)
 
     send.assert_called_once_with(fake_config, _DATE)
@@ -45,7 +45,7 @@ def test_posts_card_and_reports_message_id(fake_config, capsys):
 def test_warns_when_no_card_posted(fake_config, capsys):
     supabase = _supabase_returning(None)
 
-    with patch("scripts.manual_daily_story.job.send_today_for_review"):
+    with patch("manual_daily_story.job.send_today_for_review"):
         _send_for_ig_review(fake_config, supabase, _DATE)
 
     assert "posted nothing" in capsys.readouterr().out
@@ -55,7 +55,7 @@ def test_best_effort_on_send_failure(fake_config, capsys):
     supabase = MagicMock()
 
     with patch(
-        "scripts.manual_daily_story.job.send_today_for_review",
+        "manual_daily_story.job.send_today_for_review",
         side_effect=RuntimeError("discord down"),
     ):
         _send_for_ig_review(fake_config, supabase, _DATE)

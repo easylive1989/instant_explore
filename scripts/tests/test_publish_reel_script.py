@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts import publish_reel
+import publish_reel
 
 
 def test_resolve_video_returns_final_mp4(tmp_path, monkeypatch):
@@ -133,7 +133,7 @@ def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
     day_dir.mkdir()
     (day_dir / "final.mp4").write_bytes(b"v")
     mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
-    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch("publish_reel.load_dotenv")
     mocker.patch.object(
         publish_reel, "_build_caption", return_value="some caption"
     )
@@ -150,10 +150,10 @@ def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
         brand_handle_ig="@lorescape",
         cta_text="Explore.",
     )
-    mocker.patch("scripts.publish_reel.Config.from_env", return_value=config)
-    mocker.patch("scripts.publish_reel.create_client", return_value=object())
+    mocker.patch("publish_reel.Config.from_env", return_value=config)
+    mocker.patch("publish_reel.create_client", return_value=object())
     pub = mocker.patch(
-        "scripts.publish_reel.instagram.publish_reel", return_value="post-1"
+        "publish_reel.instagram.publish_reel", return_value="post-1"
     )
 
     result = publish_reel.main(["2026-06-22"])
@@ -167,7 +167,7 @@ def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
     day_dir.mkdir()
     (day_dir / "final.mp4").write_bytes(b"v")
     mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
-    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch("publish_reel.load_dotenv")
     mocker.patch.object(
         publish_reel, "_build_caption", return_value="some caption"
     )
@@ -184,10 +184,10 @@ def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
         brand_handle_ig="@lorescape",
         cta_text="Explore.",
     )
-    mocker.patch("scripts.publish_reel.Config.from_env", return_value=config)
-    mocker.patch("scripts.publish_reel.create_client", return_value=object())
+    mocker.patch("publish_reel.Config.from_env", return_value=config)
+    mocker.patch("publish_reel.create_client", return_value=object())
     pub = mocker.patch(
-        "scripts.publish_reel.instagram.publish_reel", return_value="post-1"
+        "publish_reel.instagram.publish_reel", return_value="post-1"
     )
 
     result = publish_reel.main(["2026-06-22"])
@@ -204,7 +204,7 @@ def test_main_returns_1_and_prints_error_on_publish_failure(
     day_dir.mkdir()
     (day_dir / "final.mp4").write_bytes(b"v")
     mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
-    mocker.patch("scripts.publish_reel.load_dotenv")
+    mocker.patch("publish_reel.load_dotenv")
     mocker.patch.object(
         publish_reel,
         "_build_caption",
@@ -221,13 +221,13 @@ def test_main_returns_1_and_prints_error_on_publish_failure(
         cta_text="Explore.",
     )
     mocker.patch(
-        "scripts.publish_reel.Config.from_env", return_value=config
+        "publish_reel.Config.from_env", return_value=config
     )
     mocker.patch(
-        "scripts.publish_reel.create_client", return_value=object()
+        "publish_reel.create_client", return_value=object()
     )
     mocker.patch(
-        "scripts.publish_reel.instagram.publish_reel",
+        "publish_reel.instagram.publish_reel",
         side_effect=RuntimeError("Reel container c1 failed: ERROR detail"),
     )
 

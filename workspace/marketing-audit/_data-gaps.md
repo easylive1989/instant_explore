@@ -31,7 +31,7 @@ These gaps prevent scoring those dimensions. Connect data sources to unlock full
 
 Run the metrics skill to pull live data:
 ```bash
-cd backend && uv run python -m scripts.metrics.report --days 30
+cd scripts && uv run python -m metrics.report --days 30
 ```
 
 This pulls GSC + GA4 + IG data using existing service account credentials.

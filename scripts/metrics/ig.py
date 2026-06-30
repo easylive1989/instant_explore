@@ -1,4 +1,4 @@
-# backend/scripts/metrics/ig.py
+# scripts/metrics/ig.py
 """Instagram Graph API source: daily account insights + profile snapshot."""
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 import requests
 
-from scripts.metrics._common import DailySource, MetricsConfig
+from metrics._common import DailySource, MetricsConfig
 
 _GRAPH = "https://graph.facebook.com/v21.0"
 _DAILY_HEADERS = [

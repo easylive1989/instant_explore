@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from scripts.metrics import gsc
-from scripts.metrics._common import MetricsConfig
+from metrics import gsc
+from metrics._common import MetricsConfig
 
 
 DAILY_SAMPLE = {

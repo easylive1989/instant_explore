@@ -7,8 +7,8 @@ of truth); :class:`MemoryStore` keeps data in-process for tests.
 """
 from __future__ import annotations
 
-from scripts.metrics._common import DailySource, merge_rows
-from scripts.metrics.sheets import SheetClient
+from metrics._common import DailySource, merge_rows
+from metrics.sheets import SheetClient
 
 
 class MetricsStore:

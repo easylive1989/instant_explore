@@ -16,19 +16,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from scripts.metrics._common import (
+from metrics._common import (
     REPO_ROOT,
     DailySource,
     MetricsConfig,
     date_range,
     missing_days,
 )
-from scripts.metrics.ga4 import SOURCE as GA4_SOURCE
-from scripts.metrics.gsc import SOURCE as GSC_SOURCE
-from scripts.metrics.ig import SOURCE as IG_SOURCE
-from scripts.metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
-from scripts.metrics.sheets import SheetClient
-from scripts.metrics.store import MetricsStore, SheetStore
+from metrics.ga4 import SOURCE as GA4_SOURCE
+from metrics.gsc import SOURCE as GSC_SOURCE
+from metrics.ig import SOURCE as IG_SOURCE
+from metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
+from metrics.sheets import SheetClient
+from metrics.store import MetricsStore, SheetStore
 
 DEFAULT_BACKFILL = 30
 
@@ -203,7 +203,7 @@ def build_store() -> SheetStore:
 
 
 def main(argv: list[str] | None = None) -> int:
-    load_dotenv(_repo_root() / "backend" / ".env")
+    load_dotenv(_repo_root() / "scripts" / ".env")
     parser = argparse.ArgumentParser(
         description="Accumulate Lorescape metrics into a Google Sheet."
     )

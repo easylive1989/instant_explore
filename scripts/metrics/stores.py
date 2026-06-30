@@ -4,7 +4,7 @@ Unlike the API sources (``gsc`` / ``ga4`` / ``ig`` / ``ig_posts``), App Store
 Connect and Play Console expose no headless API here, so their numbers are
 read by hand from the browser and passed in as flags. This script upserts one
 date-keyed row into the ``stores`` tab, reusing the same spreadsheet, service
-account, and merge/de-dup behaviour as :mod:`scripts.metrics.report`. Re-running
+account, and merge/de-dup behaviour as :mod:`metrics.report`. Re-running
 for the same date overwrites that row.
 """
 from __future__ import annotations
@@ -14,8 +14,8 @@ import os
 
 from dotenv import load_dotenv
 
-from scripts.metrics._common import REPO_ROOT, date_range, merge_rows
-from scripts.metrics.sheets import SheetClient
+from metrics._common import REPO_ROOT, date_range, merge_rows
+from metrics.sheets import SheetClient
 
 TAB = "stores"
 HEADERS = [
@@ -73,7 +73,7 @@ def build_client() -> SheetClient:
 
 
 def main(argv: list[str] | None = None) -> int:
-    load_dotenv(REPO_ROOT / "backend" / ".env")
+    load_dotenv(REPO_ROOT / "scripts" / ".env")
     parser = argparse.ArgumentParser(
         description="Record an App Store / Play snapshot into the sheet."
     )

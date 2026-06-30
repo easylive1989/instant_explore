@@ -21,7 +21,7 @@ description: Use when the user wants to manually publish a specific day's finish
 2. **先 dry-run** 檢查影片路徑與將送出的 caption：
 
    ```bash
-   cd backend && uv run python -m scripts.publish_reel <date> --dry-run
+   cd scripts && uv run python -m publish_reel <date> --dry-run
    ```
 
    把 caption 念給使用者確認。caption 來源優先序：`--caption` 覆寫 →
@@ -30,7 +30,7 @@ description: Use when the user wants to manually publish a specific day's finish
 3. 使用者確認後，正式發布：
 
    ```bash
-   cd backend && uv run python -m scripts.publish_reel <date>
+   cd scripts && uv run python -m publish_reel <date>
    ```
 
    成功會印出 `Published reel: <ig_post_id>`。

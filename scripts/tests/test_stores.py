@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from datetime import date, timedelta
 
-from scripts.metrics import stores
+from metrics import stores
 
 
 class FakeClient:

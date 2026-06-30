@@ -8,10 +8,10 @@ depict the place itself — not loosely related themes), and writes them to:
 The caller still visually filters the downloads to keep only genuine
 place shots; these feed the cover image and the Google Flow video prompt.
 
-Usage (from backend/):
-    uv run python -m scripts.unsplash_images [--date YYYY-MM-DD]
+Usage (from scripts/):
+    uv run python -m unsplash_images [--date YYYY-MM-DD]
 
-Requires UNSPLASH_ACCESS_KEY in backend/.env or the environment.
+Requires UNSPLASH_ACCESS_KEY in scripts/.env or the environment.
 Get a free demo key (50 req/hr) at https://unsplash.com/developers
 """
 
@@ -71,7 +71,7 @@ def _load_access_key() -> str:
     key = os.environ.get("UNSPLASH_ACCESS_KEY", "")
     if key:
         return key
-    env_path = Path(__file__).parent.parent / ".env"
+    env_path = Path(__file__).parent / ".env"
     if env_path.exists():
         for line in env_path.read_text().splitlines():
             if line.startswith("UNSPLASH_ACCESS_KEY="):
@@ -126,7 +126,7 @@ def main() -> None:
     if not draft_path.exists():
         print(
             f"ERROR: {DRAFT_PATH} not found.\n"
-            "Run `uv run python -m scripts.manual_daily_story generate` first.",
+            "Run `uv run python -m manual_daily_story generate` first.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -165,7 +165,7 @@ def main() -> None:
                 "error": str(exc),
             }
 
-    out_dir = Path(__file__).parent.parent.parent / "outputs" / "daily_image" / args.date
+    out_dir = Path(__file__).parent.parent / "outputs" / "daily_image" / args.date
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Download images — {angle_key}_{index+1}.jpg

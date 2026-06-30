@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from scripts.metrics import _common as c
+from metrics import _common as c
 
 
 def test_date_range_defaults_to_last_7_days_ending_yesterday():

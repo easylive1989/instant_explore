@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from scripts.metrics import report
-from scripts.metrics._common import DailySource, MetricsConfig
-from scripts.metrics.store import MemoryStore
+from metrics import report
+from metrics._common import DailySource, MetricsConfig
+from metrics.store import MemoryStore
 
 
 def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True):

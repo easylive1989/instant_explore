@@ -16,10 +16,10 @@ ffmpeg's ``overlay`` filter. This deliberately avoids ffmpeg's libass /
 drawtext text filters, which are not compiled into the Homebrew ffmpeg on
 this machine.
 
-Run from backend/:
+Run from scripts/:
 
-    uv run python -m scripts.daily_video_post --date 2026-06-20
-    uv run python -m scripts.daily_video_post \\
+    uv run python -m daily_video_post --date 2026-06-20
+    uv run python -m daily_video_post \\
         --date 2026-06-20 \\
         --input outputs/daily_video/2026-06-20/source.mp4 \\
         --text  outputs/daily_video/2026-06-20/narration.txt \\
@@ -46,7 +46,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger("daily_video_post")
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_SAY_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
 DEFAULT_GEMINI_VOICE = "Kore"  # Warm female prebuilt Gemini TTS voice.
