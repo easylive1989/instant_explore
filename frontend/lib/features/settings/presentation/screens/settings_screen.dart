@@ -239,7 +239,10 @@ class _AccountGroup extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
 
-    if (user != null) {
+    // Anonymous users have a session but no real identity yet, so treat them
+    // as signed out here — they must see the Google/Apple buttons to upgrade
+    // (which links the identity in place via linkIdentity).
+    if (user != null && !user.isAnonymous) {
       return _SettingsGroup(
         label: 'settings.account_section'.tr(),
         child: _SettingsCard(

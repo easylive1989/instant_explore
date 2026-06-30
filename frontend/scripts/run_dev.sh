@@ -60,6 +60,8 @@ fvm flutter run \
     --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
     --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID \
     --dart-define=GOOGLE_IOS_CLIENT_ID=$GOOGLE_IOS_CLIENT_ID \
+    --dart-define=REVENUECAT_API_KEY_IOS="${REVENUECAT_API_KEY_IOS}" \
+    --dart-define=REVENUECAT_API_KEY_ANDROID="${REVENUECAT_API_KEY_ANDROID}" \
     --dart-define=BACKEND_BASE_URL="${BACKEND_BASE_URL:-https://api.lorescape.app}"
 
 FLUTTER_PID=$!
