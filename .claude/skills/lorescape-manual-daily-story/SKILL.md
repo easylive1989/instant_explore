@@ -80,8 +80,15 @@ https://unsplash.com/developers).
 
 ### Step 1 — Pick the next place
 
+> **Execution contexts.** The ops CLIs (`manual_daily_story`,
+> `unsplash_images`, `daily_video_post`) run from the `scripts/` uv project
+> (`cd scripts && uv run python -m <module>`). The inline backend-library
+> snippets in Steps 1–2 call `lorescape_backend` directly, so run them in
+> the backend env (`cd backend && uv run python …`), where bare
+> `load_dotenv()` picks up `backend/.env`.
+
 ```bash
-python3 -c "
+cd backend && uv run python -c "
 from dotenv import load_dotenv; import os; load_dotenv()
 os.environ.pop('GOOGLE_API_KEY', None)
 from supabase import create_client
@@ -94,6 +101,8 @@ print(p.id, p.wikipedia_title_en)
 ```
 
 ### Step 2 — Fetch Wikipedia material
+
+Run in the backend env (`cd backend && uv run python …`):
 
 ```python
 from lorescape_backend.daily_story import wikipedia
