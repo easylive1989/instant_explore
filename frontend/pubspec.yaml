@@ -107,6 +107,7 @@ dependencies:
   # requires firebase_core ^4.11.0 (Firebase SDK 12.15.0 / iOS 16). Same
   # class-based provider API (providerAndroid/providerApple) used in main.dart.
   firebase_app_check: 0.4.4+1
+  marionette_flutter: ^0.6.0
 
 dev_dependencies:
   flutter_test:
