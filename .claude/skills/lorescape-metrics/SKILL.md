@@ -1,6 +1,6 @@
 ---
 name: lorescape-metrics
-description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「App 下載 / 評分」. API-first (GSC/GA4/IG); App Store / Play captured via the Chrome browser. Accumulates into a Google Sheet (METRICS_SHEET_ID), one tab per source. Local, read-only, does not touch the server.
+description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, RevenueCat subscription/revenue snapshot, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「訂閱 / 營收 / MRR / RevenueCat」「App 下載 / 評分」. API-first (GSC/GA4/IG/RevenueCat); App Store / Play captured via the Chrome browser. Accumulates into a Google Sheet (METRICS_SHEET_ID), one tab per source. Local, read-only, does not touch the server.
 ---
 
 # Lorescape 數據抓取報告
@@ -8,7 +8,7 @@ description: Use when the user wants to update Lorescape's accumulating daily me
 把 Lorescape 各來源的產品數據**累積**到一張 **Google Sheet**
 （`scripts/.env` 的 `METRICS_SHEET_ID`），每來源一個分頁、逐日一列、
 跨次累積。試算表是唯一資料來源，補抓缺口時直接讀回試算表判斷。
-API 為主（GSC / GA4 / IG / IG 逐則貼文），App Store / Play 用瀏覽器抓。
+API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play 用瀏覽器抓。
 
 預設抓**昨天**；執行時自動偵測「最後紀錄日 → 昨天」的缺口並逐日補抓，
 分頁首次（或空）時回溯 30 天建立基線。重跑同一天會覆蓋、不重複。
@@ -21,11 +21,16 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文），App Store / Play 用瀏覽器
 | `ga4` | `ga4` | date | 每日 web / iOS / Android 各自的 active / new users（App = iOS + Android） |
 | `ig` | `ig` | date | 帳號每日 reach / profile_views（+ 最新一天 followers/media 快照） |
 | `ig_posts` | `ig_posts` | media_id | 逐則貼文：reach、likes、comments、saved、shares、total_interactions，Reels 另含 plays、avg_watch_time |
+| `revenuecat` | `revenuecat` | date | 訂閱/營收每日快照：mrr、active_subscriptions、active_trials、active_users_28d、new_customers_28d、revenue_28d |
 
 `ig_posts` 以 media_id 累積，每次重抓最近 30 天的貼文以刷新會隨時間變動的
 insights；較舊的貼文保留既有紀錄。
 
-分析公式請另開分頁**引用**這四頁（如 `=gsc!A2`），不要直接在這四頁加欄位，
+`revenuecat` 是**快照**來源：RevenueCat 公開 API 只給「當下」的 overview
+指標，沒有逐日歷史，所以每次只會記昨天一列（重跑同日覆蓋），**漏掉的天無法
+回補**。要逐日連續就得每天跑一次。
+
+分析公式請另開分頁**引用**這些頁（如 `=gsc!A2`），不要直接在這些頁加欄位，
 否則下次同步會被整頁覆寫。
 
 ## 前置條件
@@ -42,6 +47,10 @@ insights；較舊的貼文保留既有紀錄。
 - **Google Sheet 目的地**：`scripts/.env` 設 `METRICS_SHEET_ID`，並把試算表
   分享給 service account（編輯者）、啟用 Sheets API。詳見
   `docs/init/metrics-setup.md` §D。
+- **RevenueCat（訂閱/營收）**：`scripts/.env` 設 `REVENUECAT_V2_API_KEY`
+  （RevenueCat → Project settings → API keys 建一把 **v2 secret key**，給
+  metrics/overview 讀取權限；注意這跟 backend/.env 的 v1 `REVENUECAT_API_KEY`
+  是不同的金鑰）與 `REVENUECAT_PROJECT_ID`（Project settings 的 Project ID）。
 - **App Store / Play**：使用者已在 Chrome 登入 App Store Connect 與 Play
   Console，見 `references/stores-browser.md`。
 

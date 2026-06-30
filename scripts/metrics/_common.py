@@ -102,6 +102,8 @@ class MetricsConfig:
     gsc_site_url: str | None = None
     ig_user_id: str | None = None
     meta_page_access_token: str | None = None
+    revenuecat_api_key: str | None = None
+    revenuecat_project_id: str | None = None
 
     @classmethod
     def from_env(cls) -> "MetricsConfig":
@@ -112,6 +114,8 @@ class MetricsConfig:
             gsc_site_url=get("GSC_SITE_URL") or None,
             ig_user_id=get("IG_USER_ID") or None,
             meta_page_access_token=get("META_PAGE_ACCESS_TOKEN") or None,
+            revenuecat_api_key=get("REVENUECAT_V2_API_KEY") or None,
+            revenuecat_project_id=get("REVENUECAT_PROJECT_ID") or None,
         )
 
 
@@ -124,6 +128,11 @@ class DailySource:
     sources return one row per day, while media-keyed sources (`keyed_by_date`
     is False) return one row per post and are always re-fetched over a recent
     window to refresh insights.
+
+    Snapshot sources (`snapshot` is True) expose only a live "now" reading
+    with no recoverable history (e.g. RevenueCat's overview metrics): the
+    engine records a single row stamped against `end` and never backfills
+    days that were missed.
     """
 
     name: str
@@ -133,6 +142,7 @@ class DailySource:
     fetch: Callable[["MetricsConfig", str, str], list[list[str]]]
     key_index: int = 0
     keyed_by_date: bool = True
+    snapshot: bool = False
     ready: Callable[["MetricsConfig"], bool] | None = None
 
     def missing_config(self, cfg: "MetricsConfig") -> list[str]:

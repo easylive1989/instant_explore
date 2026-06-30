@@ -27,6 +27,7 @@ from metrics.ga4 import SOURCE as GA4_SOURCE
 from metrics.gsc import SOURCE as GSC_SOURCE
 from metrics.ig import SOURCE as IG_SOURCE
 from metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
+from metrics.revenuecat import SOURCE as REVENUECAT_SOURCE
 from metrics.sheets import SheetClient
 from metrics.store import MetricsStore, SheetStore
 
@@ -34,7 +35,9 @@ DEFAULT_BACKFILL = 30
 
 SOURCES: dict[str, DailySource] = {
     source.name: source
-    for source in (GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE)
+    for source in (
+        GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE, REVENUECAT_SOURCE,
+    )
 }
 
 
@@ -77,11 +80,14 @@ def plan_window(
     """Return the (start, end) to fetch, or None if already up to date.
 
     Date-keyed sources fetch only the gap up to `end`; media-keyed sources
-    always refresh the most recent `backfill` days. An explicit window
-    overrides both for manual backfills.
+    always refresh the most recent `backfill` days; snapshot sources record
+    a single live reading for `end` unless that day is already stored. An
+    explicit window overrides all of these for manual backfills.
     """
     if explicit is not None:
         return explicit
+    if source.snapshot:
+        return None if end in store.keys(source) else (end, end)
     if source.keyed_by_date:
         days = missing_days(store.keys(source), end, backfill)
         return (days[0], days[-1]) if days else None
@@ -155,7 +161,14 @@ def check_lines(
             lines.append(f"- {name}: {missing_note(source, cfg)}")
             continue
         keys = store.keys(source)
-        if source.keyed_by_date:
+        if source.snapshot:
+            latest = max(keys) if keys else "empty"
+            if end in keys:
+                lines.append(f"- {name}: ready, up to date (last {latest})")
+            else:
+                lines.append(f"- {name}: ready, snapshot for {end} "
+                             f"(last {latest})")
+        elif source.keyed_by_date:
             days = missing_days(keys, end, backfill)
             latest = max(keys) if keys else "empty"
             if not days:

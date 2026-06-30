@@ -5,7 +5,8 @@ from metrics._common import DailySource, MetricsConfig
 from metrics.store import MemoryStore
 
 
-def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True):
+def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True,
+                 snapshot=False):
     return DailySource(
         name="demo",
         filename="demo.csv",
@@ -13,6 +14,7 @@ def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True):
         required=required,
         fetch=lambda cfg, s, e: rows,
         keyed_by_date=keyed_by_date,
+        snapshot=snapshot,
     )
 
 
@@ -47,6 +49,30 @@ def test_plan_window_media_keyed_uses_recent_window():
     assert report.plan_window(src, MemoryStore(), "2026-06-23", 3, None) == (
         "2026-06-21", "2026-06-23"
     )
+
+
+def test_plan_window_snapshot_targets_end_when_absent():
+    src = _demo_source([], snapshot=True)
+    assert report.plan_window(
+        src, MemoryStore(), "2026-06-23", 30, None
+    ) == ("2026-06-23", "2026-06-23")
+
+
+def test_plan_window_snapshot_none_when_day_already_stored():
+    src = _demo_source([], snapshot=True)
+    store = MemoryStore()
+    store.seed("demo", ["date", "v"], [["2026-06-23", "1"]])
+    assert report.plan_window(src, store, "2026-06-23", 30, None) is None
+
+
+def test_check_lines_snapshot_reports_pending_day():
+    src = _demo_source([], snapshot=True)
+    report.SOURCES["demo"] = src
+    try:
+        lines = report.check_lines(READY, ["demo"], "2026-06-23", MemoryStore())
+    finally:
+        report.SOURCES.pop("demo", None)
+    assert "snapshot for 2026-06-23" in "\n".join(lines)
 
 
 def test_accumulate_skips_when_not_ready():
