@@ -5,7 +5,7 @@
 - **Type:** Mobile app (iOS + Android), freemium with subscription
 - **One-liner:** AI 隨行的旅行說書人 — 走到任何景點，即時生成一段以史實為本的真實故事，再以語音娓娓道來。
 - **URL:** https://lorescape.app
-- **App Store:** [TODO — add iOS App Store URL]
+- **App Store:** https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060
 - **Google Play:** https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore
 
 ## Audience
@@ -21,16 +21,16 @@
   - 語音逐句同步高亮，邊聽邊看
   - 每日故事推播，養成每天閱讀世界的習慣
   - 文化足跡日誌自動整理旅行知識，可匯出 PDF
-- **Proof points:** [TODO — 用戶數、下載量、故事生成次數、訂閱轉換率]
+- **Proof points:** [需使用者確認:是否公開下載數/生成次數/轉換率]
 - **Source notes:** 所有功能描述來自 README.md 與 landing page copy（landing/src/i18n/）
 
 ## Revenue Model
 - **Pricing:** Freemium + 訂閱制
 - **Key plans:**
   - Free：基本探索功能
-  - Premium Weekly：每週訂閱（`$rc_weekly`）— 價格 [TODO]
-  - Premium Monthly：每月訂閱（`$rc_monthly`）— 價格 [TODO]
-  - Premium Yearly：每年訂閱（`$rc_annual`）— 價格 [TODO]
+  - Premium Weekly：每週訂閱（`$rc_weekly`）— 價格 [需使用者確認]
+  - Premium Monthly：每月訂閱（`$rc_monthly`）— 價格 [需使用者確認]
+  - Premium Yearly：每年訂閱（`$rc_annual`）— 價格 [需使用者確認]
 - **Platform:** RevenueCat（統一管理 App Store + Google Play 訂閱）
 
 ## Brand Voice
@@ -50,7 +50,7 @@
   - Instagram — 已發佈品牌啟動貼文，規劃每週一則景點故事系列
   - App Store（iOS）
   - Google Play（Android）
-- **Planned:** [TODO — 填入計畫開拓的渠道，例如：YouTube Shorts、SEO 部落格、TikTok、KOL 合作、旅遊社群]
+- **Planned:** YouTube Shorts、SEO 部落格（lorescape.app/blog）、TikTok 短影音、旅遊社群 KOL 合作 [草稿,待使用者確認]
 
 ## Competitive Landscape
 - **Direct competitors:**
