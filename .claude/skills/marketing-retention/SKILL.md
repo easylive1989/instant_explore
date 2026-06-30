@@ -183,4 +183,3 @@ IG 社群內容重新觸及（非 email）。
 - 所有 GA4 數字來自 lorescape-metrics Google Sheet；不重新串 GA4 API。
 - RevenueCat 資料非 Sheet 來源，須使用者手動提供。
 - 推播文案必須符合 MARKETING.md 品牌調性（沉靜知性，無誇張行銷語氣）。
-- 折扣優惠上限 20%（需使用者明確批准才可超過）。

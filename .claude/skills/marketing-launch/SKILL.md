@@ -50,8 +50,8 @@ Generate `workspace/launch/_timeline.md`.
 
 | Asset | Channel | Phase | Skill |
 |-------|---------|-------|-------|
-| App Store 文案更新（標題、副標、描述） | ASO | Pre-launch | marketing-landing-page |
-| Google Play 文案更新 | ASO | Pre-launch | marketing-landing-page |
+| App Store 文案更新（標題、副標、描述） | ASO | Pre-launch | marketing-social |
+| Google Play 文案更新 | ASO | Pre-launch | marketing-social |
 | Landing page 功能 section 更新 | Web | Pre-launch | marketing-landing-page |
 | IG 預告 Reels（1–2 則） | Instagram | Pre-launch | marketing-social |
 | IG 主發佈 Reels（1–2 則） | Instagram | Launch Day | marketing-social |
@@ -74,7 +74,7 @@ Produce assets in dependency order:
 1. **Landing page copy** — defines the core messaging everyone else references
    → Use `marketing-landing-page`
 2. **ASO copy** — App Store / Google Play title, subtitle, description updated to reflect launch
-   → Derived from landing page copy
+   → Use `marketing-social`
 3. **IG launch Reels scripts** — extract hero message + visual hooks from above
    → Use `marketing-social`
 4. **Content calendar** — schedule pre/launch/post Reels and supporting posts
