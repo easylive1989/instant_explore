@@ -277,13 +277,17 @@ class _AccountGroup extends ConsumerWidget {
             title: 'settings.account_not_signed_in'.tr(),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FilledButton.icon(
+                OutlinedButton.icon(
                   key: const ValueKey('sign_in_google'),
-                  icon: const Icon(Icons.login),
+                  icon: Image.asset(
+                    'assets/images/google_logo.png',
+                    width: 18,
+                    height: 18,
+                  ),
                   label: Text('settings.sign_in_google'.tr()),
                   onPressed: () => _handleSignIn(context, ref, useApple: false),
                 ),
