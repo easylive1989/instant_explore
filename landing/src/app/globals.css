@@ -1332,3 +1332,98 @@
     font-size: 38px;
   }
 }
+
+/* ============ DAILY STORY SHARE PAGE (/[locale]/story/[date]) ============ */
+@layer components {
+  .story-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(36px, 7vw, 80px) var(--gut) clamp(72px, 10vw, 120px);
+  }
+  .story-cover {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--e3);
+    margin-bottom: clamp(28px, 4vw, 40px);
+  }
+  .story-eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin: 0 0 14px;
+  }
+  .story-meta {
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+    margin: 0 0 12px;
+  }
+  .story-title {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(30px, 5.4vw, 46px);
+    line-height: 1.18;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin: 0 0 24px;
+    text-wrap: balance;
+  }
+  .story-hook {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(18px, 2.6vw, 23px);
+    line-height: 1.55;
+    color: var(--clay-deep);
+    border-left: 3px solid var(--clay);
+    padding-left: 20px;
+    margin: 0 0 30px;
+    text-wrap: balance;
+  }
+  .story-body {
+    font-family: var(--serif);
+    font-size: clamp(16px, 1.9vw, 18px);
+    line-height: 1.85;
+    color: var(--ink-2);
+    margin: 0 0 20px;
+  }
+  .story-continue {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: clamp(30px, 5vw, 44px) 0 22px;
+    padding-top: clamp(24px, 3vw, 32px);
+    border-top: 1px solid var(--line);
+  }
+  .story-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .story-page--empty {
+    text-align: center;
+    max-width: 560px;
+  }
+  .story-page--empty .story-hook,
+  .story-page--empty .story-continue {
+    border: none;
+    padding: 0;
+  }
+  .story-page--empty .story-cta {
+    justify-content: center;
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  .story-cta .btn--store-custom {
+    width: 100%;
+  }
+}
