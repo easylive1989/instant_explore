@@ -62,6 +62,36 @@ DEFAULT_BG_VOLUME = 0.28  # Ambient kept audible but well under the voiceover.
 LEAD_IN_SECONDS = 0.3  # Small silence before the first line starts.
 PAUSE_SECONDS = 0.25  # Gap inserted between spoken lines.
 AUDIO_RATE = 44100
+# IG serves ≥1080p uploads through a higher-quality encode and skips its own
+# upscaler, so we floor every reel at a 1080-wide 9:16 frame even when the
+# Flow master came down at 720p. Pass --target-height 0 to keep the source.
+DEFAULT_TARGET_HEIGHT = 1920
+# IG Reels overlays its own UI on the bottom ~20% (caption, handle, audio,
+# progress) and the right ~13% (action buttons). Keep the caption block's
+# bottom edge above that band so nothing important is covered.
+CAPTION_BOTTOM_MARGIN_FRACTION = 0.20
+# The first narration line is the curiosity hook: render it larger and
+# centred slightly above the middle so it grabs attention in the opening
+# seconds, instead of sitting in the bottom body-caption position.
+HOOK_FONT_FRACTION = 0.060
+BODY_FONT_FRACTION = 0.045
+HOOK_CENTER_FRACTION = 0.40
+
+
+def _target_dimensions(
+    width: int, height: int, target_height: int
+) -> tuple[int, int]:
+    """Output size for ``target_height``, preserving aspect (even width).
+
+    Returns the source size unchanged when ``target_height`` is 0 or already
+    matches, so an already-1080p master is never needlessly re-scaled.
+    """
+    if target_height <= 0 or height == target_height:
+        return width, height
+    scaled_width = round(width * target_height / height)
+    if scaled_width % 2:
+        scaled_width += 1
+    return scaled_width, target_height
 
 
 class PostProductionError(RuntimeError):
@@ -318,34 +348,63 @@ def _wrap(
     return lines or [""]
 
 
+def _line_height(font: ImageFont.FreeTypeFont, font_size: int) -> int:
+    """Vertical advance per wrapped row, with a little extra leading."""
+    ascent, descent = font.getmetrics()
+    return ascent + descent + round(font_size * 0.25)
+
+
+def _draw_caption(
+    width: int, height: int, rows: list[str],
+    font: ImageFont.FreeTypeFont, top_y: int, line_height: int, stroke: int,
+) -> Image.Image:
+    """Draw centred, stroked white rows onto a transparent full-frame image."""
+    image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    y = top_y
+    for row in rows:
+        x = (width - font.getlength(row)) / 2
+        draw.text(
+            (x, y), row, font=font, fill=(255, 255, 255, 255),
+            stroke_width=stroke, stroke_fill=(0, 0, 0, 235),
+        )
+        y += line_height
+    return image
+
+
 def _render_caption_pngs(
     timings: list[tuple[float, float, str]],
     width: int, height: int, font_file: str, work_dir: Path,
 ) -> list[tuple[Path, float, float]]:
-    """Render each caption line to a full-frame transparent PNG with Pillow."""
-    font_size = max(20, round(height * 0.045))
-    margin_v = round(height * 0.10)
+    """Render each caption line to a full-frame transparent PNG with Pillow.
+
+    The first line is the spoken hook: it is drawn larger and centred just
+    above the middle to grab attention in the opening seconds. Remaining
+    lines are the standard body captions, bottom-anchored above IG's UI band.
+    """
     max_text_width = width * 0.84
     stroke = max(2, round(height * 0.004))
-    font = ImageFont.truetype(font_file, font_size)
-    ascent, descent = font.getmetrics()
-    line_height = ascent + descent + round(font_size * 0.25)
+    body_size = max(20, round(height * BODY_FONT_FRACTION))
+    hook_size = max(24, round(height * HOOK_FONT_FRACTION))
+    body_font = ImageFont.truetype(font_file, body_size)
+    hook_font = ImageFont.truetype(font_file, hook_size)
+    bottom_margin = round(height * CAPTION_BOTTOM_MARGIN_FRACTION)
 
     captions: list[tuple[Path, float, float]] = []
-    for index, (start, end, text) in enumerate(timings, start=1):
+    for index, (start, end, text) in enumerate(timings):
+        is_hook = index == 0
+        font = hook_font if is_hook else body_font
+        line_height = _line_height(font, hook_size if is_hook else body_size)
         rows = _wrap(text, font, max_text_width)
-        image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
         block_height = line_height * len(rows)
-        y = height - margin_v - block_height
-        for row in rows:
-            x = (width - font.getlength(row)) / 2
-            draw.text(
-                (x, y), row, font=font, fill=(255, 255, 255, 255),
-                stroke_width=stroke, stroke_fill=(0, 0, 0, 235),
-            )
-            y += line_height
-        png = work_dir / f"caption_{index}.png"
+        if is_hook:
+            top_y = round(height * HOOK_CENTER_FRACTION - block_height / 2)
+        else:
+            top_y = height - bottom_margin - block_height
+        image = _draw_caption(
+            width, height, rows, font, top_y, line_height, stroke
+        )
+        png = work_dir / f"caption_{index + 1}.png"
         image.save(png)
         captions.append((png, start, end))
     return captions
@@ -357,15 +416,19 @@ def _render(
     badge: tuple[Path, int, int] | None,
     delogo: tuple[int, int, int, int] | None, out_dir: Path,
     final_path: Path, bg_volume: float, voice_dur: float, video_dur: float,
-    has_audio: bool,
+    has_audio: bool, scale_to: tuple[int, int] | None = None,
 ) -> bool:
-    """Composite delogo + badge + captions + audio; return if padded.
+    """Composite delogo + scale + badge + captions + audio; return if padded.
 
     ``voice_path`` None means no narration: original audio is kept and no
     captions are burned (caption timing comes from the voiceover). ``badge``
     is an optional ``(path, x, y)`` brand mark overlaid full-duration on top.
     ``delogo`` is an optional ``(x, y, w, h)`` region blurred away first (to
-    erase the Flow/Veo watermark before the brand mark covers it).
+    erase the Flow/Veo watermark before the brand mark covers it); its
+    coordinates are in source pixels, so the blur and the badge overlay both
+    run before ``scale_to``. ``scale_to`` is an optional ``(w, h)`` the base
+    frame is scaled to (after delogo + badge) so captions — rendered at the
+    final resolution — composite crisply on top.
     """
     inputs = ["-i", str(source)]
     index = 1
@@ -391,6 +454,17 @@ def _render(
         dx, dy, dw, dh = delogo
         vparts.append(f"{current}delogo=x={dx}:y={dy}:w={dw}:h={dh}[vdl]")
         current = "[vdl]"
+    # The badge covers the delogo'd Flow watermark, so its coordinates are in
+    # SOURCE pixels — overlay it before scaling so it stays aligned. Captions,
+    # by contrast, are rendered at the final resolution and overlaid after.
+    if badge_idx is not None:
+        bx, by = badge[1], badge[2]
+        vparts.append(f"{current}[{badge_idx}:v]overlay={bx}:{by}[vbdg]")
+        current = "[vbdg]"
+    if scale_to is not None:
+        sw, sh = scale_to
+        vparts.append(f"{current}scale={sw}:{sh}:flags=lanczos[vsc]")
+        current = "[vsc]"
     if padded:
         vparts.append(
             f"{current}tpad=stop_mode=clone:"
@@ -398,11 +472,7 @@ def _render(
         )
         current = "[vbase]"
 
-    overlays = []
-    if badge_idx is not None:
-        bx, by = badge[1], badge[2]
-        overlays.append((f"[{badge_idx}:v]", f"overlay={bx}:{by}"))
-    overlays += [
+    overlays = [
         (f"[{caption_idx0 + i}:v]",
          f"overlay=eof_action=repeat:enable='between(t,{s:.3f},{e:.3f})'")
         for i, (_png, s, e) in enumerate(captions)
@@ -540,11 +610,22 @@ def cmd_build(args: argparse.Namespace) -> int:
     width, height = _ffprobe_dimensions(source)
     video_dur = _ffprobe_duration(source)
     has_audio = _has_audio_stream(source)
+    render_width, render_height = _target_dimensions(
+        width, height, args.target_height
+    )
+    scale_to = (
+        (render_width, render_height)
+        if (render_width, render_height) != (width, height)
+        else None
+    )
+    # Badge coords are source-space (they cover the Flow watermark before
+    # scaling); captions are rendered at the final scaled resolution.
     badge = _resolve_badge(args, width, height)
     delogo = _parse_delogo(args.delogo)
     logger.info(
-        "source %dx%d, %.2fs, audio=%s, badge=%s, delogo=%s",
-        width, height, video_dur, has_audio, bool(badge), bool(delogo),
+        "source %dx%d -> output %dx%d, %.2fs, audio=%s, badge=%s, delogo=%s",
+        width, height, render_width, render_height, video_dur, has_audio,
+        bool(badge), bool(delogo),
     )
     final_path = out_dir / "final.mp4"
 
@@ -552,7 +633,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         logger.info("no-voice: branding + original audio only")
         _render(
             source, None, [], badge, delogo, out_dir, final_path,
-            args.bg_volume, 0.0, video_dur, has_audio,
+            args.bg_volume, 0.0, video_dur, has_audio, scale_to,
         )
         logger.info("done: %s (%.2fs)", final_path, video_dur)
         return 0
@@ -573,12 +654,12 @@ def cmd_build(args: argparse.Namespace) -> int:
     logger.info("voiceover: %.2fs", voice_dur)
 
     captions = _render_caption_pngs(
-        timings, width, height, args.font, work_dir
+        timings, render_width, render_height, args.font, work_dir
     )
 
     padded = _render(
         source, voice_path, captions, badge, delogo, out_dir, final_path,
-        args.bg_volume, voice_dur, video_dur, has_audio,
+        args.bg_volume, voice_dur, video_dur, has_audio, scale_to,
     )
 
     shutil.rmtree(work_dir, ignore_errors=True)
@@ -636,6 +717,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--font", default=DEFAULT_FONT,
         help=f"Caption font file path (default: {DEFAULT_FONT})"
+    )
+    parser.add_argument(
+        "--target-height", type=int, default=DEFAULT_TARGET_HEIGHT,
+        help="Scale output to this height (9:16 width kept), flooring IG "
+        f"quality at 1080p (default: {DEFAULT_TARGET_HEIGHT}; 0 = keep source)"
     )
     parser.add_argument(
         "--bg-volume", type=float, default=DEFAULT_BG_VOLUME,
