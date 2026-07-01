@@ -1,9 +1,17 @@
 name: Deploy Landing
 
 # Landing is a static marketing site deployed independently of the app /
-# backend / DB pipeline (see deploy.yml). Manual trigger only.
+# backend / DB pipeline (see deploy.yml).
+#
+# The daily-story share pages (/[locale]/story/[date]) are statically
+# generated at build time from Supabase, so the site must be rebuilt after a
+# new story is published or that day's shared link 404s. `schedule` rebuilds
+# every 3 hours (UTC) as a freshness baseline; trigger `workflow_dispatch`
+# manually right after publishing for an immediate refresh.
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 */3 * * *"
 
 jobs:
   deploy-landing:
