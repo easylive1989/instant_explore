@@ -49,11 +49,54 @@ def test_build_caption_from_story_row(mocker):
             "image_attribution": None,
         },
     )
+    mocker.patch.object(publish_reel, "_read_narration", return_value=None)
     result = publish_reel._build_caption(
         supabase=object(), config=config, date_str="2026-06-22", override=None
     )
     assert "Alhambra" in result
     assert "#Spain" in result
+
+
+def test_build_caption_leads_with_narration_hook(mocker):
+    config = SimpleNamespace(
+        brand_handle_ig="@love.lorescape", cta_text="Explore."
+    )
+    mocker.patch.object(
+        publish_reel,
+        "_load_story_row",
+        return_value={
+            "place_name": "Alhambra",
+            "era": "13th century",
+            "story": "A Moorish palace tale.",
+            "hashtags": ["Spain"],
+            "image_attribution": None,
+        },
+    )
+    mocker.patch.object(
+        publish_reel,
+        "_read_narration",
+        return_value="這座宮殿藏著什麼秘密？\n第二行不該當鉤子。",
+    )
+    result = publish_reel._build_caption(
+        supabase=object(), config=config, date_str="2026-06-22", override=None
+    )
+    assert result.startswith("這座宮殿藏著什麼秘密？")
+
+
+def test_narration_hook_returns_first_nonblank_line(tmp_path, monkeypatch):
+    day_dir = tmp_path / "2026-06-22"
+    day_dir.mkdir()
+    (day_dir / "narration.txt").write_text(
+        "\n第一句鉤子。\n第二句。\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+
+    assert publish_reel._narration_hook("2026-06-22") == "第一句鉤子。"
+
+
+def test_narration_hook_none_when_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+    assert publish_reel._narration_hook("2026-06-22") is None
 
 
 def test_build_caption_falls_back_to_narration(mocker):

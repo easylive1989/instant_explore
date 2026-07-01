@@ -10,7 +10,7 @@ from lorescape_backend.shared.genai import (
     GenaiSettings,
 )
 
-_DEFAULT_CTA_TEXT = "Explore more places with Lorescape."
+_DEFAULT_CTA_TEXT = "你會想造訪哪一座？留言告訴我 👇 喜歡的話，記得收藏這篇。"
 
 
 @dataclass(frozen=True)

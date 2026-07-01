@@ -396,6 +396,13 @@ card). Put **one caption line per row** in:
 outputs/daily_video/{date}/narration.txt
 ```
 
+**The first line is the hook** — it renders as a large, upper-centre title
+in the opening seconds (not a bottom caption) and doubles as the IG
+caption's first line. Make it a curiosity gap: a question or a striking
+reversal that withholds the answer (e.g. 「這座教堂，為什麼被一道牆一分為
+二？」), and let the second line pay it off. A flat statement wastes the
+hook slot.
+
 Show it to the user for a quick confirm / tweak before rendering. Each row
 becomes one on-screen caption shown only while that line is spoken.
 
@@ -409,9 +416,17 @@ cd scripts && uv run python -m daily_video_post --date {date} \
 cd scripts && uv run python -m daily_video_post --date {date}
 ```
 
-Standing choices baked into the defaults: zh-TW, full burned-in captions
-(white text + black outline, bottom third), and the master's ambient audio
-kept but ducked to ~28% under the voiceover. Two TTS engines:
+Standing choices baked into the defaults: zh-TW; the output is scaled to
+**1080×1920** (IG serves ≥1080p through a better encode — pass
+`--target-height 0` to keep the source size); burned-in captions are white
+text + black outline, with the **first line as a large upper-centre hook**
+and the rest kept in the lower **safe zone above IG's UI band** (bottom
+~20% / right ~13%); and the master's ambient audio is kept but ducked to
+~28% under the voiceover; and a short fade from/to black at the clip edges
+(≈0.3s, `--no-fade` to disable) so a looping reel has a clean boundary. A
+slow Ken Burns zoom is available via `--ken-burns` but **off by default** —
+the Flow master usually already has camera motion, so only reach for it on
+static footage. Two TTS engines:
 
 - **`--engine gemini`** (preferred) — Gemini TTS via the backend's
   `GEMINI_API_KEY` / GenaiSettings; default voice `Kore` (warm female).
@@ -428,7 +443,8 @@ kept but ducked to ~28% under the voiceover. Two TTS engines:
   speaking rate (say only).
 
 Other overridable flags: `--bg-volume`, `--font`, `--input`,
-`--text`/`--line`.
+`--text`/`--line`, `--target-height` (0 keeps the source size),
+`--ken-burns`, `--no-fade`.
 
 **Watermark removal + brand lockup (`--delogo` + `--badge`).** Flow/Veo
 clips carry a visible Gemini diamond watermark. Erase it with

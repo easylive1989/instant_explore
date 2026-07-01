@@ -32,27 +32,37 @@ class StoryCopy:
     # Lead-image credit (author / licence / source). None when there is no
     # commercially usable image; omitted from the caption when absent.
     image_attribution: str | None = None
+    # Curiosity-gap opening line (the reel's spoken hook). When present it
+    # leads the caption so the preview shows the hook, not "place · era".
+    hook: str | None = None
 
 
 def build_full_caption(
     *, story: StoryCopy, brand_handle: str, cta_text: str
 ) -> str:
-    """Build the full IG caption (header + body + hashtags + CTA + credit).
+    """Build the full IG caption (hook + header + body + tags + CTA + credit).
 
-    Truncates only the body to keep the result under IG's 2200-char limit.
-    A photo credit line is appended when the story has an image attribution.
+    When the story carries a ``hook`` it leads the caption so the preview
+    shows the curiosity gap; otherwise the header (``place · era``) leads,
+    preserving the original layout. Truncates only the body to keep the
+    result under IG's 2200-char limit. A photo credit line is appended when
+    the story has an image attribution.
     """
+    lead = story.hook.strip() if story.hook else ""
     header = _header(story)
     tags = _format_tags(BRAND_TAGS + story.hashtags)
     footer = _footer(cta_text=cta_text, brand_handle=brand_handle)
     credit = _photo_credit(story.image_attribution)
 
-    fixed = "\n\n".join(p for p in (header, "", tags, footer, credit) if p)
-    body_budget = _IG_HARD_LIMIT - len(fixed) - 2  # account for separators
+    non_body = [p for p in (lead, header, tags, footer, credit) if p]
+    # Budget for the body: hard limit minus every other block, minus a small
+    # margin for the "\n\n" separators the body itself adds.
+    body_budget = _IG_HARD_LIMIT - len("\n\n".join(non_body)) - 4
     body = story.story if len(story.story) <= body_budget else _truncate(
         story.story, body_budget
     )
-    return "\n\n".join(p for p in (header, body, tags, footer, credit) if p)
+    parts = [p for p in (lead, header, body, tags, footer, credit) if p]
+    return "\n\n".join(parts)
 
 
 def _photo_credit(attribution: str | None) -> str:
