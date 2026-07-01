@@ -84,3 +84,24 @@ export async function getDailyStory(
     return null;
   }
 }
+
+export type StorySlug = { locale: "zh" | "en"; date: string };
+
+/// Lists every published story as a {locale, date} slug for static
+/// generation. Reads only `publish_date` + `language` from `daily_stories`
+/// (anon; RLS limits to past dates). Throws on a query error so a broken
+/// build fails loudly instead of silently shipping zero pages.
+export async function getPublishedStorySlugs(): Promise<StorySlug[]> {
+  const client = getSupabaseClient();
+  const { data, error } = await client
+    .from("daily_stories")
+    .select("publish_date, language")
+    .order("publish_date", { ascending: false });
+  if (error) throw new Error(`Failed to list stories: ${error.message}`);
+  return ((data ?? []) as Array<{ publish_date: string; language: string }>).map(
+    (r) => ({
+      locale: r.language.startsWith("zh") ? "zh" : "en",
+      date: r.publish_date,
+    }),
+  );
+}

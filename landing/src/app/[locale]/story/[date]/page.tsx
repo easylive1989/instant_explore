@@ -2,10 +2,23 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isLocale, type Locale } from "@/i18n/config";
-import { getDailyStory, isValidStoryDate } from "@/lib/dailyStory";
+import {
+  getDailyStory,
+  isValidStoryDate,
+  getPublishedStorySlugs,
+} from "@/lib/dailyStory";
 import StoreButtons from "@/components/StoreButtons";
 
 type Params = { locale: string; date: string };
+
+// Static export: only pages listed here are generated; any other date 404s
+// on the static host (new stories appear after the next build + deploy).
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const slugs = await getPublishedStorySlugs();
+  return slugs.map((s) => ({ locale: s.locale, date: s.date }));
+}
 
 export async function generateMetadata({
   params,
