@@ -89,6 +89,12 @@ export interface Dict {
     ogTitle: string;
     ogDescription: string;
   };
+  story: {
+    eyebrow: string;
+    continueCta: string;
+    notFoundTitle: string;
+    notFoundBody: string;
+  };
 }
 
 const zh: Dict = {
@@ -214,6 +220,14 @@ const zh: Dict = {
     ogTitle: "Lorescape — 讓每一處風景，開口說它的故事",
     ogDescription: "AI 隨行的旅行說書人，為每一處風景備好屬於它的故事。",
   },
+  story: {
+    eyebrow: "來自 Lorescape 的每日故事",
+    continueCta: "想聽完整故事？下載 App，每天還有一則新的。",
+    notFoundTitle: "這則故事還在路上",
+    notFoundBody:
+      "我們找不到這一則故事，但每天都有一則新的在等你。下載 Lorescape，" +
+      "走到哪，就聽那裡的歷史故事。",
+  },
 };
 
 const en: Dict = {
@@ -338,6 +352,14 @@ const en: Dict = {
     keywords: ["AI tour guide", "travel storyteller", "local stories", "audio guide", "cultural travel", "Lorescape"],
     ogTitle: "Lorescape — Let every place tell its story",
     ogDescription: "Your AI travel storyteller, with a story ready for every place you visit.",
+  },
+  story: {
+    eyebrow: "A daily story from Lorescape",
+    continueCta: "Want the full story? Download the app — a new one every day.",
+    notFoundTitle: "This story is still on its way",
+    notFoundBody:
+      "We couldn't find this one, but there's a new story every day. " +
+      "Download Lorescape and hear the history of any place you visit.",
   },
 };
 
