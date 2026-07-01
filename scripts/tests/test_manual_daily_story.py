@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import dataclasses
+import subprocess
 from datetime import date
 from unittest.mock import MagicMock, patch
 
-from manual_daily_story import _send_for_ig_review
+from manual_daily_story import _send_for_ig_review, _trigger_landing_deploy
 
 _DATE = date(2026, 6, 18)
 
@@ -63,3 +64,33 @@ def test_best_effort_on_send_failure(fake_config, capsys):
     out = capsys.readouterr().out
     assert "IG review hand-off failed" in out
     assert "discord down" in out
+
+
+def test_trigger_landing_deploy_runs_gh_workflow(capsys):
+    with patch("manual_daily_story.subprocess.run") as run:
+        _trigger_landing_deploy()
+
+    run.assert_called_once_with(
+        ["gh", "workflow", "run", "deploy-landing.yml", "--ref", "master"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert "Triggered landing deploy" in capsys.readouterr().out
+
+
+def test_trigger_landing_deploy_skips_when_gh_missing(capsys):
+    with patch("manual_daily_story.subprocess.run", side_effect=FileNotFoundError):
+        _trigger_landing_deploy()  # must not raise
+
+    assert "gh CLI not found" in capsys.readouterr().out
+
+
+def test_trigger_landing_deploy_warns_on_failure(capsys):
+    error = subprocess.CalledProcessError(1, "gh", stderr="boom")
+    with patch("manual_daily_story.subprocess.run", side_effect=error):
+        _trigger_landing_deploy()  # must not raise
+
+    out = capsys.readouterr().out
+    assert "landing deploy trigger failed" in out
+    assert "boom" in out

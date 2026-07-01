@@ -34,6 +34,7 @@ import argparse
 import dataclasses
 import json
 import os
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
@@ -218,7 +219,38 @@ def cmd_publish(args: argparse.Namespace) -> int:
         .execute()
     ).data
     print(f"Verification — rows for {publish_date}: {rows}")
+
+    _trigger_landing_deploy()
     return 0
+
+
+def _trigger_landing_deploy() -> None:
+    """Rebuild the marketing site so the new story's web page goes live.
+
+    The `/story/<date>` share pages are statically generated at build time,
+    so a freshly published story 404s on lorescape.app until the landing is
+    redeployed. Fire the GitHub Actions "Deploy Landing" workflow via the gh
+    CLI. Non-fatal: the story is already published, so any failure here just
+    means the 3-hourly scheduled rebuild picks it up instead.
+    """
+    try:
+        subprocess.run(
+            ["gh", "workflow", "run", "deploy-landing.yml", "--ref", "master"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print("Triggered landing deploy (Deploy Landing workflow).")
+    except FileNotFoundError:
+        print(
+            "gh CLI not found — skipping landing deploy. Trigger manually: "
+            "gh workflow run deploy-landing.yml"
+        )
+    except subprocess.CalledProcessError as exc:
+        print(
+            f"Warning: landing deploy trigger failed ({exc.stderr.strip()}). "
+            "The 3-hourly schedule will rebuild it; or trigger manually."
+        )
 
 
 def _send_for_ig_review(config: Config, supabase, publish_date: date) -> None:
