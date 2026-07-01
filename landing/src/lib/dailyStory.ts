@@ -8,12 +8,13 @@ export type StoryTeaser = {
   hook: string;
   paragraphs: string[];
   imageUrl: string | null;
+  imageAttribution: string | null;
 };
 
 const COLUMNS =
   "publish_date, language, place_name, place_location, era, story, " +
-  "image_url, card_title, card_title_sub, card_paragraphs, " +
-  "card_pull_quote, card_pull_quote_attrib";
+  "image_url, image_attribution, card_title, card_title_sub, " +
+  "card_paragraphs, card_pull_quote, card_pull_quote_attrib";
 
 export function localeToLanguage(locale: "zh" | "en"): "zh-TW" | "en" {
   return locale === "zh" ? "zh-TW" : "en";
@@ -56,6 +57,10 @@ export function rowToTeaser(row: Record<string, unknown>): StoryTeaser {
     hook: str(row.card_pull_quote) || str(row.card_title_sub),
     paragraphs: firstParagraphs(row, 2),
     imageUrl: typeof row.image_url === "string" ? row.image_url : null,
+    imageAttribution:
+      typeof row.image_attribution === "string"
+        ? row.image_attribution
+        : null,
   };
 }
 

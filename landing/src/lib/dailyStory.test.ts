@@ -50,11 +50,13 @@ describe("rowToTeaser", () => {
       card_title_sub: "sub",
       card_paragraphs: ["p1", "p2", "p3"],
       card_pull_quote: "a hook",
+      image_attribution: "Photo by X, CC BY-SA 4.0",
     });
     expect(teaser.title).toBe("Ruin and rebirth");
     expect(teaser.hook).toBe("a hook");
     expect(teaser.paragraphs).toEqual(["p1", "p2"]);
     expect(teaser.imageUrl).toBe("https://x/cover.jpg");
+    expect(teaser.imageAttribution).toBe("Photo by X, CC BY-SA 4.0");
     expect(teaser.placeName).toBe("Colosseum");
   });
   it("falls back to place_name/card_title_sub when card fields are null", () => {
@@ -73,5 +75,6 @@ describe("rowToTeaser", () => {
     expect(teaser.hook).toBe("the sub hook");
     expect(teaser.paragraphs).toEqual(["only body"]);
     expect(teaser.imageUrl).toBeNull();
+    expect(teaser.imageAttribution).toBeNull();
   });
 });

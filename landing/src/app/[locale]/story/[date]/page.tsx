@@ -89,12 +89,19 @@ export default async function StoryPage({ params }: { params: Params }) {
   return (
     <main className="story-page">
       {story.imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          className="story-cover"
-          src={story.imageUrl}
-          alt={story.placeName}
-        />
+        <figure className="story-figure">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="story-cover"
+            src={story.imageUrl}
+            alt={story.placeName}
+          />
+          {story.imageAttribution && (
+            <figcaption className="story-cover-credit">
+              📷 {story.imageAttribution}
+            </figcaption>
+          )}
+        </figure>
       )}
       <p className="story-eyebrow">{d.story.eyebrow}</p>
       <p className="story-meta">

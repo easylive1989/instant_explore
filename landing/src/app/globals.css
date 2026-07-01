@@ -1340,6 +1340,9 @@
     margin: 0 auto;
     padding: clamp(36px, 7vw, 80px) var(--gut) clamp(72px, 10vw, 120px);
   }
+  .story-figure {
+    margin: 0 0 clamp(28px, 4vw, 40px);
+  }
   .story-cover {
     width: 100%;
     aspect-ratio: 3 / 2;
@@ -1347,7 +1350,13 @@
     border-radius: 18px;
     border: 1px solid var(--line-strong);
     box-shadow: var(--e3);
-    margin-bottom: clamp(28px, 4vw, 40px);
+  }
+  .story-cover-credit {
+    font-family: var(--sans);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink-3);
+    margin: 10px 0 0;
   }
   .story-eyebrow {
     font-family: var(--sans);
