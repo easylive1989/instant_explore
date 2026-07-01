@@ -55,6 +55,17 @@ def test_full_caption_under_ig_limit_when_story_is_huge():
     assert len(out) <= 2200
 
 
+def test_full_caption_leads_with_hook_when_present():
+    out = build_full_caption(
+        story=_story(hook="這座教堂為什麼被一分為二？"),
+        brand_handle="@love.lorescape",
+        cta_text="Explore more.",
+    )
+    assert out.startswith("這座教堂為什麼被一分為二？")
+    # The header still appears, just after the hook.
+    assert "Colosseum · 70-80 CE" in out
+
+
 def test_full_caption_includes_photo_credit_when_present():
     story = _story(
         image_attribution="Jane Doe / CC BY-SA 4.0 (via Wikimedia Commons)"

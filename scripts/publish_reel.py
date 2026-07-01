@@ -112,6 +112,18 @@ def _read_narration(date_str: str) -> str | None:
     return None
 
 
+def _narration_hook(date_str: str) -> str | None:
+    """Return the first narration line (the reel's spoken hook), or None."""
+    text = _read_narration(date_str)
+    if not text:
+        return None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped:
+            return stripped
+    return None
+
+
 def _build_caption(
     supabase, config, date_str: str, override: str | None
 ) -> str:
@@ -126,6 +138,7 @@ def _build_caption(
             story=row["story"],
             hashtags=tuple(row.get("hashtags") or ()),
             image_attribution=row.get("image_attribution"),
+            hook=_narration_hook(date_str),
         )
         return caption.build_full_caption(
             story=story_copy,
