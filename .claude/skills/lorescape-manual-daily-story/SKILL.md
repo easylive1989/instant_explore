@@ -422,7 +422,11 @@ Standing choices baked into the defaults: zh-TW; the output is scaled to
 text + black outline, with the **first line as a large upper-centre hook**
 and the rest kept in the lower **safe zone above IG's UI band** (bottom
 ~20% / right ~13%); and the master's ambient audio is kept but ducked to
-~28% under the voiceover. Two TTS engines:
+~28% under the voiceover; and a short fade from/to black at the clip edges
+(≈0.3s, `--no-fade` to disable) so a looping reel has a clean boundary. A
+slow Ken Burns zoom is available via `--ken-burns` but **off by default** —
+the Flow master usually already has camera motion, so only reach for it on
+static footage. Two TTS engines:
 
 - **`--engine gemini`** (preferred) — Gemini TTS via the backend's
   `GEMINI_API_KEY` / GenaiSettings; default voice `Kore` (warm female).
@@ -439,7 +443,8 @@ and the rest kept in the lower **safe zone above IG's UI band** (bottom
   speaking rate (say only).
 
 Other overridable flags: `--bg-volume`, `--font`, `--input`,
-`--text`/`--line`.
+`--text`/`--line`, `--target-height` (0 keeps the source size),
+`--ken-burns`, `--no-fade`.
 
 **Watermark removal + brand lockup (`--delogo` + `--badge`).** Flow/Veo
 clips carry a visible Gemini diamond watermark. Erase it with

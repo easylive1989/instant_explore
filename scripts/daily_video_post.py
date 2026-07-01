@@ -76,6 +76,13 @@ CAPTION_BOTTOM_MARGIN_FRACTION = 0.20
 HOOK_FONT_FRACTION = 0.060
 BODY_FONT_FRACTION = 0.045
 HOOK_CENTER_FRACTION = 0.40
+# Fade from/to black at the clip edges so a looping reel has a clean, calm
+# boundary on replay (a true seamless loop is impossible for distinct scenes
+# with burned-in captions). Ken Burns is opt-in: the Flow master already has
+# camera motion, so a slow zoom only helps genuinely static footage.
+DEFAULT_FADE_SECONDS = 0.3
+KEN_BURNS_MAX_ZOOM = 1.12
+KEN_BURNS_FPS = 30
 
 
 def _target_dimensions(
@@ -417,6 +424,8 @@ def _render(
     delogo: tuple[int, int, int, int] | None, out_dir: Path,
     final_path: Path, bg_volume: float, voice_dur: float, video_dur: float,
     has_audio: bool, scale_to: tuple[int, int] | None = None,
+    ken_burns: bool = False, fade_duration: float = 0.0,
+    out_size: tuple[int, int] | None = None,
 ) -> bool:
     """Composite delogo + scale + badge + captions + audio; return if padded.
 
@@ -428,7 +437,9 @@ def _render(
     coordinates are in source pixels, so the blur and the badge overlay both
     run before ``scale_to``. ``scale_to`` is an optional ``(w, h)`` the base
     frame is scaled to (after delogo + badge) so captions — rendered at the
-    final resolution — composite crisply on top.
+    final resolution — composite crisply on top. ``ken_burns`` applies a slow
+    zoom (using ``out_size``) to the scaled frame before captions. A non-zero
+    ``fade_duration`` fades video + audio from/to black at the clip edges.
     """
     inputs = ["-i", str(source)]
     index = 1
@@ -465,6 +476,22 @@ def _render(
         sw, sh = scale_to
         vparts.append(f"{current}scale={sw}:{sh}:flags=lanczos[vsc]")
         current = "[vsc]"
+    out_dur = voice_dur if padded else video_dur
+    # Ken Burns: a gentle continuous zoom over the moving portion, completing
+    # by video_dur so any padded tail freezes on the fully-zoomed frame.
+    if ken_burns and out_size is not None:
+        kw, kh = out_size
+        frames = max(1, round(video_dur * KEN_BURNS_FPS))
+        # Drive zoom off the output frame number ``on`` (linear ramp): the
+        # accumulating ``zoom+rate`` form silently fails to persist in some
+        # ffmpeg builds, leaving the clip un-zoomed.
+        rate = (KEN_BURNS_MAX_ZOOM - 1.0) / frames
+        vparts.append(
+            f"{current}zoompan=z='min(1+{rate:.6f}*on,{KEN_BURNS_MAX_ZOOM})':"
+            f"d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+            f"s={kw}x{kh}:fps={KEN_BURNS_FPS}[vkb]"
+        )
+        current = "[vkb]"
     if padded:
         vparts.append(
             f"{current}tpad=stop_mode=clone:"
@@ -478,9 +505,19 @@ def _render(
         for i, (_png, s, e) in enumerate(captions)
     ]
     for pos, (overlay_in, op) in enumerate(overlays):
-        label = "[v]" if pos == len(overlays) - 1 else f"[vo{pos}]"
+        label = f"[vo{pos}]"
         vparts.append(f"{current}{overlay_in}{op}{label}")
         current = label
+
+    fade_d = min(fade_duration, out_dur / 3) if fade_duration > 0 else 0.0
+    fade_out_start = max(0.0, out_dur - fade_d)
+    if fade_d > 0:
+        vparts.append(
+            f"{current}fade=t=in:st=0:d={fade_d:.3f}:color=black,"
+            f"fade=t=out:st={fade_out_start:.3f}:d={fade_d:.3f}:"
+            "color=black[v]"
+        )
+        current = "[v]"
     video_map = current if vparts else "0:v"
 
     aparts: list[str] = []
@@ -498,6 +535,13 @@ def _render(
         audio_map = "[a]"
     else:
         audio_map = "0:a" if has_audio else None
+
+    if fade_d > 0 and audio_map is not None:
+        aparts.append(
+            f"{audio_map}afade=t=in:st=0:d={fade_d:.3f},"
+            f"afade=t=out:st={fade_out_start:.3f}:d={fade_d:.3f}[aout]"
+        )
+        audio_map = "[aout]"
 
     filter_complex = ";".join(vparts + aparts)
     cmd = ["ffmpeg", "-y", *inputs]
@@ -628,12 +672,15 @@ def cmd_build(args: argparse.Namespace) -> int:
         bool(badge), bool(delogo),
     )
     final_path = out_dir / "final.mp4"
+    out_size = (render_width, render_height)
+    fade_duration = 0.0 if args.no_fade else DEFAULT_FADE_SECONDS
 
     if args.no_voice:
         logger.info("no-voice: branding + original audio only")
         _render(
             source, None, [], badge, delogo, out_dir, final_path,
             args.bg_volume, 0.0, video_dur, has_audio, scale_to,
+            args.ken_burns, fade_duration, out_size,
         )
         logger.info("done: %s (%.2fs)", final_path, video_dur)
         return 0
@@ -660,6 +707,7 @@ def cmd_build(args: argparse.Namespace) -> int:
     padded = _render(
         source, voice_path, captions, badge, delogo, out_dir, final_path,
         args.bg_volume, voice_dur, video_dur, has_audio, scale_to,
+        args.ken_burns, fade_duration, out_size,
     )
 
     shutil.rmtree(work_dir, ignore_errors=True)
@@ -722,6 +770,16 @@ def main(argv: list[str]) -> int:
         "--target-height", type=int, default=DEFAULT_TARGET_HEIGHT,
         help="Scale output to this height (9:16 width kept), flooring IG "
         f"quality at 1080p (default: {DEFAULT_TARGET_HEIGHT}; 0 = keep source)"
+    )
+    parser.add_argument(
+        "--ken-burns", action="store_true",
+        help="Apply a slow Ken Burns zoom (for static footage; the Flow "
+        "master usually already has camera motion, so this is off by default)"
+    )
+    parser.add_argument(
+        "--no-fade", action="store_true",
+        help="Disable the fade from/to black at the clip edges (on by "
+        f"default, {DEFAULT_FADE_SECONDS}s, for a clean loop boundary)"
     )
     parser.add_argument(
         "--bg-volume", type=float, default=DEFAULT_BG_VOLUME,
