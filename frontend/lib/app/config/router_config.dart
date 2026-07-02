@@ -17,6 +17,7 @@ import 'package:context_app/features/trip/presentation/screens/trip_edit_screen.
 import 'package:context_app/features/trip/presentation/screens/trip_list_screen.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/presentation/screens/daily_story_detail_screen.dart';
+import 'package:context_app/features/daily_story/presentation/screens/story_deep_link_screen.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -127,6 +128,14 @@ class RouterConfig {
             final story = state.extra as DailyStory;
             return DailyStoryDetailScreen(story: story);
           },
+        ),
+        GoRoute(
+          path: '/:locale/story/:date',
+          name: 'story_deep_link',
+          builder: (context, state) => StoryDeepLinkScreen(
+            locale: state.pathParameters['locale']!,
+            date: state.pathParameters['date']!,
+          ),
         ),
         GoRoute(
           path: '/camera',
