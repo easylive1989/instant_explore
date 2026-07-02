@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "T9UXT366P9.com.paulchwu.instantexplore",
+        "paths": ["/zh/story/*", "/en/story/*"]
+      }
+    ]
+  }
+}
