@@ -177,9 +177,14 @@ void main() {
   group('SupabaseDailyStoryRepository.fetchByDate', () {
     test('given a row matching the language + publish_date, '
         'when fetchByDate is called, '
-        'then it maps the row into a DailyStory', () async {
+        'then it sends the matching filters and maps the row into a '
+        'DailyStory', () async {
       final row = _sampleRow(publishDate: '2026-07-01', language: 'zh-TW');
-      final client = _clientReturning([row]);
+      final client = _clientAssertingQuery(
+        rows: [row],
+        expectedLanguageFilter: 'eq.zh-TW',
+        expectedDateFilter: 'eq.2026-07-01',
+      );
       final repo = SupabaseDailyStoryRepository(client);
 
       final story = await repo.fetchByDate(
@@ -194,8 +199,12 @@ void main() {
 
     test('given no row matches the language + publish_date, '
         'when fetchByDate is called, '
-        'then it returns null', () async {
-      final client = _clientReturning(<Map<String, dynamic>>[]);
+        'then it sends the matching filters and returns null', () async {
+      final client = _clientAssertingQuery(
+        rows: <Map<String, dynamic>>[],
+        expectedLanguageFilter: 'eq.en',
+        expectedDateFilter: 'eq.2026-01-01',
+      );
       final repo = SupabaseDailyStoryRepository(client);
 
       final story = await repo.fetchByDate(
@@ -226,11 +235,21 @@ Map<String, dynamic> _sampleRow({
   };
 }
 
-/// A [SupabaseClient] whose HTTP layer always responds with [rows], so
-/// repository methods can be exercised end-to-end (query building, HTTP,
-/// JSON parsing) without a real network call.
-SupabaseClient _clientReturning(List<Map<String, dynamic>> rows) {
+/// A [SupabaseClient] used only by `fetchByDate` tests. Asserts that the
+/// outgoing PostgREST request actually carries the `language` and
+/// `publish_date` equality filters (e.g. `eq.zh-TW`, `eq.2026-07-01`)
+/// before responding with [rows], so a regression that swaps/drops a
+/// `.eq()` filter fails the test even though the canned response would
+/// otherwise still map correctly.
+SupabaseClient _clientAssertingQuery({
+  required List<Map<String, dynamic>> rows,
+  required String expectedLanguageFilter,
+  required String expectedDateFilter,
+}) {
   final mockHttpClient = MockClient((request) async {
+    final query = request.url.queryParameters;
+    expect(query['language'], expectedLanguageFilter);
+    expect(query['publish_date'], expectedDateFilter);
     return http.Response(
       jsonEncode(rows),
       200,
