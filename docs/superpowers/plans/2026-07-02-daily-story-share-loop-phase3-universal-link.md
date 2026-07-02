@@ -18,9 +18,9 @@
 - The AASA file (`apple-app-site-association`, no extension) must be served with `Content-Type: application/json` and over HTTPS with no redirect.
 - The loop already works after Phase 2; Phase 3 is an enhancement for installed users. Never break the web fallback.
 
-## Known value still required (USER-PROVIDED)
+## Known value (OBTAINED)
 
-- **Android Play App Signing SHA-256 fingerprint** — from Play Console → Test and release → Setup → App integrity → App signing key certificate (the *App signing key*, not the upload key, because Play re-signs). Format: colon-separated hex `AB:CD:...`. Placed in `assetlinks.json` (Task 1). Until provided, Task 1 uses the placeholder `REPLACE_WITH_PLAY_APP_SIGNING_SHA256`.
+- **Android Play App Signing SHA-256** = `61:F0:29:DC:66:95:EC:DD:71:52:97:DA:F4:CB:7E:A1:2D:AB:19:A1:E9:EE:8F:0D:C0:74:95:C6:F0:AF:D5:B1` (read from Play Console → App signing key certificate, the key Google re-signs with — correct for App Links). Baked into `assetlinks.json` in Task 1.
 
 ---
 
@@ -61,7 +61,7 @@ Replace the fingerprint placeholder with the real Play App Signing SHA-256 befor
     "target": {
       "namespace": "android_app",
       "package_name": "com.paulchwu.instantexplore",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_PLAY_APP_SIGNING_SHA256"]
+      "sha256_cert_fingerprints": ["61:F0:29:DC:66:95:EC:DD:71:52:97:DA:F4:CB:7E:A1:2D:AB:19:A1:E9:EE:8F:0D:C0:74:95:C6:F0:AF:D5:B1"]
     }
   }
 ]
