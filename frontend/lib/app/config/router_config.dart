@@ -18,6 +18,7 @@ import 'package:context_app/features/trip/presentation/screens/trip_list_screen.
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/presentation/screens/daily_story_detail_screen.dart';
 import 'package:context_app/features/daily_story/presentation/screens/story_deep_link_screen.dart';
+import 'package:context_app/shared/widgets/redirect_to_home.dart';
 
 class RouterConfig {
   RouterConfig._();
@@ -179,8 +180,9 @@ class RouterConfig {
           },
         ),
       ],
-      errorBuilder: (context, state) =>
-          Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
+      // A URL that matches no route (e.g. a malformed deep link like
+      // `/zh/storybook`) redirects home instead of an error page.
+      errorBuilder: (context, state) => const RedirectToHome(),
     );
   }
 }
