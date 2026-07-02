@@ -46,6 +46,25 @@ class InMemoryDailyStoryRepository implements DailyStoryRepository {
     return matching.take(limit).toList();
   }
 
+  @override
+  Future<DailyStory?> fetchByDate({
+    required String language,
+    required DateTime date,
+  }) async {
+    _maybeThrow();
+    try {
+      return _stories.firstWhere(
+        (s) =>
+            s.language == language &&
+            s.publishDate.year == date.year &&
+            s.publishDate.month == date.month &&
+            s.publishDate.day == date.day,
+      );
+    } on StateError {
+      return null;
+    }
+  }
+
   void _maybeThrow() {
     final err = errorOnNextCall;
     if (err != null) {

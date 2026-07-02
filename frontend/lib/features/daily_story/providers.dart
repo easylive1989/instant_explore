@@ -65,6 +65,17 @@ final dailyStoryHistoryByLanguageProvider =
       return repo.fetchHistory(language: language, before: before, limit: 30);
     });
 
+/// The daily story published on a specific [date] in a DB [language]
+/// string (e.g. `'zh-TW'`). Backs the `/story/:date` deep link.
+final dailyStoryByDateProvider =
+    FutureProvider.family<DailyStory?, ({String language, DateTime date})>((
+      ref,
+      key,
+    ) async {
+      final repo = ref.watch(dailyStoryRepositoryProvider);
+      return repo.fetchByDate(language: key.language, date: key.date);
+    });
+
 DateTime _startOfToday() {
   final now = DateTime.now();
   return DateTime(now.year, now.month, now.day);

@@ -1,10 +1,22 @@
+import 'dart:convert';
+
 import 'package:context_app/features/daily_story/data/supabase_daily_story_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // `rowToStory` is a public static helper used by the repository to convert
 // joined Supabase rows into DailyStory objects. Testing it directly proves
 // that the row parser handles all the field shapes correctly (full / sparse
 // card fields, partial place join, etc.) without spinning up a real client.
+//
+// `fetchByDate` additionally needs coverage of the HTTP round-trip (query
+// params -> response -> row mapping / empty-to-null branch). Rather than
+// mocking Supabase's internal query-builder chain (not done anywhere else in
+// this codebase), we inject a `SupabaseClient` backed by a `MockClient` from
+// `package:http/testing.dart` so the request never touches the network but
+// the real query-building and parsing code still runs.
 
 void main() {
   group('SupabaseDailyStoryRepository.rowToStory', () {
@@ -161,4 +173,74 @@ void main() {
       expect(story.wikidataId, isNull);
     });
   });
+
+  group('SupabaseDailyStoryRepository.fetchByDate', () {
+    test('given a row matching the language + publish_date, '
+        'when fetchByDate is called, '
+        'then it maps the row into a DailyStory', () async {
+      final row = _sampleRow(publishDate: '2026-07-01', language: 'zh-TW');
+      final client = _clientReturning([row]);
+      final repo = SupabaseDailyStoryRepository(client);
+
+      final story = await repo.fetchByDate(
+        language: 'zh-TW',
+        date: DateTime(2026, 7, 1),
+      );
+
+      expect(story, isNotNull);
+      expect(story!.publishDate, DateTime(2026, 7, 1));
+      expect(story.language, 'zh-TW');
+    });
+
+    test('given no row matches the language + publish_date, '
+        'when fetchByDate is called, '
+        'then it returns null', () async {
+      final client = _clientReturning(<Map<String, dynamic>>[]);
+      final repo = SupabaseDailyStoryRepository(client);
+
+      final story = await repo.fetchByDate(
+        language: 'en',
+        date: DateTime(2026, 1, 1),
+      );
+
+      expect(story, isNull);
+    });
+  });
+}
+
+/// A minimal row shape that satisfies [SupabaseDailyStoryRepository
+/// .rowToStory] (no card fields / place join needed for these tests).
+Map<String, dynamic> _sampleRow({
+  required String publishDate,
+  required String language,
+}) {
+  return <String, dynamic>{
+    'publish_date': publishDate,
+    'language': language,
+    'place_name': '羅馬競技場',
+    'place_location': '義大利羅馬',
+    'era': '公元 70-80 年',
+    'story': 'x',
+    'image_url': null,
+    'wikipedia_url': 'https://zh.wikipedia.org/wiki/Colosseum',
+  };
+}
+
+/// A [SupabaseClient] whose HTTP layer always responds with [rows], so
+/// repository methods can be exercised end-to-end (query building, HTTP,
+/// JSON parsing) without a real network call.
+SupabaseClient _clientReturning(List<Map<String, dynamic>> rows) {
+  final mockHttpClient = MockClient((request) async {
+    return http.Response(
+      jsonEncode(rows),
+      200,
+      request: request,
+      headers: {'content-type': 'application/json'},
+    );
+  });
+  return SupabaseClient(
+    'https://example.supabase.co',
+    'anon-key',
+    httpClient: mockHttpClient,
+  );
 }

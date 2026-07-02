@@ -17,4 +17,12 @@ abstract class DailyStoryRepository {
     required DateTime before,
     int limit = 30,
   });
+
+  /// Returns the story published on [date] in [language], or `null` if none
+  /// exists (or the date is future-dated and hidden by RLS). Used by the
+  /// `/story/:date` deep link to open a specific day's story.
+  Future<DailyStory?> fetchByDate({
+    required String language,
+    required DateTime date,
+  });
 }

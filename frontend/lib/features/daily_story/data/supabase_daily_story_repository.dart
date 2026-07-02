@@ -43,6 +43,21 @@ class SupabaseDailyStoryRepository implements DailyStoryRepository {
     return rows.map(rowToStory).toList();
   }
 
+  @override
+  Future<DailyStory?> fetchByDate({
+    required String language,
+    required DateTime date,
+  }) async {
+    final rows = await _client
+        .from(_table)
+        .select(_select)
+        .eq('language', language)
+        .eq('publish_date', _isoDate(date))
+        .limit(1);
+    if (rows.isEmpty) return null;
+    return rowToStory(rows.first);
+  }
+
   /// Public for testability. Parses a single row (possibly with the
   /// `daily_story_places` join expanded) into a [DailyStory].
   static DailyStory rowToStory(Map<String, dynamic> row) {
