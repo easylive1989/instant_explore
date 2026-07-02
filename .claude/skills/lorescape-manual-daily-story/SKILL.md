@@ -239,7 +239,9 @@ candidates to `outputs/daily_image/{date}/`. Then:
    anything loosely related — generic textures, unrelated cities, stock
    scenes, abstract moods. It is better to keep two true shots than ten
    tangential ones.
-3. **Cover image:** if 5a gave a Wikipedia lead, keep it as the cover.
+3. **Cover image:** if 5a gave a Wikipedia lead, keep it as the cover
+   (then set `image_attribution` per [5d](#5d--cover-licensing-by-and-sa-set-once-in-image_attribution)
+   — a CC BY-SA lead needs a **BY + SA** line, not attribution alone).
    Otherwise pick the single best landscape place photo and patch the
    draft:
    - `image_url` → that photo's `url`
@@ -272,6 +274,38 @@ no usable place photo was found, and the options:
 
 Never silently switch places, publish with a NULL cover, or pad the pool
 with loosely-related images.
+
+### 5d — Cover licensing: BY **and** SA (set once in `image_attribution`)
+
+Both the carousel caption and the reel caption build their credit line from
+the draft's `image_attribution` (via `social.caption._photo_credit`). Set it
+correctly **once** and both posts stay compliant — no `--caption` override
+needed.
+
+- **Unsplash / CC0 / public-domain cover** → no ShareAlike; attribution not
+  legally required. A plain courtesy credit is enough:
+  `"<photographer> / Unsplash"`.
+- **CC BY / CC BY-SA cover (e.g. a Wikipedia lead image)** → the IG card
+  composites text + tint onto the photo, so the card is an **adaptation**.
+  You must (a) attribute author + licence + source (**BY**), and for
+  **BY-SA** also (b) release the adapted **cover** under the same CC BY-SA
+  version and (c) note it was modified (**SA**). Attribution-only is NOT
+  enough for BY-SA. Extend `image_attribution` to carry the SA line, e.g.:
+
+  ```
+  封面圖：<author> / CC BY-SA <ver> (via Wikimedia Commons)｜本封面為改作，同依 CC BY-SA <ver> 釋出，歡迎在相同條款下轉載、改作。
+  ```
+
+  Match `<ver>` to the actual image (2.0 / 3.0 / 4.0 — read it off
+  `lead.attribution`, don't hard-code). **Scope the SA to the cover only** —
+  do NOT declare the AI video itself CC BY-SA; the video is generated from
+  the Unsplash place photo, which carries no ShareAlike, so over-releasing it
+  gives away rights for nothing. **Don't emphasise "AI-generated"** in the
+  licence line — it isn't required for CC compliance.
+- **Prefer a non-CC-BY-SA cover when you can.** If a genuine Unsplash / CC0
+  place photo exists, using it as the cover sidesteps the SA obligation
+  entirely (no licence block needed). Reach for a CC BY-SA Wikipedia lead as
+  cover only when Unsplash has no genuine shot.
 
 ## Google Flow reel (after publish)
 
@@ -498,6 +532,7 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 | Unsplash | ALWAYS runs; queries anchored on the place name; keep only genuine place shots |
 | Image pool | Wikipedia lead (if any) + kept Unsplash shots → cover + video reference |
 | Cover chain | Wikipedia commercial lead → best Unsplash place shot → ask user → switch place (never NULL at publish) |
+| Cover licensing | Set `image_attribution` per [5d](#5d--cover-licensing-by-and-sa-set-once-in-image_attribution): Unsplash/CC0 = courtesy credit; **CC BY-SA lead = BY + SA line** (release cover under same version, note modified, scope SA to cover only, don't hype "AI"). One field feeds both carousel + reel captions |
 | Unsplash key | `UNSPLASH_ACCESS_KEY` in `backend/.env` (free demo, 50 req/hr) |
 | Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
@@ -528,6 +563,11 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 - **Resolve the cover before review.** A NULL `image_url` reaches
   `publish`, blocks the IG card, and skips the Discord review — the
   story goes live in the App with no cover.
+- **A CC BY-SA cover needs SA, not just BY** (see [5d](#5d--cover-licensing-by-and-sa-set-once-in-image_attribution)).
+  A Wikipedia lead image composited into the IG card is an *adaptation* —
+  attribution alone leaves the ShareAlike clause unmet. Put the BY+SA line
+  in `image_attribution` so both the carousel and reel captions carry it.
+  Prefer an Unsplash/CC0 cover to avoid the obligation entirely.
 - **Don't publish an unreviewed draft.** Rewriting takes seconds; an
   unreviewed story going live in the App does not. Get an explicit
   "可以/通過/發布" first.

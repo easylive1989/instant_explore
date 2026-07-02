@@ -27,6 +27,15 @@ description: Use when the user wants to manually publish a specific day's finish
    把 caption 念給使用者確認。caption 來源優先序：`--caption` 覆寫 →
    Supabase 當天 zh-TW daily story → 該天 `narration.txt`。
 
+   **確認授權（BY + SA）**：caption 結尾的 `📷` 署名來自故事的
+   `image_attribution`。若封面是 **CC BY-SA**（如維基百科主圖），只有署名
+   還不夠——那張圖疊字後的封面是「改作」，SA 條款要求同時宣告封面依相同
+   CC BY-SA 版本釋出並註明改作。正確做法是把 BY+SA 寫進故事的
+   `image_attribution`（見 lorescape-manual-daily-story 的 §5d），讓輪播與
+   reel 兩邊 caption 自動帶到；臨時發布可用 `--caption` 覆寫補上，例如：
+   `📷 封面圖：<作者> / CC BY-SA <版本> (via Wikimedia Commons)｜本封面為改作，同依 CC BY-SA <版本> 釋出，歡迎在相同條款下轉載、改作。`
+   影片素材若來自 Unsplash 則無 SA 義務，SA 只鎖封面、且不需強調 AI 生成。
+
 3. 使用者確認後，正式發布：
 
    ```bash
