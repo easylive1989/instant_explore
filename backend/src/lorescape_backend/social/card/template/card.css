@@ -111,10 +111,13 @@ html, body {
   opacity: 0.5;
 }
 
-/* Coordinates — top-right */
+/* Coordinates — top-right.
+   `top: 150px` keeps it clear of the 135px band Instagram crops off the top
+   of a Reel cover in the profile grid (the cover is reused as the Reel grid
+   face), so the coordinates survive the 1:1 grid thumbnail. */
 .ls-coord {
   position: absolute;
-  top: 60px;
+  top: 150px;
   right: 60px;
   z-index: 3;
   text-align: right;
@@ -333,10 +336,13 @@ html, body {
    Carousel slide-specific styling
    ============================================================ */
 
-/* Cover — vermilion 朱印 seal carrying the single city glyph */
+/* Cover — vermilion 朱印 seal carrying the single city glyph.
+   `top: 150px` keeps the whole 92px seal below the 135px band Instagram
+   crops off the top of a Reel cover in the profile grid, so the place seal
+   is never clipped in the grid thumbnail. */
 .ls-seal {
   position: absolute;
-  top: 60px;
+  top: 150px;
   left: 56px;
   z-index: 3;
   width: 92px;
