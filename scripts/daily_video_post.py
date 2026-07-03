@@ -47,7 +47,7 @@ logger = logging.getLogger("daily_video_post")
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_SAY_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
-DEFAULT_GEMINI_VOICE = "Kore"  # Warm female prebuilt Gemini TTS voice.
+DEFAULT_GEMINI_VOICE = "Despina"  # Smooth female prebuilt Gemini TTS voice.
 GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
 # Natural-language style steer prepended to each line for Gemini TTS.
 DEFAULT_GEMINI_STYLE = "用溫暖、沉穩、語速稍快的紀錄片旁白語氣說："
