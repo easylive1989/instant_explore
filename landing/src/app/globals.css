@@ -117,16 +117,18 @@
   .brand .seal {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    background: var(--clay);
+    border-radius: 8px;
+    overflow: hidden;
     display: grid;
     place-items: center;
     flex: none;
     box-shadow: var(--e1);
   }
-  .brand .seal svg {
-    width: 18px;
-    height: 18px;
+  .brand .seal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .nav__links {
     display: flex;
@@ -1159,14 +1161,16 @@
   .foot__brand .seal {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    background: var(--clay);
+    border-radius: 8px;
+    overflow: hidden;
     display: grid;
     place-items: center;
   }
-  .foot__brand .seal svg {
-    width: 18px;
-    height: 18px;
+  .foot__brand .seal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .foot__tag {
     font-family: var(--serif);
