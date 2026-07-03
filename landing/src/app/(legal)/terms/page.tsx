@@ -32,7 +32,7 @@ export default function TermsPage() {
               Terms of Use
             </h1>
             <p className="text-sm uppercase tracking-widest text-ink-3">
-              Effective Date: 2026-04-23
+              Effective Date: 2026-07-03
             </p>
           </header>
 
@@ -233,7 +233,97 @@ export default function TermsPage() {
             jurisdiction requires otherwise.
           </p>
 
-          <h2>16. Contact</h2>
+          <h2>16. Apple App Store — Additional Terms</h2>
+          <p>
+            The following additional terms apply if you obtained the App from
+            the Apple App Store. They form part of, and are subject to, these
+            Terms. In the event of any conflict, these Apple-specific terms
+            control with respect to your use of the App obtained from the
+            Apple App Store.
+          </p>
+          <ul>
+            <li>
+              <strong>Acknowledgement</strong>: These Terms are concluded
+              between you and Lorescape only, and not with Apple Inc.
+              (&quot;Apple&quot;). Lorescape, not Apple, is solely responsible
+              for the App and its content. These Terms may not provide for
+              usage rules that conflict with the Apple Media Services Terms and
+              Conditions.
+            </li>
+            <li>
+              <strong>Scope of License</strong>: The license granted to you for
+              the App is limited to a non-transferable license to use the App
+              on any Apple-branded products that you own or control, and as
+              permitted by the Usage Rules set out in the Apple Media Services
+              Terms and Conditions.
+            </li>
+            <li>
+              <strong>Maintenance and Support</strong>: Lorescape is solely
+              responsible for providing any maintenance and support services
+              for the App, as required under applicable law. You and Lorescape
+              acknowledge that Apple has no obligation whatsoever to furnish any
+              maintenance and support services with respect to the App.
+            </li>
+            <li>
+              <strong>Warranty</strong>: Lorescape is solely responsible for any
+              product warranties, whether express or implied by law, to the
+              extent not effectively disclaimed. If the App fails to conform to
+              any applicable warranty, you may notify Apple, and Apple will
+              refund the purchase price (if any) for the App to you. To the
+              maximum extent permitted by applicable law, Apple will have no
+              other warranty obligation whatsoever with respect to the App, and
+              any other claims, losses, liabilities, damages, costs, or
+              expenses attributable to any failure to conform to any warranty
+              are the sole responsibility of Lorescape.
+            </li>
+            <li>
+              <strong>Product Claims</strong>: Lorescape, not Apple, is
+              responsible for addressing any claims by you or any third party
+              relating to the App or your possession and use of the App,
+              including but not limited to: (i) product liability claims; (ii)
+              any claim that the App fails to conform to any applicable legal or
+              regulatory requirement; and (iii) claims arising under consumer
+              protection, privacy, or similar legislation.
+            </li>
+            <li>
+              <strong>Intellectual Property Rights</strong>: In the event of any
+              third-party claim that the App, or your possession and use of the
+              App, infringes that third party&apos;s intellectual property
+              rights, Lorescape, not Apple, will be solely responsible for the
+              investigation, defense, settlement, and discharge of any such
+              intellectual property infringement claim.
+            </li>
+            <li>
+              <strong>Legal Compliance</strong>: You represent and warrant that
+              (i) you are not located in a country that is subject to a U.S.
+              Government embargo, or that has been designated by the U.S.
+              Government as a &quot;terrorist-supporting&quot; country; and (ii)
+              you are not listed on any U.S. Government list of prohibited or
+              restricted parties.
+            </li>
+            <li>
+              <strong>Developer Contact</strong>: Any questions, complaints, or
+              claims with respect to the App should be directed to Lorescape at{" "}
+              <a href="mailto:easylive1989@gmail.com">
+                easylive1989@gmail.com
+              </a>
+              .
+            </li>
+            <li>
+              <strong>Third-Party Terms</strong>: You must comply with any
+              applicable third-party terms of agreement when using the App.
+            </li>
+            <li>
+              <strong>Third-Party Beneficiary</strong>: You and Lorescape
+              acknowledge and agree that Apple, and Apple&apos;s subsidiaries,
+              are third-party beneficiaries of these Terms, and that, upon your
+              acceptance of these Terms, Apple will have the right (and will be
+              deemed to have accepted the right) to enforce these Terms against
+              you as a third-party beneficiary.
+            </li>
+          </ul>
+
+          <h2>17. Contact</h2>
           <p>If you have questions about these Terms, contact us at:</p>
           <ul>
             <li>
