@@ -39,7 +39,10 @@ _FIT_SCRIPT = """
 (opts) => {
   const plate = document.querySelector('.ls-text');
   if (!plate) return 1;
-  let fit = 1;
+  const initial = parseFloat(
+    getComputedStyle(plate).getPropertyValue('--fit'),
+  );
+  let fit = Number.isFinite(initial) ? initial : 1;
   let guard = 0;
   while (
     plate.scrollHeight > plate.clientHeight &&

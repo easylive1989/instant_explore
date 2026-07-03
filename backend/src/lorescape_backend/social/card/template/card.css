@@ -363,11 +363,15 @@ html, body {
 }
 
 /* Story page — full-height text plate. The content block is vertically
-   centered so short stories don't leave a lopsided gap at the bottom; the
-   `--fit` auto-shrink still protects against overflow when a story is long.
+   centered so short stories don't leave a lopsided gap at the bottom.
+   `--fit: 1.5` scales the type up for the standalone page (the 19.5px base
+   was tuned for the combined card's 590px lower slot; alone at 1350px it
+   reads tiny in the feed) — the renderer's auto-shrink starts from this
+   value and dials down when a story is long, so overflow stays impossible.
    The folio band is a seam decoration for the combined card, so it is hidden
    on the standalone story page. */
 .ls-card--story .ls-text {
+  --fit: 1.5;
   padding-top: 130px;
   padding-bottom: 130px;
   align-content: center;
