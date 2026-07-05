@@ -1,88 +1,56 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { PaperBackdrop } from "../components/PaperBackdrop";
 import { PhoneFrame } from "../components/PhoneFrame";
-import { PlayerMockup } from "../components/mockups/PlayerMockup";
+import { StoryOptionsMockup } from "../components/mockups/StoryOptionsMockup";
 import { SceneHeading } from "../components/SceneHeading";
-import { colors, fonts, paperGrain } from "../theme";
 import { usePortrait } from "../utils/layout";
-import { fadeIn, slideUp, popIn } from "../utils/animations";
-import { useVideoConfig } from "remotion";
+import { popIn } from "../utils/animations";
 
-const angles = [
-  { num: "01", title: "摧毀與重生的百年豪賭" },
-  { num: "02", title: "祭壇之下的神聖祕密" },
-  { num: "03", title: "文藝復興巨匠的接力賽" },
-];
-
-// Beat 3 (0–6s local): dark section — same landmark, many stories.
+// Beat 3 (0–6s local): same landmark, three ways to read it — the phone pops
+// in showing the story-options screen while the manifesto line lands beside it.
 export const AnglesScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const portrait = usePortrait();
 
-  const cards = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 540 }}>
-      {angles.map((a, i) => {
-        const p = popIn(frame, fps, 18 + i * 12);
-        const selected = i === 0 && frame > 70;
-        return (
-          <div
-            key={a.num}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 22,
-              padding: "22px 26px",
-              borderRadius: 18,
-              background: selected ? colors.clay : "rgba(247,241,230,0.06)",
-              border: `1px solid ${selected ? colors.clay : "rgba(247,241,230,0.14)"}`,
-              opacity: p,
-              transform: `translateX(${(1 - p) * 40}px)`,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: fonts.serif,
-                fontSize: 30,
-                fontWeight: 700,
-                color: selected ? colors.onDark : colors.clay,
-              }}
-            >
-              {a.num}
-            </span>
-            <span
-              style={{
-                fontFamily: fonts.serif,
-                fontSize: 28,
-                color: colors.onDark,
-              }}
-            >
-              {a.title}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
+  const entrance = popIn(frame, fps, 6);
 
   const phone = (
     <div
       style={{
-        opacity: fadeIn(frame, 60, 20),
-        transform: `translateY(${slideUp(frame, 60, 26, 60)}px)`,
+        opacity: entrance,
+        transform: `scale(${0.94 + entrance * 0.06})`,
       }}
     >
-      <PhoneFrame width={portrait ? 440 : 380} height={portrait ? 900 : 800}>
-        <PlayerMockup />
+      <PhoneFrame
+        width={portrait ? 440 : 380}
+        height={portrait ? 900 : 800}
+        statusDark
+      >
+        <StoryOptionsMockup />
       </PhoneFrame>
     </div>
   );
 
-  return (
-    <AbsoluteFill style={{ backgroundColor: colors.inkBg }}>
-      <AbsoluteFill
-        style={{ backgroundImage: paperGrain, backgroundSize: "22px 22px", opacity: 0.4 }}
+  const copy = (
+    <div style={{ maxWidth: 720 }}>
+      <SceneHeading
+        over="MANY ANGLES · 一書多章"
+        title={
+          <>
+            同一座教堂，
+            <br />
+            藏著三種讀法。
+          </>
+        }
+        startFrame={4}
       />
+    </div>
+  );
+
+  return (
+    <PaperBackdrop tone="sunk">
       <AbsoluteFill
         style={{
           flexDirection: portrait ? "column" : "row",
@@ -92,24 +60,9 @@ export const AnglesScene: React.FC = () => {
           padding: portrait ? "80px 60px" : "0 140px",
         }}
       >
-        <div>
-          <SceneHeading
-            over="Many Angles, One Place"
-            title={
-              <>
-                同一座地標，
-                <br />
-                不只一個故事
-              </>
-            }
-            startFrame={4}
-            onDark
-          />
-          <div style={{ height: 34 }} />
-          {cards}
-        </div>
+        {copy}
         {phone}
       </AbsoluteFill>
-    </AbsoluteFill>
+    </PaperBackdrop>
   );
 };
