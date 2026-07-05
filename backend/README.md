@@ -16,11 +16,14 @@ Gemini and serves them to the app, plus runs the daily-story / social pipeline.
     - `03:00` — reconcile subscriptions against RevenueCat
   - `publisher` container (`lorescape_backend.social.publisher_daemon`,
     same image):
-    - `21:00` — read the Discord ✅/❌ reactions and publish the carousel to IG
-    - `21:10` / `23:10` — publish the day's reel video from
-      `/opt/lorescape-media/daily_video/<date>/` (rsynced from the
-      operator's machine via `scripts/upload_reel_to_vps.sh`; idempotent
-      via the `social_posts` table)
+    - `21:00` — read the story review's ✅/❌ and publish the carousel to IG
+    - `21:10` / `23:10` — read the reel review's ✅/❌ (its own Discord
+      message, independent of the carousel's) and publish the day's reel
+      video from `/opt/lorescape-media/daily_video/<date>/`. The video +
+      review are submitted by `scripts/upload_reel_to_vps.sh` on the
+      operator's machine; state machine lives in the `social_posts` table
+      (pending → published/failed/rejected/skipped; still-unreacted at
+      23:10 → skipped)
 
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
 

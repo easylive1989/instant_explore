@@ -6,10 +6,12 @@ process, while the api container keeps only the generate and reconcile
 jobs. Daily jobs (Asia/Taipei):
 
     21:00 — carousel: read Discord reactions, publish the approved story
-    21:10 — reel: publish the day's video from DAILY_VIDEO_DIR
-    23:10 — reel retry: picks up a video uploaded after 21:10 (the reel
-            job is idempotent via the social_posts table, so re-running
-            after a successful publish is a no-op)
+    21:10 — reel: read the reel review message's reactions (independent
+            of the carousel review) and publish the day's video from
+            DAILY_VIDEO_DIR; an unreacted review stays pending
+    23:10 — reel final pass: publishes a late ✅ (or a late upload) and
+            marks a still-unreacted review as skipped; idempotent via
+            the social_posts table
 
 `DAILY_STORY_PUBLISH_ENABLED=0` pauses all three jobs (the process stays
 up so the container doesn't restart-loop).
@@ -59,6 +61,9 @@ def _register_jobs(scheduler, config: Config) -> None:
     def _reel() -> None:
         run_reel_publish_job(config, date.today())
 
+    def _reel_final() -> None:
+        run_reel_publish_job(config, date.today(), final_pass=True)
+
     scheduler.add_job(
         _carousel,
         trigger=CronTrigger(hour=CAROUSEL_HOUR, minute=CAROUSEL_MINUTE),
@@ -72,7 +77,7 @@ def _register_jobs(scheduler, config: Config) -> None:
         replace_existing=True,
     )
     scheduler.add_job(
-        _reel,
+        _reel_final,
         trigger=CronTrigger(hour=REEL_RETRY_HOUR, minute=REEL_RETRY_MINUTE),
         id=REEL_RETRY_JOB_ID,
         replace_existing=True,

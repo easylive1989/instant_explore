@@ -91,6 +91,9 @@ def test_reel_jobs_run_for_today(mock_run, fake_config):
         call.args[0]()
 
     assert mock_run.call_count == 2
-    for run_call in mock_run.call_args_list:
-        assert run_call.args[0] is fake_config
-        assert run_call.args[1] == date.today()
+    first, final = mock_run.call_args_list
+    assert first.args == (fake_config, date.today())
+    assert not first.kwargs.get("final_pass")
+    # The 23:10 pass marks a still-unreacted review as skipped.
+    assert final.args == (fake_config, date.today())
+    assert final.kwargs["final_pass"] is True

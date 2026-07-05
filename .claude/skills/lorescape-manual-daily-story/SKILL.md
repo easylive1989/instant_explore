@@ -211,20 +211,24 @@ step turns it into the IG Reels cut by adding a short zh-TW voiceover and
 full burned-in captions. See
 [IG Reels post-production](#ig-reels-post-production-subtitles--voiceover).
 
-### Step 11 — Upload to VPS for auto-publish
+### Step 11 — Upload to VPS + send for review
 
-Once `final.mp4` is confirmed, rsync it (plus `narration.txt`) to the VPS:
+Once `final.mp4` is confirmed, one command uploads AND submits for review:
 
 ```bash
 scripts/upload_reel_to_vps.sh {date}     # date 預設今天
 ```
 
-The `publisher` container on the VPS publishes it to IG Reels at **21:10**
-Asia/Taipei (retry at 23:10 for late uploads), but only after the day's
-story got the Discord ✅ (the 21:00 carousel job flips
-`review_state=published`, which gates the reel). Publish state is recorded
-in the `social_posts` table, so re-runs never double-post. If the upload
-misses 23:10 too, publish manually with the publish-reel skill.
+It rsyncs `final.mp4` + `narration.txt` to the VPS, then posts the video
+to the Discord review channel (✅/❌ seeded; >9.5MB videos are compressed
+to a 720p preview for review only). **The reel has its own review,
+independent of the carousel's** — remind the user to react ✅ on the
+*video* message. The `publisher` container publishes at **21:10**
+Asia/Taipei; an unreacted review gets one more chance at **23:10**, then
+is marked `skipped` (manual publish only after that). State lives in
+`social_posts` (media_type='reel'), so re-runs never double-post. A
+re-edited video can be re-submitted by re-running the same command — the
+review resets to pending with a fresh message.
 
 ## Image resolution
 
@@ -546,7 +550,8 @@ build supports them (`ffmpeg -filters | grep subtitles`).
 
 Then present `final.mp4` in chat — this is the IG Reels deliverable. After
 the user confirms it, run Step 11 (`scripts/upload_reel_to_vps.sh {date}`)
-so the VPS publishes it automatically at 21:10.
+to upload it and send it into its own Discord review; the VPS publishes
+automatically at 21:10 once the video message gets a ✅.
 
 ## Quick Reference
 
@@ -564,7 +569,7 @@ so the VPS publishes it automatically at 21:10.
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
 | Reel prompt output | `marketing/outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
 | IG Reels post-prod | After Flow + user downloads master to `marketing/outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Despina) is the default; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback (ElevenLabs removed — Western accent on zh) |
-| Reel auto-publish | `scripts/upload_reel_to_vps.sh {date}` rsyncs `final.mp4` + `narration.txt` to the VPS; the publisher container posts to IG Reels at 21:10 (retry 23:10) once the story's Discord ✅ landed. State in `social_posts`; manual fallback = publish-reel skill |
+| Reel auto-publish | `scripts/upload_reel_to_vps.sh {date}` rsyncs `final.mp4` + `narration.txt` to the VPS **and** posts the video to Discord for its own ✅/❌ review (independent of the carousel's). Publisher container publishes at 21:10; still-unreacted at 23:10 → `skipped`. State in `social_posts`; manual fallback = publish-reel skill |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
