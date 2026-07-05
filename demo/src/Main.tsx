@@ -45,7 +45,7 @@ export const Main: React.FC = () => {
       <Sequence from={690} durationInFrames={120}>
         <JournalScene />
       </Sequence>
-      <Sequence from={810} durationInFrames={120}>
+      <Sequence from={810} durationInFrames={90}>
         <CtaScene />
       </Sequence>
     </AbsoluteFill>
