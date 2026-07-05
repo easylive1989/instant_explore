@@ -1,15 +1,8 @@
 import React from "react";
 import { Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { colors, fonts } from "../../theme";
+import { colors, fonts, radius, categoryColors } from "../../theme";
 import { popIn } from "../../utils/animations";
-
-const nearby = [
-  { name: "台中朝聖宮", dist: "320 m", img: "images/temple.jpg" },
-  { name: "聖伯多祿大殿", dist: "1.2 km", img: "images/stpeters.jpg" },
-  { name: "中央公園步道", dist: "650 m", img: "images/park.jpg" },
-];
-
-const chips = ["自然景觀", "人文古蹟", "信仰聖地", "城市地標"];
+import { nearbyPlaces, exploreChips } from "../../data";
 
 // In-app "explore nearby" list: distance-sorted place cards + category chips.
 export const ExploreMockup: React.FC = () => {
@@ -30,7 +23,7 @@ export const ExploreMockup: React.FC = () => {
         附近值得停留
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, margin: "16px 0 24px" }}>
-        {chips.map((c, i) => (
+        {exploreChips.map((c, i) => (
           <span
             key={c}
             style={{
@@ -40,7 +33,7 @@ export const ExploreMockup: React.FC = () => {
               color: i === 0 ? colors.onDark : colors.clayDeep,
               background: i === 0 ? colors.clay : colors.clayTint,
               padding: "9px 18px",
-              borderRadius: 999,
+              borderRadius: radius.pill,
               opacity: popIn(frame, fps, 10 + i * 5),
             }}
           >
@@ -49,8 +42,9 @@ export const ExploreMockup: React.FC = () => {
         ))}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {nearby.map((n, i) => {
+        {nearbyPlaces.map((n, i) => {
           const p = popIn(frame, fps, 26 + i * 12);
+          const cat = categoryColors[n.cat];
           return (
             <div
               key={n.name}
@@ -59,7 +53,7 @@ export const ExploreMockup: React.FC = () => {
                 alignItems: "center",
                 gap: 18,
                 padding: 14,
-                borderRadius: 18,
+                borderRadius: radius.lg,
                 background: colors.paper,
                 border: `1px solid ${colors.line}`,
                 opacity: p,
@@ -69,14 +63,38 @@ export const ExploreMockup: React.FC = () => {
               <Img
                 src={staticFile(n.img)}
                 alt=""
-                style={{ width: 78, height: 78, borderRadius: 14, objectFit: "cover" }}
+                style={{ width: 78, height: 78, borderRadius: radius.img, objectFit: "cover", flex: "none" }}
               />
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: fonts.serif, fontSize: 26, color: colors.ink }}>
                   {n.name}
                 </div>
-                <div style={{ fontFamily: fonts.sans, fontSize: 18, color: colors.clay, marginTop: 4 }}>
-                  {n.dist}
+                <div
+                  style={{
+                    fontFamily: fonts.sans,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    color: colors.ink3,
+                    marginTop: 4,
+                  }}
+                >
+                  {n.latin}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: radius.pill,
+                      background: cat.ink,
+                      flex: "none",
+                    }}
+                  />
+                  <span style={{ fontFamily: fonts.sans, fontSize: 18, color: colors.clay }}>
+                    {n.dist}
+                  </span>
                 </div>
               </div>
             </div>
