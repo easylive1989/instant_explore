@@ -11,14 +11,16 @@
 
 ### 分鏡
 
-| Scene   | 時間     | 內容                                              |
-| ------- | -------- | ------------------------------------------------- |
-| Hook    | 0–5s     | 紙感手記開場，「抬起眼睛，世界本身就是展品。」     |
-| Story   | 5–11s    | 功能01 即時寫故事，聖伯多祿實景 + 打字故事         |
-| Angles  | 11–17s   | 功能02 同一地標多角度，深底播放器                 |
-| Explore | 17–22s   | 功能03 探索身邊，附近地點 + 主題 chips            |
-| Journal | 22–26s   | 功能04 旅程成冊，手記自動成篇                      |
-| CTA     | 26–30s   | 「城市是一本書。開始閱讀吧。」+ 商店徽章           |
+「城市是一本書」6 幕結構，開場與收尾都在同一片暗色 ink gradient 上呼應（頁子闔上又翻開的意象）。
+
+| Scene   | Frame 範圍 | 時間   | 內容                                                        |
+| ------- | ---------- | ------ | ------------------------------------------------------------- |
+| Hook    | 0–150      | 0–5s   | 暗色開場宣言，無 App UI：「抬起眼睛，世界本身就是一本書。」   |
+| Explore | 150–330    | 5–11s  | 地標登場：探索身邊清單 + 主題 chips（`ExploreMockup`）        |
+| Angles  | 330–510    | 11–17s | 一書多章：同一地標的三種故事角度選單（`StoryOptionsMockup`）  |
+| Reader  | 510–690    | 17–23s | 沉浸聆聽：聖伯多祿大殿故事全文閱讀器（`ReaderMockup`）        |
+| Journal | 690–810    | 23–27s | 旅程成冊：手記自動彙整成篇（`JournalMockup`）                 |
+| Cta     | 810–900    | 27–30s | 暗色收尾：「城市是一本書。開始閱讀吧。」+ 商店徽章             |
 
 ## 常用指令
 
@@ -52,40 +54,49 @@ npx remotion still LorescapeIntro out/frame.png --frame=90 --scale=0.5
 
 ```
 src/
-├── Root.tsx                  # Composition 註冊
-├── Main.tsx                  # 組合 5 個 Sequence + Audio
+├── Root.tsx                  # Composition 註冊（16:9 + 9:16 兩個 Composition）
+├── Main.tsx                  # 組合 6 個 Sequence（Scene 起訖 frame）+ Audio
+├── theme.ts                  # 顏色 / 字型 / 陰影等 design tokens（對齊 landing）
+├── data.ts                   # 全片文案與假資料（故事角度、附近地點、手記篇章…）
 ├── index.ts                  # registerRoot 入口
 ├── index.css                 # Tailwind import
 ├── scenes/
-│   ├── HookScene.tsx
-│   ├── IntroScene.tsx
-│   ├── NarrationScene.tsx
-│   ├── PassportScene.tsx
-│   └── CtaScene.tsx
+│   ├── HookScene.tsx         # 開場宣言
+│   ├── ExploreScene.tsx      # 地標登場
+│   ├── AnglesScene.tsx       # 一書多章
+│   ├── ReaderScene.tsx       # 沉浸聆聽
+│   ├── JournalScene.tsx      # 旅程成冊
+│   └── CtaScene.tsx          # CTA 收尾
 ├── components/
 │   ├── PhoneFrame.tsx        # iPhone 外框
 │   ├── Wordmark.tsx          # "Lorescape" 標準字
-│   ├── StoneTexture.tsx      # Hook 用石紋 + 金光 SVG
+│   ├── PaperBackdrop.tsx     # 紙感背景紋理
+│   ├── SceneHeading.tsx      # 共用 over-line + 標題排版
+│   ├── BrandSeal.tsx         # 品牌印章 / 標記
 │   ├── Waveform.tsx          # 聲紋動畫
 │   ├── StoreBadges.tsx       # App Store / Google Play 徽章
 │   └── mockups/
-│       ├── HomeMockup.tsx
-│       ├── PlayerMockup.tsx
-│       └── PassportMockup.tsx
+│       ├── ExploreMockup.tsx      # 探索身邊列表 UI
+│       ├── StoryOptionsMockup.tsx # 多角度故事選單 UI
+│       ├── ReaderMockup.tsx       # 故事閱讀器 UI
+│       └── JournalMockup.tsx      # 旅程手記 UI
 └── utils/
-    └── animations.ts         # 共用 easing / spring helpers
+    ├── animations.ts         # 共用 easing / spring helpers
+    └── layout.ts             # 直向 / 橫向 (usePortrait) 版面切換
 ```
 
 ## 客製化
 
-| 想改的內容             | 檔案位置                                  |
-| ---------------------- | ----------------------------------------- |
-| Hook 文案              | `src/scenes/HookScene.tsx` (`line1`, `line2`) |
-| 產品 slogan/tagline    | `src/scenes/IntroScene.tsx`, `CtaScene.tsx` |
-| 品牌主色 / 背景色      | 各 scene 內的 `radial-gradient` / Tailwind 類別 |
-| Store badge 連結資訊   | `src/components/StoreBadges.tsx`          |
-| 影片長度 / FPS         | `src/Root.tsx` 的 `<Composition />` props |
-| Scene 起訖時間         | `src/Main.tsx` 的 `<Sequence from=... durationInFrames=...>` |
+| 想改的內容                     | 檔案位置                                                      |
+| ------------------------------ | -------------------------------------------------------------- |
+| Hook 開場宣言文案               | `src/scenes/HookScene.tsx`（內嵌兩行文字）                     |
+| CTA 收尾標語                    | `src/scenes/CtaScene.tsx`（「城市是一本書。開始閱讀吧。」）    |
+| 各 Scene 的 over-line / 大標    | 各 scene 呼叫 `SceneHeading` 的 `over` / `title` props         |
+| 故事角度 / 完整故事 / 附近地點 / 手記篇章等假資料 | `src/data.ts`（`storyOptions`, `stPetersStory`, `nearbyPlaces`, `journalEntries`, `exploreChips`） |
+| 品牌色彩 / 字型 / 陰影 tokens   | `src/theme.ts`                                                 |
+| Store badge 連結資訊            | `src/components/StoreBadges.tsx`                               |
+| 影片長度 / FPS / 解析度         | `src/Root.tsx` 的 `<Composition />` props                      |
+| Scene 起訖 frame                | `src/Main.tsx` 的 `<Sequence from=... durationInFrames=...>`   |
 
 ## 設計參考
 
@@ -93,7 +104,7 @@ src/
 - 紙白背景 `#f7f1e6`、凸紙 `#fdfaf3`、凹紙 `#ece3d3`
 - 品牌陶土色 `#bc5e3e` → 深陶 `#97442a`
 - 墨色文字 `#221c14`、襯線中文標題 Noto Serif TC
-- 功能02 深底區 `#1b1611`
+- 暗色收尾 / 開場漸層 `#2c2620 → #17120d`（Hook / Cta），Reader 深底 `#1b1611`
 
 ## 授權
 
