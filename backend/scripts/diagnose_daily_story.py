@@ -346,44 +346,53 @@ def check_discord_reactions(
 def check_recent_failures(
     supabase, report: DiagnosisReport, lookback_days: int = 14
 ) -> None:
-    """Step 7: list rows in failed state or with publish_error."""
+    """Step 7: list failed review states and failed social_posts rows."""
     cutoff = report.target_date - timedelta(days=lookback_days)
-    response = (
+    failed_reviews = (
         supabase.table("daily_stories")
-        .select(
-            "publish_date,language,review_state,publish_error,"
-            "ig_post_id"
-        )
-        .or_("review_state.eq.failed,publish_error.not.is.null")
+        .select("publish_date,language,review_state")
+        .eq("review_state", "failed")
         .gte("publish_date", cutoff.isoformat())
         .order("publish_date", desc=True)
         .limit(10)
         .execute()
-    )
-    rows = response.data or []
-    if not rows:
+    ).data or []
+    failed_posts = (
+        supabase.table("social_posts")
+        .select("publish_date,media_type,status,error,ig_post_id")
+        .eq("status", "failed")
+        .gte("publish_date", cutoff.isoformat())
+        .order("publish_date", desc=True)
+        .limit(10)
+        .execute()
+    ).data or []
+    if not failed_reviews and not failed_posts:
         report.findings.append(Finding(
             step="recent_failures",
             severity="ok",
             message=f"No failed rows in the last {lookback_days} days",
         ))
         return
-    real_failures = [r for r in rows if r.get("review_state") == "failed"]
     skip_signals = [
-        r for r in rows
-        if (r.get("publish_error") or "").startswith("ig_skipped_")
+        r for r in failed_posts
+        if (r.get("error") or "").startswith("ig_skipped_")
     ]
+    real_failures = len(failed_reviews) + len(failed_posts) - len(skip_signals)
     sev: Severity = "warn" if real_failures else "info"
     report.findings.append(Finding(
         step="recent_failures",
         severity=sev,
         message=(
-            f"{len(rows)} rows with failure markers in last "
+            f"{len(failed_reviews)} failed review rows and "
+            f"{len(failed_posts)} failed social_posts rows in last "
             f"{lookback_days} days "
-            f"({len(real_failures)} real failures, "
+            f"({real_failures} real failures, "
             f"{len(skip_signals)} recoverable skips)"
         ),
-        detail={"rows": rows},
+        detail={
+            "daily_stories": failed_reviews,
+            "social_posts": failed_posts,
+        },
     ))
 
 

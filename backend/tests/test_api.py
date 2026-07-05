@@ -1,4 +1,9 @@
-"""Tests for the FastAPI app + in-container scheduler wiring."""
+"""Tests for the FastAPI app + in-container scheduler wiring.
+
+The 21:00 Instagram publish jobs moved to the standalone publisher
+daemon (see test_publisher_daemon.py); the api scheduler only carries
+generate + reconcile.
+"""
 from __future__ import annotations
 
 from datetime import date
@@ -11,8 +16,6 @@ import dataclasses
 from lorescape_backend.api import (
     GENERATE_HOUR,
     GENERATE_JOB_ID,
-    PUBLISH_HOUR,
-    PUBLISH_JOB_ID,
     RECONCILE_HOUR,
     RECONCILE_JOB_ID,
     _register_jobs,
@@ -24,7 +27,7 @@ def test_health_returns_ok():
     assert health() == {"status": "ok"}
 
 
-def test_register_jobs_schedules_generate_and_publish(fake_config):
+def test_register_jobs_schedules_generate(fake_config):
     scheduler = MagicMock()
     _register_jobs(scheduler, fake_config)
 
@@ -40,13 +43,14 @@ def test_register_jobs_schedules_generate_and_publish(fake_config):
     assert gen_fields["minute"] == "0"
     assert gen_call.kwargs["replace_existing"] is True
 
-    pub_call = calls_by_id[PUBLISH_JOB_ID]
-    pub_trigger = pub_call.kwargs["trigger"]
-    assert isinstance(pub_trigger, CronTrigger)
-    pub_fields = {field.name: str(field) for field in pub_trigger.fields}
-    assert pub_fields["hour"] == str(PUBLISH_HOUR)
-    assert pub_fields["minute"] == "0"
-    assert pub_call.kwargs["replace_existing"] is True
+
+def test_register_jobs_does_not_schedule_publish(fake_config):
+    """Publishing lives in the publisher daemon, not the api scheduler."""
+    scheduler = MagicMock()
+    _register_jobs(scheduler, fake_config)
+
+    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
+    assert ids == {GENERATE_JOB_ID, RECONCILE_JOB_ID}
 
 
 def test_register_jobs_schedules_reconcile_when_revenuecat_enabled(fake_config):
@@ -69,7 +73,7 @@ def test_register_jobs_skips_reconcile_when_revenuecat_disabled(fake_config):
     _register_jobs(scheduler, config)
 
     ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
-    assert ids == {GENERATE_JOB_ID, PUBLISH_JOB_ID}
+    assert ids == {GENERATE_JOB_ID}
 
 
 @patch("lorescape_backend.api.run_generate_and_review")
@@ -89,50 +93,13 @@ def test_generate_job_runs_for_today(mock_run, fake_config):
     assert args[1] == date.today()
 
 
-@patch("lorescape_backend.api.run_publish_job")
-def test_publish_job_runs_for_today(mock_run, fake_config):
-    scheduler = MagicMock()
-    _register_jobs(scheduler, fake_config)
-
-    pub_call = next(
-        call for call in scheduler.add_job.call_args_list
-        if call.kwargs["id"] == PUBLISH_JOB_ID
-    )
-    pub_call.args[0]()
-
-    mock_run.assert_called_once()
-    args = mock_run.call_args.args
-    assert args[0] is fake_config
-    assert args[1] == date.today()
-
-
-def test_register_jobs_skips_story_jobs_when_both_per_job_flags_disabled(
-    fake_config,
-):
+def test_register_jobs_skips_generate_when_disabled(fake_config):
     config = dataclasses.replace(
-        fake_config,
-        daily_story_generate_enabled=False,
-        daily_story_publish_enabled=False,
+        fake_config, daily_story_generate_enabled=False
     )
     scheduler = MagicMock()
     _register_jobs(scheduler, config)
 
     ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
     assert GENERATE_JOB_ID not in ids
-    assert PUBLISH_JOB_ID not in ids
     assert ids == {RECONCILE_JOB_ID}  # reconcile unaffected
-
-
-def test_register_jobs_publish_only_when_generate_disabled(fake_config):
-    """Manual-story mode: 21:00 publish runs, 09:00 Gemini generate does not."""
-    config = dataclasses.replace(
-        fake_config,
-        daily_story_generate_enabled=False,
-        daily_story_publish_enabled=True,
-    )
-    scheduler = MagicMock()
-    _register_jobs(scheduler, config)
-
-    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
-    assert GENERATE_JOB_ID not in ids
-    assert PUBLISH_JOB_ID in ids

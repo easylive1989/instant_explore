@@ -2,13 +2,15 @@
 
 Hosts:
 - `/health` endpoint (placeholder for monitoring)
-- An APScheduler with two daily jobs at Asia/Taipei:
+- An APScheduler with daily jobs at Asia/Taipei:
     08:00 — generate today's story and post it to Discord for review
-    21:00 — read review reactions and publish to Instagram
+    03:00 — reconcile subscriptions against RevenueCat
 
-Manual CLIs (preserved for back-fill / debugging):
+The 21:00 Instagram publish jobs live in the separate `publisher`
+container (`lorescape_backend.social.publisher_daemon`), not here.
+
+Manual CLI (preserved for back-fill / debugging):
 - `python -m lorescape_backend.daily_story [YYYY-MM-DD]`
-- `python -m lorescape_backend.social.publisher [YYYY-MM-DD]`
 """
 from __future__ import annotations
 
@@ -23,29 +25,23 @@ from fastapi import FastAPI
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story.job import run_generate_and_review
 from lorescape_backend.narration.routes import router as narration_router
-from lorescape_backend.social.publisher import run_publish_job
 from lorescape_backend.subscriptions.reconcile import run_reconcile_job
 from lorescape_backend.subscriptions.routes import router as subscriptions_router
 
 logger = logging.getLogger(__name__)
 
 GENERATE_JOB_ID = "daily_story_generate"
-PUBLISH_JOB_ID = "daily_story_publish"
 RECONCILE_JOB_ID = "subscription_reconcile"
 SCHEDULER_TIMEZONE = "Asia/Taipei"
 GENERATE_HOUR = 8
-PUBLISH_HOUR = 21
 RECONCILE_HOUR = 3
 
 
 def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
-    """Register the generate, publish, and reconcile jobs on the scheduler."""
+    """Register the generate and reconcile jobs on the scheduler."""
 
     def _generate() -> None:
         run_generate_and_review(config, date.today())
-
-    def _publish() -> None:
-        run_publish_job(config, date.today())
 
     def _reconcile() -> None:
         run_reconcile_job(config)
@@ -61,18 +57,6 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
         logger.warning(
             "daily_story.generate paused — 09:00 generate job not scheduled "
             "(DAILY_STORY_GENERATE_ENABLED is off)"
-        )
-    if config.daily_story_publish_enabled:
-        scheduler.add_job(
-            _publish,
-            trigger=CronTrigger(hour=PUBLISH_HOUR, minute=0),
-            id=PUBLISH_JOB_ID,
-            replace_existing=True,
-        )
-    else:
-        logger.warning(
-            "daily_story.publish paused — 21:00 publish job not scheduled "
-            "(DAILY_STORY_PUBLISH_ENABLED is off)"
         )
     if config.revenuecat_reconcile_enabled:
         scheduler.add_job(

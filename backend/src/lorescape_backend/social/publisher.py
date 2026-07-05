@@ -12,7 +12,9 @@ State machine (per `daily_stories` row, only the zh-TW row is tracked):
                            described in backend/README.md)
 
 The zh-TW row carries the review state and Discord message id (matching what
-the reviewer sees) and supplies the IG card + caption copy.
+the reviewer sees) and supplies the IG card + caption copy. The IG publish
+outcome itself (post id / error) is recorded in the `social_posts` table
+(media_type='carousel'), not on the daily_stories row.
 
 Idempotent: only rows still in 'pending' are touched.
 """
@@ -26,7 +28,7 @@ from supabase import create_client
 
 from lorescape_backend.config import Config
 from lorescape_backend.daily_story import discord_notify, discord_review
-from lorescape_backend.social import card_storage, caption, instagram
+from lorescape_backend.social import card_storage, caption, instagram, post_log
 from lorescape_backend.social.card import mapper
 from lorescape_backend.social.card.renderer import render_slides
 
@@ -160,14 +162,14 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
 
     except Exception as exc:  # noqa: BLE001 — orchestrator catches all
         logger.exception("Publish failed for row %s", row["id"])
-        _update_state(
+        _update_state(supabase, row, "failed")
+        post_log.record_post(
             supabase,
-            row,
-            "failed",
-            extra={
-                "publish_error": _truncate(str(exc), 1000),
-                "ig_post_id": ig_post_id,
-            },
+            publish_date=row["publish_date"],
+            media_type="carousel",
+            status="failed",
+            ig_post_id=ig_post_id,
+            error=_truncate(str(exc), 1000),
         )
         if config.discord_webhook_url:
             discord_notify.notify_failure(
@@ -178,15 +180,16 @@ def _try_publish(supabase, config: Config, row: dict[str, Any]) -> None:
             )
         return
 
-    _update_state(
-        supabase,
-        row,
-        "published",
-        extra={
-            "ig_post_id": ig_post_id,
-            "publish_error": publish_error,
-        },
-    )
+    _update_state(supabase, row, "published")
+    if ig_post_id is not None or publish_error is not None:
+        post_log.record_post(
+            supabase,
+            publish_date=row["publish_date"],
+            media_type="carousel",
+            status="published" if ig_post_id else "failed",
+            ig_post_id=ig_post_id,
+            error=publish_error,
+        )
 
 
 def _load_pending_rows(supabase, target_date: date) -> list[dict[str, Any]]:
@@ -213,22 +216,11 @@ def _load_place_row(supabase, place_id: str) -> dict[str, Any] | None:
     return rows[0] if rows else None
 
 
-def _update_state(
-    supabase,
-    row: dict[str, Any],
-    new_state: str,
-    *,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    now = datetime.now(timezone.utc).isoformat()
+def _update_state(supabase, row: dict[str, Any], new_state: str) -> None:
     payload: dict[str, Any] = {
         "review_state": new_state,
-        "reviewed_at": now,
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
     }
-    if new_state == "published":
-        payload["published_at"] = now
-    if extra:
-        payload.update(extra)
     (
         supabase.table("daily_stories")
         .update(payload)
