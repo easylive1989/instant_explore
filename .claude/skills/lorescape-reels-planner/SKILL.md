@@ -88,5 +88,5 @@ description: Use when the user wants to plan or refresh the daily place-story Re
 - **不寫 Supabase**：`daily_story_places` 只讀；`used_at` 由發文流程更新。
 - 已排進 calendar 但當天臨時換點時，從備援池同類型互換，
   並在 calendar 檔上直接改，保持檔案與實際發文一致。
-- 品牌貼文另有 `marketing/content-calendar/_content-map.md`
-  （marketing-content-calendar 負責），兩層互不衝突。
+- 品牌補充貼文（若有）由 marketing-content-calendar 另行規劃，
+  與本 skill 的每日選點層互不衝突。
