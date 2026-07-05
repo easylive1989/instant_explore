@@ -28,6 +28,24 @@ export const colors = {
   onDark2: "#c3b7a4",
 } as const;
 
+// Category palette (muted, refined) — ported from ls2.css :root.
+export const categoryColors = {
+  nature: { ink: "#4E6138", bg: "#E6E8D5" },
+  heritage: { ink: "#8A6320", bg: "#F0E5CC" },
+  urban: { ink: "#44597A", bg: "#DFE4EC" },
+  coast: { ink: "#2F6566", bg: "#D9E7E4" },
+  sacred: { ink: "#6E4A63", bg: "#ECDCE6" },
+} as const;
+
+export const radius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 22,
+  img: 10,
+  pill: 999,
+} as const;
+
 export const fonts = {
   serif: `${serifLoaded}, "Songti TC", serif`,
   sans: `${sansLoaded}, -apple-system, sans-serif`,
