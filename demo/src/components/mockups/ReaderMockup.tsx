@@ -42,40 +42,41 @@ export const ReaderMockup: React.FC = () => {
               "linear-gradient(to bottom, rgba(0,0,0,0.1) 40%, rgba(27,22,17,0.92))",
           }}
         />
-        <div style={{ position: "absolute", left: 34, bottom: 118 }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              height: 44,
-              padding: "0 18px",
-              border: "1px solid rgba(255,255,255,0.55)",
-              borderRadius: 8,
-              color: "#fff",
-              fontFamily: fonts.sans,
-              fontSize: 18,
-              fontWeight: 600,
-              letterSpacing: "0.16em",
-            }}
-          >
-            {s.chapter}
-          </span>
-        </div>
         <div
           style={{
             position: "absolute",
             left: 34,
             right: 34,
             bottom: 34,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 14,
           }}
         >
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              height: 40,
+              padding: "0 18px",
+              border: "1px solid rgba(255,255,255,0.55)",
+              borderRadius: 8,
+              color: "#fff",
+              fontFamily: fonts.sans,
+              fontSize: 16,
+              fontWeight: 600,
+              letterSpacing: "0.16em",
+            }}
+          >
+            {s.chapter}
+          </span>
           <div
             style={{
               fontFamily: fonts.sans,
-              fontSize: 18,
+              fontSize: 16,
               letterSpacing: "0.14em",
               color: "rgba(255,255,255,0.8)",
-              marginBottom: 12,
             }}
           >
             {s.latin}
@@ -84,8 +85,8 @@ export const ReaderMockup: React.FC = () => {
             style={{
               fontFamily: fonts.serif,
               fontWeight: 700,
-              fontSize: 46,
-              lineHeight: 1.12,
+              fontSize: 36,
+              lineHeight: 1.2,
               color: "#fff",
             }}
           >
@@ -94,7 +95,7 @@ export const ReaderMockup: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ padding: "34px 34px 160px" }}>
+      <div style={{ padding: "34px 34px 200px" }}>
         <p
           style={{
             fontFamily: fonts.serif,
@@ -141,8 +142,8 @@ export const ReaderMockup: React.FC = () => {
           right: 0,
           bottom: 0,
           padding: "22px 28px 34px",
-          background:
-            "linear-gradient(to top, rgba(27,22,17,1), rgba(27,22,17,0))",
+          background: colors.inkBg,
+          boxShadow: "0 -28px 34px -6px rgba(27,22,17,0.85)",
           display: "flex",
           alignItems: "center",
           gap: 16,
