@@ -12,7 +12,7 @@ export const JournalMockup: React.FC = () => {
   return (
     <div style={{ width: "100%", height: "100%", background: colors.paperSunk, padding: "70px 30px 30px" }}>
       <div style={{ fontFamily: fonts.serif, fontWeight: 700, fontSize: 34, color: colors.ink, marginBottom: 24 }}>
-        田野手記
+        歷程
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {journalEntries.map((e, i) => {
