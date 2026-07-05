@@ -4,73 +4,74 @@ import { PaperBackdrop } from "../components/PaperBackdrop";
 import { PhoneFrame } from "../components/PhoneFrame";
 import { JournalMockup } from "../components/mockups/JournalMockup";
 import { SceneHeading } from "../components/SceneHeading";
-import { colors, fonts } from "../theme";
+import { colors } from "../theme";
 import { usePortrait } from "../utils/layout";
-import { fadeIn, slideUp, popIn } from "../utils/animations";
+import { popIn } from "../utils/animations";
 
-const stats = [
-  { num: "I", cn: "自動成篇" },
-  { num: "II", cn: "依旅程歸檔" },
-  { num: "III", cn: "沿時間軸重溫" },
-];
-
-// Beat 5 (0–4s local): your journey is bound into a journal automatically.
+// Beat 5 (0–4s local): every stop is quietly bound into a personal field
+// journal — the phone pops in over a light page-stack while the manifesto
+// line lands beside it.
 export const JournalScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const portrait = usePortrait();
 
+  const entrance = popIn(frame, fps, 6);
+  const phoneWidth = portrait ? 440 : 380;
+  const phoneHeight = portrait ? 900 : 800;
+
   const phone = (
-    <div
-      style={{
-        opacity: fadeIn(frame, 8, 18),
-        transform: `translateY(${slideUp(frame, 8, 24, 56)}px)`,
-      }}
-    >
-      <PhoneFrame width={portrait ? 440 : 380} height={portrait ? 900 : 800}>
-        <JournalMockup />
-      </PhoneFrame>
+    <div style={{ position: "relative", width: phoneWidth, height: phoneHeight }}>
+      {/* Faint pages peeking out behind the phone — a light "bound journal" feel. */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 62,
+          background: colors.paperRaised,
+          border: `1px solid ${colors.line}`,
+          transform: `rotate(-4deg) translateY(${(1 - entrance) * 16}px)`,
+          opacity: entrance * 0.55,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 62,
+          background: colors.paperRaised,
+          border: `1px solid ${colors.line}`,
+          transform: `rotate(-2deg) translateY(${(1 - entrance) * 9}px)`,
+          opacity: entrance * 0.75,
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
+          opacity: entrance,
+          transform: `scale(${0.94 + entrance * 0.06})`,
+        }}
+      >
+        <PhoneFrame width={phoneWidth} height={phoneHeight} statusDark>
+          <JournalMockup />
+        </PhoneFrame>
+      </div>
     </div>
   );
 
   const copy = (
-    <div style={{ maxWidth: 540 }}>
-      <SceneHeading over="Journey Journal" title="你的旅程，自動成冊" startFrame={4} />
-      <p
-        style={{
-          fontFamily: fonts.sans,
-          fontSize: 24,
-          lineHeight: 1.7,
-          color: colors.ink2,
-          margin: "26px 0 30px",
-          opacity: fadeIn(frame, 22, 18),
-        }}
-      >
-        每一次駐足，都被悄悄寫進一本屬於你的旅行手記。
-      </p>
-      <div style={{ display: "flex", gap: 14 }}>
-        {stats.map((s, i) => (
-          <div
-            key={s.num}
-            style={{
-              flex: 1,
-              padding: "18px 14px",
-              borderRadius: 16,
-              background: colors.paperRaised,
-              border: `1px solid ${colors.line}`,
-              textAlign: "center",
-              opacity: popIn(frame, fps, 30 + i * 8),
-            }}
-          >
-            <div style={{ fontFamily: fonts.serif, fontSize: 30, fontWeight: 700, color: colors.clay }}>
-              {s.num}
-            </div>
-            <div style={{ fontFamily: fonts.sans, fontSize: 18, color: colors.ink2, marginTop: 6 }}>
-              {s.cn}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div style={{ maxWidth: 640 }}>
+      <SceneHeading
+        over="YOUR JOURNAL · 旅程成冊"
+        title={
+          <>
+            你走過的地方，
+            <br />
+            正在寫成一本書。
+          </>
+        }
+        startFrame={4}
+      />
     </div>
   );
 
