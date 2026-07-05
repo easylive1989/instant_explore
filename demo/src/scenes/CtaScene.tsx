@@ -1,71 +1,87 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { PaperBackdrop } from "../components/PaperBackdrop";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { Wordmark } from "../components/Wordmark";
 import { StoreBadges } from "../components/StoreBadges";
 import { colors, fonts } from "../theme";
-import { fadeIn, slideUp } from "../utils/animations";
+import { usePortrait } from "../utils/layout";
+import { fadeIn, popIn, slideUp } from "../utils/animations";
 
-// Beat 6 (0–4s local): closing call-to-action on warm paper.
+// Beat 6 (0–4s local): dark brand outro. Bookends HookScene's dark radial
+// background — the video opens and closes on the same ink gradient, with
+// the wordmark, slogan, and store badges carrying the closing beat instead
+// of app-feature content.
 export const CtaScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const portrait = usePortrait();
+
+  const badgeScale = (portrait ? 0.7 : 1) * popIn(frame, fps, 46);
 
   return (
-    <PaperBackdrop>
+    <AbsoluteFill
+      style={{
+        background:
+          "radial-gradient(120% 100% at 70% -10%, #2c2620, #17120d 60%)",
+      }}
+    >
       <AbsoluteFill
         style={{
           alignItems: "center",
           justifyContent: "center",
-          gap: 30,
-          padding: 100,
+          gap: portrait ? 22 : 30,
+          padding: portrait ? 60 : 120,
         }}
       >
-        <div style={{ opacity: fadeIn(frame, 4, 16), transform: `translateY(${slideUp(frame, 4, 20, 30)}px)` }}>
-          <Wordmark size={66} />
-        </div>
-        <span
+        <div
           style={{
-            fontFamily: fonts.sans,
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: colors.clay,
-            opacity: fadeIn(frame, 16, 16),
+            opacity: fadeIn(frame, 4, 16),
+            transform: `translateY(${slideUp(frame, 4, 20, 30)}px)`,
           }}
         >
-          開始你的第一段故事
+          <Wordmark size={portrait ? 50 : 66} color={colors.onDark} />
+        </div>
+
+        <span
+          style={{
+            fontFamily: fonts.serif,
+            fontSize: portrait ? 19 : 24,
+            fontWeight: 600,
+            letterSpacing: "0.16em",
+            color: colors.onDark2,
+            opacity: fadeIn(frame, 16, 16),
+            transform: `translateY(${slideUp(frame, 16, 16, 20)}px)`,
+          }}
+        >
+          旅行說書人
         </span>
+
         <div
           style={{
             fontFamily: fonts.serif,
             fontWeight: 700,
-            fontSize: 72,
-            lineHeight: 1.25,
+            fontSize: portrait ? 44 : 68,
+            lineHeight: 1.3,
             textAlign: "center",
-            color: colors.ink,
-            opacity: fadeIn(frame, 22, 18),
-            transform: `translateY(${slideUp(frame, 22, 24, 34)}px)`,
+            color: colors.onDark,
+            opacity: fadeIn(frame, 26, 18),
+            transform: `translateY(${slideUp(frame, 26, 18, 30)}px)`,
           }}
         >
           城市是一本書。
           <br />
           開始閱讀吧。
         </div>
-        <p
+
+        <div
           style={{
-            fontFamily: fonts.sans,
-            fontSize: 24,
-            color: colors.ink2,
-            opacity: fadeIn(frame, 40, 18),
+            marginTop: portrait ? 8 : 16,
+            opacity: fadeIn(frame, 46, 16),
+            transform: `scale(${badgeScale})`,
           }}
         >
-          加入五萬名探索者，一同揭開世界各地隱藏的篇章。
-        </p>
-        <div style={{ marginTop: 18, opacity: fadeIn(frame, 52, 20) }}>
           <StoreBadges />
         </div>
       </AbsoluteFill>
-    </PaperBackdrop>
+    </AbsoluteFill>
   );
 };
