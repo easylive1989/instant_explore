@@ -15,21 +15,21 @@ export const StoryOptionsMockup: React.FC = () => {
         width: "100%",
         height: "100%",
         background: colors.paperRaised,
-        padding: "84px 34px 34px",
+        padding: "60px 30px 28px",
       }}
     >
       <div
         style={{
           fontFamily: fonts.serif,
           fontWeight: 700,
-          fontSize: 40,
+          fontSize: 27,
           color: colors.ink,
-          marginBottom: 26,
+          marginBottom: 14,
         }}
       >
         想聽哪段故事？
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {storyOptions.map((o, i) => {
           const p = popIn(frame, fps, 14 + i * 12);
           return (
@@ -37,8 +37,8 @@ export const StoryOptionsMockup: React.FC = () => {
               key={o.no}
               style={{
                 display: "flex",
-                gap: 18,
-                padding: "22px 22px",
+                gap: 12,
+                padding: "14px 16px",
                 borderRadius: radius.lg,
                 background: colors.paper,
                 border: `1px solid ${colors.line}`,
@@ -51,10 +51,10 @@ export const StoryOptionsMockup: React.FC = () => {
                 style={{
                   fontFamily: fonts.serif,
                   fontWeight: 700,
-                  fontSize: 40,
+                  fontSize: 30,
                   lineHeight: 1,
                   color: colors.clay,
-                  width: 48,
+                  width: 36,
                   flex: "none",
                 }}
               >
@@ -65,8 +65,8 @@ export const StoryOptionsMockup: React.FC = () => {
                   style={{
                     fontFamily: fonts.serif,
                     fontWeight: 600,
-                    fontSize: 32,
-                    lineHeight: 1.3,
+                    fontSize: 22,
+                    lineHeight: 1.28,
                     color: colors.ink,
                   }}
                 >
@@ -75,10 +75,10 @@ export const StoryOptionsMockup: React.FC = () => {
                 <div
                   style={{
                     fontFamily: fonts.sans,
-                    fontSize: 24,
-                    lineHeight: 1.55,
+                    fontSize: 16,
+                    lineHeight: 1.42,
                     color: colors.ink2,
-                    marginTop: 8,
+                    marginTop: 5,
                   }}
                 >
                   {o.desc}
