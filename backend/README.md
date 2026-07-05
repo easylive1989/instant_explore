@@ -9,11 +9,18 @@ Gemini and serves them to the app, plus runs the daily-story / social pipeline.
   - `POST /narration` — expand a chosen angle into a full 3-paragraph story,
     grounded on Wikipedia, for TTS playback
   - `GET /health` — health check
-- **Daily story scheduler** — APScheduler inside the FastAPI container fires
-  two jobs every day, both in Asia/Taipei:
-  - `09:00` — generate the day's story and post it to Discord for review
-  - `21:00` — read the Discord ✅/❌ reactions and publish to IG
-  No host-side cron.
+- **Daily story scheduler** — split across two containers, both in
+  Asia/Taipei, no host-side cron:
+  - `api` container (FastAPI + APScheduler):
+    - `09:00` — generate the day's story and post it to Discord for review
+    - `03:00` — reconcile subscriptions against RevenueCat
+  - `publisher` container (`lorescape_backend.social.publisher_daemon`,
+    same image):
+    - `21:00` — read the Discord ✅/❌ reactions and publish the carousel to IG
+    - `21:10` / `23:10` — publish the day's reel video from
+      `/opt/lorescape-media/daily_video/<date>/` (rsynced from the
+      operator's machine via `scripts/upload_reel_to_vps.sh`; idempotent
+      via the `social_posts` table)
 
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
 
@@ -84,9 +91,12 @@ docker exec lorescape-backend python -c \
   "from lorescape_backend.config import Config; Config.from_env(); print('config ok')"
 ```
 
-That's it. No crontab, no `docker exec` from outside — the container's own
-APScheduler thread fires the generate job at 09:00 and the publish job at
-21:00, both in Asia/Taipei.
+That's it. No crontab, no `docker exec` from outside — the `api` container
+fires the generate job at 09:00, and the `publisher` container fires the
+carousel publish at 21:00 plus the reel publish at 21:10/23:10, all in
+Asia/Taipei. For the reel jobs, create the media directory once on the host
+(`mkdir -p /opt/lorescape-media/daily_video`) — it is bind-mounted read-only
+into the publisher container.
 
 ### Subsequent updates (automated by CI)
 

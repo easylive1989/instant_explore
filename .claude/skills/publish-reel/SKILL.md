@@ -3,10 +3,17 @@ name: publish-reel
 description: Use when the user wants to manually publish a specific day's finished video from marketing/outputs/daily_video/<date>/ to Instagram Reels using the local IG token in backend/.env — e.g. "發布某天的影片到 IG reels", "把今天的影片發到 Reels", "publish reel for 2026-06-22". Local-only, does not touch the server's scheduled publish job.
 ---
 
-# Publish a daily video to Instagram Reels (local)
+# Publish a daily video to Instagram Reels (local, manual fallback)
 
 手動把 `marketing/outputs/daily_video/<date>/final.mp4` 用本機 IG token 發布為 IG Reels。
-完全在本機執行，不經 server 排程、不寫回 Supabase。
+完全在本機執行，不寫回 Supabase 的發布狀態。
+
+**這是手動 fallback / 補發工具。** 正常流程是
+`scripts/upload_reel_to_vps.sh <date>` 把影片 rsync 上 VPS，publisher
+容器在 21:10（Asia/Taipei，23:10 補跑）自動發布（gate = 當天 story 的
+Discord ✅）。只有自動發布錯過或失敗時才走這裡。注意：本 skill 發布成功
+**不會**寫 `social_posts`，若當天影片之後才被傳上 VPS，publisher 可能重
+複發——手動補發後就不要再上傳同一天的影片。
 
 ## 前置條件
 
@@ -53,6 +60,19 @@ description: Use when the user wants to manually publish a specific day's finish
 - `--dry-run`：只印影片與 caption，不實際發布。
 
 ## 疑難排解
+
+**自動發布沒發？** 依序檢查（前三步可用 lorescape-debug skill 的
+service-role curl）：
+
+1. **VPS 上有沒有影片**：`ssh lorescape-vps ls /opt/lorescape-media/daily_video/<date>/`
+   —— 沒有就是本機忘了跑 `scripts/upload_reel_to_vps.sh`。
+2. **story 是否已核准**：`daily_stories` 該日 zh-TW 列的
+   `review_state` 必須是 `published`（Discord ✅ + 21:00 carousel 成功）。
+3. **social_posts 狀態**：查該日 `media_type=reel` 列——`failed` 的
+   `error` 欄有 Graph API 錯誤訊息；`published` 表示其實已發出。
+4. **publisher log**：`ssh lorescape-vps "cd /opt/lorescape/backend && docker compose logs --since 24h publisher"`。
+
+手動發布問題：
 
 - `Instagram not configured`：`backend/.env` 缺 `IG_USER_ID` 或
   `META_PAGE_ACCESS_TOKEN`。

@@ -23,12 +23,10 @@ from dotenv import load_dotenv
 from supabase import create_client
 
 from lorescape_backend.config import Config
-from lorescape_backend.social import caption, card_storage, instagram
-from lorescape_backend.social.card import mapper, render_cover
+from lorescape_backend.social import caption, instagram, reel_cover
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_VIDEO_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_video"
-PUBLISH_LANGUAGE = "zh-TW"
 
 
 def _resolve_video(date_str: str, override: str | None) -> Path:
@@ -52,75 +50,11 @@ def _resolve_video(date_str: str, override: str | None) -> Path:
     return path
 
 
-def _load_story_row(supabase, date_str: str) -> dict | None:
-    """Return the zh-TW daily_stories row for the date, or None."""
-    response = (
-        supabase.table("daily_stories")
-        .select("*")
-        .eq("publish_date", date_str)
-        .eq("language", PUBLISH_LANGUAGE)
-        .limit(1)
-        .execute()
-    )
-    rows = response.data or []
-    return rows[0] if rows else None
-
-
-def _load_place_row(supabase, place_id: str) -> dict | None:
-    """Return the daily_story_places row for the id, or None."""
-    response = (
-        supabase.table("daily_story_places")
-        .select("*")
-        .eq("id", place_id)
-        .limit(1)
-        .execute()
-    )
-    rows = response.data or []
-    return rows[0] if rows else None
-
-
-def _build_cover_url(supabase, date_str: str) -> str | None:
-    """Render the carousel cover for the date and upload it; return the public
-    URL so the Reel shares the same title face as the grid cards.
-
-    Returns None (the Reel then falls back to a video frame) whenever the
-    story/place data needed to render the cover is missing.
-    """
-    row = _load_story_row(supabase, date_str)
-    if row is None:
-        return None
-    place_id = row.get("place_id")
-    if not place_id:
-        return None
-    place_row = _load_place_row(supabase, place_id)
-    if place_row is None:
-        return None
-    content = mapper.build_card_content(row, place_row)
-    if content is None:
-        return None
-    png = render_cover(content)
-    return card_storage.upload_card_png(
-        supabase, png, path=f"{date_str}/reel-cover.png"
-    )
-
-
 def _read_narration(date_str: str) -> str | None:
     """Return the narration.txt text for the date, or None."""
     path = DAILY_VIDEO_DIR / date_str / "narration.txt"
     if path.is_file():
         return path.read_text(encoding="utf-8").strip()
-    return None
-
-
-def _narration_hook(date_str: str) -> str | None:
-    """Return the first narration line (the reel's spoken hook), or None."""
-    text = _read_narration(date_str)
-    if not text:
-        return None
-    for line in text.splitlines():
-        stripped = line.strip()
-        if stripped:
-            return stripped
     return None
 
 
@@ -130,7 +64,7 @@ def _build_caption(
     """Build the IG caption: override → Supabase story → narration.txt."""
     if override:
         return override
-    row = _load_story_row(supabase, date_str)
+    row = reel_cover.load_story_row(supabase, date_str)
     if row is not None:
         story_copy = caption.StoryCopy(
             place_name=row["place_name"],
@@ -138,7 +72,7 @@ def _build_caption(
             story=row["story"],
             hashtags=tuple(row.get("hashtags") or ()),
             image_attribution=row.get("image_attribution"),
-            hook=_narration_hook(date_str),
+            hook=reel_cover.narration_hook(_read_narration(date_str)),
         )
         return caption.build_full_caption(
             story=story_copy,
@@ -184,7 +118,7 @@ def main(argv: list[str]) -> int:
     cover_url: str | None = None
     if not args.no_cover:
         try:
-            cover_url = _build_cover_url(supabase, args.date)
+            cover_url = reel_cover.build_cover_url(supabase, args.date)
         except Exception as exc:  # noqa: BLE001 — cover is best-effort
             print(
                 f"Warning: could not build cover ({exc}); publishing "

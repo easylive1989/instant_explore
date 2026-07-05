@@ -55,7 +55,8 @@ def _supabase_multi_table(*, zh_rows, place_row=None):
 
     `client.table("daily_stories")` serves the select-pending-zh-TW query
     (returns zh_rows). `client.table("daily_story_places")` returns place_row
-    wrapped in a list. `client.table(...).update(...)` always returns a
+    wrapped in a list. `client.table("social_posts")` records publish
+    outcomes via upsert. `client.table(...).update(...)` always returns a
     passing chain.
     """
     update_chain = MagicMock()
@@ -78,6 +79,11 @@ def _supabase_multi_table(*, zh_rows, place_row=None):
         [place_row] if place_row else []
     )
 
+    social_posts_table = MagicMock()
+    social_posts_table.upsert.return_value.execute.return_value = MagicMock(
+        data=None
+    )
+
     client = MagicMock()
 
     def _table(name):
@@ -85,10 +91,12 @@ def _supabase_multi_table(*, zh_rows, place_row=None):
             return daily_stories_table
         if name == "daily_story_places":
             return places_table
+        if name == "social_posts":
+            return social_posts_table
         raise AssertionError(f"unexpected table: {name}")
 
     client.table.side_effect = _table
-    return client, daily_stories_table, places_table, update_chain
+    return client, daily_stories_table, social_posts_table, update_chain
 
 
 @patch("lorescape_backend.social.publisher.create_client")
@@ -101,7 +109,7 @@ def test_approved_row_publishes_to_ig(
 ):
     zh = _row()
     place = _place_row()
-    client, ds_table, places_table, update_chain = _supabase_multi_table(
+    client, ds_table, social_table, update_chain = _supabase_multi_table(
         zh_rows=[zh], place_row=place,
     )
     create.return_value = client
@@ -131,9 +139,13 @@ def test_approved_row_publishes_to_ig(
 
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "published"
-    assert payload["ig_post_id"] == "ig-1"
-    # Healthy publish: no publish_error set
-    assert payload.get("publish_error") in (None, "")
+    # IG outcome is recorded on social_posts, not daily_stories
+    assert "ig_post_id" not in payload
+    post = social_table.upsert.call_args[0][0]
+    assert post["media_type"] == "carousel"
+    assert post["status"] == "published"
+    assert post["ig_post_id"] == "ig-1"
+    assert post["error"] is None
 
 
 @patch("lorescape_backend.social.publisher.create_client")
@@ -179,7 +191,9 @@ def test_publish_exception_marks_failed_and_notifies(
 ):
     rows = [_row()]
     place = _place_row()
-    client, table, _, _ = _supabase_multi_table(zh_rows=rows, place_row=place)
+    client, table, social_table, _ = _supabase_multi_table(
+        zh_rows=rows, place_row=place,
+    )
     create.return_value = client
     check.return_value = "approved"
     render.return_value = [b"\x89PNGcover", b"\x89PNGstory", b"\x89PNGcta"]
@@ -190,7 +204,10 @@ def test_publish_exception_marks_failed_and_notifies(
 
     payload = table.update.call_args[0][0]
     assert payload["review_state"] == "failed"
-    assert "API blew up" in payload["publish_error"]
+    post = social_table.upsert.call_args[0][0]
+    assert post["media_type"] == "carousel"
+    assert post["status"] == "failed"
+    assert "API blew up" in post["error"]
     notify.assert_called_once()
 
 
@@ -286,7 +303,7 @@ def test_approved_row_skips_ig_when_place_row_missing(
     upload, render, ig_pub, check, create, fake_config
 ):
     zh = _row()
-    client, ds_table, _, _ = _supabase_multi_table(
+    client, ds_table, social_table, _ = _supabase_multi_table(
         zh_rows=[zh], place_row=None,
     )
     create.return_value = client
@@ -297,7 +314,9 @@ def test_approved_row_skips_ig_when_place_row_missing(
     ig_pub.assert_not_called()
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "published"
-    assert payload["publish_error"] == "ig_skipped_missing_card_content"
+    post = social_table.upsert.call_args[0][0]
+    assert post["status"] == "failed"
+    assert post["error"] == "ig_skipped_missing_card_content"
 
 
 @patch("lorescape_backend.social.publisher.create_client")
@@ -310,7 +329,7 @@ def test_approved_row_skips_ig_when_card_fields_null(
 ):
     zh = _row(card_title=None)  # one missing card field → mapper returns None
     place = _place_row()
-    client, ds_table, _, _ = _supabase_multi_table(
+    client, ds_table, social_table, _ = _supabase_multi_table(
         zh_rows=[zh], place_row=place,
     )
     create.return_value = client
@@ -322,7 +341,9 @@ def test_approved_row_skips_ig_when_card_fields_null(
     render.assert_not_called()
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "published"
-    assert payload["publish_error"] == "ig_skipped_missing_card_content"
+    post = social_table.upsert.call_args[0][0]
+    assert post["status"] == "failed"
+    assert post["error"] == "ig_skipped_missing_card_content"
 
 
 @patch("lorescape_backend.social.publisher.create_client")
@@ -336,7 +357,7 @@ def test_ig_render_failure_marks_failed_and_notifies(
 ):
     zh = _row()
     place = _place_row()
-    client, ds_table, _, _ = _supabase_multi_table(
+    client, ds_table, social_table, _ = _supabase_multi_table(
         zh_rows=[zh], place_row=place,
     )
     create.return_value = client
@@ -347,7 +368,9 @@ def test_ig_render_failure_marks_failed_and_notifies(
 
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "failed"
-    assert "chromium crashed" in payload["publish_error"]
+    post = social_table.upsert.call_args[0][0]
+    assert post["status"] == "failed"
+    assert "chromium crashed" in post["error"]
     notify.assert_called_once()
 
 
@@ -362,7 +385,7 @@ def test_ig_upload_failure_marks_failed_and_notifies(
 ):
     zh = _row()
     place = _place_row()
-    client, ds_table, _, _ = _supabase_multi_table(
+    client, ds_table, social_table, _ = _supabase_multi_table(
         zh_rows=[zh], place_row=place,
     )
     create.return_value = client
@@ -374,5 +397,7 @@ def test_ig_upload_failure_marks_failed_and_notifies(
 
     payload = ds_table.update.call_args[0][0]
     assert payload["review_state"] == "failed"
-    assert "supabase storage down" in payload["publish_error"]
+    post = social_table.upsert.call_args[0][0]
+    assert post["status"] == "failed"
+    assert "supabase storage down" in post["error"]
     notify.assert_called_once()

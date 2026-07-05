@@ -1,4 +1,10 @@
-"""Tests for the manual IG Reels publish script."""
+"""Tests for the manual IG Reels publish script.
+
+Cover rendering and hook parsing moved to the shared
+`lorescape_backend.social.reel_cover` module (tested in backend/tests);
+here we cover the script-local pieces: video resolution, caption source
+priority, and the CLI wiring.
+"""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -39,8 +45,8 @@ def test_build_caption_from_story_row(mocker):
         brand_handle_ig="@love.lorescape", cta_text="Explore."
     )
     mocker.patch.object(
-        publish_reel,
-        "_load_story_row",
+        publish_reel.reel_cover,
+        "load_story_row",
         return_value={
             "place_name": "Alhambra",
             "era": "13th century",
@@ -62,8 +68,8 @@ def test_build_caption_leads_with_narration_hook(mocker):
         brand_handle_ig="@love.lorescape", cta_text="Explore."
     )
     mocker.patch.object(
-        publish_reel,
-        "_load_story_row",
+        publish_reel.reel_cover,
+        "load_story_row",
         return_value={
             "place_name": "Alhambra",
             "era": "13th century",
@@ -83,7 +89,7 @@ def test_build_caption_leads_with_narration_hook(mocker):
     assert result.startswith("這座宮殿藏著什麼秘密？")
 
 
-def test_narration_hook_returns_first_nonblank_line(tmp_path, monkeypatch):
+def test_read_narration_returns_text(tmp_path, monkeypatch):
     day_dir = tmp_path / "2026-06-22"
     day_dir.mkdir()
     (day_dir / "narration.txt").write_text(
@@ -91,16 +97,18 @@ def test_narration_hook_returns_first_nonblank_line(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
 
-    assert publish_reel._narration_hook("2026-06-22") == "第一句鉤子。"
+    assert publish_reel._read_narration("2026-06-22") == "第一句鉤子。\n第二句。"
 
 
-def test_narration_hook_none_when_missing(tmp_path, monkeypatch):
+def test_read_narration_none_when_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
-    assert publish_reel._narration_hook("2026-06-22") is None
+    assert publish_reel._read_narration("2026-06-22") is None
 
 
 def test_build_caption_falls_back_to_narration(mocker):
-    mocker.patch.object(publish_reel, "_load_story_row", return_value=None)
+    mocker.patch.object(
+        publish_reel.reel_cover, "load_story_row", return_value=None
+    )
     mocker.patch.object(
         publish_reel, "_read_narration", return_value="narration line"
     )
@@ -111,7 +119,9 @@ def test_build_caption_falls_back_to_narration(mocker):
 
 
 def test_build_caption_raises_when_nothing_available(mocker):
-    mocker.patch.object(publish_reel, "_load_story_row", return_value=None)
+    mocker.patch.object(
+        publish_reel.reel_cover, "load_story_row", return_value=None
+    )
     mocker.patch.object(publish_reel, "_read_narration", return_value=None)
     with pytest.raises(ValueError):
         publish_reel._build_caption(
@@ -120,55 +130,6 @@ def test_build_caption_raises_when_nothing_available(mocker):
             date_str="2026-06-22",
             override=None,
         )
-
-
-def test_build_cover_url_renders_uploads_and_returns_url(mocker):
-    mocker.patch.object(
-        publish_reel, "_load_story_row", return_value={"place_id": "p1"}
-    )
-    mocker.patch.object(
-        publish_reel, "_load_place_row", return_value={"id": "p1"}
-    )
-    mocker.patch.object(
-        publish_reel.mapper, "build_card_content", return_value=object()
-    )
-    mocker.patch.object(
-        publish_reel, "render_cover", return_value=b"\x89PNGcover"
-    )
-    upload = mocker.patch.object(
-        publish_reel.card_storage,
-        "upload_card_png",
-        return_value="https://x.supabase.co/.../2026-06-22/reel-cover.png",
-    )
-
-    url = publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
-
-    assert url == "https://x.supabase.co/.../2026-06-22/reel-cover.png"
-    assert upload.call_args.kwargs["path"] == "2026-06-22/reel-cover.png"
-
-
-def test_build_cover_url_none_when_story_row_missing(mocker):
-    mocker.patch.object(publish_reel, "_load_story_row", return_value=None)
-    assert (
-        publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
-        is None
-    )
-
-
-def test_build_cover_url_none_when_card_content_missing(mocker):
-    mocker.patch.object(
-        publish_reel, "_load_story_row", return_value={"place_id": "p1"}
-    )
-    mocker.patch.object(
-        publish_reel, "_load_place_row", return_value={"id": "p1"}
-    )
-    mocker.patch.object(
-        publish_reel.mapper, "build_card_content", return_value=None
-    )
-    assert (
-        publish_reel._build_cover_url(supabase=object(), date_str="2026-06-22")
-        is None
-    )
 
 
 def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
@@ -181,7 +142,7 @@ def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
         publish_reel, "_build_caption", return_value="some caption"
     )
     mocker.patch.object(
-        publish_reel, "_build_cover_url",
+        publish_reel.reel_cover, "build_cover_url",
         return_value="https://x/cover.png",
     )
     config = SimpleNamespace(
@@ -215,7 +176,7 @@ def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
         publish_reel, "_build_caption", return_value="some caption"
     )
     mocker.patch.object(
-        publish_reel, "_build_cover_url",
+        publish_reel.reel_cover, "build_cover_url",
         side_effect=RuntimeError("render exploded"),
     )
     config = SimpleNamespace(
@@ -252,6 +213,9 @@ def test_main_returns_1_and_prints_error_on_publish_failure(
         publish_reel,
         "_build_caption",
         return_value="some caption",
+    )
+    mocker.patch.object(
+        publish_reel.reel_cover, "build_cover_url", return_value=None
     )
 
     config = SimpleNamespace(

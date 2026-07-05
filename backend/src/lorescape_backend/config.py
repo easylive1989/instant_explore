@@ -73,6 +73,11 @@ class Config:
     daily_story_generate_enabled: bool = True
     daily_story_publish_enabled: bool = True
 
+    # Directory holding the per-date reel videos rsynced from the operator's
+    # machine (<dir>/<YYYY-MM-DD>/final.mp4 + narration.txt). Unset disables
+    # the 21:10 reel publish job. Env: DAILY_VIDEO_DIR.
+    daily_video_dir: str | None = None
+
     @classmethod
     def from_env(cls) -> "Config":
         def required(name: str) -> str:
@@ -144,6 +149,7 @@ class Config:
             daily_story_publish_enabled=is_on(
                 "DAILY_STORY_PUBLISH_ENABLED", master_default
             ),
+            daily_video_dir=optional("DAILY_VIDEO_DIR"),
         )
 
     @property

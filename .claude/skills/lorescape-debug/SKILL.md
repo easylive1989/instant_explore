@@ -103,7 +103,17 @@ TODAY=$(date -u +%F)
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?publish_date=eq.${TODAY}&select=id,language,place_name,review_state,discord_message_id,hashtags,card_title_ch,card_paragraphs_ch,reviewed_at,published_at,ig_post_id,publish_error,created_at"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?publish_date=eq.${TODAY}&select=id,language,place_name,review_state,discord_message_id,hashtags,card_title_ch,card_paragraphs_ch,reviewed_at,created_at"
+```
+
+The IG publish outcome (post id / error) lives in `social_posts`, one row
+per (publish_date, media_type ∈ carousel|reel):
+
+```bash
+curl -s \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/social_posts?publish_date=eq.${TODAY}&select=media_type,status,ig_post_id,error,published_at"
 ```
 
 Check:
@@ -125,7 +135,7 @@ curl -s \
   "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_story_places?id=eq.${PLACE_ID}&select=name,is_active,used_at,card_location_en,card_city_ch,card_city_en,latitude,longitude"
 ```
 
-IG card needs `card_location_en`, `card_city_ch`, `card_city_en`, `latitude`, `longitude` all NOT NULL. If any is NULL, IG publish will skip with `publish_error="ig_skipped_missing_card_content"`. `used_at` must be set (otherwise tomorrow re-picks the same place).
+IG card needs `card_location_en`, `card_city_ch`, `card_city_en`, `latitude`, `longitude` all NOT NULL. If any is NULL, IG publish will skip, recording a `social_posts` row with `error="ig_skipped_missing_card_content"`. `used_at` must be set (otherwise tomorrow re-picks the same place).
 
 ### Step 5 — Discord review message exists?
 
@@ -171,10 +181,14 @@ Predict the 21:00 verdict per `discord_review.check_reaction`:
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?or=(review_state.eq.failed,publish_error.not.is.null)&order=publish_date.desc&limit=10&select=publish_date,language,review_state,publish_error,ig_post_id"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?review_state=eq.failed&order=publish_date.desc&limit=10&select=publish_date,language,review_state"
+curl -s \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/social_posts?status=eq.failed&order=publish_date.desc&limit=10&select=publish_date,media_type,error,ig_post_id"
 ```
 
-`ig_skipped_missing_card_content` is a recoverable design choice, not a crash. Anything else = real failure with traceback in `publish_error`.
+`ig_skipped_missing_card_content` is a recoverable design choice, not a crash. Anything else = real failure with traceback in `social_posts.error`.
 
 ### Step 8 — Scheduler timezone drift?
 
@@ -219,7 +233,11 @@ curl -s \
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?language=eq.en&order=publish_date.desc&limit=14&select=publish_date,review_state,ig_post_id,publish_error"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?language=eq.en&order=publish_date.desc&limit=14&select=publish_date,review_state"
+curl -s \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/social_posts?order=publish_date.desc&limit=14&select=publish_date,media_type,status,ig_post_id,error"
 ```
 
 ### Pickable places remaining
