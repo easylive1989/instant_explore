@@ -35,6 +35,9 @@ _REQUEST_TIMEOUT = 30
 # Cap Retry-After we honor so a misbehaving header can't stall the job.
 _MAX_RETRY_AFTER_SECONDS = 5.0
 _REVIEW_INSTRUCTION = "React ✅ to publish at 21:00 Asia/Taipei · ❌ to skip"
+_REEL_REVIEW_INSTRUCTION = (
+    "React ✅ to publish the reel at 21:10 Asia/Taipei · ❌ to skip"
+)
 
 
 @dataclass(frozen=True)
@@ -49,12 +52,43 @@ def send_for_review(
     *, bot_token: str, channel_id: str, payload: ReviewPayload
 ) -> str:
     """Post the IG card image and seed it with ✅/❌. Returns message id."""
-    message_id = _post_image_message(
+    message_id = _post_attachment_message(
         bot_token=bot_token,
         channel_id=channel_id,
-        png_bytes=payload.card_png,
+        file_bytes=payload.card_png,
         filename=f"ig-card-{payload.publish_date}.png",
+        content_type="image/png",
         content=_REVIEW_INSTRUCTION,
+    )
+    for emoji in (APPROVE_EMOJI, REJECT_EMOJI):
+        _add_self_reaction(
+            bot_token=bot_token,
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=emoji,
+        )
+    return message_id
+
+
+def send_video_for_review(
+    *,
+    bot_token: str,
+    channel_id: str,
+    video_bytes: bytes,
+    publish_date: str,
+) -> str:
+    """Post the reel video and seed it with ✅/❌. Returns message id.
+
+    The video must fit the channel's attachment limit (10 MB on a
+    non-boosted server) — callers compress a preview when needed.
+    """
+    message_id = _post_attachment_message(
+        bot_token=bot_token,
+        channel_id=channel_id,
+        file_bytes=video_bytes,
+        filename=f"ig-reel-{publish_date}.mp4",
+        content_type="video/mp4",
+        content=_REEL_REVIEW_INSTRUCTION,
     )
     for emoji in (APPROVE_EMOJI, REJECT_EMOJI):
         _add_self_reaction(
@@ -94,17 +128,18 @@ def check_reaction(
     return "none"
 
 
-def _post_image_message(
+def _post_attachment_message(
     *,
     bot_token: str,
     channel_id: str,
-    png_bytes: bytes,
+    file_bytes: bytes,
     filename: str,
+    content_type: str,
     content: str,
 ) -> str:
-    """POST /channels/{id}/messages as multipart with the PNG attached."""
+    """POST /channels/{id}/messages as multipart with the file attached."""
     files = {
-        "files[0]": (filename, png_bytes, "image/png"),
+        "files[0]": (filename, file_bytes, content_type),
         "payload_json": (
             None,
             json.dumps({"content": content}),

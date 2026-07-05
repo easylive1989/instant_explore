@@ -106,14 +106,18 @@ curl -s \
   "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/daily_stories?publish_date=eq.${TODAY}&select=id,language,place_name,review_state,discord_message_id,hashtags,card_title_ch,card_paragraphs_ch,reviewed_at,created_at"
 ```
 
-The IG publish outcome (post id / error) lives in `social_posts`, one row
-per (publish_date, media_type ∈ carousel|reel):
+The IG publish state lives in `social_posts`, one row per (publish_date,
+media_type ∈ carousel|reel). Carousel rows only record the outcome
+(review state stays on `daily_stories.review_state`); reel rows carry the
+full review state machine — `pending` (awaiting ✅ on the reel's own
+Discord video message, `discord_message_id`) → `published` / `failed` /
+`rejected` / `skipped` (no reaction by the 23:10 final pass):
 
 ```bash
 curl -s \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/social_posts?publish_date=eq.${TODAY}&select=media_type,status,ig_post_id,error,published_at"
+  "https://ymndmrefqprhtjxhgsei.supabase.co/rest/v1/social_posts?publish_date=eq.${TODAY}&select=media_type,status,discord_message_id,ig_post_id,error,published_at"
 ```
 
 Check:

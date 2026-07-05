@@ -201,3 +201,49 @@ def test_emoji_constants():
     """Keep the wire-level emoji bytes stable — Discord URLs depend on these."""
     assert APPROVE_EMOJI == "✅"
     assert REJECT_EMOJI == "❌"
+
+
+def test_send_video_for_review_uploads_mp4_then_adds_two_reactions(
+    requests_mock,
+):
+    from lorescape_backend.daily_story.discord_review import (
+        send_video_for_review,
+    )
+
+    fake_mp4 = b"\x00\x00\x00 ftypisomfake-reel-bytes"
+    requests_mock.post(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
+        json={"id": MESSAGE},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9C%85/@me",
+        json={},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9D%8C/@me",
+        json={},
+    )
+
+    msg_id = send_video_for_review(
+        bot_token="tok",
+        channel_id=CHANNEL,
+        video_bytes=fake_mp4,
+        publish_date="2026-07-05",
+    )
+
+    assert msg_id == MESSAGE
+    body = requests_mock.request_history[0].body
+    if isinstance(body, str):
+        body = body.encode("latin-1")
+    assert fake_mp4 in body
+    assert b"video/mp4" in body
+    assert b"ig-reel-2026-07-05.mp4" in body
+    # The reel instruction points at the 21:10 reel publish time.
+    assert b"21:10" in body
+    # Both seed reactions were added.
+    reaction_puts = [
+        r for r in requests_mock.request_history if r.method == "PUT"
+    ]
+    assert len(reaction_puts) == 2
