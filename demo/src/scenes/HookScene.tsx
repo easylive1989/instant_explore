@@ -1,75 +1,70 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { PaperBackdrop } from "../components/PaperBackdrop";
 import { colors, fonts } from "../theme";
 import { usePortrait } from "../utils/layout";
-import { fadeIn, slideUp } from "../utils/animations";
+import { fadeIn, fadeOut, slideUp } from "../utils/animations";
 
-// Beat 1 (0–5s): manifesto opener on warm paper.
+// Beat 1 (0–5s): dark, wordless-stage manifesto opener. No app UI — this is
+// the "page turning open" moment before the product is shown.
 export const HookScene: React.FC = () => {
   const frame = useCurrentFrame();
   const portrait = usePortrait();
-  const ruleWidth = fadeIn(frame, 6, 22) * (portrait ? 320 : 460);
+
+  const sceneOpacity = fadeOut(frame, 120, 24);
+  const dividerWidth = fadeIn(frame, 22, 20) * (portrait ? 90 : 130);
 
   return (
-    <PaperBackdrop>
+    <AbsoluteFill
+      style={{
+        background:
+          "radial-gradient(120% 100% at 70% -10%, #2c2620, #17120d 60%)",
+        opacity: sceneOpacity,
+      }}
+    >
       <AbsoluteFill
         style={{
           alignItems: "center",
           justifyContent: "center",
-          padding: portrait ? 80 : 140,
+          padding: portrait ? 60 : 120,
         }}
       >
         <div
           style={{
-            height: 2,
-            width: ruleWidth,
-            background: colors.clay,
-            marginBottom: 44,
-          }}
-        />
-        <div
-          style={{
             fontFamily: fonts.serif,
             fontWeight: 700,
-            fontSize: portrait ? 64 : 78,
-            lineHeight: 1.32,
-            color: colors.ink,
+            fontSize: portrait ? 64 : 96,
+            lineHeight: 1.4,
+            color: colors.onDark,
             textAlign: "center",
-            maxWidth: portrait ? 720 : 1180,
+            whiteSpace: "nowrap",
           }}
         >
           <div
             style={{
-              opacity: fadeIn(frame, 14, 18),
-              transform: `translateY(${slideUp(frame, 14, 24, 36)}px)`,
-            }}
-          >
-            別再低頭盯著螢幕。
-          </div>
-          <div
-            style={{
-              opacity: fadeIn(frame, 40, 20),
-              transform: `translateY(${slideUp(frame, 40, 26, 36)}px)`,
+              opacity: fadeIn(frame, 10, 18),
+              transform: `translateY(${slideUp(frame, 10, 18, 36)}px)`,
             }}
           >
             抬起眼睛，
-            <span style={{ color: colors.clay }}>世界本身就是展品。</span>
+          </div>
+          <div
+            style={{
+              height: 2,
+              width: dividerWidth,
+              margin: "18px auto",
+              background: colors.clay,
+            }}
+          />
+          <div
+            style={{
+              opacity: fadeIn(frame, 30, 18),
+              transform: `translateY(${slideUp(frame, 30, 18, 36)}px)`,
+            }}
+          >
+            世界本身就是一本書。
           </div>
         </div>
-        <div
-          style={{
-            marginTop: 52,
-            fontFamily: fonts.sans,
-            fontSize: 22,
-            letterSpacing: "0.12em",
-            color: colors.ink3,
-            opacity: fadeIn(frame, 78, 24),
-          }}
-        >
-          Lorescape
-        </div>
       </AbsoluteFill>
-    </PaperBackdrop>
+    </AbsoluteFill>
   );
 };
