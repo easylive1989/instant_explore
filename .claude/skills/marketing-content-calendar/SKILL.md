@@ -67,7 +67,7 @@ description: Plan a Lorescape content calendar — aligns to the daily-story rhy
 
 ### 月度內容行事曆表
 
-生成 `workspace/marketing-content-calendar/_content-map.md`：
+生成 `marketing/marketing-content-calendar/_content-map.md`：
 
 | 週 | 日期 | 內容標題 | 格式 | 通路 | 主題 | 語言 | 優先級 |
 |----|------|----------|------|------|------|------|--------|
@@ -88,7 +88,7 @@ description: Plan a Lorescape content calendar — aligns to the daily-story rhy
 
 ### 候選內容評分（Kill List）
 
-建立 `workspace/marketing-content-calendar/_idea-eval.md`：
+建立 `marketing/marketing-content-calendar/_idea-eval.md`：
 
 | 構想 | 通路 | 分數 (0–25) | 決定 | 原因 |
 |------|------|------------|------|------|
@@ -138,7 +138,7 @@ description: Plan a Lorescape content calendar — aligns to the daily-story rhy
 
 ## Phase 5: 分發備忘
 
-生成 `workspace/marketing-content-calendar/_distribution.md`：
+生成 `marketing/marketing-content-calendar/_distribution.md`：
 - 哪些 SEO 部落格可截短為 IG 貼文（交 marketing-repurpose 處理）
 - App Store 更新文案與 IG 公告的對應關係
 - 每月景點故事系列的 Hashtag 策略（固定標籤 + 輪換標籤）
@@ -146,7 +146,7 @@ description: Plan a Lorescape content calendar — aligns to the daily-story rhy
 ## 輸出結構
 
 ```
-workspace/marketing-content-calendar/
+marketing/marketing-content-calendar/
 ├── _content-map.md         # 完整月度行事曆
 ├── _idea-eval.md           # 候選內容評分
 ├── briefs/

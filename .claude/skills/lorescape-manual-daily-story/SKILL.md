@@ -72,7 +72,7 @@ cd scripts && uv run python -m unsplash_images --date 2026-06-16
 
 It reads the draft, runs 5 **place-anchored** landscape queries (every
 query contains the place name), and saves results + downloaded jpgs to
-`outputs/daily_image/{date}/unsplash_results.json` (repo root). Needs
+`marketing/outputs/daily_image/{date}/unsplash_results.json` (repo root). Needs
 `UNSPLASH_ACCESS_KEY` in `scripts/.env` (free demo key, 50 req/hr, from
 https://unsplash.com/developers).
 
@@ -230,7 +230,7 @@ cd scripts && uv run python -m unsplash_images
 ```
 
 This reads the draft, runs 5 place-anchored queries, and downloads
-candidates to `outputs/daily_image/{date}/`. Then:
+candidates to `marketing/outputs/daily_image/{date}/`. Then:
 
 1. **Look at the downloaded jpgs** (read the image files) — don't judge
    from descriptions alone.
@@ -322,7 +322,7 @@ live UI.
   `actor_2.png` (clear front face) as the identity reference; swap to
   `actor_5.png` (back view) when the shot is framed from behind.
 - **Place photo** — this run's best genuine shot from
-  `outputs/daily_image/{date}/` (the Wikipedia cover or a kept Unsplash
+  `marketing/outputs/daily_image/{date}/` (the Wikipedia cover or a kept Unsplash
   photo). This locks the REAL building, not an AI hallucination.
 
 **Creative direction (Lorescape standing choices):**
@@ -352,7 +352,7 @@ live UI.
   reference images, so the prompt is **camera-first + action**, lightly
   referencing "the woman" and "the brick church / the place" (~60–90
   words). Also save the prompt text to
-  `outputs/daily_image/{date}/video_prompt.md`.
+  `marketing/outputs/daily_image/{date}/video_prompt.md`.
 
 **⛔ Paid checkpoint** — Flow generation spends the user's Flow credits
 (Omni Flash 9:16 10s ≈ 15 credits ×1). Stage everything, then get an
@@ -417,7 +417,7 @@ scripts/import_source_video.sh {date}     # specific date
 ```
 
 It moves the mp4 from `~/Downloads` to
-`outputs/daily_video/{date}/source.mp4` (renaming it), prompting which to
+`marketing/outputs/daily_video/{date}/source.mp4` (renaming it), prompting which to
 pick when several mp4s are present. They can also drop it there manually,
 or put it anywhere and pass the path with `--input`.
 
@@ -427,7 +427,7 @@ seconds spoken, conversational and for the ear (not a transcript of the
 card). Put **one caption line per row** in:
 
 ```
-outputs/daily_video/{date}/narration.txt
+marketing/outputs/daily_video/{date}/narration.txt
 ```
 
 **The first line is the hook** — it renders as a large, upper-centre title
@@ -517,8 +517,8 @@ if the voiceover runs past the clip it holds the last frame so nothing is
 cut. Output:
 
 ```
-outputs/daily_video/{date}/final.mp4   ← the IG Reels deliverable
-outputs/daily_video/{date}/voice.wav   ← kept for review
+marketing/outputs/daily_video/{date}/final.mp4   ← the IG Reels deliverable
+marketing/outputs/daily_video/{date}/voice.wav   ← kept for review
 ```
 
 **Implementation note:** captions are rendered to transparent PNGs with
@@ -541,10 +541,10 @@ Then present `final.mp4` in chat — this is the IG Reels deliverable.
 | Cover chain | Wikipedia commercial lead → best Unsplash place shot → ask user → switch place (never NULL at publish) |
 | Cover licensing | Set `image_attribution` per [5d](#5d--cover-licensing-by-and-sa-set-once-in-image_attribution): Unsplash/CC0 = courtesy credit; **CC BY-SA lead = BY + SA line** (release cover under same version, note modified, scope SA to cover only, don't hype "AI"). One field feeds both carousel + reel captions |
 | Unsplash key | `UNSPLASH_ACCESS_KEY` in `backend/.env` (free demo, 50 req/hr) |
-| Unsplash output | `outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
+| Unsplash output | `marketing/outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
 | Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
-| Reel prompt output | `outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
-| IG Reels post-prod | After Flow + user downloads master to `outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Despina) is the default; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback (ElevenLabs removed — Western accent on zh) |
+| Reel prompt output | `marketing/outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
+| IG Reels post-prod | After Flow + user downloads master to `marketing/outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Despina) is the default; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback (ElevenLabs removed — Western accent on zh) |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |

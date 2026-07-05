@@ -58,7 +58,7 @@ venv/
 .pytest_cache/
 
 # Local outputs (generated assets, not tracked)
-outputs/
+marketing/outputs/
 
 # Google service account credentials
 service-account.json

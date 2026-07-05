@@ -79,6 +79,11 @@ insights；較舊的貼文保留既有紀錄。
    `references/stores-browser.md` 用 Chrome 抓下載數與評分，把數字記到
    試算表（截圖可留在 scratchpad），需要時附一段文字摘要給使用者。
 
+5. **選點規劃提示**：若本次更新了 `ig` / `ig_posts` 並向使用者做了
+   IG 成效分析，結尾提示可接著用 **lorescape-reels-planner** 依最新
+   數據規劃或檢核每日景點 Reel 的選點 calendar（下期排程、配比調整、
+   期末檢核到期時尤其該提）。
+
 ## 注意
 
 - 全程本機、唯讀，不寫 Supabase、不碰 server 排程；只寫使用者自己的試算表。

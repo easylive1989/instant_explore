@@ -108,7 +108,7 @@ Plan and batch-produce Instagram-first social content for Lorescape.
 ## Phase 5: 輸出
 
 ```
-workspace/marketing-social/
+marketing/marketing-social/
 ├── _calendar.md          # 整體規劃表
 ├── ig-captions/
 │   ├── yyyy-mm-dd.md

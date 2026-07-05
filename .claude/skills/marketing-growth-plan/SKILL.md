@@ -121,10 +121,10 @@ Month 3:
 
 ## Phase 5: Output
 
-Save to `workspace/growth-plan/`:
+Save to `marketing/growth-plan/`:
 
 ```
-workspace/growth-plan/
+marketing/growth-plan/
 ├── _stage-assessment.md         # 當前階段 + 診斷
 ├── _90-day-plan.md              # 完整計畫
 ├── _metrics-dashboard.md        # 追蹤指標

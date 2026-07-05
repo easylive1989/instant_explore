@@ -47,7 +47,7 @@ Brand Voice 寫作守則（從 MARKETING.md 強制執行）：
 | **pull quote** | 原故事中可直接引用的金句（優先使用 card_pull_quote） |
 | **地點脈絡** | 景點名稱、地點、時代（用於 hashtag 與 SEO） |
 
-生成 `workspace/marketing-repurpose/_extraction-map.md`：
+生成 `marketing/marketing-repurpose/_extraction-map.md`：
 
 | 提取內容 | 類型 | 最適通路 | 格式 |
 |----------|------|---------|------|
@@ -149,7 +149,7 @@ Brand Voice 寫作守則（從 MARKETING.md 強制執行）：
 ## 輸出結構
 
 ```
-workspace/marketing-repurpose/
+marketing/marketing-repurpose/
 ├── _extraction-map.md      # 故事解析提取圖
 ├── _source-story.md        # 原始故事副本（參考用）
 ├── carousel/

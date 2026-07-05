@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # 把 ~/Downloads 裡下載好的 mp4 改名成 source.mp4，
-# 放到 outputs/daily_video/<today>/ 資料夾。
+# 放到 marketing/outputs/daily_video/<today>/ 資料夾。
 #
 # 用法：
 #   scripts/import_source_video.sh            # 日期用今天
@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 DATE="${1:-$(date +%F)}"
-DEST_DIR="${REPO_ROOT}/outputs/daily_video/${DATE}"
+DEST_DIR="${REPO_ROOT}/marketing/outputs/daily_video/${DATE}"
 DEST="${DEST_DIR}/source.mp4"
 
 # 收集 Downloads 裡的 mp4（只看第一層，不遞迴）

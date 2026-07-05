@@ -1,11 +1,11 @@
 ---
 name: publish-reel
-description: Use when the user wants to manually publish a specific day's finished video from outputs/daily_video/<date>/ to Instagram Reels using the local IG token in backend/.env — e.g. "發布某天的影片到 IG reels", "把今天的影片發到 Reels", "publish reel for 2026-06-22". Local-only, does not touch the server's scheduled publish job.
+description: Use when the user wants to manually publish a specific day's finished video from marketing/outputs/daily_video/<date>/ to Instagram Reels using the local IG token in backend/.env — e.g. "發布某天的影片到 IG reels", "把今天的影片發到 Reels", "publish reel for 2026-06-22". Local-only, does not touch the server's scheduled publish job.
 ---
 
 # Publish a daily video to Instagram Reels (local)
 
-手動把 `outputs/daily_video/<date>/final.mp4` 用本機 IG token 發布為 IG Reels。
+手動把 `marketing/outputs/daily_video/<date>/final.mp4` 用本機 IG token 發布為 IG Reels。
 完全在本機執行，不經 server 排程、不寫回 Supabase。
 
 ## 前置條件
@@ -13,7 +13,7 @@ description: Use when the user wants to manually publish a specific day's finish
 - `backend/.env` 已填好 `IG_USER_ID`、`META_PAGE_ACCESS_TOKEN`、
   `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`（取得方式見
   `docs/init/social_publisher_setup.md`）。
-- 目標日期的 `outputs/daily_video/<date>/final.mp4` 已存在。
+- 目標日期的 `marketing/outputs/daily_video/<date>/final.mp4` 已存在。
 
 ## 步驟
 

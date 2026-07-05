@@ -4,7 +4,7 @@ The lorescape-manual-daily-story skill produces a clean 9:16 / 10s reel in
 Google Flow with NO narration and NO on-screen text (Step 9). That clip is
 the master. This script is Step 10: it takes the downloaded master and
 overlays a short zh-TW voiceover plus full burned-in captions, producing an
-IG-ready cut in ``outputs/daily_video/{date}/final.mp4``.
+IG-ready cut in ``marketing/outputs/daily_video/{date}/final.mp4``.
 
 The voiceover uses Gemini TTS by default (natural zh-TW; macOS ``say`` is
 the offline fallback via ``--engine say``). Captions are kept in sync by
@@ -22,8 +22,8 @@ Run from scripts/:
     uv run python -m daily_video_post --date 2026-06-20
     uv run python -m daily_video_post \\
         --date 2026-06-20 \\
-        --input outputs/daily_video/2026-06-20/source.mp4 \\
-        --text  outputs/daily_video/2026-06-20/narration.txt \\
+        --input marketing/outputs/daily_video/2026-06-20/source.mp4 \\
+        --text  marketing/outputs/daily_video/2026-06-20/narration.txt \\
         --voice Meijia --bg-volume 0.28
 
 ``--text`` points at a UTF-8 file with one caption line per row (Claude
@@ -638,7 +638,7 @@ def cmd_build(args: argparse.Namespace) -> int:
     }
     voice = args.voice or _engine_default_voice[args.engine]
 
-    out_dir = REPO_ROOT / "outputs" / "daily_video" / args.date
+    out_dir = REPO_ROOT / "marketing" / "outputs" / "daily_video" / args.date
     out_dir.mkdir(parents=True, exist_ok=True)
 
     source = Path(args.input) if args.input else out_dir / "source.mp4"
@@ -648,7 +648,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         raise PostProductionError(
             f"input video not found: {source}\n"
             "Download the Flow reel and place it at "
-            f"outputs/daily_video/{args.date}/source.mp4 (or pass --input)."
+            f"marketing/outputs/daily_video/{args.date}/source.mp4 (or pass --input)."
         )
 
     width, height = _ffprobe_dimensions(source)
@@ -734,11 +734,11 @@ def main(argv: list[str]) -> int:
     )
     parser.add_argument(
         "--input", help="Source video (default: "
-        "outputs/daily_video/{date}/source.mp4)"
+        "marketing/outputs/daily_video/{date}/source.mp4)"
     )
     parser.add_argument(
         "--text", help="UTF-8 file, one caption line per row (default: "
-        "outputs/daily_video/{date}/narration.txt)"
+        "marketing/outputs/daily_video/{date}/narration.txt)"
     )
     parser.add_argument(
         "--line", action="append", help="Caption line (repeatable; overrides "

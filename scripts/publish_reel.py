@@ -1,6 +1,6 @@
 """Manually publish a daily video to Instagram Reels from your machine.
 
-Reads the finished video at outputs/daily_video/<date>/final.mp4, builds the
+Reads the finished video at marketing/outputs/daily_video/<date>/final.mp4, builds the
 caption from the Supabase daily story for that date (zh-TW), and publishes it
 as an IG Reel using the local IG credentials in backend/.env. This is fully
 local and independent of the server's scheduled publish job — nothing is
@@ -27,7 +27,7 @@ from lorescape_backend.social import caption, card_storage, instagram
 from lorescape_backend.social.card import mapper, render_cover
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DAILY_VIDEO_DIR = REPO_ROOT / "outputs" / "daily_video"
+DAILY_VIDEO_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_video"
 PUBLISH_LANGUAGE = "zh-TW"
 
 

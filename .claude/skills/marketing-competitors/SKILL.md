@@ -115,7 +115,7 @@ Generate a 1-page App 對比卡 per competitor (format adapted for B2C App conte
 ## Phase 5: Output
 
 ```
-workspace/competitive-intel/
+marketing/competitive-intel/
 ├── _landscape-overview.md       # 全景 5 層分析
 ├── _competitive-matrix.md       # App 比較矩陣
 ├── app-comparison-cards/

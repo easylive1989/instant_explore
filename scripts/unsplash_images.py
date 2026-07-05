@@ -3,7 +3,7 @@
 Reads /tmp/lorescape_daily_story_draft.json, runs 5 place-anchored queries
 against the Unsplash API (every query contains the place name, so results
 depict the place itself — not loosely related themes), and writes them to:
-  outputs/daily_image/{date}/unsplash_results.json  (repo root)
+  marketing/outputs/daily_image/{date}/unsplash_results.json  (repo root)
 
 The caller still visually filters the downloads to keep only genuine
 place shots; these feed the cover image and the Google Flow video prompt.
@@ -165,7 +165,7 @@ def main() -> None:
                 "error": str(exc),
             }
 
-    out_dir = Path(__file__).parent.parent / "outputs" / "daily_image" / args.date
+    out_dir = Path(__file__).parent.parent / "marketing" / "outputs" / "daily_image" / args.date
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Download images — {angle_key}_{index+1}.jpg
