@@ -77,3 +77,14 @@ def test_html_is_escaped_but_highlights_stay_markup():
     html = render_html(slide, photo_uri="x")
     assert "<script>alert" not in html
     assert "&lt;script&gt;" in html
+
+
+def test_overlapping_highlights_do_not_nest():
+    slide = WanderSlide(
+        layout="beat", photo="x.jpg",
+        lines=("西西公主嫁入奧地利皇室。",),
+        highlights=("奧地利", "奧地利皇室"),
+    )
+    html = render_html(slide, photo_uri="x")
+    assert '<em class="hl">奧地利皇室</em>' in html
+    assert '<em class="hl"><em' not in html
