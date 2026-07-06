@@ -102,3 +102,36 @@ def test_get_post_returns_row_or_none():
     row = post_log.get_post(client, "2026-07-05", "reel")
 
     assert row == {"status": "pending"}
+
+
+def test_record_review_pending_carries_slide_urls_and_caption():
+    client, table = _client()
+
+    post_log.record_review_pending(
+        client,
+        publish_date="2026-07-06",
+        media_type="carousel",
+        discord_message_id="msg-1",
+        slide_urls=["https://x/1.jpg", "https://x/2.jpg"],
+        caption="今天的故事",
+    )
+
+    payload, = table.upsert.call_args.args
+    assert payload["slide_urls"] == ["https://x/1.jpg", "https://x/2.jpg"]
+    assert payload["caption"] == "今天的故事"
+    assert payload["status"] == "pending"
+
+
+def test_record_review_pending_defaults_keep_reel_payload_nullable():
+    client, table = _client()
+
+    post_log.record_review_pending(
+        client,
+        publish_date="2026-07-06",
+        media_type="reel",
+        discord_message_id="msg-2",
+    )
+
+    payload, = table.upsert.call_args.args
+    assert payload["slide_urls"] is None
+    assert payload["caption"] is None

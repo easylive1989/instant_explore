@@ -22,10 +22,14 @@ def record_review_pending(
     publish_date: str,
     media_type: str,
     discord_message_id: str,
+    slide_urls: list[str] | None = None,
+    caption: str | None = None,
 ) -> None:
     """Upsert a 'pending' row pointing at the Discord review message.
 
-    Re-sending for review (e.g. after a re-edited video) resets any prior
+    For pre-rendered carousels, `slide_urls` carries the uploaded slide
+    URLs and `caption` the reviewed IG caption; the 21:00 publish job then
+    publishes these exact images. Re-sending for review resets any prior
     state so the publish job re-reads the new message's reactions.
     """
     payload: dict[str, Any] = {
@@ -33,6 +37,8 @@ def record_review_pending(
         "media_type": media_type,
         "status": "pending",
         "discord_message_id": discord_message_id,
+        "slide_urls": slide_urls,
+        "caption": caption,
         "ig_post_id": None,
         "error": None,
         "published_at": None,
