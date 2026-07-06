@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from PIL import Image
+from playwright.sync_api import sync_playwright
 
 from lorescape_backend.social.wander.content import (
     WanderCarousel,
@@ -14,6 +15,9 @@ from lorescape_backend.social.wander.content import (
     WanderSlide,
 )
 from lorescape_backend.social.wander.renderer import (
+    _FIT_OPTS,
+    _FIT_SCRIPT,
+    _html_file,
     render_carousel,
     render_slide,
 )
@@ -76,3 +80,38 @@ def test_long_copy_shrinks_via_fit_instead_of_overflowing(photos_dir):
     )
     jpeg = render_slide(long_slide, photos_dir=photos_dir)
     assert Image.open(BytesIO(jpeg)).size == (1080, 1350)
+
+
+def test_fit_script_shrinks_long_copy_until_it_fits(photos_dir):
+    """Auto-fit 必須真的縮字：--fit < 1 且縮完不再 overflow.
+
+    `test_long_copy_shrinks_via_fit_instead_of_overflowing` only checks the
+    output image dimensions, which stay 1080x1350 even if `--fit` never
+    engages (`.ws-card` hides overflow, so clipping is invisible to a size
+    check). This test drives the real fit pass and reads the DOM metrics
+    directly, so a no-op fit script would fail it.
+    """
+    long_slide = WanderSlide(
+        layout="beat", photo="a.jpg", title="長文測試，",
+        lines=tuple(f"這是一句用來把版面塞爆的長句子第 {i} 行。"
+                    for i in range(14)),
+    )
+    with _html_file(long_slide, photos_dir=photos_dir) as tmp_path:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            try:
+                page = browser.new_page(
+                    viewport={"width": 1080, "height": 1350},
+                    device_scale_factor=1.0,
+                )
+                page.goto(tmp_path.as_uri(), wait_until="networkidle")
+                fit = page.evaluate(_FIT_SCRIPT, _FIT_OPTS)
+                metrics = page.evaluate(
+                    "() => { const p = document.querySelector('.ws-fit');"
+                    " return {scroll: p.scrollHeight, client: p.clientHeight}; }"
+                )
+            finally:
+                browser.close()
+
+    assert fit < 1.0
+    assert metrics["scroll"] <= metrics["client"]
