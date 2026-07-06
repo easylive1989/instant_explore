@@ -33,10 +33,11 @@ description: Use when the user wants to publish a wander-style (dark
 - 7–9 頁；每頁 2–4 短句（`lines`），句尾逗號製造翻頁懸念；
   `lines` 中空字串 `""` = 裝飾分隔線。
 - 節拍順序：cover 鉤子（含一次反轉）→ beat 起伏 → beat 衝突 →
-  beat 彩蛋（第一人稱「最讓我意外的是…」）→ beat 轉折 →
+  beat 彩蛋（「最令人意外的是…」）→ beat 轉折 →
   bright 主題頁（呼應旅行/自由，配最亮的照片）→ ending
-  （結局 + 「她」→「我們」的讀者投射；品牌區塊模板自帶）。
-- 人稱：以「她/他」為主；「我」只出現在彩蛋頁與結局詮釋。
+  （結局 + 收在普世的讀者投射；品牌區塊模板自帶）。
+- 人稱：全篇第三人稱（「她/他/它」），**任何頁都不用「我」**
+  （彩蛋頁用「最令人意外的是⋯」「很少人知道，」這類寫法）。
 - `highlights` 每頁最多 2 個金色強調詞；一個主題詞（如「自由」）
   貫穿全篇。
 - 照片配頁跟情緒走：悲劇配最暗的照片（`overlay: "darker"`）、
@@ -56,7 +57,7 @@ description: Use when the user wants to publish a wander-style (dark
          "lines": ["原本安排訂婚的，", "其實是她的姊姊。", "",
                     "沒想到，", "皇帝卻對西西公主一見鍾情。"]},
         {"layout": "beat", "photo": "gym.jpg", "text_position": "left",
-         "title": "最讓我意外的是⋯", "highlights": ["運動器材"],
+         "title": "最令人意外的是⋯", "highlights": ["運動器材"],
          "lines": ["她的房間裡，", "竟然設有運動器材。"]},
         {"layout": "bright", "photo": "palace.jpg",
          "lines": ["比起留在皇宮，", "她更喜歡旅行。"]},
