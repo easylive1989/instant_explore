@@ -37,12 +37,27 @@ logger = logging.getLogger(__name__)
 PUBLISH_LANGUAGE = "zh-TW"
 
 
-def run_publish_job(config: Config, target_date: date | None = None) -> None:
-    """Process all pending daily_stories rows for the given date (default: today)."""
+def run_publish_job(
+    config: Config,
+    target_date: date | None = None,
+    *,
+    dry_run: bool = False,
+) -> None:
+    """Process all pending daily_stories rows for the given date (default: today).
+
+    When a pre-rendered (wander-style) carousel was sent for review for
+    this date, that review alone decides the day's carousel and the
+    default rendering flow is skipped entirely. `dry_run` only affects
+    the pre-rendered branch (prints the decision without publishing).
+    """
     if target_date is None:
         target_date = date.today()
 
     supabase = create_client(config.supabase_url, config.supabase_service_role_key)
+
+    if _handle_prerendered(supabase, config, target_date, dry_run=dry_run):
+        return
+
     rows = _load_pending_rows(supabase, target_date)
 
     if not rows:
@@ -233,18 +248,147 @@ def _truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
+def _handle_prerendered(
+    supabase, config: Config, target_date: date, *, dry_run: bool = False
+) -> bool:
+    """Publish a pre-rendered carousel if one was sent for review today.
+
+    Returns True when a pre-rendered row exists (slide_urls non-empty) —
+    the caller must then skip the default flow entirely, regardless of
+    the outcome here.
+    """
+    date_str = target_date.isoformat()
+    row = post_log.get_post(supabase, date_str, "carousel")
+    if row is None or not row.get("slide_urls"):
+        return False
+
+    status = row.get("status")
+    if status in ("published", "rejected", "skipped"):
+        logger.info(
+            "Pre-rendered carousel for %s already '%s'; nothing to do",
+            date_str, status,
+        )
+        return True
+
+    message_id = row.get("discord_message_id")
+    if not message_id or not config.review_enabled:
+        logger.warning(
+            "Pre-rendered carousel for %s has no reviewable message "
+            "(message_id=%s, review_enabled=%s); leaving pending",
+            date_str, message_id, config.review_enabled,
+        )
+        return True
+
+    decision = discord_review.check_reaction(
+        bot_token=config.discord_bot_token,  # type: ignore[arg-type]
+        channel_id=config.discord_review_channel_id,  # type: ignore[arg-type]
+        message_id=message_id,
+        approver_ids=config.discord_approver_ids,
+    )
+    slide_urls = list(row["slide_urls"])
+    ig_caption = row.get("caption") or ""
+
+    if dry_run:
+        print(f"[dry-run] decision: {decision}")
+        for url in slide_urls:
+            print(f"[dry-run] slide:   {url}")
+        print(f"[dry-run] caption:\n{ig_caption}")
+        return True
+
+    if decision == "rejected":
+        post_log.mark_status(
+            supabase, publish_date=date_str, media_type="carousel",
+            status="rejected",
+        )
+        _sync_story_state(supabase, date_str, "rejected")
+        return True
+    if decision == "none":
+        post_log.mark_status(
+            supabase, publish_date=date_str, media_type="carousel",
+            status="skipped",
+        )
+        _sync_story_state(supabase, date_str, "skipped")
+        return True
+
+    # decision == "approved"
+    if not config.instagram_enabled:
+        logger.warning(
+            "Instagram not configured; leaving pre-rendered carousel pending"
+        )
+        return True
+    try:
+        ig_post_id = instagram.publish_carousel(
+            ig_user_id=config.ig_user_id,  # type: ignore[arg-type]
+            access_token=config.meta_page_access_token,  # type: ignore[arg-type]
+            image_urls=slide_urls,
+            caption=ig_caption,
+        )
+    except Exception as exc:  # noqa: BLE001 — orchestrator catches all
+        logger.exception("Pre-rendered carousel publish failed for %s",
+                         date_str)
+        post_log.record_post(
+            supabase, publish_date=date_str, media_type="carousel",
+            status="failed", error=_truncate(str(exc), 1000),
+        )
+        _sync_story_state(supabase, date_str, "failed")
+        if config.discord_webhook_url:
+            discord_notify.notify_failure(
+                webhook_url=config.discord_webhook_url,
+                date_str=date_str,
+                error_message=f"Pre-rendered carousel publish failed: {exc}",
+                traceback_str="",
+            )
+        return True
+
+    post_log.record_post(
+        supabase, publish_date=date_str, media_type="carousel",
+        status="published", ig_post_id=ig_post_id,
+    )
+    _sync_story_state(supabase, date_str, "published")
+    logger.info("Published pre-rendered carousel for %s: %s",
+                date_str, ig_post_id)
+    return True
+
+
+def _sync_story_state(supabase, date_str: str, new_state: str) -> None:
+    """Mirror the pre-rendered carousel outcome onto the day's story row.
+
+    Only rows still in 'pending' are touched, so a story already resolved
+    by other means keeps its state; this prevents the next-day back-fill
+    flow from re-sending an already-decided day.
+    """
+    (
+        supabase.table("daily_stories")
+        .update({
+            "review_state": new_state,
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+        })
+        .eq("publish_date", date_str)
+        .eq("language", PUBLISH_LANGUAGE)
+        .eq("review_state", "pending")
+        .execute()
+    )
+
+
 def main() -> None:
-    """CLI entrypoint: `python -m lorescape_backend.social.publisher [YYYY-MM-DD]`."""
-    import logging
-    import sys
+    """CLI: `python -m lorescape_backend.social.publisher [date] [--dry-run]`."""
+    import argparse
 
     logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "date", nargs="?", help="Publish date YYYY-MM-DD (default: today)"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Pre-rendered branch only: print decision/slides/caption "
+             "without publishing",
+    )
+    args = parser.parse_args()
 
     config = Config.from_env()
-    target = (
-        date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else date.today()
-    )
-    run_publish_job(config, target)
+    target = date.fromisoformat(args.date) if args.date else date.today()
+    run_publish_job(config, target, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":

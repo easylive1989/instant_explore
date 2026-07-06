@@ -83,6 +83,8 @@ def _supabase_multi_table(*, zh_rows, place_row=None):
     social_posts_table.upsert.return_value.execute.return_value = MagicMock(
         data=None
     )
+    # No pre-rendered row for these tests: default flow only.
+    social_posts_table.select.return_value = _make_select_chain([])
 
     client = MagicMock()
 
