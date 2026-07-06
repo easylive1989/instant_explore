@@ -116,7 +116,7 @@
 
 - [ ] **c) Remove import** — after the edits, run:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore && grep -n "AppColors" frontend/lib/features/saved_locations/presentation/widgets/saved_locations_fab.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -n "AppColors" frontend/lib/features/saved_locations/presentation/widgets/saved_locations_fab.dart
   ```
   Expected: zero matches. Then remove `import 'package:context_app/common/config/app_colors.dart';`.
 
@@ -138,7 +138,7 @@
 
 - [ ] **b) Remove import** — after the edit, run:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore && grep -n "AppColors" frontend/lib/features/saved_locations/presentation/widgets/saved_locations_dialog.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -n "AppColors" frontend/lib/features/saved_locations/presentation/widgets/saved_locations_dialog.dart
   ```
   Expected: zero matches. Then remove `import 'package:context_app/common/config/app_colors.dart';`.
 
@@ -146,26 +146,26 @@
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/saved_locations/presentation/widgets/ test/features/saved_locations/presentation/widgets/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/saved_locations/presentation/widgets/ test/features/saved_locations/presentation/widgets/
   ```
   Expected: No issues.
 
 - [ ] **Saved locations tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/saved_locations/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/saved_locations/
   ```
   Expected: all pass.
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 ### Step 4: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/saved_locations/presentation/widgets/ && \
   git commit -m "$(cat <<'EOF'
 feat(saved-locations): route hardcoded colors through colorScheme

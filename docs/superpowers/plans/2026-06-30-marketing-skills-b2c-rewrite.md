@@ -44,7 +44,7 @@ for d in .claude/skills/marketing-*/ ; do n=$(basename "$d"); grep -q "^name: $n
 - [ ] **Step 1: 確認刪除前的總數**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 ls -d .claude/skills/kai-* .claude/skills/kai .claude/skills/kaicalls-design 2>/dev/null | wc -l   # 預期 49
 ```
 Expected: `49`
@@ -52,7 +52,7 @@ Expected: `49`
 - [ ] **Step 2: 刪除 34 個目錄**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/.claude/skills
+cd /Users/paulwu/Documents/PLRepo/instant_explore/.claude/skills
 git rm -r kai-abm kai-ad-campaign kai-audit kai-brand-pulse kai-brief kai-budget \
   kai-case-study kai-cold-outreach kai-daily-ad-review kai-data-dashboard \
   kai-email-system kai-growth-hacker kai-html-presentation kai-influencer \
@@ -65,7 +65,7 @@ git rm -r kai-abm kai-ad-campaign kai-audit kai-brand-pulse kai-brief kai-budget
 - [ ] **Step 3: 驗證只剩 15 個保留項**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 ls -d .claude/skills/kai-* | sort
 ls -d .claude/skills/kai-* | wc -l                                   # 預期 15
 ls -d .claude/skills/kai .claude/skills/kaicalls-design 2>/dev/null | wc -l   # 預期 0
@@ -94,7 +94,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 - [ ] **Step 1: 蒐集可推導的資料**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 # 訂閱方案 / 價格線索
 grep -rn "rc_weekly\|rc_monthly\|rc_annual\|Premium\|subscription" frontend/lib --include="*.dart" | head
 # App Store / bundle id 線索
@@ -159,7 +159,7 @@ cat .claude/skills/kai-gate/SKILL.md
 - [ ] **Step 3: 刪除舊目錄並驗證**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git rm -r .claude/skills/kai-gate
 # VERIFY(見 Global Constraints)
 grep -rIn -e 'E:\\' -e 'kai-cmo-harness' -e '/kai-' -e 'scripts/quality_gates' -e 'data/learning/' .claude/skills/marketing-gate ;
@@ -204,7 +204,7 @@ for s in social content-calendar repurpose; do echo "=== kai-$s ==="; cat .claud
 - [ ] **Step 4: 建立 marketing-repurpose/SKILL.md**
 - [ ] **Step 5: 刪除三個舊目錄並 VERIFY**
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git rm -r .claude/skills/kai-social .claude/skills/kai-content-calendar .claude/skills/kai-repurpose
 grep -rIn -e 'E:\\' -e 'kai-cmo-harness' -e '/kai-' -e 'scripts/quality_gates' -e 'data/learning/' .claude/skills/marketing-social .claude/skills/marketing-content-calendar .claude/skills/marketing-repurpose
 for d in marketing-social marketing-content-calendar marketing-repurpose; do grep -q "^name: $d$" .claude/skills/$d/SKILL.md || echo "MISMATCH $d"; done
@@ -243,7 +243,7 @@ for s in brand competitors growth-plan launch; do echo "=== kai-$s ==="; cat .cl
 - [ ] **Step 2-5: 逐一建立 marketing-brand / marketing-competitors / marketing-growth-plan / marketing-launch/SKILL.md**(套用上述重點)
 - [ ] **Step 6: 刪除四個舊目錄並 VERIFY**
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git rm -r .claude/skills/kai-brand .claude/skills/kai-competitors .claude/skills/kai-growth-plan .claude/skills/kai-launch
 grep -rIn -e 'E:\\' -e 'kai-cmo-harness' -e '/kai-' -e 'scripts/quality_gates' -e 'data/learning/' .claude/skills/marketing-brand .claude/skills/marketing-competitors .claude/skills/marketing-growth-plan .claude/skills/marketing-launch
 for d in marketing-brand marketing-competitors marketing-growth-plan marketing-launch; do grep -q "^name: $d$" .claude/skills/$d/SKILL.md || echo "MISMATCH $d"; done
@@ -282,7 +282,7 @@ sed -n '1,40p' landing/src/i18n/dictionaries.ts
 - [ ] **Step 2-4: 逐一建立 marketing-seo-audit / marketing-landing-page / marketing-cro/SKILL.md**
 - [ ] **Step 5: 刪除三個舊目錄並 VERIFY**
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git rm -r .claude/skills/kai-seo-audit .claude/skills/kai-landing-page .claude/skills/kai-cro
 grep -rIn -e 'E:\\' -e 'kai-cmo-harness' -e '/kai-' -e 'scripts/quality_gates' -e 'data/learning/' .claude/skills/marketing-seo-audit .claude/skills/marketing-landing-page .claude/skills/marketing-cro
 for d in marketing-seo-audit marketing-landing-page marketing-cro; do grep -q "^name: $d$" .claude/skills/$d/SKILL.md || echo "MISMATCH $d"; done
@@ -323,7 +323,7 @@ sed -n '1,60p' .claude/skills/lorescape-metrics/SKILL.md
 - [ ] **Step 2-5: 逐一建立四個 marketing-*/SKILL.md**
 - [ ] **Step 6: 刪除四個舊目錄並 VERIFY**
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git rm -r .claude/skills/kai-analytics .claude/skills/kai-weekly-audit .claude/skills/kai-monthly-audit .claude/skills/kai-retention
 grep -rIn -e 'E:\\' -e 'kai-cmo-harness' -e '/kai-' -e 'scripts/quality_gates' -e 'data/learning/' .claude/skills/marketing-analytics .claude/skills/marketing-weekly-audit .claude/skills/marketing-monthly-audit .claude/skills/marketing-retention
 for d in marketing-analytics marketing-weekly-audit marketing-monthly-audit marketing-retention; do grep -q "^name: $d$" .claude/skills/$d/SKILL.md || echo "MISMATCH $d"; done
@@ -349,7 +349,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
 - [ ] **Step 1: 確認正好 15 個 marketing-* 且無 kai- 殘留**
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 ls -d .claude/skills/marketing-* | wc -l        # 預期 15
 ls -d .claude/skills/kai-* 2>/dev/null | wc -l   # 預期 0
 ```

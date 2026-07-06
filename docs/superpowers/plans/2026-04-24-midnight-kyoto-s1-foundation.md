@@ -180,7 +180,7 @@ If `--fatal-infos` fails on a deprecation warning at a call site, **stop and rep
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/common/config/app_colors.dart && \
   git commit -m "feat(theme): expand AppColors with Midnight Kyoto token palette"
 ```
@@ -578,7 +578,7 @@ Expected: No issues.
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/common/config/theme_config.dart \
     frontend/test/common/config/theme_config_test.dart && \
   git commit -m "refactor(theme): rewrite ThemeConfig as Midnight Kyoto dark theme"
@@ -774,7 +774,7 @@ If a settings widget test fails specifically on the theme toggle, **proceed to T
 - [ ] **Step 7: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/app.dart \
     frontend/lib/features/settings/presentation/controllers/theme_mode_notifier.dart \
     frontend/test/features/settings/presentation/controllers/theme_mode_notifier_test.dart && \
@@ -844,7 +844,7 @@ Expected: all pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/settings/presentation/screens/settings_screen.dart \
     frontend/test/features/settings/presentation/screens/settings_screen_test.dart && \
   git commit -m "feat(settings): remove theme-mode toggle (dark-only)"

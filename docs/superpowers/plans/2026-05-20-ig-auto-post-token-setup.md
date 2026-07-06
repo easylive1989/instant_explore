@@ -53,7 +53,7 @@
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 test -f backend/.env && echo "EXISTS" || echo "MISSING"
 ```
 
@@ -65,7 +65,7 @@ Skip if Step 1 returned `EXISTS`.
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 cp backend/.env.example backend/.env
 ```
 
@@ -75,7 +75,7 @@ Expected: file created, no output. After this `backend/.env` exists with all key
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run --env-file=.env python -c "from lorescape_backend.config import Config; c = Config.from_env(); print('IG enabled:', c.instagram_enabled)"
 ```
 
@@ -98,7 +98,7 @@ This task is **interactive and browser-based**. Run the helper script and follow
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 python scripts/meta_token_helper.py --platform instagram
 ```
 
@@ -152,7 +152,7 @@ META_PAGE_ACCESS_TOKEN=EAAXXXX...verylongstring...XXX
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git check-ignore -v backend/.env
 ```
 
@@ -167,7 +167,7 @@ Expected:
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git status --short backend/.env
 ```
 
@@ -184,7 +184,7 @@ Expected: empty output (gitignored files don't appear).
 
 Run:
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run --env-file=.env python -c "from lorescape_backend.config import Config; c = Config.from_env(); print('IG enabled:', c.instagram_enabled)"
 ```
 

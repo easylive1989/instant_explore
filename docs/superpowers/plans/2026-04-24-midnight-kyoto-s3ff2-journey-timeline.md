@@ -137,7 +137,7 @@
 
 - [ ] **g) Cleanup imports**: After all the edits above, run:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore && grep -n "AppColors" frontend/lib/features/journey/presentation/screens/journey_screen.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -n "AppColors" frontend/lib/features/journey/presentation/screens/journey_screen.dart
   ```
   Expected: zero matches. Remove `import 'package:context_app/common/config/app_colors.dart';`.
 
@@ -231,25 +231,25 @@
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart lib/features/journey/presentation/widgets/quick_guide_timeline_entry.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart lib/features/journey/presentation/widgets/quick_guide_timeline_entry.dart
   ```
   Expected: No issues.
 
 - [ ] **Journey tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/
   ```
   Expected: all pass.
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
 
 ### Step 5: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/journey/presentation/screens/journey_screen.dart \
     frontend/lib/features/journey/presentation/widgets/timeline_entry.dart \
     frontend/lib/features/journey/presentation/widgets/quick_guide_timeline_entry.dart && \

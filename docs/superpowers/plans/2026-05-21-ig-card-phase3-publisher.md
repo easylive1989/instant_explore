@@ -29,7 +29,7 @@
 
 ## Commands
 
-Run all backend commands from `/Users/paulwu/Documents/Github/instant_explore/backend`:
+Run all backend commands from `/Users/paulwu/Documents/PLRepo/instant_explore/backend`:
 
 ```bash
 uv run pytest path/to/test.py::test_name -v

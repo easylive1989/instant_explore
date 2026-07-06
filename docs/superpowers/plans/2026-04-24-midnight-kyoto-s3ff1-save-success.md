@@ -127,26 +127,26 @@ static const Color success = Color(0xFF10B981);
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/journey/presentation/screens/save_success_screen.dart lib/common/config/app_colors.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/journey/presentation/screens/save_success_screen.dart lib/common/config/app_colors.dart
   ```
   Expected: No issues.
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 - [ ] **Total deprecation count:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze 2>&1 | grep "issues found"
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze 2>&1 | grep "issues found"
   ```
   Expected: 6 issues (down from 7 — un-deprecating `success` removed the warning at this call site).
 
 ### Step 4: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/common/config/app_colors.dart \
     frontend/lib/features/journey/presentation/screens/save_success_screen.dart && \
   git commit -m "$(cat <<'EOF'

@@ -509,7 +509,7 @@ The other 9 tests (refresh, search, place rendering, bookmark, navigation, filte
 - [ ] **Step 8: Run targeted analyzer**
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/explore/presentation/screens/explore_screen.dart test/features/explore/presentation/screens/explore_screen_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/explore/presentation/screens/explore_screen.dart test/features/explore/presentation/screens/explore_screen_test.dart
 ```
 
 Expected: No issues. Old `AppColors.amber` reference at line 181 should be gone.
@@ -517,7 +517,7 @@ Expected: No issues. Old `AppColors.amber` reference at line 181 should be gone.
 - [ ] **Step 9: Run explore tests**
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/explore/presentation/screens/explore_screen_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/explore/presentation/screens/explore_screen_test.dart
 ```
 
 Expected: 11/11 PASS.
@@ -527,7 +527,7 @@ If a test fails not because of a behaviour change but because the widget tree as
 - [ ] **Step 10: Run full test suite**
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
 ```
 
 Expected: 390+ tests pass. The widget tree change should not affect tests outside `explore_screen_test.dart`.
@@ -535,7 +535,7 @@ Expected: 390+ tests pass. The widget tree change should not affect tests outsid
 - [ ] **Step 11: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/explore/presentation/screens/explore_screen.dart \
     frontend/test/features/explore/presentation/screens/explore_screen_test.dart && \
   git commit -m "$(cat <<'EOF'

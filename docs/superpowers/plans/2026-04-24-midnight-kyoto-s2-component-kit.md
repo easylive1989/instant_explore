@@ -189,7 +189,7 @@ Expected: 4/4 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/_press_scale.dart \
     frontend/test/shared/widgets/midnight/press_scale_test.dart && \
   git commit -m "feat(theme): add PressScale helper for Midnight Kyoto buttons"
@@ -388,7 +388,7 @@ Expected: 3/3 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/ambient_backdrop.dart \
     frontend/test/shared/widgets/midnight/ambient_backdrop_test.dart && \
   git commit -m "feat(theme): add AmbientBackdrop with pulse halo"
@@ -532,7 +532,7 @@ Expected: 4/4 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/glass_card.dart \
     frontend/test/shared/widgets/midnight/glass_card_test.dart && \
   git commit -m "feat(theme): add GlassCard widget"
@@ -756,7 +756,7 @@ Expected: 7/7 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/pill_button.dart \
     frontend/test/shared/widgets/midnight/pill_button_test.dart && \
   git commit -m "feat(theme): add PillButton with primary/secondary/ghost variants"
@@ -928,7 +928,7 @@ Expected: 6/6 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/pill_icon_button.dart \
     frontend/test/shared/widgets/midnight/pill_icon_button_test.dart && \
   git commit -m "feat(theme): add PillIconButton"
@@ -1081,7 +1081,7 @@ Expected: 3/3 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/status_chip.dart \
     frontend/test/shared/widgets/midnight/status_chip_test.dart && \
   git commit -m "feat(theme): add StatusChip with five tones"
@@ -1230,7 +1230,7 @@ Expected: 4/4 PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/midnight_app_bar.dart \
     frontend/test/shared/widgets/midnight/midnight_app_bar_test.dart && \
   git commit -m "feat(theme): add MidnightAppBar with blur and uppercase title"
@@ -1525,7 +1525,7 @@ Expected: all pass. If any existing widget test fails because the screen no long
 - [ ] **Step 10: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/shared/widgets/midnight/ \
     frontend/test/shared/widgets/midnight/ \
     frontend/lib/common/config/theme_config.dart \

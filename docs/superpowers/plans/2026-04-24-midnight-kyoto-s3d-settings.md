@@ -167,7 +167,7 @@ Drop `final colorScheme = Theme.of(context).colorScheme;` from `_SectionHeader.b
 After all the steps above, run:
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore && grep -n "AppColors" frontend/lib/features/settings/presentation/screens/settings_screen.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -n "AppColors" frontend/lib/features/settings/presentation/screens/settings_screen.dart
 ```
 
 If the grep returns nothing, remove `import 'package:context_app/common/config/app_colors.dart';` from the import block. If anything remains (it shouldn't), inspect.
@@ -188,23 +188,23 @@ If the tests don't exercise the title at all, no test edits are needed.
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/settings/presentation/screens/settings_screen.dart test/features/settings/presentation/screens/settings_screen_test.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/settings/presentation/screens/settings_screen.dart test/features/settings/presentation/screens/settings_screen_test.dart
   ```
 
 - [ ] **Settings tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/settings/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/settings/
   ```
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
 
 ### Step 11: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/settings/presentation/screens/settings_screen.dart \
     frontend/test/features/settings/presentation/screens/settings_screen_test.dart && \
   git commit -m "$(cat <<'EOF'

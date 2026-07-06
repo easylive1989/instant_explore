@@ -519,7 +519,7 @@ class _Divider extends StatelessWidget {
 After all the steps in `subscription_plan_card.dart`, run:
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore && grep -n "AppColors" frontend/lib/features/subscription/presentation/widgets/subscription_plan_card.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -n "AppColors" frontend/lib/features/subscription/presentation/widgets/subscription_plan_card.dart
 ```
 
 Should return nothing. Remove `import 'package:context_app/common/config/app_colors.dart';` from the file.
@@ -535,7 +535,7 @@ In `frontend/lib/shared/widgets/midnight_kyoto_backdrop.dart`, delete the entire
 After deletion, verify no remaining usage:
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore && grep -rn "midnightKyotoTheme" frontend/
+cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -rn "midnightKyotoTheme" frontend/
 ```
 
 Expected: zero matches.
@@ -544,26 +544,26 @@ Expected: zero matches.
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/subscription/presentation/ lib/shared/widgets/midnight_kyoto_backdrop.dart test/features/subscription/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/subscription/presentation/ lib/shared/widgets/midnight_kyoto_backdrop.dart test/features/subscription/
   ```
   Expected: No issues.
 
 - [ ] **Subscription tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/subscription/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/subscription/
   ```
   Expected: all pass. If a test asserts `find.byType(Theme)` or specific styles, fix with minimum-touch finders.
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 ### Step 17: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/subscription/presentation/screens/subscription_screen.dart \
     frontend/lib/features/subscription/presentation/widgets/subscription_plan_card.dart \
     frontend/lib/shared/widgets/midnight_kyoto_backdrop.dart \

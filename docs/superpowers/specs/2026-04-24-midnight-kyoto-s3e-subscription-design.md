@@ -479,7 +479,7 @@ class _Divider extends StatelessWidget {
 驗證沒有 consumer：
 
 ```
-cd /Users/paulwu/Documents/Github/instant_explore && grep -rn "midnightKyotoTheme" frontend/
+cd /Users/paulwu/Documents/PLRepo/instant_explore && grep -rn "midnightKyotoTheme" frontend/
 ```
 
 預期僅出現在 `midnight_kyoto_backdrop.dart` 自身（被刪除前）。S3-e 此次 commit 後應該為 0。

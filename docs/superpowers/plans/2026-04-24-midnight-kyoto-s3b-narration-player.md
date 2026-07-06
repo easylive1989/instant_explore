@@ -661,26 +661,26 @@ Pick (a) and add a sensible string in both languages.
 
 - [ ] **Targeted analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/narration/presentation/screens/ lib/features/narration/presentation/widgets/ test/features/narration/presentation/screens/narration_screen_test.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/narration/presentation/screens/ lib/features/narration/presentation/widgets/ test/features/narration/presentation/screens/narration_screen_test.dart
   ```
   Expected: No issues.
 
 - [ ] **Narration tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/narration/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/narration/
   ```
   Expected: all pass.
 
 - [ ] **Full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 #### Step 9: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/narration/presentation/screens/narration_screen.dart \
     frontend/lib/features/narration/presentation/widgets/narration_control_panel.dart \
     frontend/lib/features/narration/presentation/widgets/narration_transcript_area.dart \

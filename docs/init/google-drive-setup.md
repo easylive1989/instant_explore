@@ -104,7 +104,7 @@ python scripts/upload_to_drive.py <本地檔案路徑> --folder-id <Google_Drive
 
 ```text
 Initializing credentials...
-Loading default credentials from project root: /Users/paulwu/Documents/Github/instant_explore/service-account.json
+Loading default credentials from project root: /Users/paulwu/Documents/PLRepo/instant_explore/service-account.json
 Uploading file to Google Drive: test.txt
 Detected MIME type: text/plain
 Target Folder ID: 1aBcDeFgHiJkLmNoPqRsTuVwXyZ
@@ -121,5 +121,5 @@ Web View Link: https://drive.google.com/file/d/1Z2y3X4w5V6u7T.../view?usp=drives
 
 | 檔案/目錄 | 說明 |
 |------|------|
-| [upload_to_drive.py](file:///Users/paulwu/Documents/Github/instant_explore/scripts/upload_to_drive.py) | Google Drive 檔案上傳的 Python 執行腳本。 |
+| [upload_to_drive.py](file:///Users/paulwu/Documents/PLRepo/instant_explore/scripts/upload_to_drive.py) | Google Drive 檔案上傳的 Python 執行腳本。 |
 | `.gitignore` | 專案 Git 排除設定檔（內已包含 `service-account.json` 以防金鑰被提交）。 |

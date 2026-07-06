@@ -51,7 +51,7 @@
 跑：
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 python scripts/meta_token_helper.py --platform instagram
 ```
 

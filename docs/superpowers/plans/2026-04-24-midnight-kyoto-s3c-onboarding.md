@@ -228,26 +228,26 @@
 
 - [ ] **Run analyzer:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/onboarding/presentation/screens/onboarding_welcome_screen.dart lib/features/onboarding/presentation/widgets/onboarding_page_art.dart test/features/onboarding/presentation/screens/onboarding_welcome_screen_test.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/onboarding/presentation/screens/onboarding_welcome_screen.dart lib/features/onboarding/presentation/widgets/onboarding_page_art.dart test/features/onboarding/presentation/screens/onboarding_welcome_screen_test.dart
   ```
   Expected: No issues.
 
 - [ ] **Run onboarding tests:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/onboarding/
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/onboarding/
   ```
   Expected: 2/2 PASS (or whatever the current count is — all should pass).
 
 - [ ] **Run full suite:**
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 ### Step 4: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/onboarding/presentation/screens/onboarding_welcome_screen.dart \
     frontend/lib/features/onboarding/presentation/widgets/onboarding_page_art.dart && \
   git commit -m "$(cat <<'EOF'

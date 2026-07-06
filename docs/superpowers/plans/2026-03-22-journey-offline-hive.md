@@ -258,7 +258,7 @@ void main() {
 - [ ] **Step 2: Run the test to confirm it fails**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/domain/models/journey_entry_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/domain/models/journey_entry_test.dart
 ```
 
 Expected: FAIL — `JourneyEntry.create` still requires `userId`, `fromJson`/`toJson` don't exist yet.
@@ -379,7 +379,7 @@ Corrected: **Do not** include `import 'dart:convert';` in `journey_entry.dart`. 
 - [ ] **Step 4: Run the test to confirm it passes**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/domain/models/journey_entry_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/domain/models/journey_entry_test.dart
 ```
 
 Expected: All tests PASS.
@@ -387,7 +387,7 @@ Expected: All tests PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/journey/domain/models/journey_entry.dart test/features/journey/domain/models/journey_entry_test.dart && git commit -m "feat: remove userId from JourneyEntry, add toJson/fromJson"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add lib/features/journey/domain/models/journey_entry.dart test/features/journey/domain/models/journey_entry_test.dart && git commit -m "feat: remove userId from JourneyEntry, add toJson/fromJson"
 ```
 
 ---
@@ -414,7 +414,7 @@ abstract class JourneyRepository {
 - [ ] **Step 2: Run analyzer to surface all compile errors caused by the interface change**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze lib/features/journey
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze lib/features/journey
 ```
 
 Expected: Errors in `supabase_journey_repository.dart`, `caching_journey_repository.dart`, `providers.dart`, `player_controller.dart`, `timeline_entry.dart`. These are resolved in later tasks — do not fix them yet. The goal here is just to commit the interface change in isolation.
@@ -422,7 +422,7 @@ Expected: Errors in `supabase_journey_repository.dart`, `caching_journey_reposit
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/journey/domain/repositories/journey_repository.dart && git commit -m "refactor: update JourneyRepository interface — getAll/save/delete, no userId"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add lib/features/journey/domain/repositories/journey_repository.dart && git commit -m "refactor: update JourneyRepository interface — getAll/save/delete, no userId"
 ```
 
 ---
@@ -567,7 +567,7 @@ void main() {
 - [ ] **Step 2: Run the test to confirm it fails**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/data/hive_journey_repository_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/data/hive_journey_repository_test.dart
 ```
 
 Expected: FAIL — `HiveJourneyRepository` doesn't exist yet.
@@ -625,7 +625,7 @@ class HiveJourneyRepository implements JourneyRepository {
 - [ ] **Step 4: Run the test to confirm it passes**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/data/hive_journey_repository_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/data/hive_journey_repository_test.dart
 ```
 
 Expected: All 6 tests PASS.
@@ -633,7 +633,7 @@ Expected: All 6 tests PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/journey/data/hive_journey_repository.dart test/features/journey/data/hive_journey_repository_test.dart && git commit -m "feat: add HiveJourneyRepository with CRUD and sort"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add lib/features/journey/data/hive_journey_repository.dart test/features/journey/data/hive_journey_repository_test.dart && git commit -m "feat: add HiveJourneyRepository with CRUD and sort"
 ```
 
 ---
@@ -724,7 +724,7 @@ New:
 - [ ] **Step 3: Run analyzer to verify these two files are now clean**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze lib/features/journey/providers.dart lib/features/narration/presentation/controllers/player_controller.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze lib/features/journey/providers.dart lib/features/narration/presentation/controllers/player_controller.dart
 ```
 
 Expected: No issues in these two files (other files still have errors from the interface change — that's fine).
@@ -732,7 +732,7 @@ Expected: No issues in these two files (other files still have errors from the i
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/journey/providers.dart lib/features/narration/presentation/controllers/player_controller.dart && git commit -m "feat: update Journey providers and PlayerController for Hive-only storage"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add lib/features/journey/providers.dart lib/features/narration/presentation/controllers/player_controller.dart && git commit -m "feat: update Journey providers and PlayerController for Hive-only storage"
 ```
 
 ---
@@ -983,7 +983,7 @@ New:
 - [ ] **Step 4: Run analyzer on the UI files**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart
 ```
 
 Expected: No issues in these three files.
@@ -991,7 +991,7 @@ Expected: No issues in these three files.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart && git commit -m "feat: remove auth gate from Journey UI"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add lib/features/narration/presentation/widgets/save_to_journey_button.dart lib/features/journey/presentation/screens/journey_screen.dart lib/features/journey/presentation/widgets/timeline_entry.dart && git commit -m "feat: remove auth gate from Journey UI"
 ```
 
 ---
@@ -1010,13 +1010,13 @@ cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add lib/featur
 - [ ] **Step 1: Delete all obsolete files**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && rm lib/features/journey/data/supabase_journey_repository.dart lib/features/journey/data/caching_journey_repository.dart lib/features/journey/data/journey_entry_mapper.dart lib/features/journey/data/services/hive_journey_cache_service.dart test/features/journey/data/supabase_journey_repository_test.dart test/features/journey/data/caching_journey_repository_test.dart test/features/journey/data/services/hive_journey_cache_service_test.dart
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && rm lib/features/journey/data/supabase_journey_repository.dart lib/features/journey/data/caching_journey_repository.dart lib/features/journey/data/journey_entry_mapper.dart lib/features/journey/data/services/hive_journey_cache_service.dart test/features/journey/data/supabase_journey_repository_test.dart test/features/journey/data/caching_journey_repository_test.dart test/features/journey/data/services/hive_journey_cache_service_test.dart
 ```
 
 - [ ] **Step 2: Run full analyzer to confirm no remaining errors**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze
 ```
 
 Expected: No errors. (Warnings about unused imports in other parts of the codebase are OK to ignore if they pre-existed.)
@@ -1024,7 +1024,7 @@ Expected: No errors. (Warnings about unused imports in other parts of the codeba
 - [ ] **Step 3: Run all journey tests**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/journey/
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/journey/
 ```
 
 Expected: All tests PASS (journey_entry_test + hive_journey_repository_test).
@@ -1032,7 +1032,7 @@ Expected: All tests PASS (journey_entry_test + hive_journey_repository_test).
 - [ ] **Step 4: Run full test suite**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
 ```
 
 Expected: All tests PASS.
@@ -1040,5 +1040,5 @@ Expected: All tests PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/frontend && git add -A && git commit -m "chore: delete obsolete Journey Supabase/caching data layer"
+cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && git add -A && git commit -m "chore: delete obsolete Journey Supabase/caching data layer"
 ```

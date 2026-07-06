@@ -59,7 +59,7 @@ backend/
 - [ ] **Step 1: Create feature branch from master**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git checkout master
 git pull --ff-only
 git checkout -b feature/ig-card-phase1-renderer
@@ -118,7 +118,7 @@ def test_card_content_paragraphs_is_tuple():
 - [ ] **Step 3: Run test to verify it fails**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_content.py -v
 ```
 
@@ -165,7 +165,7 @@ class CardContent:
 - [ ] **Step 5: Run test to verify it passes**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_content.py -v
 ```
 
@@ -174,7 +174,7 @@ Expected: 3 tests PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/src/lorescape_backend/social/card/__init__.py \
         backend/src/lorescape_backend/social/card/content.py \
         backend/tests/test_card_content.py
@@ -247,7 +247,7 @@ dev = [
 - [ ] **Step 2: Sync dependencies**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv sync
 ```
 
@@ -256,7 +256,7 @@ Expected: installs playwright, jinja2, pillow without errors. `uv.lock` updated.
 - [ ] **Step 3: Install Playwright Chromium locally**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run playwright install chromium
 ```
 
@@ -265,7 +265,7 @@ Expected: Chromium downloaded into Playwright's cache (~150MB). One-time per dev
 - [ ] **Step 4: Verify imports work**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run python -c "import playwright; import jinja2; from PIL import Image; print('OK')"
 ```
 
@@ -274,7 +274,7 @@ Expected: `OK`.
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/pyproject.toml backend/uv.lock
 git commit -m "chore(deps): add playwright, jinja2, pillow for IG card renderer"
 ```
@@ -382,7 +382,7 @@ if __name__ == "__main__":
 - [ ] **Step 2: Run the script to download fonts**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run python scripts/download_card_fonts.py
 ```
 
@@ -403,7 +403,7 @@ If any of the 6 mappings doesn't match a `@font-face` block (Google sometimes re
 - [ ] **Step 3: Verify all 6 font files are present and non-empty**
 
 ```bash
-ls -la /Users/paulwu/Documents/Github/instant_explore/backend/src/lorescape_backend/social/card/template/fonts/
+ls -la /Users/paulwu/Documents/PLRepo/instant_explore/backend/src/lorescape_backend/social/card/template/fonts/
 ```
 
 Expected: 6 `.woff2` files, each >10KB.
@@ -428,7 +428,7 @@ Source: Google Fonts (https://fonts.google.com). Re-download via:
 - [ ] **Step 5: Commit fonts + script**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/scripts/download_card_fonts.py \
         backend/src/lorescape_backend/social/card/template/fonts/
 git commit -m "chore(card): bundle Google Fonts for offline IG card rendering"
@@ -541,7 +541,7 @@ def test_render_html_links_local_css_and_fonts():
 - [ ] **Step 3: Run tests to verify they fail**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_template.py -v
 ```
 
@@ -667,7 +667,7 @@ __all__ = ["CardContent", "render_html"]
 - [ ] **Step 7: Run tests to verify they pass**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_template.py -v
 ```
 
@@ -676,7 +676,7 @@ Expected: 7 tests PASS.
 - [ ] **Step 8: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/src/lorescape_backend/social/card/template/card.html.j2 \
         backend/src/lorescape_backend/social/card/template.py \
         backend/src/lorescape_backend/social/card/_demo.py \
@@ -1064,13 +1064,13 @@ html, body {
 - [ ] **Step 2: Sanity check the file**
 
 ```bash
-ls -la /Users/paulwu/Documents/Github/instant_explore/backend/src/lorescape_backend/social/card/template/card.css
+ls -la /Users/paulwu/Documents/PLRepo/instant_explore/backend/src/lorescape_backend/social/card/template/card.css
 ```
 
 Expected: file exists, > 4KB.
 
 ```bash
-grep -c "@font-face" /Users/paulwu/Documents/Github/instant_explore/backend/src/lorescape_backend/social/card/template/card.css
+grep -c "@font-face" /Users/paulwu/Documents/PLRepo/instant_explore/backend/src/lorescape_backend/social/card/template/card.css
 ```
 
 Expected: `6`.
@@ -1078,7 +1078,7 @@ Expected: `6`.
 - [ ] **Step 3: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/src/lorescape_backend/social/card/template/card.css
 git commit -m "feat(card): add E0c CSS (朱印方塊, Chinese-only, no chapter)"
 ```
@@ -1137,7 +1137,7 @@ def test_render_card_dimensions_are_1080_by_1350(png_bytes: bytes):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_renderer.py -v
 ```
 
@@ -1206,7 +1206,7 @@ __all__ = ["CardContent", "render_card", "render_html"]
 - [ ] **Step 5: Run tests to verify they pass**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run pytest tests/test_card_renderer.py -v
 ```
 
@@ -1215,7 +1215,7 @@ Expected: 3 tests PASS. Note: first run may be slow (browser startup ~1-2s).
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/src/lorescape_backend/social/card/renderer.py \
         backend/src/lorescape_backend/social/card/__init__.py \
         backend/tests/test_card_renderer.py
@@ -1256,7 +1256,7 @@ if __name__ == "__main__":
 - [ ] **Step 2: Run the CLI manually**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 uv run python -m lorescape_backend.social.card.renderer
 ```
 
@@ -1276,7 +1276,7 @@ Expected: `(1080, 1350) PNG`.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/src/lorescape_backend/social/card/renderer.py
 git commit -m "feat(card): add CLI entrypoint for manual visual inspection"
 ```
@@ -1322,7 +1322,7 @@ CMD ["uvicorn", "lorescape_backend.api:app", "--host", "0.0.0.0", "--port", "800
 - [ ] **Step 2: Build the image locally to verify**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 docker build -t lorescape-backend:phase1-test .
 ```
 
@@ -1343,7 +1343,7 @@ Expected: file exists, >50KB.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git add backend/Dockerfile
 git commit -m "build(backend): install Playwright Chromium for IG card rendering"
 ```
@@ -1358,7 +1358,7 @@ real question is "does the PNG look like the E0c design from the chat?"
 - [ ] **Step 1: Render the demo**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore/backend
+cd /Users/paulwu/Documents/PLRepo/instant_explore/backend
 rm -f /tmp/eiffel.png
 uv run python -m lorescape_backend.social.card.renderer
 open /tmp/eiffel.png
@@ -1410,7 +1410,7 @@ Attach this PNG to the PR in Task 10.
 - [ ] **Step 1: Push the feature branch**
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore
+cd /Users/paulwu/Documents/PLRepo/instant_explore
 git push -u origin feature/ig-card-phase1-renderer
 ```
 

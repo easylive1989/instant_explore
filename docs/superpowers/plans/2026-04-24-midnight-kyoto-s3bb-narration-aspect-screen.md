@@ -338,13 +338,13 @@ class AspectOption extends StatelessWidget {
 
 - [ ] Run targeted analyzer:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/narration/presentation/screens/select_narration_aspect_screen.dart test/features/narration/presentation/screens/select_narration_aspect_screen_test.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter analyze --fatal-infos lib/features/narration/presentation/screens/select_narration_aspect_screen.dart test/features/narration/presentation/screens/select_narration_aspect_screen_test.dart
   ```
   Expected: No issues.
 
 - [ ] Run aspect-screen test:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test test/features/narration/presentation/screens/select_narration_aspect_screen_test.dart
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test test/features/narration/presentation/screens/select_narration_aspect_screen_test.dart
   ```
   Expected: 9/9 PASS.
   
@@ -352,14 +352,14 @@ class AspectOption extends StatelessWidget {
 
 - [ ] Run full suite:
   ```
-  cd /Users/paulwu/Documents/Github/instant_explore/frontend && fvm flutter test
+  cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend && fvm flutter test
   ```
   Expected: 390+ pass.
 
 ### Step 13: Commit
 
 ```bash
-cd /Users/paulwu/Documents/Github/instant_explore && \
+cd /Users/paulwu/Documents/PLRepo/instant_explore && \
   git add frontend/lib/features/narration/presentation/screens/select_narration_aspect_screen.dart \
     frontend/test/features/narration/presentation/screens/select_narration_aspect_screen_test.dart && \
   git commit -m "$(cat <<'EOF'
