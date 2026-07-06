@@ -25,6 +25,18 @@ Gemini and serves them to the app, plus runs the daily-story / social pipeline.
       (pending → published/failed/rejected/skipped; still-unreacted at
       23:10 → skipped)
 
+### Pre-rendered (wander-style) carousel
+
+If `scripts/send_carousel_for_review.py` staged a pre-rendered carousel for
+the day (a `social_posts` carousel row with non-NULL `slide_urls`), the
+21:00 job publishes exactly those images gated by ✅/❌ on that review
+message, and the default card rendering is skipped for the day. ❌ or no
+reaction means no carousel that day (no fallback). The day's
+`daily_stories` row is synced to the same terminal state. See
+`.claude/skills/lorescape-wander-carousel/SKILL.md` for the operator flow
+and `docs/superpowers/specs/2026-07-06-wander-carousel-style-design.md`
+for the design.
+
 See `docs/superpowers/specs/2026-05-10-daily-place-story-design.md` for the full spec.
 
 ## Local development

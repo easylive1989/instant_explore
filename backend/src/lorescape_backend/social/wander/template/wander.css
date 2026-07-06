@@ -1,0 +1,181 @@
+/* Wander-style slide: 1080×1350, dark photo overlay, ivory/gold serif type.
+   Fonts are shared with the default card style (../../card/template/fonts). */
+@import url("../../card/template/fonts/fonts.css");
+
+:root {
+  --ink: #f0e8d6;
+  --ink-dim: rgba(240, 232, 214, 0.82);
+  --gold: #c8a468;
+  --gold-line: rgba(200, 164, 104, 0.55);
+  --serif-tc: 'Noto Serif TC', serif;
+  --serif-en: 'EB Garamond', serif;
+  --script: 'Cormorant Garamond', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+.ws-card {
+  position: relative;
+  width: 1080px;
+  height: 1350px;
+  overflow: hidden;
+  background: #161009;
+  font-family: var(--serif-tc);
+  color: var(--ink);
+}
+
+/* ---- photo + tint + frame ---- */
+.ws-photo {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.ws-tint {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 17, 10, 0.62),
+    rgba(24, 17, 10, 0.50) 45%,
+    rgba(24, 17, 10, 0.74)
+  );
+}
+.ws-overlay--darker .ws-tint {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 14, 8, 0.76),
+    rgba(20, 14, 8, 0.66) 50%,
+    rgba(20, 14, 8, 0.86)
+  );
+}
+.ws-overlay--light .ws-tint {
+  background: linear-gradient(
+    180deg,
+    rgba(240, 232, 216, 0.60),
+    rgba(240, 232, 216, 0.30) 55%,
+    rgba(240, 232, 216, 0.52)
+  );
+}
+/* Light pages flip to dark-gold ink for contrast. */
+.ws-overlay--light {
+  --ink: #4c3b22;
+  --ink-dim: rgba(76, 59, 34, 0.85);
+  --gold: #8a6a34;
+  --gold-line: rgba(138, 106, 52, 0.55);
+}
+.ws-frame {
+  position: absolute; inset: 26px;
+  border: 1px solid var(--gold-line);
+}
+.ws-card--cover .ws-frame { display: none; }
+
+/* ---- shared type ---- */
+em.hl { font-style: normal; color: var(--gold); }
+.ws-rule { width: 64px; border-top: 2px solid var(--gold); opacity: 0.85; }
+.ws-sep {
+  width: 56px; height: 0;
+  border-top: 1px solid var(--gold-line);
+  margin: calc(26px * var(--fit, 1)) 0;
+}
+.ws-lines { display: flex; flex-direction: column; }
+.ws-line {
+  font-size: calc(40px * var(--fit, 1));
+  line-height: 1.9;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ws-title {
+  font-size: calc(64px * var(--fit, 1));
+  font-weight: 900;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+/* ---- beat / bright / ending text plate ---- */
+.ws-body {
+  --fit: 1;
+  position: absolute;
+  display: flex; flex-direction: column;
+  gap: calc(30px * var(--fit));
+  max-height: 860px;
+  overflow: hidden;
+}
+.ws-body--left  { left: 96px;  top: 300px; width: 560px; }
+.ws-body--right { right: 96px; top: 300px; width: 560px; }
+.ws-body--top   { left: 110px; right: 110px; top: 150px; }
+.ws-body--center {
+  left: 120px; right: 120px; top: 170px;
+  text-align: center; align-items: center;
+}
+.ws-body--center .ws-sep { margin-left: auto; margin-right: auto; }
+
+/* ---- cover ---- */
+.ws-cover {
+  --fit: 1;
+  position: absolute;
+  left: 84px; top: 96px; width: 600px;
+  display: flex; flex-direction: column;
+  max-height: 1130px;
+  overflow: hidden;
+}
+.ws-tag { display: flex; align-items: baseline; gap: 18px; }
+.ws-tag__zh {
+  font-size: 30px; letter-spacing: 0.42em; font-weight: 700;
+}
+.ws-tag__en {
+  font-family: var(--serif-en);
+  font-size: 24px; letter-spacing: 0.3em; font-style: italic;
+  color: var(--ink-dim);
+}
+.ws-title-xl {
+  margin-top: 100px;
+  font-size: calc(150px * var(--fit));
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+}
+.ws-script {
+  font-family: var(--script);
+  font-style: italic;
+  font-size: calc(56px * var(--fit));
+  color: var(--gold);
+  margin-top: 6px;
+}
+.ws-orn {
+  display: flex; align-items: center; gap: 18px;
+  color: var(--gold);
+  font-size: 32px;
+  margin: 44px 0 36px;
+}
+.ws-orn::before, .ws-orn::after {
+  content: "";
+  flex: 0 0 56px;
+  border-top: 1px solid var(--gold-line);
+}
+
+/* ---- ending brand block ---- */
+.ws-endbrand {
+  position: absolute;
+  left: 96px; bottom: 96px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ws-endbrand__rule {
+  width: 64px; border-top: 2px solid var(--gold);
+  margin-bottom: 10px;
+}
+.ws-endbrand__name {
+  font-family: var(--serif-en);
+  font-size: 58px; letter-spacing: 0.14em; font-weight: 600;
+}
+.ws-endbrand__tag { font-size: 30px; letter-spacing: 0.2em; color: var(--ink-dim); }
+.ws-endbrand__cta { font-size: 28px; letter-spacing: 0.12em; color: var(--gold); margin-top: 14px; }
+
+/* ---- brandmark（每頁落款；ending 由品牌區取代） ---- */
+.ws-brandmark {
+  position: absolute; left: 0; right: 0; bottom: 46px;
+  text-align: center;
+  font-family: var(--serif-en);
+  font-size: 24px; letter-spacing: 0.34em;
+  color: var(--ink-dim);
+}
+.ws-card--ending .ws-brandmark { display: none; }

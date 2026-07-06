@@ -247,3 +247,76 @@ def test_send_video_for_review_uploads_mp4_then_adds_two_reactions(
         r for r in requests_mock.request_history if r.method == "PUT"
     ]
     assert len(reaction_puts) == 2
+
+
+def test_send_images_for_review_posts_one_message_with_all_files(
+    requests_mock,
+):
+    from lorescape_backend.daily_story.discord_review import (
+        send_images_for_review,
+    )
+
+    post = requests_mock.post(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
+        json={"id": MESSAGE},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9C%85/@me",
+        json={},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9D%8C/@me",
+        json={},
+    )
+
+    message_id = send_images_for_review(
+        bot_token="tok",
+        channel_id=CHANNEL,
+        images=[b"jpeg-1", b"jpeg-2", b"jpeg-3"],
+        publish_date="2026-07-06",
+    )
+
+    assert message_id == MESSAGE
+    body = post.last_request.body
+    if isinstance(body, str):
+        body = body.encode("latin-1")
+    # multipart body must carry three file fields with their filenames.
+    assert b'name="files[0]"' in body
+    assert b'name="files[2]"' in body
+    assert b"ig-carousel-2026-07-06-01.jpg" in body
+    assert b"ig-carousel-2026-07-06-03.jpg" in body
+
+
+def test_send_images_for_review_seeds_both_reactions(requests_mock):
+    from lorescape_backend.daily_story.discord_review import (
+        send_images_for_review,
+    )
+
+    requests_mock.post(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages",
+        json={"id": MESSAGE},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9C%85/@me",
+        json={},
+    )
+    requests_mock.put(
+        f"https://discord.com/api/v10/channels/{CHANNEL}/messages/{MESSAGE}"
+        f"/reactions/%E2%9D%8C/@me",
+        json={},
+    )
+
+    send_images_for_review(
+        bot_token="tok",
+        channel_id=CHANNEL,
+        images=[b"x"],
+        publish_date="2026-07-06",
+    )
+
+    reaction_puts = [
+        r for r in requests_mock.request_history if r.method == "PUT"
+    ]
+    assert len(reaction_puts) == 2

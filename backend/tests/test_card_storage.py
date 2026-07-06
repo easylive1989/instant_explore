@@ -46,3 +46,25 @@ def test_upload_card_png_returns_public_url_unchanged():
     url = upload_card_png(client, b"x", path="x.png")
 
     assert url == "https://abc.supabase.co/storage/v1/object/public/ig-cards/x.png?token=ignored"
+
+
+def test_upload_card_image_uses_given_content_type():
+    supabase = MagicMock()
+    bucket = supabase.storage.from_.return_value
+    bucket.get_public_url.return_value = "https://x/ig-cards/wander/d/s.jpg"
+
+    from lorescape_backend.social.card_storage import upload_card_image
+
+    url = upload_card_image(
+        supabase, b"jpegbytes",
+        path="wander/2026-07-06/slide_01.jpg",
+        content_type="image/jpeg",
+    )
+
+    assert url == "https://x/ig-cards/wander/d/s.jpg"
+    supabase.storage.from_.assert_called_with("ig-cards")
+    bucket.upload.assert_called_once_with(
+        path="wander/2026-07-06/slide_01.jpg",
+        file=b"jpegbytes",
+        file_options={"content-type": "image/jpeg", "upsert": "true"},
+    )

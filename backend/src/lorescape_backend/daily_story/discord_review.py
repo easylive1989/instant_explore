@@ -100,6 +100,59 @@ def send_video_for_review(
     return message_id
 
 
+_CAROUSEL_REVIEW_INSTRUCTION = (
+    "Wander carousel — React ✅ to publish at 21:00 Asia/Taipei · ❌ to skip"
+)
+
+
+def send_images_for_review(
+    *,
+    bot_token: str,
+    channel_id: str,
+    images: list[bytes],
+    publish_date: str,
+) -> str:
+    """Post a pre-rendered carousel (all slides in ONE message), seed ✅/❌.
+
+    One message keeps a single message id for the publish job to poll.
+    Discord allows up to 10 attachments per message — the IG carousel
+    limit is also 10, so callers never exceed it.
+    """
+    files: dict = {
+        "payload_json": (
+            None,
+            json.dumps({"content": _CAROUSEL_REVIEW_INSTRUCTION}),
+            "application/json",
+        ),
+    }
+    for index, image_bytes in enumerate(images):
+        files[f"files[{index}]"] = (
+            f"ig-carousel-{publish_date}-{index + 1:02d}.jpg",
+            image_bytes,
+            "image/jpeg",
+        )
+    headers = {
+        "Authorization": f"Bot {bot_token}",
+        "User-Agent": "lorescape-daily-story (https://github.com, 0.1.0)",
+    }
+    response = requests.post(
+        f"{DISCORD_API}/channels/{channel_id}/messages",
+        headers=headers,
+        files=files,
+        timeout=_REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    message_id = response.json()["id"]
+    for emoji in (APPROVE_EMOJI, REJECT_EMOJI):
+        _add_self_reaction(
+            bot_token=bot_token,
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=emoji,
+        )
+    return message_id
+
+
 def check_reaction(
     *,
     bot_token: str,
