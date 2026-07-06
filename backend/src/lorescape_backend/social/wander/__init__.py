@@ -5,3 +5,4 @@ from .content import (  # noqa: F401
     WanderSlide,
     load_carousel,
 )
+from .renderer import render_carousel, render_slide  # noqa: F401
