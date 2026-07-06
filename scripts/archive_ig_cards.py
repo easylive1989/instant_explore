@@ -33,8 +33,9 @@ ARCHIVE_DIR = REPO_ROOT / "marketing" / "outputs" / "ig_cards_archive"
 BUCKET_NAME = "ig-cards"
 
 
-def _last_month() -> str:
-    today = date.today()
+def _last_month(today: date | None = None) -> str:
+    if today is None:
+        today = date.today()
     year, month = (today.year, today.month - 1) if today.month > 1 \
         else (today.year - 1, 12)
     return f"{year:04d}-{month:02d}"

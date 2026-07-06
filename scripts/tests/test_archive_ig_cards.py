@@ -1,6 +1,7 @@
 """archive_ig_cards — 下載整月 ig-cards 物件到本機後刪 bucket 端."""
 from __future__ import annotations
 
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -70,3 +71,11 @@ def test_download_failure_aborts_without_deleting(bucket):
 def test_month_with_no_objects_is_a_noop(bucket):
     assert mod.main(["2026-01"]) == 0
     bucket.remove.assert_not_called()
+
+
+def test_last_month_mid_year():
+    assert mod._last_month(date(2026, 7, 6)) == "2026-06"
+
+
+def test_last_month_january_rolls_to_previous_december():
+    assert mod._last_month(date(2026, 1, 15)) == "2025-12"
