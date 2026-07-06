@@ -28,6 +28,33 @@ export const APP_STORE_URL =
 export const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.paulchwu.instantexplore&hl=zh_TW";
 
-export function storeUrlFor(platform: DownloadPlatform): string {
-  return platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
+/// Builds the store URL with install-attribution params so the App Store and
+/// Play consoles can attribute installs back to the landing page and the CTA
+/// that converted. GA's `download_click` only sees the on-site click; these
+/// params survive the redirect into the store.
+///
+/// - Google Play reads the Install Referrer: a `referrer` param holding a
+///   URL-encoded UTM string, surfaced in Play Console acquisition reports.
+/// - App Store reads a campaign token (`ct`, max 40 chars, alphanumeric),
+///   surfaced in App Store Connect App Analytics under Campaigns.
+///
+/// Passing no `location` returns the bare URL (e.g. for non-CTA references).
+export function storeUrlFor(
+  platform: DownloadPlatform,
+  location?: DownloadLocation,
+): string {
+  const base = platform === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
+  if (!location) return base;
+
+  if (platform === "android") {
+    const referrer = new URLSearchParams({
+      utm_source: "lorescape.app",
+      utm_medium: "web",
+      utm_campaign: "landing",
+      utm_content: location,
+    }).toString();
+    return `${base}&referrer=${encodeURIComponent(referrer)}`;
+  }
+
+  return `${base}?ct=web_${location}`;
 }

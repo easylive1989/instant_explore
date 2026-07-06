@@ -42,7 +42,7 @@ export default function DownloadLink({
 
   return (
     <a
-      href={storeUrlFor(platform)}
+      href={storeUrlFor(platform, location)}
       target="_blank"
       rel="noopener noreferrer"
       className={className}
