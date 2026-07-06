@@ -4,7 +4,11 @@ description: Use when the user wants to publish a wander-style (dark
   photo-overlay, person-narrative) IG carousel for a Lorescape daily story —
   e.g. 「今天用 wander 風格發」,「做 wander 圖組」,「茜茜公主那種風格」.
   Covers writing the 7–9 slide beats, rendering, local preview, and sending
-  for Discord review. Requires a user-provided photos folder.
+  for Discord review. Photos default to the day's
+  marketing/outputs/daily_image/<date>/ pool; a user-provided folder can
+  override. This is the FIXED carousel style for daily stories (since
+  2026-07-06) — lorescape-manual-daily-story Step 8b runs this flow after
+  every publish.
 ---
 
 # Wander 風格 IG Carousel
@@ -15,8 +19,10 @@ description: Use when the user wants to publish a wander-style (dark
 
 ## 流程
 
-1. **向使用者要**：日期（預設今天）、照片資料夾路徑（5–9 張同景點實拍）、
-   故事角度（哪個人物/事件）。
+1. **輸入**：日期（預設今天）；照片預設用當天
+   `marketing/outputs/daily_image/<date>/` 的 genuine place photos
+   （manual daily story Step 5 產出；不足 5 張或使用者另有指定時才要
+   資料夾路徑）；故事角度（哪個人物/事件）不明顯時問使用者。
 2. **寫文案** `marketing/outputs/daily_carousel/<date>/slides.json` +
    `caption.txt`，**給使用者審稿，改到同意為止**（見下方文案規則）。
 3. **渲染**：

@@ -49,6 +49,12 @@ on, the 21:00 cron then auto-posts to Instagram once an approver reacts
 not the App. If Discord isn't configured the hand-off is skipped (story
 still goes live in the App).
 
+**Carousel 一律用 wander 風格（2026-07-06 起的固定決策）。** publish 之後
+必跑 Step 8b 產 wander 圖組並送審；`publish` 自己貼的預設 IG 卡片訊息
+只是備援，**不要**對它按 ✅（有 wander pending row 時 21:00 publisher
+會直接發 wander 圖組、跳過預設卡片；預設卡片只在 wander 沒送審的日子
+才會被用到）。
+
 ## The Tools
 
 Publish (writes the reviewed draft to Supabase + Discord hand-off):
@@ -192,8 +198,26 @@ cd scripts && uv run python -m manual_daily_story publish
 
 Relay the verification output (row count + place_name per language) and
 the IG review hand-off result (the printed `message_id=…` line, or the
-"skipping IG review hand-off" / "posted nothing" note). If it posted to
-Discord, tell the user to approve with ✅ for the 21:00 IG publish.
+"skipping IG review hand-off" / "posted nothing" note). 提醒使用者：
+**不要**對這則預設卡片訊息按 ✅ — carousel 走 Step 8b 的 wander 流程。
+
+### Step 8b — Wander carousel（固定風格，publish 後必跑）
+
+Carousel 固定用 wander 風格。跟著 **lorescape-wander-carousel** skill 的
+文案規則與流程執行：
+
+1. **照片**：直接用本次 Step 5 留下的
+   `marketing/outputs/daily_image/{date}/` genuine place photos，
+   不需要另外要資料夾（張數不足 5 張時才問使用者補圖）。
+2. **文案**：Claude 寫
+   `marketing/outputs/daily_carousel/{date}/slides.json` + `caption.txt`
+   （7–9 拍、全篇第三人稱不用「我」、cover tag_zh 用「國家・城市」格式、
+   一個主題詞貫穿），**給使用者審稿**。
+3. **渲染 + 目視**：wander renderer CLI 產出 `slide_*.jpg`，
+   請使用者確認，要改就改 slides.json 重渲染。
+4. **送審**：`cd scripts && uv run python -m send_carousel_for_review {date}`，
+   提醒使用者在 21:00（Asia/Taipei）前對 **wander 圖組訊息** 按 ✅。
+   ❌ 或不按 = 當天 carousel 不發（不會 fallback 到預設風格）。
 
 ### Step 9 — Generate the Google Flow reel (ONLY after publish)
 
@@ -570,6 +594,7 @@ automatically at 21:10 once the video message gets a ✅.
 | Reel prompt output | `marketing/outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
 | IG Reels post-prod | After Flow + user downloads master to `marketing/outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Despina) is the default; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback (ElevenLabs removed — Western accent on zh) |
 | Reel auto-publish | `scripts/upload_reel_to_vps.sh {date}` rsyncs `final.mp4` + `narration.txt` to the VPS **and** posts the video to Discord for its own ✅/❌ review (independent of the carousel's). Publisher container publishes at 21:10; still-unreacted at 23:10 → `skipped`. State in `social_posts`; manual fallback = publish-reel skill |
+| Carousel 風格 | **固定 wander**（Step 8b）：照片用本次 daily_image、Claude 寫 slides.json 審稿後渲染、`send_carousel_for_review` 送審；✅ 按在 wander 圖組訊息上，預設卡片訊息忽略 |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; the 21:00 cron flips it to `published`/`skipped`/etc. based on the Discord ✅/❌ reaction |
 | IG review hand-off | `publish` posts the card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
@@ -607,6 +632,10 @@ automatically at 21:10 once the video message gets a ✅.
   a place dropped in 5c) doesn't burn the place rotation.
 - **`generate` sub-command is deprecated** — it calls Gemini. Claude
   writes the content instead.
+- **✅ 要按在 wander 圖組訊息上，不是預設卡片訊息上。** 兩則審核訊息
+  同時存在時（publish 的卡片 + Step 8b 的圖組），有 wander pending row
+  的日子 21:00 publisher 只看圖組訊息的反應；對卡片訊息按 ✅ 不會有
+  任何效果。
 - **~4% of places have no Wikipedia lead image** (sampled on the
   919-place pool, ≈ once a month) — the Unsplash pass normally covers
   these; a switch place (5c) is the rare case where Unsplash is empty too.
