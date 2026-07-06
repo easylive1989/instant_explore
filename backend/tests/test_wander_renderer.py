@@ -2,6 +2,7 @@
 """wander/renderer.py — Playwright JPEG 渲染（真的開 chromium，同 card 慣例）."""
 from __future__ import annotations
 
+import json
 from io import BytesIO
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import pytest
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
+from lorescape_backend.social.wander import renderer as renderer_module
 from lorescape_backend.social.wander.content import (
     WanderCarousel,
     WanderContentError,
@@ -115,3 +117,28 @@ def test_fit_script_shrinks_long_copy_until_it_fits(photos_dir):
 
     assert fit < 1.0
     assert metrics["scroll"] <= metrics["client"]
+
+
+def test_cli_removes_stale_slides_before_writing(tmp_path, monkeypatch):
+    """重渲染必須清掉舊的 slide_*.jpg，避免殘留頁被送審發布."""
+    day_dir = tmp_path / "2026-07-06"
+    day_dir.mkdir()
+    (day_dir / "slides.json").write_text(json.dumps({
+        "slides": [
+            {"layout": "beat", "photo": "a.jpg", "lines": ["一句。"]},
+            {"layout": "ending", "photo": "a.jpg", "lines": ["結尾。"]},
+        ],
+    }, ensure_ascii=False), encoding="utf-8")
+    (day_dir / "caption.txt").write_text("cap", encoding="utf-8")
+    (day_dir / "slide_03.jpg").write_bytes(b"stale")
+    (day_dir / "slide_09.jpg").write_bytes(b"stale")
+    monkeypatch.setattr(
+        renderer_module, "render_carousel",
+        lambda carousel, *, photos_dir: [b"new-1", b"new-2"],
+    )
+
+    exit_code = renderer_module.main([str(day_dir), str(tmp_path)])
+
+    assert exit_code == 0
+    slides = sorted(p.name for p in day_dir.glob("slide_*.jpg"))
+    assert slides == ["slide_01.jpg", "slide_02.jpg"]

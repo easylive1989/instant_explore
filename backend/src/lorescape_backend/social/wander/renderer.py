@@ -155,6 +155,8 @@ def main(argv: list[str]) -> int:
     except WanderContentError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+    for stale in day_dir.glob("slide_*.jpg"):
+        stale.unlink()
     for index, jpeg in enumerate(jpegs, 1):
         out = day_dir / f"slide_{index:02d}.jpg"
         out.write_bytes(jpeg)

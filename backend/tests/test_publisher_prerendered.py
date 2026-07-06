@@ -164,3 +164,13 @@ def test_dry_run_prints_without_publishing(mocks, capsys):
     out = capsys.readouterr().out
     assert "approved" in out
     assert URLS[0] in out
+
+
+def test_dry_run_without_prerendered_row_skips_default_flow(mocks, capsys):
+    mocks.post_log.get_post.return_value = None
+
+    run_publish_job(mocks.config, TARGET, dry_run=True)
+
+    mocks.load_rows.assert_not_called()
+    mocks.ig_pub.assert_not_called()
+    assert "no pre-rendered carousel" in capsys.readouterr().out

@@ -47,8 +47,10 @@ def run_publish_job(
 
     When a pre-rendered (wander-style) carousel was sent for review for
     this date, that review alone decides the day's carousel and the
-    default rendering flow is skipped entirely. `dry_run` only affects
-    the pre-rendered branch (prints the decision without publishing).
+    default rendering flow is skipped entirely. `dry_run` prints the
+    decision without publishing in the pre-rendered branch, and — when no
+    pre-rendered carousel exists for this date — never falls through to
+    the real default flow either.
     """
     if target_date is None:
         target_date = date.today()
@@ -56,6 +58,13 @@ def run_publish_job(
     supabase = create_client(config.supabase_url, config.supabase_service_role_key)
 
     if _handle_prerendered(supabase, config, target_date, dry_run=dry_run):
+        return
+
+    if dry_run:
+        print(
+            f"[dry-run] no pre-rendered carousel for "
+            f"{target_date.isoformat()}; default flow not executed"
+        )
         return
 
     rows = _load_pending_rows(supabase, target_date)
@@ -381,8 +390,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--dry-run", action="store_true",
-        help="Pre-rendered branch only: print decision/slides/caption "
-             "without publishing",
+        help="Print decision/slides/caption without publishing; never "
+             "falls through to the default (non-pre-rendered) flow",
     )
     args = parser.parse_args()
 
