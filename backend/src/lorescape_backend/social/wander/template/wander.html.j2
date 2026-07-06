@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+{# base_url is injected by the Playwright renderer so wander.css and the
+   shared card fonts resolve via file://. Unit tests pass "". #}
+<base href="{{ base_url }}" />
+<link rel="stylesheet" href="wander.css" />
+</head>
+<body>
+<div class="ws-card ws-card--{{ slide.layout }} ws-overlay--{{ slide.overlay }}">
+  <div class="ws-photo" style="background-image: url('{{ photo_uri | safe }}');"></div>
+  <div class="ws-tint"></div>
+  <div class="ws-frame"></div>
+
+  {% if slide.layout == 'cover' %}
+  <div class="ws-cover ws-fit">
+    <div class="ws-tag">
+      <span class="ws-tag__zh">{{ slide.tag_zh }}</span>
+      <span class="ws-tag__en">{{ slide.tag_en }}</span>
+    </div>
+    <h1 class="ws-title-xl">{{ slide.title }}</h1>
+    {% if slide.title_en %}<p class="ws-script">{{ slide.title_en }}</p>{% endif %}
+    <div class="ws-orn">♛</div>
+    <div class="ws-lines">
+      {% for line in slide.lines %}
+        {% if line %}<p class="ws-line">{{ line | hl(slide.highlights) }}</p>
+        {% else %}<div class="ws-sep"></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% elif slide.layout == 'ending' %}
+  <div class="ws-body ws-body--{{ slide.text_position }} ws-fit">
+    {% if slide.title %}<h2 class="ws-title">{{ slide.title | hl(slide.highlights) }}</h2>
+    <div class="ws-rule"></div>{% endif %}
+    <div class="ws-lines">
+      {% for line in slide.lines %}
+        {% if line %}<p class="ws-line">{{ line | hl(slide.highlights) }}</p>
+        {% else %}<div class="ws-sep"></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <div class="ws-endbrand">
+    <div class="ws-endbrand__rule"></div>
+    <p class="ws-endbrand__name">Lorescape</p>
+    <p class="ws-endbrand__tag">AI 旅行說書人</p>
+    <p class="ws-endbrand__cta">下載連結在個人簡介 ↓</p>
+  </div>
+
+  {% else %}{# beat / bright #}
+  <div class="ws-body ws-body--{{ 'center' if slide.layout == 'bright' else slide.text_position }} ws-fit">
+    {% if slide.title %}<h2 class="ws-title">{{ slide.title | hl(slide.highlights) }}</h2>
+    <div class="ws-rule"></div>{% endif %}
+    <div class="ws-lines">
+      {% for line in slide.lines %}
+        {% if line %}<p class="ws-line">{{ line | hl(slide.highlights) }}</p>
+        {% else %}<div class="ws-sep"></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="ws-brandmark">Lorescape</div>
+</div>
+</body>
+</html>
