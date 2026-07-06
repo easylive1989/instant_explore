@@ -41,7 +41,8 @@ description: Use when the user wants to publish a wander-style (dark
   貫穿全篇。
 - 照片配頁跟情緒走：悲劇配最暗的照片（`overlay: "darker"`）、
   bright 頁配唯一明亮照（`overlay: "light"`）。
-- layout 欄位：`cover`（需 tag_zh/tag_en/title/title_en）、
+- layout 欄位：`cover`（需 tag_zh/tag_en/title/title_en；tag_zh 用
+  「國家・城市/省」地點格式，**不要寫「XX 旅行」**）、
   `beat`（可選 title、text_position: left|right|top）、`bright`、`ending`。
 - caption.txt：既有貼文 caption 慣例（故事鉤子 + hashtags + @love.lorescape）。
 
@@ -50,7 +51,7 @@ description: Use when the user wants to publish a wander-style (dark
     {
       "slides": [
         {"layout": "cover", "photo": "dress.jpg",
-         "tag_zh": "奧地利旅行", "tag_en": "Austria",
+         "tag_zh": "奧地利・維也納", "tag_en": "Austria",
          "title": "茜茜公主", "title_en": "Empress Sisi",
          "lines": ["原本安排訂婚的，", "其實是她的姊姊。", "",
                     "沒想到，", "皇帝卻對西西公主一見鍾情。"]},
