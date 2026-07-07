@@ -26,3 +26,10 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - 狀態: 未開始
 - 來源: cro-2026-07-06.md（P1）
 - [ ] T1: Hero 下方放「App Store 5.0 ★」徽章
+
+## F5: 留存/完成率量測 (epic: E1)
+- 狀態: 未開始
+- 來源: decisions/2026-07-07-現階段主線補流量暫緩新功能.md（埋點不受暫緩）；cro-2026-07-06.md（narration 完成率為 missing_data）
+- 註: narration 四種事件（started/progress/completed/abandoned，含 completion_rate）已埋，見 docs/adr/0003；缺的是彙整視圖與留存量測
+- [ ] T1: 從既有 Firebase narration 事件彙整「聆聽完成率」視圖（非重新埋點）
+- [ ] T2: 確認並補齊次日/7日留存的量測與檢視
