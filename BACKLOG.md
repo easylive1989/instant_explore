@@ -33,3 +33,15 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - 註: narration 四種事件（started/progress/completed/abandoned，含 completion_rate）已埋，見 docs/adr/0003；缺的是彙整視圖與留存量測
 - [ ] T1: 從既有 Firebase narration 事件彙整「聆聽完成率」視圖（非重新埋點）
 - [ ] T2: 確認並補齊次日/7日留存的量測與檢視
+
+## F6: 7 天免費試用 (epic: E1)
+- 狀態: 進行中（暫停於 App Store Connect 設定，2026-07-08）
+- 來源: F2 延伸；使用者決定導入 7 天試用（CRO P1「若無 trial，導入免費試用」）
+- 決定: 試用套用**月方案＋年方案**，週方案不加（7 天≈整個週期）；地區全部、eligibility 新訂閱者
+- 依賴: T4/T5 依賴 T1–T3 完成；商店設定（T1/T2）需使用者操作登入與同意協議，AI 不代做
+- ⚠️ 落地頁（T5）在 T1–T2 真正設好前不得先廣告試用（避免誇大不實）
+- [ ] T1: App Store Connect — Premium Monthly / Yearly 各建 7 天免費試用介紹性優惠（今日停在 Premium Monthly 訂閱頁找「介紹性優惠」入口，尚未建立任何 offer、未送出任何設定）
+- [ ] T2: Google Play — 月/年訂閱設 7 天免費試用
+- [ ] T3: 確認 RevenueCat offering 帶出 intro offer
+- [ ] T4: App paywall 顯示「7 天免費試用」（SubscriptionPlan 目前無試用欄位，需讀 RevenueCat package 的 intro offer）
+- [ ] T5: 落地頁定價區塊廣告 7 天試用（依賴 T1–T2）
