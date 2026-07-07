@@ -10,7 +10,10 @@ from lorescape_backend.shared.genai import (
     GenaiSettings,
 )
 
-_DEFAULT_CTA_TEXT = "你會想造訪哪一座？留言告訴我 👇 喜歡的話，記得收藏這篇。"
+_DEFAULT_CTA_TEXT = (
+    "你會想造訪哪一座？完整故事與語音導覽都在 App 裡"
+    "——點個人檔案的連結就能聽。"
+)
 
 
 @dataclass(frozen=True)

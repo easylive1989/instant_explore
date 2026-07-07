@@ -5,10 +5,10 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 公司 epics 見 `../BACKLOG.md`（company repo）。
 
 ## F1: IG 導流 CTA (epic: E1)
-- 狀態: 未開始
+- 狀態: 進行中
 - 來源: marketing/audits/cro-2026-07-06.md（P0）
-- [ ] T1: Reel 結尾加明確 CTA，把 reach 導向 profile/商店
-- [ ] T2: IG bio 連結補上商店按鈕與導引文案
+- [x] T1: Reel caption 預設 CTA 改為導向個人檔案連結/App（config.py `_DEFAULT_CTA_TEXT`）
+- [ ] T2: IG bio 連結補上商店按鈕與導引文案（IG 個人檔案手動設定，非程式）
 
 ## F2: 落地頁與商店定價/試用透明度 (epic: E1)
 - 狀態: 未開始
