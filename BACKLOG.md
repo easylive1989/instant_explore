@@ -5,10 +5,10 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 公司 epics 見 `../BACKLOG.md`（company repo）。
 
 ## F1: IG 導流 CTA (epic: E1)
-- 狀態: 進行中
+- 狀態: 已完成
 - 來源: marketing/audits/cro-2026-07-06.md（P0）
 - [x] T1: Reel caption 預設 CTA 改為導向個人檔案連結/App（config.py `_DEFAULT_CTA_TEXT`）
-- [ ] T2: IG bio 連結補上商店按鈕與導引文案（IG 個人檔案手動設定，非程式）
+- [x] T2: IG bio 導引文案與連結（既有 bio 已含「🎧 免費下載 ↓」＋ lorescape.app 落地頁連結，2026-07-08 查證，維持現狀不新增直連商店按鈕以保留落地頁歸因）
 
 ## F2: 落地頁與商店定價/試用透明度 (epic: E1)
 - 狀態: 未開始
