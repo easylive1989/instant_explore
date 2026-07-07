@@ -139,7 +139,7 @@ class Config:
             ig_user_id=optional("IG_USER_ID"),
             meta_page_access_token=optional("META_PAGE_ACCESS_TOKEN"),
             brand_handle_ig=os.environ.get("BRAND_HANDLE_IG", ""),
-            cta_text=os.environ.get("CTA_TEXT", _DEFAULT_CTA_TEXT),
+            cta_text=_DEFAULT_CTA_TEXT,
             revenuecat_webhook_auth_token=optional(
                 "REVENUECAT_WEBHOOK_AUTH_TOKEN"
             ),
