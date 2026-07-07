@@ -11,7 +11,7 @@ from lorescape_backend.shared.genai import (
 )
 
 _DEFAULT_CTA_TEXT = (
-    "你會想造訪哪一座？完整故事與語音導覽都在 App 裡"
+    "你會想親自走一趟嗎？完整故事與語音導覽都在 App 裡"
     "——點個人檔案的連結就能聽。"
 )
 
