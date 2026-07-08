@@ -291,6 +291,7 @@
     "plan_weekly": "WEEKLY PLAN",
     "plan_monthly": "MONTHLY PLAN",
     "plan_yearly": "YEARLY PLAN",
+    "free_trial_days": "{days}-day free trial",
     "period_weekly": "/ week",
     "period_monthly": "/ month",
     "period_yearly": "/ year",

@@ -10,90 +10,84 @@ void main() {
   });
 
   group('SubscriptionPlanCard', () {
-    testWidgets(
-      'given the loading state, when the card is shown, '
-      'then it renders a price skeleton and no subscribe-ready text',
-      (tester) async {
-        await _pumpCard(tester, const SubscriptionPlanCardState.loading());
+    testWidgets('given the loading state, when the card is shown, '
+        'then it renders a price skeleton and no subscribe-ready text', (
+      tester,
+    ) async {
+      await _pumpCard(tester, const SubscriptionPlanCardState.loading());
 
-        expect(
-          find.byKey(const ValueKey('planCard.priceSkeleton')),
-          findsOneWidget,
-        );
-        expect(find.text('NT\$90'), findsNothing);
-      },
-    );
+      expect(
+        find.byKey(const ValueKey('planCard.priceSkeleton')),
+        findsOneWidget,
+      );
+      expect(find.text('NT\$90'), findsNothing);
+    });
 
-    testWidgets(
-      'given a ready state, when the card is shown, '
-      'then the price string is the largest font on the card',
-      (tester) async {
-        await _pumpCard(
-          tester,
-          const SubscriptionPlanCardState.ready(
-            planLabel: 'MONTHLY PLAN',
-            priceString: 'NT\$90',
-            periodLabel: '/ month',
-            bullets: ['Unlimited', 'Ad-free', 'Routes'],
-            autoRenewNotice: 'Auto-renews monthly. Cancel anytime.',
-            selected: true,
-          ),
-        );
+    testWidgets('given a ready state, when the card is shown, '
+        'then the price string is the largest font on the card', (
+      tester,
+    ) async {
+      await _pumpCard(
+        tester,
+        const SubscriptionPlanCardState.ready(
+          planLabel: 'MONTHLY PLAN',
+          priceString: 'NT\$90',
+          periodLabel: '/ month',
+          bullets: ['Unlimited', 'Ad-free', 'Routes'],
+          autoRenewNotice: 'Auto-renews monthly. Cancel anytime.',
+          selected: true,
+        ),
+      );
 
-        final priceSize = _fontSize(tester, 'NT\$90');
-        final periodSize = _fontSize(tester, '/ month');
-        final planLabelSize = _fontSize(tester, 'MONTHLY PLAN');
-        final noticeSize =
-            _fontSize(tester, 'Auto-renews monthly. Cancel anytime.');
-        final bulletSize = _fontSize(tester, 'Unlimited');
+      final priceSize = _fontSize(tester, 'NT\$90');
+      final periodSize = _fontSize(tester, '/ month');
+      final planLabelSize = _fontSize(tester, 'MONTHLY PLAN');
+      final noticeSize = _fontSize(
+        tester,
+        'Auto-renews monthly. Cancel anytime.',
+      );
+      final bulletSize = _fontSize(tester, 'Unlimited');
 
-        expect(priceSize, greaterThan(periodSize));
-        expect(priceSize, greaterThan(planLabelSize));
-        expect(priceSize, greaterThan(noticeSize));
-        expect(priceSize, greaterThan(bulletSize));
-      },
-    );
+      expect(priceSize, greaterThan(periodSize));
+      expect(priceSize, greaterThan(planLabelSize));
+      expect(priceSize, greaterThan(noticeSize));
+      expect(priceSize, greaterThan(bulletSize));
+    });
 
-    testWidgets(
-      'given a ready state, when the card is shown, '
-      'then every provided bullet appears',
-      (tester) async {
-        await _pumpCard(
-          tester,
-          const SubscriptionPlanCardState.ready(
-            planLabel: 'MONTHLY PLAN',
-            priceString: 'NT\$90',
-            periodLabel: '/ month',
-            bullets: ['Unlimited', 'Ad-free', 'Routes'],
-            autoRenewNotice: 'Notice',
-            selected: true, // bullets only render in the selected state
-          ),
-        );
+    testWidgets('given a ready state, when the card is shown, '
+        'then every provided bullet appears', (tester) async {
+      await _pumpCard(
+        tester,
+        const SubscriptionPlanCardState.ready(
+          planLabel: 'MONTHLY PLAN',
+          priceString: 'NT\$90',
+          periodLabel: '/ month',
+          bullets: ['Unlimited', 'Ad-free', 'Routes'],
+          autoRenewNotice: 'Notice',
+          selected: true, // bullets only render in the selected state
+        ),
+      );
 
-        expect(find.text('Unlimited'), findsOneWidget);
-        expect(find.text('Ad-free'), findsOneWidget);
-        expect(find.text('Routes'), findsOneWidget);
-      },
-    );
+      expect(find.text('Unlimited'), findsOneWidget);
+      expect(find.text('Ad-free'), findsOneWidget);
+      expect(find.text('Routes'), findsOneWidget);
+    });
 
-    testWidgets(
-      'given an error state, when the user taps retry, '
-      'then onRetry is invoked exactly once',
-      (tester) async {
-        var retryCount = 0;
-        await _pumpCard(
-          tester,
-          const SubscriptionPlanCardState.error(message: 'oops'),
-          onRetry: () => retryCount++,
-        );
+    testWidgets('given an error state, when the user taps retry, '
+        'then onRetry is invoked exactly once', (tester) async {
+      var retryCount = 0;
+      await _pumpCard(
+        tester,
+        const SubscriptionPlanCardState.error(message: 'oops'),
+        onRetry: () => retryCount++,
+      );
 
-        await tester.tap(find.byKey(const ValueKey('planCard.retry')));
-        await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('planCard.retry')));
+      await tester.pump();
 
-        expect(retryCount, 1);
-        expect(find.text('oops'), findsOneWidget);
-      },
-    );
+      expect(retryCount, 1);
+      expect(find.text('oops'), findsOneWidget);
+    });
 
     testWidgets(
       'given a ready state with isBestValue=true, when the card is shown, '
@@ -135,50 +129,85 @@ void main() {
       },
     );
 
+    testWidgets('given selected=false, when the card is shown, '
+        'then bullets are not rendered', (tester) async {
+      await _pumpCard(
+        tester,
+        const SubscriptionPlanCardState.ready(
+          planLabel: 'WEEKLY PLAN',
+          priceString: 'NT\$30',
+          periodLabel: '/ week',
+          bullets: ['Unlimited', 'Ad-free'],
+          autoRenewNotice: 'auto',
+          selected: false,
+        ),
+      );
+
+      expect(find.text('Unlimited'), findsNothing);
+      expect(find.text('Ad-free'), findsNothing);
+    });
+
     testWidgets(
-      'given selected=false, when the card is shown, '
-      'then bullets are not rendered',
+      'given a ready state with a freeTrialLabel, when the card is shown '
+      'unselected, then the trial label is visible upfront',
+      (tester) async {
+        await _pumpCard(
+          tester,
+          const SubscriptionPlanCardState.ready(
+            planLabel: 'MONTHLY PLAN',
+            priceString: 'NT\$150',
+            periodLabel: '/ month',
+            bullets: ['Unlimited'],
+            autoRenewNotice: 'auto',
+            selected: false,
+            freeTrialLabel: '7 天免費試用',
+          ),
+        );
+
+        expect(find.text('7 天免費試用'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a ready state without a freeTrialLabel, when the card is shown, '
+      'then no trial label is rendered',
       (tester) async {
         await _pumpCard(
           tester,
           const SubscriptionPlanCardState.ready(
             planLabel: 'WEEKLY PLAN',
-            priceString: 'NT\$30',
+            priceString: 'NT\$33',
             periodLabel: '/ week',
-            bullets: ['Unlimited', 'Ad-free'],
+            bullets: ['Unlimited'],
             autoRenewNotice: 'auto',
             selected: false,
           ),
         );
 
-        expect(find.text('Unlimited'), findsNothing);
-        expect(find.text('Ad-free'), findsNothing);
+        expect(find.text('7 天免費試用'), findsNothing);
       },
     );
 
-    testWidgets(
-      'given an onTap callback, when the card is tapped, '
-      'then onTap is invoked exactly once',
-      (tester) async {
-        var taps = 0;
-        await _pumpCard(
-          tester,
-          SubscriptionPlanCardState.ready(
-            planLabel: 'WEEKLY PLAN',
-            priceString: 'NT\$30',
-            periodLabel: '/ week',
-            bullets: const ['Unlimited'],
-            autoRenewNotice: 'auto',
-            onTap: () => taps++,
-          ),
-        );
+    testWidgets('given an onTap callback, when the card is tapped, '
+        'then onTap is invoked exactly once', (tester) async {
+      var taps = 0;
+      await _pumpCard(
+        tester,
+        SubscriptionPlanCardState.ready(
+          planLabel: 'WEEKLY PLAN',
+          priceString: 'NT\$30',
+          periodLabel: '/ week',
+          bullets: const ['Unlimited'],
+          autoRenewNotice: 'auto',
+          onTap: () => taps++,
+        ),
+      );
 
-        await tester.tap(find.text('WEEKLY PLAN'));
-        await tester.pump();
+      await tester.tap(find.text('WEEKLY PLAN'));
+      await tester.pump();
 
-        expect(taps, 1);
-      },
-    );
+      expect(taps, 1);
+    });
   });
 }
 

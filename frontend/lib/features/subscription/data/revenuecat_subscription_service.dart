@@ -125,11 +125,46 @@ class RevenueCatSubscriptionService implements SubscriptionService {
           period: period,
           packageIdentifier: pkg.identifier,
           isBestValue: period == SubscriptionPeriod.yearly,
+          freeTrialDays: freeTrialDays(
+            introductoryPrice: pkg.storeProduct.introductoryPrice,
+            androidFreeTrialPeriod:
+                pkg.storeProduct.defaultOption?.freePhase?.billingPeriod,
+          ),
         ),
       );
     }
     return plans;
   }
+
+  /// Normalized length of the introductory free trial in days, or `null` when
+  /// there is none. iOS surfaces the trial as an [IntroductoryPrice] with a
+  /// zero price; Google Play surfaces it as the free [PricingPhase] of the
+  /// default subscription option, whose [Period] is passed as
+  /// [androidFreeTrialPeriod]. Both are normalized to days so the paywall can
+  /// show a single "N 天免費試用" label regardless of store.
+  @visibleForTesting
+  static int? freeTrialDays({
+    IntroductoryPrice? introductoryPrice,
+    Period? androidFreeTrialPeriod,
+  }) {
+    final intro = introductoryPrice;
+    if (intro != null && intro.price == 0) {
+      return _periodToDays(intro.periodNumberOfUnits, intro.periodUnit);
+    }
+    final period = androidFreeTrialPeriod;
+    if (period != null) {
+      return _periodToDays(period.value, period.unit);
+    }
+    return null;
+  }
+
+  static int? _periodToDays(int value, PeriodUnit unit) => switch (unit) {
+    PeriodUnit.day => value,
+    PeriodUnit.week => value * 7,
+    PeriodUnit.month => value * 30,
+    PeriodUnit.year => value * 365,
+    PeriodUnit.unknown => null,
+  };
 
   PackageType _packageTypeFor(SubscriptionPeriod period) => switch (period) {
     SubscriptionPeriod.weekly => PackageType.weekly,

@@ -44,6 +44,7 @@ class SubscriptionPlanCard extends StatelessWidget {
         :final autoRenewNotice,
         :final selected,
         :final isBestValue,
+        :final freeTrialLabel,
         :final onTap,
       ) =>
         InkWell(
@@ -61,6 +62,7 @@ class SubscriptionPlanCard extends StatelessWidget {
               autoRenewNotice: autoRenewNotice,
               selected: selected,
               isBestValue: isBestValue,
+              freeTrialLabel: freeTrialLabel,
             ),
           ),
         ),
@@ -103,6 +105,7 @@ sealed class SubscriptionPlanCardState {
     required String autoRenewNotice,
     bool selected,
     bool isBestValue,
+    String? freeTrialLabel,
     VoidCallback? onTap,
   }) = SubscriptionPlanCardStateReady;
 }
@@ -125,6 +128,7 @@ final class SubscriptionPlanCardStateReady extends SubscriptionPlanCardState {
     required this.autoRenewNotice,
     this.selected = false,
     this.isBestValue = false,
+    this.freeTrialLabel,
     this.onTap,
   });
 
@@ -135,6 +139,11 @@ final class SubscriptionPlanCardStateReady extends SubscriptionPlanCardState {
   final String autoRenewNotice;
   final bool selected;
   final bool isBestValue;
+
+  /// Pre-formatted free-trial line (e.g. "7 天免費試用"), or `null` when the
+  /// plan has no trial. Shown upfront so the offer is visible before the user
+  /// selects the plan.
+  final String? freeTrialLabel;
   final VoidCallback? onTap;
 }
 
@@ -231,6 +240,7 @@ class _Ready extends StatelessWidget {
     required this.autoRenewNotice,
     required this.selected,
     required this.isBestValue,
+    required this.freeTrialLabel,
   });
 
   final String planLabel;
@@ -240,6 +250,7 @@ class _Ready extends StatelessWidget {
   final String autoRenewNotice;
   final bool selected;
   final bool isBestValue;
+  final String? freeTrialLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +303,17 @@ class _Ready extends StatelessWidget {
             ),
           ],
         ),
+        if (freeTrialLabel != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            freeTrialLabel!,
+            style: TextStyle(
+              fontSize: SubscriptionPlanCard._bulletFontSize,
+              fontWeight: FontWeight.w600,
+              color: palette.clay,
+            ),
+          ),
+        ],
         if (selected) ...[
           const SizedBox(height: 16),
           _Divider(palette: palette),

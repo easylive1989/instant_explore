@@ -10,11 +10,17 @@ class SubscriptionPlan {
   final String packageIdentifier;
   final bool isBestValue;
 
+  /// Length of the introductory free trial in days, or `null` when the plan
+  /// has no free trial. Normalized to days across stores (iOS reports the
+  /// trial as e.g. 1 week, Google Play as 7 days — both surface as 7 here).
+  final int? freeTrialDays;
+
   const SubscriptionPlan({
     required this.priceString,
     required this.period,
     required this.packageIdentifier,
     this.isBestValue = false,
+    this.freeTrialDays,
   });
 
   @override
@@ -25,11 +31,17 @@ class SubscriptionPlan {
           priceString == other.priceString &&
           period == other.period &&
           packageIdentifier == other.packageIdentifier &&
-          isBestValue == other.isBestValue;
+          isBestValue == other.isBestValue &&
+          freeTrialDays == other.freeTrialDays;
 
   @override
-  int get hashCode =>
-      Object.hash(priceString, period, packageIdentifier, isBestValue);
+  int get hashCode => Object.hash(
+    priceString,
+    period,
+    packageIdentifier,
+    isBestValue,
+    freeTrialDays,
+  );
 }
 
 /// 訂閱方案週期

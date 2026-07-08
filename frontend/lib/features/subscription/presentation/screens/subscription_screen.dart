@@ -250,6 +250,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       autoRenewNotice: 'subscription.auto_renew_notice'.tr(),
       selected: plan.period == _selectedPeriod,
       isBestValue: plan.isBestValue,
+      freeTrialLabel: plan.freeTrialDays != null
+          ? 'subscription.free_trial_days'.tr(
+              namedArgs: {'days': '${plan.freeTrialDays}'},
+            )
+          : null,
       onTap: _isPurchasing
           ? null
           : () => setState(() => _selectedPeriod = plan.period),

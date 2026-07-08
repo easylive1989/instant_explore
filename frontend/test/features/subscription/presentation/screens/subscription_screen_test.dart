@@ -36,31 +36,29 @@ void main() {
   });
 
   group('SubscriptionScreen', () {
-    testWidgets(
-      'given plans loaded, when the screen first shows, '
-      'then yearly is selected and Best value badge is visible',
-      (tester) async {
-        await _givenScreen(tester, _serviceWith(_kAllPlans));
+    testWidgets('given plans loaded, when the screen first shows, '
+        'then yearly is selected and Best value badge is visible', (
+      tester,
+    ) async {
+      await _givenScreen(tester, _serviceWith(_kAllPlans));
 
-        expect(find.text('subscription.plan_yearly'), findsOneWidget);
-        expect(find.text('subscription.badge_best_value'), findsOneWidget);
-        expect(find.text('subscription.subscribe_yearly'), findsOneWidget);
-      },
-    );
+      expect(find.text('subscription.plan_yearly'), findsOneWidget);
+      expect(find.text('subscription.badge_best_value'), findsOneWidget);
+      expect(find.text('subscription.subscribe_yearly'), findsOneWidget);
+    });
 
-    testWidgets(
-      'given yearly selected, when the user taps the weekly card, '
-      'then subscribe button label changes to Subscribe Weekly',
-      (tester) async {
-        await _givenScreen(tester, _serviceWith(_kAllPlans));
+    testWidgets('given yearly selected, when the user taps the weekly card, '
+        'then subscribe button label changes to Subscribe Weekly', (
+      tester,
+    ) async {
+      await _givenScreen(tester, _serviceWith(_kAllPlans));
 
-        await tester.tap(find.text('subscription.plan_weekly'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.text('subscription.plan_weekly'));
+      await tester.pumpAndSettle();
 
-        expect(find.text('subscription.subscribe_weekly'), findsOneWidget);
-        expect(find.text('subscription.subscribe_yearly'), findsNothing);
-      },
-    );
+      expect(find.text('subscription.subscribe_weekly'), findsOneWidget);
+      expect(find.text('subscription.subscribe_yearly'), findsNothing);
+    });
 
     testWidgets(
       'given the user taps subscribe, when purchase succeeds, '
@@ -83,26 +81,25 @@ void main() {
       },
     );
 
-    testWidgets(
-      'given an anonymous user taps subscribe, '
-      'then a sign-in prompt is shown and no purchase is made',
-      (tester) async {
-        final service = _serviceWith(_kAllPlans)
-          ..stubPurchase(status: const SubscriptionStatus(isPremium: true));
+    testWidgets('given an anonymous user taps subscribe, '
+        'then a sign-in prompt is shown and no purchase is made', (
+      tester,
+    ) async {
+      final service = _serviceWith(_kAllPlans)
+        ..stubPurchase(status: const SubscriptionStatus(isPremium: true));
 
-        await _givenScreenOnRoute(tester, service, user: _anonUser);
+      await _givenScreenOnRoute(tester, service, user: _anonUser);
 
-        await tester.scrollUntilVisible(
-          find.text('subscription.subscribe_yearly'),
-          100,
-        );
-        await tester.tap(find.text('subscription.subscribe_yearly'));
-        await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('subscription.subscribe_yearly'),
+        100,
+      );
+      await tester.tap(find.text('subscription.subscribe_yearly'));
+      await tester.pumpAndSettle();
 
-        expect(find.text('subscription.login_required'), findsOneWidget);
-        expect(service.purchaseCalls, isEmpty);
-      },
-    );
+      expect(find.text('subscription.login_required'), findsOneWidget);
+      expect(service.purchaseCalls, isEmpty);
+    });
 
     testWidgets(
       'given the service returns only weekly + monthly, when the screen loads, '
@@ -117,94 +114,79 @@ void main() {
       },
     );
 
-    testWidgets(
-      'given the service throws on load, when retry is tapped, '
-      'then getAvailablePlans is called again and plans render',
-      (tester) async {
-        final service = FakeSubscriptionService()
-          ..stubGetAvailablePlans(error: Exception('network'));
+    testWidgets('given the service throws on load, when retry is tapped, '
+        'then getAvailablePlans is called again and plans render', (
+      tester,
+    ) async {
+      final service = FakeSubscriptionService()
+        ..stubGetAvailablePlans(error: Exception('network'));
 
-        await _givenScreen(tester, service);
+      await _givenScreen(tester, service);
 
-        expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
+      expect(find.byKey(const ValueKey('planCard.retry')), findsOneWidget);
 
-        service.stubGetAvailablePlans(plans: _kAllPlans);
-        await tester.tap(find.byKey(const ValueKey('planCard.retry')));
-        await tester.pumpAndSettle();
+      service.stubGetAvailablePlans(plans: _kAllPlans);
+      await tester.tap(find.byKey(const ValueKey('planCard.retry')));
+      await tester.pumpAndSettle();
 
-        expect(find.text('NT\$900'), findsOneWidget);
-      },
-    );
+      expect(find.text('NT\$900'), findsOneWidget);
+    });
 
-    testWidgets(
-      'given no prior purchase, when the user taps restore, '
-      'then the no-purchases snackbar is shown',
-      (tester) async {
-        final service = _serviceWith(_kAllPlans)
-          ..stubRestore(status: SubscriptionStatus.free);
+    testWidgets('given no prior purchase, when the user taps restore, '
+        'then the no-purchases snackbar is shown', (tester) async {
+      final service = _serviceWith(_kAllPlans)
+        ..stubRestore(status: SubscriptionStatus.free);
 
-        await _givenScreen(tester, service);
+      await _givenScreen(tester, service);
 
-        await tester.scrollUntilVisible(
-          find.text('subscription.restore'),
-          100,
-        );
-        await tester.tap(find.text('subscription.restore'));
-        await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('subscription.restore'), 100);
+      await tester.tap(find.text('subscription.restore'));
+      await tester.pumpAndSettle();
 
-        expect(find.text('subscription.no_purchases_found'), findsOneWidget);
-      },
-    );
+      expect(find.text('subscription.no_purchases_found'), findsOneWidget);
+    });
 
-    testWidgets(
-      'given the terms link is tapped, when the user interacts, '
-      'then the injected launcher is called with the terms URL',
-      (tester) async {
-        final launched = <Uri>[];
-        await _givenScreen(
-          tester,
-          _serviceWith(_kAllPlans),
-          launcher: (uri) async {
-            launched.add(uri);
-            return true;
-          },
-        );
+    testWidgets('given the terms link is tapped, when the user interacts, '
+        'then the injected launcher is called with the terms URL', (
+      tester,
+    ) async {
+      final launched = <Uri>[];
+      await _givenScreen(
+        tester,
+        _serviceWith(_kAllPlans),
+        launcher: (uri) async {
+          launched.add(uri);
+          return true;
+        },
+      );
 
-        await tester.scrollUntilVisible(
-          find.text('subscription.terms'),
-          100,
-        );
-        await tester.tap(find.text('subscription.terms'));
-        await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('subscription.terms'), 100);
+      await tester.tap(find.text('subscription.terms'));
+      await tester.pumpAndSettle();
 
-        expect(launched, [Uri.parse(LegalUrls.termsOfUse)]);
-      },
-    );
+      expect(launched, [Uri.parse(LegalUrls.termsOfUse)]);
+    });
 
-    testWidgets(
-      'given the privacy link is tapped, when the user interacts, '
-      'then the injected launcher is called with the privacy URL',
-      (tester) async {
-        final launched = <Uri>[];
-        await _givenScreen(
-          tester,
-          _serviceWith(_kAllPlans),
-          launcher: (uri) async {
-            launched.add(uri);
-            return true;
-          },
-        );
+    testWidgets('given the privacy link is tapped, when the user interacts, '
+        'then the injected launcher is called with the privacy URL', (
+      tester,
+    ) async {
+      final launched = <Uri>[];
+      await _givenScreen(
+        tester,
+        _serviceWith(_kAllPlans),
+        launcher: (uri) async {
+          launched.add(uri);
+          return true;
+        },
+      );
 
-        await tester.scrollUntilVisible(
-          find.text('subscription.privacy'),
-          100,
-        );
-        await tester.tap(find.text('subscription.privacy'));
-        await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('subscription.privacy'), 100);
+      await tester.tap(find.text('subscription.privacy'));
+      await tester.pumpAndSettle();
 
-        expect(launched, [Uri.parse(LegalUrls.privacyPolicy)]);
-      },
-    );
+      expect(launched, [Uri.parse(LegalUrls.privacyPolicy)]);
+    });
   });
 }
 
