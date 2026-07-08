@@ -40,7 +40,7 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - 決定: 試用套用**月方案＋年方案**，週方案不加（7 天≈整個週期）；地區全部、eligibility 新訂閱者
 - 依賴: T4/T5 依賴 T1–T3 完成；商店設定（T1/T2）需使用者操作登入與同意協議，AI 不代做
 - ⚠️ 落地頁（T5）在 T1–T2 真正設好前不得先廣告試用（避免誇大不實）
-- [ ] T1: App Store Connect — Premium Monthly / Yearly 各建 7 天免費試用介紹性優惠（今日停在 Premium Monthly 訂閱頁找「介紹性優惠」入口，尚未建立任何 offer、未送出任何設定）
+- [x] T1: App Store Connect — Premium Monthly / Yearly 各建 7 天免費試用介紹性優惠（2026-07-08 完成，首週免費、175 地區、新訂閱者、2026-07-08～2027-07-08、到期前需延長）
 - [ ] T2: Google Play — 月/年訂閱設 7 天免費試用
 - [ ] T3: 確認 RevenueCat offering 帶出 intro offer
 - [ ] T4: App paywall 顯示「7 天免費試用」（SubscriptionPlan 目前無試用欄位，需讀 RevenueCat package 的 intro offer）
