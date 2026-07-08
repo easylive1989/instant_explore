@@ -63,6 +63,22 @@ export interface Dict {
     caption: string;
     ariaLabel: string;
   };
+  pricing: {
+    no: string;
+    h2: string;
+    lede: string;
+    trialBadge: string;
+    recommendedBadge: string;
+    plans: {
+      name: string;
+      price: string;
+      period: string;
+      desc: string;
+      trial: boolean;
+      recommended: boolean;
+    }[];
+    note: string;
+  };
   finalCTA: {
     over: string;
     h2Top: string;
@@ -193,6 +209,48 @@ const zh: Dict = {
   videoDemo: {
     caption: "看看 Lorescape 如何把眼前的風景，變成一段值得細聽的故事。",
     ariaLabel: "Lorescape App 示範影片",
+  },
+  pricing: {
+    no: "方案",
+    h2: "先免費試用 7 天，喜歡再訂閱",
+    lede: "付費方案皆含 7 天免費試用，隨時可取消。",
+    trialBadge: "7 天免費試用",
+    recommendedBadge: "推薦",
+    plans: [
+      {
+        name: "免費",
+        price: "NT$0",
+        period: "",
+        desc: "每日 1 次 AI 導覽",
+        trial: false,
+        recommended: false,
+      },
+      {
+        name: "週訂",
+        price: "NT$33",
+        period: "/ 週",
+        desc: "無限 AI 導覽",
+        trial: false,
+        recommended: false,
+      },
+      {
+        name: "月訂",
+        price: "NT$150",
+        period: "/ 月",
+        desc: "無限 AI 導覽",
+        trial: true,
+        recommended: false,
+      },
+      {
+        name: "年訂",
+        price: "NT$660",
+        period: "/ 年",
+        desc: "最超值，約 4.4 個月月費",
+        trial: true,
+        recommended: true,
+      },
+    ],
+    note: "價格依地區與商店而異；訂閱可隨時於 App Store / Google Play 取消。",
   },
   finalCTA: {
     over: "開始你的第一段故事",
@@ -326,6 +384,48 @@ const en: Dict = {
   videoDemo: {
     caption: "See how Lorescape turns the view in front of you into a story worth hearing.",
     ariaLabel: "Lorescape app demo video",
+  },
+  pricing: {
+    no: "Plans",
+    h2: "Try 7 days free, subscribe if you love it",
+    lede: "Every paid plan includes a 7-day free trial. Cancel anytime.",
+    trialBadge: "7-day free trial",
+    recommendedBadge: "Recommended",
+    plans: [
+      {
+        name: "Free",
+        price: "NT$0",
+        period: "",
+        desc: "1 AI tour per day",
+        trial: false,
+        recommended: false,
+      },
+      {
+        name: "Weekly",
+        price: "NT$33",
+        period: "/ week",
+        desc: "Unlimited AI tours",
+        trial: false,
+        recommended: false,
+      },
+      {
+        name: "Monthly",
+        price: "NT$150",
+        period: "/ month",
+        desc: "Unlimited AI tours",
+        trial: true,
+        recommended: false,
+      },
+      {
+        name: "Yearly",
+        price: "NT$660",
+        period: "/ year",
+        desc: "Best value — about 4.4 months of monthly",
+        trial: true,
+        recommended: true,
+      },
+    ],
+    note: "Prices vary by region and store. Cancel anytime in the App Store or Google Play.",
   },
   finalCTA: {
     over: "Begin your first story",
