@@ -63,6 +63,12 @@ export interface Dict {
     caption: string;
     ariaLabel: string;
   };
+  trust: {
+    no: string;
+    h2: string;
+    lede: string;
+    proof: string;
+  };
   pricing: {
     no: string;
     h2: string;
@@ -140,7 +146,7 @@ const zh: Dict = {
     line1: "別再低頭盯著螢幕。",
     line2Lead: "抬起眼睛，",
     line2Quote: "世界本身就是展品。",
-    cite: "Lorescape · 地誌手記",
+    cite: "Lorescape · 旅行說書人",
   },
   localStories: {
     no: "功能 01",
@@ -210,6 +216,13 @@ const zh: Dict = {
     caption: "看看 Lorescape 如何把眼前的風景，變成一段值得細聽的故事。",
     ariaLabel: "Lorescape App 示範影片",
   },
+  trust: {
+    no: "以史實為本",
+    h2: "AI 說的，是真的嗎？",
+    lede:
+      "每一則故事都以 Wikipedia 為事實依據，並附上出處連結——不是 AI 憑空杜撰。你聽到的每一段脈絡，都能回溯到可查證的來源。",
+    proof: "每則故事，皆附 Wikipedia 出處",
+  },
   pricing: {
     no: "方案",
     h2: "先免費試用 7 天，喜歡再訂閱",
@@ -269,7 +282,7 @@ const zh: Dict = {
     terms: "使用條款",
     credits: "圖片來源",
     copyright: "© 2026 Lorescape. 版權所有。",
-    version: "地誌手記 · v1.0",
+    version: "旅行說書人 · v1.0",
   },
   metadata: {
     title: "Lorescape — 讓每一處風景，開口說它的故事",
@@ -384,6 +397,13 @@ const en: Dict = {
   videoDemo: {
     caption: "See how Lorescape turns the view in front of you into a story worth hearing.",
     ariaLabel: "Lorescape app demo video",
+  },
+  trust: {
+    no: "Grounded in fact",
+    h2: "Is what the AI says true?",
+    lede:
+      "Every story is grounded in Wikipedia and comes with source links — not invented by AI. Every detail you hear traces back to a source you can check.",
+    proof: "Every story cites its Wikipedia source",
   },
   pricing: {
     no: "Plans",

@@ -6,6 +6,7 @@ import LocalStories from "@/components/LocalStories";
 import ManyAngles from "@/components/ManyAngles";
 import ExploreNearby from "@/components/ExploreNearby";
 import JourneyJournal from "@/components/JourneyJournal";
+import Trust from "@/components/Trust";
 import Pricing from "@/components/Pricing";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
@@ -27,6 +28,7 @@ export default function Home({ params }: { params: { locale: string } }) {
         <ManyAngles d={d.manyAngles} />
         <ExploreNearby d={d.exploreNearby} />
         <JourneyJournal d={d.journeyJournal} />
+        <Trust d={d.trust} />
         <Pricing d={d.pricing} />
         <FinalCTA d={d.finalCTA} store={d.storeButtons} />
       </main>
