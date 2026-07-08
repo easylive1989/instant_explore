@@ -215,8 +215,6 @@
     "terms": "繼續即表示您同意我們的服務條款和隱私權政策。",
     "app_version": "版本資訊無法取得",
     "copyright": "© 2025 Lorescape",
-    "daily_usage": "每日使用量",
-    "remaining_today": "今日剩餘 {remaining} 次",
     "sync_section": "雲端同步",
     "sync_toggle": "同步到雲端",
     "sync_toggle_subtitle_on": "您的地點與旅程會在裝置間保持同步。",
@@ -261,9 +259,6 @@
     "start_narration": "開始導覽"
   },
   "subscription": {
-    "paywall_title": "已達今日免費上限",
-    "paywall_subtitle": "免費版每日 {limit} 次 AI 導覽",
-    "remaining_usage": "今日剩餘 {remaining} 次",
     "unlimited_access": "無限使用中",
     "expires_at": "有效至 {date}",
     "remaining_days": "剩餘 {days} 天",

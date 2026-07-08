@@ -215,8 +215,6 @@
     "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
     "app_version": "Version information unavailable",
     "copyright": "© 2025 Lorescape",
-    "daily_usage": "Daily Usage",
-    "remaining_today": "{remaining} remaining today",
     "sync_section": "Cloud Sync",
     "sync_toggle": "Sync to Cloud",
     "sync_toggle_subtitle_on": "Your places and journeys stay in sync across devices.",
@@ -261,9 +259,6 @@
     "start_narration": "Start Guide"
   },
   "subscription": {
-    "paywall_title": "Daily Free Limit Reached",
-    "paywall_subtitle": "Free version includes {limit} AI guides per day",
-    "remaining_usage": "{remaining} guides remaining today",
     "unlimited_access": "Unlimited Access",
     "expires_at": "Valid until {date}",
     "remaining_days": "{days} days remaining",

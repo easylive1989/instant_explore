@@ -5,7 +5,6 @@ import 'package:context_app/features/onboarding/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
 import 'package:context_app/features/subscription/providers.dart';
 import 'package:context_app/features/sync/providers.dart';
-import 'package:context_app/features/usage/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -49,8 +48,6 @@ class SettingsScreen extends ConsumerWidget {
             const _AccountGroup(),
             const SizedBox(height: 26),
             const _SyncGroup(),
-            const SizedBox(height: 26),
-            const _UsageGroup(),
             const SizedBox(height: 26),
             const _OnboardingGroup(),
             const SizedBox(height: 36),
@@ -338,51 +335,6 @@ class _SyncGroup extends ConsumerWidget {
               key: const ValueKey('sync_toggle_switch'),
               value: enabled && isSignedIn,
               onChanged: isSignedIn ? (v) => _handleToggle(ref, v) : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UsageGroup extends ConsumerWidget {
-  const _UsageGroup();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final usageAsync = ref.watch(usageStatusProvider);
-    final isPremium = ref.watch(isPremiumProvider);
-
-    return _SettingsGroup(
-      label: 'settings.daily_usage'.tr(),
-      child: _SettingsCard(
-        children: [
-          usageAsync.when(
-            data: (status) => _SettingsRow(
-              icon: Icons.bar_chart,
-              title: 'settings.daily_usage'.tr(),
-              trailing: _TrailingValue(
-                isPremium
-                    ? 'subscription.unlimited_access'.tr()
-                    : 'settings.remaining_today'.tr(
-                        namedArgs: {'remaining': status.remaining.toString()},
-                      ),
-              ),
-            ),
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: AdaptiveProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            ),
-            error: (_, __) => _SettingsRow(
-              icon: Icons.bar_chart,
-              title: 'settings.daily_usage'.tr(),
             ),
           ),
         ],

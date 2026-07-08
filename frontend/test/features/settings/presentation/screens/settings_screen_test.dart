@@ -27,17 +27,15 @@ void main() {
   });
 
   group('SettingsScreen', () {
-    testWidgets(
-      'given a free user with remaining usage, when the screen loads, '
-      'then the preferences, usage and upgrade CTA are visible',
-      (tester) async {
-        await _givenSettingsScreen(tester, status: SubscriptionStatus.free);
+    testWidgets('given a free user, when the screen loads, '
+        'then preferences and the upgrade CTA are visible and there is no '
+        'daily-usage section', (tester) async {
+      await _givenSettingsScreen(tester, status: SubscriptionStatus.free);
 
-        _thenPreferencesSectionIsVisible();
-        _thenUsageSectionIsVisible();
-        _thenUpgradeCtaIsVisible();
-      },
-    );
+      _thenPreferencesSectionIsVisible();
+      _thenUsageSectionIsHidden();
+      _thenUpgradeCtaIsVisible();
+    });
 
     testWidgets('given a premium user, when the screen loads, '
         'then the premium-active tile is shown instead of the upgrade CTA', (
@@ -175,9 +173,11 @@ void _thenPreferencesSectionIsVisible() {
   expect(find.text('settings.change_language'), findsOneWidget);
 }
 
-void _thenUsageSectionIsVisible() {
-  expect(find.text('SETTINGS.DAILY_USAGE'), findsOneWidget);
-  expect(find.text('settings.daily_usage'), findsOneWidget);
+void _thenUsageSectionIsHidden() {
+  // The free tier has no daily on-demand quota (full story is subscriber-only,
+  // enforced on the backend), so the misleading "daily usage" row was removed.
+  expect(find.text('SETTINGS.DAILY_USAGE'), findsNothing);
+  expect(find.text('settings.daily_usage'), findsNothing);
 }
 
 void _thenUpgradeCtaIsVisible() {
