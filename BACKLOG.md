@@ -11,10 +11,10 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [x] T2: IG bio 導引文案與連結（既有 bio 已含「🎧 免費下載 ↓」＋ lorescape.app 落地頁連結，2026-07-08 查證，維持現狀不新增直連商店按鈕以保留落地頁歸因）
 
 ## F2: 落地頁與商店定價/試用透明度 (epic: E1)
-- 狀態: 未開始
+- 狀態: 已完成
 - 來源: cro-2026-07-06.md（P1，Offer 層目前最弱）
-- [ ] T1: 落地頁新增方案與試用區塊（Free/週/月/年）
-- [ ] T2: 確認 RevenueCat 是否已設免費試用，未設則導入或凸顯 Free 方案深度
+- [x] T1: 落地頁新增方案與試用區塊（Free/週/月/年，2026-07-08，見 landing Pricing 元件，與 F6 T5 同一提交）
+- [x] T2: 免費試用已導入（見 F6：月/年 7 天試用已在兩商店啟用），定價區塊明列試用
 
 ## F3: 落地頁「以 Wikipedia 為據」信任區塊 (epic: E1)
 - 狀態: 未開始
@@ -35,7 +35,7 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [ ] T2: 確認並補齊次日/7日留存的量測與檢視
 
 ## F6: 7 天免費試用 (epic: E1)
-- 狀態: 進行中（暫停於 App Store Connect 設定，2026-07-08）
+- 狀態: 已完成（2026-07-08，全部子步驟完成）
 - 來源: F2 延伸；使用者決定導入 7 天試用（CRO P1「若無 trial，導入免費試用」）
 - 決定: 試用套用**月方案＋年方案**，週方案不加（7 天≈整個週期）；地區全部、eligibility 新訂閱者
 - 依賴: T4/T5 依賴 T1–T3 完成；商店設定（T1/T2）需使用者操作登入與同意協議，AI 不代做
@@ -44,4 +44,4 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [x] T2: Google Play — 月/年訂閱各建並啟用 7 天免費試用優惠（2026-07-08 完成，offer id free-trial-7d、獲取新客、從未訂閱任何項目、174 地區、狀態有效）
 - [x] T3: 確認 RevenueCat offering 帶出 intro offer（2026-07-08 查證：offering「default」active，3 packages 正確對應月/年/週的 iOS 產品與 Android 基本方案；未綁特定 offer=標準做法，RevenueCat 執行期自動帶出符合資格的 free-trial-7d／iOS 介紹性優惠，RC 無需額外設定，新優惠可能需數分鐘同步）
 - [x] T4: App paywall 顯示「7 天免費試用」（2026-07-08 完成，TDD；SubscriptionPlan 加 freeTrialDays、資料層讀 iOS introductoryPrice / Android freePhase、卡片顯示、free_trial_days 翻譯；subscription 30 tests + full suite pass）
-- [ ] T5: 落地頁定價區塊廣告 7 天試用（依賴 T1–T2）
+- [x] T5: 落地頁定價區塊廣告 7 天試用（2026-07-08 完成，Pricing 元件，月/年標「7 天免費試用」、年標推薦；本機視覺驗證通過）
