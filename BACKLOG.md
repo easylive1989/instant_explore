@@ -33,11 +33,12 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - 註：原 T2（商店描述改 Wikipedia 為據開場）經使用者決定不做，已移除。
 
 ## F5: 留存/完成率量測 (epic: E1)
-- 狀態: 已完成（程式；⚠️ live 抓取待 GA4 憑證放入 scripts/.env 後實跑驗證）
+- 狀態: 已完成（含 live GA4 驗證）
 - 來源: decisions/2026-07-07-現階段主線補流量暫緩新功能.md（埋點不受暫緩）；cro-2026-07-06.md（narration 完成率為 missing_data）
 - 註: narration 四種事件（started/progress/completed/abandoned，含 completion_rate）已埋，見 docs/adr/0003；缺的是彙整視圖與留存量測
-- [x] T1: 從既有 Firebase narration 事件彙整「聆聽完成率」視圖（2026-07-08，scripts/metrics/narration.py 查 GA4 事件算 completed/started 完成率，累積進 metrics Sheet；單元測試 21 passed；⚠️ live 抓取待 GA4 憑證放入 scripts/.env 後由 lorescape-metrics 實跑驗證）
-- [x] T2: 次日/7日留存量測（2026-07-08，scripts/metrics/retention.py 用 GA4 cohort report 算 D1/D7 留存率，回溯 14 天重算讓 D7 成熟，累積進 metrics Sheet；單元測試 21 passed；⚠️ live cohort 查詢待 GA4 憑證實跑驗證）
+- live 驗證（2026-07-08，`lorescape-metrics --only narration,retention`）：retention 寫入 13 rows 真實 cohort 資料；narration 查詢正確、事件名（narration_started/completed/abandoned）與 App logEvent 相符，目前 0 rows（pre-traffic，尚無播放事件，有流量後自動填）。兩來源已在 metrics Sheet。
+- [x] T1: 從既有 Firebase narration 事件彙整「聆聽完成率」視圖（scripts/metrics/narration.py，GA4 completed/started；單元測試通過 + live 驗證）
+- [x] T2: 次日/7日留存量測（scripts/metrics/retention.py，GA4 cohort D1/D7，回溯 14 天重算；單元測試通過 + live 驗證 13 rows）
 
 ## F6: 7 天免費試用 (epic: E1)
 - 狀態: 已完成（2026-07-08，全部子步驟完成）
