@@ -27,10 +27,10 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [x] T2: 免費試用已導入（見 F6：月/年 7 天試用已在兩商店啟用），定價區塊明列試用
 
 ## F3: 落地頁「以 Wikipedia 為據」信任區塊 (epic: E1)
-- 狀態: 進行中
+- 狀態: 已完成
 - 來源: cro-2026-07-06.md（P1，異議處理 + proof）
 - [x] T1: 新增「AI 說的，是真的嗎？」異議處理區塊，附 Wikipedia 出處 proof（2026-07-08，landing Trust 元件，置於 JourneyJournal 後、Pricing 前；本機視覺驗證通過）
-- [ ] T2: 商店描述前 3 行改以「痛點→Wikipedia 為據的解法」開場（App Store Connect / Play Console 描述文字，需商店後台編輯）
+- 註：原 T2（商店描述改 Wikipedia 為據開場）經使用者決定不做，已移除。
 
 ## F5: 留存/完成率量測 (epic: E1)
 - 狀態: 未開始
