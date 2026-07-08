@@ -55,3 +55,11 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [x] T3: 確認 RevenueCat offering 帶出 intro offer（2026-07-08 查證：offering「default」active，3 packages 正確對應月/年/週的 iOS 產品與 Android 基本方案；未綁特定 offer=標準做法，RevenueCat 執行期自動帶出符合資格的 free-trial-7d／iOS 介紹性優惠，RC 無需額外設定，新優惠可能需數分鐘同步）
 - [x] T4: App paywall 顯示「7 天免費試用」（2026-07-08 完成，TDD；SubscriptionPlan 加 freeTrialDays、資料層讀 iOS introductoryPrice / Android freePhase、卡片顯示、free_trial_days 翻譯；subscription 30 tests + full suite pass）
 - [x] T5: 落地頁定價區塊廣告 7 天試用（2026-07-08 完成，Pricing 元件，月/年標「7 天免費試用」、年標推薦；本機視覺驗證通過）
+
+## F7: 免費方案文案/程式一致性查核
+
+- 狀態: 未開始
+- 來源: 2026-07-08 落地頁定價修正時發現——免費層實際為「每日精選故事」，但程式與翻譯仍寫「每日 1 次 AI 導覽」
+- [ ] T1: 查 `frontend/lib/features/usage/data/local_usage_repository.dart` 的 `_dailyFreeLimit = 1` 是否反映現況（免費是否仍卡每日 1 次 AI 導覽？還是應為 0／不同機制）
+- [ ] T2: 翻譯鍵 `subscription.paywall_subtitle`「免費版每日 {limit} 次 AI 導覽」與 App paywall 顯示是否需改為「每日精選故事」
+- [ ] T3: 確認 App paywall 沒有對使用者做與落地頁不一致的免費層宣稱
