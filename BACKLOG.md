@@ -4,6 +4,16 @@
 feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feature 底下。
 公司 epics 見 `../BACKLOG.md`（company repo）。
 
+## ⚠️ 待部署（程式已在 repo，尚未上生產，2026-07-08）
+
+以下改動已 commit + push 到 master，但**尚未部署到生產**，使用者尚看不到：
+
+- [ ] **落地頁**（`landing/`）：build 並部署到 `lorescape.app`。含 F2/F6 T5 定價 section（廣告 7 天試用）
+- [ ] **Backend**（`backend/`）：部署到 VPS。含 F1 T1 的 Reel caption CTA 文案（已改為固定常數、不吃 CTA_TEXT env）
+- [ ] **App**（`frontend/`）：重新 build 並送商店審核上架（新版本），才會顯示 F6 T4 的「7 天免費試用」字樣
+  - 註：商店端 7 天試用本身已對現有 App 生效（RevenueCat 自動帶出）；此步只影響 paywall 上「顯示那行字」
+- 已是生產狀態、不需部署：App Store / Google Play 的試用設定、RevenueCat offering
+
 ## F1: IG 導流 CTA (epic: E1)
 - 狀態: 已完成
 - 來源: marketing/audits/cro-2026-07-06.md（P0）
