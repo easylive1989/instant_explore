@@ -27,6 +27,7 @@ from metrics.ga4 import SOURCE as GA4_SOURCE
 from metrics.gsc import SOURCE as GSC_SOURCE
 from metrics.ig import SOURCE as IG_SOURCE
 from metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
+from metrics.narration import SOURCE as NARRATION_SOURCE
 from metrics.revenuecat import SOURCE as REVENUECAT_SOURCE
 from metrics.sheets import SheetClient
 from metrics.store import MetricsStore, SheetStore
@@ -36,7 +37,8 @@ DEFAULT_BACKFILL = 30
 SOURCES: dict[str, DailySource] = {
     source.name: source
     for source in (
-        GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE, REVENUECAT_SOURCE,
+        GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE, NARRATION_SOURCE,
+        REVENUECAT_SOURCE,
     )
 }
 
