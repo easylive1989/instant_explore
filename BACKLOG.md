@@ -53,8 +53,9 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 
 ## F7: 免費方案文案/程式一致性查核
 
-- 狀態: 未開始
-- 來源: 2026-07-08 落地頁定價修正時發現——免費層實際為「每日精選故事」，但程式與翻譯仍寫「每日 1 次 AI 導覽」
-- [ ] T1: 查 `frontend/lib/features/usage/data/local_usage_repository.dart` 的 `_dailyFreeLimit = 1` 是否反映現況（免費是否仍卡每日 1 次 AI 導覽？還是應為 0／不同機制）
-- [ ] T2: 翻譯鍵 `subscription.paywall_subtitle`「免費版每日 {limit} 次 AI 導覽」與 App paywall 顯示是否需改為「每日精選故事」
-- [ ] T3: 確認 App paywall 沒有對使用者做與落地頁不一致的免費層宣稱
+- 狀態: 已完成（2026-07-08）
+- 來源: 落地頁定價修正時發現免費文案不一致
+- 查核結論: 真實政策＝完整故事訂閱者專屬（後端 `narration/routes.py` 回 402 enforced）；免費可瀏覽故事角度＋每日精選故事，**無每日 on-demand 次數**。本地 `_dailyFreeLimit = 1` 只是顯示用計數器（非 enforcement），且免費用戶產生完整故事一律 402、`consumeUsage` 到不了，導致 settings 永遠顯示「剩餘 1 次」卻用不到。
+- [x] T1/T2/T3: 移除 settings「每日使用」區塊；清掉沒在用的殘留翻譯（paywall_title/subtitle/remaining_usage、daily_usage/remaining_today）。App full suite 552 passed。
+- 可選後續（未做）：本地 usage 計數器（`_dailyFreeLimit`/`consumeUsage`）移除顯示後成為內部殘留，若要一併移除需動 narration use case 與其測試，留待需要時再清。
+- ⚠️ 此為 Flutter 改動，需隨「待部署 → App」一起重新 build 送審才會生效。
