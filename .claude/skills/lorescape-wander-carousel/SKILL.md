@@ -14,7 +14,8 @@ description: Use when the user wants to publish a wander-style (dark
 # Wander 風格 IG Carousel
 
 發布日的 carousel 改用 wander 風格（第三人稱人物敘事 + 暗色壓字）。
-送審後 21:00 自動發布；當天預設風格 carousel 會被跳過。
+送審後由發布 bot 在 Discord 貼按鈕，核准／排程／立即發布皆由操作者決定；
+當天預設風格 carousel 會被跳過。
 設計 spec：docs/superpowers/specs/2026-07-06-wander-carousel-style-design.md
 
 ## 流程
@@ -31,8 +32,12 @@ description: Use when the user wants to publish a wander-style (dark
    請使用者打開 `slide_*.jpg` 目視確認；要調整就改 slides.json 重渲染。
 4. **送審**：
    `cd scripts && uv run python -m send_carousel_for_review <date>`
-   提醒使用者到 Discord 按 ✅（21:00 Asia/Taipei 前）。
-5. ❌ 或不按 = 當天 carousel 不發（不會 fallback 到預設風格）。
+   這一步只上傳素材、建立 pending 的 `social_posts` row；發布 bot 約
+   一分鐘內會在 Discord 貼出帶四顆按鈕的審核訊息（✅ 核准 / 🕘 排程 /
+   🚀 立即發布 / ❌ 拒絕），提醒使用者去操作。
+5. ✅ 核准後若沒排程時間不會自動發：用 🕘 排程指定 Asia/Taipei 時間，
+   或直接按 🚀 立即發布馬上發。❌ 拒絕或完全不理 = 當天 carousel 不發
+   （不會 fallback 到預設風格）。
 
 ## 文案規則（slides.json）
 

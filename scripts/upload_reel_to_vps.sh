@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
 # 把後製完成的 Reel（final.mp4 + narration.txt）rsync 到 VPS 的
-# /opt/lorescape-media/daily_video/<date>/，並把影片送進 Discord 審核
-# （✅ 後 publisher 容器在 21:10、或 23:10 補跑，自動發布到 IG Reels）。
+# /opt/lorescape-media/daily_video/<date>/，並寫一筆 pending row（Discord
+# bot 會輪詢到並貼審核訊息；按 🚀 立即發布，或核准後到排程時間才發
+# 到 IG Reels）。
 #
 # 用法：
 #   scripts/upload_reel_to_vps.sh            # 日期用今天
@@ -40,10 +41,8 @@ rsync -av --progress \
   "${VPS_HOST}:${VPS_MEDIA_DIR}/${DATE}/"
 
 echo ""
-echo "影片送 Discord 審核中..."
+echo "寫入 pending row..."
 (cd "${SCRIPT_DIR}" && uv run python -m send_reel_for_review "${DATE}")
 
 echo ""
-echo "✅ 已上傳並送審。到 Discord 對這支影片按 ✅，publisher 會在 21:10"
-echo "   （Asia/Taipei）自動發布；21:10 前沒按的話 23:10 會再檢查一次，"
-echo "   到時仍無反應就標 skipped（之後只能手動補發）。"
+echo "✅ 發布 bot 會在 Discord 貼審核訊息；按 🚀 立即發布，或核准後到排程時間才發。"

@@ -1,8 +1,8 @@
 """Tests for the FastAPI app + in-container scheduler wiring.
 
-The 21:00 Instagram publish jobs moved to the standalone publisher
-daemon (see test_publisher_daemon.py); the api scheduler only carries
-generate + reconcile.
+Instagram publishing moved to the standalone publisher_bot (a Discord
+Gateway bot, see test_bot_scheduler.py / test_bot_interactions.py); the
+api scheduler only carries generate + reconcile.
 """
 from __future__ import annotations
 

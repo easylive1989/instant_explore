@@ -138,7 +138,7 @@ def run_reel_publish_job(
         )
         return
 
-    ig_caption = _build_caption(config, supabase, date_str, video_path.parent)
+    ig_caption = build_reel_caption(config, supabase, date_str, video_path.parent)
 
     cover_url: str | None = None
     try:
@@ -188,7 +188,7 @@ def run_reel_publish_job(
     logger.info("Published reel for %s: %s", date_str, ig_post_id)
 
 
-def _build_caption(
+def build_reel_caption(
     config: Config, supabase, date_str: str, day_dir: Path
 ) -> str:
     """Caption from the day's story row, falling back to narration.txt."""

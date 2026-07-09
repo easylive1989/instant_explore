@@ -135,3 +135,88 @@ def test_record_review_pending_defaults_keep_reel_payload_nullable():
     payload, = table.upsert.call_args.args
     assert payload["slide_urls"] is None
     assert payload["caption"] is None
+
+
+def test_stage_pending_upserts_clean_pending_row():
+    client, table = _client()
+
+    post_log.stage_pending(
+        client,
+        publish_date="2026-07-09",
+        media_type="carousel",
+        slide_urls=["https://x/1.jpg"],
+        caption="cap",
+    )
+
+    payload, = table.upsert.call_args.args
+    assert payload["status"] == "pending"
+    assert payload["discord_message_id"] is None
+    assert payload["review_decision"] is None
+    assert payload["scheduled_at"] is None
+    assert payload["overdue_notified_at"] is None
+    assert payload["slide_urls"] == ["https://x/1.jpg"]
+    assert payload["caption"] == "cap"
+    assert (
+        table.upsert.call_args.kwargs["on_conflict"]
+        == "publish_date,media_type"
+    )
+
+
+def test_set_review_decision_writes_decision_and_reviewer():
+    client, table = _client()
+
+    post_log.set_review_decision(
+        client,
+        publish_date="2026-07-09",
+        media_type="carousel",
+        decision="approved",
+        reviewed_by="user-1",
+    )
+
+    payload = table.update.call_args.args[0]
+    assert payload["review_decision"] == "approved"
+    assert payload["reviewed_by"] == "user-1"
+    assert payload["reviewed_at"] is not None
+
+
+def test_set_schedule_sets_scheduled_status():
+    client, table = _client()
+
+    post_log.set_schedule(
+        client,
+        publish_date="2026-07-09",
+        media_type="reel",
+        scheduled_at="2026-07-09T13:00:00+00:00",
+    )
+
+    payload = table.update.call_args.args[0]
+    assert payload["scheduled_at"] == "2026-07-09T13:00:00+00:00"
+    assert payload["status"] == "scheduled"
+
+
+def test_list_pending_unposted_filters_status_and_null_message():
+    client = MagicMock()
+    chain = client.table.return_value.select.return_value
+    chain.eq.return_value = chain
+    chain.is_.return_value = chain
+    chain.execute.return_value = MagicMock(data=[{"id": "r1"}])
+
+    rows = post_log.list_pending_unposted(client)
+
+    assert rows == [{"id": "r1"}]
+    chain.eq.assert_any_call("status", "pending")
+    chain.is_.assert_any_call("discord_message_id", "null")
+
+
+def test_list_scheduled_due_filters_status_and_time():
+    client = MagicMock()
+    chain = client.table.return_value.select.return_value
+    chain.eq.return_value = chain
+    chain.lte.return_value = chain
+    chain.execute.return_value = MagicMock(data=[{"id": "r2"}])
+
+    rows = post_log.list_scheduled_due(client, "2026-07-09T13:00:00+00:00")
+
+    assert rows == [{"id": "r2"}]
+    chain.eq.assert_any_call("status", "scheduled")
+    chain.lte.assert_any_call("scheduled_at", "2026-07-09T13:00:00+00:00")

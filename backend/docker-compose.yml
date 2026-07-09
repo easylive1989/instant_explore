@@ -23,13 +23,14 @@ services:
       timeout: 5s
       retries: 3
 
-  # Social publisher: 21:00 carousel + 21:10/23:10 reel jobs, decoupled from
-  # the API server. Reuses the api image (built above by `--build`).
+  # Social publisher: Discord Gateway bot that handles the review reactions
+  # (carousel + reel) and on-demand publish/republish, decoupled from the
+  # API server. Reuses the api image (built above by `--build`).
   publisher:
     image: lorescape-backend:latest
     container_name: lorescape-publisher
     restart: unless-stopped
-    command: ["python", "-m", "lorescape_backend.social.publisher_daemon"]
+    command: ["python", "-m", "lorescape_backend.social.publisher_bot"]
     env_file: .env
     environment:
       # Container path of the volume below; the reel job reads

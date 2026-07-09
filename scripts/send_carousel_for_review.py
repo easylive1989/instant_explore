@@ -1,13 +1,13 @@
-"""Send a wander-style carousel to Discord for review + stage it for publish.
+"""Upload a wander-style carousel's slides and stage it for review.
 
 Reads marketing/outputs/daily_carousel/<date>/slide_*.jpg + caption.txt
 (rendered by `python -m lorescape_backend.social.wander.renderer`), uploads
 the slides to the public `ig-cards` bucket (wander/<date>/slide_NN.jpg),
-posts them all in ONE Discord review message seeded with ✅/❌, and upserts
-a 'pending' social_posts row carrying the message id, the slide URLs and
-the caption. The VPS 21:00 publish job then publishes exactly these images
-once an approver reacts ✅ — the default carousel rendering is skipped for
-that day.
+and upserts a clean 'pending' social_posts row carrying the slide URLs and
+the caption (no Discord message id yet). The Discord publisher bot polls for
+pending rows lacking a message id, posts the review message with ✅/❌
+buttons, and publishes exactly these images once an approver approves — the
+default carousel rendering is skipped for that day.
 
 Run from scripts/:
 
@@ -25,16 +25,10 @@ from dotenv import load_dotenv
 from supabase import create_client
 
 from lorescape_backend.config import Config
-from lorescape_backend.daily_story import discord_review
 from lorescape_backend.social import card_storage, post_log
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_CAROUSEL_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_carousel"
-
-# Discord attachment cap on a non-boosted server (per file), with headroom —
-# same convention as send_reel_for_review.py. Rendered slides are ~1 MB so
-# hitting this means something went wrong upstream.
-MAX_ATTACHMENT_BYTES = int(9.5 * 1024 * 1024)
 
 
 def main(argv: list[str]) -> int:
@@ -48,13 +42,6 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
 
     config = Config.from_env()
-    if not (config.discord_bot_token and config.discord_review_channel_id):
-        print(
-            "Discord review not configured: set DISCORD_BOT_TOKEN and "
-            "DISCORD_REVIEW_CHANNEL_ID in backend/.env",
-            file=sys.stderr,
-        )
-        return 1
 
     day_dir = DAILY_CAROUSEL_DIR / args.date
     slide_paths = sorted(day_dir.glob("slide_*.jpg"))
@@ -68,14 +55,6 @@ def main(argv: list[str]) -> int:
     caption = caption_path.read_text(encoding="utf-8").strip()
 
     slide_bytes = [p.read_bytes() for p in slide_paths]
-    for path, data in zip(slide_paths, slide_bytes):
-        if len(data) > MAX_ATTACHMENT_BYTES:
-            print(
-                f"{path.name} is {len(data)} bytes — over the Discord "
-                f"attachment limit; re-render with lower quality",
-                file=sys.stderr,
-            )
-            return 1
 
     supabase = create_client(
         config.supabase_url, config.supabase_service_role_key
@@ -88,24 +67,16 @@ def main(argv: list[str]) -> int:
         )
         for path, data in zip(slide_paths, slide_bytes)
     ]
-
-    message_id = discord_review.send_images_for_review(
-        bot_token=config.discord_bot_token,
-        channel_id=config.discord_review_channel_id,
-        images=slide_bytes,
-        publish_date=args.date,
-    )
-    post_log.record_review_pending(
+    post_log.stage_pending(
         supabase,
         publish_date=args.date,
         media_type="carousel",
-        discord_message_id=message_id,
         slide_urls=slide_urls,
         caption=caption,
     )
     print(
-        f"Sent {len(slide_urls)} slides for review: message_id={message_id}"
-        f" — react ✅ before 21:00 Asia/Taipei to publish."
+        f"Uploaded {len(slide_urls)} slides + staged pending row for "
+        f"{args.date}. 發布 bot 會在一分鐘內於 Discord 貼審核訊息。"
     )
     return 0
 
