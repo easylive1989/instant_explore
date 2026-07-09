@@ -17,6 +17,7 @@ dependencies = [
     "google-api-python-client>=2,<3",
     "google-auth>=2,<3",
     "google-analytics-data>=0.18,<1",
+    "discord.py>=2.4,<3",
 ]
 
 [project.optional-dependencies]
