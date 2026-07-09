@@ -54,8 +54,8 @@ def main(argv: list[str]) -> int:
         supabase, publish_date=args.date, media_type="reel"
     )
     print(
-        f"Staged pending row for {args.date}'s reel. 發布 bot 會在一分鐘內"
-        f"於 Discord 貼審核訊息 — 核准後 21:10（或 23:10）Asia/Taipei 發布。"
+        "已上傳影片並建立 pending row。發布 bot 會在 Discord 貼審核訊息；"
+        "按 🚀 立即發布，或核准後到排程時間才發。"
     )
     return 0
 
