@@ -88,10 +88,12 @@ def test_republish_resets_terminal_and_publishes(mock_pub, fake_config):
     )
     assert ok is True
     mock_pub.assert_called_once()
-    # publish_row 收到的是重置後的「本地副本」。
+    # publish_row 收到的是重置後的「本地副本」，且帶 force=True 明確略過
+    # 鎖內重讀守衛（否則 DB 裡仍是終態，會被誤判成「已發布過」擋下）。
     passed = mock_pub.call_args.args[2]
     assert passed["status"] == "pending"
     assert passed["ig_post_id"] is None
+    assert mock_pub.call_args.kwargs["force"] is True
     # 但底層儲存體本身沒被動到（證明 republish 只改本地副本）。
     assert sb.rows[0]["status"] == "failed"
     assert sb.rows[0]["ig_post_id"] == "ig-old"

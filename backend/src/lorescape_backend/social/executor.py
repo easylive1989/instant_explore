@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from pathlib import Path
 
 from lorescape_backend.config import Config
@@ -21,22 +22,60 @@ logger = logging.getLogger(__name__)
 
 VIDEO_FILENAME = "final.mp4"
 
+# 序列化發布：避免兩個 `asyncio.to_thread` worker thread（例如快速連點
+# 兩下「立即發布」，或排程迴圈跟互動同時觸發）都在守衛檢查通過後才有
+# 一個真的寫入 `published`，導致重複發布到 IG。
+_PUBLISH_LOCK = threading.Lock()
 
-def publish_row(config: Config, supabase, row: dict) -> bool:
-    """依 media_type 分派發布；已發布過則直接回 True。"""
-    if row.get("status") == "published" or row.get("ig_post_id"):
+
+def publish_row(
+    config: Config, supabase, row: dict, *, force: bool = False
+) -> bool:
+    """依 media_type 分派發布；已發布過則直接回 True。
+
+    `force=False`（預設，含排程迴圈與立即發布）：進鎖後會重讀 DB 最新的
+    row 狀態；若已被別的執行緒發布過，直接回 True 不重發——這是關掉
+    race 的關鍵，因為傳入的 `row` 可能是併發呼叫之間的過期記憶體快照。
+
+    `force=True`（僅 `interactions.republish` 使用）：略過重讀守衛，直接
+    用呼叫端傳入的 row（其 status/ig_post_id 已被刻意重置），藉此明確
+    覆寫終態重新發布。
+    """
+    if not force and (
+        row.get("status") == "published" or row.get("ig_post_id")
+    ):
         logger.info(
             "Row %s already published (ig=%s); skipping",
             row.get("id"), row.get("ig_post_id"),
         )
         return True
-    media_type = row.get("media_type")
-    if media_type == "carousel":
-        return publish_carousel_row(config, supabase, row)
-    if media_type == "reel":
-        return publish_reel_row(config, supabase, row)
-    logger.warning("Unknown media_type %r on row %s", media_type, row.get("id"))
-    return False
+
+    with _PUBLISH_LOCK:
+        if not force:
+            fresh = post_log.get_post(
+                supabase, row["publish_date"], row["media_type"]
+            )
+            if fresh is not None:
+                if fresh.get("status") == "published" or fresh.get(
+                    "ig_post_id"
+                ):
+                    logger.info(
+                        "Row %s already published by another publisher "
+                        "(ig=%s); skipping",
+                        fresh.get("id"), fresh.get("ig_post_id"),
+                    )
+                    return True
+                row = fresh
+
+        media_type = row.get("media_type")
+        if media_type == "carousel":
+            return publish_carousel_row(config, supabase, row)
+        if media_type == "reel":
+            return publish_reel_row(config, supabase, row)
+        logger.warning(
+            "Unknown media_type %r on row %s", media_type, row.get("id")
+        )
+        return False
 
 
 def publish_carousel_row(config: Config, supabase, row: dict) -> bool:

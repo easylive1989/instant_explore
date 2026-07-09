@@ -5,6 +5,7 @@ import dataclasses
 from unittest.mock import MagicMock, patch
 
 from lorescape_backend.social import executor
+from tests._fakes import FakeSupabase
 
 
 def _client():
@@ -57,14 +58,61 @@ def test_publish_carousel_row_records_failure(mock_pub, fake_config):
 
 @patch("lorescape_backend.social.executor.instagram.publish_carousel")
 def test_publish_row_skips_already_published(mock_pub, fake_config):
-    client, _ = _client()
+    sb = FakeSupabase([
+        _carousel_row(status="published", ig_post_id="ig-old"),
+    ])
 
     ok = executor.publish_row(
-        fake_config, client, _carousel_row(ig_post_id="ig-old"),
+        fake_config, sb, _carousel_row(status="published",
+                                        ig_post_id="ig-old"),
     )
 
     assert ok is True
     mock_pub.assert_not_called()
+
+
+@patch("lorescape_backend.social.executor.instagram.publish_carousel")
+def test_publish_row_reread_guard_blocks_stale_snapshot(mock_pub, fake_config):
+    """兩個並發發布：第二個讀到的 in-memory row 是「尚未發布」的舊快照，
+    但 DB 裡其實已經被第一個 request 標記成 published 了。鎖內重讀 DB
+    最新狀態必須擋下這次重複發布。"""
+    sb = FakeSupabase([
+        _carousel_row(status="published", ig_post_id="ig-old"),
+    ])
+    stale_snapshot = _carousel_row(status="scheduled", ig_post_id=None)
+
+    ok = executor.publish_row(fake_config, sb, stale_snapshot)
+
+    assert ok is True
+    mock_pub.assert_not_called()
+
+
+@patch("lorescape_backend.social.executor.instagram.publish_carousel",
+       return_value="ig-new")
+def test_publish_row_force_republishes_terminal_row(mock_pub, fake_config):
+    row = _carousel_row(status="failed", ig_post_id="ig-old")
+    sb = FakeSupabase([dict(row)])
+
+    ok = executor.publish_row(fake_config, sb, row, force=True)
+
+    assert ok is True
+    mock_pub.assert_called_once()
+    assert sb.rows[0]["status"] == "published"
+    assert sb.rows[0]["ig_post_id"] == "ig-new"
+
+
+@patch("lorescape_backend.social.executor.instagram.publish_carousel",
+       return_value="ig-123")
+def test_publish_row_happy_path_publishes_fresh_row(mock_pub, fake_config):
+    row = _carousel_row(status="scheduled", ig_post_id=None)
+    sb = FakeSupabase([dict(row)])
+
+    ok = executor.publish_row(fake_config, sb, row)
+
+    assert ok is True
+    mock_pub.assert_called_once()
+    assert sb.rows[0]["status"] == "published"
+    assert sb.rows[0]["ig_post_id"] == "ig-123"
 
 
 @patch("lorescape_backend.social.executor.instagram.publish_carousel")

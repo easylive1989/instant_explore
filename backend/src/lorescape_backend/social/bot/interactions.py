@@ -77,4 +77,4 @@ def republish(
     row = dict(row)
     row["status"] = "pending"
     row["ig_post_id"] = None
-    return executor.publish_row(config, supabase, row)
+    return executor.publish_row(config, supabase, row, force=True)
