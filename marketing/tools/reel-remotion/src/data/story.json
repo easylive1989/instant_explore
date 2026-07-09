@@ -1,0 +1,120 @@
+{
+  "date": "2026-07-08",
+  "place": "Himeji Castle",
+  "placeZh": "姬路城",
+  "titleZh": "白鷺城",
+  "titleEn": "Himeji Castle",
+  "region": "日本・兵庫",
+  "credits": "Photos: Sue Winston, Svetlana Gumerova, Vladimir Haltakov, Yuan Yang, Charlie Charoenwattana / Unsplash",
+  "beats": [
+    {
+      "id": "cover",
+      "layout": "cover",
+      "photo": "direct_2.jpg",
+      "focus": "50% 40%",
+      "kicker": "日本・兵庫",
+      "title": "白鷺城",
+      "subtitle": "Himeji Castle",
+      "lines": [
+        "遠看，她像一隻白鷺，",
+        "正要振翅飛走。",
+        "",
+        "卻七百年來，從未離開。"
+      ],
+      "highlights": ["白鷺"]
+    },
+    {
+      "id": "form",
+      "layout": "beat",
+      "photo": "direct_3.jpg",
+      "focus": "50% 35%",
+      "kicker": "其之一 · 姿",
+      "title": "白鷺之姿",
+      "lines": [
+        "她通體雪白，屋簷輕揚，",
+        "像停在山頂的白鷺。"
+      ],
+      "highlights": ["雪白", "白鷺"]
+    },
+    {
+      "id": "airraid",
+      "layout": "beat",
+      "photo": "direct_1.jpg",
+      "focus": "50% 45%",
+      "overlay": "darker",
+      "kicker": "其之二 · 戰火",
+      "title": "1945，焦土",
+      "lines": [
+        "姬路曾被空襲，化為焦土，",
+        "火光燒紅了天空。"
+      ],
+      "highlights": ["焦土"]
+    },
+    {
+      "id": "miracle",
+      "layout": "beat",
+      "photo": "view_1.jpg",
+      "focus": "50% 30%",
+      "kicker": "其之三 · 奇蹟",
+      "title": "沒有爆炸的彈",
+      "lines": [
+        "一枚燒夷彈落在天守閣頂，",
+        "卻奇蹟般，沒有爆炸。"
+      ],
+      "highlights": ["沒有爆炸"]
+    },
+    {
+      "id": "quake",
+      "layout": "beat",
+      "photo": "direct_5.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之四 · 不動",
+      "title": "1995，屹立",
+      "lines": [
+        "阪神大地震撼動關西，",
+        "她依然穩穩屹立。"
+      ],
+      "highlights": ["屹立"]
+    },
+    {
+      "id": "restore",
+      "layout": "beat",
+      "photo": "view_3.jpg",
+      "focus": "50% 35%",
+      "kicker": "其之五 · 重生",
+      "title": "白回最初",
+      "lines": [
+        "工匠拂去屋瓦的塵垢，",
+        "她一夕回到最初的雪白。"
+      ],
+      "highlights": ["最初"]
+    },
+    {
+      "id": "stay",
+      "layout": "bright",
+      "photo": "direct_4.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之六 · 守望",
+      "title": "哪裡也沒去",
+      "lines": [
+        "有人說，她像要飛走的鳥。",
+        "可她哪裡也沒去——",
+        "守著，就是她的遠行。"
+      ],
+      "highlights": ["沒去", "遠行"]
+    },
+    {
+      "id": "ending",
+      "layout": "ending",
+      "photo": "view_2.jpg",
+      "focus": "50% 45%",
+      "kicker": "結語",
+      "title": "",
+      "lines": [
+        "有些遠行，是走向遠方；",
+        "有些堅持，是留在原地。"
+      ],
+      "highlights": ["遠方", "原地"]
+    }
+  ]
+}

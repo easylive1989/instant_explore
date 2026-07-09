@@ -1,0 +1,30 @@
+export type BeatLayout = "cover" | "beat" | "bright" | "ending";
+
+export interface Beat {
+  id: string;
+  layout: BeatLayout;
+  photo: string;
+  /** CSS object-position, e.g. "50% 40%" — where the frame focuses. */
+  focus: string;
+  /** Short kicker / aspect label shown above the narration. */
+  kicker: string;
+  title: string;
+  subtitle?: string;
+  /** darker = push a heavier scrim for readability on bright photos. */
+  overlay?: "darker";
+  /** Narration lines; an empty string marks a stanza break. */
+  lines: string[];
+  /** Substrings inside `lines` to emphasise. */
+  highlights: string[];
+}
+
+export interface Story {
+  date: string;
+  place: string;
+  placeZh: string;
+  titleZh: string;
+  titleEn: string;
+  region: string;
+  credits: string;
+  beats: Beat[];
+}

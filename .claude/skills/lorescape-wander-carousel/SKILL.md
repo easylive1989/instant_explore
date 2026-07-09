@@ -48,10 +48,20 @@ description: Use when the user wants to publish a wander-style (dark
   貫穿全篇。
 - 照片配頁跟情緒走：悲劇配最暗的照片（`overlay: "darker"`）、
   bright 頁配唯一明亮照（`overlay: "light"`）。
+- **選圖只用 Unsplash 來源的檔案**：以當天資料夾的
+  `unsplash_results.json` 裡列出的檔名為準。資料夾裡可能混有
+  Wikipedia 封面等非 Unsplash 檔（reel 參考用），這些不能進 slides
+  ——壓字渲染屬改作，CC BY-SA 圖改作需以相同條款釋出，別讓它
+  意外發生。若使用者指定要用 CC 授權圖，caption 必須帶完整
+  BY+SA 行（規則同 lorescape-manual-daily-story 的 5d）。
 - layout 欄位：`cover`（需 tag_zh/tag_en/title/title_en；tag_zh 用
   「國家・城市/省」地點格式，**不要寫「XX 旅行」**）、
   `beat`（可選 title、text_position: left|right|top）、`bright`、`ending`。
-- caption.txt：既有貼文 caption 慣例（故事鉤子 + hashtags + @love.lorescape）。
+- caption.txt：既有貼文 caption 慣例（故事鉤子 + hashtags + @love.lorescape），
+  **並附照片 credit 行**：列出 slides 實際用到的攝影師，格式
+  `📷 Photos: <名字, 名字, …> / Unsplash`（名字取自
+  `unsplash_results.json`；Unsplash License 不強制署名，但固定附上）。
+  若有 CC 授權圖則改用該圖的完整 BY+SA 行。
 
 ## slides.json 範例（節錄）
 
