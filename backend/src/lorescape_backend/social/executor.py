@@ -86,9 +86,14 @@ def publish_reel_row(config: Config, supabase, row: dict) -> bool:
         logger.warning("No reel video at %s", video_path)
         _record_failed(supabase, date_str, "reel", f"no_video:{video_path}")
         return False
-    ig_caption = reel_publisher.build_reel_caption(
-        config, supabase, date_str, video_path.parent
-    )
+    try:
+        ig_caption = reel_publisher.build_reel_caption(
+            config, supabase, date_str, video_path.parent
+        )
+    except Exception as exc:  # noqa: BLE001 — orchestrator catches all
+        logger.exception("Reel caption build failed for %s", date_str)
+        _record_failed(supabase, date_str, "reel", _truncate(str(exc)))
+        return False
     cover_url = None
     try:
         cover_url = reel_cover.build_cover_url(supabase, date_str)
