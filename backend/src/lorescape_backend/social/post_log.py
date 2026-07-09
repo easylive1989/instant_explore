@@ -1,12 +1,11 @@
 """Track per-day Instagram publish state in the `social_posts` table.
 
-One row per (publish_date, media_type). For reels the row is created as
-`pending` by the local send-for-review step (carrying the Discord message
-id of the video review post); the publish job then moves it to
-published / failed / rejected / skipped. For carousels only the outcome
-is recorded (review state lives on daily_stories.review_state). Upserts
-overwrite the same row, which is what makes re-running a publish job for
-the same day idempotent.
+One row per (publish_date, media_type). Rows are created as `pending` by
+local send-for-review scripts (carrying the Discord message id of the review
+post). The Discord publisher bot monitors these rows, posts the review
+message with approval/rejection buttons, and transitions the state via button
+interactions to published / rejected / skipped. Upserts overwrite the same
+row, which is what makes re-running send scripts for the same day idempotent.
 """
 from __future__ import annotations
 

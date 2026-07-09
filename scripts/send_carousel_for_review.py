@@ -4,10 +4,10 @@ Reads marketing/outputs/daily_carousel/<date>/slide_*.jpg + caption.txt
 (rendered by `python -m lorescape_backend.social.wander.renderer`), uploads
 the slides to the public `ig-cards` bucket (wander/<date>/slide_NN.jpg),
 and upserts a clean 'pending' social_posts row carrying the slide URLs and
-the caption (no Discord message id yet). The Discord bot polls for pending
-rows lacking a message id and posts the review message with ✅/❌ buttons;
-the VPS 21:00 publish job then publishes exactly these images once an
-approver approves — the default carousel rendering is skipped for that day.
+the caption (no Discord message id yet). The Discord publisher bot polls for
+pending rows lacking a message id, posts the review message with ✅/❌
+buttons, and publishes exactly these images once an approver approves — the
+default carousel rendering is skipped for that day.
 
 Run from scripts/:
 

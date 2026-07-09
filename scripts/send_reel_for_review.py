@@ -3,10 +3,10 @@
 Confirms marketing/outputs/daily_video/<date>/final.mp4 exists locally and
 upserts a clean 'pending' social_posts row for it (no Discord message id,
 no slide_urls/caption — the bot builds the reel caption from narration.txt
-+ the story row). The Discord bot polls for pending rows lacking a message
-id, renders a 720p review preview itself, and posts it with ✅/❌ buttons.
-The VPS reel job (21:10 / 23:10 Asia/Taipei) then publishes only after an
-approver reacts ✅ — this review is independent of the carousel's.
++ the story row). The Discord publisher bot polls for pending rows lacking a
+message id, renders a 720p review preview if needed, and posts it with ✅/❌
+buttons. The publisher bot then publishes only after an approver approves —
+this review is independent of the carousel's.
 
 Run from scripts/ (normally invoked by upload_reel_to_vps.sh AFTER rsync):
 
