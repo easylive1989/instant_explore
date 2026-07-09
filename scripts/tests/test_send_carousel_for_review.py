@@ -1,4 +1,4 @@
-"""Tests for the carousel Discord review submission script."""
+"""Tests for the carousel upload + pending-row staging script."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,8 +11,6 @@ import send_carousel_for_review
 
 def _config(**overrides):
     base = dict(
-        discord_bot_token="tok",
-        discord_review_channel_id="chan-1",
         supabase_url="https://x.supabase.co",
         supabase_service_role_key="key",
     )
@@ -49,31 +47,28 @@ def env(mocker):
         lambda supabase, data, *, path, content_type:
         f"https://x/ig-cards/{path}"
     )
-    send = mocker.patch.object(
-        send_carousel_for_review.discord_review, "send_images_for_review",
-        return_value="msg-1",
-    )
     pending = mocker.patch.object(
-        send_carousel_for_review.post_log, "record_review_pending"
+        send_carousel_for_review.post_log, "stage_pending"
     )
-    return SimpleNamespace(upload=upload, send=send, pending=pending)
+    return SimpleNamespace(upload=upload, pending=pending)
 
 
-def test_uploads_slides_sends_review_and_records_pending(day_dir, env):
+def test_uploads_slides_and_stages_pending_row(day_dir, env):
     assert send_carousel_for_review.main(["2026-07-06"]) == 0
+
+    # The script no longer imports discord_review at all — local scripts
+    # only upload + stage a row; the bot owns posting the review message.
+    assert not hasattr(send_carousel_for_review, "discord_review")
 
     assert env.upload.call_count == 2
     first = env.upload.call_args_list[0]
     assert first.kwargs["path"] == "wander/2026-07-06/slide_01.jpg"
     assert first.kwargs["content_type"] == "image/jpeg"
 
-    env.send.assert_called_once()
-    assert len(env.send.call_args.kwargs["images"]) == 2
-
     env.pending.assert_called_once()
     kwargs = env.pending.call_args.kwargs
+    assert kwargs["publish_date"] == "2026-07-06"
     assert kwargs["media_type"] == "carousel"
-    assert kwargs["discord_message_id"] == "msg-1"
     assert kwargs["slide_urls"] == [
         "https://x/ig-cards/wander/2026-07-06/slide_01.jpg",
         "https://x/ig-cards/wander/2026-07-06/slide_02.jpg",
@@ -87,18 +82,11 @@ def test_missing_slides_dir_fails(env, tmp_path, mocker):
     )
     assert send_carousel_for_review.main(["2026-07-06"]) == 1
     env.upload.assert_not_called()
-
-
-def test_oversized_slide_fails_before_upload(day_dir, env, mocker):
-    mocker.patch.object(send_carousel_for_review, "MAX_ATTACHMENT_BYTES", 3)
-    assert send_carousel_for_review.main(["2026-07-06"]) == 1
     env.pending.assert_not_called()
 
 
-def test_main_fails_when_discord_not_configured(day_dir, env, mocker):
-    mocker.patch(
-        "send_carousel_for_review.Config.from_env",
-        return_value=_config(discord_bot_token=None),
-    )
+def test_missing_caption_fails(day_dir, env):
+    (day_dir / "caption.txt").unlink()
     assert send_carousel_for_review.main(["2026-07-06"]) == 1
     env.upload.assert_not_called()
+    env.pending.assert_not_called()
