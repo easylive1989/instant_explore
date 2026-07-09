@@ -20,7 +20,8 @@ export type DownloadLocation =
   | "hero"
   | "final_cta"
   | "footer"
-  | "story";
+  | "story"
+  | "place";
 
 export const APP_STORE_URL =
   "https://apps.apple.com/tw/app/%E8%AE%80%E6%99%AF/id6751904060";
