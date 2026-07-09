@@ -6,8 +6,9 @@ Hosts:
     08:00 — generate today's story and post it to Discord for review
     03:00 — reconcile subscriptions against RevenueCat
 
-The 21:00 Instagram publish jobs live in the separate `publisher`
-container (`lorescape_backend.social.publisher_daemon`), not here.
+The Instagram publish flow (review reactions + on-demand publish) lives
+in the separate `publisher` container (`lorescape_backend.social.publisher_bot`,
+a Discord Gateway bot), not here.
 
 Manual CLI (preserved for back-fill / debugging):
 - `python -m lorescape_backend.daily_story [YYYY-MM-DD]`

@@ -7,12 +7,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# tzdata is required for APScheduler's `timezone="Asia/Taipei"` to resolve
-# via zoneinfo; the slim base image ships without /usr/share/zoneinfo, so
-# without this the scheduler silently falls back to UTC and fires the
-# daily-story cron 8h off from the intended local time.
+# tzdata is required for the API's APScheduler jobs and the publisher bot's
+# `zoneinfo.ZoneInfo("Asia/Taipei")` (schedule-modal time parsing) to resolve
+# local time; the slim base image ships without /usr/share/zoneinfo, so
+# without this those would silently fall back to UTC. ffmpeg is required by
+# the publisher bot to render the 720p reel preview before publishing.
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends tzdata && \
+    apt-get install -y --no-install-recommends tzdata ffmpeg && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     rm -rf /var/lib/apt/lists/*

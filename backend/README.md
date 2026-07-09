@@ -14,8 +14,8 @@ Gemini and serves them to the app, plus runs the daily-story / social pipeline.
   - `api` container (FastAPI + APScheduler):
     - `09:00` — generate the day's story and post it to Discord for review
     - `03:00` — reconcile subscriptions against RevenueCat
-  - `publisher` container (`lorescape_backend.social.publisher_daemon`,
-    same image):
+  - `publisher` container (`lorescape_backend.social.publisher_bot`, a
+    Discord Gateway bot, same image):
     - `21:00` — read the story review's ✅/❌ and publish the carousel to IG
     - `21:10` / `23:10` — read the reel review's ✅/❌ (its own Discord
       message, independent of the carousel's) and publish the day's reel
