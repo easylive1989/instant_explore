@@ -1,0 +1,138 @@
+name: Deploy Backend
+
+# 只部署後端（含 publisher Discord bot）+ 推 Supabase migration，不碰 App。
+# 手動觸發（App 部署走獨立的 deploy-app.yml）。
+#
+# 第一次部署仍需手動到 VPS：clone repo 到 /opt/lorescape、cp .env.example .env
+# 並填入 secrets（含 DISCORD_BOT_TOKEN / DISCORD_REVIEW_CHANNEL_ID /
+# DISCORD_APPROVER_IDS，publisher bot 缺這些會 SystemExit）、
+# 跑一次 `docker compose up -d --build`。之後由這個 workflow 自動
+# git pull + rebuild + 重啟。
+on:
+  workflow_dispatch:
+
+jobs:
+  # 先推資料庫 schema，確保新後端程式依賴的欄位已存在，再部署程式碼。
+  push-supabase-db:
+    name: Push Supabase DB Schema
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project to setup IPv4
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # The database password is required by `link` in non-interactive environments
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+
+      - name: Push database migrations
+        run: supabase db push
+        env:
+          # After linking, only the DB password is needed for `db push`
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+
+  # 部署 Backend 到 VPS（Docker compose）——含 api 與 publisher bot 容器。
+  # 依賴 push-supabase-db：schema 先上，程式碼後上。
+  deploy-backend:
+    name: Deploy Backend to VPS
+    runs-on: ubuntu-latest
+    needs: [push-supabase-db]
+    steps:
+      - name: Deploy + health check via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/lorescape
+            git fetch --prune origin master
+            git reset --hard origin/master
+            cd backend
+            docker compose up -d --build
+
+            echo "=== docker compose ps ==="
+            docker compose ps
+
+            # api /health（容器內自檢，與 compose healthcheck 同一支）
+            echo "=== api /health ==="
+            sleep 5
+            if docker compose exec -T api python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"; then
+              echo "✅ api healthy"
+            else
+              echo "❌ api /health failed"
+              docker compose logs --tail=40 api
+              exit 1
+            fi
+
+            # publisher 容器必須存在且為 running（bad token 會 SystemExit → restart-loop）
+            cid=$(docker compose ps -q publisher)
+            if [ -z "$cid" ]; then
+              echo "❌ no publisher container found"
+              docker compose ps
+              exit 1
+            fi
+            state=$(docker inspect -f '{{.State.Status}}' "$cid")
+            echo "publisher state: $state"
+            if [ "$state" != "running" ]; then
+              echo "❌ publisher not running (state=$state)"
+              docker compose logs --tail=60 publisher
+              exit 1
+            fi
+
+            # bot 必須連上 Discord Gateway（最多等 ~50s）
+            echo "=== waiting for bot to connect to Discord Gateway ==="
+            connected=0
+            for i in $(seq 1 10); do
+              if docker compose logs --tail=200 publisher 2>&1 \
+                   | grep -qiE "connected to gateway|has connected"; then
+                connected=1
+                break
+              fi
+              sleep 5
+            done
+            if [ "$connected" = "1" ]; then
+              echo "✅ bot connected to Discord Gateway"
+            else
+              echo "❌ bot did not connect to Gateway within ~50s"
+              docker compose logs --tail=80 publisher
+              exit 1
+            fi
+
+            echo "=== publisher recent logs ==="
+            docker compose logs --tail=30 publisher
+
+  deploy-status:
+    name: Deploy Status Report
+    runs-on: ubuntu-latest
+    needs: [push-supabase-db, deploy-backend]
+    if: always()
+
+    steps:
+      - name: Report Status
+        run: |
+          echo "## 🚀 後端部署狀態報告"
+          echo "- Supabase DB 推送: ${{ needs.push-supabase-db.result }}"
+          echo "- Backend + bot 部署: ${{ needs.deploy-backend.result }}"
+
+          if [ "${{ needs.push-supabase-db.result }}" = "success" ] && \
+             [ "${{ needs.deploy-backend.result }}" = "success" ]; then
+            echo "✅ 後端部署成功完成！"
+          else
+            echo "❌ 後端部署失敗，請檢查日誌"
+            exit 1
+          fi
