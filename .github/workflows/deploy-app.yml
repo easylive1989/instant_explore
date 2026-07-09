@@ -1,71 +1,16 @@
-name: Deploy
+name: Deploy App
 
+# 只建置與上架行動 App（Android → Play internal、iOS → TestFlight）。
+# 手動觸發。後端與 Supabase migration 走獨立的 deploy-backend.yml；
+# 若這次 App 依賴新的 DB schema，請先跑 deploy-backend 再跑本 workflow。
 on:
-  schedule:
-    # 每週五 02:00 UTC（台灣時間 10:00）部署
-    - cron: "0 2 * * 5"
   workflow_dispatch:
 
 jobs:
-  # 更新 Supabase 資料庫
-  push-supabase-db:
-    name: Push Supabase DB Schema
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: supabase
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: master
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Link Supabase project to setup IPv4
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          # The database password is required by `link` in non-interactive environments
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
-
-      - name: Push database migrations
-        run: supabase db push
-        env:
-          # After linking, only the DB password is needed for `db push`
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
-
-  # 部署 Backend 到 VPS（Docker compose）
-  # 第一次部署需要手動到 VPS：clone repo 到 /opt/lorescape、cp .env.example .env
-  # 並填入 secrets、跑 `docker compose up -d --build`、安裝 crontab。之後由這個 job
-  # 自動 git pull + rebuild。
-  deploy-backend:
-    name: Deploy Backend to VPS
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -e
-            cd /opt/lorescape
-            git fetch --prune origin master
-            git reset --hard origin/master
-            cd backend
-            docker compose up -d --build
-
   # Android 建置與部署
   build-android:
     name: Build & Deploy Android AAB
     runs-on: ubuntu-latest
-    needs: [push-supabase-db]
     defaults:
       run:
         working-directory: frontend
@@ -158,7 +103,6 @@ jobs:
   build-ios:
     name: Build & Deploy iOS IPA
     runs-on: macos-latest
-    needs: [push-supabase-db]
     defaults:
       run:
         working-directory: frontend
@@ -283,30 +227,24 @@ jobs:
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore.mobileprovision
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/Instant_Explore_ShareExtension.mobileprovision
 
-  # Landing 部署已拆到獨立的 deploy-landing.yml（手動觸發）。
-
   # 建置狀態報告
   deploy-status:
     name: Deploy Status Report
     runs-on: ubuntu-latest
-    needs: [push-supabase-db, deploy-backend, build-android, build-ios]
+    needs: [build-android, build-ios]
     if: always()
 
     steps:
       - name: Report Status
         run: |
-          echo "## 🚀 部署狀態報告"
-          echo "- Supabase DB 推送: ${{ needs.push-supabase-db.result }}"
-          echo "- Backend 部署: ${{ needs.deploy-backend.result }}"
+          echo "## 🚀 App 部署狀態報告"
           echo "- Android 建置: ${{ needs.build-android.result }}"
           echo "- iOS 建置: ${{ needs.build-ios.result }}"
 
-          if [ "${{ needs.push-supabase-db.result }}" = "success" ] && \
-             [ "${{ needs.deploy-backend.result }}" = "success" ] && \
-             [ "${{ needs.build-android.result }}" = "success" ] && \
+          if [ "${{ needs.build-android.result }}" = "success" ] && \
              [ "${{ needs.build-ios.result }}" = "success" ]; then
-            echo "✅ 所有部署成功完成！"
+            echo "✅ App 建置與上架成功完成！"
           else
-            echo "❌ 部分部署失敗，請檢查日誌"
+            echo "❌ 部分建置失敗，請檢查日誌"
             exit 1
           fi
