@@ -16,6 +16,10 @@ export interface Beat {
   lines: string[];
   /** Substrings inside `lines` to emphasise. */
   highlights: string[];
+  /** Optional explicit on-screen duration (frames); overrides the text-derived
+   * default. Set by the voiceover pipeline so each beat holds long enough for
+   * its spoken narration. */
+  durationFrames?: number;
 }
 
 export interface Story {

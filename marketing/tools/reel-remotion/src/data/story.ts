@@ -17,6 +17,7 @@ const nonEmptyLines = (beat: Beat): number =>
  * added later, but the on-screen text must be legible on its own too.
  */
 export const beatFrames = (beat: Beat): number => {
+  if (typeof beat.durationFrames === "number") return beat.durationFrames;
   if (beat.layout === "cover") return 140;
   if (beat.layout === "ending") return 150;
   const byText = 66 + 27 * nonEmptyLines(beat);
