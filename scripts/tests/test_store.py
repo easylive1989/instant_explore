@@ -39,6 +39,18 @@ def test_keys_reads_first_column():
     assert store.keys(_source()) == {"2026-06-20"}
 
 
+def test_keys_composite_index_returns_tuples():
+    client = FakeClient({"demo": [
+        ["media_id", "obs_date", "v"],
+        ["m1", "2026-06-22", "1"],
+        ["m1", "2026-06-23", "2"],
+    ]})
+    store = SheetStore(client)
+    assert store.keys(_source(key_index=(0, 1))) == {
+        ("m1", "2026-06-22"), ("m1", "2026-06-23"),
+    }
+
+
 def test_keys_empty_tab_returns_empty_set():
     store = SheetStore(FakeClient())
     assert store.keys(_source()) == set()

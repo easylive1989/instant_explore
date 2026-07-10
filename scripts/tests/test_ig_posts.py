@@ -68,22 +68,24 @@ def test_parse_media_list_no_next_yields_none_cursor():
 
 def test_build_row_for_reel_includes_video_metrics():
     row = ig_posts.build_row(REEL, ig_posts.insights_map(CORE),
-                             ig_posts.insights_map(VIDEO))
+                             ig_posts.insights_map(VIDEO), "2026-06-24")
     assert row[0] == "111"
-    assert row[1] == "2026-06-22"
-    assert row[2] == "REELS"
-    assert row[4] == "line one line two"  # newlines collapsed
-    assert row[5] == "900"   # reach
-    assert row[6] == "30"    # likes from media field
-    assert row[11] == "1200"  # views
-    assert row[12] == "5400"  # avg_watch_time
+    assert row[1] == "2026-06-24"  # obs_date (the day observed)
+    assert row[2] == "2026-06-22"  # posted_date (publish day)
+    assert row[3] == "REELS"
+    assert row[5] == "line one line two"  # newlines collapsed
+    assert row[6] == "900"   # reach
+    assert row[7] == "30"    # likes from media field
+    assert row[12] == "1200"  # views
+    assert row[13] == "5400"  # avg_watch_time
 
 
 def test_build_row_for_image_blanks_video_metrics():
-    row = ig_posts.build_row(IMAGE, ig_posts.insights_map(CORE), {})
-    assert row[2] == "IMAGE"
-    assert row[11] == ""  # views blank for non-video
-    assert row[12] == ""
+    row = ig_posts.build_row(IMAGE, ig_posts.insights_map(CORE), {},
+                             "2026-06-24")
+    assert row[3] == "IMAGE"
+    assert row[12] == ""  # views blank for non-video
+    assert row[13] == ""
 
 
 def test_media_in_window_stops_paging_past_start(monkeypatch):
@@ -120,11 +122,25 @@ def test_fetch_posts_degrades_on_insight_error(monkeypatch):
     rows = ig_posts.fetch_posts(cfg, "2026-06-20", "2026-06-23")
     assert len(rows) == 1
     assert rows[0][0] == "222"
-    assert rows[0][5] == ""  # reach blank after failure
-    assert rows[0][6] == "12"  # likes still from media field
+    assert rows[0][6] == ""  # reach blank after failure
+    assert rows[0][7] == "12"  # likes still from media field
 
 
-def test_source_descriptor_is_media_keyed():
+def test_fetch_posts_stamps_end_as_observation_date(monkeypatch):
+    monkeypatch.setattr(ig_posts, "media_in_window",
+                        lambda cfg, s, e: [REEL, IMAGE])
+    monkeypatch.setattr(ig_posts, "_media_insights",
+                        lambda cfg, mid, metrics: CORE)
+    cfg = MetricsConfig(ig_user_id="1", meta_page_access_token="t")
+    rows = ig_posts.fetch_posts(cfg, "2026-06-17", "2026-06-23")
+    # Both posts observed on the window end, keyed by (media_id, obs_date).
+    assert [(r[0], r[1]) for r in rows] == [
+        ("111", "2026-06-23"), ("222", "2026-06-23"),
+    ]
+
+
+def test_source_descriptor_is_media_keyed_daily():
     assert ig_posts.SOURCE.name == "ig_posts"
     assert ig_posts.SOURCE.keyed_by_date is False
-    assert ig_posts.SOURCE.key_index == 0
+    assert ig_posts.SOURCE.key_index == (0, 1)  # (media_id, obs_date)
+    assert ig_posts.SOURCE.refresh_days == 7

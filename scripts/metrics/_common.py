@@ -35,23 +35,44 @@ def report_dir(end_date: str, root: Path = REPO_ROOT) -> Path:
     return root / "docs" / "metrics" / end_date
 
 
+KeyIndex = int | tuple[int, ...]
+
+
+def row_key(row: list[str], key_index: KeyIndex):
+    """Extract a row's merge key: one column, or a tuple of columns.
+
+    A tuple `key_index` yields a composite key (e.g. media id + observation
+    date), letting a source store several rows that share any single column.
+    """
+    if isinstance(key_index, tuple):
+        return tuple(row[i] for i in key_index)
+    return row[key_index]
+
+
+def key_width(key_index: KeyIndex) -> int:
+    """Highest column index a key touches, for bounds-checking rows."""
+    return max(key_index) if isinstance(key_index, tuple) else key_index
+
+
 def merge_rows(
     existing: list[list[str]],
     new_rows: list[list[str]],
-    key_index: int = 0,
+    key_index: KeyIndex = 0,
 ) -> list[list[str]]:
     """Merge `new_rows` into `existing`, keyed by a column, sorted by key.
 
     Rows sharing a key with `new_rows` are overwritten (re-fetching a day or
     post refreshes it); the result is sorted by key so the dataset stays
-    chronologically ordered. Storage-agnostic: callers supply the existing
-    rows and persist the result however they like.
+    chronologically ordered. `key_index` may be a tuple of columns for a
+    composite key. Storage-agnostic: callers supply the existing rows and
+    persist the result however they like.
     """
-    merged: dict[str, list[str]] = {
-        row[key_index]: row for row in existing if len(row) > key_index
+    width = key_width(key_index)
+    merged: dict = {
+        row_key(row, key_index): row for row in existing if len(row) > width
     }
     for row in new_rows:
-        merged[row[key_index]] = row
+        merged[row_key(row, key_index)] = row
     return [merged[key] for key in sorted(merged)]
 
 
@@ -126,8 +147,11 @@ class DailySource:
     The backfill engine reads `filename`, finds the gap up to yesterday, and
     calls `fetch(cfg, start, end)` once for the whole window — date-keyed
     sources return one row per day, while media-keyed sources (`keyed_by_date`
-    is False) return one row per post and are always re-fetched over a recent
-    window to refresh insights.
+    is False) are always re-fetched over a recent window (`refresh_days`, or
+    the run's backfill horizon when unset). A media-keyed source may key rows
+    on a composite `key_index` (e.g. media id + observation date) to keep a
+    per-post daily time series rather than a single overwriting snapshot; like
+    a snapshot source, past days it missed cannot be recovered.
 
     Snapshot sources (`snapshot` is True) expose only a live "now" reading
     with no recoverable history (e.g. RevenueCat's overview metrics): the
@@ -140,9 +164,10 @@ class DailySource:
     headers: list[str]
     required: tuple[str, ...]
     fetch: Callable[["MetricsConfig", str, str], list[list[str]]]
-    key_index: int = 0
+    key_index: KeyIndex = 0
     keyed_by_date: bool = True
     snapshot: bool = False
+    refresh_days: int | None = None
     ready: Callable[["MetricsConfig"], bool] | None = None
 
     def missing_config(self, cfg: "MetricsConfig") -> list[str]:

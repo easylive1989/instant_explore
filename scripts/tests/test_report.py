@@ -6,7 +6,7 @@ from metrics.store import MemoryStore
 
 
 def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True,
-                 snapshot=False):
+                 snapshot=False, refresh_days=None):
     return DailySource(
         name="demo",
         filename="demo.csv",
@@ -15,6 +15,7 @@ def _demo_source(rows, required=("gsc_site_url",), keyed_by_date=True,
         fetch=lambda cfg, s, e: rows,
         keyed_by_date=keyed_by_date,
         snapshot=snapshot,
+        refresh_days=refresh_days,
     )
 
 
@@ -48,6 +49,14 @@ def test_plan_window_media_keyed_uses_recent_window():
     src = _demo_source([], keyed_by_date=False)
     assert report.plan_window(src, MemoryStore(), "2026-06-23", 3, None) == (
         "2026-06-21", "2026-06-23"
+    )
+
+
+def test_plan_window_media_keyed_refresh_days_overrides_backfill():
+    src = _demo_source([], keyed_by_date=False, refresh_days=7)
+    # refresh_days wins over the run's backfill horizon (30 here).
+    assert report.plan_window(src, MemoryStore(), "2026-06-23", 30, None) == (
+        "2026-06-17", "2026-06-23"
     )
 
 

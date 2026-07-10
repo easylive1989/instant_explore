@@ -83,9 +83,10 @@ def plan_window(
     """Return the (start, end) to fetch, or None if already up to date.
 
     Date-keyed sources fetch only the gap up to `end`; media-keyed sources
-    always refresh the most recent `backfill` days; snapshot sources record
-    a single live reading for `end` unless that day is already stored. An
-    explicit window overrides all of these for manual backfills.
+    always refresh their recent window (`refresh_days`, else `backfill`);
+    snapshot sources record a single live reading for `end` unless that day
+    is already stored. An explicit window overrides all of these for manual
+    backfills.
     """
     if explicit is not None:
         return explicit
@@ -94,7 +95,8 @@ def plan_window(
     if source.keyed_by_date:
         days = missing_days(store.keys(source), end, backfill)
         return (days[0], days[-1]) if days else None
-    start = (date.fromisoformat(end) - timedelta(days=backfill - 1)).isoformat()
+    lookback = source.refresh_days or backfill
+    start = (date.fromisoformat(end) - timedelta(days=lookback - 1)).isoformat()
     return start, end
 
 
@@ -182,11 +184,12 @@ def check_lines(
                     f"backfill {len(days)} day(s) → {end}"
                 )
         else:
+            lookback = source.refresh_days or backfill
             start = (date.fromisoformat(end)
-                     - timedelta(days=backfill - 1)).isoformat()
+                     - timedelta(days=lookback - 1)).isoformat()
             lines.append(
-                f"- {name}: ready, refresh posts {start} → {end} "
-                f"({len(keys)} stored)"
+                f"- {name}: ready, track posts published {start} → {end}, "
+                f"+1 obs/post ({len(keys)} row(s) stored)"
             )
     return lines
 

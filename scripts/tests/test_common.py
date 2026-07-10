@@ -59,6 +59,28 @@ def test_merge_rows_appends_overwrites_and_sorts():
     ]
 
 
+def test_row_key_single_and_composite():
+    row = ["m1", "2026-06-23", "x"]
+    assert c.row_key(row, 0) == "m1"
+    assert c.row_key(row, (0, 1)) == ("m1", "2026-06-23")
+
+
+def test_merge_rows_composite_key_keeps_per_post_daily_series():
+    existing = [
+        ["m1", "2026-06-22", "100"],
+        ["m1", "2026-06-23", "150"],
+    ]
+    new = [
+        ["m1", "2026-06-23", "180"],  # same (m1, 06-23) → overwrite
+        ["m2", "2026-06-23", "40"],   # new post, same day → append
+    ]
+    assert c.merge_rows(existing, new, key_index=(0, 1)) == [
+        ["m1", "2026-06-22", "100"],
+        ["m1", "2026-06-23", "180"],
+        ["m2", "2026-06-23", "40"],
+    ]
+
+
 def test_missing_days_seeds_first_backfill_when_empty():
     days = c.missing_days(set(), "2026-06-23", first_backfill=3)
     assert days == ["2026-06-21", "2026-06-22", "2026-06-23"]

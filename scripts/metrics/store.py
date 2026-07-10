@@ -7,7 +7,7 @@ of truth); :class:`MemoryStore` keeps data in-process for tests.
 """
 from __future__ import annotations
 
-from metrics._common import DailySource, merge_rows
+from metrics._common import DailySource, key_width, merge_rows, row_key
 from metrics.sheets import SheetClient
 
 
@@ -28,11 +28,16 @@ class MetricsStore:
         """Overwrite `source`'s dataset with the given headers and rows."""
         raise NotImplementedError
 
-    def keys(self, source: DailySource) -> set[str]:
-        """Return the key-column values already stored for `source`."""
+    def keys(self, source: DailySource) -> set:
+        """Return the key values already stored for `source`.
+
+        Each value is a single column or, for a composite `key_index`, the
+        tuple of columns that identifies a row.
+        """
         _, rows = self.read(source)
         ki = source.key_index
-        return {row[ki] for row in rows if len(row) > ki}
+        width = key_width(ki)
+        return {row_key(row, ki) for row in rows if len(row) > width}
 
     def upsert(
         self, source: DailySource, headers: list[str], new_rows: list[list[str]]
