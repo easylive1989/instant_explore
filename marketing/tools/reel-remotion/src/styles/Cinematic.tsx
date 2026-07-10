@@ -42,7 +42,9 @@ const BeatScene: React.FC<{ beat: Beat; index: number }> = ({ beat, index }) => 
       <AbsoluteFill
         style={{
           justifyContent: centered ? "center" : "flex-end",
-          padding: "0 90px 150px 90px",
+          // Bottom-anchored narration is lifted clear of Instagram's Reels UI
+          // band (username / caption / action buttons cover the bottom ~17%).
+          padding: centered ? "0 90px 150px 90px" : "0 90px 330px 90px",
         }}
       >
         <div>
@@ -139,7 +141,7 @@ export const Cinematic: React.FC = () => {
         style={{
           position: "absolute",
           right: 44,
-          bottom: 56,
+          bottom: 120,
           width: 132,
           height: "auto",
           opacity: 0.9,
