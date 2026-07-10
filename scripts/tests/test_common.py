@@ -81,6 +81,18 @@ def test_merge_rows_composite_key_keeps_per_post_daily_series():
     ]
 
 
+def test_merge_rows_sort_index_orders_by_chosen_columns():
+    # key = (media_id, obs_date) col (0,1); sort by posted_date col 2.
+    existing = [
+        ["m2", "2026-07-09", "2026-07-03", "x"],
+        ["m1", "2026-07-09", "2026-07-08", "y"],
+    ]
+    new = [["m3", "2026-07-09", "2026-07-05", "z"]]
+    merged = c.merge_rows(existing, new, key_index=(0, 1), sort_index=(2, 0, 1))
+    # ordered by posted_date, not by media_id / key.
+    assert [r[2] for r in merged] == ["2026-07-03", "2026-07-05", "2026-07-08"]
+
+
 def test_missing_days_seeds_first_backfill_when_empty():
     days = c.missing_days(set(), "2026-06-23", first_backfill=3)
     assert days == ["2026-06-21", "2026-06-22", "2026-06-23"]

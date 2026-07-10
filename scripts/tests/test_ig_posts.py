@@ -143,4 +143,5 @@ def test_source_descriptor_is_media_keyed_daily():
     assert ig_posts.SOURCE.name == "ig_posts"
     assert ig_posts.SOURCE.keyed_by_date is False
     assert ig_posts.SOURCE.key_index == (0, 1)  # (media_id, obs_date)
+    assert ig_posts.SOURCE.sort_index == (2, 0, 1)  # posted_date first
     assert ig_posts.SOURCE.refresh_days == 7

@@ -58,22 +58,25 @@ def merge_rows(
     existing: list[list[str]],
     new_rows: list[list[str]],
     key_index: KeyIndex = 0,
+    sort_index: KeyIndex | None = None,
 ) -> list[list[str]]:
-    """Merge `new_rows` into `existing`, keyed by a column, sorted by key.
+    """Merge `new_rows` into `existing`, keyed by a column, then sort.
 
     Rows sharing a key with `new_rows` are overwritten (re-fetching a day or
-    post refreshes it); the result is sorted by key so the dataset stays
-    chronologically ordered. `key_index` may be a tuple of columns for a
-    composite key. Storage-agnostic: callers supply the existing rows and
-    persist the result however they like.
+    post refreshes it). `key_index` may be a tuple of columns for a composite
+    key. The result is ordered by `sort_index` when given (e.g. publish date
+    for per-post rows), otherwise by the key — either way the dataset stays
+    deterministically ordered. Storage-agnostic: callers supply the existing
+    rows and persist the result however they like.
     """
-    width = key_width(key_index)
+    order = sort_index if sort_index is not None else key_index
+    width = max(key_width(key_index), key_width(order))
     merged: dict = {
         row_key(row, key_index): row for row in existing if len(row) > width
     }
     for row in new_rows:
         merged[row_key(row, key_index)] = row
-    return [merged[key] for key in sorted(merged)]
+    return sorted(merged.values(), key=lambda row: row_key(row, order))
 
 
 def missing_days(
@@ -165,6 +168,7 @@ class DailySource:
     required: tuple[str, ...]
     fetch: Callable[["MetricsConfig", str, str], list[list[str]]]
     key_index: KeyIndex = 0
+    sort_index: KeyIndex | None = None
     keyed_by_date: bool = True
     snapshot: bool = False
     refresh_days: int | None = None

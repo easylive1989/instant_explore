@@ -169,6 +169,7 @@ SOURCE = DailySource(
     required=("ig_user_id", "meta_page_access_token"),
     fetch=fetch_posts,
     key_index=(0, 1),
+    sort_index=(2, 0, 1),  # posted_date, media_id, obs_date
     keyed_by_date=False,
     refresh_days=_TRACK_DAYS,
 )

@@ -44,7 +44,8 @@ class MetricsStore:
     ) -> None:
         """Merge `new_rows` into `source`'s dataset and persist the result."""
         _, existing = self.read(source)
-        self._write(source, headers, merge_rows(existing, new_rows, source.key_index))
+        self._write(source, headers, merge_rows(
+            existing, new_rows, source.key_index, source.sort_index))
 
 
 class SheetStore(MetricsStore):
