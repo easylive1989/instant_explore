@@ -64,20 +64,25 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play
 
 ## 步驟
 
+> 以下所有相對路徑（`scripts/`、`docs/`、`references/`）都是相對於**專案根目錄
+> `instant_explore/`**，不是這個 skill 資料夾。metrics 程式在
+> `instant_explore/scripts/metrics/`。指令請在專案根目錄下執行，例如
+> `cd /Users/paulwu/Documents/PLRepo/instant_explore/scripts`。
+
 1. 跟使用者確認要更新哪些來源（預設全部）。一般不必指定日期，工具會自動補到
    昨天；如要手動補特定區間用 `--start/--end`，調整首次回溯天數用 `--days N`
    （`ig_posts` 的追蹤窗固定 7 天、不受 `--days` 影響）。
 
 2. **先 dry-run** 檢查設定與待補進度（讀試算表算缺口，不抓 API）：
 
-       cd scripts && uv run python -m metrics.report --check
+       cd <instant_explore 專案根>/scripts && uv run python -m metrics.report --check
 
    每個來源會顯示 ready / 缺設定，以及「最後紀錄日、待補幾天 → 昨天」
    （`ig_posts` 顯示追蹤中的貼文發布區間 + 已存的觀察列數）。缺設定的先補。
 
 3. 抓 API 來源並寫進試算表：
 
-       cd scripts && uv run python -m metrics.report
+       cd <instant_explore 專案根>/scripts && uv run python -m metrics.report
 
    只抓單一來源時用 `--only`，例如 `--only ig_posts` 或 `--only gsc,ga4`。
    完成後把 stdout 的每來源結果（`+N row(s) for <區間>` / `up to date` /
