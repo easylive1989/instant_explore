@@ -640,7 +640,7 @@ press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
 | `review_state` | Starts `pending`; historically only changed by the legacy default-card publish job (`python -m lorescape_backend.social.publisher`) based on the Discord ✅/❌ reaction — that CLI was deleted in the 2026-07-11 publisher split (see `docs/adr/0004-split-social-publisher-from-backend.md`), not carried over. Not touched by the wander carousel/reel bot flow — that state lives in `social_posts` |
 | IG review hand-off | `publish` posts the default card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
-| Env flags | `DAILY_STORY_GENERATE_ENABLED` (09:00 Gemini, keep OFF) and `DAILY_STORY_PUBLISH_ENABLED` (gates the publish bot's scheduled auto-publish loop; 🚀 立即發布 still works manually even when OFF; ON) — both fall back to legacy `DAILY_STORY_ENABLED` |
+| Env flags | `DAILY_STORY_PUBLISH_ENABLED` (gates the publish bot's scheduled auto-publish loop; 🚀 立即發布 still works manually even when OFF; ON) — falls back to legacy `DAILY_STORY_ENABLED`. The 09:00 Gemini generate cron no longer exists (removed in the publisher split; generation is manual CLI only) |
 | Languages | Always both `zh-TW` and `en` (App queries per language) |
 
 ## Gotchas
@@ -687,7 +687,8 @@ press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
 
 - Diagnosing why a past story is missing/broken → use the
   lorescape-debug skill (read-only) first.
-- Re-enabling the automatic Gemini generation → set
-  `DAILY_STORY_GENERATE_ENABLED=1` on the VPS and restart (keep this OFF
-  while Claude writes the content). To let manual stories auto-post to
-  Instagram, set `DAILY_STORY_PUBLISH_ENABLED=1` instead.
+- Re-enabling automatic Gemini generation → no scheduled generate job
+  exists anymore (removed in the publisher split); generation is manual
+  CLI only (`python -m lorescape_publisher.daily_story`). To let manual
+  stories auto-post to Instagram, set `DAILY_STORY_PUBLISH_ENABLED=1` in
+  publisher/.env instead.
