@@ -40,16 +40,16 @@ iPhone 尺寸：`1320x2868`=6.9"、`1284x2778`=6.5"、`1206x2622`=6.3"、`1125x2
 
 1. 把編輯器複製到 iCloud 外（首次）：
    ```bash
-   cp -R docs/screenshots/editor ~/lorescape-screenshots-editor
+   cp -R marketing/screenshots/editor ~/lorescape-screenshots-editor
    cd ~/lorescape-screenshots-editor && bun install
    ```
 2. 啟動編輯器調整文案／版面／配色：
    ```bash
    bun dev   # → http://localhost:3000，調整後按 Export bundle（下載 zip）
    ```
-3. 把匯出的 zip 解壓回 `docs/screenshots/export/`。
+3. 把匯出的 zip 解壓回 `marketing/screenshots/export/`。
 4. 改完記得把 `~/lorescape-screenshots-editor` 的 `app-store-screenshots.json` 與
-   `src/` 改動同步回 `docs/screenshots/editor/`。
+   `src/` 改動同步回 `marketing/screenshots/editor/`。
 
 ### 高解析重截 app 畫面（素材）
 
@@ -57,7 +57,7 @@ iPhone 尺寸：`1320x2868`=6.9"、`1284x2778`=6.5"、`1206x2622`=6.3"、`1125x2
 `docs/design/project/` 的 React 設計原型以 4× 重截。重截：
 
 ```bash
-cp docs/screenshots/editor/capture/_capture.* /tmp/ls-proto/   # /tmp/ls-proto = docs/design/project 的複本
+cp marketing/screenshots/editor/capture/_capture.* /tmp/ls-proto/   # /tmp/ls-proto = docs/design/project 的複本
 cd /tmp/ls-proto && python3 -m http.server 8899 &
 node _capture.mjs   # 需要全域 playwright；輸出到 ~/lorescape-screenshots-editor/public/...
 ```
