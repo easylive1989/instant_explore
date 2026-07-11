@@ -18,6 +18,9 @@ import 'package:context_app/features/usage/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Feature 公開介面：narration player 狀態型別供 analytics observer 使用。
+export 'presentation/controllers/narration_state.dart';
+
 /// 共享的 narration HTTP client。讀取 BACKEND_BASE_URL 設定。
 ///
 /// 每次請求附上目前 Supabase session 的 access token，後端據此辨識使用者

@@ -1,5 +1,4 @@
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/presentation/widgets/reading_palette.dart';
 import 'package:context_app/features/narration/providers.dart';
 import 'package:flutter/material.dart';

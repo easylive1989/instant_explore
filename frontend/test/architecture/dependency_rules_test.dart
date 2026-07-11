@@ -24,7 +24,6 @@ const Set<String> _pendingCrossFeature = {
   'lib/features/sync/providers.dart -> features/saved_locations/data/hive_saved_locations_repository.dart',
   'lib/features/sync/providers.dart -> features/trip/data/hive_trip_repository.dart',
   // presentation 層跨引
-  'lib/features/analytics/presentation/narration_analytics_observer.dart -> features/narration/presentation/controllers/narration_state.dart',
   'lib/features/explore/presentation/screens/explore_screen.dart -> features/saved_locations/presentation/widgets/saved_locations_fab.dart',
   'lib/features/journey/presentation/screens/journey_screen.dart -> features/trip/presentation/widgets/trip_grid.dart',
   'lib/features/journey/presentation/widgets/timeline_entry.dart -> features/trip/presentation/widgets/move_to_trip_sheet.dart',

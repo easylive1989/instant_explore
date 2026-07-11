@@ -6,7 +6,6 @@ import 'package:context_app/features/analytics/domain/models/abandon_reason.dart
 import 'package:context_app/features/analytics/domain/models/analytics_event.dart';
 import 'package:context_app/features/analytics/domain/models/narration_event_source.dart';
 import 'package:context_app/features/analytics/providers.dart';
-import 'package:context_app/features/narration/presentation/controllers/narration_state.dart';
 import 'package:context_app/features/narration/providers.dart';
 
 /// SharedPreferences key tracking whether the user has ever started a
