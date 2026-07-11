@@ -77,27 +77,40 @@ class ReelVoiceoverError(Exception):
     """Raised when the voiced reel cannot be built."""
 
 
-def synth_beats(beats, work_dir, cache, synth, force, measure=None):
+def synth_beats(beats, work_dir, cache, synth, force, measure=None, cache_path=None):
     """TTS each beat.narration into work_dir/beat_<id>.wav (cache-aware).
 
     Returns ({beat_id: (wav_path|None, voice_sec)}, new_cache). A beat with an
-    empty narration yields (None, 0.0) and is dropped from the cache.
+    empty narration yields (None, 0.0) and is dropped from the cache. When
+    cache_path is given, the cache is persisted after every mutation so a
+    mid-run failure (e.g. TTS quota exhaustion) keeps already-synthesized
+    beats cached instead of re-burning quota on the next run.
     """
     measure = measure or dvp._ffprobe_duration
     result, new_cache = {}, dict(cache)
+
+    def _persist():
+        if cache_path is not None:
+            Path(cache_path).write_text(
+                json.dumps(new_cache, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+
     for beat in beats:
         bid = beat["id"]
         text = (beat.get("narration") or "").strip()
         wav = Path(work_dir) / f"beat_{bid}.wav"
         if not text:
             result[bid] = (None, 0.0)
-            new_cache.pop(bid, None)
+            if new_cache.pop(bid, None) is not None:
+                _persist()
             continue
         if not force and cache_hit(cache, bid, text, wav.exists()):
             logger.info("tts skip (cached): %s", bid)
         else:
             synth(text, wav)
             new_cache[bid] = narration_hash(text)
+            _persist()
         result[bid] = (wav, measure(wav))
     return result, new_cache
 
@@ -168,49 +181,52 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--force-tts", action="store_true")
     args = parser.parse_args(argv)
 
-    story = json.loads(STORY_JSON.read_text(encoding="utf-8"))
-    beats = story["beats"]
+    try:
+        story = json.loads(STORY_JSON.read_text(encoding="utf-8"))
+        beats = story["beats"]
 
-    od = out_dir(args.date)
-    work = od / "voice_work"
-    work.mkdir(parents=True, exist_ok=True)
-    cache_path = work / "voice_cache.json"
-    cache = (
-        json.loads(cache_path.read_text(encoding="utf-8"))
-        if cache_path.exists() else {}
-    )
+        od = out_dir(args.date)
+        work = od / "voice_work"
+        work.mkdir(parents=True, exist_ok=True)
+        cache_path = work / "voice_cache.json"
+        cache = (
+            json.loads(cache_path.read_text(encoding="utf-8"))
+            if cache_path.exists() else {}
+        )
 
-    voice = args.voice or (
-        dvp.DEFAULT_GEMINI_VOICE if args.engine == "gemini" else "Meijia"
-    )
-    synth = dvp._make_synth(args.engine, voice, None, args.style)
-    logger.info("tts: engine=%s voice=%s", args.engine, voice)
-    synth_result, new_cache = synth_beats(
-        beats, work, cache, synth, force=args.force_tts,
-    )
-    cache_path.write_text(
-        json.dumps(new_cache, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+        voice = args.voice or (
+            dvp.DEFAULT_GEMINI_VOICE if args.engine == "gemini" else "Meijia"
+        )
+        synth = dvp._make_synth(args.engine, voice, None, args.style)
+        logger.info("tts: engine=%s voice=%s", args.engine, voice)
+        synth_result, _ = synth_beats(
+            beats, work, cache, synth, force=args.force_tts,
+            cache_path=cache_path,
+        )
 
-    durations = []
-    for beat in beats:
-        _, voice_sec = synth_result[beat["id"]]
-        dframes = duration_frames(text_default_frames(beat), voice_sec)
-        beat["durationFrames"] = dframes
-        durations.append(dframes)
-        logger.info("%-7s voice=%5.2fs -> durationFrames=%d",
-                    beat["id"], voice_sec, dframes)
-    STORY_JSON.write_text(
-        json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+        durations = []
+        for beat in beats:
+            _, voice_sec = synth_result[beat["id"]]
+            dframes = duration_frames(text_default_frames(beat), voice_sec)
+            beat["durationFrames"] = dframes
+            durations.append(dframes)
+            logger.info("%-7s voice=%5.2fs -> durationFrames=%d",
+                        beat["id"], voice_sec, dframes)
+        STORY_JSON.write_text(
+            json.dumps(story, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
-    voice_wav = od / "voice.wav"
-    build_voice_wav(beats, synth_result, durations, voice_wav)
-    render_reel(args.date)
-    final = od / "final.mp4"
-    mux(args.date, voice_wav, final)
-    logger.info("DONE -> %s (%.2fs)", final, total_frames(durations) / FPS)
-    return 0
+        voice_wav = od / "voice.wav"
+        build_voice_wav(beats, synth_result, durations, voice_wav)
+        render_reel(args.date)
+        final = od / "final.mp4"
+        mux(args.date, voice_wav, final)
+        logger.info("DONE -> %s (%.2fs)", final, total_frames(durations) / FPS)
+        return 0
+    except (dvp.PostProductionError, ReelVoiceoverError) as exc:
+        logger.error("reel_voiceover failed: %s", exc)
+        return 1
 
 
 if __name__ == "__main__":

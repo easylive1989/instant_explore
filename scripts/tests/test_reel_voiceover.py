@@ -1,7 +1,10 @@
 """Tests for the reel voiceover pipeline's pure helpers."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
+
+import pytest
 
 import reel_voiceover as rv
 
@@ -92,6 +95,31 @@ def test_synth_beats_force_resynths_cached(tmp_path):
     rv.synth_beats(beats, tmp_path, cache, fake_synth, force=True,
                    measure=lambda p: 3.0)
     assert synthed == ["hello"]
+
+
+def test_synth_beats_persists_cache_after_each_synth(tmp_path):
+    beats = [
+        {"id": "cover", "narration": "hello"},
+        {"id": "beat1", "narration": "boom"},
+    ]
+    cache_path = tmp_path / "voice_cache.json"
+    calls = []
+
+    def flaky_synth(text, dest):
+        calls.append(text)
+        if text == "boom":
+            raise RuntimeError("simulated mid-run TTS failure")
+        Path(dest).write_bytes(b"y")
+
+    with pytest.raises(RuntimeError):
+        rv.synth_beats(
+            beats, tmp_path, {}, flaky_synth, force=False,
+            measure=lambda p: 4.0, cache_path=cache_path,
+        )
+
+    # cover was synthesized before the failure; its hash must already be on disk
+    persisted = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert persisted == {"cover": rv.narration_hash("hello")}
 
 
 def test_voice_filter_graph_delays_and_trims():
