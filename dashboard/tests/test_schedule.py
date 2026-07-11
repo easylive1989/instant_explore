@@ -134,7 +134,6 @@ class TestRender:
         assert "marketing-weekly-audit" in html  # 週一含週表項
         # 三張折疊表已移除
         assert "table-fold" not in html
-        assert "每月（1 號）" not in html
         # 月曆：2026 年 7 月有 31 個當月格
         assert html.count("data-day=") == 31
         # 今天（7/13）高亮且預設選取，明細預設展開

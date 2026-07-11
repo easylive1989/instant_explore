@@ -631,7 +631,7 @@ def _calendar_html(schedule: dict, today: date) -> str:
         for d in week
         if d.month == today.month
     )
-    legend = "● 每日　▲ 每週（週一）　■ 每月（1號）　點日期看明細"
+    legend = "● 每日　▲ 每週（週一）　■ 每月（1 號）　點日期看明細"
     return (
         f'<div class="callout"><b>{today.year} 年 {today.month} 月</b>　{_E(legend)}</div>'
         f'<div class="calendar">{head}{cells}</div>{details}'
