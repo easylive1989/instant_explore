@@ -1,7 +1,7 @@
 """Upload rendered IG card PNGs to the public `ig-cards` Supabase bucket.
 
 Bucket must be created out-of-band (see
-`docs/operations/2026-05-21-ig-cards-bucket-setup.md`). Uploads use upsert
+`docs/init/2026-05-21-ig-cards-bucket-setup.md`). Uploads use upsert
 so re-running the publisher for the same date overwrites the previous PNG
 at the same path (and keeps the same public URL).
 """

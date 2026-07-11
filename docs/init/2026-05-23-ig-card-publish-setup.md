@@ -147,7 +147,7 @@ META_PAGE_ACCESS_TOKEN=EAAX...
 
 **為什麼**：publisher 把渲染好的 PNG 上傳這裡、再把 public URL 餵給 IG API。沒這個 bucket → publisher 一上傳就 500、row 落 `failed` 狀態、Discord 噴錯。
 
-完整步驟見 `docs/operations/2026-05-21-ig-cards-bucket-setup.md`。摘要：
+完整步驟見 `docs/init/2026-05-21-ig-cards-bucket-setup.md`。摘要：
 
 1. Supabase Dashboard（**production** 那個專案，URL 含 `kypcxxjqsinamcqrjeog`） → 左側 **Storage** → **New bucket**
 2. 填入：

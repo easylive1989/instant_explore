@@ -123,7 +123,7 @@ refreshed via the **lorescape-reels-planner** skill; only then fall back
 to `place_picker.pick_next_place(sb)`.
 
 > **Execution contexts.** The ops CLIs (`manual_daily_story`,
-> `unsplash_images`, `daily_video_post`) run from the `scripts/` uv project
+> `unsplash_images`, `reel_voiceover`) run from the `scripts/` uv project
 > (`cd scripts && uv run python -m <module>`). The inline library snippets
 > in Steps 1–2 call `lorescape_publisher` directly, so run them in the
 > publisher env (`cd publisher && uv run python …`), where bare
@@ -255,19 +255,13 @@ Use lorescape-daily-reel for the full pipeline (prepare → condense
 narration → `build_video.sh`). Output:
 `marketing/outputs/daily_video/{date}/cinematic.mp4`.
 
-Legacy fallback only if explicitly requested: the old Google Flow reel of
-the guide character — see [Google Flow reel](#google-flow-reel-after-publish).
-
 ### Step 10 — (optional) voiceover
 
 **Gate: only after the Step 9 reel exists and the user wants narration.**
 The Remotion reel already has burned-in narration text **and** a BGM bed —
 it is a finished deliverable on its own. Only if the user wants a spoken
 voiceover, generate a zh-TW TTS track and mux it over the reel (build the
-reel with `--lufs -28` so the music sits under the voice). The old Flow
-caption/voiceover post step in
-[IG Reels post-production](#ig-reels-post-production-subtitles--voiceover)
-applies only to the legacy Flow master.
+reel with `--lufs -28` so the music sits under the voice).
 
 ### Step 11 — Upload to VPS + send for review
 
@@ -393,232 +387,6 @@ needed.
   entirely (no licence block needed). Reach for a CC BY-SA Wikipedia lead as
   cover only when Unsplash has no genuine shot.
 
-## Google Flow reel (after publish)
-
-Generate the reel **only after Step 8 (publish)**. It uses the
-**ai-media-generator** skill (Google Flow / Omni Flash) — invoke that
-skill and follow its `automation/site-profiles/flow.md` profile for the
-live UI.
-
-**Inputs (both locked as Flow Ingredients so identity + real site hold):**
-
-- **Guide character** — `docs/ig/reels/actor/` (the recurring Lorescape
-  guide: a woman in her late 50s, curly grey hair, round glasses, olive
-  linen jacket, cream scarf, holding a brown leather journal). Use
-  `actor_2.png` (clear front face) as the identity reference; swap to
-  `actor_5.png` (back view) when the shot is framed from behind.
-- **Place photo** — this run's best genuine shot from
-  `marketing/outputs/daily_image/{date}/` (the Wikipedia cover or a kept Unsplash
-  photo). This locks the REAL building, not an AI hallucination.
-
-**Creative direction (Lorescape standing choices):**
-
-- **Concept** — the guide walks the place and warmly presents it: a
-  knowing smile, gesturing at the architecture as if telling its story.
-  Knowledgeable, intimate documentary feel — matches Lorescape's "voice
-  tour guide" brand. Three standing variants (the user picks; each is a
-  separate paid generation):
-  - **Guide-led** (default) — `actor_2.png` + place photo as Ingredients;
-    the guide steps into frame and presents the place. Front face visible.
-  - **From-behind / faceless** — `actor_5.png` (back view) + place photo;
-    a lone figure gazes out at the place. Still a person, no face.
-  - **Place-only / no-guide** ("無導覽員版本") — **drop the actor
-    Ingredient entirely**, keep ONLY the place photo, and rewrite the
-    prompt as a pure camera move with **no person** (drone-style glide /
-    push-in / shoreline drift) ending with an explicit `No people, no
-    on-screen text.` Quiet, immersive, POV-traveler feel.
-- **Flow settings** — Omni Flash · 視頻 · 素材 (Ingredients) · **9:16** · 10s · 1x.
-  IG Reels are vertical, so always generate **9:16** (Flow defaults to
-  16:9 — switch it in the settings panel before sending).
-- **Audio** — ambient diegetic only (footsteps, wind); a single warm
-  cello note works well. No narration, no on-screen text. This is the
-  **clean master** by design — the IG Reels narration and captions are
-  layered on afterwards in Step 10, never baked into the Flow generation.
-- **Prompt** — Ingredients mode means the visuals come from the
-  reference images, so the prompt is **camera-first + action**, lightly
-  referencing "the woman" and "the brick church / the place" (~60–90
-  words). Also save the prompt text to
-  `marketing/outputs/daily_image/{date}/video_prompt.md`.
-
-**⛔ Paid checkpoint** — Flow generation spends the user's Flow credits
-(Omni Flash 9:16 10s ≈ 15 credits ×1). Stage everything, then get an
-explicit "go" before clicking send. Never log in for the user — the
-Google OAuth login is theirs.
-
-**Flow automation notes (battle-tested 2026-06):**
-
-- **Upload** — `file_upload`'s host-path mode is unavailable. Resize the
-  actor + place images small (`sips -s format jpeg -Z 640 in.png --out
-  out.jpg`), serve them from a localhost CORS server, and have the page
-  `fetch('http://127.0.0.1:PORT/...')` them into the file input
-  (`input.files` via `DataTransfer` + dispatch `change`). Then add each
-  via the prompt box `+` → 素材 picker → 「添加到提示」 (one at a time;
-  the picker is single-select).
-- **Prompt box is a Slate contentEditable** — inject via a `beforeinput`
-  event with `inputType:'insertFromPaste'` + a `DataTransfer`;
-  `execCommand('insertText')` leaves the send button `aria-disabled`.
-- **Verify before/after send** — confirm the send button
-  `aria-disabled="false"` before clicking; the first send is sometimes a
-  no-op, so confirm a new generating tile appears in the gallery before
-  re-sending (a blind re-send double-charges credits).
-- **Dropping an Ingredient for the place-only variant** — each thumbnail
-  already in the prompt box carries its own remove button (find the
-  `img`'s nearest `button` ancestor, labelled `cancel`, and `.click()`
-  it). The picker re-filters so an already-added asset disappears from the
-  list; a removed one reappears.
-- **Re-editing the prompt after a JS delete breaks Slate (2026-06)** —
-  once you `execCommand('delete')` / clear the box via JS, the Slate
-  selection model goes stale and **every** `beforeinput` insert
-  (`insertText` *and* `insertFromPaste`) silently no-ops — `textContent`
-  stays length 0 even though `focusedOk` reads true. Recover with a **real
-  `computer.left_click` into the box** (a trusted pointer event rebuilds
-  Slate's selection), confirm `document.activeElement` is the
-  `contenteditable`, then `computer.type` the new prompt. Map the click
-  coord by the screenshot↔CSS scale: `screenshot_xy = css_xy ×
-  (screenshot_innerW / window.innerWidth)` (≈ 0.80 at 1542-wide
-  screenshots / 1920 CSS). The fresh-editor first injection still works
-  with the §0 `beforeinput` sequence; this gotcha is **only** on re-edits
-  after a delete.
-
-Then present the Flow result in chat. Offer preview / download (download
-needs explicit permission) / regenerate a variant — then continue to
-Step 10 to produce the IG Reels cut.
-
-## IG Reels post-production (subtitles + voiceover)
-
-The Flow reel is the clean master. For Instagram — which autoplays muted —
-add a short zh-TW voiceover plus full burned-in captions so a viewer knows
-the place at a glance. This is a **local post-production** step driven by
-`scripts/daily_video_post.py` (Gemini TTS + `ffmpeg`); it never
-re-runs Flow.
-
-**1. Get the master onto disk (user action).** Downloading is the user's
-job — the ai-media-generator skill never auto-downloads. Ask the user to
-download the finished reel from the Flow gallery. Once it lands in
-`~/Downloads`, point them at the helper that renames + files it for you:
-
-```bash
-scripts/import_source_video.sh            # date = today
-scripts/import_source_video.sh {date}     # specific date
-```
-
-It moves the mp4 from `~/Downloads` to
-`marketing/outputs/daily_video/{date}/source.mp4` (renaming it), prompting which to
-pick when several mp4s are present. They can also drop it there manually,
-or put it anywhere and pass the path with `--input`.
-
-**2. Write the narration (Claude, grounded in the published story).** Write
-a **short zh-TW intro** that fits inside the 10s clip — 1–2 sentences, ~8–10
-seconds spoken, conversational and for the ear (not a transcript of the
-card). Put **one caption line per row** in:
-
-```
-marketing/outputs/daily_video/{date}/narration.txt
-```
-
-**The first line is the hook** — it renders as a large, upper-centre title
-in the opening seconds (not a bottom caption) and doubles as the IG
-caption's first line. Make it a curiosity gap: a question or a striking
-reversal that withholds the answer (e.g. 「這座教堂，為什麼被一道牆一分為
-二？」), and let the second line pay it off. A flat statement wastes the
-hook slot.
-
-Show it to the user for a quick confirm / tweak before rendering. Each row
-becomes one on-screen caption shown only while that line is spoken.
-
-**3. Render the IG cut.**
-
-```bash
-# Gemini TTS (default; natural voice, default voice Despina):
-cd scripts && uv run python -m daily_video_post --date {date}
-# Offline fallback (macOS say, voice Meijia) — no daily quota:
-cd scripts && uv run python -m daily_video_post --date {date} --engine say
-```
-
-Standing choices baked into the defaults: zh-TW; the output is scaled to
-**1080×1920** (IG serves ≥1080p through a better encode — pass
-`--target-height 0` to keep the source size); burned-in captions are white
-text + black outline, with the **first line as a large upper-centre hook**
-and the rest kept in the lower **safe zone above IG's UI band** (bottom
-~20% / right ~13%); and the master's ambient audio is kept but ducked to
-~28% under the voiceover; and a short fade from/to black at the clip edges
-(≈0.3s, `--no-fade` to disable) so a looping reel has a clean boundary. A
-slow Ken Burns zoom is available via `--ken-burns` but **off by default** —
-the Flow master usually already has camera motion, so only reach for it on
-static footage. Two TTS engines:
-
-- **`--engine gemini`** (default) — Gemini TTS via the publisher's
-  `GEMINI_API_KEY` / GenaiSettings (`publisher/.env`); default voice
-  `Despina` (smooth female — user-picked 2026-07-03 after auditioning in
-  AI Studio). Other options: `Kore`, `Aoede`, `Callirrhoe`, `Leda`,
-  `Vindemiatrix` (set with `--voice`). Pacing is steered by `--style`
-  (default asks for a warm, slightly-faster documentary tone). ⚠️ **Free
-  tier = 10 TTS requests/day per key** and each line is one request — and
-  **flaky empty responses (`content=None`) still burn quota**. The script
-  handles both automatically: empty responses are retried (up to 4
-  attempts), and on `429 RESOURCE_EXHAUSTED` it switches to the
-  **`GEMINI_API_KEY_2`** fallback key in `publisher/.env` for the rest of
-  the run. If both keys are exhausted: wait for the daily reset
-  (midnight Pacific = 15:00 台北), switch to the Vertex backend
-  (~$0.004/reel — needs `GOOGLE_CLOUD_PROJECT` + ADC or a service
-  account with `aiplatform` permission; the metrics SA does NOT have
-  it), or use `say`. Duration is non-deterministic (~±1s run to run).
-- **`--engine say`** (offline fallback) — macOS `say` voice `Meijia`
-  (美佳); no quota, tighter length control, more robotic. `--rate` sets
-  speaking rate (say only).
-- **ElevenLabs was removed (2026-07-03)** — its English-native voices
-  read zh-TW with a Western accent; don't re-add it.
-
-Other overridable flags: `--bg-volume`, `--font`, `--input`,
-`--text`/`--line`, `--target-height` (0 keeps the source size),
-`--ken-burns`, `--no-fade`.
-
-**Watermark removal + brand lockup (`--delogo` + `--badge`).** Flow/Veo
-clips carry a visible Gemini diamond watermark. Erase it with
-`--delogo x,y,w,h` (an ffmpeg delogo region) and cover the spot with the
-Lorescape brand lockup via `--badge docs/ig/lorescape-lockup.png
---badge-x X --badge-y Y` (the lockup = logo + "Lorescape", on transparent
-bg). The badge defaults to the bottom-right corner if `--badge-x/y` are
-omitted.
-
-⚠️ **Google moves the watermark per video**, so the coordinates are NOT
-fixed — measure them each run before setting `--delogo`/`--badge-*`:
-extract ~20 frames and average them (`fps=2` → mean), which blurs the
-moving background and leaves the static watermark crisp; read its bounding
-box off the averaged frame. (An opaque badge can cover the mark without
-`--delogo`; the current transparent lockup needs `--delogo` underneath.)
-
-Example (this is a per-video measurement, not a reusable constant):
-
-```bash
-cd scripts && uv run python -m daily_video_post --date {date} \
-    --engine gemini \
-    --delogo 852,1694,88,84 \
-    --badge docs/ig/lorescape-lockup.png --badge-x 772 --badge-y 1669
-```
-
-The script speaks each line separately to measure its duration (so captions
-stay in sync), keeps the original ambient bed low under the narration, and
-if the voiceover runs past the clip it holds the last frame so nothing is
-cut. Output:
-
-```
-marketing/outputs/daily_video/{date}/final.mp4   ← the IG Reels deliverable
-marketing/outputs/daily_video/{date}/voice.wav   ← kept for review
-```
-
-**Implementation note:** captions are rendered to transparent PNGs with
-Pillow and composited via ffmpeg's `overlay` filter — the Homebrew ffmpeg
-here is built **without** libass/freetype, so the `subtitles`/`drawtext`
-filters are unavailable. Don't switch to those without first confirming the
-build supports them (`ffmpeg -filters | grep subtitles`).
-
-Then present `final.mp4` in chat — this is the IG Reels deliverable. After
-the user confirms it, run Step 11 (`scripts/upload_reel_to_vps.sh {date}`)
-to upload it and stage it for its own Discord review; the publish bot
-posts a buttoned review message there, and publishing happens once you
-press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
-
 ## Quick Reference
 
 | Fact | Detail |
@@ -632,9 +400,7 @@ press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
 | Cover licensing | Set `image_attribution` per [5d](#5d--cover-licensing-by-and-sa-set-once-in-image_attribution): Unsplash/CC0 = courtesy credit; **CC BY-SA lead = BY + SA line** (release cover under same version, note modified, scope SA to cover only, don't hype "AI"). One field feeds both carousel + reel captions |
 | Unsplash key | `UNSPLASH_ACCESS_KEY` in `backend/.env` (free demo, 50 req/hr) |
 | Unsplash output | `marketing/outputs/daily_image/{date}/unsplash_results.json` + jpgs (repo root) |
-| Flow reel | ONLY after publish; ai-media-generator + Omni Flash; guide (`docs/ig/reels/actor/`) + place photo as Ingredients; 9:16 (vertical for Reels) · 10s; paid (~15 cr), confirm before send |
-| Reel prompt output | `marketing/outputs/daily_image/{date}/video_prompt.md` (repo root, next to the photos) |
-| IG Reels post-prod | After Flow + user downloads master to `marketing/outputs/daily_video/{date}/source.mp4` (use `scripts/import_source_video.sh [date]` to move it from `~/Downloads` and rename); `uv run python -m daily_video_post --date X` adds zh-TW voiceover + burned-in captions from `narration.txt` → `final.mp4`. Gemini TTS (voice Despina) is the default; free tier = 10 TTS req/day; `say`/Meijia is the offline fallback (ElevenLabs removed — Western accent on zh) |
+| Reel | ONLY after publish; Remotion Cinematic（place photos + aspect-switching + narration text）via the lorescape-daily-reel skill → `marketing/outputs/daily_video/{date}/cinematic.mp4`；voiceover 可選（Step 10） |
 | Reel review + publish | `scripts/upload_reel_to_vps.sh {date}` rsyncs `final.mp4` + `narration.txt` to the VPS, then `send_reel_for_review` stages a pending `social_posts` row; the publish bot posts its own buttoned review (✅核准/🕘排程/🚀立即發布/❌拒絕), independent of the carousel's. Publishes on 🚀, or once an approved row's scheduled time arrives; a due-but-unapproved row just gets one nudge, no publish. State in `social_posts`; manual fallback = publish-reel skill |
 | Carousel 風格 | **固定 wander**（Step 8b）：照片用本次 daily_image、Claude 寫 slides.json 審稿後渲染、`send_carousel_for_review` 上傳 + 建 pending row（發布 bot 之後貼按鈕審核）；按鈕操作在 bot 貼的 wander 圖組訊息上，預設卡片訊息忽略 |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
@@ -647,11 +413,10 @@ press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
 
 - **GOOGLE_API_KEY shadowing:** when calling backend Python modules
   directly, pop it first: `os.environ.pop('GOOGLE_API_KEY', None)`.
-- **Reel comes AFTER publish, never before.** Don't start the Google
-  Flow generation during content review — it's a post-publish
-  deliverable. Wait until the user has decided to publish (Step 8), then
-  build it from this run's place photos + the `docs/ig/reels/actor/`
-  guide.
+- **Reel comes AFTER publish, never before.** Don't start rendering the
+  reel during content review — it's a post-publish deliverable. Wait
+  until the user has decided to publish (Step 8), then build it from
+  this run's place photos via lorescape-daily-reel.
 - **Run Unsplash every time, even when Wikipedia has a lead image.** The
   place photos are needed for the video prompt and the genuine-place
   check — not only as a cover fallback.

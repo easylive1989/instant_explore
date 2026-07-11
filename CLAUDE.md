@@ -26,13 +26,9 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | 路徑 | 內容 |
 |---|---|
 | `adr/` | 技術決策紀錄（ADR，編號 0001…） |
-| `app-review/` | App Store 審核往來（如 AI 揭露回覆） |
-| `brand/` | 品牌素材：logo、App icon |
 | `design/` | Claude Design 匯出的 UI mockup handoff bundle（官網、design system） |
-| `ig/` | IG 品牌素材（logo lockup、啟動貼文文案） |
-| `init/` | 各服務的一次性建置指南（Firebase、訂閱、IG 發布、metrics…） |
+| `init/` | 各服務的一次性建置指南（Firebase、訂閱、IG 發布、ig-cards bucket、metrics…） |
 | `landing_page_review/` | 外部落地頁 review 報告 |
-| `operations/` | 一次性維運操作紀錄（backfill、bucket 設定…） |
 | `screenshots/` | 商店行銷截圖產出與編輯器（app-store-screenshots skill） |
 | `superpowers/` | 開發用 specs 與 implementation plans（依日期命名） |
 
@@ -41,6 +37,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | 路徑 | 內容 |
 |---|---|
 | `audits/` | 行銷稽核報告（CRO、SEO…） |
+| `brand/` | 品牌素材：logo、App icon、IG lockup（每日影片浮水印用） |
 | `content-calendar/` | Reels 景點排程 calendar |
 | `outputs/` | 每日產出，依日期分資料夾：`daily_image/`（照片池）、`daily_carousel/`（IG 圖組）、`daily_video/`（reel 成品） |
 | `sound/` | Reel 用 BGM 音檔 |
