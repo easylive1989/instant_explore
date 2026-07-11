@@ -1,0 +1,17 @@
+services:
+  publisher:
+    build: .
+    image: lorescape-publisher:latest
+    container_name: lorescape-publisher
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Container path of the volume below; the reel flow reads
+      # <DAILY_VIDEO_DIR>/<date>/final.mp4 + narration.txt, rsynced from the
+      # operator's machine by scripts/upload_reel_to_vps.sh.
+      DAILY_VIDEO_DIR: /media/daily_video
+    volumes:
+      - /opt/lorescape-media/daily_video:/media/daily_video:ro
+      # Vertex AI service-account key（僅 GEMINI_BACKEND=vertex 時需要；
+      # .env 的 GOOGLE_APPLICATION_CREDENTIALS 指向 CONTAINER 路徑）。
+      - ./service-account.json:/app/service-account.json:ro

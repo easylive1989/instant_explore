@@ -23,21 +23,3 @@ services:
       timeout: 5s
       retries: 3
 
-  # Social publisher: Discord Gateway bot that handles the review reactions
-  # (carousel + reel) and on-demand publish/republish, decoupled from the
-  # API server. Reuses the api image (built above by `--build`).
-  publisher:
-    image: lorescape-backend:latest
-    container_name: lorescape-publisher
-    restart: unless-stopped
-    command: ["python", "-m", "lorescape_backend.social.publisher_bot"]
-    env_file: .env
-    environment:
-      # Container path of the volume below; the reel job reads
-      # <DAILY_VIDEO_DIR>/<date>/final.mp4 + narration.txt, rsynced from the
-      # operator's machine by scripts/upload_reel_to_vps.sh.
-      DAILY_VIDEO_DIR: /media/daily_video
-    volumes:
-      - /opt/lorescape-media/daily_video:/media/daily_video:ro
-    depends_on:
-      - api
