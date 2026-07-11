@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from lorescape_backend.config import Config
+from lorescape_publisher.config import Config
 
 
 @pytest.fixture
@@ -21,6 +21,4 @@ def fake_config() -> Config:
         meta_page_access_token="meta_page_token",
         brand_handle_ig="@love.lorescape",
         cta_text="Explore more places with Lorescape.",
-        revenuecat_webhook_auth_token="test_webhook_token",
-        revenuecat_api_key="test_rc_api_key",
     )

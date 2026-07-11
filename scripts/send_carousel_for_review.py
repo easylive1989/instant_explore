@@ -1,7 +1,7 @@
 """Upload a wander-style carousel's slides and stage it for review.
 
 Reads marketing/outputs/daily_carousel/<date>/slide_*.jpg + caption.txt
-(rendered by `python -m lorescape_backend.social.wander.renderer`), uploads
+(rendered by `python -m lorescape_publisher.wander.renderer`), uploads
 the slides to the public `ig-cards` bucket (wander/<date>/slide_NN.jpg),
 and upserts a clean 'pending' social_posts row carrying the slide URLs and
 the caption (no Discord message id yet). The Discord publisher bot polls for
@@ -24,8 +24,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from supabase import create_client
 
-from lorescape_backend.config import Config
-from lorescape_backend.social import card_storage, post_log
+from lorescape_publisher.config import Config
+from lorescape_publisher import card_storage, post_log
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_CAROUSEL_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_carousel"

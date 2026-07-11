@@ -11,12 +11,13 @@ dependencies = [
     "pillow>=10,<12",
     "certifi>=2024",
     # publish_reel + manual_daily_story (and daily_video_post's gemini engine)
-    # import the backend package and reuse its Config / social / daily_story code.
-    "lorescape-backend",
+    # import the publisher package and reuse its Config / daily_story /
+    # publishing code.
+    "lorescape-publisher",
 ]
 
 [tool.uv.sources]
-lorescape-backend = { path = "../backend", editable = true }
+lorescape-publisher = { path = "../publisher", editable = true }
 
 [dependency-groups]
 dev = [

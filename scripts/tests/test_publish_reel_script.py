@@ -1,7 +1,7 @@
 """Tests for the manual IG Reels publish script.
 
 Cover rendering and hook parsing moved to the shared
-`lorescape_backend.social.reel_cover` module (tested in backend/tests);
+`lorescape_publisher.reel_cover` module (tested in publisher/tests);
 here we cover the script-local pieces: video resolution, caption source
 priority, and the CLI wiring.
 """

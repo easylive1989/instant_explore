@@ -22,8 +22,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from supabase import create_client
 
-from lorescape_backend.config import Config
-from lorescape_backend.social import caption, instagram, reel_cover
+from lorescape_publisher.config import Config
+from lorescape_publisher import caption, instagram, reel_cover
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_VIDEO_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_video"

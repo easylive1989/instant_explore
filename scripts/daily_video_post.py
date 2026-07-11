@@ -522,8 +522,8 @@ def _build_gemini_client():
 
     load_dotenv(REPO_ROOT / "backend" / ".env")
     os.environ.pop("GOOGLE_API_KEY", None)
-    from lorescape_backend.config import Config
-    from lorescape_backend.shared.genai import build_client
+    from lorescape_publisher.config import Config
+    from lorescape_publisher.genai import build_client
 
     return build_client(Config.from_env().genai_settings)
 

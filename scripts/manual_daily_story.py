@@ -42,8 +42,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from supabase import create_client
 
-from lorescape_backend.config import Config
-from lorescape_backend.daily_story import (
+from lorescape_publisher.config import Config
+from lorescape_publisher.daily_story import (
     gemini_client,
     job,
     place_picker,
