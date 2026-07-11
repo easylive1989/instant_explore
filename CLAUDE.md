@@ -50,7 +50,10 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 - `lib/` 分四層：`app/`（config、router、theme、shell）、`core/`（基礎設施）、
   `shared/`（共用 widgets）、`features/`（功能模組，內部依
   data / domain / presentation 分層）。
-- 依賴規則：feature 之間不互相依賴；`app/`、`core/`、`shared/` 不依賴 `features/`。
+- 依賴規則：feature 之間只能跨引他 feature 的 domain 與 `providers.dart`
+  （視為該 feature 的公開介面）；data / presentation 不得跨 feature 引用。
+  `app/` 僅得以 composition root 身分（router、shell）引用 features；
+  `core/`、`shared/` 不依賴 `features/`。
 - 技術選型：Riverpod（`Notifier` / `AsyncNotifier`）、go_router、
   supabase_flutter、purchases_flutter（RevenueCat）、Firebase Analytics / AI。
 - 每次改動後執行 `fvm flutter analyze --fatal-infos`，所有問題修完才算完成。
