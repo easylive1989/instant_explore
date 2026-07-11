@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/// Providers for the Trip PDF export feature.
-///
-/// Concrete service providers are added in later tasks; this file exists
-/// so consumers have a stable import path from day one.
-final exportFeaturePlaceholderProvider = Provider<void>((ref) {});
+// Trip PDF export feature 的公開介面。
+//
+// 依 CLAUDE.md 依賴規則，其他 feature 一律經由本檔引用 export 功能。
+export 'domain/models/pdf_export_result.dart';
+export 'domain/services/trip_pdf_export_service.dart';
+export 'presentation/default_pdf_export_pipeline.dart';
+export 'presentation/pdf_builder/trip_pdf_document_builder.dart';

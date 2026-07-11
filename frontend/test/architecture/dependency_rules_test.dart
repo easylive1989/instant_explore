@@ -26,8 +26,6 @@ const Set<String> _pendingCrossFeature = {
   // presentation 層跨引
   'lib/features/journey/presentation/screens/journey_screen.dart -> features/trip/presentation/widgets/trip_grid.dart',
   'lib/features/journey/presentation/widgets/timeline_entry.dart -> features/trip/presentation/widgets/move_to_trip_sheet.dart',
-  'lib/features/trip/presentation/screens/trip_detail_screen.dart -> features/export/presentation/default_pdf_export_pipeline.dart',
-  'lib/features/trip/presentation/screens/trip_detail_screen.dart -> features/export/presentation/pdf_builder/trip_pdf_document_builder.dart',
   'lib/features/trip/presentation/screens/trip_detail_screen.dart -> features/journey/presentation/widgets/timeline_entry.dart',
 };
 
