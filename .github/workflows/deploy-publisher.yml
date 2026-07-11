@@ -1,0 +1,113 @@
+name: Deploy Publisher
+
+# 只部署 social publisher（Discord 審核 bot + IG 發布）+ 推 Supabase migration。
+# 與 deploy-backend.yml 互相獨立；db push 兩邊都跑（冪等）。
+#
+# 第一次部署需手動到 VPS：建立 /opt/lorescape/publisher/.env（自
+# backend/.env 拆出 Discord / IG / Gemini / Supabase 值；見
+# publisher/.env.example），若用 Vertex 另外放 service-account.json，
+# 然後跑一次 `docker compose up -d --build`。
+on:
+  workflow_dispatch:
+
+jobs:
+  push-supabase-db:
+    name: Push Supabase DB Schema
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project to setup IPv4
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+
+      - name: Push database migrations
+        run: supabase db push
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+
+  deploy-publisher:
+    name: Deploy Publisher to VPS
+    runs-on: ubuntu-latest
+    needs: [push-supabase-db]
+    steps:
+      - name: Deploy + gateway check via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/lorescape
+            git fetch --prune origin master
+            git reset --hard origin/master
+            cd publisher
+            docker compose up -d --build
+
+            echo "=== docker compose ps ==="
+            docker compose ps
+
+            # publisher 容器必須存在且為 running（bad token 會 SystemExit → restart-loop）
+            cid=$(docker compose ps -q publisher)
+            if [ -z "$cid" ]; then
+              echo "❌ no publisher container found"
+              docker compose ps
+              exit 1
+            fi
+            state=$(docker inspect -f '{{.State.Status}}' "$cid")
+            echo "publisher state: $state"
+            if [ "$state" != "running" ]; then
+              echo "❌ publisher not running (state=$state)"
+              docker compose logs --tail=60 publisher
+              exit 1
+            fi
+
+            # bot 必須連上 Discord Gateway（最多等 ~50s）
+            echo "=== waiting for bot to connect to Discord Gateway ==="
+            connected=0
+            for i in $(seq 1 10); do
+              if docker compose logs --tail=200 publisher 2>&1 \
+                   | grep -qiE "connected to gateway|has connected"; then
+                connected=1
+                break
+              fi
+              sleep 5
+            done
+            if [ "$connected" = "1" ]; then
+              echo "✅ bot connected to Discord Gateway"
+            else
+              echo "❌ bot did not connect to Gateway within ~50s"
+              docker compose logs --tail=80 publisher
+              exit 1
+            fi
+
+            echo "=== publisher recent logs ==="
+            docker compose logs --tail=30 publisher
+
+  deploy-status:
+    name: Deploy Status Report
+    runs-on: ubuntu-latest
+    needs: [push-supabase-db, deploy-publisher]
+    if: always()
+
+    steps:
+      - name: Report Status
+        run: |
+          echo "## 🚀 Publisher 部署狀態報告"
+          echo "- Supabase DB 推送: ${{ needs.push-supabase-db.result }}"
+          echo "- Publisher 部署: ${{ needs.deploy-publisher.result }}"
