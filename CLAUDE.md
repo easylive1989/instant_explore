@@ -14,6 +14,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `supabase/` | Supabase schema 與 migrations |
 | `marketing/` | 行銷產出與工具（子資料夾見下表） |
 | `scripts/` | 每日故事 / reel / metrics 自動化腳本（Python，uv 管理） |
+| `dashboard/` | 產品面板更新工具（Python，uv 管理）：本地收集 backlog / 測試 / 部署 / 產品數據後整頁重寫 Notion 面板頁，不部署 |
 | `docs/` | 專案文件（子資料夾見下表） |
 | `demo/` | Remotion 專案：30 秒 App 介紹影片（UI 皆為 code mockup） |
 | `BACKLOG.md` | 專案工作項：features（F1…）與 tasks（T1…）；epic 見檔內「Epic」段 |
