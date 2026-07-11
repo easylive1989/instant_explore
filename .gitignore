@@ -64,3 +64,7 @@ marketing/outputs/
 service-account.json
 # Superpowers brainstorming visual companion (local only)
 .superpowers/
+
+# reel-remotion 每日產製的工作素材（照片、依故事文字 subset 的字型）
+marketing/tools/reel-remotion/public/photos/
+marketing/tools/reel-remotion/public/fonts/
