@@ -88,6 +88,14 @@ DATA = {
         ],
         "all_published": True,
     },
+    "reels": {
+        "entries": [
+            {"date": "2026-07-11", "place": "富士山",
+             "db_title": "Fujisan, sacred place", "category": "日本"},
+            {"date": "2026-07-12", "place": "佩特拉", "db_title": "Petra", "category": "世界名勝"},
+        ],
+        "range": "2026/07/06 – 08/02",
+    },
     "errors": {},
 }
 
@@ -138,21 +146,32 @@ class TestBuildHtml:
         ]:
             assert text in html, text
 
-    def test_三個_tab_與對應面板(self):
+    def test_四個_tab_與對應面板(self):
         html = build_html(DATA)
         for key, label in [
-            ("progress", "功能進度"), ("dev", "開發現況"), ("analytics", "數據分析"),
+            ("progress", "功能進度"), ("dev", "開發現況"),
+            ("analytics", "數據分析"), ("story", "每日故事"),
         ]:
             assert f'data-tab="{key}"' in html
             assert label in html
             assert f'id="tab-{key}"' in html
-        # 分組正確：backlog 在 progress、tests 在 dev、metrics 在 analytics
+        # 分組正確：backlog 在 progress、tests 在 dev、metrics 在 analytics、
+        # 每日故事與 reels 在 story
         progress = html.split('id="tab-progress"')[1].split('id="tab-dev"')[0]
         dev = html.split('id="tab-dev"')[1].split('id="tab-analytics"')[0]
-        analytics = html.split('id="tab-analytics"')[1]
+        analytics = html.split('id="tab-analytics"')[1].split('id="tab-story"')[0]
+        story = html.split('id="tab-story"')[1]
         assert "F9" in progress and "552/552" not in progress
         assert "552/552" in dev and "impressions" not in dev
-        assert "impressions" in analytics and "carousel" in analytics
+        assert "impressions" in analytics and "carousel" not in analytics
+        assert "carousel" in story and "富士山" in story
+
+    def test_reels_今日景點與未來排程(self):
+        html = build_html(DATA)  # generated_at 2026-07-11
+        story = html.split('id="tab-story"')[1]
+        assert "今日景點：富士山" in story
+        assert "佩特拉" in story  # 未來 7 天
+        assert "完整排程" in story
 
     def test_看板_已完成與進行中分欄(self):
         html = build_html(DATA)

@@ -15,7 +15,7 @@ from .config import DASHBOARD_DIR, OUT_DATA_DIR, load_env
 def _registry() -> dict[str, Callable[[], dict]]:
     """區塊名 → collector。lazy import 讓單一 collector 壞掉不影響其他。"""
     from .collectors import backlog, daily_story, deploys, e2e_cases, metrics
-    from .collectors import tests_flutter, tests_python
+    from .collectors import reels_calendar, tests_flutter, tests_python
 
     def tests() -> dict:
         flutter = tests_flutter.collect()
@@ -28,6 +28,7 @@ def _registry() -> dict[str, Callable[[], dict]]:
         "deploys": deploys.collect,
         "metrics": metrics.collect,
         "daily_story": daily_story.collect,
+        "reels": reels_calendar.collect,
     }
 
 

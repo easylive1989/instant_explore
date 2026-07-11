@@ -511,6 +511,42 @@ def _daily_story_html(story: dict) -> str:
     return f'<div class="chips">{"".join(chips)}</div>'
 
 
+# ---------- Reels 排程 ----------
+
+
+def _reels_html(reels: dict, today: str) -> str:
+    entries = reels["entries"]
+    today_entry = next((e for e in entries if e["date"] == today), None)
+    upcoming = [e for e in entries if e["date"] > today][:7]
+
+    parts = []
+    if today_entry:
+        parts.append(
+            f'<div class="callout"><b>今日景點：{_E(today_entry["place"])}</b>'
+            f'（{_E(today_entry["category"])}）　'
+            f'<span style="color:var(--muted)">DB 標題：{_E(today_entry["db_title"])}</span></div>'
+        )
+    elif entries:
+        parts.append('<div class="callout warn">排程表沒有今天的景點（可能超出排程範圍）</div>')
+
+    def rows(items: list[dict]) -> str:
+        return "".join(
+            f"<tr><td>{_E(e['date'])}</td><td>{_E(e['place'])}</td>"
+            f"<td>{_E(e['category'])}</td><td>{_E(e['db_title'])}</td></tr>"
+            for e in items
+        )
+
+    header = "<thead><tr><th>日期</th><th>景點</th><th>類型</th><th>DB 標題</th></tr></thead>"
+    if upcoming:
+        parts.append(f"<table>{header}<tbody>{rows(upcoming)}</tbody></table>")
+    parts.append(
+        f'<details class="table-fold"><summary>完整排程（{_E(reels["range"])}，'
+        f"{len(entries)} 檔）</summary>"
+        f"<table>{header}<tbody>{rows(entries)}</tbody></table></details>"
+    )
+    return "".join(parts)
+
+
 # ---------- 組頁 ----------
 
 # tab key → (tab 標籤, [(section key, section 標題)])
@@ -525,7 +561,10 @@ _TABS = [
     ]),
     ("analytics", "📈 數據分析", [
         ("metrics", "📈 產品數據"),
-        ("daily_story", "📅 每日故事"),
+    ]),
+    ("story", "📅 每日故事", [
+        ("daily_story", "📅 今日發布狀態"),
+        ("reels", "🎬 Reels 選點排程"),
     ]),
 ]
 
@@ -559,6 +598,8 @@ def build_html(data: dict) -> str:
     deploys = data.get("deploys")
     metrics = data.get("metrics")
     story = data.get("daily_story")
+    reels = data.get("reels")
+    today = str(data.get("generated_at", ""))[:10]
 
     bodies = {
         "backlog": (
@@ -570,6 +611,7 @@ def build_html(data: dict) -> str:
         "e2e": _e2e_html(e2e) if e2e else None,
         "metrics": "".join(_metric_card(t) for t in metrics["tabs"]) if metrics else None,
         "daily_story": _daily_story_html(story) if story else None,
+        "reels": _reels_html(reels, today) if reels else None,
     }
 
     tab_buttons = "".join(
