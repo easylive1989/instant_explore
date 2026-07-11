@@ -6,6 +6,10 @@ import 'package:context_app/features/trip/domain/repositories/trip_repository.da
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Feature 公開介面：journey 頁面重用的 trip widgets。
+export 'presentation/widgets/move_to_trip_sheet.dart';
+export 'presentation/widgets/trip_grid.dart';
+
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   return ref.watch(syncingTripRepositoryProvider);
 });

@@ -4,6 +4,9 @@ import 'package:context_app/features/journey/domain/repositories/journey_reposit
 import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Feature 公開介面：trip 詳情頁重用的時間軸元件。
+export 'presentation/widgets/timeline_entry.dart';
+
 /// Journey 頁的檢視模式：完整時間軸 或 依旅程分群。
 enum JourneyViewMode { timeline, byTrip }
 

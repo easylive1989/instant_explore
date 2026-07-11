@@ -23,10 +23,6 @@ const Set<String> _pendingCrossFeature = {
   'lib/features/sync/providers.dart -> features/journey/data/hive_journey_repository.dart',
   'lib/features/sync/providers.dart -> features/saved_locations/data/hive_saved_locations_repository.dart',
   'lib/features/sync/providers.dart -> features/trip/data/hive_trip_repository.dart',
-  // presentation 層跨引
-  'lib/features/journey/presentation/screens/journey_screen.dart -> features/trip/presentation/widgets/trip_grid.dart',
-  'lib/features/journey/presentation/widgets/timeline_entry.dart -> features/trip/presentation/widgets/move_to_trip_sheet.dart',
-  'lib/features/trip/presentation/screens/trip_detail_screen.dart -> features/journey/presentation/widgets/timeline_entry.dart',
 };
 
 /// app/ 中已知違規檔案（整檔豁免）。修復後清空。

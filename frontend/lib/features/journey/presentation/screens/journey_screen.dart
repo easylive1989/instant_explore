@@ -1,7 +1,5 @@
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
-import 'package:context_app/features/trip/presentation/widgets/trip_grid.dart';
 import 'package:context_app/features/trip/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

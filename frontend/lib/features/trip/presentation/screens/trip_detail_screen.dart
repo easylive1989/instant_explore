@@ -2,10 +2,8 @@ import 'package:context_app/features/export/domain/models/pdf_export_result.dart
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
-import 'package:context_app/features/trip/presentation/widgets/move_to_trip_sheet.dart';
 import 'package:context_app/features/trip/providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

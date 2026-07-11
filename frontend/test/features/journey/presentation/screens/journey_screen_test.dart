@@ -1,7 +1,6 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:context_app/features/journey/presentation/widgets/timeline_entry.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
