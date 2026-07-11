@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// 清單，還債任務逐條移除；新增違規會讓本測試立即失敗。
 
 final RegExp _featureImportRe = RegExp(
-  "import 'package:context_app/(features/[^']+)'",
+  "(?:import|export) 'package:context_app/(features/[^']+)'",
 );
 
 /// 已知跨 feature 違規：「來源檔 -> import 目標」。已清零；不得新增。
@@ -46,6 +46,11 @@ List<String> _featureImports(File file) => _featureImportRe
     .toList();
 
 void main() {
+  test('掃描根目錄存在（防 cwd 錯誤時 vacuous pass）', () {
+    expect(Directory('lib/features').existsSync(), isTrue,
+        reason: '測試須從 frontend/ package root 執行');
+  });
+
   test('feature 之間只能跨引 domain 與 providers.dart', () {
     final violations = <String>[];
     final stillPending = <String>{};

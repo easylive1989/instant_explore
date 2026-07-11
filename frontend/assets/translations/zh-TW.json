@@ -247,17 +247,6 @@
     "food_market": "在地美食",
     "food_market_description": "夜市、美食街、特色餐廳"
   },
-  "camera": {
-    "title": "拍照辨識",
-    "instruction": "拍攝景點或美食",
-    "instruction_subtitle": "AI 將自動辨識並生成專屬導覽",
-    "take_photo": "拍照",
-    "from_gallery": "從相簿選擇",
-    "analyzing": "正在分析中...",
-    "analysis_error": "分析失敗，請重試",
-    "retry": "重試",
-    "start_narration": "開始導覽"
-  },
   "subscription": {
     "unlimited_access": "無限使用中",
     "expires_at": "有效至 {date}",

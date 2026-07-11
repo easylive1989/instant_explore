@@ -247,17 +247,6 @@
     "food_market": "Local Cuisine",
     "food_market_description": "Night markets, food streets, specialty restaurants"
   },
-  "camera": {
-    "title": "Photo Recognition",
-    "instruction": "Capture a landmark or dish",
-    "instruction_subtitle": "AI will identify and generate a personalized guide",
-    "take_photo": "Take Photo",
-    "from_gallery": "Choose from Gallery",
-    "analyzing": "Analyzing...",
-    "analysis_error": "Analysis failed, please try again",
-    "retry": "Retry",
-    "start_narration": "Start Guide"
-  },
   "subscription": {
     "unlimited_access": "Unlimited Access",
     "expires_at": "Valid until {date}",
