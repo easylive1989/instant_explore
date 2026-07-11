@@ -4,7 +4,11 @@ from datetime import date
 import pytest
 
 from lorescape_dashboard.collectors import schedule
-from lorescape_dashboard.collectors.schedule import compute_today, parse_schedule
+from lorescape_dashboard.collectors.schedule import (
+    compute_for_date,
+    compute_today,
+    parse_schedule,
+)
 
 SAMPLE = """\
 # Lorescape Scheduler 行程表
@@ -69,6 +73,28 @@ class TestComputeToday:
         sections = parse_schedule(SAMPLE)
         items = compute_today(sections, date(2026, 8, 1))  # 週六、1 號
         assert [i["cadence"] for i in items] == ["每日", "每日", "每月"]
+
+
+class TestComputeForDate:
+    def test_平日只列每日項(self):
+        sections = parse_schedule(SAMPLE)
+        items = compute_for_date(sections, date(2026, 7, 14))  # 週二、非 1 號
+        assert [i["cadence"] for i in items] == ["每日", "每日"]
+
+    def test_週一加列週表(self):
+        sections = parse_schedule(SAMPLE)
+        items = compute_for_date(sections, date(2026, 7, 13))  # 週一
+        assert [i["cadence"] for i in items] == ["每日", "每日", "每週"]
+
+    def test_一號加列月表(self):
+        sections = parse_schedule(SAMPLE)
+        items = compute_for_date(sections, date(2026, 8, 1))  # 週六、1 號
+        assert [i["cadence"] for i in items] == ["每日", "每日", "每月"]
+
+    def test_週一恰為一號同時加列週表與月表(self):
+        sections = parse_schedule(SAMPLE)
+        items = compute_for_date(sections, date(2026, 6, 1))  # 週一、1 號
+        assert [i["cadence"] for i in items] == ["每日", "每日", "每週", "每月"]
 
 
 class TestCollect:

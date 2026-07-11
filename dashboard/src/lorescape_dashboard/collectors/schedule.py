@@ -39,14 +39,19 @@ def parse_schedule(text: str) -> dict:
     return sections
 
 
-def compute_today(sections: dict, today: date) -> list[dict]:
-    """今日待辦：每日項全列；週一加週表；1 號加月表。"""
+def compute_for_date(sections: dict, d: date) -> list[dict]:
+    """指定日期的待辦：每日項全列；週一加週表；1 號加月表。"""
     items = [{**i, "cadence": "每日"} for i in sections["daily"]]
-    if today.weekday() == 0:
+    if d.weekday() == 0:
         items += [{**i, "cadence": "每週"} for i in sections["weekly"]]
-    if today.day == 1:
+    if d.day == 1:
         items += [{**i, "cadence": "每月"} for i in sections["monthly"]]
     return items
+
+
+def compute_today(sections: dict, today: date) -> list[dict]:
+    """今日待辦（compute_for_date 的薄包裝）。"""
+    return compute_for_date(sections, today)
 
 
 def collect() -> dict:
