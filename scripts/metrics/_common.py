@@ -128,6 +128,11 @@ class MetricsConfig:
     meta_page_access_token: str | None = None
     revenuecat_api_key: str | None = None
     revenuecat_project_id: str | None = None
+    asc_key_id: str | None = None
+    asc_issuer_id: str | None = None
+    asc_key_path: str | None = None
+    asc_vendor_number: str | None = None
+    play_reports_bucket: str | None = None
 
     @classmethod
     def from_env(cls) -> "MetricsConfig":
@@ -140,6 +145,11 @@ class MetricsConfig:
             meta_page_access_token=get("META_PAGE_ACCESS_TOKEN") or None,
             revenuecat_api_key=get("REVENUECAT_V2_API_KEY") or None,
             revenuecat_project_id=get("REVENUECAT_PROJECT_ID") or None,
+            asc_key_id=get("ASC_KEY_ID") or None,
+            asc_issuer_id=get("ASC_ISSUER_ID") or None,
+            asc_key_path=get("ASC_KEY_PATH") or None,
+            asc_vendor_number=get("ASC_VENDOR_NUMBER") or None,
+            play_reports_bucket=get("PLAY_REPORTS_BUCKET") or None,
         )
 
 

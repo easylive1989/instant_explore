@@ -1,6 +1,6 @@
 ---
 name: lorescape-metrics
-description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, RevenueCat subscription/revenue snapshot, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「訂閱 / 營收 / MRR / RevenueCat」「App 下載 / 評分」. API-first (GSC/GA4/IG/RevenueCat); App Store / Play captured via the Chrome browser. Accumulates into in-repo CSVs (data/metrics/*.csv, gitignored), one file per source. Local, read-only, does not touch the server.
+description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, RevenueCat subscription/revenue snapshot, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「訂閱 / 營收 / MRR / RevenueCat」「App 下載 / 評分」. All sources via API (GSC / GA4 / IG / RevenueCat / App Store Connect / Play reports bucket). Accumulates into in-repo CSVs (data/metrics/*.csv, gitignored), one file per source. Local, read-only, does not touch the server.
 ---
 
 # Lorescape 數據抓取報告
@@ -9,7 +9,8 @@ description: Use when the user wants to update Lorescape's accumulating daily me
 （gitignored——含營收而 repo 是 public），每來源一檔、逐日一列、
 跨次累積。CSV 是唯一資料來源，補抓缺口時直接讀回 CSV 判斷。
 （2026-07-11 前累積在 Google Sheet，歷史已匯出後停用。）
-API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play 用瀏覽器抓。
+全部來源都走 API（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat / App Store
+Connect / Play 報表 bucket），不再用瀏覽器抓。
 
 預設抓**昨天**；執行時自動偵測「最後紀錄日 → 昨天」的缺口並逐日補抓，
 檔案首次（或空）時回溯 30 天建立基線。重跑同一天會覆蓋、不重複。
@@ -23,6 +24,8 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play
 | `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（= 個人檔案/bio 瀏覽數）（+ 最新一天 followers/media 快照） |
 | `ig_posts` | `ig_posts.csv` | (media_id, obs_date) | 每則貼文**逐日**追蹤：obs_date、posted_date、reach、likes、comments、saved、shares、total_interactions，Reels 另含 views、avg_watch_time |
 | `revenuecat` | `revenuecat.csv` | date | 訂閱/營收每日快照：mrr、active_subscriptions、active_trials、active_users_28d、new_customers_28d、revenue_28d |
+| `store_ios` | `store_ios.csv` | date | App Store 每日 downloads（ASC 銷售日報，可回補約一年）＋ 最新一天 avg_rating / ratings_count（iTunes lookup，TW storefront）與 reviews_count 快照 |
+| `store_android` | `store_android.csv` | date | Play 每日 installs / active_devices ＋ avg_rating_daily / avg_rating_total（Play Console 報表 bucket，可回補，但匯出約落後 2 天） |
 
 `ig_posts` 是**每則貼文的逐日時間序列**：每次跑會為「發布在近 7 天內的每則
 貼文」各記一列當天觀察（key = `media_id` + `obs_date`），所以每篇貼文最多
@@ -38,6 +41,14 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play
 `revenuecat` 是**快照**來源：RevenueCat 公開 API 只給「當下」的 overview
 指標，沒有逐日歷史，所以每次只會記昨天一列（重跑同日覆蓋），**漏掉的天無法
 回補**。要逐日連續就得每天跑一次。
+
+`store_ios` 的 downloads 是逐日**首次下載數**（更新、重下載不算）。ASC 的
+銷售日報約在**次日下午（台灣時間）**才產生，還沒好的日子會自動留待下次補；
+評分（TW storefront）與評論數跟 `ig` 的 followers 一樣只在最新一天填快照。
+`store_android` 兩個評分欄與 installs 都有逐日歷史、可回補；Play 匯出約落後
+2 天，最近兩天會自然留缺待補（Play 官方沒有「總評分數」可撈，故無此欄）。
+
+2026-07-11 前用瀏覽器手抓的 `stores.csv` 保留當歷史檔，不再更新。
 
 不要手動編輯這些 CSV（下次同步會整檔覆寫）；分析請複製出去或用 dashboard
 （`dashboard/` 工具的產品數據 tab 直接讀這些 CSV）。
@@ -59,8 +70,13 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play
   （RevenueCat → Project settings → API keys 建一把 **v2 secret key**，給
   metrics/overview 讀取權限；注意這跟 backend/.env 的 v1 `REVENUECAT_API_KEY`
   是不同的金鑰）與 `REVENUECAT_PROJECT_ID`（Project settings 的 Project ID）。
-- **App Store / Play**：使用者已在 Chrome 登入 App Store Connect 與 Play
-  Console，見 `references/stores-browser.md`。
+- **App Store（`store_ios`）**：`scripts/.env` 設 `ASC_KEY_ID` /
+  `ASC_ISSUER_ID` / `ASC_KEY_PATH`（App Store Connect API 金鑰 .p8，權限
+  「銷售與報告」）/ `ASC_VENDOR_NUMBER`（付款與財務報告頁的廠商編號）。
+- **Play（`store_android`）**：Play Console 已把上面那個 Google service
+  account 加為使用者（權限「查看應用程式資訊並下載大量報表」），
+  `scripts/.env` 設 `PLAY_REPORTS_BUCKET`（下載報表頁的 Cloud Storage URI
+  中 `pubsite_prod_rev_…` 那段）。授權後最久要 24 小時才生效。
 
 ## 步驟
 
@@ -88,11 +104,7 @@ API 為主（GSC / GA4 / IG / IG 逐則貼文 / RevenueCat），App Store / Play
    完成後把 stdout 的每來源結果（`+N row(s) for <區間>` / `up to date` /
    `skipped`）念給使用者，必要時讀出對應 CSV 的近期幾列確認。
 
-4. **App Store / Play（瀏覽器）**：依使用者要求，按
-   `references/stores-browser.md` 用 Chrome 抓下載數與評分，把數字記到
-   `stores.csv`（`uv run python -m metrics.stores`，截圖可留在 scratchpad），需要時附一段文字摘要給使用者。
-
-5. **選點規劃提示**：若本次更新了 `ig` / `ig_posts` 並向使用者做了
+4. **選點規劃提示**：若本次更新了 `ig` / `ig_posts` 並向使用者做了
    IG 成效分析，結尾提示可接著用 **lorescape-reels-planner** 依最新
    數據規劃或檢核每日景點 Reel 的選點 calendar（下期排程、配比調整、
    期末檢核到期時尤其該提）。

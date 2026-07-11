@@ -934,6 +934,7 @@ dependencies = [
     { name = "google-auth" },
     { name = "lorescape-publisher" },
     { name = "pillow" },
+    { name = "pyjwt", extra = ["crypto"] },
     { name = "python-dotenv" },
     { name = "requests" },
 ]
@@ -952,6 +953,7 @@ requires-dist = [
     { name = "google-auth", specifier = ">=2,<3" },
     { name = "lorescape-publisher", editable = "../publisher" },
     { name = "pillow", specifier = ">=10,<12" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.9,<3" },
     { name = "python-dotenv", specifier = ">=1,<2" },
     { name = "requests", specifier = ">=2.32,<3" },
 ]

@@ -14,7 +14,10 @@ from ..config import REPO_ROOT
 DATA_DIR = REPO_ROOT / "data" / "metrics"
 
 # 面板顯示的來源（略過 ig_posts——逐貼文時間序列對面板太細）
-_TABS = ["gsc", "ga4", "ig", "revenuecat", "stores", "narration", "retention"]
+_TABS = [
+    "gsc", "ga4", "ig", "revenuecat", "store_ios", "store_android",
+    "narration", "retention",
+]
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 

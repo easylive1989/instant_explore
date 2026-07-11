@@ -425,7 +425,8 @@ _HEADLINES = {
     "ga4": ["web_active_users", "ios_active_users", "android_active_users"],
     "ig": ["reach", "followers_count"],
     "revenuecat": ["mrr", "active_subscriptions", "active_trials"],
-    "stores": ["ios_downloads_30d", "android_installs"],
+    "store_ios": ["downloads", "avg_rating"],
+    "store_android": ["installs", "avg_rating_total"],
     "narration": ["completion_rate"],
     "retention": ["cohort_size", "d1_rate", "d7_rate"],
 }
