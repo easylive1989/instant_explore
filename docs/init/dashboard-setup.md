@@ -7,10 +7,10 @@
 
 | 區塊 | 來源 | 設定位置 |
 |---|---|---|
-| 產品數據 | metrics Google Sheet | `scripts/.env` 的 `METRICS_SHEET_ID` + `GOOGLE_APPLICATION_CREDENTIALS`（見 `docs/init/metrics-setup.md`） |
+| 產品數據 | `data/metrics/*.csv`（lorescape-metrics 累積，gitignored） | 無需設定；資料空時先跑 lorescape-metrics |
 | 每日故事 | Supabase `social_posts` | `publisher/.env` 的 `SUPABASE_URL` + service key |
 | 部署狀態 | GitHub Actions | `gh` CLI 已登入即可 |
-| backlog / 測試 / E2E | repo 本身 | 無需設定 |
+| backlog / 測試 / E2E / Reels 排程 | repo 本身 | 無需設定 |
 
 缺任一憑證時只有對應區塊顯示錯誤卡片，其餘照常產生。
 

@@ -1,25 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from datetime import date, timedelta
 
 from metrics import stores
-
-
-class FakeClient:
-    """Minimal SheetClient stand-in recording reads and writes."""
-
-    def __init__(self, tabs=None):
-        self.sheet_id = "fake"
-        self.tabs: dict[str, list[list[str]]] = tabs or {}
-        self.writes: list[tuple[str, list[list[str]]]] = []
-
-    def read_tab(self, title):
-        return self.tabs.get(title, [])
-
-    def write_tab(self, title, values):
-        self.writes.append((title, values))
-        self.tabs[title] = values
 
 
 def _args(**overrides):
@@ -38,28 +23,33 @@ def _args(**overrides):
     return argparse.Namespace(**base)
 
 
+def _read(path):
+    with path.open(newline="") as f:
+        return list(csv.reader(f))
+
+
 def test_build_row_orders_fields_and_keeps_blanks():
     row = stores.build_row(_args())
     assert row == ["2026-06-29", "1", "5.0", "1", "0", "", "", "", "hi"]
 
 
-def test_upsert_writes_header_then_row_into_stores_tab():
-    client = FakeClient()
-    count = stores.upsert(client, stores.build_row(_args()))
-    title, values = client.writes[-1]
-    assert title == "stores"
+def test_upsert_writes_header_then_row(tmp_path):
+    path = tmp_path / "stores.csv"
+    count = stores.upsert(path, stores.build_row(_args()))
+    values = _read(path)
     assert values[0] == stores.HEADERS
     assert values[1][0] == "2026-06-29"
     assert count == 1
 
 
-def test_upsert_overwrites_same_date_without_duplicating():
-    seed = [stores.HEADERS, ["2026-06-29", "1", "5.0", "1", "0", "", "", "", ""]]
-    client = FakeClient({"stores": seed})
-    count = stores.upsert(
-        client, stores.build_row(_args(ios_downloads="3"))
-    )
-    _, values = client.writes[-1]
+def test_upsert_overwrites_same_date_without_duplicating(tmp_path):
+    path = tmp_path / "stores.csv"
+    with path.open("w", newline="") as f:
+        csv.writer(f).writerows(
+            [stores.HEADERS, ["2026-06-29", "1", "5.0", "1", "0", "", "", "", ""]]
+        )
+    count = stores.upsert(path, stores.build_row(_args(ios_downloads="3")))
+    values = _read(path)
     assert count == 1
     assert values[1][1] == "3"
 

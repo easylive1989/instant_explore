@@ -1,49 +1,30 @@
-"""產品數據：讀 lorescape-metrics 累積的 Google Sheet，各分頁整形成面板統計。
+"""產品數據：讀 lorescape-metrics 累積在 data/metrics/ 的 CSV，整形成面板統計。
 
-SheetClient 的 read-only 部分複製自 scripts/metrics/sheets.py（dashboard 是
-獨立 uv 專案，無法 import scripts/；比照 ADR 0004 的兩份複製慣例，改動需
-人工同步）。
+2026-07-11 起 metrics 不再寫 Google Sheet，改由 scripts/metrics 的 FileStore
+累積到 repo 內的 data/metrics/*.csv（gitignored）。
 """
 from __future__ import annotations
 
-import os
+import csv
 import re
 from datetime import date, timedelta
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+from ..config import REPO_ROOT
 
-from ..config import SETUP_DOC
+DATA_DIR = REPO_ROOT / "data" / "metrics"
 
-_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-# 面板顯示的分頁（略過 ig_posts——逐貼文時間序列對面板太細）
+# 面板顯示的來源（略過 ig_posts——逐貼文時間序列對面板太細）
 _TABS = ["gsc", "ga4", "ig", "revenuecat", "stores", "narration", "retention"]
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
-def _build_service():
-    creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-    if not creds_path or not os.path.exists(creds_path):
-        raise SystemExit(
-            "GOOGLE_APPLICATION_CREDENTIALS 未設定或檔案不存在；"
-            f"見 docs/init/metrics-setup.md 與 {SETUP_DOC}"
-        )
-    creds = service_account.Credentials.from_service_account_file(
-        creds_path, scopes=_SCOPES
-    )
-    return build("sheets", "v4", credentials=creds, cache_discovery=False)
-
-
-def _read_tab(service, sheet_id: str, title: str) -> list[list[str]]:
-    resp = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=sheet_id, range=f"'{title}'")
-        .execute()
-    )
-    return resp.get("values", [])
+def _read_csv(name: str) -> list[list[str]]:
+    path = DATA_DIR / f"{name}.csv"
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as f:
+        return list(csv.reader(f))
 
 
 def _to_float(value: str) -> float | None:
@@ -56,7 +37,7 @@ def _to_float(value: str) -> float | None:
 def shape_tab(
     name: str, values: list[list[str]], today: date | None = None, days: int = 30
 ) -> dict | None:
-    """把一個分頁（header + rows）整形成統計：最新值、週變化、近七列。"""
+    """把一個來源（header + rows）整形成統計：最新值、週變化、近七列。"""
     if len(values) < 2:
         return None
     today = today or date.today()
@@ -110,17 +91,16 @@ def shape_tab(
 
 
 def collect() -> dict:
-    sheet_id = os.environ.get("METRICS_SHEET_ID", "").strip()
-    if not sheet_id:
+    if not DATA_DIR.is_dir():
         raise SystemExit(
-            f"METRICS_SHEET_ID 未設定（scripts/.env）；見 {SETUP_DOC}"
+            f"{DATA_DIR} 不存在——先跑 lorescape-metrics 累積數據"
+            "（scripts/metrics，寫入 data/metrics/*.csv）"
         )
-    service = _build_service()
     tabs = []
     for name in _TABS:
         try:
-            shaped = shape_tab(name, _read_tab(service, sheet_id, name))
-        except Exception as exc:  # 個別分頁失敗不拖垮整個區塊
+            shaped = shape_tab(name, _read_csv(name))
+        except Exception as exc:  # 個別來源失敗不拖垮整個區塊
             shaped = {"name": name, "error": str(exc)}
         if shaped:
             tabs.append(shaped)

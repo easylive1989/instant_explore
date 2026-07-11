@@ -1,8 +1,9 @@
 # Lorescape 數據抓取（lorescape-metrics）設定指南
 
-`lorescape-metrics` skill 在本機手動抓取產品數據，**累積**到一張 Google
-Sheet（`METRICS_SHEET_ID`），每來源一個同名分頁、逐日一列、跨次累積。
-試算表即唯一資料來源（見 §D）。
+`lorescape-metrics` skill 在本機手動抓取產品數據，**累積**到 repo 內的
+`data/metrics/*.csv`（每來源一檔、逐日一列、跨次累積；**gitignored**——數據
+含營收而 repo 是 public）。CSV 即唯一資料來源（見 §D）。
+2026-07-11 前累積在 Google Sheet，已一次性匯出到 CSV 後停用。
 
 - 程式位置：`scripts/metrics/`
 - 執行：`cd scripts && uv run python -m metrics.report`（預設抓昨天，
@@ -165,38 +166,29 @@ parameter metric_type=total_value`。`ig.py` 已處理：逐日以
 
 ## C. 驗證
 
-先完成 §D（Google Sheet 目的地）後再執行：
-
 ```
 cd scripts
 uv run python -m metrics.report --check   # 四來源 ready + 待補進度
 uv run python -m metrics.report           # 抓昨天 + 自動補缺口
 ```
-`--check` 會讀試算表算出每來源「最後紀錄日、待補幾天 → 昨天」（`ig_posts`
-顯示要刷新的貼文區間）。實際抓取後，資料**直接寫進試算表**的同名分頁
-（`gsc` / `ga4` / `ig` / `ig_posts`），stdout 列出每來源 `+N row(s)` /
-`up to date` / `skipped`。
+`--check` 會讀 CSV 算出每來源「最後紀錄日、待補幾天 → 昨天」（`ig_posts`
+顯示要刷新的貼文區間）。實際抓取後，資料**直接寫進 `data/metrics/` 的同名
+CSV**（`gsc.csv` / `ga4.csv` / `ig.csv` / `ig_posts.csv`…），stdout 列出每
+來源 `+N row(s)` / `up to date` / `skipped`。
 
 ---
 
-## D. Google Sheet 目的地（必要）
+## D. 資料目的地：`data/metrics/*.csv`
 
-數據累積在一張 Google 試算表，每來源一個同名分頁（不存在會自動建立），
-試算表即唯一資料來源——補抓缺口時直接讀回試算表判斷。沿用 §A 的 service
-account，不需新增任何憑證。
+數據累積在 repo 的 `data/metrics/`，每來源一個同名 CSV（不存在會自動建立），
+CSV 即唯一資料來源——補抓缺口時直接讀回 CSV 判斷。**無需任何額外設定**。
 
-1. 開試算表 → 右上「共用」→ 把 service account 的 email
-   （金鑰 JSON 的 `client_email`，例如
-   `lorescape-metrics@<project>.iam.gserviceaccount.com`）加為**編輯者**，
-   並**取消勾選「通知使用者」**（機器人帳號，寄信會退信）。
-2. 啟用 Sheets API：
-   `gcloud services enable sheets.googleapis.com --project <PROJECT_ID>`
-   （或到 Cloud Console 的 API Library 啟用）。
-3. 在 `scripts/.env` 設目標試算表：
-   `METRICS_SHEET_ID=<試算表網址 /d/ 後面那段 id>`。
-
-每次同步是「讀回 → 合併去重 → 整頁覆寫」。分析公式請另開分頁**引用**這四頁
-（如 `=gsc!A2`），不要直接在這四頁加欄位或排序，否則下次同步會被覆蓋。
+- 該資料夾已 gitignore（數據含營收，repo 為 public），只存在本機；
+  需要備份請自行處理（例如定期複製或私有備份）。
+- 每次同步是「讀回 → 合併去重 → 整檔覆寫」，不要手動編輯這些 CSV，
+  否則下次同步會被覆蓋。
+- 2026-07-11 前的 Google Sheet 歷史已全數匯出到這些 CSV；Sheet 與
+  `METRICS_SHEET_ID` 均已停用。
 
 ---
 
@@ -212,14 +204,11 @@ account，不需新增任何憑證。
 | IG `(#10) does not have permission` | token 沒帶 `instagram_manage_insights` | §B 補權限重產 token |
 | IG `(#100) profile_views ... metric_type=total_value` | API 改版 | 已於 `ig.py` 修正（§B4） |
 | meta_token_helper `No Facebook Pages found` | 新版/商業粉專不出現在 /me/accounts | helper 已改問 Page ID（§B3） |
-| Sheets 403 `caller does not have permission` | 試算表沒分享給 service account | §D1 把 email 加為編輯者 |
-| Sheets 403 `SERVICE_DISABLED` | 專案沒啟用 Sheets API | §D2 啟用 sheets.googleapis.com |
-| `METRICS_SHEET_ID is not set` | 沒設目標試算表 | §D3 在 .env 設 `METRICS_SHEET_ID` |
 
 ## 相關檔案
 - `scripts/metrics/`（`report.py` 補抓引擎、`gsc.py`/`ga4.py`/`ig.py`/
-  `ig_posts.py` 來源；合併去重在 `_common.py`；`sheets.py` Sheets API client、
-  `store.py` 讀寫試算表分頁的儲存層）
+  `ig_posts.py` 來源；合併去重在 `_common.py`；`store.py` 的 `FileStore`
+  讀寫 `data/metrics/*.csv`）
 - `.claude/skills/lorescape-metrics/`（SKILL.md + references）
 - `scripts/meta_token_helper.py`（換長期 Meta token）
 - `docs/superpowers/specs|plans/2026-06-24-lorescape-metrics*`（設計與計畫）

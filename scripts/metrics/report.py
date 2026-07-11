@@ -1,15 +1,15 @@
-"""Accumulate metrics sources into a Google Sheet.
+"""Accumulate metrics sources into per-source CSVs under ``data/metrics/``.
 
-Each source is upserted into a same-named tab (``gsc`` / ``ga4`` / ``ig`` /
-``ig_posts``) of the spreadsheet named by ``METRICS_SHEET_ID``, keyed by
-date (or media id). A run targets yesterday and backfills any missing days
-since the last record, so each tab grows one row per day over time. The
-spreadsheet is the source of truth — gap detection reads it back.
+Each source is upserted into a same-named CSV (``gsc.csv`` / ``ga4.csv`` /
+``ig.csv`` / ``ig_posts.csv``…), keyed by date (or media id). A run targets
+yesterday and backfills any missing days since the last record, so each file
+grows one row per day over time. The CSVs are the source of truth — gap
+detection reads them back. The directory is in-repo but gitignored (the
+numbers include revenue and the repo is public).
 """
 from __future__ import annotations
 
 import argparse
-import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -30,10 +30,10 @@ from metrics.ig_posts import SOURCE as IG_POSTS_SOURCE
 from metrics.narration import SOURCE as NARRATION_SOURCE
 from metrics.retention import SOURCE as RETENTION_SOURCE
 from metrics.revenuecat import SOURCE as REVENUECAT_SOURCE
-from metrics.sheets import SheetClient
-from metrics.store import MetricsStore, SheetStore
+from metrics.store import FileStore, MetricsStore
 
 DEFAULT_BACKFILL = 30
+DATA_DIR = REPO_ROOT / "data" / "metrics"
 
 SOURCES: dict[str, DailySource] = {
     source.name: source
@@ -210,21 +210,15 @@ def format_results(results: list[AccumResult]) -> str:
     return "\n".join(out)
 
 
-def build_store() -> SheetStore:
-    """Build the Google Sheet store from ``METRICS_SHEET_ID``."""
-    sheet_id = os.environ.get("METRICS_SHEET_ID")
-    if not sheet_id:
-        raise SystemExit(
-            "METRICS_SHEET_ID is not set in backend/.env; see "
-            "docs/init/metrics-setup.md §D."
-        )
-    return SheetStore(SheetClient(sheet_id))
+def build_store() -> FileStore:
+    """Build the CSV file store under ``data/metrics/``."""
+    return FileStore(DATA_DIR)
 
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv(_repo_root() / "scripts" / ".env")
     parser = argparse.ArgumentParser(
-        description="Accumulate Lorescape metrics into a Google Sheet."
+        description="Accumulate Lorescape metrics into data/metrics/ CSVs."
     )
     parser.add_argument(
         "--days", type=int, default=DEFAULT_BACKFILL,
@@ -251,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     results = run(cfg, names, end, store, args.days, explicit)
-    print(f"google sheet: {store.sheet_id}")
+    print(f"data dir: {store.directory}")
     print(format_results(results))
     return 0
 

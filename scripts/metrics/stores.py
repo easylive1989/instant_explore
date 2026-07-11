@@ -1,23 +1,22 @@
-"""Accumulate App Store / Play store snapshots into the metrics sheet.
+"""Accumulate App Store / Play store snapshots into ``data/metrics/stores.csv``.
 
 Unlike the API sources (``gsc`` / ``ga4`` / ``ig`` / ``ig_posts``), App Store
 Connect and Play Console expose no headless API here, so their numbers are
 read by hand from the browser and passed in as flags. This script upserts one
-date-keyed row into the ``stores`` tab, reusing the same spreadsheet, service
-account, and merge/de-dup behaviour as :mod:`metrics.report`. Re-running
-for the same date overwrites that row.
+date-keyed row into ``stores.csv``, reusing the same merge/de-dup behaviour
+as :mod:`metrics.report`. Re-running for the same date overwrites that row.
 """
 from __future__ import annotations
 
 import argparse
-import os
+import csv
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 from metrics._common import REPO_ROOT, date_range, merge_rows
-from metrics.sheets import SheetClient
 
-TAB = "stores"
+CSV_PATH = REPO_ROOT / "data" / "metrics" / "stores.csv"
 HEADERS = [
     "date",
     "ios_downloads_30d",
@@ -52,30 +51,24 @@ def build_row(args: argparse.Namespace) -> list[str]:
     ]
 
 
-def upsert(client: SheetClient, row: list[str]) -> int:
-    """Merge `row` into the ``stores`` tab by date; return the row count."""
-    existing = client.read_tab(TAB)
-    rows = existing[1:] if existing else []
+def upsert(path: Path, row: list[str]) -> int:
+    """Merge `row` into ``stores.csv`` by date; return the row count."""
+    rows: list[list[str]] = []
+    if path.exists():
+        with path.open(newline="", encoding="utf-8") as f:
+            values = list(csv.reader(f))
+        rows = values[1:] if values else []
     merged = merge_rows(rows, [row], key_index=0)
-    client.write_tab(TAB, [HEADERS, *merged])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerows([HEADERS, *merged])
     return len(merged)
-
-
-def build_client() -> SheetClient:
-    """Build the Sheets client from ``METRICS_SHEET_ID``."""
-    sheet_id = os.environ.get("METRICS_SHEET_ID")
-    if not sheet_id:
-        raise SystemExit(
-            "METRICS_SHEET_ID is not set in backend/.env; see "
-            "docs/init/metrics-setup.md §D."
-        )
-    return SheetClient(sheet_id)
 
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv(REPO_ROOT / "scripts" / ".env")
     parser = argparse.ArgumentParser(
-        description="Record an App Store / Play snapshot into the sheet."
+        description="Record an App Store / Play snapshot into stores.csv."
     )
     parser.add_argument("--date", default=None,
                         help="snapshot date, ISO (default: yesterday)")
@@ -98,9 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     args.date = args.date or _default_date()
 
-    client = build_client()
-    count = upsert(client, build_row(args))
-    print(f"google sheet: {client.sheet_id}")
+    count = upsert(CSV_PATH, build_row(args))
+    print(f"csv: {CSV_PATH}")
     print(f"- stores: upserted {args.date} ({count} row(s) total)")
     return 0
 

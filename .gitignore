@@ -67,3 +67,6 @@ marketing/tools/reel-remotion/public/fonts/
 # Dashboard 工具產出（collector JSON 快取）
 dashboard/out/
 *.egg-info/
+
+# Metrics 累積數據（含營收，repo 為 public 故不進版控）
+data/

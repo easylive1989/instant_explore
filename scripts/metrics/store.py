@@ -2,13 +2,18 @@
 
 A store maps each :class:`DailySource` to one tab-shaped dataset (header row
 plus data rows) and supports reading the existing keys and upserting fresh
-rows. :class:`SheetStore` persists to a Google Sheet (the production source
-of truth); :class:`MemoryStore` keeps data in-process for tests.
+rows. :class:`FileStore` persists to per-source CSVs under ``data/metrics/``
+(the production source of truth, gitignored — the numbers include revenue
+and the repo is public); :class:`MemoryStore` keeps data in-process for
+tests. The legacy Google Sheet backend was removed 2026-07-11 after the
+one-time export to CSVs.
 """
 from __future__ import annotations
 
+import csv
+from pathlib import Path
+
 from metrics._common import DailySource, key_width, merge_rows, row_key
-from metrics.sheets import SheetClient
 
 
 class MetricsStore:
@@ -48,28 +53,26 @@ class MetricsStore:
             existing, new_rows, source.key_index, source.sort_index))
 
 
-class SheetStore(MetricsStore):
-    """Persist datasets to a Google Sheet, one tab per source.
+class FileStore(MetricsStore):
+    """Persist datasets to per-source CSV files in one directory.
 
-    Reads are cached for the lifetime of the store so a run that both plans
-    the backfill window and upserts only fetches each tab once.
+    File name comes from ``DailySource.filename``; the first CSV row is the
+    header. The directory lives in-repo (``data/metrics/``) but is
+    gitignored — the numbers include revenue and the repo is public.
     """
 
-    def __init__(self, client: SheetClient) -> None:
-        self._client = client
-        self._cache: dict[str, list[list[str]]] = {}
+    def __init__(self, directory: Path) -> None:
+        self.directory = directory
 
-    @property
-    def sheet_id(self) -> str:
-        return self._client.sheet_id
-
-    def _values(self, name: str) -> list[list[str]]:
-        if name not in self._cache:
-            self._cache[name] = self._client.read_tab(name)
-        return self._cache[name]
+    def _path(self, source: DailySource) -> Path:
+        return self.directory / source.filename
 
     def read(self, source: DailySource) -> tuple[list[str], list[list[str]]]:
-        values = self._values(source.name)
+        path = self._path(source)
+        if not path.exists():
+            return [], []
+        with path.open(newline="", encoding="utf-8") as f:
+            values = list(csv.reader(f))
         if not values:
             return [], []
         return values[0], values[1:]
@@ -77,8 +80,10 @@ class SheetStore(MetricsStore):
     def _write(
         self, source: DailySource, headers: list[str], rows: list[list[str]]
     ) -> None:
-        self._client.write_tab(source.name, [headers, *rows])
-        self._cache[source.name] = [headers, *rows]
+        self.directory.mkdir(parents=True, exist_ok=True)
+        with self._path(source).open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerows([headers, *rows])
 
 
 class MemoryStore(MetricsStore):

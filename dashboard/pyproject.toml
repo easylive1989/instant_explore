@@ -6,8 +6,6 @@ requires-python = ">=3.11"
 dependencies = [
     "requests>=2.32,<3",
     "python-dotenv>=1,<2",
-    "google-auth>=2,<3",
-    "google-api-python-client>=2,<3",
 ]
 
 [project.optional-dependencies]
