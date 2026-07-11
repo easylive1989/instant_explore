@@ -10,11 +10,6 @@ from lorescape_backend.shared.genai import (
     GenaiSettings,
 )
 
-_DEFAULT_CTA_TEXT = (
-    "你會想親自走一趟嗎？完整故事與語音導覽都在 App 裡"
-    "——點個人檔案的連結就能聽。"
-)
-
 
 @dataclass(frozen=True)
 class Config:
@@ -23,24 +18,6 @@ class Config:
     # Present (required) only when gemini_backend == "ai-studio"; on the
     # Vertex backend it is None because auth comes from GCP credentials.
     gemini_api_key: str | None
-
-    # Failure-alert webhook (existing, sends to a 'noisy' channel).
-    discord_webhook_url: str | None
-
-    # Review-flow bot (new). Bot posts the daily story and reads reactions.
-    # When any of these is missing, the publish flow is disabled and the
-    # job degrades to "generate-only" mode.
-    discord_bot_token: str | None
-    discord_review_channel_id: str | None
-    discord_approver_ids: tuple[str, ...]
-
-    # Instagram Business via Meta Graph. When token is missing, IG is skipped.
-    ig_user_id: str | None
-    meta_page_access_token: str | None
-
-    # Branding bits stamped into every published post.
-    brand_handle_ig: str
-    cta_text: str
 
     # RevenueCat. Webhook auth token guards the /webhooks/revenuecat endpoint
     # (must match the "Authorization" header configured in the RevenueCat
@@ -64,23 +41,6 @@ class Config:
     # emergencies). Env: NARRATION_WEB_SEARCH=0/false to disable.
     narration_web_search_enabled: bool = True
 
-    # Daily story pipeline (09:00 generate + 21:00 publish cron jobs).
-    # DAILY_STORY_ENABLED is the legacy master switch; the two per-job flags
-    # below default to it but can be overridden independently. This lets the
-    # 21:00 IG-publish job keep running for manually-written (Claude) stories
-    # while the 09:00 Gemini generate job stays paused.
-    # Env: DAILY_STORY_ENABLED / DAILY_STORY_GENERATE_ENABLED /
-    # DAILY_STORY_PUBLISH_ENABLED = 0/false/off to pause. The 03:00
-    # subscription reconcile and all HTTP APIs are unaffected.
-    daily_story_enabled: bool = True
-    daily_story_generate_enabled: bool = True
-    daily_story_publish_enabled: bool = True
-
-    # Directory holding the per-date reel videos rsynced from the operator's
-    # machine (<dir>/<YYYY-MM-DD>/final.mp4 + narration.txt). Unset disables
-    # the 21:10 reel publish job. Env: DAILY_VIDEO_DIR.
-    daily_video_dir: str | None = None
-
     @classmethod
     def from_env(cls) -> "Config":
         def required(name: str) -> str:
@@ -97,17 +57,6 @@ class Config:
                 (os.environ.get(name) or default).strip().lower()
                 not in ("0", "false", "off")
             )
-
-        approver_raw = os.environ.get("DISCORD_APPROVER_IDS", "")
-        approver_ids = tuple(
-            part.strip() for part in approver_raw.split(",") if part.strip()
-        )
-
-        # The per-job flags fall back to the master switch when unset, so an
-        # operator who only sets DAILY_STORY_ENABLED keeps the old all-or-
-        # nothing behaviour; setting a per-job flag overrides just that job.
-        daily_story_enabled = is_on("DAILY_STORY_ENABLED", "1")
-        master_default = "1" if daily_story_enabled else "0"
 
         # On the Vertex backend the API key is unused (auth comes from GCP
         # credentials) and a project is required instead.
@@ -132,27 +81,11 @@ class Config:
             gcp_project=gcp_project,
             gcp_location=os.environ.get("GOOGLE_CLOUD_LOCATION")
             or "us-central1",
-            discord_webhook_url=optional("DISCORD_WEBHOOK_URL"),
-            discord_bot_token=optional("DISCORD_BOT_TOKEN"),
-            discord_review_channel_id=optional("DISCORD_REVIEW_CHANNEL_ID"),
-            discord_approver_ids=approver_ids,
-            ig_user_id=optional("IG_USER_ID"),
-            meta_page_access_token=optional("META_PAGE_ACCESS_TOKEN"),
-            brand_handle_ig=os.environ.get("BRAND_HANDLE_IG", ""),
-            cta_text=_DEFAULT_CTA_TEXT,
             revenuecat_webhook_auth_token=optional(
                 "REVENUECAT_WEBHOOK_AUTH_TOKEN"
             ),
             revenuecat_api_key=optional("REVENUECAT_API_KEY"),
             narration_web_search_enabled=is_on("NARRATION_WEB_SEARCH", "1"),
-            daily_story_enabled=daily_story_enabled,
-            daily_story_generate_enabled=is_on(
-                "DAILY_STORY_GENERATE_ENABLED", master_default
-            ),
-            daily_story_publish_enabled=is_on(
-                "DAILY_STORY_PUBLISH_ENABLED", master_default
-            ),
-            daily_video_dir=optional("DAILY_VIDEO_DIR"),
         )
 
     @property
@@ -164,19 +97,6 @@ class Config:
             project=self.gcp_project,
             location=self.gcp_location,
         )
-
-    @property
-    def review_enabled(self) -> bool:
-        """True if Discord review is fully configured."""
-        return bool(
-            self.discord_bot_token
-            and self.discord_review_channel_id
-            and self.discord_approver_ids
-        )
-
-    @property
-    def instagram_enabled(self) -> bool:
-        return bool(self.ig_user_id and self.meta_page_access_token)
 
     @property
     def revenuecat_webhook_enabled(self) -> bool:

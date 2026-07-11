@@ -21,14 +21,6 @@ def _config(webhook_token: str | None = _WEBHOOK_TOKEN) -> Config:
         supabase_url="x",
         supabase_service_role_key="x",
         gemini_api_key="x",
-        discord_webhook_url=None,
-        discord_bot_token=None,
-        discord_review_channel_id=None,
-        discord_approver_ids=(),
-        ig_user_id=None,
-        meta_page_access_token=None,
-        brand_handle_ig="",
-        cta_text="",
         revenuecat_webhook_auth_token=webhook_token,
     )
 
