@@ -84,3 +84,31 @@ class TestCollect:
         result = schedule.collect()
         assert len(result["daily"]) == 2
         assert all(i["cadence"] == "每日" for i in result["today"][:2])
+
+
+class TestRender:
+    def _data(self) -> dict:
+        sections = parse_schedule(SAMPLE)
+        return {
+            "errors": {},
+            "collected_at": {},
+            "generated_at": "2026-07-13 09:00",
+            "schedule": {
+                "today": compute_today(sections, date(2026, 7, 13)),
+                **sections,
+            },
+        }
+
+    def test_渲染今日待辦與三張表(self):
+        from lorescape_dashboard import render
+
+        html = render.section_body("schedule", self._data())
+        assert "今日待辦" in html
+        assert "產生當日每日故事" in html
+        assert "marketing-weekly-audit" in html  # 週一含週表項
+        assert "每月（1 號）" in html  # 完整表仍列出
+
+    def test_registry_含_schedule(self):
+        from lorescape_dashboard.cli import _registry
+
+        assert "schedule" in _registry()

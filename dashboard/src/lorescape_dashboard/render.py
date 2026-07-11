@@ -554,10 +554,45 @@ def _reels_html(reels: dict, today: str) -> str:
     return "".join(parts)
 
 
+# ---------- Scheduler 行程表 ----------
+
+_SCHEDULE_TITLES = [("daily", "每日"), ("weekly", "每週（週一）"), ("monthly", "每月（1 號）")]
+
+
+def _schedule_rows(items: list[dict], with_cadence: bool = False) -> str:
+    return "".join(
+        "<tr>"
+        + (f'<td>{_E(i["cadence"])}</td>' if with_cadence else "")
+        + f'<td>{_E(i["time"])}</td><td>{_E(_strip_md(i["task"]))}</td>'
+        f'<td>{_E(_strip_md(i["command"]))}</td></tr>'
+        for i in items
+    )
+
+
+def _schedule_html(schedule: dict) -> str:
+    today_header = (
+        "<thead><tr><th>週期</th><th>時間</th><th>工作</th><th>指令 / skill</th></tr></thead>"
+    )
+    header = "<thead><tr><th>時間</th><th>工作</th><th>指令 / skill</th></tr></thead>"
+    parts = [
+        '<div class="callout"><b>今日待辦</b></div>',
+        f'<table>{today_header}<tbody>{_schedule_rows(schedule["today"], with_cadence=True)}</tbody></table>',
+    ]
+    for key, title in _SCHEDULE_TITLES:
+        parts.append(
+            f'<details class="table-fold" open><summary>{_E(title)}（{len(schedule[key])} 項）</summary>'
+            f'<table>{header}<tbody>{_schedule_rows(schedule[key])}</tbody></table></details>'
+        )
+    return "".join(parts)
+
+
 # ---------- 組頁 ----------
 
 # tab key → (tab 標籤, [(section key, section 標題)])
 _TABS = [
+    ("routine", "🗓 例行行程", [
+        ("schedule", "🗓 Scheduler 行程表"),
+    ]),
     ("progress", "📋 功能進度", [
         ("backlog", "📋 Backlog"),
     ]),
@@ -631,6 +666,8 @@ def section_body(key: str, data: dict) -> str:
         body = _daily_story_html(value)
     elif key == "reels":
         body = _reels_html(value, today)
+    elif key == "schedule":
+        body = _schedule_html(value)
     else:
         body = _error_card(key, "未知的區塊")
 
