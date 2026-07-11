@@ -30,7 +30,6 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `ig/` | IG 品牌素材與早期 Reels 腳本／演員素材 |
 | `init/` | 各服務的一次性建置指南（Firebase、訂閱、IG 發布、metrics…） |
 | `landing_page_review/` | 外部落地頁 review 報告 |
-| `metrics/` | 早期手動數據快照（已被 lorescape-metrics 的 Google Sheet 取代） |
 | `operations/` | 一次性維運操作紀錄（backfill、bucket 設定…） |
 | `screenshots/` | 商店行銷截圖產出與編輯器（app-store-screenshots skill） |
 | `superpowers/` | 開發用 specs 與 implementation plans（依日期命名） |
