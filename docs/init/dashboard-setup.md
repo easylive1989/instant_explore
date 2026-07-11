@@ -21,7 +21,19 @@ cd dashboard && uv run lorescape-dashboard            # 跑三套測試 + 全區
 uv run lorescape-dashboard --skip-tests               # 跳過跑測試（用上次結果）
 uv run lorescape-dashboard --only metrics,daily_story # 只刷新指定區塊
 uv run lorescape-dashboard --no-open                  # 不自動開瀏覽器
+uv run lorescape-dashboard --serve --skip-tests       # 即時模式（見下）
 ```
+
+### 即時模式（--serve）
+
+起本地 server（預設 http://localhost:8321，`--port` 可改）：
+
+- 每個區塊標題旁有「↻」按鈕，按下重新收集該區塊並就地更新（不重載頁面）；
+  測試那顆會重跑三套測試（約 1–2 分鐘）
+- 每日故事與部署狀態每 60 秒自動背景刷新
+- 各區塊顯示「資料時間」（該區塊上次收集的時間）
+- 注意：產品數據的「即時」上限是 metrics Sheet 的更新頻率（跑 lorescape-metrics
+  才有新資料）
 
 各區塊收集結果快取在 `dashboard/out/data/*.json`（gitignore），跳過的區塊
 沿用上次快取。

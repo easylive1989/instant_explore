@@ -96,6 +96,12 @@ details.table-fold summary{color:var(--muted);cursor:pointer;font-size:12px}
 .chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;
   padding:8px 12px;font-size:14px;display:flex;gap:8px;align-items:center}
 footer{margin-top:48px;color:var(--muted);font-size:12px}
+.sec-stamp{color:var(--muted);font-size:12px;margin-bottom:8px}
+button.refresh{appearance:none;border:1px solid var(--border);background:var(--surface);
+  color:var(--ink-2);border-radius:6px;font-size:13px;line-height:1;padding:4px 8px;
+  cursor:pointer;margin-left:4px}
+button.refresh:hover{color:var(--series)}
+button.refresh:disabled{opacity:.5;cursor:wait}
 """
 
 
@@ -579,40 +585,66 @@ const initial=location.hash.slice(1);
 show([...tabs].some(b=>b.dataset.tab===initial)?initial:tabs[0].dataset.tab);
 """
 
+# serve 模式（http 下才啟用）：區塊 ↻ 按鈕 + 每日故事/部署 60 秒自動刷新
+_LIVE_JS = """
+if(location.protocol==='http:'||location.protocol==='https:'){
+  async function refreshSection(key,btn){
+    if(btn){btn.disabled=true;btn.textContent='…';}
+    try{
+      const resp=await fetch('/api/section/'+key,{method:'POST'});
+      if(resp.ok){document.getElementById('body-'+key).innerHTML=await resp.text();}
+    }finally{if(btn){btn.disabled=false;btn.textContent='↻';}}
+  }
+  document.querySelectorAll('section').forEach(sec=>{
+    const btn=document.createElement('button');
+    btn.className='refresh';btn.textContent='↻';
+    btn.title=sec.id==='tests'?'重跑三套測試（約 1–2 分鐘）':'重新收集這個區塊';
+    btn.addEventListener('click',()=>refreshSection(sec.id,btn));
+    sec.querySelector('h2').appendChild(btn);
+  });
+  setInterval(()=>{refreshSection('daily_story');refreshSection('deploys');},60000);
+}
+"""
 
-def build_html(data: dict) -> str:
+
+def section_body(key: str, data: dict) -> str:
+    """單一區塊的內文 HTML（serve 模式的 ↻ 就地替換也用這個）。"""
     errors = data.get("errors", {})
     current_month = str(data.get("generated_at", ""))[:7]
-
-    def section(key: str, title: str, body: str | None) -> str:
-        content = body if body is not None else _error_card(
-            key, errors.get(key, "沒有資料（該 collector 未執行）")
-        )
-        return (
-            f'<section id="{key}"><h2><span class="hash">#</span>{_E(title)}</h2>{content}</section>'
-        )
-
-    backlog = data.get("backlog")
-    tests = data.get("tests")
-    e2e = data.get("e2e")
-    deploys = data.get("deploys")
-    metrics = data.get("metrics")
-    story = data.get("daily_story")
-    reels = data.get("reels")
     today = str(data.get("generated_at", ""))[:10]
+    value = data.get(key)
 
-    bodies = {
-        "backlog": (
-            _epic_html(backlog) + _pending_html(backlog) + _kanban_html(backlog, current_month)
-            if backlog else None
-        ),
-        "deploys": _deploys_html(deploys) if deploys else None,
-        "tests": _tests_html(tests) if tests else None,
-        "e2e": _e2e_html(e2e) if e2e else None,
-        "metrics": "".join(_metric_card(t) for t in metrics["tabs"]) if metrics else None,
-        "daily_story": _daily_story_html(story) if story else None,
-        "reels": _reels_html(reels, today) if reels else None,
-    }
+    if value is None:
+        body = _error_card(key, errors.get(key, "沒有資料（該 collector 未執行）"))
+    elif key == "backlog":
+        body = _epic_html(value) + _pending_html(value) + _kanban_html(value, current_month)
+    elif key == "deploys":
+        body = _deploys_html(value)
+    elif key == "tests":
+        body = _tests_html(value)
+    elif key == "e2e":
+        body = _e2e_html(value)
+    elif key == "metrics":
+        body = "".join(_metric_card(t) for t in value["tabs"])
+    elif key == "daily_story":
+        body = _daily_story_html(value)
+    elif key == "reels":
+        body = _reels_html(value, today)
+    else:
+        body = _error_card(key, "未知的區塊")
+
+    stamp = data.get("collected_at", {}).get(key)
+    if stamp:
+        body = f'<div class="sec-stamp">資料時間：{_E(stamp)}</div>{body}'
+    return body
+
+
+def build_html(data: dict) -> str:
+    def section(key: str, title: str) -> str:
+        return (
+            f'<section id="{key}"><h2><span class="hash">#</span>{_E(title)}</h2>'
+            f'<div class="sec-body" id="body-{key}">{section_body(key, data)}</div></section>'
+        )
 
     tab_buttons = "".join(
         f'<button role="tab" data-tab="{key}" aria-selected="false">{_E(label)}</button>'
@@ -620,7 +652,7 @@ def build_html(data: dict) -> str:
     )
     panels = "".join(
         f'<div class="panel" id="tab-{key}" role="tabpanel">'
-        + "".join(section(s_key, s_title, bodies[s_key]) for s_key, s_title in sections)
+        + "".join(section(s_key, s_title) for s_key, s_title in sections)
         + "</div>"
         for key, _, sections in _TABS
     )
@@ -642,6 +674,6 @@ def build_html(data: dict) -> str:
 {panels}
 <footer>由 dashboard/ 工具產生・<code>uv run lorescape-dashboard</code></footer>
 </main>
-<script>{_TAB_JS}</script>
+<script>{_TAB_JS}{_LIVE_JS}</script>
 </body>
 </html>"""

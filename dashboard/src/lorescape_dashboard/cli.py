@@ -48,7 +48,7 @@ def gather(
 ) -> dict:
     """收集（或讀快取）每個區塊，錯誤隔離：單區塊失敗退回快取並記錯誤。"""
     data_dir.mkdir(parents=True, exist_ok=True)
-    data: dict = {"errors": {}}
+    data: dict = {"errors": {}, "collected_at": {}}
 
     for name, collect in registry.items():
         cache_path = data_dir / f"{name}.json"
@@ -58,6 +58,8 @@ def gather(
             data[name] = cached["data"] if cached else None
             if cached is None:
                 data["errors"][name] = "跳過收集且沒有快取"
+            else:
+                data["collected_at"][name] = cached["collected_at"]
             continue
 
         try:
@@ -65,6 +67,7 @@ def gather(
         except Exception as exc:
             if cached:
                 data[name] = cached["data"]
+                data["collected_at"][name] = cached["collected_at"]
                 data["errors"][name] = (
                     f"{exc}（改用 {cached['collected_at']} 的快取）"
                 )
@@ -73,13 +76,12 @@ def gather(
                 data["errors"][name] = str(exc)
             continue
 
+        stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         data[name] = fresh
+        data["collected_at"][name] = stamp
         cache_path.write_text(
             json.dumps(
-                {
-                    "collected_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "data": fresh,
-                },
+                {"collected_at": stamp, "data": fresh},
                 ensure_ascii=False,
                 indent=1,
             ),
@@ -94,6 +96,9 @@ def main() -> None:
     parser.add_argument("--skip-tests", action="store_true", help="跳過跑測試，改用上次快取")
     parser.add_argument("--only", help="只刷新這些區塊（逗號分隔），其餘用快取")
     parser.add_argument("--no-open", action="store_true", help="產生後不自動開瀏覽器")
+    parser.add_argument("--serve", action="store_true",
+                        help="起本地 server：↻ 按鈕可即時重收集單一區塊，每日故事/部署每 60 秒自動刷新")
+    parser.add_argument("--port", type=int, default=8321, help="--serve 的埠號（預設 8321）")
     args = parser.parse_args()
 
     load_env()
@@ -115,6 +120,14 @@ def main() -> None:
     for name in registry:
         status = "❌ " + data["errors"][name] if name in data["errors"] else "✅"
         print(f"  {name}: {status}")
+
+    if args.serve:
+        from . import server
+
+        if not args.no_open:
+            webbrowser.open(f"http://localhost:{args.port}")
+        server.serve(registry, gather, OUT_DATA_DIR, args.port)
+        return
 
     out_path = DASHBOARD_DIR / "out" / "index.html"
     out_path.write_text(render.build_html(data), encoding="utf-8")

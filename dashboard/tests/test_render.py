@@ -2,6 +2,7 @@
 from lorescape_dashboard.render import (
     build_html,
     health_signals,
+    section_body,
     sparkline_svg,
 )
 
@@ -180,6 +181,14 @@ class TestBuildHtml:
     def test_區塊錯誤顯示錯誤卡(self):
         data = {**DATA, "metrics": None, "errors": {"metrics": "no credentials"}}
         assert "no credentials" in build_html(data)
+
+    def test_section_body_可獨立渲染並帶資料時間(self):
+        data = {**DATA, "collected_at": {"deploys": "2026-07-11 16:00"}}
+        body = section_body("deploys", data)
+        assert "backend" in body and "<section" not in body
+        assert "資料時間：2026-07-11 16:00" in body
+        # 無資料的區塊回錯誤卡
+        assert "boom" in section_body("metrics", {**DATA, "metrics": None, "errors": {"metrics": "boom"}})
 
     def test_html_跳脫(self):
         data = {

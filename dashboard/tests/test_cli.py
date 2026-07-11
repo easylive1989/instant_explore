@@ -9,9 +9,18 @@ def test_成功收集並寫入快取(tmp_path):
     data = gather(registry, refresh={"backlog"}, data_dir=tmp_path)
     assert data["backlog"] == {"features": []}
     assert data["errors"] == {}
+    assert data["collected_at"]["backlog"]  # 收集時間有記錄
     cached = json.loads((tmp_path / "backlog.json").read_text())
     assert cached["data"] == {"features": []}
     assert "collected_at" in cached
+
+
+def test_用快取時帶出快取的收集時間(tmp_path):
+    (tmp_path / "tests.json").write_text(
+        json.dumps({"collected_at": "2026-07-10 09:00", "data": {"suites": []}})
+    )
+    data = gather({"tests": lambda: {}}, refresh=set(), data_dir=tmp_path)
+    assert data["collected_at"]["tests"] == "2026-07-10 09:00"
 
 
 def test_不刷新時用快取(tmp_path):
