@@ -4,10 +4,9 @@ Mirrors the 8-step health check from .claude/skills/lorescape-debug
 (skipping steps 1+2 which need gh CLI / git on host), then offers an
 interactive recovery plan for the common failure patterns.
 
-Run from inside the backend container so secrets are read from .env:
+Run locally so secrets are read from publisher/.env:
 
-    docker exec -it lorescape-backend \\
-        python -m scripts.diagnose_daily_story --date 2026-05-28
+    cd publisher && uv run python -m scripts.diagnose_daily_story --date 2026-05-28
 
 Defaults to today's Asia/Taipei date. Pass --apply to actually execute
 recovery actions (without it everything is dry-run). Pass

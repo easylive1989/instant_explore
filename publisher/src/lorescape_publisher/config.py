@@ -52,12 +52,11 @@ class Config:
     gcp_project: str | None = None
     gcp_location: str = "us-central1"
 
-    # Daily story pipeline flags. DAILY_STORY_ENABLED is the legacy master
-    # switch; the per-job flags default to it but can be overridden
-    # independently. Env: DAILY_STORY_ENABLED / DAILY_STORY_GENERATE_ENABLED /
-    # DAILY_STORY_PUBLISH_ENABLED = 0/false/off to pause.
+    # Daily story pipeline flags. DAILY_STORY_ENABLED is the master switch;
+    # DAILY_STORY_PUBLISH_ENABLED defaults to it but can be overridden
+    # independently. Env: DAILY_STORY_ENABLED / DAILY_STORY_PUBLISH_ENABLED =
+    # 0/false/off to pause.
     daily_story_enabled: bool = True
-    daily_story_generate_enabled: bool = True
     daily_story_publish_enabled: bool = True
 
     # Directory holding the per-date reel videos rsynced from the operator's
@@ -120,9 +119,6 @@ class Config:
             brand_handle_ig=os.environ.get("BRAND_HANDLE_IG", ""),
             cta_text=_DEFAULT_CTA_TEXT,
             daily_story_enabled=daily_story_enabled,
-            daily_story_generate_enabled=is_on(
-                "DAILY_STORY_GENERATE_ENABLED", master_default
-            ),
             daily_story_publish_enabled=is_on(
                 "DAILY_STORY_PUBLISH_ENABLED", master_default
             ),

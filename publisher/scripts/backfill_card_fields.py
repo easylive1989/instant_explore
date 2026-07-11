@@ -20,7 +20,7 @@ NOT touched by this script. After running, the operator should fill any
 NULLs via the Supabase Dashboard.
 
 Usage:
-    cd backend
+    cd publisher
     uv run python -m scripts.backfill_card_fields --dry-run   # estimate
     uv run python -m scripts.backfill_card_fields             # real run
 """

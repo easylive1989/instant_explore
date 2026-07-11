@@ -26,7 +26,6 @@ _OPTIONAL_ENV_VARS = (
     "META_PAGE_ACCESS_TOKEN",
     "BRAND_HANDLE_IG",
     "DAILY_STORY_ENABLED",
-    "DAILY_STORY_GENERATE_ENABLED",
     "DAILY_STORY_PUBLISH_ENABLED",
     "DAILY_VIDEO_DIR",
 )
@@ -86,7 +85,6 @@ def test_daily_story_defaults_on_and_kill_switch(monkeypatch):
     monkeypatch.setenv("DAILY_STORY_ENABLED", "0")
     config = Config.from_env()
     assert config.daily_story_enabled is False
-    assert config.daily_story_generate_enabled is False
     assert config.daily_story_publish_enabled is False
 
 
@@ -95,7 +93,6 @@ def test_per_job_flags_override_master_switch(monkeypatch):
     monkeypatch.setenv("DAILY_STORY_ENABLED", "0")
     monkeypatch.setenv("DAILY_STORY_PUBLISH_ENABLED", "1")
     config = Config.from_env()
-    assert config.daily_story_generate_enabled is False
     assert config.daily_story_publish_enabled is True
 
 
