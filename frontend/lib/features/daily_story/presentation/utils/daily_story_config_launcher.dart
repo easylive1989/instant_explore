@@ -9,8 +9,8 @@ import 'package:go_router/go_router.dart';
 /// Builds an explore [Place] from a [DailyStory] so the daily-story screen can
 /// reuse the on-demand generation page (`/config`) for the SAME place.
 ///
-/// Lives in `app/` because it bridges two features (daily_story → explore);
-/// features must not depend on each other directly.
+/// Bridges daily_story → explore by building a [Place] from a [DailyStory];
+/// cross-feature domain imports are allowed by the dependency rules.
 ///
 /// Returns null when [DailyStory.wikidataId] is missing — generation requires
 /// a `wikidata:`-prefixed id, so the caller should hide the CTA instead.

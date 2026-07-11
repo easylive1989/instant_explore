@@ -21,9 +21,7 @@ final RegExp _featureImportRe = RegExp(
 const Set<String> _pendingCrossFeature = {};
 
 /// app/ 中已知違規檔案（整檔豁免）。修復後清空。
-const Set<String> _pendingAppFiles = {
-  'lib/app/utils/daily_story_config_launcher.dart',
-};
+const Set<String> _pendingAppFiles = {};
 
 /// app/ 中允許引用 features 的 composition root（檔案或目錄前綴）。
 const List<String> _appCompositionRoots = [

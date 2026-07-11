@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:context_app/app/utils/daily_story_config_launcher.dart';
+import 'package:context_app/features/daily_story/presentation/utils/daily_story_config_launcher.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
 import 'package:context_app/features/daily_story/domain/services/daily_story_sharing_service.dart';
