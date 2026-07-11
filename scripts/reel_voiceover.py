@@ -7,7 +7,9 @@ scripts/ uv project:
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
+import json
 import logging
 import math
 import sys
@@ -132,3 +134,84 @@ def build_voice_wav(beats, synth_result, durations, out_path) -> None:
         "ffmpeg", "-y", *inputs, "-filter_complex", graph,
         "-map", "[out]", "-c:a", "pcm_s16le", str(out_path), "-loglevel", "error",
     ])
+
+
+def render_reel(date: str, lufs: str = "-28") -> None:
+    """Re-render the reel with voice-matched durations + a quiet BGM bed."""
+    dvp._run(["bash", str(BUILD_VIDEO), date, "--lufs", lufs])
+
+
+def mux(date: str, voice_path: Path, out_path: Path) -> None:
+    """Lay voice over cinematic.mp4, ducking its BGM under the voice."""
+    cinematic = out_dir(date) / "cinematic.mp4"
+    graph = (
+        "[1:a]loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000[vtmp];"
+        "[vtmp]asplit=2[v1][v2];"
+        "[0:a][v1]sidechaincompress=threshold=0.03:ratio=8:attack=5:release=300[bgd];"
+        "[bgd][v2]amix=inputs=2:normalize=0:duration=first[a]"
+    )
+    dvp._run([
+        "ffmpeg", "-y", "-i", str(cinematic), "-i", str(voice_path),
+        "-filter_complex", graph, "-map", "0:v", "-map", "[a]",
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        str(out_path), "-loglevel", "error",
+    ])
+
+
+def main(argv: list[str]) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("date", help="YYYY-MM-DD")
+    parser.add_argument("--engine", choices=("gemini", "say"), default="gemini")
+    parser.add_argument("--voice", default=None)
+    parser.add_argument("--style", default=dvp.DEFAULT_GEMINI_STYLE)
+    parser.add_argument("--force-tts", action="store_true")
+    args = parser.parse_args(argv)
+
+    story = json.loads(STORY_JSON.read_text(encoding="utf-8"))
+    beats = story["beats"]
+
+    od = out_dir(args.date)
+    work = od / "voice_work"
+    work.mkdir(parents=True, exist_ok=True)
+    cache_path = work / "voice_cache.json"
+    cache = (
+        json.loads(cache_path.read_text(encoding="utf-8"))
+        if cache_path.exists() else {}
+    )
+
+    voice = args.voice or (
+        dvp.DEFAULT_GEMINI_VOICE if args.engine == "gemini" else "Meijia"
+    )
+    synth = dvp._make_synth(args.engine, voice, None, args.style)
+    logger.info("tts: engine=%s voice=%s", args.engine, voice)
+    synth_result, new_cache = synth_beats(
+        beats, work, cache, synth, force=args.force_tts,
+    )
+    cache_path.write_text(
+        json.dumps(new_cache, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    durations = []
+    for beat in beats:
+        _, voice_sec = synth_result[beat["id"]]
+        dframes = duration_frames(text_default_frames(beat), voice_sec)
+        beat["durationFrames"] = dframes
+        durations.append(dframes)
+        logger.info("%-7s voice=%5.2fs -> durationFrames=%d",
+                    beat["id"], voice_sec, dframes)
+    STORY_JSON.write_text(
+        json.dumps(story, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+    voice_wav = od / "voice.wav"
+    build_voice_wav(beats, synth_result, durations, voice_wav)
+    render_reel(args.date)
+    final = od / "final.mp4"
+    mux(args.date, voice_wav, final)
+    logger.info("DONE -> %s (%.2fs)", final, total_frames(durations) / FPS)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
