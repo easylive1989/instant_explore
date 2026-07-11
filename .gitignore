@@ -15,9 +15,8 @@ Thumbs.db
 .pub-cache/
 .pub/
 build/
-*.lock
 .fvm/
-coverage
+coverage/
 
 # IDE
 .vscode/
@@ -36,10 +35,6 @@ coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# FVM Version Cache
-.fvm/
-.fvm
 
 # Firebase
 .firebase/
