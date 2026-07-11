@@ -125,14 +125,25 @@ class TestRender:
             },
         }
 
-    def test_渲染今日待辦與三張表(self):
+    def test_渲染今日待辦與月曆(self):
         from lorescape_dashboard import render
 
         html = render.section_body("schedule", self._data())
         assert "今日待辦" in html
         assert "產生當日每日故事" in html
         assert "marketing-weekly-audit" in html  # 週一含週表項
-        assert "每月（1 號）" in html  # 完整表仍列出
+        # 三張折疊表已移除
+        assert "table-fold" not in html
+        assert "每月（1 號）" not in html
+        # 月曆：2026 年 7 月有 31 個當月格
+        assert html.count("data-day=") == 31
+        # 今天（7/13）高亮且預設選取，明細預設展開
+        assert 'class="cal-day today selected" data-day="2026-07-13"' in html
+        assert 'id="cal-detail-2026-07-13">' in html
+        assert 'id="cal-detail-2026-07-14" hidden' in html
+        # 週一格有週標籤、1 號格有月標籤
+        assert "▲ 週 1" in html
+        assert "■ 月 1" in html
 
     def test_registry_含_schedule(self):
         from lorescape_dashboard.cli import _registry

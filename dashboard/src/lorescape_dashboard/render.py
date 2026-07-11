@@ -5,8 +5,12 @@ sparkline 2px 線 + 端點 dot、表格 tabular-nums。
 """
 from __future__ import annotations
 
+import calendar
 import html
 import re
+from datetime import date
+
+from .collectors.schedule import compute_for_date
 
 _E = html.escape
 
@@ -102,6 +106,20 @@ button.refresh{appearance:none;border:1px solid var(--border);background:var(--s
   cursor:pointer;margin-left:4px}
 button.refresh:hover{color:var(--series)}
 button.refresh:disabled{opacity:.5;cursor:wait}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:10px 0}
+.cal-head{text-align:center;font-size:12px;color:var(--ink-2);padding:4px 0}
+.cal-day{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  min-height:64px;padding:6px 8px;font-size:12px;cursor:pointer;display:flex;
+  flex-direction:column;gap:2px}
+.cal-day b{font-size:13px;font-variant-numeric:tabular-nums}
+.cal-day.out{background:none;border-color:transparent;cursor:default}
+.cal-day:not(.out):hover{border-color:var(--series)}
+.cal-day.today b{color:var(--series)}
+.cal-day.selected{border-color:var(--series);box-shadow:0 0 0 1px var(--series);
+  background:var(--wash)}
+.cal-tag{color:var(--ink-2);white-space:nowrap}
+.cal-detail{margin-top:12px}
+.cal-detail h3{font-size:13px;color:var(--ink-2);margin-bottom:6px}
 """
 
 
@@ -556,7 +574,7 @@ def _reels_html(reels: dict, today: str) -> str:
 
 # ---------- Scheduler 行程表 ----------
 
-_SCHEDULE_TITLES = [("daily", "每日"), ("weekly", "每週（週一）"), ("monthly", "每月（1 號）")]
+_WEEKDAY_NAMES = "一二三四五六日"
 
 
 def _schedule_rows(items: list[dict], with_cadence: bool = False) -> str:
@@ -569,21 +587,70 @@ def _schedule_rows(items: list[dict], with_cadence: bool = False) -> str:
     )
 
 
-def _schedule_html(schedule: dict) -> str:
+def _cal_cell(d: date, month: int, schedule: dict, today: date) -> str:
+    """單一日曆格：非當月為淡色空格；當月列日期與精簡標籤。"""
+    if d.month != month:
+        return '<div class="cal-day out"></div>'
+    tags = []
+    if schedule["daily"]:
+        tags.append(f'<span class="cal-tag">● 每日 {len(schedule["daily"])}</span>')
+    if d.weekday() == 0 and schedule["weekly"]:
+        tags.append(f'<span class="cal-tag">▲ 週 {len(schedule["weekly"])}</span>')
+    if d.day == 1 and schedule["monthly"]:
+        tags.append(f'<span class="cal-tag">■ 月 {len(schedule["monthly"])}</span>')
+    classes = "cal-day today selected" if d == today else "cal-day"
+    return (
+        f'<div class="{classes}" data-day="{d.isoformat()}">'
+        f'<b>{d.day}</b>{"".join(tags)}</div>'
+    )
+
+
+def _cal_detail(d: date, schedule: dict, today: date) -> str:
+    """單日明細（預先渲染、非今天隱藏，JS 點格子切換顯示）。"""
+    header = (
+        "<thead><tr><th>週期</th><th>時間</th><th>工作</th><th>指令 / skill</th></tr></thead>"
+    )
+    rows = _schedule_rows(compute_for_date(schedule, d), with_cadence=True)
+    hidden = "" if d == today else " hidden"
+    title = f"{d.month}/{d.day}（週{_WEEKDAY_NAMES[d.weekday()]}）"
+    return (
+        f'<div class="cal-detail" id="cal-detail-{d.isoformat()}"{hidden}>'
+        f"<h3>{_E(title)} 待辦</h3><table>{header}<tbody>{rows}</tbody></table></div>"
+    )
+
+
+def _calendar_html(schedule: dict, today: date) -> str:
+    weeks = calendar.Calendar().monthdatescalendar(today.year, today.month)
+    head = "".join(f'<div class="cal-head">{w}</div>' for w in _WEEKDAY_NAMES)
+    cells = "".join(
+        _cal_cell(d, today.month, schedule, today) for week in weeks for d in week
+    )
+    details = "".join(
+        _cal_detail(d, schedule, today)
+        for week in weeks
+        for d in week
+        if d.month == today.month
+    )
+    legend = "● 每日　▲ 每週（週一）　■ 每月（1號）　點日期看明細"
+    return (
+        f'<div class="callout"><b>{today.year} 年 {today.month} 月</b>　{_E(legend)}</div>'
+        f'<div class="calendar">{head}{cells}</div>{details}'
+    )
+
+
+def _schedule_html(schedule: dict, today_str: str) -> str:
+    try:
+        today = date.fromisoformat(today_str)
+    except ValueError:
+        today = date.today()
     today_header = (
         "<thead><tr><th>週期</th><th>時間</th><th>工作</th><th>指令 / skill</th></tr></thead>"
     )
-    header = "<thead><tr><th>時間</th><th>工作</th><th>指令 / skill</th></tr></thead>"
-    parts = [
-        '<div class="callout"><b>今日待辦</b></div>',
-        f'<table>{today_header}<tbody>{_schedule_rows(schedule["today"], with_cadence=True)}</tbody></table>',
-    ]
-    for key, title in _SCHEDULE_TITLES:
-        parts.append(
-            f'<details class="table-fold" open><summary>{_E(title)}（{len(schedule[key])} 項）</summary>'
-            f'<table>{header}<tbody>{_schedule_rows(schedule[key])}</tbody></table></details>'
-        )
-    return "".join(parts)
+    return (
+        '<div class="callout"><b>今日待辦</b></div>'
+        f'<table>{today_header}<tbody>{_schedule_rows(schedule["today"], with_cadence=True)}</tbody></table>'
+        + _calendar_html(schedule, today)
+    )
 
 
 # ---------- 組頁 ----------
@@ -642,6 +709,18 @@ if(location.protocol==='http:'||location.protocol==='https:'){
 }
 """
 
+# 月曆點格子 → 切換該日明細；委派到 document，確保 serve 模式 ↻ 後仍可點
+_CAL_JS = """
+document.addEventListener('click',e=>{
+  const cell=e.target.closest('.cal-day[data-day]');
+  if(!cell)return;
+  const sec=cell.closest('.sec-body');
+  sec.querySelectorAll('.cal-day.selected').forEach(c=>c.classList.remove('selected'));
+  cell.classList.add('selected');
+  sec.querySelectorAll('.cal-detail').forEach(p=>p.hidden=p.id!=='cal-detail-'+cell.dataset.day);
+});
+"""
+
 
 def section_body(key: str, data: dict) -> str:
     """單一區塊的內文 HTML（serve 模式的 ↻ 就地替換也用這個）。"""
@@ -667,7 +746,7 @@ def section_body(key: str, data: dict) -> str:
     elif key == "reels":
         body = _reels_html(value, today)
     elif key == "schedule":
-        body = _schedule_html(value)
+        body = _schedule_html(value, today)
     else:
         body = _error_card(key, "未知的區塊")
 
@@ -712,6 +791,6 @@ def build_html(data: dict) -> str:
 {panels}
 <footer>由 dashboard/ 工具產生・<code>uv run lorescape-dashboard</code></footer>
 </main>
-<script>{_TAB_JS}{_LIVE_JS}</script>
+<script>{_TAB_JS}{_LIVE_JS}{_CAL_JS}</script>
 </body>
 </html>"""
