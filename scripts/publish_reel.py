@@ -2,7 +2,7 @@
 
 Reads the finished video at marketing/outputs/daily_video/<date>/final.mp4, builds the
 caption from the Supabase daily story for that date (zh-TW), and publishes it
-as an IG Reel using the local IG credentials in backend/.env. This is fully
+as an IG Reel using the local IG credentials in publisher/.env. This is fully
 local and independent of the server's scheduled publish job — nothing is
 written back to Supabase.
 
@@ -90,7 +90,7 @@ def _build_caption(
 
 def main(argv: list[str]) -> int:
     """CLI entrypoint."""
-    load_dotenv(REPO_ROOT / "backend" / ".env")
+    load_dotenv(REPO_ROOT / "publisher" / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("date", help="Publish date, YYYY-MM-DD")
     parser.add_argument("--caption", help="Override the caption text")
@@ -135,7 +135,7 @@ def main(argv: list[str]) -> int:
     if not config.instagram_enabled:
         print(
             "Instagram not configured: set IG_USER_ID and "
-            "META_PAGE_ACCESS_TOKEN in backend/.env",
+            "META_PAGE_ACCESS_TOKEN in publisher/.env",
             file=sys.stderr,
         )
         return 1

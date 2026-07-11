@@ -33,7 +33,7 @@ DAILY_CAROUSEL_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_carousel"
 
 def main(argv: list[str]) -> int:
     """CLI entrypoint."""
-    load_dotenv(REPO_ROOT / "backend" / ".env")
+    load_dotenv(REPO_ROOT / "publisher" / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "date", nargs="?", default=date.today().isoformat(),

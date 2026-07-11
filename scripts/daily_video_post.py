@@ -511,7 +511,7 @@ def _render(
 
 
 def _build_gemini_client():
-    """Build a google-genai client from the backend's .env / config.
+    """Build a google-genai client from the publisher's .env / config.
 
     Reuses the project's GenaiSettings (AI Studio key or Vertex) so the
     backend switch stays in one place. GOOGLE_API_KEY is popped first: the
@@ -520,7 +520,7 @@ def _build_gemini_client():
     """
     from dotenv import load_dotenv
 
-    load_dotenv(REPO_ROOT / "backend" / ".env")
+    load_dotenv(REPO_ROOT / "publisher" / ".env")
     os.environ.pop("GOOGLE_API_KEY", None)
     from lorescape_publisher.config import Config
     from lorescape_publisher.genai import build_client
@@ -533,7 +533,7 @@ class _GeminiSynth:
 
     The free tier caps TTS at 10 requests/day per key, and flaky empty
     candidates still count against it. When the primary key 429s, the
-    ``GEMINI_API_KEY_2`` key from ``backend/.env`` takes over for the rest
+    ``GEMINI_API_KEY_2`` key from ``publisher/.env`` takes over for the rest
     of the run; empty responses are retried a couple of times before
     failing the render.
     """

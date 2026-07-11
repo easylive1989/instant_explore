@@ -63,7 +63,7 @@ def _month_object_paths(bucket, month: str) -> list[str]:
 
 def main(argv: list[str]) -> int:
     """CLI entrypoint."""
-    load_dotenv(REPO_ROOT / "backend" / ".env")
+    load_dotenv(REPO_ROOT / "publisher" / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "month", nargs="?", default=_last_month(),

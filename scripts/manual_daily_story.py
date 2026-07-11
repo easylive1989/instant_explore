@@ -309,7 +309,7 @@ def _send_for_ig_review(config: Config, supabase, publish_date: date) -> None:
 
 
 def main(argv: list[str]) -> int:
-    load_dotenv(Path(__file__).resolve().parents[1] / "backend" / ".env")
+    load_dotenv(Path(__file__).resolve().parents[1] / "publisher" / ".env")
     # The google-genai SDK prefers GOOGLE_API_KEY over GEMINI_API_KEY when
     # both are set; on this machine GOOGLE_API_KEY is a non-Gemini key, so
     # drop it. Done here (not at import) to keep importing this module for
