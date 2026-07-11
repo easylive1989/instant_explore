@@ -29,7 +29,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `app-review/` | App Store 審核往來（如 AI 揭露回覆） |
 | `brand/` | 品牌素材：logo、App icon |
 | `design/` | Claude Design 匯出的 UI mockup handoff bundle（官網、design system） |
-| `ig/` | IG 品牌素材與早期 Reels 腳本／演員素材 |
+| `ig/` | IG 品牌素材（logo lockup、啟動貼文文案） |
 | `init/` | 各服務的一次性建置指南（Firebase、訂閱、IG 發布、metrics…） |
 | `landing_page_review/` | 外部落地頁 review 報告 |
 | `operations/` | 一次性維運操作紀錄（backfill、bucket 設定…） |
