@@ -66,6 +66,7 @@ const beats = slides.map((s, i) => {
     ...(layout === "cover" && s.title_en ? { subtitle: s.title_en } : {}),
     lines: s.lines || [],
     highlights: s.highlights || [],
+    narration: (s.lines || []).filter((l) => l !== "").join(""),
   };
 });
 
