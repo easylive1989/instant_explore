@@ -80,6 +80,6 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 - [x] T1: 建 place 路由 + 首批 5 景點（羅浮宮 louvre、故宮 national-palace-museum、大英博物館 british-museum、聖家堂 sagrada-familia、中正紀念堂 chiang-kai-shek-memorial-hall）× zh/en = 10 頁；首頁 zh/en metadata 織入「語音導覽 app / audio tour guide app」等搜尋詞（commit c5358c51，push + Deploy Landing 部署完成，2026-07-09，正式站 10 頁皆 200、sitemap 6→16 URL）
 - [x] T2: GSC 對 10 個新網址催索引（加速收錄）
   - 2026-07-10 已催 9/10：5 個 zh 全部 + en louvre/national-palace-museum/british-museum/sagrada-familia；踩到 GSC 每日配額上限
-  - 2026-07-11 查證剩下的 `en/place/chiang-kai-shek-memorial-hall` 已被 Google 自然索引（GSC「網頁已編入索引」），無需手動催；景點頁開始進 Google 索引，方向驗證中
+  - 2026-07-11 查證：**10/10 景點頁全部「網頁已編入索引」**（含剩下未手動催的 en/chiang，Google 自然收錄）。部署後 1 天全數進索引，方向驗證通過；下一步等曝光/查詢資料，依 F9 T3 決定擴充
 - [ ] T3: 1–4 週後回看 GSC 曝光/查詢，依有反應的景點決定下一批擴充；候選——叢集 B 國外（凡爾賽宮、羅馬競技場、梵谷博物館、米蘭大教堂、國王湖），叢集 C 台灣（九份、淡水紅毛城、台北 101、日月潭）
 - 註: 擴充前先確認首批方向對了（有曝光/排名）再大量複製，避免版型或方向要調時改一堆頁
