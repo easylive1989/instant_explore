@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/narration/domain/models/story_hook.dart';
 import 'package:context_app/features/narration/presentation/controllers/narration_generation_controller.dart';
 import 'package:context_app/features/narration/presentation/controllers/story_hook_controller.dart';

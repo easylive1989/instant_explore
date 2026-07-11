@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
-import 'package:context_app/features/explore/presentation/extensions/place_category_extension.dart';
+import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';

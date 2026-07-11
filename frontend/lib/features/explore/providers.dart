@@ -13,6 +13,9 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/settings/providers.dart';
 
+// Feature 公開介面：providers.dart 得 re-export 精選元件供他 feature 使用。
+export 'presentation/extensions/place_category_extension.dart';
+
 // Infrastructure Providers
 final locationServiceProvider = Provider<LocationService>((ref) {
   return GeolocatorService();
