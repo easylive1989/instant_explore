@@ -4,6 +4,9 @@ import 'package:context_app/features/saved_locations/domain/repositories/saved_l
 import 'package:context_app/features/sync/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Feature 公開介面：儲存地點 FAB 供 explore 頁面掛載。
+export 'presentation/widgets/saved_locations_fab.dart';
+
 /// Singleton repository provider.
 final savedLocationsRepositoryProvider = Provider<SavedLocationsRepository>((
   ref,

@@ -1,7 +1,6 @@
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
-import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_fab.dart';
 import 'package:context_app/features/saved_locations/presentation/widgets/saved_locations_sheet.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
