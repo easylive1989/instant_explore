@@ -52,6 +52,8 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
   data / domain / presentation 分層）。
 - 依賴規則：feature 之間只能跨引他 feature 的 domain 與 `providers.dart`
   （視為該 feature 的公開介面）；data / presentation 不得跨 feature 引用。
+  被跨 feature 重用的元件由該 feature 的 providers.dart 明文 re-export；
+  守門測試在 frontend/test/architecture/dependency_rules_test.dart。
   `app/` 僅得以 composition root 身分（router、shell）引用 features；
   `core/`、`shared/` 不依賴 `features/`。
 - 技術選型：Riverpod（`Notifier` / `AsyncNotifier`）、go_router、

@@ -17,10 +17,10 @@ final RegExp _featureImportRe = RegExp(
   "import 'package:context_app/(features/[^']+)'",
 );
 
-/// 已知跨 feature 違規：「來源檔 -> import 目標」。修一筆刪一筆，不得新增。
+/// 已知跨 feature 違規：「來源檔 -> import 目標」。已清零；不得新增。
 const Set<String> _pendingCrossFeature = {};
 
-/// app/ 中已知違規檔案（整檔豁免）。修復後清空。
+/// app/ 中已知違規檔案（整檔豁免）。已清零；不得新增。
 const Set<String> _pendingAppFiles = {};
 
 /// app/ 中允許引用 features 的 composition root（檔案或目錄前綴）。
