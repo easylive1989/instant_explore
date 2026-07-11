@@ -56,7 +56,7 @@ scripts/build_video.sh <YYYY-MM-DD>              # music-forward (-20 LUFS)
 # 3b. 語音版（zh-TW 旁白，逐 beat 同步）-> daily_video/<date>/final.mp4
 #     先在 story.json 每拍填 `narration`（口說版，見 Step 2），再：
 cd ../../../scripts && uv run python -m reel_voiceover <YYYY-MM-DD>
-#     离線 say（不吃 Gemini 配額）：… -m reel_voiceover <date> --engine say
+#     離線 say（不吃 Gemini 配額）：… -m reel_voiceover <date> --engine say
 #     改一句只重唸一句（逐拍快取）；--force-tts 全部重唸
 ```
 
@@ -90,7 +90,7 @@ to read in 30s and too long for a voiceover to keep pace. Edit each beat's
 | Live preview / tweak | `npx remotion studio` |
 | One-frame check | `npx remotion still Cinematic out.png --frame=90 --scale=0.5` |
 | Build final | `scripts/build_video.sh <date> [--style S] [--bgm F] [--lufs N]` |
-| Build voiced (final.mp4) | `cd scripts && uv run python -m reel_voiceover <date> [--engine say] [--force-tts]` |
+| Build voiced (final.mp4) | `cd ../../../scripts && uv run python -m reel_voiceover <date> [--engine say] [--force-tts]` |
 | Output | `marketing/outputs/daily_video/<date>/cinematic.mp4` |
 
 ## Common Mistakes
@@ -103,7 +103,7 @@ to read in 30s and too long for a voiceover to keep pace. Edit each beat's
 - **Logo detail (the trail) lost** → use `public/logo-lockup-white.png`
   (blue strokes → white, light fill → transparent). Don't flatten the whole
   logo to solid white; that swallows the trail.
-- **BGM too loud under a planned voiceover** → build with `--lufs -28`.
+- **BGM too loud under the voiceover** → the voiced flow (`reel_voiceover`) already builds the bed at `--lufs -28` automatically; only reach for a manual `--lufs -28` on the music-only `build_video.sh` path.
 - **ffmpeg has no `drawtext`/libass here** → all text is Remotion (or PIL
   overlays), never ffmpeg drawtext.
 
