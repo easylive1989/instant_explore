@@ -16,7 +16,7 @@ FRONTEND_DIR = REPO_ROOT / "frontend"
 BACKEND_DIR = REPO_ROOT / "backend"
 PUBLISHER_DIR = REPO_ROOT / "publisher"
 
-SETUP_DOC = "docs/init/dashboard-notion-setup.md"
+SETUP_DOC = "docs/init/dashboard-setup.md"
 
 
 def load_env() -> None:

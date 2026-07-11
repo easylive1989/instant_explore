@@ -7,11 +7,13 @@ from collections.abc import Callable
 
 from ..config import REPO_ROOT
 
+# 每個服務依序嘗試候選 workflow 檔（後者為改名前的舊檔，GitHub 的 run
+# 歷史跟著舊 workflow 走，改名後新檔查不到成功記錄）
 _WORKFLOWS = {
-    "backend": "deploy-backend.yml",
-    "publisher": "deploy-publisher.yml",
-    "landing": "deploy-landing.yml",
-    "app": "deploy-app.yml",
+    "backend": ["deploy-backend.yml"],
+    "publisher": ["deploy-publisher.yml"],
+    "landing": ["deploy-landing.yml"],
+    "app（商店上架）": ["deploy-app.yml", "deploy.yml"],
 }
 
 
@@ -26,8 +28,9 @@ def _gh_last_success(workflow_file: str) -> dict | None:
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
-        check=True,
     )
+    if proc.returncode != 0:  # workflow 不存在（如已無舊檔歷史）視同無記錄
+        return None
     runs = json.loads(proc.stdout).get("workflow_runs", [])
     return runs[0] if runs else None
 
@@ -54,8 +57,10 @@ def collect(
     behind_count: Callable[[str], int] = _behind_count,
 ) -> dict:
     services = []
-    for service, workflow_file in _WORKFLOWS.items():
-        run = gh_last_success(workflow_file)
+    for service, candidates in _WORKFLOWS.items():
+        run = next(
+            (r for f in candidates if (r := gh_last_success(f)) is not None), None
+        )
         if run is None:
             services.append(
                 {

@@ -1,14 +1,15 @@
-"""進入點與 orchestrator：收集各區塊（含快取與錯誤隔離）後更新 Notion 面板。"""
+"""進入點與 orchestrator：收集各區塊（含快取與錯誤隔離）後產生 HTML 面板。"""
 from __future__ import annotations
 
 import argparse
 import json
+import webbrowser
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from . import notion_writer
-from .config import OUT_DATA_DIR, load_env, require_env
+from . import render
+from .config import DASHBOARD_DIR, OUT_DATA_DIR, load_env
 
 
 def _registry() -> dict[str, Callable[[], dict]]:
@@ -88,10 +89,10 @@ def gather(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="更新 Lorescape 產品面板（Notion）")
+    parser = argparse.ArgumentParser(description="產生 Lorescape 產品面板（本地 HTML）")
     parser.add_argument("--skip-tests", action="store_true", help="跳過跑測試，改用上次快取")
     parser.add_argument("--only", help="只刷新這些區塊（逗號分隔），其餘用快取")
-    parser.add_argument("--dry-run", action="store_true", help="只收集與組 blocks，不寫 Notion")
+    parser.add_argument("--no-open", action="store_true", help="產生後不自動開瀏覽器")
     args = parser.parse_args()
 
     load_env()
@@ -114,18 +115,8 @@ def main() -> None:
         status = "❌ " + data["errors"][name] if name in data["errors"] else "✅"
         print(f"  {name}: {status}")
 
-    if args.dry_run:
-        counts = {
-            "主頁": len(notion_writer.build_main_blocks(data)),
-            "Backlog": len(notion_writer.build_backlog_blocks(data)),
-            "測試": len(notion_writer.build_tests_blocks(data)),
-            "產品數據": len(notion_writer.build_metrics_blocks(data)),
-        }
-        features = len((data.get("backlog") or {}).get("features", []))
-        print(f"--dry-run：{counts}，features rows: {features}，不寫 Notion")
-        return
-
-    token = require_env("NOTION_TOKEN")
-    page_id = require_env("NOTION_DASHBOARD_PAGE_ID")
-    notion_writer.sync(token, page_id, data)
-    print(f"已更新 Notion 面板：https://notion.so/{page_id.replace('-', '')}")
+    out_path = DASHBOARD_DIR / "out" / "index.html"
+    out_path.write_text(render.build_html(data), encoding="utf-8")
+    print(f"面板已產生：{out_path}")
+    if not args.no_open:
+        webbrowser.open(out_path.as_uri())
