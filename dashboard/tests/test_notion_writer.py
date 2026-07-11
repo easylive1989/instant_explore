@@ -1,7 +1,16 @@
-"""notion_writer 的 blocks 組裝與整頁重寫測試。"""
+"""notion_writer 的 blocks 組裝、feature 屬性映射與頁面同步測試。"""
 import requests_mock as rm_lib
 
-from lorescape_dashboard.notion_writer import build_blocks, update_page
+from lorescape_dashboard.notion_writer import (
+    NotionClient,
+    build_backlog_blocks,
+    build_main_blocks,
+    build_metrics_blocks,
+    build_tests_blocks,
+    feature_properties,
+    metrics_db_properties,
+    metrics_row_properties,
+)
 
 DATA = {
     "generated_at": "2026-07-11 21:30",
@@ -83,104 +92,177 @@ DATA = {
 }
 
 
-def _types(blocks):
-    return [b["type"] for b in blocks]
+def _texts(blocks):
+    out = []
+    for b in blocks:
+        payload = b.get(b["type"], {})
+        for rt in payload.get("rich_text", []):
+            out.append(rt["text"]["content"])
+    return out
 
 
-class TestBuildBlocks:
+class TestBuildMainBlocks:
     def test_頂部為健康燈號_column_list(self):
-        blocks = build_blocks(DATA)
+        blocks = build_main_blocks(DATA)
         assert blocks[0]["type"] == "column_list"
-        columns = blocks[0]["column_list"]["children"]
-        assert len(columns) >= 3
-        assert all(c["type"] == "column" for c in columns)
+        assert len(blocks[0]["column_list"]["children"]) >= 3
 
-    def test_含所有區塊標題(self):
-        blocks = build_blocks(DATA)
-        headings = [
-            b["heading_1"]["rich_text"][0]["text"]["content"]
-            for b in blocks
-            if b["type"] == "heading_1"
-        ]
-        joined = "".join(headings)
-        for keyword in ["Epic", "Backlog", "部署", "測試", "E2E", "產品數據", "每日故事"]:
-            assert keyword in joined, keyword
-
-    def test_表格_ragged_rows_補齊到表寬(self):
-        # Sheets API 會裁掉尾端空欄；metrics recent_rows 可能比 headers 短
-        data = {
-            **DATA,
-            "metrics": {
-                "tabs": [
-                    {
-                        "name": "stores", "latest_date": "2026-07-10",
-                        "headers": ["date", "a", "b", "note"],
-                        "stats": {"a": {"latest": 1.0, "week_ago": None, "delta": None}},
-                        "recent_rows": [["2026-07-10", "1"], ["2026-07-09", "1", "2", "n", "extra"]],
-                    }
-                ]
-            },
-        }
-        blocks = build_blocks(data)
-        tables = [b for b in blocks if b["type"] == "table"]
-        stores = tables[-1]
-        for row in stores["table"]["children"]:
-            assert len(row["table_row"]["cells"]) == 4
+    def test_主頁只含總覽_部署_每日故事(self):
+        blocks = build_main_blocks(DATA)
+        joined = "".join(_texts(blocks))
+        assert "部署狀態" in joined
+        assert "每日故事" in joined
+        assert "F9" not in joined  # backlog 細節不在主頁
+        assert "gsc" not in joined  # metrics 細節不在主頁
 
     def test_部署表格寬度與服務數(self):
-        blocks = build_blocks(DATA)
+        blocks = build_main_blocks(DATA)
         table = next(b for b in blocks if b["type"] == "table")
         assert table["table"]["table_width"] == 4
-        # header + 2 services
-        assert len(table["table"]["children"]) == 3
-
-    def test_backlog_feature_是_toggle_含_to_do(self):
-        blocks = build_blocks(DATA)
-        toggle = next(b for b in blocks if b["type"] == "toggle")
-        children = toggle["toggle"]["children"]
-        assert children[0]["type"] == "to_do"
-        assert children[0]["to_do"]["checked"] is True
-
-    def test_失敗測試列出名稱(self):
-        blocks = build_blocks(DATA)
-        texts = [
-            rt["text"]["content"]
-            for b in blocks
-            if b["type"] == "bulleted_list_item"
-            for rt in b["bulleted_list_item"]["rich_text"]
-        ]
-        assert any("test_bad" in t for t in texts)
-
-    def test_區塊錯誤時顯示錯誤_callout(self):
-        data = {**DATA, "metrics": None, "errors": {"metrics": "no credentials"}}
-        blocks = build_blocks(data)
-        callouts = [
-            rt["text"]["content"]
-            for b in blocks
-            if b["type"] == "callout"
-            for rt in b["callout"]["rich_text"]
-        ]
-        assert any("no credentials" in t for t in callouts)
+        assert len(table["table"]["children"]) == 3  # header + 2 services
 
 
-class TestUpdatePage:
-    def test_先清空再分批_append(self, requests_mock: rm_lib.Mocker):
-        page_id = "39a8303f78f780f3bdc4d8e3eb1545a1"
+class TestBuildBacklogBlocks:
+    def test_含_epic_進度與待部署(self):
+        joined = "".join(_texts(build_backlog_blocks(DATA)))
+        assert "E1" in joined
+        assert "倒數 24 天" in joined
+        assert "待部署" in joined
+
+    def test_無資料時顯示錯誤_callout(self):
+        data = {**DATA, "backlog": None, "errors": {"backlog": "boom"}}
+        joined = "".join(_texts(build_backlog_blocks(data)))
+        assert "boom" in joined
+
+
+class TestBuildTestsBlocks:
+    def test_統計表_失敗清單_e2e_案例(self):
+        blocks = build_tests_blocks(DATA)
+        joined = "".join(_texts(blocks))
+        assert "test_bad" in joined
+        assert "generate narration success" in joined
+        table = next(b for b in blocks if b["type"] == "table")
+        assert len(table["table"]["children"]) == 3  # header + 2 suites
+
+
+class TestBuildMetricsBlocks:
+    def test_數字卡_無表格_表格由_database_取代(self):
+        blocks = build_metrics_blocks(DATA)
+        assert any(b["type"] == "column_list" for b in blocks)
+        assert not any(b["type"] == "table" for b in blocks)
+
+
+class TestMetricsDb:
+    def test_schema_數值欄為_number_note_為文字(self):
+        props = metrics_db_properties(["date", "clicks", "note"])
+        assert props["日期"] == {"title": {}}
+        assert props["clicks"] == {"number": {}}
+        assert props["note"] == {"rich_text": {}}
+
+    def test_row_properties(self):
+        props = metrics_row_properties(
+            ["date", "clicks", "ctr", "note"], ["2026-07-10", "3", "0.50%", "hi"]
+        )
+        assert props["日期"]["title"][0]["text"]["content"] == "2026-07-10"
+        assert props["clicks"]["number"] == 3.0
+        assert props["ctr"]["number"] == 0.5
+        assert props["note"]["rich_text"][0]["text"]["content"] == "hi"
+
+    def test_ragged_row_缺欄與空值跳過(self):
+        props = metrics_row_properties(["date", "clicks", "note"], ["2026-07-10", ""])
+        assert "clicks" not in props
+        assert "note" not in props
+
+
+class TestFeatureProperties:
+    def test_屬性映射(self):
+        props = feature_properties(DATA["backlog"]["features"][0], "2026-07")
+        assert props["Feature"]["title"][0]["text"]["content"] == "景點 SEO 著陸頁"
+        assert props["編號"]["rich_text"][0]["text"]["content"] == "F9"
+        assert props["編號數"]["number"] == 9
+        assert props["Epic"]["select"]["name"] == "E1"
+        assert props["狀態"]["select"]["name"] == "進行中"
+        assert props["進度"]["rich_text"][0]["text"]["content"] == "1/2"
+
+    def test_無_epic_時不設_select(self):
+        feature = {**DATA["backlog"]["features"][0], "epic": None}
+        assert feature_properties(feature, "2026-07")["Epic"] == {"select": None}
+
+    def test_sprint_未完成跟著當前月(self):
+        props = feature_properties(
+            DATA["backlog"]["features"][0], "2026-08", existing_sprint="2026-07"
+        )
+        assert props["Sprint"]["select"]["name"] == "2026-08"
+        assert props["本期"]["checkbox"] is True
+
+    def test_本期_已完成過月後為_false(self):
+        feature = {**DATA["backlog"]["features"][0], "done": True, "status": "已完成"}
+        props = feature_properties(feature, "2026-08", existing_sprint="2026-07")
+        assert props["本期"]["checkbox"] is False
+
+    def test_sprint_已完成鎖在完成月_從狀態文字解析(self):
+        feature = {
+            **DATA["backlog"]["features"][0],
+            "done": True, "status": "已完成（2026-06-08，全部子步驟完成）",
+        }
+        props = feature_properties(feature, "2026-07")
+        assert props["Sprint"]["select"]["name"] == "2026-06"
+
+    def test_sprint_已完成且既有值時不改動(self):
+        feature = {**DATA["backlog"]["features"][0], "done": True, "status": "已完成"}
+        props = feature_properties(feature, "2026-08", existing_sprint="2026-07")
+        assert props["Sprint"]["select"]["name"] == "2026-07"
+
+    def test_sprint_已完成無日期無既有值用當前月(self):
+        feature = {**DATA["backlog"]["features"][0], "done": True, "status": "已完成"}
+        props = feature_properties(feature, "2026-07")
+        assert props["Sprint"]["select"]["name"] == "2026-07"
+
+
+class TestNotionClient:
+    def test_wipe_content_保留子頁面與資料庫(self, requests_mock: rm_lib.Mocker):
         requests_mock.get(
-            f"https://api.notion.com/v1/blocks/{page_id}/children",
-            json={"results": [{"id": "b1"}, {"id": "b2"}], "has_more": False},
+            "https://api.notion.com/v1/blocks/p1/children",
+            json={
+                "results": [
+                    {"id": "b1", "type": "paragraph"},
+                    {"id": "b2", "type": "child_page"},
+                    {"id": "b3", "type": "child_database"},
+                    {"id": "b4", "type": "table"},
+                ],
+                "has_more": False,
+            },
         )
         requests_mock.delete(rm_lib.ANY, json={})
+        NotionClient("tok").wipe_content("p1")
+        deleted = [
+            r.url.split("/")[-1]
+            for r in requests_mock.request_history
+            if r.method == "DELETE"
+        ]
+        assert deleted == ["b1", "b4"]
+
+    def test_append_分批(self, requests_mock: rm_lib.Mocker):
         requests_mock.patch(
-            f"https://api.notion.com/v1/blocks/{page_id}/children", json={}
+            "https://api.notion.com/v1/blocks/p1/children", json={}
         )
-
         blocks = [{"type": "paragraph", "paragraph": {"rich_text": []}}] * 90
-        update_page("tok", page_id, blocks, chunk_size=40)
-
-        deletes = [r for r in requests_mock.request_history if r.method == "DELETE"]
+        NotionClient("tok").append("p1", blocks, chunk_size=40)
         appends = [r for r in requests_mock.request_history if r.method == "PATCH"]
-        assert len(deletes) == 2
-        assert len(appends) == 3  # 90 / 40 → 40+40+10
+        assert len(appends) == 3
         assert appends[0].headers["Authorization"] == "Bearer tok"
         assert "Notion-Version" in appends[0].headers
+
+    def test_find_child_page_以標題比對(self, requests_mock: rm_lib.Mocker):
+        requests_mock.get(
+            "https://api.notion.com/v1/blocks/p1/children",
+            json={
+                "results": [
+                    {"id": "c1", "type": "child_page", "child_page": {"title": "📋 Backlog"}},
+                ],
+                "has_more": False,
+            },
+        )
+        client = NotionClient("tok")
+        assert client.find_child_page("p1", "📋 Backlog") == "c1"
+        assert client.find_child_page("p1", "🧪 測試") is None

@@ -114,12 +114,18 @@ def main() -> None:
         status = "❌ " + data["errors"][name] if name in data["errors"] else "✅"
         print(f"  {name}: {status}")
 
-    blocks = notion_writer.build_blocks(data)
     if args.dry_run:
-        print(f"--dry-run：組出 {len(blocks)} 個頂層 blocks，不寫 Notion")
+        counts = {
+            "主頁": len(notion_writer.build_main_blocks(data)),
+            "Backlog": len(notion_writer.build_backlog_blocks(data)),
+            "測試": len(notion_writer.build_tests_blocks(data)),
+            "產品數據": len(notion_writer.build_metrics_blocks(data)),
+        }
+        features = len((data.get("backlog") or {}).get("features", []))
+        print(f"--dry-run：{counts}，features rows: {features}，不寫 Notion")
         return
 
     token = require_env("NOTION_TOKEN")
     page_id = require_env("NOTION_DASHBOARD_PAGE_ID")
-    notion_writer.update_page(token, page_id, blocks)
+    notion_writer.sync(token, page_id, data)
     print(f"已更新 Notion 面板：https://notion.so/{page_id.replace('-', '')}")

@@ -12,7 +12,9 @@
 ## 2. 指定面板頁面並分享給 integration
 
 1. 在 Notion 建（或選）一個空白頁面當面板。
-   ⚠️ 此頁內容**每次更新會被整頁清空重寫**，不要放手動筆記。
+   ⚠️ 此頁與其子頁的**內容 blocks 每次更新會清空重寫**，不要放手動筆記；
+   子頁面與 databases（Features、各數據來源）會保留並持續累積，
+   你在 database 上自建的 view / 排序 / 欄位也會保留。
 2. 頁面右上 `…` → 「Connections」→ 加入剛建立的 integration。
 3. 從頁面 URL 取得 page ID：網址結尾的 32 碼 hex（有無 `-` 皆可）。
 

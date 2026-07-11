@@ -105,6 +105,7 @@ def shape_tab(
         "latest_date": latest[0],
         "stats": stats,
         "recent_rows": list(reversed(recent))[:7],
+        "rows_30d": recent,
     }
 
 

@@ -42,6 +42,12 @@ class TestShapeTab:
             "2026-07-10", "2026-07-09", "2026-07-04",
         ]
 
+    def test_rows_30d_為窗內全列_舊到新(self):
+        tab = shape_tab("gsc", VALUES, today=TODAY)
+        assert [r[0] for r in tab["rows_30d"]] == [
+            "2026-07-04", "2026-07-09", "2026-07-10",
+        ]
+
     def test_只留近三十天的資料算統計(self):
         # 6/1 在 30 天外 → week_ago 找不到 30 天內更早的列時仍可用界外列補
         tab = shape_tab("gsc", VALUES, today=TODAY, days=7)
