@@ -138,7 +138,7 @@ helper 最後印出：
 IG_USER_ID=17841402312650550
 META_PAGE_ACCESS_TOKEN=<永久粉專 token>
 ```
-覆蓋 `scripts/.env` 同名兩行。IG token 同時也在 `backend/.env`（伺服器發文用），
+覆蓋 `scripts/.env` 同名兩行。IG token 同時也在 `publisher/.env`（伺服器發文用），
 輪替時兩個檔案都要更新。
 
 > 手動備援：在 Explorer 用 user token 跑

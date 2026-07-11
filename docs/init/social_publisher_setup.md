@@ -8,13 +8,17 @@
 
 ## 系統架構說明
 
-後端（`backend/`）有一個排程發文系統：
-- 每日由 APScheduler cron job 觸發
-- 從 Supabase 取出待發文的 story
-- 透過 Discord bot 確認（人工 ✅/❌ 審核）後，自動發佈到 Instagram
-- 相關程式碼位於 `backend/src/lorescape_backend/social/`
+> 註：2026-07-11 隨 `docs/adr/0004-split-social-publisher-from-backend.md`
+> 拆分，本節描述的發文系統已搬到頂層 `publisher/` 專案（獨立 image /
+> `.env` / docker-compose），`backend/` 現在只服務 App 的 narration API。
 
-### 需要填入 `backend/.env` 的金鑰
+`publisher/` 有一個常駐發文系統：
+- Daily story 產線產生待發文 story
+- 常駐 Discord Gateway bot 確認（人工按鈕審核：✅ 核准 / 🕘 排程 / 🚀 立即
+  發布 / ❌ 拒絕）後，自動發佈到 Instagram
+- 相關程式碼位於 `publisher/src/lorescape_publisher/`
+
+### 需要填入 `publisher/.env` 的金鑰
 
 ```dotenv
 # ── Instagram Business via Meta Graph API ─────────────────────────────────────
@@ -27,7 +31,7 @@ DISCORD_REVIEW_CHANNEL_ID=
 DISCORD_APPROVER_IDS=
 ```
 
-範本見 `backend/.env.example`。
+範本見 `publisher/.env.example`。
 
 ---
 
@@ -51,7 +55,7 @@ DISCORD_APPROVER_IDS=
 
 ## 已完成的項目
 
-### 1. `backend/.env.example` 更新
+### 1. `publisher/.env.example` 更新
 
 已加入所有社群發文所需的環境變數（Instagram、Discord review bot、品牌 handle）。
 
@@ -68,7 +72,7 @@ python scripts/meta_token_helper.py --platform instagram
 
 - 在 Meta Developer Console 建立了「Lorescape」App
 - 新增 Instagram API、Facebook Pages 兩個 use case
-- 已在 `backend/src/lorescape_backend/social/` 實作 Instagram 的發文邏輯
+- 已在 `publisher/src/lorescape_publisher/` 實作 Instagram 的發文邏輯
 
 ---
 
@@ -111,7 +115,7 @@ Script 會自動：
 6. 自動解析 IG Business Account ID
 7. 印出要填入 `.env` 的兩行
 
-最後填入 `backend/.env`：
+最後填入 `publisher/.env`：
 ```
 IG_USER_ID=<數字>
 META_PAGE_ACCESS_TOKEN=<長字串>
@@ -153,8 +157,8 @@ META_PAGE_ACCESS_TOKEN=<長字串>
 
 | 檔案 | 說明 |
 |------|------|
-| `backend/.env.example` | 所有環境變數範本 |
+| `publisher/.env.example` | 所有環境變數範本 |
 | `scripts/meta_token_helper.py` | Meta token 互動換發工具 |
-| `backend/src/lorescape_backend/social/instagram.py` | Instagram 發文邏輯 |
-| `backend/src/lorescape_backend/social/publisher.py` | 21:00 publish job orchestrator |
-| `backend/src/lorescape_backend/config.py` | 設定載入（含 instagram_enabled 判斷）|
+| `publisher/src/lorescape_publisher/instagram.py` | Instagram 發文邏輯 |
+| `publisher/src/lorescape_publisher/bot.py` + `bot_flows/` | 常駐 Discord Gateway bot；按鈕審核與排程發布（21:00 固定 cron 的 orchestrator 已於拆分前的 F8 移除）|
+| `publisher/src/lorescape_publisher/config.py` | 設定載入（含 review_enabled 判斷）|

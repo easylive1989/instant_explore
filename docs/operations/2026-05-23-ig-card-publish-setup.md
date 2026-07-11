@@ -282,6 +282,12 @@ cd backend && uv run python -m lorescape_backend.social.publisher <YYYY-MM-DD>
 ssh root@<vps> 'cd /opt/lorescape && docker compose exec backend python -m lorescape_backend.social.publisher <YYYY-MM-DD>'
 ```
 
+> **2026-07-11 更新**：上面這支 legacy 預設卡片 `publisher` CLI 已隨
+> `docs/adr/0004-split-social-publisher-from-backend.md` 的拆分整支刪除
+> （不是搬到 `publisher/`），此段落僅保留作為當時設定過程的歷史紀錄。目前
+> IG 發布走 wander carousel + reel，由常駐 Discord bot（`publisher/` 專案）
+> 審核／發布，見 `.claude/skills/lorescape-wander-carousel/SKILL.md`。
+
 ---
 
 ## TL;DR

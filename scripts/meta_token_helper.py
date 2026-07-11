@@ -3,7 +3,7 @@
 
 Run this script once to exchange a short-lived token for the long-lived
 tokens needed by the automated Instagram posting system, then paste the
-values into backend/.env.
+values into publisher/.env.
 
 Usage
 -----
@@ -11,12 +11,12 @@ Usage
   python scripts/meta_token_helper.py --platform instagram
 
 The script walks you through each step interactively and prints the exact
-env-var lines to copy into backend/.env at the end.
+env-var lines to copy into publisher/.env at the end.
 
 Prerequisites
 -------------
   pip install requests
-  (already a dependency of lorescape-backend)
+  (already a dependency of lorescape-publisher)
 
 Reference
 ---------
@@ -57,7 +57,7 @@ def _success(label: str, value: str) -> None:
 
 def _env_block(pairs: list[tuple[str, str]]) -> None:
     print("\n" + "═" * 60)
-    print("  Copy these lines into  backend/.env")
+    print("  Copy these lines into  publisher/.env")
     print("═" * 60)
     for key, val in pairs:
         print(f"  {key}={val}")
@@ -198,7 +198,7 @@ def instagram_flow() -> None:
 
     print(textwrap.dedent("""
   Note: The Page access token above does NOT expire as long as it was
-  generated from a long-lived user token. Store it securely in backend/.env
+  generated from a long-lived user token. Store it securely in publisher/.env
   and do not commit it to version control.
     """))
 

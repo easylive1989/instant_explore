@@ -35,9 +35,9 @@ Set these four env vars before running any recipe. The user sets them via Claude
 | Env var | Used for | How to obtain |
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | PostgREST queries (bypasses RLS) | Supabase Dashboard → Project Settings → API → `service_role` (secret) |
-| `DISCORD_BOT_TOKEN` | Discord REST | Same token VPS uses (VPS `.env`) |
-| `DISCORD_REVIEW_CHANNEL_ID` | Channel scoping | VPS `.env` |
-| `DISCORD_APPROVER_IDS` | Reaction vote weighting | VPS `.env` (comma-separated) |
+| `DISCORD_BOT_TOKEN` | Discord REST | Same token VPS uses (VPS `publisher/.env`, since the 2026-07-11 split — see `docs/adr/0004-split-social-publisher-from-backend.md`) |
+| `DISCORD_REVIEW_CHANNEL_ID` | Channel scoping | VPS `publisher/.env` |
+| `DISCORD_APPROVER_IDS` | Reaction vote weighting | VPS `publisher/.env` (comma-separated) |
 
 Verify (length-check only, never echo values):
 
@@ -91,10 +91,10 @@ VPS = headSha of the **most-recent `success`**. A failed `schedule` run on Frida
 
 ```bash
 DEPLOYED_SHA=<sha-from-step-1>
-git log "$DEPLOYED_SHA..HEAD" --oneline -- backend/ supabase/
+git log "$DEPLOYED_SHA..HEAD" --oneline -- backend/ publisher/ supabase/
 ```
 
-If a `feat(review)` / `feat(publisher)` commit is undeployed, the publisher behavior on VPS may differ from `master`. See Gotchas → "REVIEW/PUBLISH language depends on deployed commit".
+If a `feat(review)` / `feat(publisher)` commit is undeployed, the publisher behavior on VPS may differ from `master`. See Gotchas → "REVIEW/PUBLISH language depends on deployed commit". Note: since the 2026-07-11 split (`docs/adr/0004-split-social-publisher-from-backend.md`), the daily-story/bot/IG code lives under `publisher/` and deploys via its own `deploy-publisher.yml` workflow, independent of whatever `backend/`'s deploy workflow last shipped — check both if Step 1's `gh run list` is scoped to only one of them.
 
 ### Step 3 — Today's rows exist & are populated?
 

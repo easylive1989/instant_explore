@@ -50,8 +50,8 @@ description: Use when the user wants to plan or refresh the daily place-story Re
    # cd scripts && uv run python - <<'EOF'
    from pathlib import Path
    from dotenv import load_dotenv
-   load_dotenv(Path("../backend/.env"))
-   from lorescape_backend.config import Config
+   load_dotenv(Path("../publisher/.env"))
+   from lorescape_publisher.config import Config
    from supabase import create_client
    config = Config.from_env()
    sb = create_client(config.supabase_url, config.supabase_service_role_key)

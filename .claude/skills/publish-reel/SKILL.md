@@ -1,6 +1,6 @@
 ---
 name: publish-reel
-description: Use when the user wants to manually publish a specific day's finished video from marketing/outputs/daily_video/<date>/ to Instagram Reels using the local IG token in backend/.env — e.g. "發布某天的影片到 IG reels", "把今天的影片發到 Reels", "publish reel for 2026-06-22". Local-only, does not touch the server's scheduled publish job.
+description: Use when the user wants to manually publish a specific day's finished video from marketing/outputs/daily_video/<date>/ to Instagram Reels using the local IG token in publisher/.env — e.g. "發布某天的影片到 IG reels", "把今天的影片發到 Reels", "publish reel for 2026-06-22". Local-only, does not touch the server's scheduled publish job.
 ---
 
 # Publish a daily video to Instagram Reels (local, manual fallback)
@@ -19,7 +19,7 @@ Discord 審核（影片訊息，與 carousel 審核**各自獨立**）；✅ 後
 
 ## 前置條件
 
-- `backend/.env` 已填好 `IG_USER_ID`、`META_PAGE_ACCESS_TOKEN`、
+- `publisher/.env` 已填好 `IG_USER_ID`、`META_PAGE_ACCESS_TOKEN`、
   `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`（取得方式見
   `docs/init/social_publisher_setup.md`）。
 - 目標日期的 `marketing/outputs/daily_video/<date>/final.mp4` 已存在。
@@ -75,11 +75,11 @@ service-role curl）：
    - `rejected` = 被按了 ❌
    - `failed` 的 `error` 欄有 Graph API 錯誤訊息；`published` 表示其實已發出
 3. **Discord 審核訊息**：確認 ✅ 是核准者本人按的（bot 種的 ✅ 不算）。
-4. **publisher log**：`ssh lorescape-vps "cd /opt/lorescape/backend && docker compose logs --since 24h publisher"`。
+4. **publisher log**：`ssh lorescape-vps "cd /opt/lorescape/publisher && docker compose logs --since 24h publisher"`。
 
 手動發布問題：
 
-- `Instagram not configured`：`backend/.env` 缺 `IG_USER_ID` 或
+- `Instagram not configured`：`publisher/.env` 缺 `IG_USER_ID` 或
   `META_PAGE_ACCESS_TOKEN`。
 - `final.mp4 not found`：確認該天資料夾與檔名，或用 `--video` 指定。
 - `No daily_stories row ... and no narration.txt`：用 `--caption` 提供文案。

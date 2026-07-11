@@ -100,11 +100,11 @@ day is planned by IG data in
 2. **Select that place by title** (not FIFO):
 
    ```bash
-   cd backend && uv run python -c "
+   cd publisher && uv run python -c "
    from dotenv import load_dotenv; import os; load_dotenv()
    os.environ.pop('GOOGLE_API_KEY', None)
    from supabase import create_client
-   from lorescape_backend.config import Config
+   from lorescape_publisher.config import Config
    sb = create_client(Config.from_env().supabase_url, Config.from_env().supabase_service_role_key)
    title = 'Himeji Castle'  # ← 換成 calendar 當日的 DB 標題
    row = sb.table('daily_story_places').select('id, wikipedia_title_en').eq('wikipedia_title_en', title).single().execute().data
@@ -124,17 +124,17 @@ to `place_picker.pick_next_place(sb)`.
 
 > **Execution contexts.** The ops CLIs (`manual_daily_story`,
 > `unsplash_images`, `daily_video_post`) run from the `scripts/` uv project
-> (`cd scripts && uv run python -m <module>`). The inline backend-library
-> snippets in Steps 1–2 call `lorescape_backend` directly, so run them in
-> the backend env (`cd backend && uv run python …`), where bare
-> `load_dotenv()` picks up `backend/.env`.
+> (`cd scripts && uv run python -m <module>`). The inline library snippets
+> in Steps 1–2 call `lorescape_publisher` directly, so run them in the
+> publisher env (`cd publisher && uv run python …`), where bare
+> `load_dotenv()` picks up `publisher/.env`.
 
 ### Step 2 — Fetch Wikipedia material
 
-Run in the backend env (`cd backend && uv run python …`):
+Run in the publisher env (`cd publisher && uv run python …`):
 
 ```python
-from lorescape_backend.daily_story import wikipedia
+from lorescape_publisher.daily_story import wikipedia
 summary   = wikipedia.fetch_summary(title)
 intro     = wikipedia.fetch_intro_extract(title) or summary.extract
 lead      = wikipedia.fetch_lead_image(title)
@@ -547,17 +547,17 @@ slow Ken Burns zoom is available via `--ken-burns` but **off by default** —
 the Flow master usually already has camera motion, so only reach for it on
 static footage. Two TTS engines:
 
-- **`--engine gemini`** (default) — Gemini TTS via the backend's
-  `GEMINI_API_KEY` / GenaiSettings; default voice `Despina` (smooth
-  female — user-picked 2026-07-03 after auditioning in AI Studio).
-  Other options: `Kore`, `Aoede`, `Callirrhoe`, `Leda`, `Vindemiatrix`
-  (set with `--voice`). Pacing is steered by `--style` (default asks for a
-  warm, slightly-faster documentary tone). ⚠️ **Free tier = 10 TTS
-  requests/day per key** and each line is one request — and **flaky
-  empty responses (`content=None`) still burn quota**. The script
+- **`--engine gemini`** (default) — Gemini TTS via the publisher's
+  `GEMINI_API_KEY` / GenaiSettings (`publisher/.env`); default voice
+  `Despina` (smooth female — user-picked 2026-07-03 after auditioning in
+  AI Studio). Other options: `Kore`, `Aoede`, `Callirrhoe`, `Leda`,
+  `Vindemiatrix` (set with `--voice`). Pacing is steered by `--style`
+  (default asks for a warm, slightly-faster documentary tone). ⚠️ **Free
+  tier = 10 TTS requests/day per key** and each line is one request — and
+  **flaky empty responses (`content=None`) still burn quota**. The script
   handles both automatically: empty responses are retried (up to 4
   attempts), and on `429 RESOURCE_EXHAUSTED` it switches to the
-  **`GEMINI_API_KEY_2`** fallback key in `backend/.env` for the rest of
+  **`GEMINI_API_KEY_2`** fallback key in `publisher/.env` for the rest of
   the run. If both keys are exhausted: wait for the daily reset
   (midnight Pacific = 15:00 台北), switch to the Vertex backend
   (~$0.004/reel — needs `GOOGLE_CLOUD_PROJECT` + ADC or a service
@@ -638,7 +638,7 @@ press 🚀 立即發布 or approve + schedule a time via 🕘 排程.
 | Reel review + publish | `scripts/upload_reel_to_vps.sh {date}` rsyncs `final.mp4` + `narration.txt` to the VPS, then `send_reel_for_review` stages a pending `social_posts` row; the publish bot posts its own buttoned review (✅核准/🕘排程/🚀立即發布/❌拒絕), independent of the carousel's. Publishes on 🚀, or once an approved row's scheduled time arrives; a due-but-unapproved row just gets one nudge, no publish. State in `social_posts`; manual fallback = publish-reel skill |
 | Carousel 風格 | **固定 wander**（Step 8b）：照片用本次 daily_image、Claude 寫 slides.json 審稿後渲染、`send_carousel_for_review` 上傳 + 建 pending row（發布 bot 之後貼按鈕審核）；按鈕操作在 bot 貼的 wander 圖組訊息上，預設卡片訊息忽略 |
 | Overwriting a date | `publish --date X` upserts, so re-publishing the same date replaces it |
-| `review_state` | Starts `pending`; only changes if someone manually runs the legacy default-card publish job (`python -m lorescape_backend.social.publisher`, see `backend/README.md` back-fill steps) based on the Discord ✅/❌ reaction. Not touched by the wander carousel/reel bot flow — that state lives in `social_posts` |
+| `review_state` | Starts `pending`; historically only changed by the legacy default-card publish job (`python -m lorescape_backend.social.publisher`) based on the Discord ✅/❌ reaction — that CLI was deleted in the 2026-07-11 publisher split (see `docs/adr/0004-split-social-publisher-from-backend.md`), not carried over. Not touched by the wander carousel/reel bot flow — that state lives in `social_posts` |
 | IG review hand-off | `publish` posts the default card to Discord (sets `discord_message_id`); needs DISCORD_BOT_TOKEN + DISCORD_REVIEW_CHANNEL_ID + DISCORD_APPROVER_IDS, else skipped |
 | Env flags | `DAILY_STORY_GENERATE_ENABLED` (09:00 Gemini, keep OFF) and `DAILY_STORY_PUBLISH_ENABLED` (gates the publish bot's scheduled auto-publish loop; 🚀 立即發布 still works manually even when OFF; ON) — both fall back to legacy `DAILY_STORY_ENABLED` |
 | Languages | Always both `zh-TW` and `en` (App queries per language) |

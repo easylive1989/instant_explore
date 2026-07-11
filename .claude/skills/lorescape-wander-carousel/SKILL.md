@@ -27,7 +27,7 @@ description: Use when the user wants to publish a wander-style (dark
 2. **寫文案** `marketing/outputs/daily_carousel/<date>/slides.json` +
    `caption.txt`，**給使用者審稿，改到同意為止**（見下方文案規則）。
 3. **渲染**：
-   `cd backend && uv run python -m lorescape_backend.social.wander.renderer \
+   `cd publisher && uv run python -m lorescape_publisher.wander.renderer \
       ../marketing/outputs/daily_carousel/<date> <photos_dir>`
    請使用者打開 `slide_*.jpg` 目視確認；要調整就改 slides.json 重渲染。
 4. **送審**：

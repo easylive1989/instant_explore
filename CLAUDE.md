@@ -8,7 +8,8 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | 路徑 | 內容 |
 |---|---|
 | `frontend/` | Flutter App（iOS + Android），產品本體 |
-| `backend/` | Python FastAPI 服務：narration API（含訂閱 402 驗證）、每日故事、IG 發布 bot（Discord 審核）、訂閱 webhook。Docker 部署於 VPS |
+| `backend/` | Python FastAPI 服務（只服務 App）：narration API（含訂閱 402 驗證）、訂閱 webhook 與 reconcile。Docker 部署於 VPS |
+| `publisher/` | Social publisher（Python）：daily story 產線、Discord 審核 bot、IG 發布。獨立 image 與 .env，Docker 部署於 VPS |
 | `landing/` | Next.js 雙語官網 lorescape.app，含 `/place/[slug]` SEO 景點頁 |
 | `supabase/` | Supabase schema 與 migrations |
 | `marketing/` | 行銷產出與工具（子資料夾見下表） |
@@ -59,11 +60,26 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 
 ## Backend（Python FastAPI）
 
-- 程式在 `backend/src/lorescape_backend/`：narration、daily_story、social、
-  subscriptions、sources。
+- 程式在 `backend/src/lorescape_backend/`：narration、subscriptions、sources。
+  daily story 產線與 IG 發布 bot 已拆到頂層 `publisher/`（`lorescape_publisher`
+  套件），backend 不再依賴這兩塊。
 - 依賴用 uv 管理；測試 `uv run pytest`。
 - 部署：GitHub Actions `deploy-backend.yml`（手動觸發）→ VPS docker compose。
-  其他 workflow：`ci.yml`、`deploy-app.yml`（App 上架）、`deploy-landing.yml`。
+  其他 workflow：`ci.yml`、`deploy-app.yml`（App 上架）、`deploy-landing.yml`、
+  `deploy-publisher.yml`（`publisher/` 獨立部署，見下）。
+
+## Publisher（Python，社群發布）
+
+- 程式在 `publisher/src/lorescape_publisher/`：daily_story（產線 + Discord
+  審核貼文）、bot / bot_flows（常駐 Discord Gateway bot，四鈕審核與排程發
+  布）、card / wander（IG 圖卡 / wander carousel 渲染）、reel_publisher（IG
+  Reels 發布）。與 backend 各自獨立 image、`.env`、`docker-compose.yml`。
+- `story_prompt.py` / `genai.py` 與 backend 對應檔案是刻意保留的兩份複製（拆
+  分時接受分岔，換完全解耦），改動需人工同步兩邊，細節見
+  `docs/adr/0004-split-social-publisher-from-backend.md`。
+- 依賴用 uv 管理；測試 `uv run pytest`。
+- 部署：GitHub Actions `deploy-publisher.yml`（手動觸發）→ VPS docker
+  compose。VPS 一次性遷移步驟見 ADR 0004。
 
 ## 外部服務
 
