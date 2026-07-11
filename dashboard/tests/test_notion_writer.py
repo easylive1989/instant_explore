@@ -106,6 +106,27 @@ class TestBuildBlocks:
         for keyword in ["Epic", "Backlog", "部署", "測試", "E2E", "產品數據", "每日故事"]:
             assert keyword in joined, keyword
 
+    def test_表格_ragged_rows_補齊到表寬(self):
+        # Sheets API 會裁掉尾端空欄；metrics recent_rows 可能比 headers 短
+        data = {
+            **DATA,
+            "metrics": {
+                "tabs": [
+                    {
+                        "name": "stores", "latest_date": "2026-07-10",
+                        "headers": ["date", "a", "b", "note"],
+                        "stats": {"a": {"latest": 1.0, "week_ago": None, "delta": None}},
+                        "recent_rows": [["2026-07-10", "1"], ["2026-07-09", "1", "2", "n", "extra"]],
+                    }
+                ]
+            },
+        }
+        blocks = build_blocks(data)
+        tables = [b for b in blocks if b["type"] == "table"]
+        stores = tables[-1]
+        for row in stores["table"]["children"]:
+            assert len(row["table_row"]["cells"]) == 4
+
     def test_部署表格寬度與服務數(self):
         blocks = build_blocks(DATA)
         table = next(b for b in blocks if b["type"] == "table")

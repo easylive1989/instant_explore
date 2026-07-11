@@ -60,10 +60,14 @@ def _divider() -> dict:
 
 
 def _table(headers: list[str], rows: list[list[str]]) -> dict:
+    width = len(headers)
+
     def row(cells: list[str]) -> dict:
+        # Sheets API 會裁掉尾端空欄，補齊/截斷到表寬否則 Notion 回 400
+        padded = (list(cells) + [""] * width)[:width]
         return {
             "type": "table_row",
-            "table_row": {"cells": [[_rt(str(c))] for c in cells]},
+            "table_row": {"cells": [[_rt(str(c))] for c in padded]},
         }
 
     return {
@@ -414,4 +418,8 @@ def update_page(token: str, page_id: str, blocks: list[dict], chunk_size: int = 
             json={"children": blocks[start : start + chunk_size]},
             timeout=60,
         )
-        resp.raise_for_status()
+        if not resp.ok:
+            raise RuntimeError(
+                f"Notion append 失敗（blocks {start}–{start + chunk_size}）："
+                f"{resp.status_code} {resp.text[:500]}"
+            )
