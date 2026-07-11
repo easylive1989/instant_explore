@@ -1,10 +1,11 @@
 import 'package:context_app/features/auth/providers.dart';
-import 'package:context_app/features/journey/data/hive_journey_repository.dart';
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/domain/repositories/journey_repository.dart';
-import 'package:context_app/features/saved_locations/data/hive_saved_locations_repository.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
 import 'package:context_app/features/saved_locations/domain/repositories/saved_locations_repository.dart';
+import 'package:context_app/features/sync/data/hive_journey_repository.dart';
+import 'package:context_app/features/sync/data/hive_saved_locations_repository.dart';
+import 'package:context_app/features/sync/data/hive_trip_repository.dart';
 import 'package:context_app/features/sync/data/supabase_journey_remote_data_source.dart';
 import 'package:context_app/features/sync/data/supabase_saved_locations_remote_data_source.dart';
 import 'package:context_app/features/sync/data/supabase_trip_remote_data_source.dart';
@@ -16,7 +17,6 @@ import 'package:context_app/features/sync/domain/services/sync_coordinator.dart'
 import 'package:context_app/features/sync/domain/services/sync_engine.dart';
 import 'package:context_app/features/sync/domain/services/sync_session.dart';
 import 'package:context_app/features/sync/presentation/controllers/sync_settings_notifier.dart';
-import 'package:context_app/features/trip/data/hive_trip_repository.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/domain/repositories/trip_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

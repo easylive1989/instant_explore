@@ -18,12 +18,7 @@ final RegExp _featureImportRe = RegExp(
 );
 
 /// 已知跨 feature 違規：「來源檔 -> import 目標」。修一筆刪一筆，不得新增。
-const Set<String> _pendingCrossFeature = {
-  // data 層跨引
-  'lib/features/sync/providers.dart -> features/journey/data/hive_journey_repository.dart',
-  'lib/features/sync/providers.dart -> features/saved_locations/data/hive_saved_locations_repository.dart',
-  'lib/features/sync/providers.dart -> features/trip/data/hive_trip_repository.dart',
-};
+const Set<String> _pendingCrossFeature = {};
 
 /// app/ 中已知違規檔案（整檔豁免）。修復後清空。
 const Set<String> _pendingAppFiles = {

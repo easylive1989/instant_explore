@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:context_app/features/trip/data/hive_trip_repository.dart';
+import 'package:context_app/features/sync/data/hive_trip_repository.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';

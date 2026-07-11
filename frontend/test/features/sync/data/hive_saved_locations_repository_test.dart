@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_category.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
-import 'package:context_app/features/saved_locations/data/hive_saved_locations_repository.dart';
 import 'package:context_app/features/saved_locations/domain/models/saved_location_entry.dart';
+import 'package:context_app/features/sync/data/hive_saved_locations_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
