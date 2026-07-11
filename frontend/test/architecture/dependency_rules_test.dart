@@ -20,13 +20,11 @@ final RegExp _featureImportRe = RegExp(
 /// 已知跨 feature 違規：「來源檔 -> import 目標」。修一筆刪一筆，不得新增。
 const Set<String> _pendingCrossFeature = {
   // data 層跨引
-  'lib/features/camera/data/image_analysis_service.dart -> features/explore/data/mappers/place_category_mapper.dart',
   'lib/features/sync/providers.dart -> features/journey/data/hive_journey_repository.dart',
   'lib/features/sync/providers.dart -> features/saved_locations/data/hive_saved_locations_repository.dart',
   'lib/features/sync/providers.dart -> features/trip/data/hive_trip_repository.dart',
   // presentation 層跨引
   'lib/features/analytics/presentation/narration_analytics_observer.dart -> features/narration/presentation/controllers/narration_state.dart',
-  'lib/features/camera/presentation/widgets/analysis_result_card.dart -> features/explore/presentation/extensions/place_category_extension.dart',
   'lib/features/explore/presentation/screens/explore_screen.dart -> features/saved_locations/presentation/widgets/saved_locations_fab.dart',
   'lib/features/journey/presentation/screens/journey_screen.dart -> features/trip/presentation/widgets/trip_grid.dart',
   'lib/features/journey/presentation/widgets/timeline_entry.dart -> features/trip/presentation/widgets/move_to_trip_sheet.dart',

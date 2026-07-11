@@ -8,7 +8,6 @@ import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/presentation/screens/select_story_hook_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
-import 'package:context_app/features/camera/presentation/screens/camera_screen.dart';
 import 'package:context_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:context_app/features/onboarding/presentation/screens/onboarding_welcome_screen.dart';
 import 'package:context_app/features/subscription/presentation/screens/subscription_screen.dart';
@@ -29,7 +28,7 @@ class RouterConfig {
       refreshListenable: _OnboardingListenable(ref),
       redirect: (context, state) {
         // Send first-run users through the welcome carousel. Other flows
-        // (deep links via `/player`, `/camera`, etc.) are left untouched
+        // (deep links via `/player`, etc.) are left untouched
         // so that an authenticated returning user is never interrupted.
         final onboarding = ref.read(onboardingControllerProvider);
         if (!onboarding.hasLoaded) {
@@ -137,11 +136,6 @@ class RouterConfig {
             locale: state.pathParameters['locale']!,
             date: state.pathParameters['date']!,
           ),
-        ),
-        GoRoute(
-          path: '/camera',
-          name: 'camera',
-          builder: (context, state) => const CameraScreen(),
         ),
         GoRoute(
           path: '/subscription',

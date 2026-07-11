@@ -2,7 +2,6 @@ import 'package:context_app/app/config/appearance_options.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/app/config/theme_config.dart';
 import 'package:context_app/features/auth/providers.dart';
-import 'package:context_app/features/camera/providers.dart';
 import 'package:context_app/features/daily_story/presentation/screens/story_list_screen.dart';
 import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/providers.dart';
@@ -20,7 +19,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fakes/fake_auth_service.dart';
-import '../../fakes/fake_image_analysis_service.dart';
 import '../../fakes/fake_location_service.dart';
 import '../../fakes/fake_places_repository.dart';
 import '../../fakes/fake_subscription_service.dart';
@@ -133,7 +131,6 @@ List<Override> _mainScreenOverrides() {
     ),
     usageRepositoryProvider.overrideWithValue(InMemoryUsageRepository()),
     subscriptionServiceProvider.overrideWithValue(FakeSubscriptionService()),
-    imageAnalysisServiceProvider.overrideWithValue(FakeImageAnalysisService()),
     onboardingRepositoryProvider.overrideWithValue(
       InMemoryOnboardingRepository(welcomeDone: true),
     ),
