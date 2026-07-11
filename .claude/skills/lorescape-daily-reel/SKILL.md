@@ -50,9 +50,14 @@ node scripts/prepare_story.mjs <YYYY-MM-DD>
 
 # 2. Claude condenses story.json's narration (the judgment step — see below)
 
-# 3. Render + mux BGM -> marketing/outputs/daily_video/<date>/cinematic.mp4
+# 3a. 音樂版（無語音）：Render + mux BGM -> daily_video/<date>/cinematic.mp4
 scripts/build_video.sh <YYYY-MM-DD>              # music-forward (-20 LUFS)
-scripts/build_video.sh <YYYY-MM-DD> --lufs -28   # quiet bed if adding voiceover
+
+# 3b. 語音版（zh-TW 旁白，逐 beat 同步）-> daily_video/<date>/final.mp4
+#     先在 story.json 每拍填 `narration`（口說版，見 Step 2），再：
+cd ../../../scripts && uv run python -m reel_voiceover <YYYY-MM-DD>
+#     离線 say（不吃 Gemini 配額）：… -m reel_voiceover <date> --engine say
+#     改一句只重唸一句（逐拍快取）；--force-tts 全部重唸
 ```
 
 `build_video.sh` subsets the fonts (required after any text change), renders,
@@ -72,6 +77,10 @@ to read in 30s and too long for a voiceover to keep pace. Edit each beat's
 - Preserve the story arc across the 8 beats; tighten wording, don't drop beats.
 - `prepare_story.mjs` auto-numbers kickers 其之一…；enrich with a one-word
   theme if it helps (e.g. `其之二 · 戰火`).
+- 若要加語音旁白，另外替每拍填 `narration`（口說、為耳朵而寫，比畫面
+  `lines` 完整一點，一拍一句連貫）。`prepare_story.mjs` 會用非空 lines
+  串接種一個草稿，潤成順口的口說版即可。reel_voiceover 會逐拍 TTS、
+  用實測長度回寫 `durationFrames`，讓畫面撐到旁白唸得完。
 
 ## Quick Reference
 
@@ -81,6 +90,7 @@ to read in 30s and too long for a voiceover to keep pace. Edit each beat's
 | Live preview / tweak | `npx remotion studio` |
 | One-frame check | `npx remotion still Cinematic out.png --frame=90 --scale=0.5` |
 | Build final | `scripts/build_video.sh <date> [--style S] [--bgm F] [--lufs N]` |
+| Build voiced (final.mp4) | `cd scripts && uv run python -m reel_voiceover <date> [--engine say] [--force-tts]` |
 | Output | `marketing/outputs/daily_video/<date>/cinematic.mp4` |
 
 ## Common Mistakes
