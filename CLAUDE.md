@@ -14,7 +14,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `marketing/` | 行銷產出：audits、content-calendar、outputs、tools（Remotion reel 等） |
 | `scripts/` | 每日故事 / reel / metrics 自動化腳本（Python，uv 管理） |
 | `docs/` | 專案文件：`adr/`（技術決策）、design、operations、superpowers specs/plans |
-| `BACKLOG.md` | 專案工作項：features（F1…）與 tasks（T1…）；公司 epics 見上層 `../BACKLOG.md` |
+| `BACKLOG.md` | 專案工作項：features（F1…）與 tasks（T1…）；epic 見檔內「Epic」段 |
 | `MARKETING.md` | 行銷設定：ICP、value prop、定價、品牌語氣、競品 |
 
 行銷與每日故事的操作流程走各個 lorescape-* 與 marketing-* skills，不在此贅述。
@@ -49,5 +49,5 @@ Google Maps / Places、RevenueCat（訂閱）、Meta Graph API（IG 發布）。
 
 - 機密只放 `.env` 與 `service-account.json`（均已 gitignore），不進版控、
   不寫死在程式碼。
-- 只影響本專案的技術決策記在 `docs/adr/`；公司層決策記在上層 `../decisions/`。
+- 技術決策記在 `docs/adr/`。
 - 文件以繁體中文撰寫（技術名詞除外）。

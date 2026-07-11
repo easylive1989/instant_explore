@@ -2,7 +2,14 @@
 
 專案層級放 features 與 tasks。feature 若服務某個公司 epic，於標題標 `(epic: EN)`；純專案層工作可不標。
 feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feature 底下。
-公司 epics 見 `../BACKLOG.md`（company repo）。
+epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
+
+## Epic E1: 補齊漏斗上層流量
+- 狀態: 進行中
+- 目標: 讓落地頁流量從 ~1/天 提升到穩定兩位數/天，並累積到能判斷 PMF 的最小用戶量
+- 政策（原 2026-07-07 公司決策）: 現階段主線＝補流量，暫緩「新功能／升級型」產品投入；不受暫緩限制的例外＝bug 修復與維運、直接服務漏斗的產品改動、留存/完成率埋點與量測
+- 展開: 下方標 `(epic: E1)` 的 features
+- [ ] 2026-08-04 回顧：檢視補流量主線是否推動流量/下載/留存指標，再決定是否解除暫緩、回補產品側投入（原公司決策設定的檢核點）
 
 ## ⚠️ 待部署（程式已在 repo，尚未上生產，2026-07-08）
 
@@ -34,7 +41,7 @@ feature 編號 `F1`、`F2`…；task 編號 `T1`、`T2`… nested 在所屬 feat
 
 ## F5: 留存/完成率量測 (epic: E1)
 - 狀態: 已完成（含 live GA4 驗證）
-- 來源: decisions/2026-07-07-現階段主線補流量暫緩新功能.md（埋點不受暫緩）；cro-2026-07-06.md（narration 完成率為 missing_data）
+- 來源: E1 政策（埋點不受暫緩）；marketing/audits/cro-2026-07-06.md（narration 完成率為 missing_data）
 - 註: narration 四種事件（started/progress/completed/abandoned，含 completion_rate）已埋，見 docs/adr/0003；缺的是彙整視圖與留存量測
 - live 驗證（2026-07-08，`lorescape-metrics --only narration,retention`）：retention 寫入 13 rows 真實 cohort 資料；narration 查詢正確、事件名（narration_started/completed/abandoned）與 App logEvent 相符，目前 0 rows（pre-traffic，尚無播放事件，有流量後自動填）。兩來源已在 metrics Sheet。
 - [x] T1: 從既有 Firebase narration 事件彙整「聆聽完成率」視圖（scripts/metrics/narration.py，GA4 completed/started；單元測試通過 + live 驗證）
