@@ -32,10 +32,16 @@ header{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;
   padding:28px 0 8px;border-bottom:1px solid var(--grid)}
 header h1{font-size:20px;letter-spacing:.04em}
 header .stamp{color:var(--muted);font-size:13px;margin-left:auto}
-nav{display:flex;flex-wrap:wrap;gap:4px 16px;padding:10px 0;font-size:13px;
-  position:sticky;top:0;background:var(--page);z-index:2;border-bottom:1px solid var(--grid)}
-nav a{color:var(--ink-2)}
-nav a:hover{color:var(--series)}
+.tabs{display:flex;gap:4px;padding:12px 0 0;position:sticky;top:0;background:var(--page);
+  z-index:2;border-bottom:1px solid var(--grid)}
+.tabs button{appearance:none;border:1px solid transparent;border-bottom:none;background:none;
+  color:var(--ink-2);font:14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:10px 16px;border-radius:8px 8px 0 0;cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--surface);border-color:var(--border);
+  color:var(--ink);font-weight:600;position:relative;top:1px}
+.panel{display:none}
+.panel.active{display:block}
 h2{font-size:16px;margin:36px 0 14px;display:flex;align-items:center;gap:8px}
 h2 .hash{color:var(--muted);font-weight:400}
 section{scroll-margin-top:48px}
@@ -507,14 +513,32 @@ def _daily_story_html(story: dict) -> str:
 
 # ---------- 組頁 ----------
 
-_SECTIONS = [
-    ("backlog", "📋 Backlog"),
-    ("deploys", "🚀 部署狀態"),
-    ("tests", "🧪 自動化測試"),
-    ("e2e", "🎯 E2E 測試案例"),
-    ("metrics", "📈 產品數據"),
-    ("daily_story", "📅 每日故事"),
+# tab key → (tab 標籤, [(section key, section 標題)])
+_TABS = [
+    ("progress", "📋 功能進度", [
+        ("backlog", "📋 Backlog"),
+    ]),
+    ("dev", "🧪 開發現況", [
+        ("tests", "🧪 自動化測試"),
+        ("e2e", "🎯 E2E 測試案例"),
+        ("deploys", "🚀 部署狀態"),
+    ]),
+    ("analytics", "📈 數據分析", [
+        ("metrics", "📈 產品數據"),
+        ("daily_story", "📅 每日故事"),
+    ]),
 ]
+
+_TAB_JS = """
+const tabs=document.querySelectorAll('.tabs button');
+function show(key){
+  tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===key));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+key));
+}
+tabs.forEach(b=>b.addEventListener('click',()=>{history.replaceState(null,'','#'+b.dataset.tab);show(b.dataset.tab);}));
+const initial=location.hash.slice(1);
+show([...tabs].some(b=>b.dataset.tab===initial)?initial:tabs[0].dataset.tab);
+"""
 
 
 def build_html(data: dict) -> str:
@@ -548,8 +572,16 @@ def build_html(data: dict) -> str:
         "daily_story": _daily_story_html(story) if story else None,
     }
 
-    nav = "".join(f'<a href="#{key}">{_E(title)}</a>' for key, title in _SECTIONS)
-    sections = "".join(section(key, title, bodies[key]) for key, title in _SECTIONS)
+    tab_buttons = "".join(
+        f'<button role="tab" data-tab="{key}" aria-selected="false">{_E(label)}</button>'
+        for key, label, _ in _TABS
+    )
+    panels = "".join(
+        f'<div class="panel" id="tab-{key}" role="tabpanel">'
+        + "".join(section(s_key, s_title, bodies[s_key]) for s_key, s_title in sections)
+        + "</div>"
+        for key, _, sections in _TABS
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="zh-Hant">
@@ -563,10 +595,11 @@ def build_html(data: dict) -> str:
 <main>
 <header><h1>LORESCAPE 產品面板</h1>
 <span class="stamp">最後更新：{_E(str(data.get("generated_at", "?")))}</span></header>
-<nav>{nav}</nav>
 {_tiles(data)}
-{sections}
+<div class="tabs" role="tablist">{tab_buttons}</div>
+{panels}
 <footer>由 dashboard/ 工具產生・<code>uv run lorescape-dashboard</code></footer>
 </main>
+<script>{_TAB_JS}</script>
 </body>
 </html>"""
