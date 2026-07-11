@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-from lorescape_backend.daily_story.wikipedia import fetch_intro_extract as fetch_intro_extract_legacy  # noqa: F401  (re-exported for monkeypatch in tests)
+from lorescape_backend.sources.wikipedia import fetch_intro_extract as fetch_intro_extract_legacy  # noqa: F401  (re-exported for monkeypatch in tests)
 from lorescape_backend.sources.models import SourceBundle, SourceExtract
 from lorescape_backend.sources.quality import assess_bundle
 from lorescape_backend.sources.wikidata import fetch_entity_claims

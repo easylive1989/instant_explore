@@ -106,3 +106,19 @@ def test_fetch_extract_by_qid_caches_subsequent_calls():
     assert first == second == "hello"
     # Cached call should not hit either endpoint twice.
     assert m.call_count == 2  # 1 sitelinks + 1 extract, second pass served from cache
+
+
+def test_fetch_intro_extract_returns_extract(requests_mock):
+    requests_mock.get(
+        "https://en.wikipedia.org/w/api.php",
+        json={"query": {"pages": {"123": {"extract": "Intro text."}}}},
+    )
+    assert wiki_src.fetch_intro_extract("Some Title") == "Intro text."
+
+
+def test_fetch_intro_extract_empty_when_missing(requests_mock):
+    requests_mock.get(
+        "https://en.wikipedia.org/w/api.php",
+        json={"query": {"pages": {"-1": {"missing": ""}}}},
+    )
+    assert wiki_src.fetch_intro_extract("No Such Page") == ""

@@ -30,6 +30,7 @@ USER_AGENT = (
     "(https://github.com/easylive1989/instant_explore)"
 )
 _WIKIDATA_API = "https://www.wikidata.org/w/api.php"
+_EN_WIKI_API_URL = "https://en.wikipedia.org/w/api.php"
 _TIMEOUT = 30
 
 # 7-day TTL × 5000 entries × ~2KB ≈ 10MB max. Restart clears cache;
@@ -114,3 +115,41 @@ def _fetch_intro_extract(title: str, lang: str) -> str | None:
         if isinstance(extract, str) and extract:
             return extract
     return None
+
+
+def fetch_intro_extract(title: str) -> str:
+    """Fetch the plaintext intro section of `title` via MediaWiki extracts API.
+
+    The REST `/page/summary` endpoint only returns the lead paragraph
+    (~200 chars for many places), which is too thin to ground a real
+    story. The MediaWiki `prop=extracts` query with `exintro=1` returns
+    the full intro section (typically 1-5k chars) — enough to mention
+    the people and events a story needs.
+
+    Returns the extracted plaintext (may be empty if the page has no
+    intro or does not exist).
+
+    Copied from daily_story/wikipedia.py — legacy wikipedia_title App path
+    (see sources/pipeline.py).
+    """
+    response = requests.get(
+        _EN_WIKI_API_URL,
+        params={
+            "action": "query",
+            "format": "json",
+            "titles": title,
+            "prop": "extracts",
+            "explaintext": 1,
+            "exintro": 1,
+            "redirects": 1,
+        },
+        headers={"User-Agent": USER_AGENT},
+        timeout=30,
+    )
+    response.raise_for_status()
+    pages = response.json().get("query", {}).get("pages", {})
+    for page in pages.values():
+        extract = page.get("extract")
+        if extract:
+            return extract
+    return ""

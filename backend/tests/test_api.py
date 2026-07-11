@@ -1,21 +1,17 @@
 """Tests for the FastAPI app + in-container scheduler wiring.
 
-Instagram publishing moved to the standalone publisher_bot (a Discord
-Gateway bot, see test_bot_scheduler.py / test_bot_interactions.py); the
-api scheduler only carries generate + reconcile.
+The daily-story pipeline and Instagram publishing live in the standalone
+publisher project (lorescape_publisher); the api scheduler only carries the
+subscription reconcile job.
 """
 from __future__ import annotations
 
-from datetime import date
-from unittest.mock import MagicMock, patch
+import dataclasses
+from unittest.mock import MagicMock
 
 from apscheduler.triggers.cron import CronTrigger
 
-import dataclasses
-
 from lorescape_backend.api import (
-    GENERATE_HOUR,
-    GENERATE_JOB_ID,
     RECONCILE_HOUR,
     RECONCILE_JOB_ID,
     _register_jobs,
@@ -27,33 +23,7 @@ def test_health_returns_ok():
     assert health() == {"status": "ok"}
 
 
-def test_register_jobs_schedules_generate(fake_config):
-    scheduler = MagicMock()
-    _register_jobs(scheduler, fake_config)
-
-    calls_by_id = {
-        call.kwargs["id"]: call for call in scheduler.add_job.call_args_list
-    }
-
-    gen_call = calls_by_id[GENERATE_JOB_ID]
-    gen_trigger = gen_call.kwargs["trigger"]
-    assert isinstance(gen_trigger, CronTrigger)
-    gen_fields = {field.name: str(field) for field in gen_trigger.fields}
-    assert gen_fields["hour"] == str(GENERATE_HOUR)
-    assert gen_fields["minute"] == "0"
-    assert gen_call.kwargs["replace_existing"] is True
-
-
-def test_register_jobs_does_not_schedule_publish(fake_config):
-    """Publishing lives in the publisher daemon, not the api scheduler."""
-    scheduler = MagicMock()
-    _register_jobs(scheduler, fake_config)
-
-    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
-    assert ids == {GENERATE_JOB_ID, RECONCILE_JOB_ID}
-
-
-def test_register_jobs_schedules_reconcile_when_revenuecat_enabled(fake_config):
+def test_register_jobs_schedules_only_reconcile(fake_config):
     # fake_config carries a REVENUECAT_API_KEY, so reconcile is scheduled.
     scheduler = MagicMock()
     _register_jobs(scheduler, fake_config)
@@ -61,10 +31,13 @@ def test_register_jobs_schedules_reconcile_when_revenuecat_enabled(fake_config):
     calls_by_id = {
         call.kwargs["id"]: call for call in scheduler.add_job.call_args_list
     }
-    assert RECONCILE_JOB_ID in calls_by_id
+    assert set(calls_by_id) == {RECONCILE_JOB_ID}
     trigger = calls_by_id[RECONCILE_JOB_ID].kwargs["trigger"]
+    assert isinstance(trigger, CronTrigger)
     fields = {field.name: str(field) for field in trigger.fields}
     assert fields["hour"] == str(RECONCILE_HOUR)
+    assert fields["minute"] == "0"
+    assert calls_by_id[RECONCILE_JOB_ID].kwargs["replace_existing"] is True
 
 
 def test_register_jobs_skips_reconcile_when_revenuecat_disabled(fake_config):
@@ -72,34 +45,4 @@ def test_register_jobs_skips_reconcile_when_revenuecat_disabled(fake_config):
     scheduler = MagicMock()
     _register_jobs(scheduler, config)
 
-    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
-    assert ids == {GENERATE_JOB_ID}
-
-
-@patch("lorescape_backend.api.run_generate_and_review")
-def test_generate_job_runs_for_today(mock_run, fake_config):
-    scheduler = MagicMock()
-    _register_jobs(scheduler, fake_config)
-
-    gen_call = next(
-        call for call in scheduler.add_job.call_args_list
-        if call.kwargs["id"] == GENERATE_JOB_ID
-    )
-    gen_call.args[0]()
-
-    mock_run.assert_called_once()
-    args = mock_run.call_args.args
-    assert args[0] is fake_config
-    assert args[1] == date.today()
-
-
-def test_register_jobs_skips_generate_when_disabled(fake_config):
-    config = dataclasses.replace(
-        fake_config, daily_story_generate_enabled=False
-    )
-    scheduler = MagicMock()
-    _register_jobs(scheduler, config)
-
-    ids = {call.kwargs["id"] for call in scheduler.add_job.call_args_list}
-    assert GENERATE_JOB_ID not in ids
-    assert ids == {RECONCILE_JOB_ID}  # reconcile unaffected
+    assert scheduler.add_job.call_args_list == []
