@@ -1,0 +1,33 @@
+[project]
+name = "lorescape-publisher"
+version = "0.1.0"
+description = "Lorescape social publisher: daily-story pipeline + Discord review bot + IG publishing"
+requires-python = ">=3.11"
+dependencies = [
+    "supabase>=2.10,<3",
+    "discord.py>=2.4,<3",
+    "requests>=2.32,<3",
+    "google-genai>=0.8,<2",
+    "python-dotenv>=1,<2",
+    "jinja2>=3.1,<4",
+    "playwright>=1.45,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "pytest-mock>=3.14,<4",
+    "requests-mock>=1.12,<2",
+    "pillow>=10,<12",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
