@@ -27,7 +27,8 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # 釘住版本：latest 需查 GitHub API，會撞匿名 rate limit（2026-07-12 失敗過）
+          version: 2.109.1
 
       - name: Link Supabase project to setup IPv4
         run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
