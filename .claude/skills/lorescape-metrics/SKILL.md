@@ -1,6 +1,6 @@
 ---
 name: lorescape-metrics
-description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, RevenueCat subscription/revenue snapshot, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「訂閱 / 營收 / MRR / RevenueCat」「App 下載 / 評分」. All sources via API (GSC / GA4 / IG / RevenueCat / App Store Connect / Play reports bucket). Accumulates into in-repo CSVs (data/metrics/*.csv, gitignored), one file per source. Local, read-only, does not touch the server.
+description: Use when the user wants to update Lorescape's accumulating daily metrics — Google Search Console search traffic, GA4 landing + app traffic, Instagram account reach/followers, per-post IG/Reels insights, Reels 24h/48h/7d insight snapshots from IG App screenshots, RevenueCat subscription/revenue snapshot, or App Store / Play downloads & ratings. Triggers on 「產品數據報告」「這週/這月數據」「抓 GSC / 搜尋流量」「GA4 / landing / App 流量」「IG 數據 / 觸及」「每則貼文 / 貼文成效」「reel 洞察 / 截圖數據」「訂閱 / 營收 / MRR / RevenueCat」「App 下載 / 評分」. Sources via API (GSC / GA4 / IG / RevenueCat / App Store Connect / Play reports bucket)；Reels 快照另由使用者提供 IG App 洞察截圖. Accumulates into in-repo CSVs (data/metrics/*.csv, gitignored), one file per source. Local, read-only, does not touch the server.
 ---
 
 # Lorescape 數據抓取報告
@@ -23,6 +23,7 @@ Connect / Play 報表 bucket），不再用瀏覽器抓。
 | `ga4` | `ga4.csv` | date | 每日 web / iOS / Android 各自的 active / new users（App = iOS + Android） |
 | `ig` | `ig.csv` | date | 帳號每日 reach / profile_views（= 個人檔案/bio 瀏覽數）（+ 最新一天 followers/media 快照） |
 | `ig_posts` | `ig_posts.csv` | (media_id, obs_date) | 每則貼文**逐日**追蹤：obs_date、posted_date、reach、likes、comments、saved、shares、total_interactions，Reels 另含 views、avg_watch_time |
+| `ig_reels` | `ig_reels_insights.csv` | (media_id, checkpoint) | **Reels 洞察快照**（發布後 24h / 48h / 7d 三個 checkpoint）：略過率等六比率、瀏覽來源占比、觀眾輪廓（粉絲比／年齡／性別／國家）——API 拿不到，由使用者提供 IG App 截圖、Claude 讀圖寫入 |
 | `revenuecat` | `revenuecat.csv` | date | 訂閱/營收每日快照：mrr、active_subscriptions、active_trials、active_users_28d、new_customers_28d、revenue_28d |
 | `store_ios` | `store_ios.csv` | date | App Store 每日 downloads（ASC 銷售日報，可回補約一年）＋ 最新一天 avg_rating / ratings_count（iTunes lookup，TW storefront）與 reviews_count 快照 |
 | `store_android` | `store_android.csv` | date | Play 每日 installs / active_devices ＋ avg_rating_daily / avg_rating_total（Play Console 報表 bucket，可回補，但匯出約落後 2 天） |
@@ -34,6 +35,16 @@ Connect / Play 報表 bucket），不再用瀏覽器抓。
 貼文 insights 只能讀「當下累計值」，跟 `revenuecat` 一樣**漏掉的天無法回補**
 ——要逐日連續就得**每天跑一次**。重跑同一天會覆蓋該貼文當天那列。檔案固定
 依 **發布日 → 貼文 → 觀察日** 排序，所以同一則貼文的逐日列會相鄰、照時間排。
+
+`ig_reels` 是**手動快照**來源：每支 Reel 在發布後 **24h、48h、7d** 各記一列
+（key = `media_id` + `checkpoint`，值為 `24h`/`48h`/`7d`）。這些欄位（略過率
+等六比率、瀏覽來源、觀眾輪廓）只存在 IG App 的洞察頁、Graph API 拿不到，
+所以流程是：skill 算出今天到期的 reels → 使用者去 IG App 截圖 → Claude 讀圖
+寫入 CSV。**這是唯一不由 `metrics.report` 管理的檔**，由 Claude 依
+`references/reel-insights.md` 的欄位定義直接讀寫；漏抓的 checkpoint **不回補、
+不留列**（快照過期即失真），重截同一 checkpoint 會覆蓋該列。檔案依
+**posted_date → media_id → checkpoint（24h→48h→7d）** 排序。
+image / carousel 貼文不做快照，維持 `ig_posts` 的 API 逐日追蹤即可。
 
 想知道「昨天有多少人看過我的 IG bio」直接看 `ig.csv` 昨天那列的
 `profile_views`（IG 的 profile/個人檔案瀏覽數，已每天記錄）。
@@ -50,7 +61,8 @@ Connect / Play 報表 bucket），不再用瀏覽器抓。
 
 2026-07-11 前用瀏覽器手抓的 `stores.csv` 保留當歷史檔，不再更新。
 
-不要手動編輯這些 CSV（下次同步會整檔覆寫）；分析請複製出去或用 dashboard
+不要手動編輯 API 來源的 CSV（下次同步會整檔覆寫）；`ig_reels_insights.csv`
+是唯一例外（Claude 依本 skill 讀寫）。分析請複製出去或用 dashboard
 （`dashboard/` 工具的產品數據 tab 直接讀這些 CSV）。
 
 ## 前置條件
@@ -104,7 +116,26 @@ Connect / Play 報表 bucket），不再用瀏覽器抓。
    完成後把 stdout 的每來源結果（`+N row(s) for <區間>` / `up to date` /
    `skipped`）念給使用者，必要時讀出對應 CSV 的近期幾列確認。
 
-4. **選點規劃提示**：若本次更新了 `ig` / `ig_posts` 並向使用者做了
+4. **Reels 洞察快照**（在 API 收集完、`ig_posts.csv` 已更新後做）：
+
+   1. 從 `ig_posts.csv` 找出 `type=REELS` 且 `posted_date` 為
+      **昨天（→24h）、前天（→48h）、7 天前（→7d）** 的貼文，並讀
+      `ig_reels_insights.csv` 排除今天已記錄的 checkpoint。
+   2. 沒有到期的就跳過本步。有的話，逐支列給使用者：
+      checkpoint、景點名（取 caption 開頭）、permalink，請使用者到
+      IG App 對每支開「洞察報告」截圖**三個 tab**：總覽（滑到「影響
+      你瀏覽次數的因素」與「瀏覽/觀看次數主要來源」都入鏡）、
+      互動次數、觀眾（「廣告受眾詳情」的年齡／國家地區／性別三個
+      子頁籤各一張；IG 沒提供輪廓時一張即可）。
+   3. 使用者貼上截圖後，依 **`references/reel-insights.md`** 的欄位
+      定義讀圖，寫入 `data/metrics/ig_reels_insights.csv`（檔不存在
+      先建 header；同 key 覆蓋；依 posted_date → media_id →
+      checkpoint 排序），最後把每支的關鍵數字（views / 略過率 /
+      按讚率 / 粉絲比）念給使用者核對。
+   4. 使用者當下沒空截圖就跳過，明確告知哪些 checkpoint 會因此留空
+      （不回補）。
+
+5. **選點規劃提示**：若本次更新了 `ig` / `ig_posts` 並向使用者做了
    IG 成效分析，結尾提示可接著用 **lorescape-reels-planner** 依最新
    數據規劃或檢核每日景點 Reel 的選點 calendar（下期排程、配比調整、
    期末檢核到期時尤其該提）。
@@ -120,3 +151,6 @@ Connect / Play 報表 bucket），不再用瀏覽器抓。
 - `ig_posts` 逐日追蹤只能往前累積、漏掉的天無法回補，所以要**每天跑一次**
   才連續；每篇貼文追蹤約 7 天後自動離開。若曾用舊版（每則單列快照）的
   `ig_posts` 資料，改版第一次跑前需把該檔清成新 header（欄位結構不同）。
+- `ig_reels` 快照同理**每天做一次**才不漏 checkpoint；漏了就留空、不回補
+  （晚拍的截圖數字已不是該時點的狀態）。觀眾輪廓在互動帳號 <100 時 IG
+  不提供，對應欄位留空即可，不算漏抓。
