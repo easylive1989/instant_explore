@@ -505,6 +505,205 @@ def _metric_card(tab: dict) -> str:
     )
 
 
+_IG_POST_COLS = [
+    ("posted_date", "發文日"), ("type", "類型"), ("caption", "貼文"),
+    ("views", "views"), ("reach", "reach"), ("likes", "likes"),
+    ("comments", "comments"), ("saved", "saved"), ("shares", "shares"),
+    ("avg_watch_time", "平均觀看"),
+]
+
+
+def _ig_post_row(post: dict) -> str:
+    cells = []
+    for key, _ in _IG_POST_COLS:
+        value = post.get(key, "")
+        if key == "caption":
+            text = value[:24] + "…" if len(value) > 24 else value or post.get("media_id", "")
+            cells.append(f'<td><a href="{_E(post.get("permalink", ""))}">{_E(text)}</a></td>')
+        elif key == "avg_watch_time":
+            ms = _to_float(value)
+            cells.append(f'<td class="num">{f"{ms / 1000:.1f}s" if ms is not None else "–"}</td>')
+        elif key in ("posted_date", "type"):
+            cells.append(f"<td>{_E(value)}</td>")
+        else:
+            cells.append(f'<td class="num">{_E(value) if value else "–"}</td>')
+    return "<tr>" + "".join(cells) + "</tr>"
+
+
+def _ig_posts_html(posts: list[dict], visible: int = 10) -> str:
+    if not posts:
+        return ""
+    header = (
+        "<thead><tr>"
+        + "".join(f"<th>{_E(label)}</th>" for _, label in _IG_POST_COLS)
+        + "</tr></thead>"
+    )
+    obs = max(p.get("obs_date", "") for p in posts)
+    table = (
+        f"<table>{header}<tbody>"
+        + "".join(_ig_post_row(p) for p in posts[:visible])
+        + "</tbody></table>"
+    )
+    fold = ""
+    if len(posts) > visible:
+        fold = (
+            f'<details class="table-fold"><summary>更早的貼文（{len(posts) - visible}）</summary>'
+            f"<table>{header}<tbody>"
+            + "".join(_ig_post_row(p) for p in posts[visible:])
+            + "</tbody></table></details>"
+        )
+    return (
+        f'<div class="metric-card"><div class="metric-head"><b>IG 貼文成效</b>'
+        f"<span>每貼文最新快照・至 {_E(obs)}</span></div>{table}{fold}</div>"
+    )
+
+
+_REEL_CHECKPOINTS = ["24h", "48h", "7d"]
+_REEL_METRICS = [
+    ("views", "views"), ("skip_rate_pct", "略過"), ("like_rate_pct", "按讚"),
+]
+
+
+def _reel_metric_cell(snapshot: dict | None, key: str) -> str:
+    value = (snapshot or {}).get(key, "")
+    if value == "":
+        return '<td class="num">–</td>'
+    text = f"{value}%" if key.endswith("_pct") else value
+    return f'<td class="num">{_E(text)}</td>'
+
+
+def _ig_reels_html(reels: list[dict]) -> str:
+    if not reels:
+        return ""
+    top = (
+        '<tr><th rowspan="2">發布日</th><th rowspan="2">Reel</th>'
+        + "".join(
+            f'<th colspan="{len(_REEL_METRICS)}">{cp}</th>'
+            for cp in _REEL_CHECKPOINTS
+        )
+        + "</tr>"
+    )
+    sub = (
+        "<tr>"
+        + "".join(
+            f"<th>{_E(label)}</th>"
+            for _ in _REEL_CHECKPOINTS for _, label in _REEL_METRICS
+        )
+        + "</tr>"
+    )
+    rows = []
+    for reel in reels:
+        caption = reel.get("caption", "")
+        text = caption[:24] + "…" if len(caption) > 24 else caption or reel.get("media_id", "")
+        cells = "".join(
+            _reel_metric_cell(reel["checkpoints"].get(cp), key)
+            for cp in _REEL_CHECKPOINTS for key, _ in _REEL_METRICS
+        )
+        rows.append(
+            f'<tr><td>{_E(reel.get("posted_date", ""))}</td>'
+            f'<td><a href="{_E(reel.get("permalink", ""))}">{_E(text)}</a></td>'
+            f"{cells}</tr>"
+        )
+    obs = max(
+        (s.get("obs_date", "") for r in reels for s in r["checkpoints"].values()),
+        default="",
+    )
+    return (
+        f'<div class="metric-card"><div class="metric-head"><b>Reels 洞察快照</b>'
+        f'<span>發布後 24h/48h/7d・至 {_E(obs)}・<a href="reels.html">完整明細 →</a></span></div>'
+        f"<table><thead>{top}{sub}</thead><tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+_REEL_DETAIL_ROWS = [
+    ("obs_date", "觀測日"),
+    ("views", "觀看次數"), ("reach", "觸及帳號"),
+    ("avg_watch_time_s", "平均觀看（秒）"), ("new_followers", "帶來粉絲"),
+    ("skip_rate_pct", "略過率"), ("share_rate_pct", "分享率"),
+    ("like_rate_pct", "按讚率"), ("save_rate_pct", "儲存率"),
+    ("repost_rate_pct", "轉發率"), ("comment_rate_pct", "留言率"),
+    ("src_reels_pct", "來源・Reels 頁籤"), ("src_explore_pct", "來源・探索"),
+    ("src_feed_pct", "來源・動態消息"), ("src_profile_pct", "來源・個人檔案"),
+    ("src_other_pct", "來源・其他"),
+    ("profile_visits", "個人檔案瀏覽"), ("likes", "按讚數"), ("comments", "留言數"),
+    ("reposts", "轉發次數"), ("shares", "分享次數"), ("saves", "儲存次數"),
+    ("follower_pct", "觀眾・粉絲比"),
+    ("age_13_17_pct", "年齡 13-17"), ("age_18_24_pct", "年齡 18-24"),
+    ("age_25_34_pct", "年齡 25-34"), ("age_35_44_pct", "年齡 35-44"),
+    ("age_45_54_pct", "年齡 45-54"), ("age_55_64_pct", "年齡 55-64"),
+    ("age_65_plus_pct", "年齡 65+"),
+    ("gender_male_pct", "性別・男"), ("gender_female_pct", "性別・女"),
+    ("gender_other_pct", "性別・未指定"),
+    ("countries", "國家分布"),
+]
+
+
+def _reel_detail_value(snapshot: dict | None, key: str) -> str:
+    value = (snapshot or {}).get(key, "")
+    if value == "":
+        return "–"
+    if key == "countries":
+        return "、".join(
+            f"{part.split(':', 1)[0]} {part.split(':', 1)[1]}%" if ":" in part else part
+            for part in value.split("|")
+        )
+    return f"{value}%" if key.endswith("_pct") else value
+
+def _reel_detail_card(reel: dict) -> str:
+    checkpoints = reel["checkpoints"]
+    caption = reel.get("caption", "") or reel.get("media_id", "")
+    head_cells = "".join(f"<th>{cp}</th>" for cp in _REEL_CHECKPOINTS)
+    rows = []
+    for key, label in _REEL_DETAIL_ROWS:
+        values = [
+            _reel_detail_value(checkpoints.get(cp), key) for cp in _REEL_CHECKPOINTS
+        ]
+        if all(v == "–" for v in values):
+            continue  # 整列皆空（如輪廓未達門檻）不佔版面
+        cells = "".join(
+            f'<td class="num">{_E(v)}</td>' if v == "–" or key != "countries"
+            else f"<td>{_E(v)}</td>"
+            for v in values
+        )
+        rows.append(f"<tr><td>{_E(label)}</td>{cells}</tr>")
+    return (
+        f'<div class="metric-card"><div class="metric-head">'
+        f'<b><a href="{_E(reel.get("permalink", ""))}">{_E(caption)}</a></b>'
+        f'<span>發布 {_E(reel.get("posted_date", ""))}</span></div>'
+        f"<table><thead><tr><th>指標</th>{head_cells}</tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+def build_reels_html(data: dict) -> str:
+    """獨立頁 out/reels.html：每支 reel 的 24h/48h/7d 完整洞察明細。"""
+    reels = (data.get("metrics") or {}).get("ig_reels", [])
+    if reels:
+        body = "".join(_reel_detail_card(r) for r in reels)
+    else:
+        body = (
+            '<div class="callout warn">還沒有 Reels 洞察快照——'
+            "用 lorescape-metrics 記錄 24h/48h/7d 截圖後再看。</div>"
+        )
+    return f"""<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lorescape Reels 洞察明細</title>
+<style>{_CSS}</style>
+</head>
+<body>
+<main>
+<header><h1>REELS 洞察明細</h1>
+<span class="stamp"><a href="index.html">← 回產品面板</a></span></header>
+{body}
+<footer>由 dashboard/ 工具產生・<code>uv run lorescape-dashboard</code></footer>
+</main>
+</body>
+</html>"""
+
+
 # ---------- 每日故事 ----------
 
 _STORY_STATUS = {
@@ -740,7 +939,11 @@ def section_body(key: str, data: dict) -> str:
     elif key == "e2e":
         body = _e2e_html(value)
     elif key == "metrics":
-        body = "".join(_metric_card(t) for t in value["tabs"])
+        body = (
+            "".join(_metric_card(t) for t in value["tabs"])
+            + _ig_posts_html(value.get("ig_posts", []))
+            + _ig_reels_html(value.get("ig_reels", []))
+        )
     elif key == "daily_story":
         body = _daily_story_html(value)
     elif key == "reels":

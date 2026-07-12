@@ -13,7 +13,7 @@ from ..config import REPO_ROOT
 
 DATA_DIR = REPO_ROOT / "data" / "metrics"
 
-# 面板顯示的來源（略過 ig_posts——逐貼文時間序列對面板太細）
+# 走 shape_tab（日期時間序列）的來源；ig_posts 結構不同，另由 shape_ig_posts 處理
 _TABS = [
     "gsc", "ga4", "ig", "revenuecat", "store_ios", "store_android",
     "narration", "retention",
@@ -93,6 +93,54 @@ def shape_tab(
     }
 
 
+def shape_ig_posts(values: list[list[str]]) -> list[dict]:
+    """ig_posts.csv（一貼文 × 一觀測日多列）→ 每貼文最新快照，發文日新到舊。"""
+    if len(values) < 2:
+        return []
+    headers, rows = values[0], values[1:]
+    latest: dict[str, dict] = {}
+    for row in rows:
+        post = dict(zip(headers, row))
+        media_id = post.get("media_id", "")
+        if not media_id:
+            continue
+        kept = latest.get(media_id)
+        if kept is None or post.get("obs_date", "") > kept.get("obs_date", ""):
+            latest[media_id] = post
+    return sorted(
+        latest.values(), key=lambda p: p.get("posted_date", ""), reverse=True
+    )
+
+
+_CHECKPOINT_ORDER = ["24h", "48h", "7d"]
+
+
+def shape_ig_reels(values: list[list[str]]) -> list[dict]:
+    """ig_reels_insights.csv（一 reel × 一 checkpoint 多列）→ 每 reel 一列，
+    checkpoints 依 24h/48h/7d 收攏，發文日新到舊。"""
+    if len(values) < 2:
+        return []
+    headers, rows = values[0], values[1:]
+    reels: dict[str, dict] = {}
+    for row in rows:
+        snapshot = dict(zip(headers, row))
+        media_id = snapshot.get("media_id", "")
+        checkpoint = snapshot.get("checkpoint", "")
+        if not media_id or checkpoint not in _CHECKPOINT_ORDER:
+            continue
+        reel = reels.setdefault(media_id, {
+            "media_id": media_id,
+            "posted_date": snapshot.get("posted_date", ""),
+            "permalink": snapshot.get("permalink", ""),
+            "caption": snapshot.get("caption", ""),
+            "checkpoints": {},
+        })
+        reel["checkpoints"][checkpoint] = snapshot
+    return sorted(
+        reels.values(), key=lambda r: r["posted_date"], reverse=True
+    )
+
+
 def collect() -> dict:
     if not DATA_DIR.is_dir():
         raise SystemExit(
@@ -107,4 +155,17 @@ def collect() -> dict:
             shaped = {"name": name, "error": str(exc)}
         if shaped:
             tabs.append(shaped)
-    return {"tabs": tabs}
+    result: dict = {"tabs": tabs}
+    try:
+        posts = shape_ig_posts(_read_csv("ig_posts"))
+    except Exception:  # 逐貼文表格失敗不拖垮整個區塊
+        posts = []
+    if posts:
+        result["ig_posts"] = posts
+    try:
+        reels = shape_ig_reels(_read_csv("ig_reels_insights"))
+    except Exception:  # 快照表失敗不拖垮整個區塊
+        reels = []
+    if reels:
+        result["ig_reels"] = reels
+    return result

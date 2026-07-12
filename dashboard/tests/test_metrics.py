@@ -1,7 +1,11 @@
 """metrics collector 的整形測試。"""
 from datetime import date
 
-from lorescape_dashboard.collectors.metrics import shape_tab
+from lorescape_dashboard.collectors.metrics import (
+    shape_ig_posts,
+    shape_ig_reels,
+    shape_tab,
+)
 
 VALUES = [
     ["date", "clicks", "impressions", "note"],
@@ -61,3 +65,67 @@ class TestShapeTab:
         values = [["date", "v"], ["2026-07-10", ""], ["2026-07-09", "3"]]
         tab = shape_tab("x", values, today=TODAY)
         assert tab["stats"]["v"]["latest"] is None
+
+
+IG_POSTS = [
+    ["media_id", "obs_date", "posted_date", "type", "permalink", "caption",
+     "reach", "likes", "comments", "saved", "shares", "total_interactions",
+     "views", "avg_watch_time"],
+    ["111", "2026-07-09", "2026-07-03", "CAROUSEL_ALBUM", "https://ig/p/a", "紹修書院",
+     "5", "2", "0", "0", "0", "2", "", ""],
+    ["111", "2026-07-11", "2026-07-03", "CAROUSEL_ALBUM", "https://ig/p/a", "紹修書院",
+     "8", "3", "0", "0", "0", "3", "", ""],
+    ["222", "2026-07-11", "2026-07-08", "REELS", "https://ig/reel/b", "姬路城",
+     "338", "6", "0", "0", "0", "6", "470", "7000"],
+]
+
+
+IG_REELS = [
+    ["media_id", "checkpoint", "obs_date", "posted_date", "permalink", "caption",
+     "views", "skip_rate_pct", "like_rate_pct"],
+    ["901", "24h", "2026-07-06", "2026-07-05", "https://ig/reel/a", "康沃爾",
+     "120", "60.0", "1.0"],
+    ["901", "7d", "2026-07-12", "2026-07-05", "https://ig/reel/a", "康沃爾",
+     "214", "63.7", "0.0"],
+    ["902", "24h", "2026-07-12", "2026-07-11", "https://ig/reel/b", "富士山",
+     "165", "68.2", "1.4"],
+]
+
+
+class TestShapeIgReels:
+    def test_每支_reel_併成一列_各_checkpoint_一組(self):
+        reels = shape_ig_reels(IG_REELS)
+        cornwall = next(r for r in reels if r["media_id"] == "901")
+        assert cornwall["caption"] == "康沃爾"
+        assert cornwall["checkpoints"]["24h"]["views"] == "120"
+        assert cornwall["checkpoints"]["7d"]["skip_rate_pct"] == "63.7"
+
+    def test_缺的_checkpoint_不出現(self):
+        reels = shape_ig_reels(IG_REELS)
+        cornwall = next(r for r in reels if r["media_id"] == "901")
+        assert "48h" not in cornwall["checkpoints"]
+
+    def test_依發布日新到舊排序(self):
+        reels = shape_ig_reels(IG_REELS)
+        assert [r["posted_date"] for r in reels] == ["2026-07-11", "2026-07-05"]
+
+    def test_空資料回空列表(self):
+        assert shape_ig_reels([]) == []
+        assert shape_ig_reels([IG_REELS[0]]) == []
+
+
+class TestShapeIgPosts:
+    def test_每貼文只留最新觀測日快照(self):
+        posts = shape_ig_posts(IG_POSTS)
+        assert len(posts) == 2
+        first = next(p for p in posts if p["media_id"] == "111")
+        assert first["obs_date"] == "2026-07-11"
+        assert first["reach"] == "8"
+
+    def test_依發文日新到舊排序(self):
+        posts = shape_ig_posts(IG_POSTS)
+        assert [p["posted_date"] for p in posts] == ["2026-07-08", "2026-07-03"]
+
+    def test_空資料回空列表(self):
+        assert shape_ig_posts([]) == []
+        assert shape_ig_posts([IG_POSTS[0]]) == []

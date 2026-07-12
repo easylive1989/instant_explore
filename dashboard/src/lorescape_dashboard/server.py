@@ -38,10 +38,13 @@ class _Handler(BaseHTTPRequestHandler):
         return data
 
     def do_GET(self) -> None:  # noqa: N802（http.server 介面）
-        if self.path.split("#")[0].split("?")[0] != "/":
+        path = self.path.split("#")[0].split("?")[0]
+        if path in ("/", "/index.html"):
+            self._send(200, render.build_html(self._data(refresh=set())))
+        elif path == "/reels.html":
+            self._send(200, render.build_reels_html(self._data(refresh=set())))
+        else:
             self._send(404, "not found", "text/plain")
-            return
-        self._send(200, render.build_html(self._data(refresh=set())))
 
     def do_POST(self) -> None:  # noqa: N802
         m = _SECTION_PATH_RE.match(self.path)

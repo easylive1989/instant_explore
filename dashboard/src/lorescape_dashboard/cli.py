@@ -132,6 +132,9 @@ def main() -> None:
 
     out_path = DASHBOARD_DIR / "out" / "index.html"
     out_path.write_text(render.build_html(data), encoding="utf-8")
+    (out_path.parent / "reels.html").write_text(
+        render.build_reels_html(data), encoding="utf-8"
+    )
     print(f"面板已產生：{out_path}")
     if not args.no_open:
         webbrowser.open(out_path.as_uri())
