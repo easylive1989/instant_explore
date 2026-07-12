@@ -277,3 +277,34 @@ def test_publish_reel_raises_when_upload_rejected(requests_mock, tmp_path):
                 video_path=str(video),
                 caption="c",
             )
+
+
+def test_publish_reel_upload_http_error_includes_response_body(
+    requests_mock, tmp_path
+):
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"x")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "reel-container-4"},
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-container-4",
+        status_code=400,
+        json={
+            "debug_info": {
+                "type": "ProcessingFailedError",
+                "message": "Video Transcoding Error",
+            }
+        },
+    )
+
+    with patch("lorescape_publisher.instagram.time.sleep"):
+        with pytest.raises(Exception, match="Video Transcoding Error"):
+            publish_reel(
+                ig_user_id="ig1",
+                access_token="tok",
+                video_path=str(video),
+                caption="c",
+            )

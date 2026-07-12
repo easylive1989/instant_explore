@@ -238,7 +238,13 @@ def _upload_reel_bytes(
         data=video_bytes,
         timeout=_UPLOAD_TIMEOUT,
     )
-    response.raise_for_status()
+    if response.status_code >= 400:
+        # rupload puts the real failure reason (e.g. transcoding errors) in
+        # the response body, which raise_for_status() would discard.
+        raise RuntimeError(
+            f"Reel upload failed with HTTP {response.status_code} for "
+            f"container {container_id}: {response.text}"
+        )
     body = response.json()
     if not body.get("success", True):
         raise RuntimeError(f"Reel upload was not accepted: {body}")
