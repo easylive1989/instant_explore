@@ -116,6 +116,19 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [ ] T3: `publish_reel.py`（本地手動 CLI）加 `--via-url` 旗標走同一條路
 - ⚠️ T2 為 publisher 改動，需 Deploy Publisher workflow 部署後才在 VPS 生效
 
+## F12: reel-remotion story.json 改為 gitignored 工作檔
+
+- 狀態: 已完成（2026-07-12）
+- 來源: story.json 為每日 pipeline 重生的工作資料（正式紀錄在 Supabase 與
+  marketing/outputs/），逐日 commit 無留史價值，但 tracked 導致 git status
+  天天 dirty；也不能單純 gitignore——Remotion 專案要有檔案才能編譯/預覽
+- 設計: 執行期檔名維持 `story.json`（所有 import/腳本/skill 文件不動）；
+  gitignore `src/data/story.json`，另 track `story.sample.json` 樣本，
+  `npm run dev`/`build` 前由 `scripts/ensure_story.mjs` 在缺檔時從樣本複製
+  （pipeline 的 prepare_story.mjs 本來就會先寫入真檔，不受影響）
+- [x] T1: story.sample.json + ensure_story.mjs + gitignore + package.json
+  pre-hooks；CLAUDE.md 專案地圖同步一句
+
 ## F10: iOS 相簿儲存權限鍵補齊
 
 - 狀態: 待辦

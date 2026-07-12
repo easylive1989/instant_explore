@@ -26,7 +26,10 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "ensure-story": "node scripts/ensure_story.mjs",
+    "predev": "npm run ensure-story",
     "dev": "remotion studio",
+    "prebuild": "npm run ensure-story",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"

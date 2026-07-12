@@ -5,3 +5,6 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# 每日 pipeline 重生的工作檔（樣本見 story.sample.json）
+src/data/story.json

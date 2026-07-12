@@ -43,7 +43,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `content-calendar/` | Reels 景點排程 calendar |
 | `outputs/` | 每日產出，依日期分資料夾：`daily_image/`（照片池）、`daily_carousel/`（IG 圖組）、`daily_video/`（reel 成品） |
 | `sound/` | Reel 用 BGM 音檔 |
-| `tools/reel-remotion/` | Remotion 影片專案（每日 reel 產製；photos/fonts 為 pipeline 重生的工作素材，不進版控） |
+| `tools/reel-remotion/` | Remotion 影片專案（每日 reel 產製；photos/fonts/story.json 為 pipeline 重生的工作素材，不進版控——story.json 缺檔時由 `npm run ensure-story` 從 tracked 的 story.sample.json 複製） |
 
 ## Frontend（Flutter）
 
