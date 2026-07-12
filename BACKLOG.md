@@ -91,6 +91,31 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [ ] T3: 1–4 週後回看 GSC 曝光/查詢，依有反應的景點決定下一批擴充；候選——叢集 B 國外（凡爾賽宮、羅馬競技場、梵谷博物館、米蘭大教堂、國王湖），叢集 C 台灣（九份、淡水紅毛城、台北 101、日月潭）
 - 註: 擴充前先確認首批方向對了（有曝光/排名）再大量複製，避免版型或方向要調時改一堆頁
 
+## F11: reel 發布 video_url fallback
+
+- 狀態: 待辦
+- 來源: 2026-07-12 晚 Meta rupload 端點故障——排程與手動發布連吃 7 次泛型
+  `ProcessingFailedError`（400），連當天早上剛成功發過的同一檔案也被拒（媒體/
+  帳號/配額全排除）；最後手動改建 `video_url` container（Meta 自己抓公開網址，
+  不經 rupload）一次成功。細節見 memory `reel-meta-transcode-failure`。
+- 目標: publisher 的 reel 發布在 rupload 回**泛型** ProcessingFailedError 時
+  自動 fallback 到 video_url 路徑，不再需要人工深夜救火
+- 設計注意:
+  - 需要一個放得下 reel 的公開 HTTP 位置（當晚是暫調 `ig-cards` bucket 上限
+    5MB→50MB 再改回；正式做法建議開專用 bucket 如 `reel-videos`、上限 100MB，
+    發布成功後刪檔）
+  - fallback 只對「泛型 ProcessingFailedError」觸發；明確的轉碼錯誤（"failed
+    to transcode"）代表影片規格問題，fallback 也救不了，應照舊 fail
+  - VPS 端 publisher 已有影片檔（`/opt/lorescape-media/daily_video/<date>/`）
+    與 Supabase service key，上傳 bucket 無新依賴
+- [ ] T1: 開 `reel-videos` 專用公開 bucket（或決定沿用 ig-cards 調上限），
+  發布流程結束後刪除暫存影片
+- [ ] T2: `lorescape_publisher/instagram.py` 的 `publish_reel` 加 fallback：
+  rupload 泛型 400 → 上傳 bucket → `video_url` container → 輪詢 → publish
+  → 清理；單元測試涵蓋兩種錯誤 body 的分流
+- [ ] T3: `publish_reel.py`（本地手動 CLI）加 `--via-url` 旗標走同一條路
+- ⚠️ T2 為 publisher 改動，需 Deploy Publisher workflow 部署後才在 VPS 生效
+
 ## F10: iOS 相簿儲存權限鍵補齊
 
 - 狀態: 待辦
