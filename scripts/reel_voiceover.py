@@ -163,10 +163,14 @@ def mux(date: str, voice_path: Path, out_path: Path) -> None:
         "[0:a][v1]sidechaincompress=threshold=0.03:ratio=8:attack=5:release=300[bgd];"
         "[bgd][v2]amix=inputs=2:normalize=0:duration=first[a]"
     )
+    # Video stays -c:v copy: build_video.sh already encoded cinematic.mp4
+    # with the IG-safe profile, so copying avoids a second generation loss.
+    # Audio 44.1kHz matches the profile Meta accepted on the 07-11 refeed.
     dvp._run([
         "ffmpeg", "-y", "-i", str(cinematic), "-i", str(voice_path),
         "-filter_complex", graph, "-map", "0:v", "-map", "[a]",
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-c:v", "copy", "-c:a", "aac", "-ar", "44100", "-b:a", "192k",
+        "-movflags", "+faststart",
         str(out_path), "-loglevel", "error",
     ])
 

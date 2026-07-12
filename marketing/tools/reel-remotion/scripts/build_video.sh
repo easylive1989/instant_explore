@@ -50,16 +50,25 @@ if [[ -z "$BGM" ]]; then
   BGM="$(ls -t "$SOUNDDIR"/*.mp3 "$SOUNDDIR"/*.wav "$SOUNDDIR"/*.m4a 2>/dev/null | head -1 || true)"
 fi
 
+# IG-safe video encode: Meta's server-side transcoder rejects the raw render
+# profile (yuvj420p full-range, e.g. 2026-07-11's reel failed with "both HD
+# and SD progressive failed to transcode"). Re-encode once here so every
+# downstream mp4 (cinematic + voiced final) inherits a profile IG accepts.
+IGSAFE_V=(-c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -r 30 -crf 20 -preset medium \
+  -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv \
+  -movflags +faststart)
+
 if [[ -z "$BGM" || ! -f "$BGM" ]]; then
   echo "== 3/3 no BGM found in $SOUNDDIR — keeping silent video =="
-  mv "$TMP" "$FINAL"
+  ffmpeg -y -i "$TMP" "${IGSAFE_V[@]}" -an "$FINAL" -loglevel error
+  rm -f "$TMP"
 else
   echo "== 3/3 mux BGM: $(basename "$BGM") @ ${LUFS} LUFS =="
   DUR="$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$TMP")"
   OF="$(python3 -c "print(f'{float('$DUR')-2:.3f}')")"
   ffmpeg -y -i "$TMP" -i "$BGM" \
     -filter_complex "[1:a]atrim=0:${DUR},loudnorm=I=${LUFS}:TP=-2:LRA=11,afade=t=in:st=0:d=1.5,afade=t=out:st=${OF}:d=2[a]" \
-    -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k -shortest "$FINAL" -loglevel error
+    -map 0:v -map "[a]" "${IGSAFE_V[@]}" -c:a aac -ar 44100 -b:a 192k -shortest "$FINAL" -loglevel error
   rm -f "$TMP"
 fi
 
