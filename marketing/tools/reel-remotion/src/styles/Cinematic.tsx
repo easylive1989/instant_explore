@@ -1,8 +1,8 @@
-import { AbsoluteFill, Img, staticFile } from "remotion";
+import { AbsoluteFill, Img, staticFile, useCurrentFrame, interpolate } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import type { Beat } from "../types";
-import { story, beatFrames } from "../data/story";
+import { story, beatFrames, totalFrames } from "../data/story";
 import { serifFamily, sansFamily } from "../fonts";
 import { KenBurnsPhoto } from "../components/photo";
 import { Reveal } from "../components/reveal";
@@ -105,6 +105,45 @@ const BeatScene: React.FC<{ beat: Beat; index: number }> = ({ beat, index }) => 
               </Reveal>
             );
           })}
+          {isEnding ? (
+            <Reveal delay={22 + revealCount * 7 + 18} fromY={18}>
+              <div style={{ marginTop: 66 }}>
+                <Img
+                  src={staticFile("logo-lockup-white.png")}
+                  style={{
+                    width: 300,
+                    height: "auto",
+                    marginBottom: 26,
+                    filter: "drop-shadow(0 2px 12px rgba(0,0,0,0.6))",
+                  }}
+                />
+                <div
+                  style={{
+                    fontFamily: serifFamily,
+                    fontWeight: 700,
+                    fontSize: 42,
+                    lineHeight: 1.5,
+                    color: "#f5f1e9",
+                    textShadow: "0 2px 22px rgba(0,0,0,0.8)",
+                    marginBottom: 14,
+                  }}
+                >
+                  更多景點故事，下載 Lorescape
+                </div>
+                <div
+                  style={{
+                    fontFamily: sansFamily,
+                    fontWeight: 500,
+                    letterSpacing: "0.22em",
+                    fontSize: 28,
+                    color: HIGHLIGHT,
+                  }}
+                >
+                  App Store・Google Play 免費下載
+                </div>
+              </div>
+            </Reveal>
+          ) : null}
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
@@ -112,6 +151,17 @@ const BeatScene: React.FC<{ beat: Beat; index: number }> = ({ beat, index }) => 
 };
 
 export const Cinematic: React.FC = () => {
+  const frame = useCurrentFrame();
+  // The ending beat renders its own large lockup + download CTA, so fade the
+  // corner watermark out as that scene arrives instead of doubling the logo.
+  const endingBeat = story.beats[story.beats.length - 1];
+  const endingStart = totalFrames(TRANSITION) - beatFrames(endingBeat);
+  const watermarkOpacity = interpolate(
+    frame,
+    [endingStart - TRANSITION, endingStart],
+    [0.9, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <TransitionSeries>
@@ -144,7 +194,7 @@ export const Cinematic: React.FC = () => {
           bottom: 120,
           width: 132,
           height: "auto",
-          opacity: 0.9,
+          opacity: watermarkOpacity,
           filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6))",
         }}
       />

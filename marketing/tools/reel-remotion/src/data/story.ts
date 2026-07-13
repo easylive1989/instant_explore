@@ -19,7 +19,9 @@ const nonEmptyLines = (beat: Beat): number =>
 export const beatFrames = (beat: Beat): number => {
   if (typeof beat.durationFrames === "number") return beat.durationFrames;
   if (beat.layout === "cover") return 140;
-  if (beat.layout === "ending") return 150;
+  // Ending holds longer than its text alone needs: the download CTA block
+  // reveals after the closing lines and must stay readable before cut-off.
+  if (beat.layout === "ending") return 195;
   const byText = 66 + 27 * nonEmptyLines(beat);
   return Math.max(116, Math.min(170, byText));
 };
