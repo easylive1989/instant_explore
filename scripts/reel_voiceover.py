@@ -24,6 +24,7 @@ FPS = 30
 TRANSITION = 18  # matches src/styles/Cinematic.tsx TRANSITION
 LEAD = 20
 TAIL = 18
+ENDING_MIN_FRAMES = 210  # ending 拍最短停留，確保片尾下載 CTA 淡入後讀得完
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REEL_DIR = REPO_ROOT / "marketing" / "tools" / "reel-remotion"
@@ -41,7 +42,7 @@ def text_default_frames(beat: dict) -> int:
     if layout == "cover":
         return 140
     if layout == "ending":
-        return 150
+        return ENDING_MIN_FRAMES
     nonempty = len([l for l in beat.get("lines", []) if l != ""])
     return max(116, min(170, 66 + 27 * nonempty))
 

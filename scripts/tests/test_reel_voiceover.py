@@ -11,7 +11,14 @@ import reel_voiceover as rv
 
 def test_text_default_frames_cover_and_ending():
     assert rv.text_default_frames({"layout": "cover", "lines": ["a", "b"]}) == 140
-    assert rv.text_default_frames({"layout": "ending", "lines": ["a"]}) == 150
+    assert rv.text_default_frames({"layout": "ending", "lines": ["a"]}) == 210
+
+
+def test_ending_holds_floor_even_with_short_voice():
+    # 3 秒旁白 → ceil(3*30)+LEAD+TAIL 遠小於 210，ending 應守住 210
+    assert rv.duration_frames(
+        rv.text_default_frames({"layout": "ending", "lines": ["a"]}), 3.0
+    ) == 210
 
 
 def test_text_default_frames_scales_with_nonempty_lines():

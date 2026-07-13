@@ -16,12 +16,17 @@ const nonEmptyLines = (beat: Beat): number =>
  * how much text has to be read — reading time matters because narration is
  * added later, but the on-screen text must be legible on its own too.
  */
+export const ENDING_MIN_FRAMES = 210;
+
 export const beatFrames = (beat: Beat): number => {
+  // Ending holds ≥ ENDING_MIN_FRAMES so the burned-in download CTA has time to
+  // fade in and stay readable, even when its narration is short. Applied even
+  // when durationFrames is set, so it survives the voiceover pipeline's rewrite.
+  if (beat.layout === "ending") {
+    return Math.max(beat.durationFrames ?? ENDING_MIN_FRAMES, ENDING_MIN_FRAMES);
+  }
   if (typeof beat.durationFrames === "number") return beat.durationFrames;
   if (beat.layout === "cover") return 140;
-  // Ending holds longer than its text alone needs: the download CTA block
-  // reveals after the closing lines and must stay readable before cut-off.
-  if (beat.layout === "ending") return 195;
   const byText = 66 + 27 * nonEmptyLines(beat);
   return Math.max(116, Math.min(170, byText));
 };
