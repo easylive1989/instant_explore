@@ -157,7 +157,8 @@ def test_main_passes_cover_url_to_publish_reel(tmp_path, mocker):
     mocker.patch("publish_reel.Config.from_env", return_value=config)
     mocker.patch("publish_reel.create_client", return_value=object())
     pub = mocker.patch(
-        "publish_reel.instagram.publish_reel", return_value="post-1"
+        "publish_reel.reel_publisher.publish_reel_with_fallback",
+        return_value="post-1",
     )
 
     result = publish_reel.main(["2026-06-22"])
@@ -191,7 +192,8 @@ def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
     mocker.patch("publish_reel.Config.from_env", return_value=config)
     mocker.patch("publish_reel.create_client", return_value=object())
     pub = mocker.patch(
-        "publish_reel.instagram.publish_reel", return_value="post-1"
+        "publish_reel.reel_publisher.publish_reel_with_fallback",
+        return_value="post-1",
     )
 
     result = publish_reel.main(["2026-06-22"])
@@ -199,6 +201,44 @@ def test_main_publishes_without_cover_when_cover_build_fails(tmp_path, mocker):
     assert result == 0
     # Cover failure must not block the publish; it falls back to no cover.
     assert pub.call_args.kwargs["cover_url"] is None
+
+
+def test_main_via_url_flag_skips_rupload_path(tmp_path, mocker):
+    day_dir = tmp_path / "2026-06-22"
+    day_dir.mkdir()
+    (day_dir / "final.mp4").write_bytes(b"v")
+    mocker.patch.object(publish_reel, "DAILY_VIDEO_DIR", tmp_path)
+    mocker.patch("publish_reel.load_dotenv")
+    mocker.patch.object(
+        publish_reel, "_build_caption", return_value="some caption"
+    )
+    mocker.patch.object(
+        publish_reel.reel_cover, "build_cover_url", return_value=None
+    )
+    config = SimpleNamespace(
+        instagram_enabled=True,
+        ig_user_id="ig1",
+        meta_page_access_token="tok",
+        supabase_url="https://x.supabase.co",
+        supabase_service_role_key="key",
+        brand_handle_ig="@lorescape",
+        cta_text="Explore.",
+    )
+    mocker.patch("publish_reel.Config.from_env", return_value=config)
+    mocker.patch("publish_reel.create_client", return_value=object())
+    with_fallback = mocker.patch(
+        "publish_reel.reel_publisher.publish_reel_with_fallback"
+    )
+    via_url = mocker.patch(
+        "publish_reel.reel_publisher.publish_reel_via_video_url",
+        return_value="post-url-1",
+    )
+
+    result = publish_reel.main(["2026-06-22", "--via-url"])
+
+    assert result == 0
+    with_fallback.assert_not_called()
+    assert via_url.call_args.kwargs["date_str"] == "2026-06-22"
 
 
 def test_main_returns_1_and_prints_error_on_publish_failure(
@@ -234,7 +274,7 @@ def test_main_returns_1_and_prints_error_on_publish_failure(
         "publish_reel.create_client", return_value=object()
     )
     mocker.patch(
-        "publish_reel.instagram.publish_reel",
+        "publish_reel.reel_publisher.publish_reel_with_fallback",
         side_effect=RuntimeError("Reel container c1 failed: ERROR detail"),
     )
 

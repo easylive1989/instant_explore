@@ -33,7 +33,13 @@ from supabase import create_client
 
 from lorescape_publisher.config import Config
 from lorescape_publisher.daily_story import discord_notify, discord_review
-from lorescape_publisher import caption, instagram, post_log, reel_cover
+from lorescape_publisher import (
+    caption,
+    instagram,
+    post_log,
+    reel_cover,
+    reel_video_storage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -159,12 +165,14 @@ def run_reel_publish_job(
         return
 
     try:
-        ig_post_id = instagram.publish_reel(
+        ig_post_id = publish_reel_with_fallback(
+            supabase,
             ig_user_id=config.ig_user_id,  # type: ignore[arg-type]
             access_token=config.meta_page_access_token,  # type: ignore[arg-type]
-            video_path=str(video_path),
-            caption=ig_caption,
+            video_path=video_path,
+            ig_caption=ig_caption,
             cover_url=cover_url,
+            date_str=date_str,
         )
     except Exception as exc:  # noqa: BLE001 — orchestrator catches all
         logger.exception("Reel publish failed for %s", date_str)
@@ -186,6 +194,80 @@ def run_reel_publish_job(
         ig_post_id=ig_post_id,
     )
     logger.info("Published reel for %s: %s", date_str, ig_post_id)
+
+
+def publish_reel_with_fallback(
+    supabase,
+    *,
+    ig_user_id: str,
+    access_token: str,
+    video_path: Path,
+    ig_caption: str,
+    cover_url: str | None,
+    date_str: str,
+) -> str:
+    """`instagram.publish_reel`, retried via the video_url path when rupload
+    fails with its generic ProcessingFailedError (BACKLOG F11)."""
+    try:
+        return instagram.publish_reel(
+            ig_user_id=ig_user_id,
+            access_token=access_token,
+            video_path=str(video_path),
+            caption=ig_caption,
+            cover_url=cover_url,
+        )
+    except instagram.ReelUploadGenericError as exc:
+        logger.warning(
+            "rupload rejected the reel generically (%s); retrying via "
+            "video_url", exc,
+        )
+        return publish_reel_via_video_url(
+            supabase,
+            ig_user_id=ig_user_id,
+            access_token=access_token,
+            video_path=video_path,
+            ig_caption=ig_caption,
+            cover_url=cover_url,
+            date_str=date_str,
+        )
+
+
+def publish_reel_via_video_url(
+    supabase,
+    *,
+    ig_user_id: str,
+    access_token: str,
+    video_path: Path,
+    ig_caption: str,
+    cover_url: str | None,
+    date_str: str,
+) -> str:
+    """Publish by letting Meta fetch the video from a temporary public URL.
+
+    The video is staged in the public `reel-videos` bucket and deleted after
+    the publish attempt regardless of outcome (a FINISHED container has its
+    own copy; a failed one expires on Meta's side within ~24h).
+    """
+    video_path = Path(video_path)
+    storage_path = f"{date_str}/{video_path.name}"
+    video_url = reel_video_storage.upload_reel_video(
+        supabase, video_path.read_bytes(), path=storage_path,
+    )
+    try:
+        return instagram.publish_reel_from_url(
+            ig_user_id=ig_user_id,
+            access_token=access_token,
+            video_url=video_url,
+            caption=ig_caption,
+            cover_url=cover_url,
+        )
+    finally:
+        try:
+            reel_video_storage.delete_reel_video(supabase, path=storage_path)
+        except Exception:  # noqa: BLE001 — cleanup is best-effort
+            logger.warning(
+                "Could not delete temp reel video %s", storage_path,
+            )
 
 
 def build_reel_caption(

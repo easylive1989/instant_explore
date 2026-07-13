@@ -93,7 +93,7 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F11: reel 發布 video_url fallback
 
-- 狀態: 待辦
+- 狀態: 已完成（2026-07-13，待 Deploy Publisher 上 VPS 生效）
 - 來源: 2026-07-12 晚 Meta rupload 端點故障——排程與手動發布連吃 7 次泛型
   `ProcessingFailedError`（400），連當天早上剛成功發過的同一檔案也被拒（媒體/
   帳號/配額全排除）；最後手動改建 `video_url` container（Meta 自己抓公開網址，
@@ -108,13 +108,20 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     to transcode"）代表影片規格問題，fallback 也救不了，應照舊 fail
   - VPS 端 publisher 已有影片檔（`/opt/lorescape-media/daily_video/<date>/`）
     與 Supabase service key，上傳 bucket 無新依賴
-- [ ] T1: 開 `reel-videos` 專用公開 bucket（或決定沿用 ig-cards 調上限），
-  發布流程結束後刪除暫存影片
-- [ ] T2: `lorescape_publisher/instagram.py` 的 `publish_reel` 加 fallback：
-  rupload 泛型 400 → 上傳 bucket → `video_url` container → 輪詢 → publish
-  → 清理；單元測試涵蓋兩種錯誤 body 的分流
-- [ ] T3: `publish_reel.py`（本地手動 CLI）加 `--via-url` 旗標走同一條路
+- [x] T1: 開 `reel-videos` 專用公開 bucket（2026-07-13 已建：public、
+  `video/mp4`、上限 50MB——100MB 超過專案全域上傳上限會 413；見
+  `docs/init/2026-07-13-reel-videos-bucket-setup.md`），發布流程結束後刪除
+  暫存影片
+- [x] T2: rupload 泛型 400 → `ReelUploadGenericError` →
+  `reel_publisher.publish_reel_with_fallback` 上傳 bucket → `video_url`
+  container（`instagram.publish_reel_from_url`）→ 輪詢 → publish → 清理；
+  分流只認 `debug_info.type=ProcessingFailedError` +
+  `message=Request processing failed`（轉碼錯誤同 type 但 message 不同，
+  照舊 fail）；測試涵蓋兩種錯誤 body 與 fallback 清理
+- [x] T3: `publish_reel.py` 加 `--via-url` 旗標直走 video_url；預設路徑也
+  自動 fallback
 - ⚠️ T2 為 publisher 改動，需 Deploy Publisher workflow 部署後才在 VPS 生效
+  （尚未部署）
 
 ## F12: reel-remotion story.json 改為 gitignored 工作檔
 
@@ -135,3 +142,17 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - 來源: 2026-07-11 frontend 依賴規則還債 final review 發現；缺口自 2026-02-05（7ef8771b 移除 `NSPhotoLibraryAddUsageDescription`）即存在，非本次 camera 刪除造成
 - 問題: daily story / journey 分享輸出 PNG（share_plus share sheet），使用者在 share sheet 點「儲存影像」時 app 缺 `NSPhotoLibraryAddUsageDescription`，iOS 會使該動作失敗（甚至 crash）
 - [ ] T1: `frontend/ios/Runner/Info.plist` 補回 `NSPhotoLibraryAddUsageDescription`（文案說明「將分享圖片儲存到相簿」）；隨下次 App build 送審生效
+
+## F13: App 留存診斷 (epic: E1)
+
+- 狀態: 待辦
+- 來源: marketing/audits/weekly-2026-07-13.md（P0）——本週 App 活躍腰斬
+  （iOS+Android 22 vs 46）、新用戶 −56%、D1 留存幾乎全週 0%（僅 07-11
+  cohort 20%）、D7 全 0%；流量端反而成長（IG 觸及 +75%、Landing 新用戶
+  +40%），問題在留不住不在進不來
+- [ ] T1: 跑 marketing-retention 分析流失點（GA4 cohort + narration 完成率
+  交叉；narration.csv 目前 0 rows，pre-traffic，一併確認事件有無進來）
+- [ ] T2: 檢查每日故事推播的實際送達與開啟情況（習慣養成迴路是否真的在
+  運作）
+- [ ] T3: 下週週報驗證 reel 片尾下載 CTA 成效（2026-07-13 上線
+  `Cinematic.tsx` ending CTA，對「IG 觸及 1,923 → iOS 下載 1」的轉化缺口）

@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 
+from lorescape_publisher.instagram import ReelUploadGenericError
 from lorescape_publisher.reel_publisher import run_reel_publish_job
 
 TARGET = date(2026, 7, 5)
@@ -178,6 +179,97 @@ def test_no_review_row_notifies_on_first_pass_only(mocks, video_config):
     assert mocks.notify.call_count == 1  # final pass stays quiet
 
     mocks.ig_pub.assert_not_called()
+
+
+@pytest.fixture
+def fallback_mocks():
+    """Patch the video_url fallback collaborators."""
+    with (
+        patch(
+            "lorescape_publisher.reel_publisher.reel_video_storage"
+        ) as storage,
+        patch(
+            "lorescape_publisher.reel_publisher.instagram"
+            ".publish_reel_from_url"
+        ) as from_url,
+    ):
+        storage.upload_reel_video.return_value = (
+            "https://x/reel-videos/2026-07-05/final.mp4"
+        )
+
+        class Namespace:
+            pass
+
+        ns = Namespace()
+        ns.storage = storage
+        ns.from_url = from_url
+        yield ns
+
+
+def test_generic_rupload_failure_falls_back_to_video_url(
+    mocks, fallback_mocks, video_config
+):
+    mocks.post_log.get_post.return_value = _reel_row()
+    mocks.check.return_value = "approved"
+    mocks.ig_pub.side_effect = ReelUploadGenericError(
+        "Reel upload failed with HTTP 400: ProcessingFailedError"
+    )
+    fallback_mocks.from_url.return_value = "reel-url-1"
+
+    run_reel_publish_job(video_config, TARGET)
+
+    upload_call = fallback_mocks.storage.upload_reel_video.call_args
+    assert upload_call.kwargs["path"] == f"{DATE_STR}/final.mp4"
+    from_url_kwargs = fallback_mocks.from_url.call_args.kwargs
+    assert from_url_kwargs["video_url"] == (
+        "https://x/reel-videos/2026-07-05/final.mp4"
+    )
+    assert from_url_kwargs["cover_url"] == "https://x/cover.png"
+    assert "羅馬競技場" in from_url_kwargs["caption"]
+    fallback_mocks.storage.delete_reel_video.assert_called_once_with(
+        ANY, path=f"{DATE_STR}/final.mp4"
+    )
+    record = mocks.post_log.record_post.call_args.kwargs
+    assert record["status"] == "published"
+    assert record["ig_post_id"] == "reel-url-1"
+
+
+def test_content_specific_upload_failure_does_not_fall_back(
+    mocks, fallback_mocks, video_config
+):
+    """Transcoding-style rejections mean the video itself is bad — the
+    video_url path cannot save it, so the row goes straight to failed."""
+    mocks.post_log.get_post.return_value = _reel_row()
+    mocks.check.return_value = "approved"
+    mocks.ig_pub.side_effect = RuntimeError(
+        "Video Transcoding Error: both HD and SD progressive failed"
+    )
+
+    run_reel_publish_job(video_config, TARGET)
+
+    fallback_mocks.storage.upload_reel_video.assert_not_called()
+    fallback_mocks.from_url.assert_not_called()
+    record = mocks.post_log.record_post.call_args.kwargs
+    assert record["status"] == "failed"
+    assert "Transcoding" in record["error"]
+
+
+def test_failed_fallback_still_deletes_temp_video_and_marks_failed(
+    mocks, fallback_mocks, video_config
+):
+    mocks.post_log.get_post.return_value = _reel_row()
+    mocks.check.return_value = "approved"
+    mocks.ig_pub.side_effect = ReelUploadGenericError("generic 400")
+    fallback_mocks.from_url.side_effect = RuntimeError("still broken")
+
+    run_reel_publish_job(video_config, TARGET)
+
+    fallback_mocks.storage.delete_reel_video.assert_called_once_with(
+        ANY, path=f"{DATE_STR}/final.mp4"
+    )
+    record = mocks.post_log.record_post.call_args.kwargs
+    assert record["status"] == "failed"
+    assert "still broken" in record["error"]
 
 
 def test_approved_but_video_missing_notifies(

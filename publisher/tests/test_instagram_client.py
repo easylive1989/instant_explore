@@ -6,9 +6,11 @@ from unittest.mock import patch
 import pytest
 
 from lorescape_publisher.instagram import (
+    ReelUploadGenericError,
     publish,
     publish_carousel,
     publish_reel,
+    publish_reel_from_url,
 )
 
 
@@ -301,10 +303,118 @@ def test_publish_reel_upload_http_error_includes_response_body(
     )
 
     with patch("lorescape_publisher.instagram.time.sleep"):
-        with pytest.raises(Exception, match="Video Transcoding Error"):
+        with pytest.raises(Exception, match="Video Transcoding Error") as ei:
             publish_reel(
                 ig_user_id="ig1",
                 access_token="tok",
                 video_path=str(video),
                 caption="c",
             )
+    # A content-specific rejection must NOT look retriable-via-URL.
+    assert not isinstance(ei.value, ReelUploadGenericError)
+
+
+def test_publish_reel_generic_processing_failure_raises_typed_error(
+    requests_mock, tmp_path
+):
+    """The 2026-07-12 rupload endpoint failure: generic body → typed error
+    so callers can fall back to the video_url path (BACKLOG F11)."""
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"x")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "reel-container-5"},
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-container-5",
+        status_code=400,
+        json={
+            "debug_info": {
+                "retriable": False,
+                "type": "ProcessingFailedError",
+                "message": "Request processing failed",
+            }
+        },
+    )
+
+    with patch("lorescape_publisher.instagram.time.sleep"):
+        with pytest.raises(ReelUploadGenericError, match="reel-container-5"):
+            publish_reel(
+                ig_user_id="ig1",
+                access_token="tok",
+                video_path=str(video),
+                caption="c",
+            )
+
+
+def test_publish_reel_non_json_error_body_is_not_generic(
+    requests_mock, tmp_path
+):
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"x")
+
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "reel-container-6"},
+    )
+    requests_mock.post(
+        "https://rupload.facebook.com/ig-api-upload/v21.0/reel-container-6",
+        status_code=500,
+        text="Internal Server Error",
+    )
+
+    with patch("lorescape_publisher.instagram.time.sleep"):
+        with pytest.raises(RuntimeError) as ei:
+            publish_reel(
+                ig_user_id="ig1",
+                access_token="tok",
+                video_path=str(video),
+                caption="c",
+            )
+    assert not isinstance(ei.value, ReelUploadGenericError)
+
+
+def test_publish_reel_from_url_creates_url_container_then_publishes(
+    requests_mock,
+):
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media",
+        json={"id": "url-container-1"},
+    )
+    requests_mock.get(
+        "https://graph.facebook.com/v21.0/url-container-1",
+        json={"status_code": "FINISHED"},
+    )
+    requests_mock.post(
+        "https://graph.facebook.com/v21.0/ig1/media_publish",
+        json={"id": "reel-post-url-1"},
+    )
+
+    with patch("lorescape_publisher.instagram.time.sleep"):
+        post_id = publish_reel_from_url(
+            ig_user_id="ig1",
+            access_token="tok",
+            video_url="https://example.com/reel-videos/d/final.mp4",
+            caption="url caption",
+            cover_url="https://example.com/cover.png",
+        )
+
+    assert post_id == "reel-post-url-1"
+
+    create_req = requests_mock.request_history[0]
+    assert create_req.qs["media_type"] == ["reels"]
+    assert create_req.qs["video_url"] == [
+        "https://example.com/reel-videos/d/final.mp4"
+    ]
+    assert create_req.qs["cover_url"] == ["https://example.com/cover.png"]
+    assert create_req.qs["caption"] == ["url caption"]
+    # video_url mode never touches the rupload endpoint or upload_type.
+    assert "upload_type" not in create_req.qs
+    assert all(
+        "rupload.facebook.com" not in r.url
+        for r in requests_mock.request_history
+    )
+
+    publish_req = requests_mock.request_history[-1]
+    assert publish_req.qs["creation_id"] == ["url-container-1"]

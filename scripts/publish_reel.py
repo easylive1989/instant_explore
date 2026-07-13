@@ -12,6 +12,10 @@ Run from scripts/:
     uv run python -m publish_reel 2026-06-22 --dry-run
     uv run python -m publish_reel 2026-06-22 --caption "自訂文案"
     uv run python -m publish_reel 2026-06-22 --video /path/to/clip.mp4
+    uv run python -m publish_reel 2026-06-22 --via-url
+
+rupload 泛型故障時預設路徑會自動 fallback 到 video_url container；
+--via-url 則直接走 video_url（見 BACKLOG F11）。
 """
 from __future__ import annotations
 
@@ -23,7 +27,7 @@ from dotenv import load_dotenv
 from supabase import create_client
 
 from lorescape_publisher.config import Config
-from lorescape_publisher import caption, instagram, reel_cover
+from lorescape_publisher import caption, reel_cover, reel_publisher
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_VIDEO_DIR = REPO_ROOT / "marketing" / "outputs" / "daily_video"
@@ -101,6 +105,12 @@ def main(argv: list[str]) -> int:
         help="Skip the rendered carousel cover; let Meta pick a video frame",
     )
     parser.add_argument(
+        "--via-url",
+        action="store_true",
+        help="Skip rupload: stage the video in the public reel-videos "
+             "bucket and let Meta fetch it (video_url container)",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the video and caption without publishing",
@@ -141,13 +151,26 @@ def main(argv: list[str]) -> int:
         return 1
 
     try:
-        post_id = instagram.publish_reel(
-            ig_user_id=config.ig_user_id,
-            access_token=config.meta_page_access_token,
-            video_path=str(video),
-            caption=ig_caption,
-            cover_url=cover_url,
-        )
+        if args.via_url:
+            post_id = reel_publisher.publish_reel_via_video_url(
+                supabase,
+                ig_user_id=config.ig_user_id,
+                access_token=config.meta_page_access_token,
+                video_path=video,
+                ig_caption=ig_caption,
+                cover_url=cover_url,
+                date_str=args.date,
+            )
+        else:
+            post_id = reel_publisher.publish_reel_with_fallback(
+                supabase,
+                ig_user_id=config.ig_user_id,
+                access_token=config.meta_page_access_token,
+                video_path=video,
+                ig_caption=ig_caption,
+                cover_url=cover_url,
+                date_str=args.date,
+            )
     except Exception as exc:
         print(f"Publish failed: {exc}", file=sys.stderr)
         return 1

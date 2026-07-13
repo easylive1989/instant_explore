@@ -8,6 +8,7 @@ Reference: https://developers.facebook.com/docs/instagram-api/guides/content-pub
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -15,6 +16,17 @@ import time
 import requests
 
 logger = logging.getLogger(__name__)
+
+
+class ReelUploadGenericError(RuntimeError):
+    """rupload rejected the bytes with its *generic* ProcessingFailedError.
+
+    This is an endpoint-side failure, not a problem with the video itself
+    (content-specific rejections like transcoding errors raise a plain
+    RuntimeError instead), so retrying via `publish_reel_from_url` — where
+    Meta fetches the video from a public URL and rupload is bypassed — can
+    succeed. Observed 2026-07-12; see BACKLOG F11.
+    """
 
 META_GRAPH_API = "https://graph.facebook.com/v21.0"
 _REQUEST_TIMEOUT = 30
@@ -197,6 +209,44 @@ def publish_reel(
     )
 
 
+def publish_reel_from_url(
+    *,
+    ig_user_id: str,
+    access_token: str,
+    video_url: str,
+    caption: str,
+    cover_url: str | None = None,
+) -> str:
+    """Create + publish an IG Reel from a public video URL. Returns post id.
+
+    Bypasses the rupload endpoint entirely: Meta fetches `video_url` itself,
+    so the URL must be publicly reachable until the container reaches
+    FINISHED. Used as the fallback when rupload fails generically
+    (`ReelUploadGenericError`).
+    """
+    params = {
+        "media_type": "REELS",
+        "video_url": video_url,
+        "caption": caption,
+        "access_token": access_token,
+    }
+    if cover_url:
+        params["cover_url"] = cover_url
+    response = requests.post(
+        f"{META_GRAPH_API}/{ig_user_id}/media",
+        params=params,
+        timeout=_REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    container_id = response.json()["id"]
+    _wait_until_finished(container_id=container_id, access_token=access_token)
+    return _publish_container(
+        ig_user_id=ig_user_id,
+        access_token=access_token,
+        container_id=container_id,
+    )
+
+
 def _create_reel_container(
     *,
     ig_user_id: str,
@@ -241,13 +291,34 @@ def _upload_reel_bytes(
     if response.status_code >= 400:
         # rupload puts the real failure reason (e.g. transcoding errors) in
         # the response body, which raise_for_status() would discard.
-        raise RuntimeError(
+        message = (
             f"Reel upload failed with HTTP {response.status_code} for "
             f"container {container_id}: {response.text}"
         )
+        if _is_generic_processing_failure(response.text):
+            raise ReelUploadGenericError(message)
+        raise RuntimeError(message)
     body = response.json()
     if not body.get("success", True):
         raise RuntimeError(f"Reel upload was not accepted: {body}")
+
+
+def _is_generic_processing_failure(body: str) -> bool:
+    """True only for rupload's generic ProcessingFailedError body.
+
+    Content-specific rejections (e.g. "Video Transcoding Error: … failed to
+    transcode") share the same `type` but carry a concrete message; the
+    video_url fallback cannot save those, so they must return False.
+    """
+    try:
+        debug = json.loads(body).get("debug_info") or {}
+    except (ValueError, AttributeError):
+        return False
+    message = str(debug.get("message", "")).lower()
+    return (
+        debug.get("type") == "ProcessingFailedError"
+        and "request processing failed" in message
+    )
 
 
 def _wait_until_finished(*, container_id: str, access_token: str) -> None:
