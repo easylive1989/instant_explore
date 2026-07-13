@@ -27,7 +27,7 @@ reel tells the same story the carousel does.
 
 Keep these when editing — this IS the approved style:
 
-- **9:16, 30fps, ~30s, no voiceover baked in** (narration added later in post)
+- **9:16, 30fps, 目標 20–30s, no voiceover baked in** (narration added later in post)
 - Full-bleed photo with a slow continuous **Ken Burns** push (never static)
 - **Cross-dissolve** between beats; each beat = one aspect of the place
 - Narration reveals **line-by-line** with a spring (weight, not a linear ramp)
