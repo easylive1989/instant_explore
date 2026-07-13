@@ -64,23 +64,29 @@ cd ../../../scripts && uv run python -m reel_voiceover <YYYY-MM-DD>
 then muxes the newest track in `marketing/sound/`. Preview the mp4, iterate,
 then hand off to upload (lorescape-manual-daily-story Step 11).
 
-### Step 2 — condensing narration (do NOT skip)
+### Step 2 — condensing narration（目標 20–30 秒，do NOT skip）
 
-`prepare_story.mjs` copies the carousel's full lines; on screen that's too much
-to read in 30s and too long for a voiceover to keep pace. Edit each beat's
-`lines` in `src/data/story.json`:
+`prepare_story.mjs` 會把 carousel 全 9 拍的完整 lines 搬進來——那對 reel
+太長（實測會到 60–100 秒，壓低完播與觸及）。目標是**成片 20–30 秒**。
+編輯 `src/data/story.json`：
 
-- Cut to **~half** — aim for **1–3 short lines per beat** (a couplet).
-- Keep the **cover hook** intact (the curiosity gap / reversal).
-- Each `highlights` entry MUST be an **exact substring** of a line, or it
-  won't render highlighted.
-- Preserve the story arc across the 8 beats; tighten wording, don't drop beats.
-- `prepare_story.mjs` auto-numbers kickers 其之一…；enrich with a one-word
-  theme if it helps (e.g. `其之二 · 戰火`).
-- 若要加語音旁白，另外替每拍填 `narration`（口說、為耳朵而寫，比畫面
-  `lines` 完整一點，一拍一句連貫）。`prepare_story.mjs` 會用非空 lines
-  串接種一個草稿，潤成順口的口說版即可。reel_voiceover 會逐拍 TTS、
-  用實測長度回寫 `durationFrames`，讓畫面撐到旁白唸得完。
+- **挑拍**：只留 **hook cover ＋ 3–4 個最強拍 ＋ ending**（合計 5–6 拍），
+  其餘整拍刪掉。保留反轉/懸念/彩蛋，丟掉鋪陳與次要細節。（carousel 仍是
+  9 拍，reel 用子集不影響圖組。）
+- **零秒 hook（cover）**：cover 的 `lines[0]` 寫成一句話講完反轉/懸念的
+  **拋問句或反轉句**（例：「全世界最著名的建築，其實是一座墳墓。」）。
+  render 會讓 `lines[0]` 第一幀就以最大字級出現，地區/地名自動降為小字，
+  所以 hook 句要能獨立抓住人、別依賴標題。cover `lines` 儘量只留 hook 句
+  ＋最多一句補充。
+- **每拍精煉**：非 cover 拍收成 **1–2 句短 clause**（口說唸完約 3–4 秒），
+  不要複句。
+- 每個 `highlights` 必須是某句 `lines` 的**精確子字串**，否則不會highlight。
+- `narration`（口說旁白）每拍填一句，比畫面 `lines` 完整一點即可；
+  `reel_voiceover` 會逐拍 TTS、用實測長度回寫 `durationFrames`。因此
+  **寫短旁白＝片子自然短**，不需另設上限。
+- 算下來若仍超過 ~35 秒（beats × 各拍旁白秒數相加），再砍一拍或縮句。
+- ending 拍會自動保留 ≥7 秒讓片尾下載 CTA 讀得完（`ENDING_MIN_FRAMES`），
+  ending 旁白寫 1–2 句收尾即可，不用硬撐長度。
 
 ## Quick Reference
 
