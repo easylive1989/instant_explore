@@ -48,63 +48,160 @@ const BeatScene: React.FC<{ beat: Beat; index: number }> = ({ beat, index }) => 
         }}
       >
         <div>
-          <Reveal delay={6}>
-            <div
-              style={{
-                fontFamily: sansFamily,
-                fontWeight: 500,
-                letterSpacing: "0.35em",
-                fontSize: 29,
-                color: HIGHLIGHT,
-                marginBottom: 22,
-              }}
-            >
-              {beat.kicker}
-            </div>
-          </Reveal>
-          {beat.title ? (
-            <Reveal delay={12}>
-              <div
-                style={{
-                  fontFamily: serifFamily,
-                  fontWeight: 900,
-                  fontSize: isCover ? 128 : 74,
-                  lineHeight: 1.1,
-                  color: "#fff",
-                  marginBottom: 30,
-                  textShadow: "0 4px 30px rgba(0,0,0,0.6)",
-                }}
-              >
-                {beat.title}
-              </div>
-            </Reveal>
-          ) : null}
-          {beat.lines.map((line, i) => {
-            if (line === "") return <div key={i} style={{ height: 20 }} />;
-            const delay = 22 + revealCount * 7;
-            revealCount += 1;
-            return (
-              <Reveal key={i} delay={delay} fromY={18}>
+          {isCover ? (
+            <>
+              {/* Zero-second hook: the first line, largest, first to appear. */}
+              <Reveal delay={6} fromY={18}>
                 <div
                   style={{
                     fontFamily: serifFamily,
-                    fontWeight: 700,
-                    fontSize: 50,
-                    lineHeight: 1.5,
-                    color: "#f5f1e9",
-                    textShadow: "0 2px 22px rgba(0,0,0,0.8)",
+                    fontWeight: 800,
+                    fontSize: 78,
+                    lineHeight: 1.35,
+                    color: "#fff",
+                    textShadow: "0 4px 30px rgba(0,0,0,0.65)",
+                    marginBottom: 26,
                   }}
                 >
                   <HighlightedLine
-                    line={line}
+                    line={beat.lines[0] ?? ""}
                     highlights={beat.highlights}
                     highlightColor={HIGHLIGHT}
                     highlightStyle="color"
                   />
                 </div>
               </Reveal>
-            );
-          })}
+              {beat.lines.slice(1).map((line, i) => {
+                if (line === "") return <div key={i} style={{ height: 18 }} />;
+                const delay = 18 + revealCount * 7;
+                revealCount += 1;
+                return (
+                  <Reveal key={i} delay={delay} fromY={18}>
+                    <div
+                      style={{
+                        fontFamily: serifFamily,
+                        fontWeight: 700,
+                        fontSize: 46,
+                        lineHeight: 1.5,
+                        color: "#f5f1e9",
+                        textShadow: "0 2px 22px rgba(0,0,0,0.8)",
+                      }}
+                    >
+                      <HighlightedLine
+                        line={line}
+                        highlights={beat.highlights}
+                        highlightColor={HIGHLIGHT}
+                        highlightStyle="color"
+                      />
+                    </div>
+                  </Reveal>
+                );
+              })}
+              {/* Demoted place tag: region + place name, small, after the hook. */}
+              <Reveal delay={18 + revealCount * 7 + 8} fromY={12}>
+                <div style={{ marginTop: 34 }}>
+                  <div
+                    style={{
+                      fontFamily: sansFamily,
+                      fontWeight: 500,
+                      letterSpacing: "0.35em",
+                      fontSize: 26,
+                      color: HIGHLIGHT,
+                      marginBottom: 10,
+                    }}
+                  >
+                    {beat.kicker}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: serifFamily,
+                      fontWeight: 900,
+                      fontSize: 46,
+                      lineHeight: 1.1,
+                      color: "#fff",
+                      textShadow: "0 4px 30px rgba(0,0,0,0.6)",
+                    }}
+                  >
+                    {beat.title}
+                    {beat.subtitle ? (
+                      <span
+                        style={{
+                          fontFamily: sansFamily,
+                          fontWeight: 400,
+                          fontSize: 26,
+                          letterSpacing: "0.08em",
+                          color: "rgba(245,241,233,0.7)",
+                          marginLeft: 16,
+                        }}
+                      >
+                        {beat.subtitle}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </Reveal>
+            </>
+          ) : (
+            <>
+              <Reveal delay={6}>
+                <div
+                  style={{
+                    fontFamily: sansFamily,
+                    fontWeight: 500,
+                    letterSpacing: "0.35em",
+                    fontSize: 29,
+                    color: HIGHLIGHT,
+                    marginBottom: 22,
+                  }}
+                >
+                  {beat.kicker}
+                </div>
+              </Reveal>
+              {beat.title ? (
+                <Reveal delay={12}>
+                  <div
+                    style={{
+                      fontFamily: serifFamily,
+                      fontWeight: 900,
+                      fontSize: 74,
+                      lineHeight: 1.1,
+                      color: "#fff",
+                      marginBottom: 30,
+                      textShadow: "0 4px 30px rgba(0,0,0,0.6)",
+                    }}
+                  >
+                    {beat.title}
+                  </div>
+                </Reveal>
+              ) : null}
+              {beat.lines.map((line, i) => {
+                if (line === "") return <div key={i} style={{ height: 20 }} />;
+                const delay = 22 + revealCount * 7;
+                revealCount += 1;
+                return (
+                  <Reveal key={i} delay={delay} fromY={18}>
+                    <div
+                      style={{
+                        fontFamily: serifFamily,
+                        fontWeight: 700,
+                        fontSize: 50,
+                        lineHeight: 1.5,
+                        color: "#f5f1e9",
+                        textShadow: "0 2px 22px rgba(0,0,0,0.8)",
+                      }}
+                    >
+                      <HighlightedLine
+                        line={line}
+                        highlights={beat.highlights}
+                        highlightColor={HIGHLIGHT}
+                        highlightStyle="color"
+                      />
+                    </div>
+                  </Reveal>
+                );
+              })}
+            </>
+          )}
           {isEnding ? (
             <Reveal delay={22 + revealCount * 7 + 18} fromY={18}>
               <div style={{ marginTop: 66 }}>
