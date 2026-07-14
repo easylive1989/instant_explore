@@ -28,6 +28,7 @@
 |---|---|---|
 | 10:00 | 月報：最近 30 天數據 vs 前月 | `/marketing-monthly-audit` |
 | 10:30 | 月報可執行事項寫進 `BACKLOG.md` | 手動 |
+| 11:00 | 技術 SEO 定期稽核 lorescape.app | `/marketing-seo-audit` |
 
 註記：reels calendar 期末檢核跟「期別結束日」走（如 8/3），由
 `/lorescape-reels-planner` 觸發，不綁月初。

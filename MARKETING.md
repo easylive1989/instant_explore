@@ -62,3 +62,11 @@
   - Wikipedia / Google 搜尋（文字為主，無故事化敘事與語音）
   - Podcast 旅遊節目（非即時、非定位觸發）
 - **Positioning:** Lorescape 是唯一能在「任何地點、任何時間」即時生成 Wikipedia 事實驗證故事並語音朗讀的 AI 旅行說書人，填補「深度知性旅人在現場的知識空白」。
+
+## Brand Positioning（品牌定位框架）
+撰寫定位 / 文案 / tagline 時的準則（原 marketing-brand skill 收攏於此；文案品質檢查走 `marketing-gate`）。
+
+- **White space（可獨佔的定位）:** 任何地點 × 任何時間 × Wikipedia 事實驗證 × AI 故事 × 語音——競品各缺一塊：Google Maps 語音導覽故事淺、Rick Steves 靜態且限歐洲、景點附設導覽鎖定點、Wikipedia/搜尋無敘事無語音、旅遊 podcast 非即時非定位觸發。
+- **定位陳述模板:** For〔深度知性旅人〕who〔站在景點前只查得到條目式資訊〕，Lorescape is the〔AI 旅行說書人〕that〔即時生成有溫度的史實故事並語音朗讀〕because〔以 Wikipedia 為事實依據、提供 2–3 個故事角度〕。
+- **差異化維度（對比競品時用）:** 覆蓋範圍、AI 即時生成、Wikipedia 事實驗證、語音朗讀、多故事角度、定位觸發、訂閱訪問。
+- **Tagline 限制:** 每則 < 8 字/words；zh-TW 與 English 並行；貼合「沉靜、知性、有溫度」語氣；禁誇張級（「最強」「最好」「革命性」）；主張須能由本檔或 codebase 佐證。

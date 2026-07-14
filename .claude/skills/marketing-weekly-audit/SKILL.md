@@ -104,14 +104,14 @@ App Store 下載數 / 評分：若使用者上週有透過 lorescape-metrics 更
 
 ### Skill 路由
 
-| 發現 | 建議執行的 skill |
+| 發現 | 建議執行的 skill / 動作 |
 |------|----------------|
 | 搜尋排名下滑 | `marketing-seo-audit` |
-| Landing 流量下滑 | `marketing-landing-page` 或 `marketing-cro` |
-| IG 觸及 / 互動率下滑 | `marketing-social` 或 `marketing-content-calendar` |
+| Landing 流量下滑 | `marketing-landing-page`（改文案） |
+| IG 觸及 / 互動率下滑 | 手動優化 caption / hashtag；題材配比見 `lorescape-reels-planner` |
 | App 活躍用戶下滑 | `marketing-retention` |
-| 整體策略方向不明 | `marketing-growth-plan` |
-| 追蹤資料缺失 | `marketing-analytics` |
+| 整體策略方向不明 | 手動：重看 `MARKETING.md` 定位 + brainstorming |
+| 追蹤資料缺失 | 手動：檢查 UTM / GA4 設定（`docs/init/metrics-setup.md`） |
 
 ---
 

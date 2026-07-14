@@ -104,15 +104,15 @@ description: Lorescape 每月行銷月報 — 從 lorescape-metrics 累積的 da
 
 ### Skill 路由
 
-| 發現 | 建議執行的 Skill |
+| 發現 | 建議執行的 Skill / 動作 |
 |------|----------------|
 | 搜尋流量長期下滑 | `marketing-seo-audit` |
-| Landing 轉換率不佳 | `marketing-cro` 或 `marketing-landing-page` |
-| IG 觸及/互動持續下滑 | `marketing-social` 或 `marketing-content-calendar` |
+| Landing 轉換率不佳 | `marketing-landing-page`（改文案） |
+| IG 觸及/互動持續下滑 | 手動優化 caption / hashtag；題材配比見 `lorescape-reels-planner` |
 | App 活躍留存惡化 | `marketing-retention` |
-| 整體成長方向模糊 | `marketing-growth-plan` |
-| 追蹤系統需要改善 | `marketing-analytics` |
-| 競爭格局有變化 | `marketing-competitors` |
+| 整體成長方向模糊 | 手動：重看 `MARKETING.md` 定位 + brainstorming |
+| 追蹤系統需要改善 | 手動：檢查 UTM / GA4 設定（`docs/init/metrics-setup.md`） |
+| 競爭格局有變化 | 手動：WebSearch 競品近況 |
 
 ---
 
