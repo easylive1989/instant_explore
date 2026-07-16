@@ -48,7 +48,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_SAY_VOICE = "Meijia"  # Taiwanese Mandarin voice shipped with macOS.
 DEFAULT_GEMINI_VOICE = "Despina"  # Smooth female prebuilt Gemini TTS voice.
-GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+# 2.5-flash-preview-tts is being wound down (new keys 404 on 2.5; it returns
+# finishReason OTHER + empty audio). Its official successor is 3.1-flash-tts.
+GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 # Natural-language style steer prepended to each line for Gemini TTS.
 DEFAULT_GEMINI_STYLE = "用溫暖、沉穩、語速稍快的紀錄片旁白語氣說："
 DEFAULT_FONT = "/System/Library/Fonts/STHeiti Medium.ttc"  # CJK font file.
