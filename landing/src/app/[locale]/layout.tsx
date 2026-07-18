@@ -21,7 +21,7 @@ export function generateMetadata({
     keywords: d.metadata.keywords,
     alternates: {
       canonical: `/${params.locale}`,
-      languages: { "zh-Hant": "/zh", en: "/en", "x-default": "/" },
+      languages: { "zh-Hant": "/zh", en: "/en", "x-default": "/en" },
     },
     openGraph: {
       title: d.metadata.ogTitle,

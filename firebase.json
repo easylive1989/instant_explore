@@ -5,6 +5,13 @@
       "firebase.json",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/zh",
+        "type": 301
+      }
+    ],
     "headers": [
       {
         "source": "/.well-known/apple-app-site-association",
