@@ -100,6 +100,9 @@ jobs:
             echo "=== publisher recent logs ==="
             docker compose logs --tail=30 publisher
 
+            echo "=== cleaning up dangling docker images ==="
+            docker image prune -f
+
   deploy-status:
     name: Deploy Status Report
     runs-on: ubuntu-latest

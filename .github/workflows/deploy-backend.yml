@@ -78,6 +78,9 @@ jobs:
               exit 1
             fi
 
+            echo "=== cleaning up dangling docker images ==="
+            docker image prune -f
+
   deploy-status:
     name: Deploy Status Report
     runs-on: ubuntu-latest
