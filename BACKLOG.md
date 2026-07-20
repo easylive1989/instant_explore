@@ -17,8 +17,9 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 - [x] **落地頁**（`landing/`）：已部署到 `lorescape.app`（2026-07-09，Deploy Landing workflow 從 master HEAD 重建，正式站驗證通過）。含 F2/F6 T5 定價 section（廣告 7 天試用）與 F9 景點著陸頁
 - [x] **Backend**（`backend/`）：已部署到 VPS（2026-07-09，Deploy Backend workflow `git reset --hard origin/master` + `docker compose up -d --build`）。含 F1 T1 的 Reel caption CTA 文案（已改為固定常數、不吃 CTA_TEXT env）＋ F8 發布 bot
-- [ ] **App**（`frontend/`）：重新 build 並送商店審核上架（新版本），才會顯示 F6 T4 的「7 天免費試用」字樣
-  - 註：商店端 7 天試用本身已對現有 App 生效（RevenueCat 自動帶出）；此步只影響 paywall 上「顯示那行字」
+- [x] **Publisher**（`publisher/`）：F11 T2 的 reel video_url fallback 於 2026-07-13 完成，2026-07-20 使用者手動觸發 Deploy Publisher workflow 上 VPS 生效
+- [x] **App**（`frontend/`）：新版本已上架商店並顯示「7 天免費試用」字樣（2026-07-20 使用者確認），F6 T4 生效
+- [ ] **App**（`frontend/`，下一輪）：F10 的 `Info.plist` 相簿權限鍵已於 2026-07-20 完成但**尚未包含在已上架版本**，待下次 build 送審才生效
 - 已是生產狀態、不需部署：App Store / Google Play 的試用設定、RevenueCat offering
 
 ## F1: IG 導流 CTA (epic: E1)
@@ -67,6 +68,7 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [x] T1/T2/T3: 移除 settings「每日使用」區塊；清掉沒在用的殘留翻譯（paywall_title/subtitle/remaining_usage、daily_usage/remaining_today）。App full suite 552 passed。
 - 可選後續（未做）：本地 usage 計數器（`_dailyFreeLimit`/`consumeUsage`）移除顯示後成為內部殘留，若要一併移除需動 narration use case 與其測試，留待需要時再清。
 - ⚠️ 此為 Flutter 改動，需隨「待部署 → App」一起重新 build 送審才會生效。
+- 2026-07-20：App 新版本已上架（見「待部署」段），與 F6 T4 同一次 build，程式改動應已隨之生效——未逐項獨立驗證，若使用者發現 settings 仍殘留舊文案請回報。
 
 ## F8: 每日故事 IG 發布改用 Discord bot (epic: E1)
 
@@ -138,10 +140,10 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F10: iOS 相簿儲存權限鍵補齊
 
-- 狀態: 待辦
+- 狀態: 已完成（程式，2026-07-20）；待下次 App build 送審生效
 - 來源: 2026-07-11 frontend 依賴規則還債 final review 發現；缺口自 2026-02-05（7ef8771b 移除 `NSPhotoLibraryAddUsageDescription`）即存在，非本次 camera 刪除造成
 - 問題: daily story / journey 分享輸出 PNG（share_plus share sheet），使用者在 share sheet 點「儲存影像」時 app 缺 `NSPhotoLibraryAddUsageDescription`，iOS 會使該動作失敗（甚至 crash）
-- [ ] T1: `frontend/ios/Runner/Info.plist` 補回 `NSPhotoLibraryAddUsageDescription`（文案說明「將分享圖片儲存到相簿」）；隨下次 App build 送審生效
+- [x] T1: `frontend/ios/Runner/Info.plist` 補回 `NSPhotoLibraryAddUsageDescription`（文案「將分享圖片儲存到相簿」，2026-07-20 完成）；隨下次 App build 送審才會在生產生效
 
 ## F13: App 留存診斷 (epic: E1)
 
@@ -156,3 +158,28 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
   運作）
 - [ ] T3: 下週週報驗證 reel 片尾下載 CTA 成效（2026-07-13 上線
   `Cinematic.tsx` ending CTA，對「IG 觸及 1,923 → iOS 下載 1」的轉化缺口）
+  - 2026-07-20 部分驗證：對「追蹤」有效（聖家堂 Reel 24h 帶進 +5 粉絲、
+    profile_visits 1，本週唯一破 1 的 CTA 轉換）；對「下載」尚未見效
+    （iOS 下載仍持平 2/週，觸及卻 +154%）。轉換斷層在 bio→商店這一段，
+    見 F15
+
+## F14: GA4 Android 追蹤斷線診斷 (epic: E1)
+
+- 狀態: 待辦
+- 來源: marketing/audits/weekly-2026-07-20.md（P0）——`ga4.csv` 的
+  `android_active_users`/`android_new_users` 自 2026-07-11 起連續 9 天全空，
+  同期 Play 端無跡象顯示帳號停用，疑追蹤斷線而非真的零活躍
+- [ ] T1: 檢查 App 端 Firebase Analytics 初始化與 GA4 Android 資料流設定
+  （`docs/init/metrics-setup.md`），確認事件是否仍在送出
+
+## F15: IG → 下載轉換優化 (epic: E1)
+
+- 狀態: 待辦
+- 來源: marketing/audits/weekly-2026-07-20.md（P0）——本週 IG 觸及 +154%
+  （1,923→4,879）、粉絲 +147%，但 profile_views 轉換率僅 0.6%（30/4,879，
+  < 1% 月底檢核門檻）、iOS 下載持平在 2；問題在帳號定位/CTA 不在觸及量
+- [ ] T1: 改 IG bio 文案（現況「🎧 免費下載 ↓」+ 落地頁連結），加強價值主張
+  句，非僅動詞指令
+- [ ] T2: 統一 Reel 結尾 CTA 為固定模板——聖家堂 Reel（7/19）24h 帶進 +5
+  粉絲、profile_visits 1，是本週唯一有效轉換的片尾，複製其結構到後續
+  daily reel（見 F13 T3 註記）
