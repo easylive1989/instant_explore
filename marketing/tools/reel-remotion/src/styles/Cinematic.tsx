@@ -222,21 +222,33 @@ const BeatScene: React.FC<{ beat: Beat; index: number }> = ({ beat, index }) => 
                     lineHeight: 1.5,
                     color: "#f5f1e9",
                     textShadow: "0 2px 22px rgba(0,0,0,0.8)",
-                    marginBottom: 14,
                   }}
                 >
-                  更多景點故事，下載 Lorescape
+                  這裡的故事說完了。
+                </div>
+                <div
+                  style={{
+                    fontFamily: serifFamily,
+                    fontWeight: 700,
+                    fontSize: 42,
+                    lineHeight: 1.5,
+                    color: HIGHLIGHT,
+                    textShadow: "0 2px 22px rgba(0,0,0,0.8)",
+                    marginBottom: 16,
+                  }}
+                >
+                  那你現在站的地方呢？
                 </div>
                 <div
                   style={{
                     fontFamily: sansFamily,
                     fontWeight: 500,
                     letterSpacing: "0.22em",
-                    fontSize: 28,
-                    color: HIGHLIGHT,
+                    fontSize: 26,
+                    color: "rgba(245,241,233,0.72)",
                   }}
                 >
-                  App Store・Google Play 免費下載
+                  Lorescape・App Store・Google Play
                 </div>
               </div>
             </Reveal>

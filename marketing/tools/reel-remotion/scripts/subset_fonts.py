@@ -28,10 +28,15 @@ ASCII_EXTRA = (
     ".,·—–、，。！？「」『』（）():;/&"
 )
 
+# Text burned into the template rather than coming from story.json (the ending
+# CTA). Without these the glyphs fall back to a system font mid-line and the
+# weight visibly changes. Keep in sync with src/styles/Cinematic.tsx.
+CHROME_TEXT = "這裡的故事說完了。那你現在站的地方呢？"
+
 
 def collect_chars() -> set:
     story = json.load(open(STORY))
-    chars = set(ASCII_EXTRA)
+    chars = set(ASCII_EXTRA) | set(CHROME_TEXT)
     for b in story["beats"]:
         for key in ("kicker", "title", "subtitle"):
             chars.update(b.get(key, "") or "")
