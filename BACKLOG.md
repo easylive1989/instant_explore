@@ -154,6 +154,24 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
   +40%），問題在留不住不在進不來
 - [ ] T1: 跑 marketing-retention 分析流失點（GA4 cohort + narration 完成率
   交叉；narration.csv 目前 0 rows，pre-traffic，一併確認事件有無進來）
+  - **2026-07-21 查證：事件沒有進來，「pre-traffic」假設否證。** GA4
+    property 514854947 從 2026-05-01 至今出現過的事件只有 14 種
+    （first_open / screen_view / session_start / user_engagement /
+    app_update / app_remove / app_store_subscription_renew …），
+    **`narration_*` 一筆都沒有**。同期 `first_open` 82 次、iOS 下載僅 6 次，
+    差距 13 倍——多出來的是開發機／模擬器，也就是說開發期間必然播放過，
+    事件卻仍然掛零 ⇒ 是埋點沒送達，不是沒人播。
+  - 已排除：consent 預設為 ON（`ConsentState.defaultOn()`）；observer 於
+    2026-05-20（6a3653c5）進 main，早於 6 月上線；`app.dart:48` 有
+    `ref.watch(narrationAnalyticsObserverProvider)`；`playerControllerProvider`
+    非 family，UI 與 observer 用的是同一個 provider；main.dart 已 eager
+    override `sharedPreferencesProvider`。靜態檢查看不出斷點。
+  - 附帶：`screen_view` 的 `unifiedScreenName` **全部是 `(not set)`**，
+    畫面追蹤同樣沒設定，GA4 上無法看任何 App 內漏斗。
+  - [ ] T1a: 實機跑 App 播一段故事，看 Firebase DebugView／device log 是否
+    有 `narration_started` 送出，定位斷點（靜態分析已到極限）
+  - [ ] T1b: 補 `screen_name` / `screen_class`（FirebaseAnalyticsObserver），
+    讓 GA4 能看 App 內畫面漏斗
 - [ ] T2: 檢查每日故事推播的實際送達與開啟情況（習慣養成迴路是否真的在
   運作）
 - [ ] T3: 下週週報驗證 reel 片尾下載 CTA 成效（2026-07-13 上線
@@ -169,8 +187,18 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - 來源: marketing/audits/weekly-2026-07-20.md（P0）——`ga4.csv` 的
   `android_active_users`/`android_new_users` 自 2026-07-11 起連續 9 天全空，
   同期 Play 端無跡象顯示帳號停用，疑追蹤斷線而非真的零活躍
-- [ ] T1: 檢查 App 端 Firebase Analytics 初始化與 GA4 Android 資料流設定
-  （`docs/init/metrics-setup.md`），確認事件是否仍在送出
+- **2026-07-21 查證：原假設（追蹤斷線）證據反向，Android 應是真的零安裝。**
+  Play reports bucket 讀取正常（service account 權限 OK），但
+  `com.paulchwu.instantexplore` 全 bucket 只有 **2026-03 一個月**的檔案，
+  內容僅一列 `2026-03-29，Daily User Installs 1`（上架前內測）；
+  **2026-04 之後零匯出，`stats/ratings/` 該 package 0 個物件**。Play 只在
+  有量的月份產月報 ⇒ 沒有月報＝沒有安裝，而非匯出故障。Play 商店頁本身
+  存活（HTTP 200）。`store_android.csv` 至今 0 列如實反映此事。
+- 據此本 feature 的問題重新定義：不是「追蹤斷線」，是 **Android 通路沒有
+  任何獲客**（上線一個多月 0 安裝）。
+- [ ] T1: ~~檢查 App 端 Firebase Analytics 初始化與 GA4 Android 資料流設定~~
+  → 改為：查 Play 商店頁能否被搜尋到（曝光/可見度）、上架狀態與國家/裝置
+  相容性設定，確認是「沒人找得到」還是「找到了不下載」
 
 ## F15: IG → 下載轉換優化 (epic: E1)
 
@@ -183,6 +211,10 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [ ] T2: 統一 Reel 結尾 CTA 為固定模板——聖家堂 Reel（7/19）24h 帶進 +5
   粉絲、profile_visits 1，是本週唯一有效轉換的片尾，複製其結構到後續
   daily reel（見 F13 T3 註記）
+  - 2026-07-21 一度把片尾改成「這裡的故事說完了／那你現在站的地方呢？」，
+    但那等於換掉本週唯一有實證的版本，且與本 task 的方向相反，**已 revert**
+    （e811abc4）。片尾維持 7/13 上線的版本。單獨保留的是字型 subset 缺字
+    修復（b6e8598a），與文案無關。
 
 ## F16: 後端可觀測性（server 狀態檢測）
 
