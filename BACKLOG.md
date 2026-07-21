@@ -11,7 +11,7 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - 展開: 下方標 `(epic: E1)` 的 features
 - [ ] 2026-08-04 回顧：檢視補流量主線是否推動流量/下載/留存指標，再決定是否解除暫緩、回補產品側投入（原公司決策設定的檢核點）
 
-## ⚠️ 待部署（程式已在 repo，尚未上生產，2026-07-08）
+## ⚠️ 待部署（程式已在 repo，尚未上生產；更新於 2026-07-21）
 
 以下改動已 commit + push 到 master，但**尚未部署到生產**，使用者尚看不到：
 
@@ -19,7 +19,12 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [x] **Backend**（`backend/`）：已部署到 VPS（2026-07-09，Deploy Backend workflow `git reset --hard origin/master` + `docker compose up -d --build`）。含 F1 T1 的 Reel caption CTA 文案（已改為固定常數、不吃 CTA_TEXT env）＋ F8 發布 bot
 - [x] **Publisher**（`publisher/`）：F11 T2 的 reel video_url fallback 於 2026-07-13 完成，2026-07-20 使用者手動觸發 Deploy Publisher workflow 上 VPS 生效
 - [x] **App**（`frontend/`）：新版本已上架商店並顯示「7 天免費試用」字樣（2026-07-20 使用者確認），F6 T4 生效
-- [ ] **App**（`frontend/`，下一輪）：F10 的 `Info.plist` 相簿權限鍵已於 2026-07-20 完成但**尚未包含在已上架版本**，待下次 build 送審才生效
+- [ ] **App**（`frontend/`，下一輪）：待下次 build 送審才生效的累積改動——
+  - F10 的 `Info.plist` 相簿權限鍵（2026-07-20 完成）
+  - F13 T1a narration 埋點修復（2026-07-21）：**在此之前上架的所有版本，
+    narration 事件都收不到**，所以 GA4 要等新版本有安裝量後才會開始有資料
+  - F13 T1b `FirebaseAnalyticsObserver`（2026-07-21）：同上，`screen_view`
+    在新版本上架前仍會是 `(not set)`
 - 已是生產狀態、不需部署：App Store / Google Play 的試用設定、RevenueCat offering
 
 ## F1: IG 導流 CTA (epic: E1)
@@ -147,7 +152,8 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F13: App 留存診斷 (epic: E1)
 
-- 狀態: 待辦
+- 狀態: 進行中（2026-07-21 埋點修復完成，待隨下次 App build 上生產驗證；
+  T2/T3 仍待辦）
 - 來源: marketing/audits/weekly-2026-07-13.md（P0）——本週 App 活躍腰斬
   （iOS+Android 22 vs 46）、新用戶 −56%、D1 留存幾乎全週 0%（僅 07-11
   cohort 20%）、D7 全 0%；流量端反而成長（IG 觸及 +75%、Landing 新用戶
@@ -194,7 +200,9 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F14: GA4 Android 追蹤斷線診斷 (epic: E1)
 
-- 狀態: 待辦
+- 狀態: 已結案（2026-07-21，原假設否證）——不是追蹤斷線，是 Android 通路
+  零獲客（上線一個多月 0 安裝，使用者確認）。獲客問題屬 E1 主線，若要推
+  Android 應另開 feature，本 feature 不再追蹤
 - 來源: marketing/audits/weekly-2026-07-20.md（P0）——`ga4.csv` 的
   `android_active_users`/`android_new_users` 自 2026-07-11 起連續 9 天全空，
   同期 Play 端無跡象顯示帳號停用，疑追蹤斷線而非真的零活躍
@@ -213,7 +221,8 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F15: IG → 下載轉換優化 (epic: E1)
 
-- 狀態: 待辦
+- 狀態: 進行中（2026-07-21 量出斷層位置：落地頁不漏，損失在 reach→profile；
+  T1 bio 文案已定稿待手動貼上，T2 片尾維持已驗證版本）
 - 來源: marketing/audits/weekly-2026-07-20.md（P0）——本週 IG 觸及 +154%
   （1,923→4,879）、粉絲 +147%，但 profile_views 轉換率僅 0.6%（30/4,879，
   < 1% 月底檢核門檻）、iOS 下載持平在 2；問題在帳號定位/CTA 不在觸及量
