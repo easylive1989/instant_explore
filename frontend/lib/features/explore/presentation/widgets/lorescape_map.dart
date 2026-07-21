@@ -15,8 +15,8 @@ import 'package:vector_map_tiles/vector_map_tiles.dart';
 ///
 /// [children] 疊在底圖之上（pin、polyline 等），由呼叫端提供。
 ///
-/// [fitToPoints] 一旦從空變成有值，鏡頭會自動框住所有點（設計稿的
-/// `fitBounds(pad(0.35), maxZoom: 6)`）。只框一次，之後不再干擾使用者操作。
+/// [fitToPoints] 一旦從空變成有值，鏡頭會自動框住所有點。只框一次，之後
+/// 不再干擾使用者操作。
 class LorescapeMap extends ConsumerStatefulWidget {
   const LorescapeMap({
     super.key,
@@ -54,8 +54,12 @@ class _LorescapeMapState extends ConsumerState<LorescapeMap> {
   bool _mapReady = false;
   bool _hasFitted = false;
 
-  /// 設計稿：`fitBounds(grp.getBounds().pad(0.35), { maxZoom: 6 })`
-  static const double _kFitMaxZoom = 6;
+  /// 框景時的最大 zoom。**不要用設計稿的 6**：設計稿的假資料是全世界散布
+  /// 的景點，maxZoom 6 是為了「框住整個世界時別放太大」；但真實資料全來自
+  /// 使用者當前位置附近的 Wikipedia geosearch（預設 10km 內），套 zoom 6 會
+  /// 讓所有 pin 縮成中心一個點。14 對應 tile 的最大原生層級（見 OpenFreeMap
+  /// TileJSON），也是只有單一地點時的合理街區級 fallback。
+  static const double _kFitMaxZoom = 14;
   static const EdgeInsets _kFitPadding = EdgeInsets.all(48);
 
   @override
