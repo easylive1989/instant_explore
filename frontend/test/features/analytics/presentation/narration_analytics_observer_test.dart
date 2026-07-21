@@ -119,6 +119,29 @@ ProviderContainer _makeContainer({
   );
 }
 
+/// Container wired the way `main.dart` wires production: only
+/// [sharedPreferencesProvider] is overridden, so [consentRepositoryProvider]
+/// resolves through the real [SharedPrefsConsentRepository]. Regression cover
+/// for the analytics blackout — every other test fakes the consent repository
+/// and therefore never exercises this path.
+ProviderContainer _makeProductionLikeContainer({
+  required _FakeAnalyticsService analytics,
+  required SharedPreferences prefs,
+  required _StubPlayerController controller,
+}) {
+  return ProviderContainer(
+    overrides: [
+      // Same shape as main.dart: an async override, resolved eagerly outside.
+      sharedPreferencesProvider.overrideWith((ref) async => prefs),
+      analyticsServiceProvider.overrideWithValue(analytics),
+      playerControllerProvider.overrideWith(() => controller),
+      narrationAnalyticsObserverProvider.overrideWith(
+        () => NarrationAnalyticsObserver(prefs: prefs),
+      ),
+    ],
+  );
+}
+
 Future<void> _flush() async {
   // Allow the observer's async event logging to settle.
   await Future<void>.delayed(Duration.zero);
@@ -585,6 +608,39 @@ void main() {
       expect(abandoned, hasLength(1));
       expect(abandoned.single.abandonReason, AbandonReason.switched);
       expect(abandoned.single.progressPct, closeTo(40.0, 1.0));
+    },
+  );
+
+  test(
+    'given_real_consent_repository_when_player_starts_playing_'
+    'then_still_emits_narration_started',
+    () async {
+      final analytics = _FakeAnalyticsService();
+      final controller = _StubPlayerController();
+      final container = _makeProductionLikeContainer(
+        analytics: analytics,
+        prefs: prefs,
+        controller: controller,
+      );
+      addTearDown(container.dispose);
+
+      container.read(narrationAnalyticsObserverProvider);
+      controller.setState(
+        _stateWith(
+          place: _place('place-1'),
+          content: _content(),
+          state: PlaybackState.playing,
+          charPosition: 0,
+        ),
+      );
+      await _flush();
+
+      expect(
+        analytics.recorded.whereType<NarrationStarted>(),
+        hasLength(1),
+        reason: 'consent gate must not swallow the event on the first read of '
+            'sharedPreferencesProvider',
+      );
     },
   );
 }

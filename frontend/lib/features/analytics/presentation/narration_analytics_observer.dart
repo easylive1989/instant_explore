@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -19,6 +20,8 @@ const double kNarrationCompletionThresholdPct = 95.0;
 
 /// Progress milestones that emit [NarrationProgress] events.
 const List<int> kProgressMilestones = <int>[25, 50, 75];
+
+final Logger _log = Logger('NarrationAnalyticsObserver');
 
 /// Bridges the narration player state stream into analytics events.
 ///
@@ -104,7 +107,7 @@ class NarrationAnalyticsObserver extends Notifier<void> {
     _lastTotalChars = next.content!.text.length;
     _hasEmittedStarted = true;
 
-    _emitStarted(next);
+    _fireAndLog(_emitStarted(next), 'narration_started');
   }
 
   Future<void> _emitStarted(NarrationState next) async {
@@ -136,7 +139,10 @@ class NarrationAnalyticsObserver extends Notifier<void> {
     for (final milestone in kProgressMilestones) {
       if (progressPct >= milestone && !_emittedMilestones.contains(milestone)) {
         _emittedMilestones.add(milestone);
-        _emitProgressEvent(milestone, elapsed, total);
+        _fireAndLog(
+          _emitProgressEvent(milestone, elapsed, total),
+          'narration_progress',
+        );
       }
     }
   }
@@ -170,7 +176,10 @@ class NarrationAnalyticsObserver extends Notifier<void> {
     if (progressPct < kNarrationCompletionThresholdPct) return;
 
     _hasEmittedCompleted = true;
-    _emitCompletedEvent(elapsed, total, progressPct);
+    _fireAndLog(
+      _emitCompletedEvent(elapsed, total, progressPct),
+      'narration_completed',
+    );
   }
 
   Future<void> _emitCompletedEvent(
@@ -220,7 +229,10 @@ class NarrationAnalyticsObserver extends Notifier<void> {
     // Mark as completed to prevent re-emission on subsequent
     // transitions for the same narration.
     _hasEmittedCompleted = true;
-    _emitAbandonedEvent(reason, elapsed, progressPct);
+    _fireAndLog(
+      _emitAbandonedEvent(reason, elapsed, progressPct),
+      'narration_abandoned',
+    );
   }
 
   Future<void> _emitAbandonedEvent(
@@ -239,7 +251,23 @@ class NarrationAnalyticsObserver extends Notifier<void> {
     await ref.read(analyticsServiceProvider).logEvent(event);
   }
 
+  /// Emitting is fire-and-forget by design (state transitions must not block
+  /// on analytics), which means a thrown error would otherwise vanish into an
+  /// unhandled async gap. A silent failure here blacked out every narration
+  /// event for two months, so failures are logged rather than dropped.
+  void _fireAndLog(Future<void> emit, String what) {
+    emit.catchError((Object error, StackTrace stackTrace) {
+      _log.warning('Failed to emit $what', error, stackTrace);
+    });
+  }
+
   Future<bool> _consentEnabled() async {
+    // Await the prefs future before touching consentRepositoryProvider: that
+    // provider resolves SharedPreferences with `requireValue`, which throws on
+    // AsyncLoading. Riverpod caches such a build failure for the container's
+    // lifetime, so a single early read would permanently kill every narration
+    // event — silently, because callers never await this future.
+    await ref.read(sharedPreferencesProvider.future);
     final state = await ref.read(consentRepositoryProvider).read();
     return state.enabled;
   }
