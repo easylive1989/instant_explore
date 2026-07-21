@@ -168,10 +168,21 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     override `sharedPreferencesProvider`。靜態檢查看不出斷點。
   - 附帶：`screen_view` 的 `unifiedScreenName` **全部是 `(not set)`**，
     畫面追蹤同樣沒設定，GA4 上無法看任何 App 內漏斗。
-  - [ ] T1a: 實機跑 App 播一段故事，看 Firebase DebugView／device log 是否
-    有 `narration_started` 送出，定位斷點（靜態分析已到極限）
-  - [ ] T1b: 補 `screen_name` / `screen_class`（FirebaseAnalyticsObserver），
-    讓 GA4 能看 App 內畫面漏斗
+  - [x] T1a: 根因已定位並修復（2026-07-21，不需實機）：
+    `consentRepositoryProvider` 以 `requireValue` 取 SharedPreferences，而
+    `main.dart` 用 async closure override `sharedPreferencesProvider`，因此
+    provider 首次被讀取時仍是 `AsyncLoading` → 丟 `StateError`。該 provider
+    全 `lib/` 只有 `_consentEnabled()` 一處會讀（第一次播放才觸發），
+    Riverpod 又快取 build 失敗並在後續讀取重拋 ⇒ 整個 container 生命週期內
+    每個 narration 事件都失敗；emit 是 fire-and-forget 沒人 await，例外落進
+    unhandled async gap，所以兩個月完全無聲。修在讀取端（先 await
+    `sharedPreferencesProvider.future`）並加 `_fireAndLog`，另補走真實
+    consent repository 的回歸測試——既有測試全都 fake 掉它，這正是測試全綠
+    而線上全死的原因。
+  - [x] T1b: 掛上 `FirebaseAnalyticsObserver`（新增 `routeObserversProvider`
+    並接進 GoRouter observers），補回 GA4 畫面名稱
+  - [ ] T1c: 下次 App 送審上架後，確認 GA4 開始出現 `narration_*` 與具名的
+    `screen_view`（修復要隨版本才會在生產生效）
 - [ ] T2: 檢查每日故事推播的實際送達與開啟情況（習慣養成迴路是否真的在
   運作）
 - [ ] T3: 下週週報驗證 reel 片尾下載 CTA 成效（2026-07-13 上線
@@ -225,6 +236,17 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     至今 0 安裝、iOS 是唯一真實通路），但落地頁同時是 SEO 資產，決定保留。
     ⇒ bio→商店的漏損要改從**落地頁**下手（商店按鈕的位置與可見度），
     而非改 bio 連結。
+- **2026-07-21 漏斗量測：斷層不在 bio→商店，在 reach→profile。** GA4 近 30 天
+  `download_click` 共 **6 次**（hero 3 / footer 1 / navbar 1 / place 1），
+  同期 iOS 下載 **6 次**——落地頁的商店按鈕點擊到實際安裝幾乎 1:1，沒有漏。
+  落地頁 CTA 本身也已齊備：Hero（首屏）、Navbar、FinalCTA、Footer 都有
+  `StoreButtons`，且 `storeUrlFor()` 已帶 App Store `ct` 與 Play install
+  referrer 歸因參數。⇒ **不要再投資重做落地頁 CTA**。
+  真正的損失全在上游：reach 2349 → profile_visits 16（0.7%）→ 落地頁
+  每日僅 1–2 人。修 profile_visits 的槓桿是片尾 CTA 與 caption（見 T2），
+  以及 bio 能不能讓人願意點連結（T1）。
+  - 這修正了 F13 T3 於 07-20 的判讀（「轉換斷層在 bio→商店這一段」）。
+  - 樣本極小（n=6），數字只能當方向不能當結論。
 - [ ] T2: 統一 Reel 結尾 CTA 為固定模板——聖家堂 Reel（7/19）24h 帶進 +5
   粉絲、profile_visits 1，是本週唯一有效轉換的片尾，複製其結構到後續
   daily reel（見 F13 T3 註記）
