@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
+import 'package:context_app/features/explore/presentation/widgets/lorescape_map.dart';
+import 'package:context_app/features/explore/presentation/widgets/place_map_pin.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:context_app/features/settings/providers.dart';
@@ -10,7 +12,9 @@ import 'package:context_app/shared/widgets/journal/glyph_thumb.dart';
 import 'package:context_app/shared/widgets/midnight/_press_scale.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
 /// Fallback warm card shadow (design token `e1`) for contexts where the
@@ -28,6 +32,17 @@ class ExploreScreen extends ConsumerStatefulWidget {
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final MapController _mapController = MapController();
+
+  /// 設計稿：點卡片時 `flyTo(coord, 14)`。
+  static const double _kFocusZoom = 14;
+
+  void _focusOn(Place place) {
+    _mapController.move(
+      LatLng(place.location.latitude, place.location.longitude),
+      _kFocusZoom,
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -70,91 +85,72 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final placesState = ref.watch(filteredPlacesProvider);
-    final colorScheme = Theme.of(context).colorScheme;
     final maxDistance = ref.watch(maxDistanceProvider);
     final isFilterActive = maxDistance != kDefaultMaxDistanceMeters;
+    final places = placesState.valueOrNull ?? const <Place>[];
 
     return Scaffold(
-      floatingActionButton: const SavedLocationsFab(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'explore.title'.tr(),
-                          style: Theme.of(context).textTheme.displayLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+      body: Stack(
+        children: [
+          LorescapeMap(
+            mapController: _mapController,
+            fitToPoints: [
+              for (final place in places)
+                LatLng(place.location.latitude, place.location.longitude),
+            ],
+            children: [
+              MarkerLayer(
+                markers: [
+                  for (final place in places)
+                    Marker(
+                      point: LatLng(
+                        place.location.latitude,
+                        place.location.longitude,
                       ),
-                      Row(
-                        children: [
-                          _FilterButton(
-                            isActive: isFilterActive,
-                            onPressed: _showFilterPanel,
-                          ),
-                          const SizedBox(width: 8),
-                          _RefreshButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              ref
-                                  .read(placesControllerProvider.notifier)
-                                  .refresh();
-                            },
-                          ),
-                        ],
+                      width: PlaceMapPin.markerSize,
+                      height: PlaceMapPin.markerSize,
+                      // 尖端落在座標上：把標記整個往上推一個身高。
+                      alignment: Alignment.topCenter,
+                      child: PlaceMapPin(
+                        category: place.category.journalCategory,
+                        onTap: () => context.pushNamed('config', extra: place),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _SearchField(
-                    controller: _searchController,
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (value) {
-                      ref.read(searchQueryProvider.notifier).state = value;
-                      ref.read(placesControllerProvider.notifier).search(value);
-                    },
-                    onClear: _searchController.text.isNotEmpty
-                        ? _clearSearch
-                        : null,
-                  ),
+                    ),
                 ],
               ),
-            ),
-            Expanded(
-              child: placesState.when(
-                loading: () => const Center(child: AdaptiveProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text('${'common.error_prefix'.tr()}: $error'),
-                ),
-                data: (places) {
-                  if (places.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'explore.empty'.tr(),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 96),
-                    itemCount: places.length,
-                    itemBuilder: (context, index) =>
-                        PlaceCard(place: places[index]),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          _MapTopOverlay(
+            placeCount: places.length,
+            searchController: _searchController,
+            isFilterActive: isFilterActive,
+            onFilter: _showFilterPanel,
+            onRefresh: () {
+              _searchController.clear();
+              ref.read(placesControllerProvider.notifier).refresh();
+            },
+            onSearchChanged: (_) => setState(() {}),
+            onSearchSubmitted: (value) {
+              ref.read(searchQueryProvider.notifier).state = value;
+              ref.read(placesControllerProvider.notifier).search(value);
+            },
+            onSearchClear: _searchController.text.isNotEmpty
+                ? _clearSearch
+                : null,
+          ),
+          _MapCardsRail(state: placesState, onFocus: _focusOn),
+          // FAB 疊在卡片列上方。設計稿把 FAB 放在 bottom:96，但那個位置正好
+          // 被卡片列蓋住（實機上直接壓在卡片上），所以改成貼著卡片列往上放。
+          Positioned(
+            right: 18,
+            bottom:
+                MediaQuery.paddingOf(context).bottom +
+                _MapCardsRail.railBottomGap +
+                _MapCardsRail.railHeight +
+                12,
+            child: const SavedLocationsFab(),
+          ),
+        ],
       ),
     );
   }
@@ -245,9 +241,13 @@ class _CircleButton extends StatelessWidget {
 class _ActiveDot extends StatelessWidget {
   const _ActiveDot();
 
+  /// 測試用：畫面上有多個有顏色的小圓（地圖 pin、卡片前往鈕），靠造型找不準。
+  static const Key testKey = Key('explore-filter-active-dot');
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: testKey,
       width: 8,
       height: 8,
       decoration: BoxDecoration(
@@ -488,92 +488,14 @@ class _FilterPanelState extends ConsumerState<_FilterPanel> {
   }
 }
 
-/// A place row card in the Field Journal style: raised paper surface with a
-/// thumbnail, name and category tag.
-class PlaceCard extends ConsumerWidget {
-  final Place place;
-
-  const PlaceCard({super.key, required this.place});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final radius = tokens?.rLg ?? 16;
-    final savedLocations = ref.watch(savedLocationsProvider);
-    final isSaved =
-        savedLocations.valueOrNull?.any((e) => e.placeId == place.id) ?? false;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.fromBorderSide(
-            BorderSide(color: colorScheme.outlineVariant),
-          ),
-          boxShadow: tokens?.e1 ?? _kCardShadow,
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(radius),
-            onTap: () => context.pushNamed('config', extra: place),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  _PlaceThumb(place: place),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          place.name,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0,
-                                height: 1.15,
-                              ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 7),
-                        CategoryTag(category: place.category.journalCategory),
-                      ],
-                    ),
-                  ),
-                  _BookmarkButton(
-                    isSaved: isSaved,
-                    onTap: () {
-                      ref
-                          .read(savedLocationsProvider.notifier)
-                          .togglePlace(place);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 64×64 thumbnail: the place photo when available, otherwise a category
-/// glyph placeholder.
+/// 60×60 縮圖：有照片用照片，否則用分類字符（設計稿 `.map-card__thumb`）。
 class _PlaceThumb extends StatelessWidget {
   const _PlaceThumb({required this.place});
 
   final Place place;
 
-  static const _size = 64.0;
-  static const _radius = 12.0;
+  static const _size = 60.0;
+  static const _radius = 10.0;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +546,359 @@ class _BookmarkButton extends StatelessWidget {
             key: ValueKey(isSaved),
             color: isSaved ? colorScheme.primary : restColor,
             size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 浮在地圖上方的標題區，對應設計稿的 `.map-top`：紙色漸層讓底下的地圖不會
+/// 干擾文字，但只有實際控制項吃得到觸控（`pointer-events` 的等價作法）。
+class _MapTopOverlay extends StatelessWidget {
+  const _MapTopOverlay({
+    required this.placeCount,
+    required this.searchController,
+    required this.isFilterActive,
+    required this.onFilter,
+    required this.onRefresh,
+    required this.onSearchChanged,
+    required this.onSearchSubmitted,
+    required this.onSearchClear,
+  });
+
+  final int placeCount;
+  final TextEditingController searchController;
+  final bool isFilterActive;
+  final VoidCallback onFilter;
+  final VoidCallback onRefresh;
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onSearchSubmitted;
+  final VoidCallback? onSearchClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final paper = tokens?.paper ?? const Color(0xFFF7F1E6);
+    final topPadding = MediaQuery.paddingOf(context).top;
+
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Stack(
+        children: [
+          // 漸層只是襯底，必須讓觸控穿過去，使用者才能拖到露出來的地圖。
+          // 注意：不能把整個浮層包進 IgnorePointer 再用巢狀
+          // IgnorePointer(ignoring: false) 想「收回來」——外層一旦排除整個
+          // 子樹，內層就救不回來，搜尋/篩選/重新整理會全部點不到。
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      paper.withValues(alpha: 0.97),
+                      paper.withValues(alpha: 0.97),
+                      paper.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.46, 1],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, topPadding + 6, 16, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(child: _Masthead(placeCount: placeCount)),
+                    _FilterButton(
+                      isActive: isFilterActive,
+                      onPressed: onFilter,
+                    ),
+                    const SizedBox(width: 8),
+                    _RefreshButton(onPressed: onRefresh),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SearchField(
+                  controller: searchController,
+                  onChanged: onSearchChanged,
+                  onSubmitted: onSearchSubmitted,
+                  onClear: onSearchClear,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// `.map-hd` 的眼眉線＋標題：一段短橫線、全大寫字距放大的說明，再壓上襯線大標。
+class _Masthead extends StatelessWidget {
+  const _Masthead({required this.placeCount});
+
+  final int placeCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final clay = tokens?.clay ?? Theme.of(context).colorScheme.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 16,
+              height: 1.5,
+              decoration: BoxDecoration(
+                color: clay,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'explore.atlas_eyebrow'.tr(args: ['$placeCount']),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.3,
+                  color: clay,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        Text(
+          'explore.title'.tr(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+            fontSize: 34,
+            height: 0.98,
+            letterSpacing: 1,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 底部橫向卡片列（`.map-cards`）。點卡片把地圖飛到該地點，點箭頭進地點頁。
+class _MapCardsRail extends StatelessWidget {
+  const _MapCardsRail({required this.state, required this.onFocus});
+
+  final AsyncValue<List<Place>> state;
+  final ValueChanged<Place> onFocus;
+
+  /// 卡片內容（縮圖 60 / 兩行名稱＋標籤）＋卡片內距 20 ＋列內距 14。
+  /// 太矮會讓名稱那欄 overflow，測試會直接抓到。
+  static const double railHeight = 116;
+
+  /// 卡片列距離螢幕底部的距離（不含 safe area）。tab bar 在下面。
+  static const double railBottomGap = 70;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: bottomInset + railBottomGap,
+      height: railHeight,
+      child: state.when(
+        loading: () => const SizedBox.shrink(),
+        // 錯誤（最常見是定位被拒）一定要說出來。地圖本身還是會顯示，若這裡
+        // 也沉默，使用者只會看到一張沒有任何地點、也沒有任何說明的地圖。
+        error: (error, _) =>
+            _RailNotice(text: '${'common.error_prefix'.tr()}: $error'),
+        data: (places) {
+          if (places.isEmpty) {
+            return _RailNotice(text: 'explore.empty'.tr());
+          }
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+            itemCount: places.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final place = places[index];
+              return _MapCard(place: place, onTap: () => onFocus(place));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 沒有地點或載入失敗時，卡片列的位置改放一張說明卡，而不是留一片空白
+/// 讓人以為畫面壞了。
+class _RailNotice extends StatelessWidget {
+  const _RailNotice({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        decoration: BoxDecoration(
+          color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
+          boxShadow: tokens?.e2 ?? _kCardShadow,
+        ),
+        child: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
+  }
+}
+
+/// 單張地點卡（`.map-card`）：252px 寬、紙色浮起、縮圖＋名稱＋分類標籤＋前往鈕。
+class _MapCard extends ConsumerWidget {
+  const _MapCard({required this.place, required this.onTap});
+
+  final Place place;
+  final VoidCallback onTap;
+
+  static const double _width = 252;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final radius = tokens?.rLg ?? 16;
+    final savedLocations = ref.watch(savedLocationsProvider);
+    final isSaved =
+        savedLocations.valueOrNull?.any((e) => e.placeId == place.id) ?? false;
+
+    return PressScale(
+      onTap: onTap,
+      child: Container(
+        width: _width,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
+          boxShadow: tokens?.e3 ?? _kCardShadow,
+        ),
+        child: Row(
+          children: [
+            // 書籤疊在縮圖角落。設計稿的 map-card 沒有書籤，但這是全 App 唯一
+            // 能收藏地點的入口，照抄會把功能弄丟；壓在縮圖上才不會擠掉名稱。
+            Stack(
+              children: [
+                _PlaceThumb(place: place),
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  // 紙色底盤：書籤壓在照片上時，深色圖示在深色照片上幾乎看不見。
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: (tokens?.paperRaised ?? const Color(0xFFFDFAF3))
+                          .withValues(alpha: 0.92),
+                      shape: BoxShape.circle,
+                      boxShadow: tokens?.e1 ?? _kCardShadow,
+                    ),
+                    child: _BookmarkButton(
+                      isSaved: isSaved,
+                      onTap: () => ref
+                          .read(savedLocationsProvider.notifier)
+                          .togglePlace(place),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    place.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 17,
+                      height: 1.2,
+                      letterSpacing: 0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  CategoryTag(category: place.category.journalCategory),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            _GoButton(onTap: () => context.pushNamed('config', extra: place)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// `.map-card__go`：34px 圓形前往鈕。
+class _GoButton extends StatelessWidget {
+  const _GoButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      button: true,
+      label: 'explore.view_place'.tr(),
+      child: PressScale(
+        onTap: onTap,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: tokens?.paperSunk ?? colorScheme.surfaceContainerHighest,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: tokens?.ink2 ?? colorScheme.onSurfaceVariant,
           ),
         ),
       ),

@@ -47,6 +47,19 @@ dependencies:
   # Location services
   geolocator: ^14.0.2
 
+  # Map (探索頁全螢幕地圖，見 docs/adr/0005-map-tile-provider.md)
+  flutter_map: ^8.1.1
+  # 釘死確切版本：9.x 仍是 prerelease，beta 之間可能有破壞性變更，不用 caret
+  # range。維護者建議正式 app 用 8.0.0 或 9.0.0-beta.x；8.0.0 只支援
+  # flutter_map 7.x，故取 9.0.0-beta.9（相依 flutter_map ^8.1.1）。
+  # 10.0.0-beta 相依 flutter_gpu + Flutter dev channel，不可用。
+  vector_map_tiles: 9.0.0-beta.9
+  # ThemeReader：把本地重新上色的 style JSON 轉成可渲染的 theme
+  # （vector_map_tiles 的傳遞依賴，但我們直接引用，故明寫）
+  vector_tile_renderer: ^6.1.0
+  # flutter_map 的座標型別（LatLng），直接被我們的程式碼引用，故明寫依賴
+  latlong2: ^0.9.1
+
   # HTTP requests
   http: ^1.2.2
   cached_network_image: ^3.4.1
@@ -140,6 +153,8 @@ flutter:
     - assets/images/onboarding/
     - assets/images/subscription/
     - assets/translations/
+    # 由 tool/build_map_style.py 產生，勿手改（見 docs/adr/0005-map-tile-provider.md）
+    - assets/map/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

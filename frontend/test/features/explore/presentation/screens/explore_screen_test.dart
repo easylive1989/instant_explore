@@ -2,6 +2,7 @@ import 'package:context_app/features/daily_story/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
+import 'package:context_app/features/explore/presentation/widgets/place_map_pin.dart';
 import 'package:context_app/features/explore/providers.dart';
 import 'package:context_app/features/saved_locations/providers.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../../../../fakes/fake_location_service.dart';
 import '../../../../fakes/fake_places_repository.dart';
 import '../../../../fakes/in_memory_daily_story_repository.dart';
 import '../../../../fakes/in_memory_saved_locations_repository.dart';
+import '../../../../helpers/fake_map_style.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_data.dart';
 
@@ -207,8 +209,28 @@ void main() {
     );
 
     testWidgets(
-      'given a place card under a router, when the card is tapped, '
+      'given a place card under a router, when the go button is tapped, '
       'then the config route is pushed with the place as extra',
+      (tester) async {
+        final extras = <Object?>[];
+
+        await _givenExploreScreenWithRouter(
+          tester,
+          places: [buildPlace(id: 'p1', name: 'Senso-ji')],
+          onConfigPush: extras.add,
+        );
+
+        await tester.tap(find.byIcon(Icons.chevron_right));
+        await tester.pumpAndSettle();
+
+        expect(extras.single, isA<Place>());
+        expect((extras.single as Place).id, equals('p1'));
+      },
+    );
+
+    testWidgets(
+      'given a place card under a router, when the card body is tapped, '
+      'then the map focuses the place instead of navigating away',
       (tester) async {
         final extras = <Object?>[];
 
@@ -221,8 +243,25 @@ void main() {
         await tester.tap(find.text('Senso-ji'));
         await tester.pumpAndSettle();
 
-        expect(extras.single, isA<Place>());
-        expect((extras.single as Place).id, equals('p1'));
+        // 點卡片本體是「把地圖飛到該地點」，不該離開探索頁——導頁只在
+        // 箭頭鈕上發生。
+        expect(extras, isEmpty);
+      },
+    );
+
+    testWidgets(
+      'given nearby places, when the screen loads, '
+      'then one map pin is rendered per place',
+      (tester) async {
+        await _givenExploreScreen(
+          tester,
+          places: [
+            buildPlace(id: 'p1', name: 'Senso-ji'),
+            buildPlace(id: 'p2', name: 'Meiji Shrine'),
+          ],
+        );
+
+        expect(find.byType(PlaceMapPin), findsNWidgets(2));
       },
     );
   });
@@ -254,12 +293,14 @@ Future<void> _givenExploreScreen(
       dailyStoryRepositoryProvider.overrideWithValue(
         InMemoryDailyStoryRepository(),
       ),
+      ...fakeMapStyleOverrides(),
     ],
   );
   // Let async searchNearby + filtered places provider resolve.
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
+  await settleMapTimers(tester);
 }
 
 Future<void> _givenExploreScreenWithRouter(
@@ -294,11 +335,13 @@ Future<void> _givenExploreScreenWithRouter(
       dailyStoryRepositoryProvider.overrideWithValue(
         InMemoryDailyStoryRepository(),
       ),
+      ...fakeMapStyleOverrides(),
     ],
   );
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
   await tester.pump(const Duration(milliseconds: 20));
+  await settleMapTimers(tester);
 }
 
 void _thenEmptyStateIsVisible() {
@@ -317,13 +360,8 @@ void _thenPlaceNamesAreHidden(List<String> names) {
   }
 }
 
-Finder _activeDotFinder() {
-  return find.byWidgetPredicate(
-    (widget) =>
-        widget is Container &&
-        widget.decoration is BoxDecoration &&
-        (widget.decoration! as BoxDecoration).shape == BoxShape.circle &&
-        (widget.decoration! as BoxDecoration).color != null,
-    description: 'filter active dot',
-  );
-}
+/// 用 Key 找篩選鈕上的小圓點。
+///
+/// 不要用「畫面上任何有顏色的圓形 Container」當條件——地圖 pin 與卡片上的
+/// 前往鈕都符合，會讓「沒有小圓點」的測試假性通過。
+Finder _activeDotFinder() => find.byKey(const Key('explore-filter-active-dot'));
