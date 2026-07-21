@@ -183,3 +183,29 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [ ] T2: 統一 Reel 結尾 CTA 為固定模板——聖家堂 Reel（7/19）24h 帶進 +5
   粉絲、profile_visits 1，是本週唯一有效轉換的片尾，複製其結構到後續
   daily reel（見 F13 T3 註記）
+
+## F16: 後端可觀測性（server 狀態檢測）
+
+- 狀態: 待辦
+- 來源: 使用者要求（2026-07-21）——增加 Lorescape 後端的可觀測性，可以檢測
+  server 的 CPU、memory、disk、是不是活著等狀態
+- 範圍備註: 屬維運工作，不受 E1 暫緩政策限制（政策明列「bug 修復與維運」為
+  例外）
+- [ ] T1: 規劃可觀測性方案（VPS 上 backend + publisher 容器的 liveness、
+  CPU / memory / disk 監控；含通知管道與工具選型），再拆實作 tasks
+
+## F17: 探索頁面重新設計
+
+- 狀態: 待辦
+- 來源: 使用者要求（2026-07-21）——重新設計 App 探索頁面，參考 Claude Design
+- 備註: 設計稿以 Claude Design 產出，handoff bundle 依慣例放 `docs/design/`
+- [ ] T1: 以 Claude Design 產出探索頁新版 mockup，與使用者確認方向後拆
+  實作 tasks
+
+## F18: 歷程頁面重新設計
+
+- 狀態: 待辦
+- 來源: 使用者要求（2026-07-21）——重新設計 App 歷程頁面，參考 Claude Design
+- 備註: 設計稿以 Claude Design 產出，handoff bundle 依慣例放 `docs/design/`
+- [ ] T1: 以 Claude Design 產出歷程頁新版 mockup，與使用者確認方向後拆
+  實作 tasks
