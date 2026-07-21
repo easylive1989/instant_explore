@@ -260,6 +260,10 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
   以及 bio 能不能讓人願意點連結（T1）。
   - 這修正了 F13 T3 於 07-20 的判讀（「轉換斷層在 bio→商店這一段」）。
   - 樣本極小（n=6），數字只能當方向不能當結論。
+- [ ] T3: 2026-08-04 前後回看 bio 改版成效——比較 `data/metrics/ig.csv` 的
+  `profile_views` 與 `ga4.csv` 的 `web_active_users`（bio 連結指向落地頁，
+  這段就是 bio 的責任區）。**注意樣本量**：目前落地頁每天僅 1–2 人，
+  至少累積兩週才有訊號，別在幾天內就下結論。基準＝07-21 之前 30 天。
 - [ ] T2: 統一 Reel 結尾 CTA 為固定模板——聖家堂 Reel（7/19）24h 帶進 +5
   粉絲、profile_visits 1，是本週唯一有效轉換的片尾，複製其結構到後續
   daily reel（見 F13 T3 註記）
@@ -267,6 +271,21 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     但那等於換掉本週唯一有實證的版本，且與本 task 的方向相反，**已 revert**
     （e811abc4）。片尾維持 7/13 上線的版本。單獨保留的是字型 subset 缺字
     修復（b6e8598a），與文案無關。
+
+## F19: publisher/.env 是佔位值（維運風險）
+
+- 狀態: 待辦
+- 來源: 2026-07-21 開工時發現——`publisher/.env` 內容是範本佔位值
+  （`SUPABASE_URL=https://your-project.supabase.co`），真正的憑證只存在
+  使用者的 shell 環境變數裡
+- 風險: publisher 的程式與 skill 文件都假設「bare `load_dotenv()` 會撈到
+  `publisher/.env`」。只要在沒有 export 環境變數的 shell 裡跑
+  `cd publisher && uv run python ...`，就會連到不存在的專案；若哪天佔位值
+  換成別的真實專案，更可能寫錯資料庫。dashboard 的 config 也會載入這份
+  `.env`（`override=False`，目前靠環境變數先存在才沒出事）
+- [ ] T1: 把真實憑證寫進 `publisher/.env`（該檔已 gitignore），或改為明確
+  要求由環境變數提供並讓 `Config.from_env()` 在讀到佔位值時直接報錯，
+  不要靜默連到錯的地方
 
 ## F16: 後端可觀測性（server 狀態檢測）
 
