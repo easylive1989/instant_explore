@@ -16,7 +16,7 @@ const nonEmptyLines = (beat: Beat): number =>
  * how much text has to be read — reading time matters because narration is
  * added later, but the on-screen text must be legible on its own too.
  */
-export const ENDING_MIN_FRAMES = 150;
+export const ENDING_MIN_FRAMES = 210;
 
 export const beatFrames = (beat: Beat): number => {
   // Ending holds ≥ ENDING_MIN_FRAMES so the burned-in download CTA has time to

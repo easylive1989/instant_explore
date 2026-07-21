@@ -85,13 +85,8 @@ then hand off to upload (lorescape-manual-daily-story Step 11).
   `reel_voiceover` 會逐拍 TTS、用實測長度回寫 `durationFrames`。因此
   **寫短旁白＝片子自然短**，不需另設上限。
 - 算下來若仍超過 ~35 秒（beats × 各拍旁白秒數相加），再砍一拍或縮句。
-- ending 拍會自動保留 ≥5 秒讓片尾下載 CTA 讀得完（`ENDING_MIN_FRAMES`），
+- ending 拍會自動保留 ≥7 秒讓片尾下載 CTA 讀得完（`ENDING_MIN_FRAMES`），
   ending 旁白寫 1–2 句收尾即可，不用硬撐長度。
-- **ending 不要用品牌收尾語**（「走進一個地方，也是走進一段人生」那類）。
-  片尾已burn-in CTA「這裡的故事說完了／那你現在站的地方呢？」，同樣在講
-  「地方」，兩者疊在一起讀起來重複、也白白多花 3 秒。ending 只寫**故事本身
-  的結局**（人物下場、時代收束、彩蛋），收在事實上，餘韻交給 CTA。
-  carousel 的 ending 仍保留品牌收尾語，兩者刻意不同。
 
 ## Quick Reference
 
