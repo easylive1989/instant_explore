@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,6 +34,18 @@ final firebaseAnalyticsProvider = Provider<FirebaseAnalytics>(
 final analyticsServiceProvider = Provider<AnalyticsService>(
   (ref) => FirebaseAnalyticsService(ref.read(firebaseAnalyticsProvider)),
 );
+
+/// Navigator observers wired into GoRouter.
+///
+/// Without a [FirebaseAnalyticsObserver] the app's automatic `screen_view`
+/// events reach GA4 with `unifiedScreenName` = `(not set)`, so no in-app
+/// funnel can be read. Exposed as a provider so tests (and any surface that
+/// must not touch Firebase) can override it with an empty list.
+final routeObserversProvider = Provider<List<NavigatorObserver>>((ref) {
+  return <NavigatorObserver>[
+    FirebaseAnalyticsObserver(analytics: ref.read(firebaseAnalyticsProvider)),
+  ];
+});
 
 /// Persists and broadcasts the user's analytics consent flag.
 ///

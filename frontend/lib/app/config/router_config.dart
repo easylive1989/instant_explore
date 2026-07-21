@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/app/shell/main_screen.dart';
+import 'package:context_app/features/analytics/providers.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/presentation/screens/select_story_hook_screen.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
@@ -25,6 +26,9 @@ class RouterConfig {
   static GoRouter createRouter(Ref ref) {
     return GoRouter(
       initialLocation: '/',
+      // Feeds GA4 screen_view with real screen names; see
+      // routeObserversProvider.
+      observers: ref.read(routeObserversProvider),
       refreshListenable: _OnboardingListenable(ref),
       redirect: (context, state) {
         // Send first-run users through the welcome carousel. Other flows
