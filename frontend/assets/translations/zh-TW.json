@@ -66,7 +66,6 @@
   "journey": {
     "title": "歷程",
     "title_uppercase": "探索歷程",
-    "no_entries": "尚未儲存任何導覽",
     "load_error": "載入失敗",
     "item_saved": "已儲存！",
     "added_to_journey": "已新增至您的探索歷程",
@@ -80,10 +79,12 @@
     "yesterday": "昨天",
     "replay": "重播",
     "login_required": "登入後即可查看您的旅程記錄",
-    "search_hint": "搜尋地點或內容...",
-    "no_results": "找不到符合的紀錄",
-    "view_timeline": "全部時間軸",
-    "view_by_trip": "依旅程"
+    "notebook": {
+      "entry_no": "手記 · No.{}",
+      "no_photo": "無照片"
+    },
+    "bookshelf": "旅程書架 · {} 本",
+    "eyebrow": "旅程紀錄 · Chronicle"
   },
   "trip": {
     "list_title": "我的旅程",
@@ -140,7 +141,12 @@
       "max_distance": "最大距離",
       "description": "只顯示在您目前位置指定距離內的地點。",
       "reset": "重設為預設值"
-    }
+    },
+    "map": {
+      "unavailable": "地圖暫時無法載入"
+    },
+    "atlas_eyebrow": "{} 個地點 · Atlas",
+    "view_place": "查看地點"
   },
   "date_picker": {
     "title": "選取日期",
@@ -151,7 +157,9 @@
     "language_english": "English",
     "language_chinese_traditional": "繁體中文",
     "error_prefix": "錯誤",
-    "place_label": "地點"
+    "place_label": "地點",
+    "share": "分享",
+    "delete": "刪除"
   },
   "auth": {
     "login": "登入",

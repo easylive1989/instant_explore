@@ -1,0 +1,211 @@
+import 'package:context_app/app/config/lorescape_tokens.dart';
+import 'package:context_app/features/explore/providers.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart' hide Theme;
+import 'package:flutter/material.dart' as material show Theme;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
+
+/// 世界地圖底圖，資料來自 OpenFreeMap 的 vector tiles。
+///
+/// 選型理由與授權義務見 `docs/adr/0005-map-tile-provider.md`。設計稿對應
+/// `docs/design/project/app2/screens_explore.jsx` 的 `.map-el`。
+///
+/// [children] 疊在底圖之上（pin、polyline 等），由呼叫端提供。
+///
+/// [fitToPoints] 一旦從空變成有值，鏡頭會自動框住所有點（設計稿的
+/// `fitBounds(pad(0.35), maxZoom: 6)`）。只框一次，之後不再干擾使用者操作。
+class LorescapeMap extends ConsumerStatefulWidget {
+  const LorescapeMap({
+    super.key,
+    this.mapController,
+    this.initialCenter = _kFallbackCenter,
+    this.initialZoom = 2,
+    this.onMapReady,
+    this.children = const [],
+    this.fitToPoints = const [],
+  });
+
+  /// 世界視野的預設中心。實際開圖時通常會被 `fitBounds` 覆寫（見 T3），
+  /// 這只是還沒有任何地點座標時的保底。
+  static const LatLng _kFallbackCenter = LatLng(24.15, 120.66);
+
+  /// 底圖 tile 的最大 zoom 是 14（見 OpenFreeMap TileJSON）。超過的層級由
+  /// 渲染端放大既有 tile，仍可正常操作。
+  static const double _kMinZoom = 2;
+  static const double _kMaxZoom = 18;
+
+  final MapController? mapController;
+  final LatLng initialCenter;
+  final double initialZoom;
+  final VoidCallback? onMapReady;
+  final List<Widget> children;
+  final List<LatLng> fitToPoints;
+
+  @override
+  ConsumerState<LorescapeMap> createState() => _LorescapeMapState();
+}
+
+class _LorescapeMapState extends ConsumerState<LorescapeMap> {
+  late final MapController _controller =
+      widget.mapController ?? MapController();
+  bool _mapReady = false;
+  bool _hasFitted = false;
+
+  /// 設計稿：`fitBounds(grp.getBounds().pad(0.35), { maxZoom: 6 })`
+  static const double _kFitMaxZoom = 6;
+  static const EdgeInsets _kFitPadding = EdgeInsets.all(48);
+
+  @override
+  void didUpdateWidget(covariant LorescapeMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _fitIfNeeded();
+  }
+
+  void _fitIfNeeded() {
+    if (_hasFitted || !_mapReady || widget.fitToPoints.isEmpty) return;
+    _hasFitted = true;
+    // 下一幀才動鏡頭：build 當下 FlutterMap 可能還沒完成第一次 layout。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _controller.fitCamera(
+        CameraFit.coordinates(
+          coordinates: widget.fitToPoints,
+          padding: _kFitPadding,
+          maxZoom: _kFitMaxZoom,
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = material.Theme.of(context).extension<LorescapeTokens>();
+    final backgroundColor =
+        tokens?.paperSunk ??
+        material.Theme.of(context).colorScheme.surfaceContainerHighest;
+    // 樣式與其版本一起等；版本用來隔離 tile 快取目錄。
+    final styleAsync = ref.watch(mapStyleProvider);
+    final styleVersion = ref.watch(mapStyleVersionProvider).valueOrNull;
+
+    if (styleVersion == null) {
+      return ColoredBox(color: backgroundColor, child: const SizedBox.expand());
+    }
+
+    return styleAsync.when(
+      loading: () =>
+          ColoredBox(color: backgroundColor, child: const SizedBox.expand()),
+      error: (error, _) => _MapUnavailable(background: backgroundColor),
+      data: (style) => FlutterMap(
+        mapController: _controller,
+        options: MapOptions(
+          initialCenter: widget.initialCenter,
+          initialZoom: widget.initialZoom,
+          minZoom: LorescapeMap._kMinZoom,
+          maxZoom: LorescapeMap._kMaxZoom,
+          backgroundColor: backgroundColor,
+          onMapReady: () {
+            _mapReady = true;
+            _fitIfNeeded();
+            widget.onMapReady?.call();
+          },
+          interactionOptions: const InteractionOptions(
+            // 不開 rotate：設計稿的浮層 header 與卡片列都假設地圖是正北向。
+            flags:
+                InteractiveFlag.drag |
+                InteractiveFlag.flingAnimation |
+                InteractiveFlag.pinchMove |
+                InteractiveFlag.pinchZoom |
+                InteractiveFlag.doubleTapZoom,
+          ),
+        ),
+        children: [
+          VectorTileLayer(
+            theme: style.theme,
+            sprites: style.sprites,
+            tileProviders: style.providers,
+            // 快取目錄依樣式版本隔離。`vector_map_tiles` 的快取 key 不含樣式
+            // 身分且 TTL 30 天，不這樣切，改配色後既有使用者會繼續看到舊地圖
+            // （2026-07-21 實測確認）。見 MapTileCacheService。
+            //
+            // 回傳型別刻意放寬成 dynamic：`cacheFolder` 宣告的 `Directory` 來自
+            // vector_map_tiles 的條件式 import，在非 dart:io 平台是
+            // `typedef Directory = String`，analyzer 會解析到那個 stub 而與
+            // `dart:io` 的 Directory 對不起來。本 App 只出 iOS / Android，
+            // 執行期一定是 dart:io 版本。
+            cacheFolder: () async =>
+                await ref
+                        .read(mapTileCacheServiceProvider)
+                        .folderForStyle(styleVersion)
+                    as dynamic,
+          ),
+          ...widget.children,
+          const _AttributionBadge(),
+        ],
+      ),
+    );
+  }
+}
+
+/// 底圖載入失敗時的替代畫面。地圖是探索頁的背景，失敗時不擋住上層 UI，
+/// 只以紙色底加一行說明帶過。
+class _MapUnavailable extends StatelessWidget {
+  const _MapUnavailable({required this.background});
+
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = material.Theme.of(context).extension<LorescapeTokens>();
+    return ColoredBox(
+      color: background,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            'explore.map.unavailable'.tr(),
+            textAlign: TextAlign.center,
+            style: material.Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color:
+                  tokens?.ink3 ??
+                  material.Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// OpenFreeMap / OpenMapTiles / OpenStreetMap 的出處標示。
+///
+/// **這是授權義務，不是裝飾**：OpenFreeMap 要求顯示
+/// `OpenFreeMap © OpenMapTiles Data from OpenStreetMap`，不得移除。
+/// 樣式對應設計稿的 `.map-el .leaflet-control-attribution`。
+class _AttributionBadge extends StatelessWidget {
+  const _AttributionBadge();
+
+  static const String _text =
+      'OpenFreeMap © OpenMapTiles Data from OpenStreetMap';
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = material.Theme.of(context).extension<LorescapeTokens>();
+    final paper = tokens?.paper ?? const Color(0xFFF7F1E6);
+    final ink3 = tokens?.ink3 ?? const Color(0xFF918471);
+
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Container(
+        color: paper.withValues(alpha: 0.7),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+        child: Text(
+          _text,
+          style: TextStyle(fontSize: 10, height: 1.2, color: ink3),
+        ),
+      ),
+    );
+  }
+}

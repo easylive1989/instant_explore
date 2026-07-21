@@ -2,6 +2,7 @@ import 'package:context_app/features/export/domain/models/pdf_export_result.dart
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/providers.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
+import 'package:context_app/shared/widgets/journal/notebook_pager.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/providers.dart';
@@ -438,6 +439,26 @@ class _ItemsList extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+          );
+        }
+        // 一般閱讀模式用手記翻頁器；進入多選後改回列表——翻頁器一次只看得到
+        // 一張，沒辦法批次勾選、移動或匯出，硬套會把既有功能弄殘。
+        if (!selectionMode) {
+          return NotebookPager(
+            pages: [
+              for (var i = 0; i < items.length; i++)
+                switch (items[i]) {
+                  NarrationJourneyItem(:final entry) => NotebookPage(
+                    title: entry.place.name,
+                    dateLabel: DateFormat(
+                      'yyyy/MM/dd · HH:mm',
+                    ).format(entry.createdAt),
+                    text: entry.narrationContent.text,
+                    address: entry.place.address,
+                    imageUrl: entry.place.imageUrl,
+                  ),
+                },
+            ],
           );
         }
         return ListView.builder(

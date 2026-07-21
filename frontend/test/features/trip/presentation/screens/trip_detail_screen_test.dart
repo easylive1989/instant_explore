@@ -4,6 +4,7 @@ import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
 import 'package:context_app/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:context_app/features/trip/providers.dart';
+import 'package:context_app/shared/widgets/journal/notebook_pager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -34,7 +35,7 @@ void main() {
         );
 
         _thenTripNameIsVisible('Kyoto Temples');
-        _thenAtLeastOneTimelineEntryIsShown();
+        _thenNotebookPagerIsShown();
       },
     );
 
@@ -456,8 +457,9 @@ void _thenTripNameIsVisible(String name) {
   expect(find.text(name), findsOneWidget);
 }
 
-void _thenAtLeastOneTimelineEntryIsShown() {
-  expect(find.byType(TimelineEntry), findsAtLeastNWidgets(1));
+/// 一般閱讀模式現在是手記翻頁器；`TimelineEntry` 只在多選模式下才出現。
+void _thenNotebookPagerIsShown() {
+  expect(find.byType(NotebookPager), findsOneWidget);
 }
 
 void _thenEmptyStateIsVisible() {

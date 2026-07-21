@@ -66,7 +66,6 @@
   "journey": {
     "title": "Journey",
     "title_uppercase": "JOURNEY OF EXPLORATION",
-    "no_entries": "No saved tours yet",
     "load_error": "Failed to load",
     "item_saved": "Item Saved!",
     "added_to_journey": "has been added to your Journey of Exploration.",
@@ -80,10 +79,12 @@
     "yesterday": "Yesterday",
     "replay": "Replay",
     "login_required": "Sign in to view your journey history",
-    "search_hint": "Search places or content...",
-    "no_results": "No matching entries found",
-    "view_timeline": "Timeline",
-    "view_by_trip": "By Trip"
+    "notebook": {
+      "entry_no": "Note · No.{}",
+      "no_photo": "No photo"
+    },
+    "bookshelf": "Bookshelf · {} volumes",
+    "eyebrow": "Chronicle"
   },
   "trip": {
     "list_title": "My Trips",
@@ -140,7 +141,12 @@
       "max_distance": "Maximum distance",
       "description": "Show only places within the selected distance from your current location.",
       "reset": "Reset to default"
-    }
+    },
+    "map": {
+      "unavailable": "Map is temporarily unavailable"
+    },
+    "atlas_eyebrow": "{} places · Atlas",
+    "view_place": "View place"
   },
   "date_picker": {
     "title": "Select date",
@@ -151,7 +157,9 @@
     "language_english": "English",
     "language_chinese_traditional": "繁體中文",
     "error_prefix": "Error",
-    "place_label": "PLACE"
+    "place_label": "PLACE",
+    "share": "Share",
+    "delete": "Delete"
   },
   "auth": {
     "login": "Sign In",

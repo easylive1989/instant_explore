@@ -7,9 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Feature 公開介面：trip 詳情頁重用的時間軸元件。
 export 'presentation/widgets/timeline_entry.dart';
 
-/// Journey 頁的檢視模式：完整時間軸 或 依旅程分群。
-enum JourneyViewMode { timeline, byTrip }
-
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return ref.watch(syncingJourneyRepositoryProvider);
 });
@@ -29,27 +26,3 @@ final allJourneyItemsProvider = FutureProvider.autoDispose<List<JourneyItem>>((
 
   return items;
 });
-
-/// Current search query entered by the user.
-final journeySearchQueryProvider = StateProvider.autoDispose<String>(
-  (ref) => '',
-);
-
-/// Journey 頁當前的檢視模式。
-final journeyViewModeProvider = StateProvider.autoDispose<JourneyViewMode>(
-  (ref) => JourneyViewMode.timeline,
-);
-
-/// Items after applying the search query.
-final filteredJourneyItemsProvider =
-    Provider.autoDispose<AsyncValue<List<JourneyItem>>>((ref) {
-      final asyncItems = ref.watch(allJourneyItemsProvider);
-      final query = ref.watch(journeySearchQueryProvider).trim().toLowerCase();
-
-      return asyncItems.whenData((items) {
-        if (query.isEmpty) return items;
-        return items
-            .where((item) => item.searchableText.toLowerCase().contains(query))
-            .toList();
-      });
-    });

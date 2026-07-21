@@ -1,6 +1,6 @@
 import 'package:context_app/features/journey/domain/models/journey_entry.dart';
 import 'package:context_app/features/journey/presentation/screens/journey_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:context_app/features/journey/presentation/widgets/trip_bookshelf.dart';
 import 'package:context_app/features/journey/providers.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/presentation/controllers/current_trip_notifier.dart';
@@ -22,178 +22,90 @@ void main() {
 
   group('JourneyScreen', () {
     testWidgets(
-      'given no entries, when the timeline view is active, '
-      'then the empty state message is rendered',
+      'given no trips at all, when the shelf loads, '
+      'then the uncategorized volume is still on the shelf',
       (tester) async {
         await _givenJourneyScreen(tester);
 
-        _thenNoEntriesStateIsVisible();
+        // 一本都沒有時書架不能整個空掉——未分類永遠有自己的一本。
+        expect(find.byType(TripBookshelf), findsOneWidget);
+        expect(_bookFinder(), findsOneWidget);
       },
     );
 
     testWidgets(
-      'given the user has journey entries, when the timeline view loads, '
-      'then each entry is displayed as a timeline card',
+      'given saved trips and no loose entries, when the shelf loads, '
+      'then one volume per trip is shown and the uncategorized one is hidden',
       (tester) async {
-        final entries = [
-          buildJourneyEntry(id: 'e1'),
-          buildJourneyEntry(id: 'e2'),
-        ];
-
-        await _givenJourneyScreen(tester, seededJourneys: entries);
-
-        _thenTimelineShowsEntries(count: 2);
-      },
-    );
-
-    testWidgets(
-      'given the timeline view is active, when the user opens search, '
-      'then a search input is revealed',
-      (tester) async {
-        await _givenJourneyScreen(tester);
-
-        await _whenUserTapsSearchToggle(tester);
-
-        _thenSearchFieldIsVisible();
-      },
-    );
-
-    testWidgets(
-      'given the timeline view is active, when the user selects by-trip, '
-      'then the trip grid replaces the timeline list',
-      (tester) async {
-        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
-
-        await _givenJourneyScreen(tester, seededTrips: [trip]);
-        await _whenUserSelectsByTripView(tester);
-
-        _thenTripCardIsVisible('Kyoto Trip');
-      },
-    );
-
-    testWidgets(
-      'given the search field is open, when the user types a query, '
-      'then a clear-search suffix icon is revealed',
-      (tester) async {
-        await _givenJourneyScreen(tester);
-        await _whenUserTapsSearchToggle(tester);
-
-        await tester.enterText(find.byType(TextField), 'tokyo');
-        await tester.pump();
-
-        expect(find.byIcon(Icons.clear), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'given a typed search query, when the user taps the clear suffix, '
-      'then the search field empties and the suffix disappears',
-      (tester) async {
-        await _givenJourneyScreen(tester);
-        await _whenUserTapsSearchToggle(tester);
-
-        await tester.enterText(find.byType(TextField), 'tokyo');
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byIcon(Icons.clear));
-        await tester.pumpAndSettle();
-
-        final textField = tester.widget<TextField>(find.byType(TextField));
-        expect(textField.controller?.text, isEmpty);
-        expect(find.byIcon(Icons.clear), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'given search is open with text, when the user taps the close toggle, '
-      'then the search bar collapses and the query is cleared',
-      (tester) async {
-        final e1 = buildJourneyEntry(id: 'e1');
-
-        await _givenJourneyScreen(tester, seededJourneys: [e1]);
-        await _whenUserTapsSearchToggle(tester);
-        await tester.enterText(find.byType(TextField), 'xyz');
-        await tester.pump();
-
-        await tester.tap(find.byIcon(Icons.close));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(TextField), findsNothing);
-        // Entry re-appears because query was cleared on toggle-close.
-        expect(find.byType(TimelineEntry), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'given a currentTripId is set, when the screen renders, '
-      'then the current-trip banner shows the trip name',
-      (tester) async {
-        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
-
         await _givenJourneyScreen(
           tester,
-          seededTrips: [trip],
-          currentTripIdInitial: 't1',
+          seededTrips: [
+            buildTrip(id: 't1', name: '京都'),
+            buildTrip(id: 't2', name: '大阪'),
+          ],
         );
 
-        expect(find.text('trip.current_badge'), findsOneWidget);
-        expect(find.text('Kyoto Trip'), findsOneWidget);
-        expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
+        expect(_bookFinder(), findsNWidgets(2));
       },
     );
 
     testWidgets(
-      'given the current-trip banner is visible, when the user taps End, '
-      'then the banner disappears',
+      'given entries that belong to no trip, when the shelf loads, '
+      'then the uncategorized volume appears alongside the trips',
       (tester) async {
-        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
-
         await _givenJourneyScreen(
           tester,
-          seededTrips: [trip],
-          currentTripIdInitial: 't1',
+          seededTrips: [buildTrip(id: 't1', name: '京都')],
+          seededJourneys: [buildJourneyEntry(id: 'e1')],
         );
 
-        await tester.tap(find.text('trip.end_current'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('trip.current_badge'), findsNothing);
-        expect(find.byIcon(Icons.flag_outlined), findsNothing);
+        expect(_bookFinder(), findsNWidgets(2));
       },
     );
 
     testWidgets(
-      'given SharedPreferences has a saved current trip id, '
-      'when the screen loads without an override, '
-      'then the current-trip banner is hydrated from storage',
+      'given a trip on the shelf under a router, when its book is tapped, '
+      'then the trip detail route is pushed',
       (tester) async {
-        SharedPreferences.setMockInitialValues(<String, Object>{
-          'current_trip_id': 't1',
-        });
-        final trip = buildTrip(id: 't1', name: 'Kyoto Trip');
+        final pushed = <String>[];
 
-        await _givenJourneyScreen(tester, seededTrips: [trip]);
+        await _givenJourneyScreenWithRouter(
+          tester,
+          seededTrips: [buildTrip(id: 't1', name: '京都')],
+          onTripPush: pushed.add,
+        );
+
+        await tester.tap(_bookFinder().last);
         await tester.pumpAndSettle();
 
-        expect(find.text('trip.current_badge'), findsOneWidget);
-        expect(find.text('Kyoto Trip'), findsOneWidget);
+        expect(pushed.single, equals('t1'));
       },
     );
 
     testWidgets(
-      'given the by-trip view is active under a router, '
-      'when the user taps the add icon, '
+      'given the by-trip shelf under a router, when the user taps add, '
       'then the trip-edit route is pushed',
       (tester) async {
         await _givenJourneyScreenWithRouter(tester);
-
-        await tester.tap(find.text('journey.view_by_trip'));
-        await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(Icons.add));
         await tester.pumpAndSettle();
 
         expect(find.byKey(const ValueKey('edit-screen')), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'given a current trip is set, when the shelf loads, '
+      'then the current-trip banner is shown above the shelf',
+      (tester) async {
+        await _givenJourneyScreen(
+          tester,
+          seededTrips: [buildTrip(id: 't1', name: '京都')],
+          currentTripIdInitial: 't1',
+        );
+
+        expect(find.text('trip.current_badge'), findsOneWidget);
       },
     );
   });
@@ -224,6 +136,7 @@ Future<void> _givenJourneyScreenWithRouter(
   WidgetTester tester, {
   List<JourneyEntry> seededJourneys = const [],
   List<Trip> seededTrips = const [],
+  void Function(String tripId)? onTripPush,
 }) async {
   final overrides = await _buildJourneyOverrides(
     seededJourneys: seededJourneys,
@@ -240,6 +153,16 @@ Future<void> _givenJourneyScreenWithRouter(
           key: ValueKey('edit-screen'),
           body: Text('edit'),
         ),
+      ),
+      GoRoute(
+        path: '/trip/:id',
+        builder: (_, state) {
+          onTripPush?.call(state.pathParameters['id']!);
+          return const Scaffold(
+            key: ValueKey('trip-screen'),
+            body: SizedBox.shrink(),
+          );
+        },
       ),
     ],
     overrides: overrides,
@@ -281,29 +204,14 @@ class _StaticCurrentTripIdNotifier extends CurrentTripIdNotifier {
   String? build() => _initial;
 }
 
-Future<void> _whenUserTapsSearchToggle(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.search));
-  await tester.pump(const Duration(milliseconds: 20));
-}
 
-Future<void> _whenUserSelectsByTripView(WidgetTester tester) async {
-  await tester.tap(find.text('journey.view_by_trip'));
-  await tester.pump(const Duration(milliseconds: 20));
-  await tester.pump(const Duration(milliseconds: 20));
-}
-
-void _thenNoEntriesStateIsVisible() {
-  expect(find.text('journey.no_entries'), findsOneWidget);
-}
-
-void _thenTimelineShowsEntries({required int count}) {
-  expect(find.byType(TimelineEntry), findsNWidgets(count));
-}
-
-void _thenSearchFieldIsVisible() {
-  expect(find.byType(TextField), findsOneWidget);
-}
-
-void _thenTripCardIsVisible(String name) {
-  expect(find.text(name), findsOneWidget);
-}
+/// 書架上的一本書。
+///
+/// 書名是直排（逐字換行）的，用 `find.text` 找不到，所以改抓語意上的按鈕；
+/// 但要限定在書架子樹內，否則 Masthead 的「新增」按鈕也會被算進來。
+Finder _bookFinder() => find.descendant(
+  of: find.byType(TripBookshelf),
+  matching: find.byWidgetPredicate(
+    (widget) => widget is Semantics && widget.properties.button == true,
+  ),
+);

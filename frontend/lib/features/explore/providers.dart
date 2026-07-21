@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:context_app/core/utils/geo_utils.dart';
 import 'package:context_app/features/explore/domain/use_cases/search_nearby_places_use_case.dart';
 import 'package:context_app/features/explore/data/services/geolocator_service.dart';
 import 'package:context_app/features/explore/data/services/wikidata_landmark_query_service.dart';
 import 'package:context_app/features/explore/data/services/wikipedia_places_service.dart';
 import 'package:context_app/features/explore/data/services/hive_places_cache_service.dart';
+import 'package:context_app/features/explore/data/services/map_tile_cache_service.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:context_app/features/explore/domain/repositories/places_repository.dart';
 import 'package:context_app/features/explore/domain/services/location_service.dart';
@@ -12,6 +16,9 @@ import 'package:context_app/features/explore/data/repositories/caching_places_re
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/settings/providers.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart'
+    show ThemeReader;
 
 // Feature 公開介面：providers.dart 得 re-export 精選元件供他 feature 使用。
 export 'presentation/extensions/place_category_extension.dart';
@@ -43,6 +50,63 @@ final placesRepositoryProvider = Provider<PlacesRepository>((ref) {
 
 final placesCacheServiceProvider = Provider<HivePlacesCacheService>((ref) {
   return HivePlacesCacheService();
+});
+
+// Map Providers
+
+/// OpenFreeMap 的上游 style JSON。**不要改成硬編 tile URL**——tile 路徑帶著
+/// 每週重建的日期段（例如 `/planet/20260621_080001_pt/{z}/{x}/{y}.pbf`），
+/// 必須由 style/TileJSON 在執行期解析。選型與授權義務見
+/// `docs/adr/0005-map-tile-provider.md`。
+const String kMapStyleUrl = 'https://tiles.openfreemap.org/styles/positron';
+
+/// 重新上色成 field journal 色票的本地樣式，由 `tool/build_map_style.py`
+/// 從上游 positron 產生。
+const String kLorescapeStyleAsset = 'assets/map/lorescape_style.json';
+
+final mapTileCacheServiceProvider = Provider<MapTileCacheService>((ref) {
+  return const MapTileCacheService();
+});
+
+/// 目前樣式的版本（內容雜湊，由 `tool/build_map_style.py` 寫入
+/// `metadata.version`）。用來隔離 tile 快取目錄，見 [mapCacheFolderProvider]。
+final mapStyleVersionProvider = FutureProvider<String>((ref) async {
+  ref.keepAlive();
+  final json =
+      jsonDecode(await rootBundle.loadString(kLorescapeStyleAsset))
+          as Map<String, dynamic>;
+  return (json['metadata'] as Map<String, dynamic>?)?['version'] as String? ??
+      'unknown';
+});
+
+/// 讀取並快取地圖樣式。
+///
+/// 兩邊各司其職：**配色**來自本地 asset（我們控制，才能對上設計稿的暖紙感），
+/// **tile 來源與 sprites** 仍交給上游 `StyleReader` 解析——那段包含每週變動的
+/// tile 路徑，寫死會在下次重建時壞掉。
+///
+/// 讀取會打數個網路請求，故以 provider 快取、全 App 只讀一次。
+final mapStyleProvider = FutureProvider<Style>((ref) async {
+  ref.keepAlive();
+  final upstream = await StyleReader(uri: kMapStyleUrl).read();
+  final localJson =
+      jsonDecode(await rootBundle.loadString(kLorescapeStyleAsset))
+          as Map<String, dynamic>;
+  final theme = ThemeReader().read(localJson);
+  // 只保留本地樣式真的會用到的 source。上游 positron 還帶著一個 Natural Earth
+  // 的 raster source（`ne2_shaded`），我們的樣式沒有任何圖層引用它，全部照收
+  // 會讓 App 白白下載一堆永遠不會顯示的 PNG（2026-07-21 在快取目錄裡實際看到）。
+  final providers = TileProviders({
+    for (final source in theme.tileSources)
+      if (upstream.providers.tileProviderBySource[source] case final provider?)
+        source: provider,
+  });
+  return Style(
+    name: localJson['name'] as String?,
+    theme: theme,
+    providers: providers,
+    sprites: upstream.sprites,
+  );
 });
 
 // Filter Providers

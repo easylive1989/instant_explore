@@ -1,241 +1,104 @@
-import 'package:context_app/features/journey/domain/models/journey_item.dart';
-import 'package:context_app/features/journey/providers.dart';
+import 'package:context_app/features/journey/presentation/widgets/trip_bookshelf.dart';
+import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/providers.dart';
+import 'package:context_app/shared/widgets/journal/masthead.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:context_app/shared/widgets/adaptive/adaptive_widgets.dart';
 
-class JourneyScreen extends ConsumerStatefulWidget {
+/// 歷程首頁：Masthead ＋ 旅程書架。
+///
+/// v2 設計把「全部時間軸」從首頁移除了——所有記錄改成點進某本旅程後、以手記
+/// 翻頁器閱讀。未歸類的記錄仍有自己的一本書（`tripId == null`）。
+class JourneyScreen extends ConsumerWidget {
   const JourneyScreen({super.key});
 
   @override
-  ConsumerState<JourneyScreen> createState() => _JourneyScreenState();
-}
-
-class _JourneyScreenState extends ConsumerState<JourneyScreen> {
-  final _searchController = TextEditingController();
-  bool _showSearch = false;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _showSearch = !_showSearch;
-      if (!_showSearch) {
-        _searchController.clear();
-        ref.read(journeySearchQueryProvider.notifier).state = '';
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final viewMode = ref.watch(journeyViewModeProvider);
-    final isTimeline = viewMode == JourneyViewMode.timeline;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncTrips = ref.watch(tripsProvider);
+    final asyncCounts = ref.watch(tripItemCountsProvider);
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title row with search toggle (only in timeline mode)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'journey.title'.tr(),
-                      style: Theme.of(context).textTheme.displayLarge,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Masthead(
+                eyebrow: 'journey.eyebrow'.tr(),
+                title: 'journey.title'.tr(),
+                actions: AdaptiveIconButton(
+                  onPressed: () => context.push('/trip/edit'),
+                  icon: Icon(
+                    Icons.add,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const _CurrentTripBanner(),
+              asyncTrips.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 48),
+                  child: Center(child: AdaptiveProgressIndicator()),
+                ),
+                error: (error, _) => Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    '${'trip.load_error'.tr()}: $error',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
-                  if (isTimeline)
-                    AdaptiveIconButton(
-                      onPressed: _toggleSearch,
-                      icon: Icon(
-                        _showSearch ? Icons.close : Icons.search,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    )
-                  else
-                    AdaptiveIconButton(
-                      onPressed: () => context.push('/trip/edit'),
-                      icon: Icon(
-                        Icons.add,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                ),
+                data: (trips) {
+                  final counts =
+                      asyncCounts.asData?.value ?? const <String?, int>{};
+                  return TripBookshelf(
+                    caption: 'journey.bookshelf'.tr(
+                      args: ['${_bookCount(trips, counts)}'],
                     ),
-                ],
+                    books: _buildBooks(context, trips, counts),
+                  );
+                },
               ),
-            ),
-
-            // Current trip banner
-            const _CurrentTripBanner(),
-
-            // View mode segmented control
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: _ViewModeToggle(viewMode: viewMode),
-            ),
-
-            // Search bar (timeline mode only)
-            if (isTimeline)
-              AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                child: _showSearch
-                    ? Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                        child: TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          onChanged: (value) {
-                            setState(() {});
-                            ref
-                                    .read(journeySearchQueryProvider.notifier)
-                                    .state =
-                                value;
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'journey.search_hint'.tr(),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: colorScheme.onSurfaceVariant,
-                              size: 20,
-                            ),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? AdaptiveIconButton(
-                                    icon: const Icon(Icons.clear, size: 18),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() {});
-                                      ref
-                                              .read(
-                                                journeySearchQueryProvider
-                                                    .notifier,
-                                              )
-                                              .state =
-                                          '';
-                                    },
-                                  )
-                                : null,
-                            filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: colorScheme.onSurface,
-                            fontSize: 15,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-            // Main content
-            Expanded(
-              child: isTimeline ? _JourneyList() : const _TripGridView(),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class _ViewModeToggle extends ConsumerWidget {
-  final JourneyViewMode viewMode;
+  int _bookCount(List<Trip> trips, Map<String?, int> counts) =>
+      trips.length + (_showUncategorized(trips, counts) ? 1 : 0);
 
-  const _ViewModeToggle({required this.viewMode});
+  /// 未歸類的記錄仍要有地方去。沒有任何旅程時也顯示，否則書架會整個空掉。
+  bool _showUncategorized(List<Trip> trips, Map<String?, int> counts) =>
+      (counts[null] ?? 0) > 0 || trips.isEmpty;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          _buildSegment(
-            context: context,
-            ref: ref,
-            label: 'journey.view_timeline'.tr(),
-            selected: viewMode == JourneyViewMode.timeline,
-            target: JourneyViewMode.timeline,
-            colorScheme: colorScheme,
-          ),
-          _buildSegment(
-            context: context,
-            ref: ref,
-            label: 'journey.view_by_trip'.tr(),
-            selected: viewMode == JourneyViewMode.byTrip,
-            target: JourneyViewMode.byTrip,
-            colorScheme: colorScheme,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSegment({
-    required BuildContext context,
-    required WidgetRef ref,
-    required String label,
-    required bool selected,
-    required JourneyViewMode target,
-    required ColorScheme colorScheme,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => ref.read(journeyViewModeProvider.notifier).state = target,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: selected ? colorScheme.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selected
-                  ? colorScheme.onSurface
-                  : colorScheme.onSurfaceVariant,
-              fontSize: 13,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
+  List<ShelfBook> _buildBooks(
+    BuildContext context,
+    List<Trip> trips,
+    Map<String?, int> counts,
+  ) {
+    final uncategorizedCount = counts[null] ?? 0;
+    return [
+      if (_showUncategorized(trips, counts))
+        ShelfBook(
+          title: 'trip.uncategorized'.tr(),
+          subtitle: 'trip.item_count'.tr(args: ['$uncategorizedCount']),
+          hasEntries: uncategorizedCount > 0,
+          onTap: () => context.push('/trip/uncategorized'),
         ),
-      ),
-    );
+      for (final trip in trips)
+        ShelfBook(
+          title: trip.name,
+          subtitle: 'trip.item_count'.tr(args: ['${counts[trip.id] ?? 0}']),
+          hasEntries: (counts[trip.id] ?? 0) > 0,
+          onTap: () => context.push('/trip/${trip.id}'),
+        ),
+    ];
   }
 }
 
@@ -334,102 +197,6 @@ class _CurrentTripBanner extends ConsumerWidget {
         );
       },
       orElse: () => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _TripGridView extends ConsumerWidget {
-  const _TripGridView();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncTrips = ref.watch(tripsProvider);
-    final asyncCounts = ref.watch(tripItemCountsProvider);
-    final currentTripId = ref.watch(currentTripIdProvider);
-
-    return asyncTrips.when(
-      data: (trips) {
-        final counts = asyncCounts.asData?.value ?? const <String?, int>{};
-        return TripGrid(
-          trips: trips,
-          counts: counts,
-          currentTripId: currentTripId,
-        );
-      },
-      loading: () => const Center(child: AdaptiveProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(
-          '${'trip.load_error'.tr()}: $error',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-}
-
-class _JourneyList extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncItems = ref.watch(filteredJourneyItemsProvider);
-    final query = ref.watch(journeySearchQueryProvider).trim();
-    final hasActiveFilter = query.isNotEmpty;
-
-    return asyncItems.when(
-      data: (items) {
-        if (items.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    hasActiveFilter ? Icons.search_off : Icons.explore_outlined,
-                    size: 48,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    hasActiveFilter
-                        ? 'journey.no_results'.tr()
-                        : 'journey.no_entries'.tr(),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 15,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            final isLast = index == items.length - 1;
-
-            return switch (item) {
-              NarrationJourneyItem(:final entry) => TimelineEntry(
-                key: ValueKey(item.id),
-                entry: entry,
-                isLast: isLast,
-              ),
-            };
-          },
-        );
-      },
-      loading: () => const Center(child: AdaptiveProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          '${'journey.load_error'.tr()}: $error',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
     );
   }
 }
