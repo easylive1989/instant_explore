@@ -4,9 +4,7 @@ from __future__ import annotations
 import re
 from datetime import date
 
-from ..config import REPO_ROOT
-
-SCHEDULE_PATH = REPO_ROOT / "SCHEDULE.md"
+from ..config import SCHEDULE_PATH
 
 _SECTION_KEYS = {"每日": "daily", "每週": "weekly", "每月": "monthly"}
 _HEADING_RE = re.compile(r"^##\s*(每日|每週|每月)")

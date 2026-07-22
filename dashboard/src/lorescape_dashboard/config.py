@@ -12,9 +12,18 @@ DASHBOARD_DIR = REPO_ROOT / "dashboard"
 OUT_DATA_DIR = DASHBOARD_DIR / "out" / "data"
 
 BACKLOG_PATH = REPO_ROOT / "BACKLOG.md"
+SCHEDULE_PATH = REPO_ROOT / "SCHEDULE.md"
+CALENDAR_PATH = REPO_ROOT / "marketing" / "content-calendar" / "_reels-place-calendar.md"
 FRONTEND_DIR = REPO_ROOT / "frontend"
 BACKEND_DIR = REPO_ROOT / "backend"
 PUBLISHER_DIR = REPO_ROOT / "publisher"
+
+# 讀 md 檔的區塊 → 其來源檔；serve 模式據此偵測 mtime 變化即時刷新。
+SECTION_SOURCE_FILES: dict[str, Path] = {
+    "backlog": BACKLOG_PATH,
+    "schedule": SCHEDULE_PATH,
+    "reels": CALENDAR_PATH,
+}
 
 SETUP_DOC = "docs/init/dashboard-setup.md"
 

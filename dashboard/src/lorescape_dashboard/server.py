@@ -1,6 +1,11 @@
-"""--serve 模式：本地 server，GET / 從快取渲染、POST /api/section/<key> 重收集。"""
+"""--serve 模式：本地 server，GET / 從快取渲染、POST /api/section/<key> 重收集。
+
+GET /api/mtimes 回傳各 md-backed 區塊來源檔的 mtime，前端據此偵測 md 編輯後
+即時刷新對應區塊（見 render._LIVE_JS）。
+"""
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Callable
 from datetime import datetime
@@ -8,12 +13,24 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import render
+from .config import SECTION_SOURCE_FILES
 
 _SECTION_PATH_RE = re.compile(r"^/api/section/([a-z_]+)$")
 
 
 def _now() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M")
+
+
+def section_mtimes(sources: dict[str, Path]) -> dict[str, float | None]:
+    """各區塊來源 md 檔的 mtime（讀不到給 None），供前端偵測變化。"""
+    result: dict[str, float | None] = {}
+    for key, path in sources.items():
+        try:
+            result[key] = path.stat().st_mtime
+        except OSError:
+            result[key] = None
+    return result
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -43,8 +60,17 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(200, render.build_html(self._data(refresh=set())))
         elif path == "/reels.html":
             self._send(200, render.build_reels_html(self._data(refresh=set())))
+        elif path == "/api/mtimes":
+            body = json.dumps(section_mtimes(SECTION_SOURCE_FILES))
+            self._send(200, body, "application/json")
         else:
             self._send(404, "not found", "text/plain")
+
+    def log_message(self, format: str, *args) -> None:
+        # /api/mtimes 每 2 秒輪詢，不記 log 免洗版
+        if self.path == "/api/mtimes":
+            return
+        print(f"  [{_now()}] {self.command} {self.path}")
 
     def do_POST(self) -> None:  # noqa: N802
         m = _SECTION_PATH_RE.match(self.path)
@@ -54,9 +80,6 @@ class _Handler(BaseHTTPRequestHandler):
         key = m.group(1)
         data = self._data(refresh={key})
         self._send(200, render.section_body(key, data))
-
-    def log_message(self, format: str, *args) -> None:
-        print(f"  [{_now()}] {self.command} {self.path}")
 
 
 def serve(

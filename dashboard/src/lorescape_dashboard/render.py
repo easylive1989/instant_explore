@@ -905,6 +905,23 @@ if(location.protocol==='http:'||location.protocol==='https:'){
     sec.querySelector('h2').appendChild(btn);
   });
   setInterval(()=>{refreshSection('daily_story');refreshSection('deploys');},60000);
+  // md-backed 區塊：輪詢來源檔 mtime，存檔後只刷新有變的那塊
+  const WATCH=['backlog','schedule','reels'];
+  let lastMtimes=null;
+  async function pollMtimes(){
+    try{
+      const resp=await fetch('/api/mtimes');
+      if(!resp.ok)return;
+      const m=await resp.json();
+      if(lastMtimes){
+        for(const k of WATCH){
+          if(m[k]&&m[k]!==lastMtimes[k])refreshSection(k);
+        }
+      }
+      lastMtimes=m;
+    }catch(e){}
+  }
+  setInterval(pollMtimes,2000);
 }
 """
 

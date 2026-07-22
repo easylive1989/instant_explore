@@ -3,11 +3,7 @@ from __future__ import annotations
 
 import re
 
-from ..config import REPO_ROOT
-
-CALENDAR_PATH = (
-    REPO_ROOT / "marketing" / "content-calendar" / "_reels-place-calendar.md"
-)
+from ..config import CALENDAR_PATH
 
 _TITLE_RANGE_RE = re.compile(r"（(\d{4})/(\d{2})/\d{2}\s*–\s*[\d/]+）")
 # 排程列：| 7/11 六 | 富士山 | Fujisan... | 日本 |
