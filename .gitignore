@@ -69,4 +69,5 @@ dashboard/out/
 *.egg-info/
 
 # Metrics 累積數據（含營收，repo 為 public 故不進版控）
-data/
+# 錨定在 repo 根：只忽略頂層 data/，別誤掃 Flutter 各 feature 的 data/ 層
+/data/
