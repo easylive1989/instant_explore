@@ -1,0 +1,150 @@
+{
+  "date": "2026-07-12",
+  "place": "Petra",
+  "placeZh": "佩特拉",
+  "titleZh": "佩特拉",
+  "titleEn": "Petra",
+  "region": "約旦・佩特拉",
+  "credits": "Photos: Ahmad Qaisieh, Brian Kairuz, Alex Vasey, Daniel Twal, Emile Guillemot, Moxin Wang, Jan Simons / Unsplash",
+  "beats": [
+    {
+      "id": "cover",
+      "layout": "cover",
+      "photo": "direct_5.jpg",
+      "focus": "50% 40%",
+      "kicker": "約旦・佩特拉",
+      "title": "佩特拉",
+      "subtitle": "Petra",
+      "lines": [
+        "這座城市曾經富甲沙漠，",
+        "卻憑空消失了七百年。",
+        "直到一個瑞士青年，說了一個謊。"
+      ],
+      "highlights": [
+        "消失",
+        "謊"
+      ],
+      "narration": "這座城市曾經富甲沙漠，卻憑空消失了七百年，直到一個瑞士青年，說了一個謊。",
+      "durationFrames": 293
+    },
+    {
+      "id": "beat1",
+      "layout": "beat",
+      "photo": "direct_1.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之一 · 鑿城",
+      "title": "",
+      "lines": [
+        "游牧民族放下帳篷，拿起鑿子，",
+        "在玫瑰色岩壁裡雕出首都。"
+      ],
+      "highlights": [
+        "鑿子"
+      ],
+      "narration": "兩千三百年前，一支游牧民族放下帳篷，拿起鑿子，在玫瑰色的岩壁裡，雕出了一座首都。",
+      "durationFrames": 324
+    },
+    {
+      "id": "beat2",
+      "layout": "beat",
+      "photo": "direct_2.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之二 · 水",
+      "title": "",
+      "lines": [
+        "沙漠裡最珍貴的不是黃金，",
+        "是水。"
+      ],
+      "highlights": [
+        "水"
+      ],
+      "narration": "沙漠裡最珍貴的不是黃金，而是水。水道與蓄水池，讓兩萬人在荒漠裡安居。",
+      "durationFrames": 317
+    },
+    {
+      "id": "beat3",
+      "layout": "beat",
+      "photo": "landscape_5.jpg",
+      "focus": "50% 40%",
+      "overlay": "darker",
+      "kicker": "其之三 · 沉寂",
+      "title": "",
+      "lines": [
+        "羅馬併吞，地震，商路改道。",
+        "玫瑰之城的燈火，一盞盞熄滅。"
+      ],
+      "highlights": [
+        "熄滅"
+      ],
+      "narration": "後來羅馬併吞了王國，地震摧毀了水利，商路一條條改道，玫瑰之城的燈火，一盞盞熄滅。",
+      "durationFrames": 371
+    },
+    {
+      "id": "beat4",
+      "layout": "beat",
+      "photo": "disambiguated_4.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之四 · 祕密",
+      "title": "最令人意外的是⋯",
+      "lines": [
+        "此後七百年，",
+        "只有貝都因人守著這個祕密。"
+      ],
+      "highlights": [
+        "祕密"
+      ],
+      "narration": "此後七百年，只有貝都因人知道它在哪裡，他們守著這個祕密，不讓任何外人靠近。",
+      "durationFrames": 278
+    },
+    {
+      "id": "beat5",
+      "layout": "beat",
+      "photo": "direct_3.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之五 · 謊言",
+      "title": "",
+      "lines": [
+        "1812年，布克哈特喬裝成朝聖者，",
+        "騙得嚮導帶他走進峽谷。"
+      ],
+      "highlights": [
+        "喬裝"
+      ],
+      "narration": "1812年，探險家布克哈特喬裝成朝聖者，以獻祭山羊為由，才騙得嚮導帶他走進峽谷。",
+      "durationFrames": 323
+    },
+    {
+      "id": "beat6",
+      "layout": "bright",
+      "photo": "direct_4.jpg",
+      "focus": "50% 40%",
+      "kicker": "其之六",
+      "title": "",
+      "lines": [
+        "有些地方，",
+        "值得穿過最窄的路，",
+        "去看見。"
+      ],
+      "highlights": [
+        "看見"
+      ],
+      "narration": "有些地方，值得穿過最窄的路，去看見。",
+      "durationFrames": 160
+    },
+    {
+      "id": "ending",
+      "layout": "ending",
+      "photo": "landscape_4.jpg",
+      "focus": "50% 40%",
+      "kicker": "結語",
+      "title": "",
+      "lines": [
+        "旅行，不只是走進一個地方。",
+        "也是透過一段故事，遇見不同的人生。"
+      ],
+      "highlights": [],
+      "narration": "如今每年百萬旅人走進同一道峽谷。旅行，不只是走進一個地方，也是透過一段故事，遇見不同的人生。",
+      "durationFrames": 372
+    }
+  ]
+}
