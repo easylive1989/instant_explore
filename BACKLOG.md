@@ -289,15 +289,24 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 
 ## F20: Cloudflare www subdomain 轉址到主網域
 
-- 狀態: 待辦
+- 狀態: 已完成（2026-07-22，瀏覽器操作 + curl 實測通過）
 - 來源: 使用者要求（2026-07-22）——`www.lorescape.app` 目前未轉址到
   `lorescape.app`，需在 Cloudflare 設定 www → apex 轉址
 - 範圍備註: 屬維運工作，不受 E1 暫緩政策限制；www 打不開也會漏接輸入
   `www.` 習慣的使用者與部分外部連結，間接影響漏斗
-- [ ] T1: 在 Cloudflare 設定 `www.lorescape.app` → `https://lorescape.app`
-  的 301 轉址（Redirect Rule；注意 www 需先有 DNS 紀錄且開 proxy，規則
-  才吃得到），保留原 path/query；完成後驗證 http/https 的 www 皆 301 到
-  apex，且 SSL 憑證涵蓋 www 無警告
+- 發現: 原本 `www` **根本沒有 DNS 紀錄**（`Could not resolve host`），不只是
+  少一條轉址規則；apex 的 A 記錄是 DNS only（灰雲），而 Redirect Rule 只對
+  走 proxy 的流量生效，故 www 必須設成 Proxied（橘雲）規則才吃得到
+- [x] T1: 兩步完成（2026-07-22）——
+  1. DNS 加 `www` CNAME → `lorescape.app`、**Proxied（橘雲）**
+  2. Redirect Rule（用 Cloudflare 內建 `redirect-www-to-root` 範本）：
+     `https://www.*` → `301` `wildcard_replace(http.request.full_uri,
+     "https://www.*", "https://${1}")`，用 `full_uri` 故 path 與 query
+     皆由 wildcard 帶過去（不需另勾 Preserve query string，避免 query 重複）
+  - 實測（curl `--resolve` 繞過本機 DNS 負快取）：
+    `https://www` → 301 → `https://lorescape.app/`（SSL 驗證 0、無警告）；
+    `https://www/place/louvre?utm=test` → 301 保留 path+query；
+    `http://www` → 兩跳（Always Use HTTPS → 轉址規則）最終落 `lorescape.app/zh` 200
 
 ## F16: 後端可觀測性（server 狀態檢測）
 
