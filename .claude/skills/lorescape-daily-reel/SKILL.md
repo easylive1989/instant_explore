@@ -56,7 +56,7 @@ scripts/build_video.sh <YYYY-MM-DD>              # music-forward (-20 LUFS)
 # 3b. 語音版（zh-TW 旁白，逐 beat 同步）-> daily_video/<date>/final.mp4
 #     先在 story.json 每拍填 `narration`（口說版，見 Step 2），再：
 cd ../../../scripts && uv run python -m reel_voiceover <YYYY-MM-DD>
-#     離線 say（不吃 Gemini 配額）：… -m reel_voiceover <date> --engine say
+#     旁白一律用 Gemini TTS（預設）；不要用離線 say。
 #     改一句只重唸一句（逐拍快取）；--force-tts 全部重唸
 ```
 
@@ -96,7 +96,7 @@ then hand off to upload (lorescape-manual-daily-story Step 11).
 | Live preview / tweak | `npx remotion studio` |
 | One-frame check | `npx remotion still Cinematic out.png --frame=90 --scale=0.5` |
 | Build final | `scripts/build_video.sh <date> [--style S] [--bgm F] [--lufs N]` |
-| Build voiced (final.mp4) | `cd ../../../scripts && uv run python -m reel_voiceover <date> [--engine say] [--force-tts]` |
+| Build voiced (final.mp4) | `cd ../../../scripts && uv run python -m reel_voiceover <date> [--force-tts]`（Gemini TTS；不要用 say） |
 | Output | `marketing/outputs/daily_video/<date>/cinematic.mp4` |
 
 ## Common Mistakes
