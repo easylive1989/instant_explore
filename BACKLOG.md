@@ -287,6 +287,18 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
   要求由環境變數提供並讓 `Config.from_env()` 在讀到佔位值時直接報錯，
   不要靜默連到錯的地方
 
+## F20: Cloudflare www subdomain 轉址到主網域
+
+- 狀態: 待辦
+- 來源: 使用者要求（2026-07-22）——`www.lorescape.app` 目前未轉址到
+  `lorescape.app`，需在 Cloudflare 設定 www → apex 轉址
+- 範圍備註: 屬維運工作，不受 E1 暫緩政策限制；www 打不開也會漏接輸入
+  `www.` 習慣的使用者與部分外部連結，間接影響漏斗
+- [ ] T1: 在 Cloudflare 設定 `www.lorescape.app` → `https://lorescape.app`
+  的 301 轉址（Redirect Rule；注意 www 需先有 DNS 紀錄且開 proxy，規則
+  才吃得到），保留原 path/query；完成後驗證 http/https 的 www 皆 301 到
+  apex，且 SSL 憑證涵蓋 www 無警告
+
 ## F16: 後端可觀測性（server 狀態檢測）
 
 - 狀態: 待辦
