@@ -444,6 +444,7 @@ _HEADLINES = {
     "ig": ["reach", "followers_count"],
     "revenuecat": ["mrr", "active_subscriptions", "active_trials"],
     "store_ios": ["downloads", "avg_rating"],
+    "store_ios_pages": ["impressions", "product_page_views"],
     "store_android": ["installs", "avg_rating_total"],
     "narration": ["completion_rate"],
     "retention": ["cohort_size", "d1_rate", "d7_rate"],

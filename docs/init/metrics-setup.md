@@ -23,7 +23,9 @@ API 來源四個，分別寫進同名分頁：
 | `ig_posts` | `ig_posts` | media_id | 逐則貼文核心互動 + Reels 影片指標 |
 
 App Store / Play 也走 API：`store_ios`（ASC 銷售日報 + iTunes lookup 評分
-快照，見 §E）與 `store_android`（Play Console 報表 bucket，見 §F）。
+快照，見 §E）、`store_ios_pages`（ASC Analytics 報表的商品頁曝光/瀏覽，
+共用同一組 ASC 金鑰，見 §E3）與 `store_android`（Play Console 報表
+bucket，見 §F）。
 （2026-07-11 前用瀏覽器手抓進 `stores.csv`，該檔保留當歷史檔。）
 
 本專案實際使用的識別碼（方便對照）：
@@ -224,6 +226,27 @@ CSV 即唯一資料來源——補抓缺口時直接讀回 CSV 判斷。**無需
 - 評分/評論數沒有歷史：`avg_rating` / `ratings_count` 來自公開 iTunes
   lookup（**TW storefront**，與 ASC 全球數可能有出入）、`reviews_count`
   來自 ASC customerReviews 總數，都只在最新一天填快照。
+
+### E3. 商品頁曝光/瀏覽（`store_ios_pages`）— Analytics Reports API
+
+用同一組 ASC 金鑰（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_PATH`，
+不需要廠商編號），從「App Store Discovery and Engagement」報表加總每日
+**impressions（曝光）**與 **product_page_views（商品頁瀏覽）**，寫進
+`store_ios_pages.csv`。
+
+- Analytics 報表是**非同步**產生的：App 要先有一個 ONGOING 的
+  analytics report request，**首次執行會自動建立**（該次記 0 列），
+  Apple 約 1–2 天後才開始每天產出日報，之後每次跑會自動補到最新已
+  產生的那天。
+- ONGOING 只提供建立請求之後的資料，**更早的歷史補不回來**（想要一次
+  性歷史得另外用 ONE_TIME_SNAPSHOT 手動撈，程式不做）。長期沒跑的話
+  Apple 會停用 request（stoppedDueToInactivity），程式會自動刪掉重建，
+  但停用期間的天數同樣補不回來——建議跟其他來源一樣每天跑。
+- 報表按維度展開（裝置/來源/地區…），數字是全維度 Counts 加總；
+  Unique Counts 只在單一維度列內去重、加總會灌水，所以**不收集**
+  unique 數。
+- 若此來源回 **403**：金鑰的「銷售與報告」權限等級可能不夠存取
+  Analytics 報表，到 ASC 把金鑰權限提高（App 管理／Admin）再試。
 
 ## F. Play（`store_android`）— Console 報表 bucket
 
