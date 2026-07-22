@@ -52,3 +52,6 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+# 本地 UI preview 入口（不接後端，餵假資料看單一 widget 的渲染／手感）。
+# 命名為 lib/*_preview.dart 即自動忽略；用 fvm flutter run -t <檔案> 執行。
+lib/*_preview.dart
