@@ -194,6 +194,26 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - [ ] T1: 規劃可觀測性方案（VPS 上 backend + publisher 容器的 liveness、
   CPU / memory / disk 監控；含通知管道與工具選型），再拆實作 tasks
 
+## F19: 落地頁 sitemap SEO 修正 (epic: E1)
+
+- 狀態: 待辦
+- 來源: 2026-07-22 sitemap 體檢——結構正確（robots 指向、canonical URL、
+  place 頁自動收錄）但有兩個缺陷：(1) `/story/[date]` 每日故事頁雖為
+  index,follow 且每日累積，卻不在 sitemap、站內也無任何連結指向（孤兒頁，
+  Google 無途徑發現）；(2) 全 sitemap 缺 `lastModified`，只帶 Google 明文
+  忽略的 `changeFrequency`/`priority`
+- 註: lastmod 亂給比不給更糟（全部蓋 build 時間會被 Google 不信任）——
+  story 頁用故事日期、place 頁用內容實際最後編輯日
+- [ ] T1: `sitemap.ts` 改 async，用既有 `getPublishedStorySlugs()` 把
+  story 頁納入 sitemap
+- [ ] T2: sitemap 各頁補正確的 `lastModified`（story＝故事日期、place＝
+  內容編輯日）；`changeFrequency`/`priority` 可順手移除
+- [ ] T3: story 頁 metadata 補 zh/en hreflang `languages` alternates
+  （目前只有 canonical；同日 zh/en 故事互為翻譯才補，先確認）
+- 相關（不在本 feature 範圍）: place/story 頁的內部連結（首頁連最新故事、
+  景點頁互連、city hub 頁）是 sitemap 修完後真正影響排名的下一步，屬
+  landing page 語意地圖工作，另立 feature 處理
+
 ## F17: 探索頁面重新設計
 
 - 狀態: 待辦
