@@ -1,4 +1,5 @@
 import 'package:context_app/features/daily_story/providers.dart';
+import 'package:context_app/features/explore/domain/errors/location_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/domain/models/place_location.dart';
 import 'package:context_app/features/explore/presentation/screens/explore_screen.dart';
@@ -264,6 +265,104 @@ void main() {
         expect(find.byType(PlaceMapPin), findsNWidgets(2));
       },
     );
+
+    group('location gate', () {
+      testWidgets(
+        'given permission is denied, when the screen loads, '
+        'then the gate card shows the denied copy and the map cards rail is silent',
+        (tester) async {
+          await _givenExploreScreen(
+            tester,
+            locationService: FakeLocationService(
+              error: LocationError.permissionDenied,
+            ),
+          );
+
+          expect(
+            find.text('explore.location_gate.permission_denied.title'),
+            findsOneWidget,
+          );
+          // 底部卡片列不再吐原始錯誤字串。
+          expect(find.textContaining('common.error_prefix'), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'given permission is denied, when the action button is tapped and '
+        'permission is granted, then requestPermission runs and places reload',
+        (tester) async {
+          final fake = FakeLocationService(
+            error: LocationError.permissionDenied,
+            grantOnRequest: true,
+          );
+          await _givenExploreScreen(tester, locationService: fake);
+
+          await tester.tap(
+            find.text('explore.location_gate.permission_denied.action'),
+          );
+          await tester.pump(const Duration(milliseconds: 20));
+          await tester.pump(const Duration(milliseconds: 20));
+
+          expect(fake.requestPermissionCallCount, 1);
+        },
+      );
+
+      testWidgets(
+        'given permission is denied forever, when the action button is tapped, '
+        'then the app settings page is opened',
+        (tester) async {
+          final fake = FakeLocationService(
+            error: LocationError.permissionDeniedForever,
+          );
+          await _givenExploreScreen(tester, locationService: fake);
+
+          await tester.tap(
+            find.text('explore.location_gate.permission_denied_forever.action'),
+          );
+          await tester.pump(const Duration(milliseconds: 20));
+
+          expect(fake.openAppSettingsCallCount, 1);
+        },
+      );
+
+      testWidgets(
+        'given location services are disabled, when the action button is '
+        'tapped, then the location settings page is opened',
+        (tester) async {
+          final fake = FakeLocationService(
+            error: LocationError.serviceDisabled,
+          );
+          await _givenExploreScreen(tester, locationService: fake);
+
+          await tester.tap(
+            find.text('explore.location_gate.service_disabled.action'),
+          );
+          await tester.pump(const Duration(milliseconds: 20));
+
+          expect(fake.openLocationSettingsCallCount, 1);
+        },
+      );
+
+      testWidgets(
+        'given a non-location error, when the screen loads, '
+        'then no gate card is shown',
+        (tester) async {
+          await _givenExploreScreen(
+            tester,
+            locationService: FakeLocationService(error: Exception('boom')),
+          );
+
+          expect(
+            find.text('explore.location_gate.permission_denied.title'),
+            findsNothing,
+          );
+          expect(
+            find.text('explore.location_gate.service_disabled.title'),
+            findsNothing,
+          );
+        },
+      );
+    });
   });
 }
 
@@ -274,10 +373,14 @@ Future<void> _givenExploreScreen(
   InMemorySavedLocationsRepository? savedRepo,
   double maxDistance = 10000.0,
   PlaceLocation? userLocation,
+  FakeLocationService? locationService,
 }) async {
-  final fakeLocation = FakeLocationService(
-    location: userLocation ?? const PlaceLocation(latitude: 25.0, longitude: 121.0),
-  );
+  final fakeLocation =
+      locationService ??
+      FakeLocationService(
+        location:
+            userLocation ?? const PlaceLocation(latitude: 25.0, longitude: 121.0),
+      );
   await pumpScreen(
     tester,
     child: const ExploreScreen(),

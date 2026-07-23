@@ -145,6 +145,23 @@
     "map": {
       "unavailable": "Map is temporarily unavailable"
     },
+    "location_gate": {
+      "service_disabled": {
+        "title": "Location services are off",
+        "description": "Turn on your device's location services to explore the stories around you.",
+        "action": "Open location settings"
+      },
+      "permission_denied": {
+        "title": "Enable location to explore nearby stories",
+        "description": "Lorescape needs your location to surface the places worth hearing about right in front of you.",
+        "action": "Allow location"
+      },
+      "permission_denied_forever": {
+        "title": "Location permission is off",
+        "description": "Location permission is permanently denied. Open Settings to turn it back on, then return here.",
+        "action": "Open settings"
+      }
+    },
     "atlas_eyebrow": "{} places · Atlas",
     "view_place": "View place"
   },

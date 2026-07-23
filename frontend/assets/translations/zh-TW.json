@@ -145,6 +145,23 @@
     "map": {
       "unavailable": "地圖暫時無法載入"
     },
+    "location_gate": {
+      "service_disabled": {
+        "title": "定位服務已關閉",
+        "description": "開啟裝置的定位服務，才能探索你身邊的故事。",
+        "action": "開啟定位服務"
+      },
+      "permission_denied": {
+        "title": "開啟定位以探索附近故事",
+        "description": "Lorescape 需要你的位置，才能找出眼前值得一聽的景點。",
+        "action": "允許定位"
+      },
+      "permission_denied_forever": {
+        "title": "定位權限已關閉",
+        "description": "定位權限已被永久關閉，請到系統設定手動開啟後再回來。",
+        "action": "前往設定"
+      }
+    },
     "atlas_eyebrow": "{} 個地點 · Atlas",
     "view_place": "查看地點"
   },

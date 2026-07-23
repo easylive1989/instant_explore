@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/app/config/lorescape_tokens.dart';
+import 'package:context_app/features/explore/domain/errors/location_error.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/explore/presentation/widgets/lorescape_map.dart';
 import 'package:context_app/features/explore/presentation/widgets/place_map_pin.dart';
@@ -139,6 +140,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 : null,
           ),
           _MapCardsRail(state: placesState, onFocus: _focusOn),
+          // 型別化 object pattern：僅在 error 為 LocationError 時比對成功，
+          // 並把 error 綁成 LocationError（`when ... is` guard 不會提升型別）。
+          if (placesState case AsyncError(error: final LocationError error))
+            Positioned.fill(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: _LocationGateCard(error: error),
+                ),
+              ),
+            ),
           // FAB 疊在卡片列上方。設計稿把 FAB 放在 bottom:96，但那個位置正好
           // 被卡片列蓋住（實機上直接壓在卡片上），所以改成貼著卡片列往上放。
           Positioned(
@@ -729,8 +740,9 @@ class _MapCardsRail extends StatelessWidget {
         loading: () => const SizedBox.shrink(),
         // 錯誤（最常見是定位被拒）一定要說出來。地圖本身還是會顯示，若這裡
         // 也沉默，使用者只會看到一張沒有任何地點、也沒有任何說明的地圖。
-        error: (error, _) =>
-            _RailNotice(text: '${'common.error_prefix'.tr()}: $error'),
+        error: (error, _) => error is LocationError
+            ? const SizedBox.shrink()
+            : _RailNotice(text: '${'common.error_prefix'.tr()}: $error'),
         data: (places) {
           if (places.isEmpty) {
             return _RailNotice(text: 'explore.empty'.tr());
@@ -779,6 +791,87 @@ class _RailNotice extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
+      ),
+    );
+  }
+}
+
+/// 定位不可用時疊在地圖中央的引導卡：共用插圖＋依狀態的說明與按鈕。
+class _LocationGateCard extends ConsumerWidget {
+  const _LocationGateCard({required this.error});
+
+  final LocationError error;
+
+  /// i18n key 用的狀態名（對齊 assets/translations 的結構）。
+  String get _stateKey => switch (error) {
+    LocationError.serviceDisabled => 'service_disabled',
+    LocationError.permissionDenied => 'permission_denied',
+    LocationError.permissionDeniedForever => 'permission_denied_forever',
+  };
+
+  Future<void> _onAction(WidgetRef ref) async {
+    final service = ref.read(locationServiceProvider);
+    switch (error) {
+      case LocationError.permissionDenied:
+        final granted = await service.requestPermission();
+        if (granted) {
+          ref.read(placesControllerProvider.notifier).refresh();
+        }
+      case LocationError.permissionDeniedForever:
+        await service.openAppSettings();
+      case LocationError.serviceDisabled:
+        await service.openLocationSettings();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final base = 'explore.location_gate.$_stateKey';
+
+    return Container(
+      width: 320,
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      decoration: BoxDecoration(
+        color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+        border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
+        boxShadow: tokens?.e3 ?? _kCardShadow,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 插圖載入失敗時退回一段留白，讓測試與缺圖情境都不會 crash。
+          Image.asset(
+            'assets/images/location_gate.png',
+            width: 160,
+            height: 120,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const SizedBox(height: 120),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            '$base.title'.tr(),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$base.description'.tr(),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => _onAction(ref),
+              child: Text('$base.action'.tr()),
+            ),
+          ),
+        ],
       ),
     );
   }
