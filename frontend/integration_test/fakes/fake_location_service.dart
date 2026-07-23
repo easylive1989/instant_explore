@@ -30,4 +30,13 @@ class FakeLocationService implements LocationService {
 
     return customLocation ?? defaultLocation;
   }
+
+  @override
+  Future<bool> requestPermission() async => true;
+
+  @override
+  Future<void> openAppSettings() async {}
+
+  @override
+  Future<void> openLocationSettings() async {}
 }
