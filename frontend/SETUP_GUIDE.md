@@ -340,10 +340,11 @@ fvm flutter doctor -v
 **iOS** (`ios/Runner/Info.plist`):
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>需要存取您的位置以顯示附近的餐廳</string>
-<key>NSLocationAlwaysUsageDescription</key>
-<string>需要存取您的位置以提供更好的服務</string>
+<string>此應用程式需要存取您的位置來顯示附近的地點</string>
 ```
+
+App 只在前景使用定位，不需要 `NSLocationAlwaysAndWhenInUseUsageDescription`；
+geolocator 也是有 WhenInUse 這把 key 就只會請求 When In Use 權限。
 
 ---
 
