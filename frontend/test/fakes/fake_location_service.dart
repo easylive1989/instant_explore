@@ -14,6 +14,7 @@ class FakeLocationService implements LocationService {
   int requestPermissionCallCount = 0;
   int openAppSettingsCallCount = 0;
   int openLocationSettingsCallCount = 0;
+  int getCurrentLocationCallCount = 0;
 
   FakeLocationService({
     this.location = const PlaceLocation(latitude: 25.0, longitude: 121.0),
@@ -23,6 +24,7 @@ class FakeLocationService implements LocationService {
 
   @override
   Future<PlaceLocation> getCurrentLocation() async {
+    getCurrentLocationCallCount += 1;
     if (error != null) throw error!;
     return location;
   }

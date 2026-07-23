@@ -297,6 +297,7 @@ void main() {
           );
           await _givenExploreScreen(tester, locationService: fake);
 
+          final before = fake.getCurrentLocationCallCount;
           await tester.tap(
             find.text('explore.location_gate.permission_denied.action'),
           );
@@ -304,6 +305,31 @@ void main() {
           await tester.pump(const Duration(milliseconds: 20));
 
           expect(fake.requestPermissionCallCount, 1);
+          // grant=true 才會觸發 refresh，refresh 內部會再打一次 getCurrentLocation。
+          expect(fake.getCurrentLocationCallCount, before + 1);
+        },
+      );
+
+      testWidgets(
+        'given permission is denied, when the action button is tapped and '
+        'permission is not granted, then places do not reload',
+        (tester) async {
+          final fake = FakeLocationService(
+            error: LocationError.permissionDenied,
+            grantOnRequest: false,
+          );
+          await _givenExploreScreen(tester, locationService: fake);
+
+          final before = fake.getCurrentLocationCallCount;
+          await tester.tap(
+            find.text('explore.location_gate.permission_denied.action'),
+          );
+          await tester.pump(const Duration(milliseconds: 20));
+          await tester.pump(const Duration(milliseconds: 20));
+
+          expect(fake.requestPermissionCallCount, 1);
+          // grant=false 時不應觸發 refresh，getCurrentLocation 呼叫次數不應增加。
+          expect(fake.getCurrentLocationCallCount, before);
         },
       );
 
