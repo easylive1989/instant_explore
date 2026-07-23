@@ -33,6 +33,7 @@ from metrics.revenuecat import SOURCE as REVENUECAT_SOURCE
 from metrics.store import FileStore, MetricsStore
 from metrics.store_android import SOURCE as STORE_ANDROID_SOURCE
 from metrics.store_ios import SOURCE as STORE_IOS_SOURCE
+from metrics.store_ios_pages import SOURCE as STORE_IOS_PAGES_SOURCE
 
 DEFAULT_BACKFILL = 30
 DATA_DIR = REPO_ROOT / "data" / "metrics"
@@ -42,7 +43,7 @@ SOURCES: dict[str, DailySource] = {
     for source in (
         GSC_SOURCE, GA4_SOURCE, IG_SOURCE, IG_POSTS_SOURCE, NARRATION_SOURCE,
         RETENTION_SOURCE, REVENUECAT_SOURCE, STORE_ANDROID_SOURCE,
-        STORE_IOS_SOURCE,
+        STORE_IOS_SOURCE, STORE_IOS_PAGES_SOURCE,
     )
 }
 

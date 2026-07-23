@@ -15,8 +15,8 @@ DATA_DIR = REPO_ROOT / "data" / "metrics"
 
 # 走 shape_tab（日期時間序列）的來源；ig_posts 結構不同，另由 shape_ig_posts 處理
 _TABS = [
-    "gsc", "ga4", "ig", "revenuecat", "store_ios", "store_android",
-    "narration", "retention",
+    "gsc", "ga4", "ig", "revenuecat", "store_ios", "store_ios_pages",
+    "store_android", "narration", "retention",
 ]
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")

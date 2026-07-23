@@ -12,14 +12,14 @@ from __future__ import annotations
 import csv
 import gzip
 import io
-import time
 from datetime import date, timedelta
 
 import requests
 
+from metrics._asc import API as _ASC
+from metrics._asc import token as _token
 from metrics._common import DailySource, MetricsConfig
 
-_ASC = "https://api.appstoreconnect.apple.com/v1"
 _LOOKUP = "https://itunes.apple.com/lookup"
 
 # Lorescape's App Store numeric id (apps.apple.com/.../id6751904060).
@@ -30,22 +30,6 @@ LOOKUP_COUNTRY = "tw"
 _DAILY_HEADERS = [
     "date", "downloads", "avg_rating", "ratings_count", "reviews_count",
 ]
-
-
-def _token(cfg: MetricsConfig) -> str:
-    """Mint a short-lived ES256 JWT for the App Store Connect API."""
-    import jwt  # lazy: needs the `cryptography` extra
-
-    now = int(time.time())
-    with open(cfg.asc_key_path, encoding="utf-8") as f:
-        key = f.read()
-    return jwt.encode(
-        {"iss": cfg.asc_issuer_id, "iat": now, "exp": now + 600,
-         "aud": "appstoreconnect-v1"},
-        key,
-        algorithm="ES256",
-        headers={"kid": cfg.asc_key_id},
-    )
 
 
 def parse_sales_units(tsv: str, apple_id: str) -> int:
