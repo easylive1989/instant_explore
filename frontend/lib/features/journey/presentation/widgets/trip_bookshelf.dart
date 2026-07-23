@@ -217,12 +217,16 @@ class _Book extends StatelessWidget {
                       border: Border.all(color: const Color(0x57FFE8C4)),
                       borderRadius: BorderRadius.circular(2),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 10,
+                    // 書名一律畫在框線內：實機 iOS 上曾出現字影跑到框外、
+                    // 落在書脊左緣的鬼影字，這層 clip 是最後一道保險。
+                    child: ClipRect(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 10,
+                        ),
+                        child: _VerticalTitle(text: book.title),
                       ),
-                      child: _VerticalTitle(text: book.title),
                     ),
                   ),
                 ),
@@ -254,7 +258,11 @@ class _Book extends StatelessWidget {
 /// 直排書名。
 ///
 /// CJK 的 `writing-mode: vertical-rl` 是「字元直立堆疊」而不是把整行轉 90°，
-/// 所以這裡逐字換行，而不是用 `RotatedBox`——後者會讓中文躺著，完全不對。
+/// 所以這裡逐字堆疊，而不是用 `RotatedBox`——後者會讓中文躺著，完全不對。
+///
+/// 每個字各自是一個單行 `Text`，而不是把字用 `\n` 接成一個多行 paragraph：
+/// 多行版本在實機 iOS 上會有某一行的字影被畫到框線左外側（偏移量剛好等於一個
+/// 行高），變成書脊上的鬼影字。單行 paragraph 沒有跨行版面，結構上不可能發生。
 class _VerticalTitle extends StatelessWidget {
   const _VerticalTitle({required this.text});
 
@@ -263,6 +271,17 @@ class _VerticalTitle extends StatelessWidget {
   /// 對應設計稿 `max-height:132px`：超出的字捨去，避免長名字把書撐爛。
   static const int _maxCharacters = 7;
 
+  static const TextStyle _style = TextStyle(
+    fontSize: 15,
+    height: 1.15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+    color: _Book._gilt,
+    shadows: [
+      Shadow(color: Color(0x66000000), offset: Offset(0, 1), blurRadius: 1),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final characters = text.characters.toList();
@@ -270,19 +289,12 @@ class _VerticalTitle extends StatelessWidget {
         ? [...characters.take(_maxCharacters - 1), '…']
         : characters;
 
-    return Text(
-      visible.join('\n'),
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 15,
-        height: 1.15,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0,
-        color: _Book._gilt,
-        shadows: [
-          Shadow(color: Color(0x66000000), offset: Offset(0, 1), blurRadius: 1),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final character in visible)
+          Text(character, textAlign: TextAlign.center, style: _style),
+      ],
     );
   }
 }
