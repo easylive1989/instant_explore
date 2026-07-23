@@ -724,8 +724,10 @@ class _MapCardsRail extends StatelessWidget {
   /// 太矮會讓名稱那欄 overflow，測試會直接抓到。
   static const double railHeight = 116;
 
-  /// 卡片列距離螢幕底部的距離（不含 safe area）。tab bar 在下面。
-  static const double railBottomGap = 70;
+  /// 卡片列與 body 底緣的間距。shell 的 Scaffold 沒有 extendBody，body 底緣
+  /// 就是 bottom navigation bar 的頂端，所以這裡只留一點讓卡片陰影透氣的小
+  /// 間距、讓卡片貼著 nav bar，不需再墊一個 tab bar 的高度。
+  static const double railBottomGap = 12;
 
   @override
   Widget build(BuildContext context) {
