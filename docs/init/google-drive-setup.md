@@ -38,8 +38,8 @@
 
 ### 方法一：預設檔名與路徑（最推薦）
 將下載的 JSON 金鑰重新命名為 **`service-account.json`**，並放置在以下任一位置。腳本執行時會自動偵測並讀取：
-1. 專案根目錄：`instant_explore/service-account.json`
-2. 後端根目錄：`instant_explore/backend/service-account.json`
+1. 專案根目錄：`lorescape/service-account.json`
+2. 後端根目錄：`lorescape/backend/service-account.json`
 
 ### 方法二：環境變數設定
 您可以設定環境變數 `GOOGLE_APPLICATION_CREDENTIALS` 指向您的 JSON 金鑰絕對路徑：
@@ -104,7 +104,7 @@ python scripts/upload_to_drive.py <本地檔案路徑> --folder-id <Google_Drive
 
 ```text
 Initializing credentials...
-Loading default credentials from project root: /Users/paulwu/Documents/PLRepo/instant_explore/service-account.json
+Loading default credentials from project root: /Users/paulwu/Documents/PLRepo/lorescape/service-account.json
 Uploading file to Google Drive: test.txt
 Detected MIME type: text/plain
 Target Folder ID: 1aBcDeFgHiJkLmNoPqRsTuVwXyZ
@@ -121,5 +121,5 @@ Web View Link: https://drive.google.com/file/d/1Z2y3X4w5V6u7T.../view?usp=drives
 
 | 檔案/目錄 | 說明 |
 |------|------|
-| [upload_to_drive.py](file:///Users/paulwu/Documents/PLRepo/instant_explore/scripts/upload_to_drive.py) | Google Drive 檔案上傳的 Python 執行腳本。 |
+| [upload_to_drive.py](file:///Users/paulwu/Documents/PLRepo/lorescape/scripts/upload_to_drive.py) | Google Drive 檔案上傳的 Python 執行腳本。 |
 | `.gitignore` | 專案 Git 排除設定檔（內已包含 `service-account.json` 以防金鑰被提交）。 |

@@ -159,7 +159,7 @@ fvm flutter doctor
 在專案根目錄建立 `.env` 檔案：
 
 ```bash
-cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend
+cd /Users/paulwu/Documents/PLRepo/lorescape/frontend
 touch .env
 ```
 
@@ -221,7 +221,7 @@ import GoogleMaps
 ### 1. 安裝相依套件
 
 ```bash
-cd /Users/paulwu/Documents/PLRepo/instant_explore/frontend
+cd /Users/paulwu/Documents/PLRepo/lorescape/frontend
 fvm flutter pub get
 ```
 

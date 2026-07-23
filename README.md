@@ -67,8 +67,8 @@
 
 ```bash
 # 複製專案
-git clone https://github.com/easylive1989/instant_explore.git
-cd instant_explore/frontend
+git clone https://github.com/easylive1989/instant_explore.git lorescape
+cd lorescape/frontend
 
 # 安裝依賴
 fvm flutter pub get
@@ -111,7 +111,7 @@ fvm flutter run \
 ### 目錄結構
 
 ```
-instant_explore/
+lorescape/
 ├── frontend/                 # Flutter 應用程式
 │   ├── lib/
 │   │   ├── main.dart         # 應用程式入口

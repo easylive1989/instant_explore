@@ -324,9 +324,9 @@ Container(
 )
 
 // ✅ 重構後
-import 'package:instant_explore/core/constants/spacing_constants.dart';
-import 'package:instant_explore/core/constants/radius_constants.dart';
-import 'package:instant_explore/core/constants/font_constants.dart';
+import 'package:context_app/core/constants/spacing_constants.dart';
+import 'package:context_app/core/constants/radius_constants.dart';
+import 'package:context_app/core/constants/font_constants.dart';
 
 Container(
   padding: EdgeInsets.all(Spacing.lg),
@@ -345,8 +345,8 @@ Container(
 確保每個檔案都 import 了需要的常數：
 
 ```dart
-import 'package:instant_explore/core/constants/spacing_constants.dart';
-import 'package:instant_explore/core/constants/radius_constants.dart';
+import 'package:context_app/core/constants/spacing_constants.dart';
+import 'package:context_app/core/constants/radius_constants.dart';
 ```
 
 #### 步驟 4：驗證
@@ -394,8 +394,8 @@ Dart Analyzer: 無錯誤 ✅
 
 ```dart
 // 在任何檔案中使用
-import 'package:instant_explore/core/constants/spacing_constants.dart';
-import 'package:instant_explore/core/constants/radius_constants.dart';
+import 'package:context_app/core/constants/spacing_constants.dart';
+import 'package:context_app/core/constants/radius_constants.dart';
 
 Widget build(BuildContext context) {
   return Container(
