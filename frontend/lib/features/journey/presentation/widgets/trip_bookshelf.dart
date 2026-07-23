@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// 書架上的一本「旅程」。
@@ -22,6 +24,9 @@ class ShelfBook {
 ///
 /// 書本高度刻意不齊（190 / 204 / 218 循環），跟設計稿一樣，避免看起來像
 /// 一排等高的色塊。
+///
+/// 書放不下時不橫向捲動，而是往下長出新的一層書架——書櫃本來就是這樣長的，
+/// 而且整頁本來就能上下捲，使用者不必為了看見第 8 本書去發現一個橫滑手勢。
 class TripBookshelf extends StatelessWidget {
   const TripBookshelf({super.key, required this.books, required this.caption});
 
@@ -31,7 +36,15 @@ class TripBookshelf extends StatelessWidget {
   final String caption;
 
   static const List<double> _heights = [190, 204, 218];
-  static const double _rowMinHeight = 214;
+
+  /// 書與書之間的間距，也用來算一層放得下幾本。
+  static const double _gap = 11;
+
+  /// 凹槽背板到書之間的內距（左右各一）。
+  static const double _shelfPadding = 14;
+
+  /// 書排相對於背板再內縮的距離（左右各一）。
+  static const double _rowPadding = 12;
 
   @override
   Widget build(BuildContext context) {
@@ -53,64 +66,111 @@ class TripBookshelf extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 32),
-            child: Stack(
-              children: [
-                // 凹槽背板：比書矮一截（底部留 14），讓層板壓在前面。
-                Positioned.fill(
-                  bottom: 14,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFFEFE3CA), Color(0xFFE3D3B4)],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final perShelf = _booksPerShelf(constraints.maxWidth);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var start = 0; start < books.length; start += perShelf)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 32),
+                      child: _Shelf(
+                        books: books.sublist(
+                          start,
+                          math.min(start + perShelf, books.length),
+                        ),
+                        // 高度與配色沿用全域序號，換層時花色才會繼續變化。
+                        firstIndex: start,
                       ),
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(8),
-                        bottom: Radius.circular(3),
-                      ),
-                      border: Border.all(color: const Color(0x24977850)),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minHeight: _rowMinHeight,
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              for (var i = 0; i < books.length; i++) ...[
-                                if (i > 0) const SizedBox(width: 11),
-                                _Book(
-                                  book: books[i],
-                                  height: _heights[i % _heights.length],
-                                  palette: _BookPalette.values[i % 4],
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      const _ShelfPlank(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
         ],
       ),
+    );
+  }
+
+  /// 一層書架放得下幾本；至少放 1 本，免得寬度極窄時除出 0。
+  static int _booksPerShelf(double maxWidth) {
+    final available = maxWidth - (_shelfPadding + _rowPadding) * 2 + _gap;
+    return math.max(1, available ~/ (_Book._width + _gap));
+  }
+}
+
+/// 一層書架：凹槽背板 ＋ 一排書 ＋ 木層板。
+class _Shelf extends StatelessWidget {
+  const _Shelf({required this.books, required this.firstIndex});
+
+  final List<ShelfBook> books;
+
+  /// 這層第一本書在整個書架裡的序號，用來延續高度與配色的循環。
+  final int firstIndex;
+
+  static const double _rowMinHeight = 214;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // 凹槽背板：比書矮一截（底部留 14），讓層板壓在前面。
+        Positioned.fill(
+          bottom: 14,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFEFE3CA), Color(0xFFE3D3B4)],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(8),
+                bottom: Radius.circular(3),
+              ),
+              border: Border.all(color: const Color(0x24977850)),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TripBookshelf._shelfPadding,
+            TripBookshelf._shelfPadding,
+            TripBookshelf._shelfPadding,
+            0,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: _rowMinHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TripBookshelf._rowPadding,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (var i = 0; i < books.length; i++) ...[
+                        if (i > 0) const SizedBox(width: TripBookshelf._gap),
+                        _Book(
+                          book: books[i],
+                          height:
+                              TripBookshelf._heights[(firstIndex + i) %
+                                  TripBookshelf._heights.length],
+                          palette: _BookPalette.values[(firstIndex + i) % 4],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const _ShelfPlank(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
