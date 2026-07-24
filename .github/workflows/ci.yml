@@ -108,5 +108,10 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
+      # card/wander renderer 測試用 Playwright(Chromium) 把 HTML 渲染成圖，
+      # 需要下載 browser binary（uv sync 只裝 Python 套件）。
+      - name: Install Playwright browser
+        run: uv run playwright install --with-deps chromium
+
       - name: Run tests
         run: uv run python -m pytest
