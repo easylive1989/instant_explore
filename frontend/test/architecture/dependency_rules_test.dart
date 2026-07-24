@@ -9,6 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 ///    （providers.dart 得 re-export 精選元件作為公開介面）。
 /// 2. `app/` 僅得以 composition root 身分（router、shell）引用 features。
 /// 3. `core/`、`shared/` 不得引用 features。
+/// 4. feature 內部 `domain/` 不得引用任何 feature 的 `presentation/` 或
+///    `data/`（含自己 feature）——domain 必須是純業務規則，不依賴 UI 或
+///    基礎設施實作。
 ///
 /// `_pendingCrossFeature` / `_pendingAppFiles` 是已知技術債的暫時允許
 /// 清單，還債任務逐條移除；新增違規會讓本測試立即失敗。
@@ -22,6 +25,10 @@ const Set<String> _pendingCrossFeature = {};
 
 /// app/ 中已知違規檔案（整檔豁免）。已清零；不得新增。
 const Set<String> _pendingAppFiles = {};
+
+/// 已知 domain -> presentation/data 違規：「來源檔 -> import 目標」。
+/// 已清零；不得新增。
+const Set<String> _pendingDomainLayer = {};
 
 /// app/ 中允許引用 features 的 composition root（檔案或目錄前綴）。
 const List<String> _appCompositionRoots = [
@@ -91,6 +98,34 @@ void main() {
       }
     }
     expect(violations, isEmpty, reason: 'app/ 非 composition root 引用 features');
+  });
+
+  test('feature 內部 domain/ 不得引用 presentation/ 或 data/', () {
+    final violations = <String>[];
+    final stillPending = <String>{};
+    for (final file in _dartFiles('lib/features')) {
+      final path = _posix(file.path);
+      final segments = path.split('/');
+      // path: lib/features/<feature>/<layer>/...
+      final layer = segments.length > 3 ? segments[3] : '';
+      if (layer != 'domain') continue;
+      for (final target in _featureImports(file)) {
+        final targetLayer = target.split('/')[2];
+        if (targetLayer != 'presentation' && targetLayer != 'data') continue;
+        final key = '$path -> $target';
+        if (_pendingDomainLayer.contains(key)) {
+          stillPending.add(key);
+        } else {
+          violations.add(key);
+        }
+      }
+    }
+    expect(violations, isEmpty, reason: 'domain/ 反向引用 presentation/ 或 data/');
+    expect(
+      _pendingDomainLayer.difference(stillPending),
+      isEmpty,
+      reason: '允許清單中有已修復項目，請自 _pendingDomainLayer 移除',
+    );
   });
 
   test('core/ 與 shared/ 不得引用 features', () {

@@ -1,8 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:context_app/features/export/domain/models/pdf_entry_data.dart';
 import 'package:context_app/features/export/domain/models/pdf_export_result.dart';
+import 'package:context_app/features/export/domain/models/pdf_labels.dart';
 import 'package:context_app/features/export/domain/services/place_image_downloader.dart';
-import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
 import 'package:context_app/features/journey/domain/models/journey_item.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:context_app/features/trip/domain/repositories/trip_repository.dart';
@@ -55,6 +56,17 @@ typedef TempFileWriterFn =
 typedef PdfShareFn = Future<void> Function(String filePath);
 typedef TripItemsFetcher = Future<List<JourneyItem>> Function(String tripId);
 
+/// Renders the final PDF bytes. Injected so the domain service stays free of
+/// the presentation-layer `pdf`-package document builder.
+typedef PdfDocumentBuilderFn =
+    Future<Uint8List> Function({
+      required Trip trip,
+      required List<PdfEntryData> entries,
+      required Uint8List coverPngBytes,
+      required PdfFontPair fonts,
+      required PdfLabels labels,
+    });
+
 /// Orchestrates the Trip → PDF export pipeline.
 class TripPdfExportService {
   final TripRepository tripRepository;
@@ -62,6 +74,7 @@ class TripPdfExportService {
   final PlaceImageDownloader imageDownloader;
   final CoverRendererFn renderCover;
   final FontLoaderFn loadFonts;
+  final PdfDocumentBuilderFn buildDocument;
   final TempFileWriterFn writeToTemp;
   final PdfShareFn share;
 
@@ -71,6 +84,7 @@ class TripPdfExportService {
     required this.imageDownloader,
     required this.renderCover,
     required this.loadFonts,
+    required this.buildDocument,
     required this.writeToTemp,
     required this.share,
   });
@@ -115,16 +129,12 @@ class TripPdfExportService {
     );
 
     final fonts = await loadFonts();
-    final builder = TripPdfDocumentBuilder(
-      regularFont: fonts.regular,
-      boldFont: fonts.bold,
-      labels: strings.pdfLabels,
-    );
-
-    final pdfBytes = await builder.build(
+    final pdfBytes = await buildDocument(
       trip: trip,
       entries: entries,
       coverPngBytes: coverBytes,
+      fonts: fonts,
+      labels: strings.pdfLabels,
     );
 
     final filePath = await writeToTemp(pdfBytes, _fileName(trip));
