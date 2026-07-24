@@ -97,6 +97,11 @@ day is planned by IG data in
 1. **Read the calendar** and find the row for the target date
    (today, or `--date` when back-filling). Take its 「DB 標題」column —
    that value equals `daily_story_places.wikipedia_title_en` exactly.
+   **Also check the「開場 hook 指定」section for that date.** If the date is
+   listed there, note (a) its assigned 開場 hook and (b) any切入點 override in
+   that row — e.g.「金閣寺」instead of the whole Kyoto Prefecture, or a
+   「換備援」instruction. The hook drives Step 3's opening; honour the切入點
+   override when selecting/framing the place.
 2. **Select that place by title** (not FIFO):
 
    ```bash
@@ -148,6 +153,17 @@ Use `WebFetch` on the Wikipedia article for richer content when the
 intro extract is too short (< 300 chars).
 
 ### Step 3 — Claude writes the stories
+
+**If the calendar assigned a 開場 hook for this date (Step 1):** the zh-TW
+opening — first `paragraph` and the reel narration's first line — must be
+**derived from that hook** (the same visceral, curiosity-gap「人的道德戲劇／
+淒美傳說」sentence, adapted to fit the 起承合 arc; don't paste it verbatim if
+it reads awkwardly, but keep its conflict and hook). Mirror the intent in the
+en version. **When the hook is a legend, the narrative MUST include an honest
+turn later that flags it as legend** (as the布拉格 astronomical-clock story did:
+「後來學者考證……多半是後世的想像」) — this is what keeps a sensational hook
+compatible with Lorescape's Wikipedia-sourced brand and clear of marketing-gate's
+AI-slop / authenticity checks. If no hook is assigned for the date, write normally.
 
 Generate **both zh-TW and en** content following this contract:
 
@@ -393,6 +409,7 @@ needed.
 |---|---|
 | Draft location | `/tmp/lorescape_daily_story_draft.json` (no DB writes until publish) |
 | Place selection | **依 `marketing/content-calendar/_reels-place-calendar.md` 當日「DB 標題」選點**（by `wikipedia_title_en`）；素材不足走同類型備援池；日期超出 calendar 範圍才 fallback 到 FIFO `pick_next_place`（並提醒用 lorescape-reels-planner 重排） |
+| 開場 hook | 若 calendar「開場 hook 指定」區列有當日 hook：故事與 reel 旁白開場一律由該 hook 衍生（Step 3），並依該列切入點 override 選點；傳說型 hook 必須在敘事後段誠實點明是傳說 |
 | `story` column | Joined `card_paragraphs` (short), NOT the long `paragraphs` — matches the cron job |
 | Unsplash | ALWAYS runs; queries anchored on the place name; keep only genuine place shots |
 | Image pool | Wikipedia lead (if any) + kept Unsplash shots → cover + video reference |
