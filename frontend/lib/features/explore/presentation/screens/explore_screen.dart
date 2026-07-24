@@ -17,6 +17,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Fallback warm card shadow (design token `e1`) for contexts where the
 /// [LorescapeTokens] theme extension is not installed (e.g. widget tests).
@@ -209,6 +210,57 @@ class _RefreshButton extends StatelessWidget {
       background: colorScheme.primary,
       iconSize: 20,
       onPressed: onPressed,
+    );
+  }
+}
+
+/// 地圖資料來源標示，改用一顆 ⓘ 收在頂部 icon 列裡。
+///
+/// **這是授權義務，不是裝飾**：OpenFreeMap / OpenMapTiles / OpenStreetMap 的
+/// 出處必須讓看地圖的人合理可及（見 ADR 0005）。OSM attribution guideline
+/// 允許在小螢幕上把完整文字收進一個明顯、直接可點的入口——這顆 ⓘ 就是那個
+/// 入口，點擊彈出完整出處與版權連結，等同於原本角落那行文字的義務。
+class _AttributionButton extends StatelessWidget {
+  const _AttributionButton();
+
+  static final Uri _osmCopyright = Uri.parse(
+    'https://www.openstreetmap.org/copyright',
+  );
+
+  Future<void> _showAttribution(BuildContext context) {
+    return showAdaptiveAlertDialog<void>(
+      context: context,
+      title: 'explore.map.attribution_title'.tr(),
+      content: 'explore.map.attribution_body'.tr(),
+      actions: [
+        AdaptiveDialogAction(
+          label: 'explore.map.attribution_source'.tr(),
+          onPressed: () {
+            Navigator.of(context).pop();
+            launchUrl(_osmCopyright, mode: LaunchMode.externalApplication);
+          },
+        ),
+        AdaptiveDialogAction(
+          label: 'explore.map.attribution_close'.tr(),
+          isDefault: true,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: 'explore.map.attribution_tooltip'.tr(),
+      child: _CircleButton(
+        icon: Icons.info_outline,
+        iconColor: colorScheme.onSurface,
+        background: colorScheme.surfaceContainerHighest,
+        iconSize: 22,
+        onPressed: () => _showAttribution(context),
+      ),
     );
   }
 }
@@ -631,6 +683,8 @@ class _MapTopOverlay extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(child: _Masthead(placeCount: placeCount)),
+                    const _AttributionButton(),
+                    const SizedBox(width: 8),
                     _FilterButton(
                       isActive: isFilterActive,
                       onPressed: onFilter,

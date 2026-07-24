@@ -143,7 +143,12 @@
       "reset": "重設為預設值"
     },
     "map": {
-      "unavailable": "地圖暫時無法載入"
+      "unavailable": "地圖暫時無法載入",
+      "attribution_tooltip": "地圖資料來源",
+      "attribution_title": "地圖資料來源",
+      "attribution_body": "OpenFreeMap © OpenMapTiles\nData from OpenStreetMap",
+      "attribution_source": "檢視 OpenStreetMap 版權",
+      "attribution_close": "關閉"
     },
     "location_gate": {
       "service_disabled": {

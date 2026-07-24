@@ -35,6 +35,22 @@ void main() {
     );
 
     testWidgets(
+      'given the map is shown, when the user taps the attribution info '
+      'button, then the map data sources are shown',
+      (tester) async {
+        await _givenExploreScreen(tester);
+
+        await tester.tap(find.byIcon(Icons.info_outline));
+        await tester.pumpAndSettle();
+
+        // 出處是 OpenFreeMap / OSM 的授權義務（見 ADR 0005）；改收在 ⓘ 後面。
+        expect(find.text('explore.map.attribution_title'), findsOneWidget);
+        expect(find.text('explore.map.attribution_body'), findsOneWidget);
+        expect(find.text('explore.map.attribution_source'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'given nearby places are returned, when the screen loads, '
       'then a place card is rendered for each place',
       (tester) async {

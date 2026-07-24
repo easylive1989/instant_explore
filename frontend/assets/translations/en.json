@@ -143,7 +143,12 @@
       "reset": "Reset to default"
     },
     "map": {
-      "unavailable": "Map is temporarily unavailable"
+      "unavailable": "Map is temporarily unavailable",
+      "attribution_tooltip": "Map data sources",
+      "attribution_title": "Map data sources",
+      "attribution_body": "OpenFreeMap © OpenMapTiles\nData from OpenStreetMap",
+      "attribution_source": "View OpenStreetMap copyright",
+      "attribution_close": "Close"
     },
     "location_gate": {
       "service_disabled": {
