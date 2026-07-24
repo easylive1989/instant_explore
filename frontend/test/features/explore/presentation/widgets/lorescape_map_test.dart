@@ -42,8 +42,7 @@ void main() {
   testWidgets(
     'given the map style loaded, '
     'when the map is shown, '
-    'then the map renders, the required attribution is visible '
-    'and overlay children are placed on top',
+    'then the map renders and overlay children are placed on top',
     (tester) async {
       await _givenLorescapeMap(
         tester,
@@ -52,12 +51,9 @@ void main() {
       );
 
       expect(find.byType(FlutterMap), findsOneWidget);
-      // Attribution 是 OpenFreeMap 的授權義務（見 ADR 0005），不得移除。
-      expect(
-        find.text('OpenFreeMap © OpenMapTiles Data from OpenStreetMap'),
-        findsOneWidget,
-      );
       expect(find.byKey(const Key('overlay')), findsOneWidget);
+      // Attribution 從地圖角標移到探索頁頂部的 ⓘ 按鈕（見 ADR 0005 與
+      // explore_screen_test）；地圖本身不再直接畫出出處文字。
     },
   );
 }

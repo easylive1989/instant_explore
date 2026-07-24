@@ -146,7 +146,6 @@ class _LorescapeMapState extends ConsumerState<LorescapeMap> {
                     as dynamic,
           ),
           ...widget.children,
-          const _AttributionBadge(),
         ],
       ),
     );
@@ -177,37 +176,6 @@ class _MapUnavailable extends StatelessWidget {
                   material.Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// OpenFreeMap / OpenMapTiles / OpenStreetMap 的出處標示。
-///
-/// **這是授權義務，不是裝飾**：OpenFreeMap 要求顯示
-/// `OpenFreeMap © OpenMapTiles Data from OpenStreetMap`，不得移除。
-/// 樣式對應設計稿的 `.map-el .leaflet-control-attribution`。
-class _AttributionBadge extends StatelessWidget {
-  const _AttributionBadge();
-
-  static const String _text =
-      'OpenFreeMap © OpenMapTiles Data from OpenStreetMap';
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = material.Theme.of(context).extension<LorescapeTokens>();
-    final paper = tokens?.paper ?? const Color(0xFFF7F1E6);
-    final ink3 = tokens?.ink3 ?? const Color(0xFF918471);
-
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: Container(
-        color: paper.withValues(alpha: 0.7),
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        child: Text(
-          _text,
-          style: TextStyle(fontSize: 10, height: 1.2, color: ink3),
         ),
       ),
     );
