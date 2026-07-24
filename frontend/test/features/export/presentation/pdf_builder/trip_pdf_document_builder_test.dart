@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:context_app/features/export/domain/models/pdf_entry_data.dart';
+import 'package:context_app/features/export/domain/models/pdf_labels.dart';
 import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
 import 'package:context_app/features/trip/domain/models/trip.dart';
 import 'package:flutter_test/flutter_test.dart';

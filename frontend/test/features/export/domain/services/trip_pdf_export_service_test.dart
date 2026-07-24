@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:context_app/features/export/domain/models/pdf_export_result.dart';
+import 'package:context_app/features/export/domain/models/pdf_labels.dart';
 import 'package:context_app/features/export/domain/services/place_image_downloader.dart';
 import 'package:context_app/features/export/domain/services/trip_pdf_export_service.dart';
 import 'package:context_app/features/export/presentation/pdf_builder/trip_pdf_document_builder.dart';
@@ -103,6 +104,17 @@ void main() {
         regular: pw.Font.helvetica(),
         bold: pw.Font.helveticaBold(),
       ),
+      buildDocument: ({
+        required trip,
+        required entries,
+        required coverPngBytes,
+        required fonts,
+        required labels,
+      }) => TripPdfDocumentBuilder(
+        regularFont: fonts.regular,
+        boldFont: fonts.bold,
+        labels: labels,
+      ).build(trip: trip, entries: entries, coverPngBytes: coverPngBytes),
       writeToTemp: (bytes, fileName) async {
         capturedPdfBytes = bytes;
         capturedFileName = fileName;
