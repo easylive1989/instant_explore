@@ -20,6 +20,7 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 
 from lorescape_backend.config import Config
+from lorescape_backend.logging_config import setup_logging
 from lorescape_backend.narration.routes import router as narration_router
 from lorescape_backend.subscriptions.reconcile import run_reconcile_job
 from lorescape_backend.subscriptions.routes import router as subscriptions_router
@@ -53,6 +54,7 @@ def _register_jobs(scheduler: BackgroundScheduler, config: Config) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
     config = Config.from_env()
     scheduler = BackgroundScheduler(timezone=SCHEDULER_TIMEZONE)
     _register_jobs(scheduler, config)
