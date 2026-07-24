@@ -19,12 +19,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Fallback warm card shadow (design token `e1`) for contexts where the
-/// [LorescapeTokens] theme extension is not installed (e.g. widget tests).
-const List<BoxShadow> _kCardShadow = [
-  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
-];
-
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
 
@@ -641,8 +635,7 @@ class _MapTopOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final paper = tokens?.paper ?? const Color(0xFFF7F1E6);
+    final paper = context.tokens.paper;
     final topPadding = MediaQuery.paddingOf(context).top;
 
     return Positioned(
@@ -837,9 +830,9 @@ class _RailNotice extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         decoration: BoxDecoration(
           color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          borderRadius: BorderRadius.circular(context.tokens.rLg),
           border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
-          boxShadow: tokens?.e2 ?? _kCardShadow,
+          boxShadow: context.tokens.e2,
         ),
         child: Text(
           text,
@@ -892,9 +885,9 @@ class _LocationGateCard extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
         color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+        borderRadius: BorderRadius.circular(context.tokens.rLg),
         border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
-        boxShadow: tokens?.e3 ?? _kCardShadow,
+        boxShadow: context.tokens.e3,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -946,7 +939,7 @@ class _MapCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tokens = Theme.of(context).extension<LorescapeTokens>();
     final colorScheme = Theme.of(context).colorScheme;
-    final radius = tokens?.rLg ?? 16;
+    final radius = context.tokens.rLg;
     final savedLocations = ref.watch(savedLocationsProvider);
     final isSaved =
         savedLocations.valueOrNull?.any((e) => e.placeId == place.id) ?? false;
@@ -960,7 +953,7 @@ class _MapCard extends ConsumerWidget {
           color: tokens?.paperRaised ?? colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
-          boxShadow: tokens?.e3 ?? _kCardShadow,
+          boxShadow: context.tokens.e3,
         ),
         child: Row(
           children: [
@@ -975,10 +968,9 @@ class _MapCard extends ConsumerWidget {
                   // 紙色底盤：書籤壓在照片上時，深色圖示在深色照片上幾乎看不見。
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: (tokens?.paperRaised ?? const Color(0xFFFDFAF3))
-                          .withValues(alpha: 0.92),
+                      color: context.tokens.paperRaised.withValues(alpha: 0.92),
                       shape: BoxShape.circle,
-                      boxShadow: tokens?.e1 ?? _kCardShadow,
+                      boxShadow: context.tokens.e1,
                     ),
                     child: _BookmarkButton(
                       isSaved: isSaved,

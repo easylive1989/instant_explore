@@ -15,15 +15,13 @@ import 'package:go_router/go_router.dart';
 /// Opens the saved-locations list as a Field Journal bottom sheet.
 Future<void> showSavedLocationsSheet(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
-  final tokens = Theme.of(context).extension<LorescapeTokens>();
+  final tokens = context.tokens;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens?.rXl ?? 22),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(tokens.rXl)),
     ),
     builder: (sheetContext) {
       final height = MediaQuery.of(sheetContext).size.height * 0.75;

@@ -19,9 +19,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Fallback warm card shadow (design token `e1`).
-const List<BoxShadow> _kCardShadow = [
-  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
-];
 
 /// 「挑一段歷史故事」選擇頁。
 ///
@@ -427,7 +424,7 @@ class _HookInsufficientSourceState extends StatelessWidget {
     final ink2 = tokens?.ink2 ?? cs.onSurfaceVariant;
     final line = tokens?.line ?? cs.outlineVariant;
     final paperRaised = tokens?.paperRaised ?? cs.surface;
-    final radius = BorderRadius.circular(tokens?.rLg ?? 16);
+    final radius = BorderRadius.circular(context.tokens.rLg);
 
     return Container(
       decoration: BoxDecoration(
@@ -546,13 +543,13 @@ class StoryHookCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: cs.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          borderRadius: BorderRadius.circular(context.tokens.rLg),
           border: Border.fromBorderSide(BorderSide(color: cs.outlineVariant)),
-          boxShadow: tokens?.e1 ?? _kCardShadow,
+          boxShadow: context.tokens.e1,
         ),
         child: Material(
           type: MaterialType.transparency,
-          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          borderRadius: BorderRadius.circular(context.tokens.rLg),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,

@@ -181,8 +181,8 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
     final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final clayTint = tokens?.clayTint ?? const Color(0xFFF7E8DD);
+    final tokens = context.tokens;
+    final clayTint = tokens.clayTint;
 
     return GestureDetector(
       onTap: _navigateToPlayer,
@@ -308,17 +308,9 @@ class _TimelineEntryState extends ConsumerState<TimelineEntry> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+                    borderRadius: BorderRadius.circular(tokens.rLg),
                     border: Border.all(color: colorScheme.outlineVariant),
-                    boxShadow:
-                        tokens?.e1 ??
-                        const [
-                          BoxShadow(
-                            color: Color(0x0F281E12),
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                          ),
-                        ],
+                    boxShadow: tokens.e1,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
