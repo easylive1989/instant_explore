@@ -64,7 +64,7 @@ class _OnboardingWelcomeScreenState
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final dark = _isDark(_step);
 
     return Scaffold(
@@ -104,7 +104,7 @@ class _WelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -221,7 +221,7 @@ class _ValueStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -318,7 +318,7 @@ class _Pillar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(15),
@@ -417,7 +417,7 @@ class _CategoriesStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -505,7 +505,7 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     return ClipRRect(
       borderRadius: BorderRadius.circular(palette.rLg),
       child: Stack(
@@ -600,7 +600,7 @@ class _ObTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final muted = dark
         ? palette.onDark.withValues(alpha: 0.22)
         : palette.lineStrong.withValues(alpha: 0.5);
@@ -675,7 +675,7 @@ class _ObDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     final isLast = step == 2;
 
     return Positioned(
@@ -733,7 +733,7 @@ class _FinishOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _Palette.of(context);
+    final palette = context.tokens;
     return Positioned.fill(
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -796,79 +796,6 @@ class _FinishOverlay extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ============================================================================
-// Palette — resolves Field Journal tokens with fallbacks for plain themes
-// ============================================================================
-
-class _Palette {
-  const _Palette({
-    required this.paper,
-    required this.paperRaised,
-    required this.paperSunk,
-    required this.line,
-    required this.lineStrong,
-    required this.ink,
-    required this.ink2,
-    required this.ink3,
-    required this.inkBg,
-    required this.onDark,
-    required this.onDark2,
-    required this.clay,
-    required this.clayDeep,
-    required this.clayTint,
-    required this.rLg,
-    required this.e1,
-  });
-
-  final Color paper;
-  final Color paperRaised;
-  final Color paperSunk;
-  final Color line;
-  final Color lineStrong;
-  final Color ink;
-  final Color ink2;
-  final Color ink3;
-  final Color inkBg;
-  final Color onDark;
-  final Color onDark2;
-  final Color clay;
-  final Color clayDeep;
-  final Color clayTint;
-  final double rLg;
-  final List<BoxShadow> e1;
-
-  factory _Palette.of(BuildContext context) {
-    final t = Theme.of(context).extension<LorescapeTokens>();
-    final cs = Theme.of(context).colorScheme;
-    return _Palette(
-      paper: t?.paper ?? const Color(0xFFF7F1E6),
-      paperRaised: t?.paperRaised ?? const Color(0xFFFDFAF3),
-      paperSunk: t?.paperSunk ?? const Color(0xFFECE3D3),
-      line: t?.line ?? const Color(0xFFE4DAC8),
-      lineStrong: t?.lineStrong ?? const Color(0xFFCDBFA6),
-      ink: t?.ink ?? const Color(0xFF221C14),
-      ink2: t?.ink2 ?? const Color(0xFF5E5341),
-      ink3: t?.ink3 ?? const Color(0xFF918471),
-      inkBg: t?.inkBg ?? const Color(0xFF1B1611),
-      onDark: t?.onDark ?? const Color(0xFFF7F1E6),
-      onDark2: t?.onDark2 ?? const Color(0xFFC3B7A4),
-      clay: t?.clay ?? cs.primary,
-      clayDeep: t?.clayDeep ?? const Color(0xFF97442A),
-      clayTint: t?.clayTint ?? const Color(0xFFF7E8DD),
-      rLg: t?.rLg ?? 16,
-      e1:
-          t?.e1 ??
-          const [
-            BoxShadow(
-              color: Color(0x0F281E12),
-              offset: Offset(0, 1),
-              blurRadius: 2,
-            ),
-          ],
     );
   }
 }

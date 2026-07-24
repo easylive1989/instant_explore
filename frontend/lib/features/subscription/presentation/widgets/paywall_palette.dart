@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 /// Resolved colours for the immersive (always-dark) Field Journal paywall.
 ///
 /// The paywall stays dark regardless of the app's light theme, so its colours
-/// come from [LorescapeTokens] (or const fallbacks when the extension is
-/// absent, e.g. widget tests). The accent still follows the active brand
-/// accent via `tokens.clay`.
+/// are a projection of [LorescapeTokens] via [BuildContext.tokens], which
+/// supplies [LorescapeTokens.fallback] when the extension is absent (e.g.
+/// widget tests). The accent still follows the active brand accent via
+/// `tokens.clay`. [lineDark] is paywall-specific and not a token.
 class PaywallPalette {
   const PaywallPalette({
     required this.inkBg,
@@ -35,16 +36,16 @@ class PaywallPalette {
   Color get badgeSurface => onDark.withValues(alpha: 0.12);
 
   factory PaywallPalette.of(BuildContext context) {
-    final t = Theme.of(context).extension<LorescapeTokens>();
+    final t = context.tokens;
     return PaywallPalette(
-      inkBg: t?.inkBg ?? const Color(0xFF1B1611),
-      clay: t?.clay ?? const Color(0xFFBC5E3E),
-      clayDeep: t?.clayDeep ?? const Color(0xFF97442A),
-      onDark: t?.onDark ?? const Color(0xFFF7F1E6),
-      onDark2: t?.onDark2 ?? const Color(0xFFC3B7A4),
-      onDark3: t?.onDark3 ?? const Color(0xFF8C8170),
+      inkBg: t.inkBg,
+      clay: t.clay,
+      clayDeep: t.clayDeep,
+      onDark: t.onDark,
+      onDark2: t.onDark2,
+      onDark3: t.onDark3,
       lineDark: const Color(0x1FF7F1E6),
-      rLg: t?.rLg ?? 16,
+      rLg: t.rLg,
     );
   }
 }

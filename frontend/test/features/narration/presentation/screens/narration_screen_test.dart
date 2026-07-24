@@ -1,3 +1,4 @@
+import 'package:context_app/app/config/lorescape_tokens.dart';
 import 'package:context_app/features/explore/domain/models/place.dart';
 import 'package:context_app/features/narration/domain/models/narration_content.dart';
 import 'package:context_app/features/narration/presentation/screens/narration_screen.dart';
@@ -64,8 +65,16 @@ void main() {
         );
 
         final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-        expect(scaffold.backgroundColor, equals(const Color(0xFFEFE2CB)));
-        expect(scaffold.backgroundColor, isNot(const Color(0xFF1B1611)));
+        // Without the theme extension the reader falls back to the canonical
+        // warm reading surface (paper), never the dark night chrome.
+        expect(
+          scaffold.backgroundColor,
+          equals(LorescapeTokens.fallback.readBg),
+        );
+        expect(
+          scaffold.backgroundColor,
+          isNot(LorescapeTokens.fallback.inkBg),
+        );
       },
     );
 
