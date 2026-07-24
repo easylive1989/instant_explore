@@ -21,6 +21,7 @@ Lorescape 是 AI 景點故事導覽 App：為使用者眼前的景點生成以 W
 | `BACKLOG.md` | 專案工作項：features（F1…）與 tasks（T1…）；epic 見檔內「Epic」段 |
 | `SCHEDULE.md` | 例行工作行程表（每日／每週一／每月 1 號）；開工用 `/lorescape-scheduler` 讀取執行，dashboard 亦解析顯示 |
 | `MARKETING.md` | 行銷設定：ICP、value prop、定價、品牌語氣、競品、品牌定位框架 |
+| `ISSUES.md` | 事故紀錄：只記「發生什麼、原因、當下怎麼處理」，不預先規劃修法；供日後判斷某類事故是否頻繁到該根治。新事故往上加 |
 
 行銷與每日故事的操作流程走各個 lorescape-* 與 marketing-* skills，不在此贅述。
 
