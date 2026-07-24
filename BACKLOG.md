@@ -11,7 +11,7 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
 - 展開: 下方標 `(epic: E1)` 的 features
 - [ ] 2026-08-04 回顧：檢視補流量主線是否推動流量/下載/留存指標，再決定是否解除暫緩、回補產品側投入（原公司決策設定的檢核點）
 
-## ⚠️ 待部署（程式已在 repo，尚未上生產；更新於 2026-07-21）
+## ⚠️ 待部署（程式已在 repo，尚未上生產；更新於 2026-07-24）
 
 以下改動已 commit + push 到 master，但**尚未部署到生產**，使用者尚看不到：
 
@@ -25,6 +25,11 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     narration 事件都收不到**，所以 GA4 要等新版本有安裝量後才會開始有資料
   - F13 T1b `FirebaseAnalyticsObserver`（2026-07-21）：同上，`screen_view`
     在新版本上架前仍會是 `(not set)`
+  - F18 T7 書架多層堆疊 ＋ T8 書脊鬼影字修復（2026-07-24，PR #95）。
+    ⚠️ 鬼影字修法**尚未實機驗證**（本地重現不出來，見 F18 T8）
+  - F17 T8 地圖出處改頂部 ⓘ 按鈕（2026-07-24，PR #96）
+  - 移除用不到的 iOS `NSLocationAlwaysAndWhenInUseUsageDescription`
+    （2026-07-24，PR #95）——App 只用前景定位，Always key 從未被用到
 - 已是生產狀態、不需部署：App Store / Google Play 的試用設定、RevenueCat offering
 
 ## F1: IG 導流 CTA (epic: E1)
@@ -464,6 +469,12 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     都要用**——不 override 樣式，`FlutterMap` 根本不會建出來；不跑完
     `vector_map_tiles` 排的 3 秒 timer，測試會以「Timer 尚未結束」失敗，
     而且訊息完全看不出跟地圖有關
+- [x] T8: 地圖出處從右下角文字角標改為頂部 icon 列的 ⓘ 按鈕（2026-07-24,
+  PR #96）。使用者要求把出處從地圖移進 icon 列。出處是 OpenFreeMap / OSM 的
+  授權義務不得移除，但 OSM attribution guideline 允許小螢幕收進「明顯且直接
+  可及」的入口——ⓘ 點擊彈出完整出處＋openstreetmap.org/copyright 連結。從
+  `LorescapeMap` 移到探索頁浮層（`LorescapeMap` 目前僅此一處使用）。ADR 0005
+  attribution 段同步更新
 
 ## F18: 歷程頁面重新設計
 
@@ -506,3 +517,49 @@ epic 承接自原公司層 backlog；目前只有 E1（見下方「Epic」）。
     若之後想找特定記錄，需要重新設計入口（例如書架上加搜尋，或旅程內搜尋）
 - 驗證: `fvm flutter analyze --fatal-infos` 乾淨、full suite 535 passed
 
+### F18 後續調整（2026-07-24）
+
+- [x] T7: 書架改多層堆疊，取代橫向捲動（2026-07-24, PR #95）。使用者反映書多
+  時要橫滑才看得到後面的書、發現成本高。改成一層放不下就往下長出新的一層
+  書架（各自凹槽背板 ＋ 木層板），整頁本來就能上下捲。一層放幾本依可用寬度
+  算（`LayoutBuilder`，390pt 下 4 本）；書高與配色沿用全域序號，換層時花色
+  繼續變化。新增 `trip_bookshelf_test.dart`（多層換行 / 靠同一左邊界 / 無橫向
+  Scrollable / caption）
+- [x] T8: 修書脊上的鬼影字（2026-07-24, PR #95）。實機 iOS 上書名某一行會有
+  一份「字影」被畫到框線左外側，偏移量剛好等於一個行高（15 × 1.15 = 17.25px）、
+  往下 1px、色 `#66000000`——即 `TextStyle.shadow` 那層。T2 的「書名逐字換行」
+  原本是把字用 `\n` 接成一個多行 paragraph；改成逐字各一個單行 `Text` 堆在
+  `Column`（單行 paragraph 沒有跨行版面），書名外框再加 `ClipRect` 保險
+  - ⚠️ **尚未實機驗證**：本地重現不出鬼影（測試走 Skia CPU raster、字型也非
+    實機 Noto Sans TC）。改前改後渲染逐像素 diff 為 None，是純結構重構。若下次
+    TestFlight 仍有鬼影，下一步＝拿掉 `_VerticalTitle` 的 `shadows`
+
+
+## F23: 定位權限 pre-permission 說明卡
+
+- 狀態: 待辦
+- 來源: 使用者詢問「一打開 app 會要求權限嗎」引出（2026-07-24）
+- 背景: 目前使用者第一次進「探索」分頁時，`PlacesController.build()` →
+  `GeolocatorService.getCurrentLocation()` 會**直接彈系統權限框**，沒有前置
+  說明。系統框只有一次機會（iOS 拒絕過 `requestPermission()` 不再彈；Android
+  11+ 拒絕兩次同理），拒絕後只能靠 `_LocationGateCard` 引導去系統設定，回收
+  率低。加一張自製說明卡在系統框之前，讓沒意願的人先被篩掉、不消耗那次機會
+- 限制: geolocator 的 `LocationPermission` 沒有 `notDetermined`，Android 上
+  「沒問過」與「拒絕過一次」都回 `denied`，無法區分——所以做法是「只要不是
+  已授權也不是 deniedForever，就先顯示卡片，按鈕才觸發系統框」
+- 註: 這張卡與現有的 `_LocationGateCard`（`explore_screen.dart`）是同一張卡的
+  鏡像——那張是「被拒絕後」顯示，這張是「還沒問過時」顯示
+- [ ] T1: 擴充 explore widget test，鎖住「進探索分頁不自動彈框」——用
+  `FakeLocationService` 加計數器，斷言進入時 `requestPermission()` 次數為 0、
+  卡片有出現；點按鈕後才變 1 且授權成功觸發 `refresh()`（先寫成紅燈，TDD）
+- [ ] T2: 移除 `GeolocatorService` 的自動請求——`getCurrentLocation()` 遇
+  `denied` 直接丟 `LocationError.permissionDenied`，不再自動 `requestPermission()`。
+  對齊 `test/integration/permission_denial_flow_test.dart`
+- [ ] T3: 改寫 `explore.map`／`location_gate` 的 `permission_denied` 文案為
+  事前邀請語氣，補隱私保證句（只在使用 App 時取用、不背景追蹤）。zh-TW / en
+- [ ] T4（選配）: 卡片加次要動作「先看看就好」，收起卡片、該 session 不再顯示
+  （UI-only provider 存旗標）
+- [ ] T5（選配）: 授權漏斗埋點——卡片曝光 / 按下允許 / 授權結果三事件接
+  Firebase Analytics，之後才有數據判斷是否提升授權率
+- [ ] T6: 實機手動驗收——iOS / Android 各跑全新安裝→卡片先出現→按鈕才彈系統
+  框；iOS「允許一次」重開 App 行為；Android 拒絕兩次後卡片切「前往設定」
