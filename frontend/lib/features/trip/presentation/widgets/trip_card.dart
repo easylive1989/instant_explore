@@ -4,10 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const List<BoxShadow> _kTileShadow = [
-  BoxShadow(color: Color(0x17281E12), offset: Offset(0, 6), blurRadius: 18),
-];
-
 /// 顯示單一 Trip 的卡片（Field Journal clay 磚）。
 class TripCard extends StatelessWidget {
   final Trip trip;
@@ -30,9 +26,9 @@ class TripCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).extension<LorescapeTokens>();
     final clay = tokens?.clay ?? colorScheme.primary;
-    final clayDeep = tokens?.clayDeep ?? const Color(0xFF97442A);
+    final clayDeep = context.tokens.clayDeep;
     const onClay = Color(0xFFFBEFE7);
-    final radius = tokens?.rXl ?? 22;
+    final radius = context.tokens.rXl;
 
     return Material(
       color: Colors.transparent,
@@ -51,7 +47,7 @@ class TripCard extends StatelessWidget {
             border: isCurrent
                 ? Border.all(color: onClay.withValues(alpha: 0.7), width: 2)
                 : null,
-            boxShadow: tokens?.e2 ?? _kTileShadow,
+            boxShadow: context.tokens.e2,
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -153,8 +149,7 @@ class UncategorizedTripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final radius = tokens?.rXl ?? 22;
+    final radius = context.tokens.rXl;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -165,7 +160,7 @@ class UncategorizedTripCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
             color: colorScheme.surfaceContainerLow,
             border: Border.all(color: colorScheme.outlineVariant),
-            boxShadow: tokens?.e1 ?? _kTileShadow,
+            boxShadow: context.tokens.e1,
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),

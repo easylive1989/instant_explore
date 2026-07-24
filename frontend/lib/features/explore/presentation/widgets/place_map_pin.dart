@@ -21,18 +21,17 @@ class PlaceMapPin extends StatelessWidget {
   static const Color _urban = Color(0xFF6A4A2F);
 
   /// 設計稿只替 urban 與 heritage 指定了顏色，其餘沿用 clay。
-  Color _fill(LorescapeTokens? tokens) {
-    final clay = tokens?.clay ?? const Color(0xFFBC5E3E);
+  Color _fill(LorescapeTokens tokens) {
     return switch (category) {
       JournalCategory.urban => _urban,
-      JournalCategory.heritage => tokens?.clayDeep ?? const Color(0xFF97442A),
-      _ => clay,
+      JournalCategory.heritage => tokens.clayDeep,
+      _ => tokens.clay,
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
+    final tokens = context.tokens;
 
     return GestureDetector(
       onTap: onTap,

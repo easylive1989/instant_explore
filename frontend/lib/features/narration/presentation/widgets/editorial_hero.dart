@@ -72,13 +72,12 @@ class _GlyphBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [category.ink, tokens?.inkBg ?? const Color(0xFF1B1611)],
+          colors: [category.ink, context.tokens.inkBg],
         ),
       ),
       child: Center(

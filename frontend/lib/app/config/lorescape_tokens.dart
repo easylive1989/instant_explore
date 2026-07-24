@@ -76,6 +76,64 @@ class LorescapeTokens extends ThemeExtension<LorescapeTokens> {
   final List<BoxShadow> e2;
   final List<BoxShadow> e3;
 
+  /// Canonical default token set (terracotta accent, paper reading surface).
+  ///
+  /// The single source of truth for the values widgets should fall back to
+  /// when the [LorescapeTokens] theme extension is absent (e.g. a widget test
+  /// that pumps without the full app theme). Read it via [BuildContext.tokens]
+  /// rather than re-hardcoding literals at each call site.
+  static const LorescapeTokens fallback = LorescapeTokens(
+    paper: Color(0xFFF7F1E6),
+    paperRaised: Color(0xFFFDFAF3),
+    paperSunk: Color(0xFFECE3D3),
+    line: Color(0xFFE4DAC8),
+    lineStrong: Color(0xFFCDBFA6),
+    ink: Color(0xFF221C14),
+    ink2: Color(0xFF5E5341),
+    ink3: Color(0xFF918471),
+    clay: Color(0xFFBC5E3E),
+    clayDeep: Color(0xFF97442A),
+    claySoft: Color(0xFFF1DDCE),
+    clayTint: Color(0xFFF7E8DD),
+    inkBg: Color(0xFF1B1611),
+    inkBg2: Color(0xFF251E17),
+    inkBg3: Color(0xFF312820),
+    onDark: Color(0xFFF7F1E6),
+    onDark2: Color(0xFFC3B7A4),
+    onDark3: Color(0xFF8C8170),
+    readBg: Color(0xFFF7F1E6),
+    readInk: Color(0xFF221C14),
+    readDim: Color(0xFF5E5341),
+    readLine: Color(0xFFE4DAC8),
+    readCap: Color(0xFF97442A),
+    rSm: 8,
+    rMd: 12,
+    rLg: 16,
+    rXl: 22,
+    rImg: 10,
+    e1: [
+      BoxShadow(
+        color: Color.fromRGBO(40, 30, 18, 0.06),
+        offset: Offset(0, 1),
+        blurRadius: 2,
+      ),
+    ],
+    e2: [
+      BoxShadow(
+        color: Color.fromRGBO(40, 30, 18, 0.09),
+        offset: Offset(0, 6),
+        blurRadius: 18,
+      ),
+    ],
+    e3: [
+      BoxShadow(
+        color: Color.fromRGBO(28, 20, 10, 0.20),
+        offset: Offset(0, 18),
+        blurRadius: 44,
+      ),
+    ],
+  );
+
   /// Resolves the full token set for a given [accent] + [reading].
   factory LorescapeTokens.forAppearance({
     required BrandAccent accent,
@@ -284,4 +342,15 @@ class LorescapeTokens extends ThemeExtension<LorescapeTokens> {
       e3: s(e3, other.e3),
     );
   }
+}
+
+/// Non-null access to the active [LorescapeTokens].
+///
+/// Returns the registered theme extension, or [LorescapeTokens.fallback] when
+/// none is present. Prefer `context.tokens.paper` over
+/// `Theme.of(context).extension<LorescapeTokens>()?.paper ?? <literal>` so the
+/// fallback values live in exactly one place.
+extension LorescapeTokensContext on BuildContext {
+  LorescapeTokens get tokens =>
+      Theme.of(this).extension<LorescapeTokens>() ?? LorescapeTokens.fallback;
 }

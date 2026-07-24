@@ -11,15 +11,13 @@ Future<DateTime?> showLorescapeDatePicker({
   required DateTime firstDate,
   required DateTime lastDate,
 }) {
-  final tokens = Theme.of(context).extension<LorescapeTokens>();
+  final tokens = context.tokens;
   return showModalBottomSheet<DateTime>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens?.rXl ?? 22),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(tokens.rXl)),
     ),
     builder: (_) => _CalendarSheet(
       initialDate: _clamp(initialDate, firstDate, lastDate),

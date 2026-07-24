@@ -112,7 +112,7 @@ class _NotebookPageView extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
         decoration: BoxDecoration(
           color: paper,
-          borderRadius: BorderRadius.circular(tokens?.rLg ?? 16),
+          borderRadius: BorderRadius.circular(context.tokens.rLg),
           border: Border.all(color: tokens?.line ?? colorScheme.outlineVariant),
           boxShadow: tokens?.e2,
         ),
@@ -211,7 +211,7 @@ class _Polaroid extends StatelessWidget {
                           style: GoogleFonts.longCang(
                             fontSize: 24,
                             height: 1.1,
-                            color: tokens?.ink ?? const Color(0xFF221C14),
+                            color: context.tokens.ink,
                           ),
                         ),
                       ),
@@ -264,7 +264,6 @@ class _EmptyPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
     return ColoredBox(
       color: const Color(0xFFEFE7D6),
       child: Center(
@@ -274,7 +273,7 @@ class _EmptyPhoto extends StatelessWidget {
             Icon(
               Icons.image_not_supported_outlined,
               size: 30,
-              color: tokens?.lineStrong ?? const Color(0xFFCDBFA6),
+              color: context.tokens.lineStrong,
             ),
             const SizedBox(height: 8),
             Text(
@@ -282,7 +281,7 @@ class _EmptyPhoto extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 letterSpacing: 1.2,
-                color: tokens?.ink3 ?? const Color(0xFF918471),
+                color: context.tokens.ink3,
               ),
             ),
           ],

@@ -5,11 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Fallback warm image shadow (design token `e1`).
-const List<BoxShadow> _kImageShadow = [
-  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
-];
-
 /// An editorial feed card showing a single [DailyStory] (Field Journal).
 ///
 /// A rounded hero image, a clay chapter overline, a serif title, a
@@ -26,7 +21,7 @@ class StoryCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).extension<LorescapeTokens>();
     final ink3 = tokens?.ink3 ?? cs.onSurfaceVariant;
-    final radius = tokens?.rImg ?? 10;
+    final radius = context.tokens.rImg;
 
     final dateLabel = DateFormat.yMMMd(
       Localizations.localeOf(context).toLanguageTag(),
@@ -51,7 +46,7 @@ class StoryCard extends StatelessWidget {
             DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(radius),
-                boxShadow: tokens?.e1 ?? _kImageShadow,
+                boxShadow: context.tokens.e1,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),

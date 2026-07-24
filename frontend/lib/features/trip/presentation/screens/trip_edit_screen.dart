@@ -237,7 +237,7 @@ class _FieldBox extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tokens = Theme.of(context).extension<LorescapeTokens>();
     final ink3 = tokens?.ink3 ?? cs.onSurfaceVariant;
-    final radius = tokens?.rMd ?? 12;
+    final radius = context.tokens.rMd;
 
     final content = Container(
       decoration: BoxDecoration(

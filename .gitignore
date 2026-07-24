@@ -71,3 +71,6 @@ dashboard/out/
 # Metrics 累積數據（含營收，repo 為 public 故不進版控）
 # 錨定在 repo 根：只忽略頂層 data/，別誤掃 Flutter 各 feature 的 data/ 層
 /data/
+
+# Graphify 產出的知識圖譜（本地分析工具，不進版控）
+graphify-out/

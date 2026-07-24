@@ -11,19 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Fallback warm shadows / dark-surface colours for contexts where the
-/// [LorescapeTokens] theme extension is not installed (e.g. widget tests).
-const List<BoxShadow> _kCardShadow = [
-  BoxShadow(color: Color(0x0F281E12), offset: Offset(0, 1), blurRadius: 2),
-];
-const List<BoxShadow> _kBannerShadow = [
-  BoxShadow(color: Color(0x17281E12), offset: Offset(0, 6), blurRadius: 18),
-];
-const Color _kInkBg = Color(0xFF1B1611);
-const Color _kInkBg2 = Color(0xFF251E17);
-const Color _kOnDark = Color(0xFFF7F1E6);
-const Color _kOnDark2 = Color(0xFFC3B7A4);
-
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -71,10 +58,10 @@ class _UpgradeBanner extends ConsumerWidget {
     final isPremium = ref.watch(isPremiumProvider);
     final statusAsync = ref.watch(subscriptionStatusProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final radius = tokens?.rLg ?? 16;
-    final onDark = tokens?.onDark ?? _kOnDark;
-    final onDark2 = tokens?.onDark2 ?? _kOnDark2;
+    final tokens = context.tokens;
+    final radius = tokens.rLg;
+    final onDark = tokens.onDark;
+    final onDark2 = tokens.onDark2;
 
     String title;
     String subtitle;
@@ -98,10 +85,10 @@ class _UpgradeBanner extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [tokens?.inkBg2 ?? _kInkBg2, tokens?.inkBg ?? _kInkBg],
+          colors: [tokens.inkBg2, tokens.inkBg],
         ),
         borderRadius: BorderRadius.circular(radius),
-        boxShadow: tokens?.e2 ?? _kBannerShadow,
+        boxShadow: tokens.e2,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -483,8 +470,8 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).extension<LorescapeTokens>();
-    final radius = tokens?.rLg ?? 16;
+    final tokens = context.tokens;
+    final radius = tokens.rLg;
 
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i++) {
@@ -503,7 +490,7 @@ class _SettingsCard extends StatelessWidget {
         border: Border.fromBorderSide(
           BorderSide(color: colorScheme.outlineVariant),
         ),
-        boxShadow: tokens?.e1 ?? _kCardShadow,
+        boxShadow: tokens.e1,
       ),
       child: Material(
         type: MaterialType.transparency,
