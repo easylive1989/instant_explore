@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story.dart';
 import 'package:context_app/features/daily_story/domain/models/daily_story_card_mode.dart';
-import 'package:context_app/features/daily_story/domain/services/daily_story_sharing_service.dart';
+import 'package:context_app/features/daily_story/presentation/services/daily_story_sharing_service.dart';
 import 'package:context_app/features/daily_story/presentation/utils/daily_story_config_launcher.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/card_layout_body.dart';
 import 'package:context_app/features/daily_story/presentation/widgets/card_reader_theme.dart';
